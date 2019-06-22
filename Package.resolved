@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AnyCodable",
+        "repositoryURL": "https://github.com/Flight-School/AnyCodable.git",
+        "state": {
+          "branch": null,
+          "revision": "1f5d3f1e1bee336190754dfcb5e8120b767ab361",
+          "version": "0.2.2"
+        }
+      },
+      {
+        "package": "Poly",
+        "repositoryURL": "https://github.com/mattpolzin/Poly.git",
+        "state": {
+          "branch": null,
+          "revision": "d24d4c1214dd05f89eb1182a46592856dd0a0645",
+          "version": "2.0.0"
+        }
+      },
+      {
+        "package": "Sampleable",
+        "repositoryURL": "https://github.com/mattpolzin/Sampleable.git",
+        "state": {
+          "branch": null,
+          "revision": "8a88ca056a58587daa99c33a04c63c9d59429932",
+          "version": "2.0.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
