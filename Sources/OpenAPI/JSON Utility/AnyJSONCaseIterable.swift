@@ -30,7 +30,7 @@ extension AnyJSONCaseIterable {
         // upon initialization.
 
         guard let arrayOfCodables = try JSONSerialization.jsonObject(with: encoder.encode(input), options: []) as? [Any] else {
-            throw OpenAPICodableError.allCasesArrayNotCodable
+            throw OpenAPI.CodableError.allCasesArrayNotCodable
         }
         return arrayOfCodables.map(AnyCodable.init)
     }

@@ -8,145 +8,149 @@
 import Foundation
 import Poly
 
-public enum OpenAPIContentType: String, Encodable, Equatable, Hashable {
-    case json = "application/json"
-}
-
-public struct OpenAPIContent: Encodable, Equatable {
-    public let schema: Either<JSONSchemaObject, JSONReference<OpenAPIComponents, JSONSchemaObject>>
-    //        public let example:
-    //        public let examples:
-    //        public let encoding:
-
-    public init(schema: Either<JSONSchemaObject, JSONReference<OpenAPIComponents, JSONSchemaObject>>) {
-        self.schema = schema
+extension OpenAPI {
+    public enum ContentType: String, Encodable, Equatable, Hashable {
+        case json = "application/json"
     }
-}
 
-/// An OpenAPI Path Item
-/// This type describes the endpoints a server has
-/// bound to a particular path.
-public enum OpenAPIPathItem: Equatable {
-    case reference(JSONReference<OpenAPIComponents, OpenAPIPathItem>)
-    case operations(PathProperties)
+    public struct Content: Encodable, Equatable {
+        public let schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
+        //        public let example:
+        //        public let examples:
+        //        public let encoding:
 
-    public struct PathProperties: Equatable {
-        public let summary: String?
-        public let description: String?
-        //        public let servers:
-        public let parameters: ParameterArray
-
-        public let get: Operation?
-        public let put: Operation?
-        public let post: Operation?
-        public let delete: Operation?
-        public let options: Operation?
-        public let head: Operation?
-        public let patch: Operation?
-        public let trace: Operation?
-
-        public init(summary: String? = nil,
-                    description: String? = nil,
-                    parameters: ParameterArray = [],
-                    get: Operation? = nil,
-                    put: Operation? = nil,
-                    post: Operation? = nil,
-                    delete: Operation? = nil,
-                    options: Operation? = nil,
-                    head: Operation? = nil,
-                    patch: Operation? = nil,
-                    trace: Operation? = nil) {
-            self.summary = summary
-            self.description = description
-            self.parameters = parameters
-
-            self.get = get
-            self.put = put
-            self.post = post
-            self.delete = delete
-            self.options = options
-            self.head = head
-            self.patch = patch
-            self.trace = trace
+        public init(schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>) {
+            self.schema = schema
         }
+    }
 
-        public typealias ParameterArray = [Either<Parameter, JSONReference<OpenAPIComponents, Parameter>>]
+    /// An OpenAPI Path Item
+    /// This type describes the endpoints a server has
+    /// bound to a particular path.
+    public enum PathItem: Equatable {
+        case reference(JSONReference<Components, PathItem>)
+        case operations(PathProperties)
 
-        public struct Parameter: Equatable {
-            public let name: String
-            public let parameterLocation: Location
-            public let description: String?
-            public let deprecated: Bool // default is false
-            public let schemaOrContent: Either<SchemaProperty, Operation.ContentMap>
-            // TODO: serialization rules
-            /*
-             Serialization Rules
-             */
-
-            public typealias SchemaProperty = Either<JSONSchemaObject, JSONReference<OpenAPIComponents, JSONSchemaObject>>
-
-            public init(name: String,
-                        parameterLocation: Location,
-                        schemaOrContent: Either<SchemaProperty, Operation.ContentMap>,
-                        description: String? = nil,
-                        deprecated: Bool = false) {
-                self.name = name
-                self.parameterLocation = parameterLocation
-                self.schemaOrContent = schemaOrContent
-                self.description = description
-                self.deprecated = deprecated
-            }
-
-            public enum Location: Equatable {
-                case query(required: Bool?)
-                case header(required: Bool?)
-                case path
-                case cookie(required: Bool?)
-            }
-        }
-
-        public struct Operation: Equatable {
-            public let tags: [String]?
+        public struct PathProperties: Equatable {
             public let summary: String?
             public let description: String?
-            //            public let externalDocs:
-            public let operationId: String
+            //        public let servers:
             public let parameters: ParameterArray
-            public let requestBody: OpenAPIRequest?
-            public let responses: ResponseMap
-            //            public let callbacks:
-            public let deprecated: Bool // default is false
-            //            public let security:
-            //            public let servers:
 
-            public init(tags: [String]? = nil,
-                        summary: String? = nil,
+            public let get: Operation?
+            public let put: Operation?
+            public let post: Operation?
+            public let delete: Operation?
+            public let options: Operation?
+            public let head: Operation?
+            public let patch: Operation?
+            public let trace: Operation?
+
+            public init(summary: String? = nil,
                         description: String? = nil,
-                        operationId: String,
-                        parameters: ParameterArray,
-                        requestBody: OpenAPIRequest? = nil,
-                        responses: ResponseMap,
-                        deprecated: Bool = false) {
-                self.tags = tags
+                        parameters: ParameterArray = [],
+                        get: Operation? = nil,
+                        put: Operation? = nil,
+                        post: Operation? = nil,
+                        delete: Operation? = nil,
+                        options: Operation? = nil,
+                        head: Operation? = nil,
+                        patch: Operation? = nil,
+                        trace: Operation? = nil) {
                 self.summary = summary
                 self.description = description
-                self.operationId = operationId
                 self.parameters = parameters
-                self.requestBody = requestBody
-                self.responses = responses
-                self.deprecated = deprecated
+
+                self.get = get
+                self.put = put
+                self.post = post
+                self.delete = delete
+                self.options = options
+                self.head = head
+                self.patch = patch
+                self.trace = trace
             }
 
-            public typealias ResponseMap = [OpenAPIResponse.StatusCode: Either<OpenAPIResponse, JSONReference<OpenAPIComponents, OpenAPIResponse>>]
+            public typealias ParameterArray = [Either<Parameter, JSONReference<Components, Parameter>>]
 
-            public typealias ContentMap = [OpenAPIContentType: OpenAPIContent]
+            public struct Parameter: Equatable {
+                public let name: String
+                public let parameterLocation: Location
+                public let description: String?
+                public let deprecated: Bool // default is false
+                public let schemaOrContent: Either<SchemaProperty, Operation.ContentMap>
+                // TODO: serialization rules
+                /*
+                 Serialization Rules
+                 */
+
+                public typealias SchemaProperty = Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
+
+                public init(name: String,
+                            parameterLocation: Location,
+                            schemaOrContent: Either<SchemaProperty, Operation.ContentMap>,
+                            description: String? = nil,
+                            deprecated: Bool = false) {
+                    self.name = name
+                    self.parameterLocation = parameterLocation
+                    self.schemaOrContent = schemaOrContent
+                    self.description = description
+                    self.deprecated = deprecated
+                }
+
+                public enum Location: Equatable {
+                    case query(required: Bool?)
+                    case header(required: Bool?)
+                    case path
+                    case cookie(required: Bool?)
+                }
+            }
+
+            public struct Operation: Equatable {
+                public let tags: [String]?
+                public let summary: String?
+                public let description: String?
+                //            public let externalDocs:
+                public let operationId: String
+                public let parameters: ParameterArray
+                public let requestBody: Request?
+                public let responses: ResponseMap
+                //            public let callbacks:
+                public let deprecated: Bool // default is false
+                //            public let security:
+                //            public let servers:
+
+                public init(tags: [String]? = nil,
+                            summary: String? = nil,
+                            description: String? = nil,
+                            operationId: String,
+                            parameters: ParameterArray,
+                            requestBody: Request? = nil,
+                            responses: ResponseMap,
+                            deprecated: Bool = false) {
+                    self.tags = tags
+                    self.summary = summary
+                    self.description = description
+                    self.operationId = operationId
+                    self.parameters = parameters
+                    self.requestBody = requestBody
+                    self.responses = responses
+                    self.deprecated = deprecated
+                }
+
+                public typealias ResponseMap = [Response.StatusCode: Either<Response, JSONReference<Components, Response>>]
+
+                public typealias ContentMap = [ContentType: Content]
+            }
         }
     }
 }
+
+
 
 // MARK: - Codable
 
-extension OpenAPIPathItem: Encodable {
+extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
@@ -160,7 +164,7 @@ extension OpenAPIPathItem: Encodable {
     }
 }
 
-extension OpenAPIPathItem.PathProperties.Operation: Encodable {
+extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
     private enum CodingKeys: String, CodingKey {
         case tags
         case summary
@@ -211,7 +215,7 @@ extension OpenAPIPathItem.PathProperties.Operation: Encodable {
     }
 }
 
-extension OpenAPIPathItem.PathProperties.Parameter: Encodable {
+extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
     private enum CodingKeys: String, CodingKey {
         case name
         case parameterLocation = "in"
@@ -270,7 +274,7 @@ extension OpenAPIPathItem.PathProperties.Parameter: Encodable {
     }
 }
 
-extension OpenAPIPathItem.PathProperties: Encodable {
+extension OpenAPI.PathItem.PathProperties: Encodable {
     private enum CodingKeys: String, CodingKey {
         case summary
         case description

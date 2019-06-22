@@ -23,7 +23,7 @@ public enum JSONSchemaObject: Equatable {
     indirect case one(of: [JSONSchemaObject])
     indirect case any(of: [JSONSchemaObject])
     indirect case not(JSONSchemaObject)
-    case reference(JSONReference<OpenAPIComponents, JSONSchemaObject>)
+    case reference(JSONReference<OpenAPI.Components, JSONSchemaObject>)
 
     public var jsonTypeFormat: JSONTypeFormat? {
         switch self {

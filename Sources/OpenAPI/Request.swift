@@ -7,23 +7,25 @@
 
 import Foundation
 
-public struct OpenAPIRequest: Equatable {
-    public let description: String?
-    public let content: OpenAPIPathItem.PathProperties.Operation.ContentMap
-    public let required: Bool
+extension OpenAPI {
+    public struct Request: Equatable {
+        public let description: String?
+        public let content: PathItem.PathProperties.Operation.ContentMap
+        public let required: Bool
 
-    public init(description: String? = nil,
-                content: OpenAPIPathItem.PathProperties.Operation.ContentMap,
-                required: Bool = true) {
-        self.description = description
-        self.content = content
-        self.required = required
+        public init(description: String? = nil,
+                    content: PathItem.PathProperties.Operation.ContentMap,
+                    required: Bool = true) {
+            self.description = description
+            self.content = content
+            self.required = required
+        }
     }
 }
 
 // MARK: - Codable
 
-extension OpenAPIRequest: Encodable {
+extension OpenAPI.Request: Encodable {
     private enum CodingKeys: String, CodingKey {
         case description
         case content
