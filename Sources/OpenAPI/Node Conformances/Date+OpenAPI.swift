@@ -8,7 +8,7 @@
 import Foundation
 
 extension Date: DateOpenAPINodeType {
-	public static func dateOpenAPINodeGuess(using encoder: JSONEncoder) -> JSONNode? {
+	public static func dateOpenAPINodeGuess(using encoder: JSONEncoder) -> JSONSchemaObject? {
 
 		switch encoder.dateEncodingStrategy {
 		case .deferredToDate, .custom:
