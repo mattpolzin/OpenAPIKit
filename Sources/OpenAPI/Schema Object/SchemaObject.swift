@@ -173,14 +173,16 @@ extension JSONSchemaObject {
 
 // MARK: - Codable
 
-extension JSONSchemaObject: Encodable {
-
+extension JSONSchemaObject {
     private enum SubschemaCodingKeys: String, CodingKey {
         case allOf
         case oneOf
         case anyOf
         case not
     }
+}
+
+extension JSONSchemaObject: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
@@ -219,6 +221,66 @@ extension JSONSchemaObject: Encodable {
             var container = encoder.singleValueContainer()
 
             try container.encode(reference)
+        }
+    }
+}
+
+extension JSONSchemaObject: Decodable {
+
+    private enum HintCodingKeys: String, CodingKey {
+        case type
+    }
+
+    public init(from decoder: Decoder) throws {
+
+        if (try? decoder.singleValueContainer()) != nil {
+            fatalError("references not decodable yet.")
+        }
+
+        let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
+
+        if container.contains(.allOf) {
+            self = .all(of: try container.decode([JSONSchemaObject].self, forKey: .allOf))
+            return
+        }
+
+        if container.contains(.anyOf) {
+            self = .any(of: try container.decode([JSONSchemaObject].self, forKey: .anyOf))
+            return
+        }
+
+        if container.contains(.oneOf) {
+            self = .one(of: try container.decode([JSONSchemaObject].self, forKey: .oneOf))
+            return
+        }
+
+        if container.contains(.not) {
+            self = .not(try container.decode(JSONSchemaObject.self, forKey: .not))
+            return
+        }
+
+        let hintContainer = try decoder.container(keyedBy: HintCodingKeys.self)
+
+        let type = try hintContainer.decode(JSONType.self, forKey: .type)
+
+        switch type {
+        case .boolean:
+            self = .boolean(try Context<JSONTypeFormat.BooleanFormat>(from: decoder))
+        case .object:
+            self = .object(try Context<JSONTypeFormat.ObjectFormat>(from: decoder),
+                           try ObjectContext(from: decoder))
+        case .array:
+            self = .array(try Context<JSONTypeFormat.ArrayFormat>(from: decoder),
+                           try ArrayContext(from: decoder))
+        case .number:
+            self = .number(try Context<JSONTypeFormat.NumberFormat>(from: decoder),
+                           try NumericContext(from: decoder))
+        case .integer:
+            self = .integer(try Context<JSONTypeFormat.IntegerFormat>(from: decoder),
+                           try NumericContext(from: decoder))
+        case .string:
+            self = .string(try Context<JSONTypeFormat.StringFormat>(from: decoder),
+                           try StringContext(from: decoder))
         }
     }
 }
