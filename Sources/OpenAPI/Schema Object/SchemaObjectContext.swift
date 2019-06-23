@@ -11,6 +11,11 @@ import Poly
 
 // MARK: - Generic Context
 
+public protocol JSONSchemaObjectContext {
+    var required: Bool { get }
+    var nullable: Bool { get }
+}
+
 extension JSONSchemaObject {
     public struct Context<Format: OpenAPIFormat>: JSONSchemaObjectContext, Equatable {
         public let format: Format

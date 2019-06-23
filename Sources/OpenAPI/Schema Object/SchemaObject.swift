@@ -8,10 +8,6 @@
 import Foundation
 import AnyCodable
 
-public protocol JSONSchemaObjectContext {
-    var required: Bool { get }
-}
-
 public enum JSONSchemaObject: Equatable {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
@@ -55,6 +51,20 @@ public enum JSONSchemaObject: Equatable {
             return context.required
         case .all, .one, .any, .not, .reference:
             return true
+        }
+    }
+
+    public var nullable: Bool {
+        switch self {
+            case .boolean(let context as JSONSchemaObjectContext),
+                 .object(let context as JSONSchemaObjectContext, _),
+                 .array(let context as JSONSchemaObjectContext, _),
+                 .number(let context as JSONSchemaObjectContext, _),
+                 .integer(let context as JSONSchemaObjectContext, _),
+                 .string(let context as JSONSchemaObjectContext, _):
+            return context.nullable
+        case .all, .one, .any, .not, .reference:
+            return false
         }
     }
 }
