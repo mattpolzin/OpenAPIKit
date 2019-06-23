@@ -133,7 +133,7 @@ extension JSONSchemaObject {
 
     /// Return a version of this `JSONSchemaObject` that only allows the given
     /// values.
-    public func with(allowedValues: [AnyCodable]) throws -> JSONSchemaObject {
+    public func with(allowedValues: [AnyCodable]) -> JSONSchemaObject {
 
         switch self {
         case .boolean(let context):

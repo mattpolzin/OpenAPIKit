@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  SchemaObjectTests.swift
 //  
 //
 //  Created by Mathew Polzin on 6/23/19.
@@ -236,5 +236,57 @@ final class SchemaObjectTests: XCTestCase {
 // MARK: - Codable
 
 extension SchemaObjectTests {
+
+    func test_encodeBoolean() {
+        let requiredBoolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true))
+
+        XCTAssertEqual(try? testStringFromEncoding(of: requiredBoolean),
+"""
+{
+  "type" : "boolean"
+}
+"""
+        )
+
+        let optionalBoolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: false))
+
+        XCTAssertEqual(try? testStringFromEncoding(of: optionalBoolean),
+"""
+{
+  "type" : "boolean"
+}
+"""
+        )
+
+        let nullableBoolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true, nullable: true))
+
+        XCTAssertEqual(try? testStringFromEncoding(of: nullableBoolean),
+"""
+{
+  "nullable" : true,
+  "type" : "boolean"
+}
+"""
+        )
+
+        let allowedValueBoolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true))
+            .with(allowedValues: [true])
+
+        XCTAssertEqual(try? testStringFromEncoding(of: allowedValueBoolean),
+"""
+{
+  "enum" : [
+    true
+  ],
+  "type" : "boolean"
+}
+"""
+        )
+    }
+
+    func test_decodeBoolean() {
+        // TODO:
+    }
+
     // TODO:
 }
