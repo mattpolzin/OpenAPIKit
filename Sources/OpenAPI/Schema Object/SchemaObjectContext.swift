@@ -48,13 +48,13 @@ extension JSONSchemaObject {
         public init(format: Format,
                     required: Bool,
                     nullable: Bool = false,
-                    //                    constantValue: Format.SwiftType? = nil,
+//                    constantValue: Format.SwiftType? = nil,
             allowedValues: [AnyCodable]? = nil,
             example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
             self.required = required
             self.nullable = nullable
-            //            self.constantValue = constantValue
+//            self.constantValue = constantValue
             self.allowedValues = allowedValues
             self.example = example
                 .flatMap { try? $0.encoder.encode($0.codable)}
@@ -170,7 +170,7 @@ extension JSONSchemaObject {
         /// to be unique. Defaults to false.
         public let uniqueItems: Bool
 
-        public init(items: JSONSchemaObject,
+        public init(items: JSONSchemaObject? = nil,
                     maxItems: Int? = nil,
                     minItems: Int = 0,
                     uniqueItems: Bool = false) {
@@ -372,7 +372,10 @@ extension JSONSchemaObject.ArrayContext: Encodable {
             try container.encode(maxItems, forKey: .maxItems)
         }
 
-        try container.encode(minItems, forKey: .minItems)
+        if minItems > 0 {
+            // omission is the same as 0
+            try container.encode(minItems, forKey: .minItems)
+        }
 
         if uniqueItems {
             // omission is the same as false
