@@ -10,7 +10,7 @@ import Foundation
 let testEncoder = { () -> JSONEncoder in
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601
-    encoder.keyEncodingStrategy = .convertToSnakeCase
+    encoder.keyEncodingStrategy = .useDefaultKeys
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     return encoder
 }()
@@ -22,6 +22,6 @@ func testStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
 let testDecoder = { () -> JSONDecoder in
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    decoder.keyDecodingStrategy = .useDefaultKeys
     return decoder
 }()
