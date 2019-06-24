@@ -639,8 +639,136 @@ extension SchemaObjectTests {
         // TODO:
     }
 
-    func test_encodeObjectWithRequiredProperties() {
+    func test_encodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
+        let requiredObject = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        let optionalObject = JSONSchemaObject.object(.init(format: .unspecified, required: false), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        let nullableObject = JSONSchemaObject.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        let allowedValueObject = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+            .with(allowedValues: [
+                AnyCodable(["hello": false])
+            ])
+
+        testEncodingPropertyLines(entity: requiredObject,
+                                  propertyLines: [
+                                    "\"additionalProperties\" : {",
+                                    "  \"type\" : \"boolean\"",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: optionalObject,
+                                  propertyLines: [
+                                    "\"additionalProperties\" : {",
+                                    "  \"type\" : \"boolean\"",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: nullableObject,
+                                  propertyLines: [
+                                    "\"additionalProperties\" : {",
+                                    "  \"type\" : \"boolean\"",
+                                    "},",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: allowedValueObject,
+                                  propertyLines: [
+                                    "\"additionalProperties\" : {",
+                                    "  \"type\" : \"boolean\"",
+                                    "},",
+                                    "\"enum\" : [",
+                                    "  {",
+                                    "    \"hello\" : false",
+                                    "  }",
+                                    "],",
+                                    "\"type\" : \"object\""
+        ])
+    }
+
+    func test_decodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
         // TODO:
+    }
+
+    func test_encodeObjectWithRequiredProperties() {
+        let requiredObject = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: true))
+        ], minProperties: 1))
+        let optionalObject = JSONSchemaObject.object(.init(format: .unspecified, required: false), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: true))
+        ], minProperties: 1))
+        let nullableObject = JSONSchemaObject.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: true))
+        ], minProperties: 1))
+        let allowedValueObject = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: true))
+        ], minProperties: 1))
+            .with(allowedValues: [
+                AnyCodable(["hello": false])
+            ])
+
+        testEncodingPropertyLines(entity: requiredObject,
+                                  propertyLines: [
+                                    "\"minProperties\" : 1,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"required\" : [",
+                                    "  \"hello\"",
+                                    "],",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: optionalObject,
+                                  propertyLines: [
+                                    "\"minProperties\" : 1,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"required\" : [",
+                                    "  \"hello\"",
+                                    "],",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: nullableObject,
+                                  propertyLines: [
+                                    "\"minProperties\" : 1,",
+                                    "\"nullable\" : true,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"required\" : [",
+                                    "  \"hello\"",
+                                    "],",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: allowedValueObject,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  {",
+                                    "    \"hello\" : false",
+                                    "  }",
+                                    "],",
+                                    "\"minProperties\" : 1,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"required\" : [",
+                                    "  \"hello\"",
+                                    "],",
+                                    "\"type\" : \"object\""
+        ])
     }
 
     func test_decodeObjectWithRequiredProperties() {
@@ -1408,7 +1536,31 @@ extension SchemaObjectTests {
     }
 
     func test_encodeAll() {
-        // TODO:
+        let allOf = JSONSchemaObject.all(of: [
+            .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+            .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+        ])
+
+        testEncodingPropertyLines(entity: allOf, propertyLines: [
+            "\"allOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"properties\" : {",
+            "      \"world\" : {",
+            "        \"type\" : \"boolean\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  }",
+            "]"
+        ])
     }
 
     func test_decodeAll() {
@@ -1416,7 +1568,31 @@ extension SchemaObjectTests {
     }
 
     func test_encodeAny() {
-        // TODO:
+        let anyOf = JSONSchemaObject.any(of: [
+            .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+            .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+        ])
+
+        testEncodingPropertyLines(entity: anyOf, propertyLines: [
+            "\"anyOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"properties\" : {",
+            "      \"world\" : {",
+            "        \"type\" : \"boolean\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  }",
+            "]"
+        ])
     }
 
     func test_decodeAny() {
@@ -1424,7 +1600,18 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNot() {
-        // TODO:
+        let allOf = JSONSchemaObject.not(.object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])))
+
+        testEncodingPropertyLines(entity: allOf, propertyLines: [
+            "\"not\" : {",
+            "  \"properties\" : {",
+            "    \"hello\" : {",
+            "      \"type\" : \"string\"",
+            "    }",
+            "  },",
+            "  \"type\" : \"object\"",
+            "}"
+        ])
     }
 
     func test_decodeNot() {
@@ -1432,7 +1619,11 @@ extension SchemaObjectTests {
     }
 
     func test_encodeFileReference() {
-        // TODO:
+        let fileRef = JSONSchemaObject.reference(.file("hello/world.json#/hello"))
+
+        testEncodingPropertyLines(entity: fileRef, propertyLines: [
+            "\"$ref\" : \"hello\\/world.json#\\/hello\""
+        ])
     }
 
     func test_decodeFileReference() {
@@ -1440,7 +1631,13 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNodeReference() {
-        // TODO:
+        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
+                                            parameters: [:])
+        let nodeRef = JSONSchemaObject.reference(.node(.init(type: \.schemas, selector: "requiredBool")))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\""
+        ])
     }
 
     func test_decodeNodeReference() {
