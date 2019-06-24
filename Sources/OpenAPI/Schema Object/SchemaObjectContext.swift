@@ -413,7 +413,9 @@ extension JSONSchemaObject.ObjectContext: Encodable {
             try container.encode(maxProperties, forKey: .maxProperties)
         }
 
-        try container.encode(properties, forKey: .properties)
+        if properties.count > 0 {
+            try container.encode(properties, forKey: .properties)
+        }
 
         if additionalProperties != nil {
             try container.encode(additionalProperties, forKey: .additionalProperties)
@@ -439,7 +441,7 @@ extension JSONSchemaObject.ObjectContext: Decodable {
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
 
-        var decodedProperties = try container.decode([String: JSONSchemaObject].self, forKey: .properties)
+        var decodedProperties = try container.decodeIfPresent([String: JSONSchemaObject].self, forKey: .properties) ?? [:]
 
         decodedProperties.forEach { (propertyName, property) in
             if requiredArray.contains(propertyName) {
