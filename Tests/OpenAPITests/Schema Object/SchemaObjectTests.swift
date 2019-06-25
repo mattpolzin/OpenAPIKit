@@ -1503,7 +1503,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeString() {
-        // TODO: add test
+        let stringData = #"{"type": "string"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .generic, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .generic, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .generic, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodeByteString() {
@@ -1523,7 +1533,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeByteString() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "format": "byte"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "format": "byte", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "format": "byte", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .byte, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .byte, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .byte, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodeBinaryString() {
@@ -1543,7 +1563,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeBinaryString() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "format": "binary"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "format": "binary", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "format": "binary", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .binary, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .binary, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .binary, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodeDateString() {
@@ -1563,7 +1593,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeDateString() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "format": "date"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "format": "date", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "format": "date", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .date, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .date, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .date, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodeDateTimeString() {
@@ -1583,7 +1623,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeDateTimeString() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "format": "date-time"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "format": "date-time", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "format": "date-time", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .dateTime, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .dateTime, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .dateTime, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodePasswordString() {
@@ -1603,7 +1653,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodePasswordString() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "format": "password"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "format": "password", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "format": "password", "enum": ["hello"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .password, required: false), .init()))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .password, required: false, nullable: true), .init()))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .password, required: false, allowedValues: ["hello"]), .init()))
     }
 
     func test_encodeStringWithMaxLength() {
