@@ -258,7 +258,7 @@ extension JSONSchemaObject.Context: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        format = try container.decode(Format.self, forKey: .format)
+        format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
         // default to false at decoding site. It is the responsibility of
         // decoders farther upstream to mark this as required if needed

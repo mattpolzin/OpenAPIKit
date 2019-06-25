@@ -243,8 +243,8 @@ extension JSONSchemaObject: Decodable {
 
     public init(from decoder: Decoder) throws {
 
-        if (try? decoder.singleValueContainer()) != nil {
-            fatalError("references not decodable yet.")
+        if let singleValueContainer = try? decoder.singleValueContainer() {
+            // will want to try to decode a reference here.
         }
 
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)

@@ -272,7 +272,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeBoolean() {
-        // TODO:
+        let booleanData = #"{"type": "boolean"}"#.data(using: .utf8)!
+        let nullableBooleanData = #"{"type": "boolean", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueBooleanData = #"{"type": "boolean", "enum": [false]}"#.data(using: .utf8)!
+
+        let boolean = try! testDecoder.decode(JSONSchemaObject.self, from: booleanData)
+        let nullableBoolean = try! testDecoder.decode(JSONSchemaObject.self, from: nullableBooleanData)
+        let allowedValueBoolean = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueBooleanData)
+
+        XCTAssertEqual(boolean, JSONSchemaObject.boolean(.init(format: .generic, required: false)))
+        XCTAssertEqual(nullableBoolean, JSONSchemaObject.boolean(.init(format: .generic, required: false, nullable: true)))
+        XCTAssertEqual(allowedValueBoolean, JSONSchemaObject.boolean(.init(format: .generic, required: false, allowedValues: [false])))
     }
 
     func test_encodeObject() {
