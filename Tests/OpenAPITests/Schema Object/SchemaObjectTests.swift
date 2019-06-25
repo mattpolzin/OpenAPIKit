@@ -294,11 +294,34 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withInitialExample() {
-        // TODO:
+        let object = JSONSchemaObject.object(.init(format: .unspecified, required: true, example: (codable: [:], encoder: testEncoder)), .init(properties: [:]))
+
+        XCTAssertEqual(object.example, "{\n\n}")
     }
 
     func test_withAddedExample() {
-        // TODO:
+        let object = try! JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+            .with(example: [String: String](), using: testEncoder)
+
+        // nonesense:
+        let allOf = JSONSchemaObject.all(of: [object])
+            .with(allowedValues: ["hello"])
+        let anyOf = JSONSchemaObject.any(of: [object])
+            .with(allowedValues: ["hello"])
+        let oneOf = JSONSchemaObject.one(of: [object])
+            .with(allowedValues: ["hello"])
+        let not = JSONSchemaObject.not(object)
+            .with(allowedValues: ["hello"])
+        let reference = JSONSchemaObject.reference(.file("hello/world.json#/hello"))
+            .with(allowedValues: ["hello"])
+
+        XCTAssertEqual(object.example, "{\n\n}")
+
+        XCTAssertNil(allOf.example)
+        XCTAssertNil(anyOf.example)
+        XCTAssertNil(oneOf.example)
+        XCTAssertNil(not.example)
+        XCTAssertNil(reference.example)
     }
 }
 
@@ -400,7 +423,39 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObject() {
-        // TODO:
+        let objectData = """
+{
+    "type": "object"
+}
+""".data(using: .utf8)!
+        let nullableObjectData = """
+{
+    "type": "object",
+    "nullable": true
+}
+""".data(using: .utf8)!
+        let allowedValueObjectData = """
+{
+    "type": "object",
+    "properties": {"hello": { "type": "boolean"}},
+    "enum": [{"hello": false}]
+}
+""".data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: [:])))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:])))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
     }
 
     func test_encodeObjectWithMaxProperties() {
@@ -472,7 +527,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithMaxProperties() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeObjectWithMinProperties() {
@@ -544,7 +599,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithMinProperties() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeObjectWithAdditionalPropertiesTrue() {
@@ -616,7 +671,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithAdditionalPropertiesTrue() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeObjectWithAdditionalPropertiesObject() {
@@ -696,7 +751,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithAdditionalPropertiesObject() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
@@ -748,7 +803,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeObjectWithRequiredProperties() {
@@ -832,7 +887,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithRequiredProperties() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArray() {
@@ -851,7 +906,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArray() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArrayWithItemsDefinition() {
@@ -901,15 +956,15 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithItemsDefinition() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArrayWithAdditionalItemsDefinition() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_decodeArrayWithAdditionalItemsDefinition() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArrayWithUniqueItems() {
@@ -951,7 +1006,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithUniqueItems() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArrayWithMaxItems() {
@@ -993,7 +1048,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithMaxItems() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeArrayWithMinItems() {
@@ -1035,7 +1090,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithMinItems() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumber() {
@@ -1054,7 +1109,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumber() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeFloatNumber() {
@@ -1074,7 +1129,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeFloatNumber() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeDoubleNumber() {
@@ -1094,7 +1149,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeDoubleNumber() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumberWithMultipleOf() {
@@ -1134,7 +1189,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithMultipleOf() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumberWithMaximum() {
@@ -1174,7 +1229,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithMaximum() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumberWithExclusiveMaximum() {
@@ -1214,7 +1269,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithExclusiveMaximum() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumberWithMinimum() {
@@ -1254,7 +1309,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithMinimum() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNumberWithExclusivceMinimum() {
@@ -1294,7 +1349,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithExclusiveMinimum() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeInteger() {
@@ -1313,7 +1368,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeInteger() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encode32bitInteger() {
@@ -1333,7 +1388,7 @@ extension SchemaObjectTests {
     }
 
     func test_decode32bitInteger() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encode64bitInteger() {
@@ -1353,7 +1408,7 @@ extension SchemaObjectTests {
     }
 
     func test_decode64bitInteger() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeString() {
@@ -1372,7 +1427,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeByteString() {
@@ -1392,7 +1447,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeByteString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeBinaryString() {
@@ -1412,7 +1467,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeBinaryString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeDateString() {
@@ -1432,7 +1487,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeDateString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeDateTimeString() {
@@ -1452,7 +1507,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeDateTimeString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodePasswordString() {
@@ -1472,7 +1527,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodePasswordString() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeStringWithMaxLength() {
@@ -1512,7 +1567,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithMaxLength() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeStringWithMinLength() {
@@ -1552,7 +1607,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithMinLength() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeStringWithPattern() {
@@ -1592,7 +1647,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithPattern() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeAll() {
@@ -1624,7 +1679,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeAll() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeAny() {
@@ -1656,7 +1711,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeAny() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNot() {
@@ -1675,7 +1730,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNot() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeFileReference() {
@@ -1687,7 +1742,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeFileReference() {
-        // TODO:
+        // TODO: add test
     }
 
     func test_encodeNodeReference() {
@@ -1701,7 +1756,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNodeReference() {
-        // TODO:
+        // TODO: add test
     }
 }
 

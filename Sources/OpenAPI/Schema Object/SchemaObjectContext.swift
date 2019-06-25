@@ -15,6 +15,7 @@ public protocol JSONSchemaObjectContext {
     var required: Bool { get }
     var nullable: Bool { get }
     var allowedValues: [AnyCodable]? { get }
+    var example: String? { get }
 }
 
 extension JSONSchemaObject {
@@ -50,8 +51,8 @@ extension JSONSchemaObject {
                     required: Bool,
                     nullable: Bool = false,
 //                    constantValue: Format.SwiftType? = nil,
-            allowedValues: [AnyCodable]? = nil,
-            example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
+                    allowedValues: [AnyCodable]? = nil,
+                    example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
             self.required = required
             self.nullable = nullable

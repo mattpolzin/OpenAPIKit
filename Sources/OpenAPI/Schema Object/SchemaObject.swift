@@ -82,6 +82,21 @@ public enum JSONSchemaObject: Equatable {
             return nil
         }
     }
+
+    /// An example, encoded as a `String`, if specified. If unspecified, returns `nil`.
+    public var example: String? {
+        switch self {
+        case .boolean(let context as JSONSchemaObjectContext),
+             .object(let context as JSONSchemaObjectContext, _),
+             .array(let context as JSONSchemaObjectContext, _),
+             .number(let context as JSONSchemaObjectContext, _),
+             .integer(let context as JSONSchemaObjectContext, _),
+             .string(let context as JSONSchemaObjectContext, _):
+            return context.example
+        case .all, .one, .any, .not, .reference:
+            return nil
+        }
+    }
 }
 
 // MARK: - Transformations
