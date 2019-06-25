@@ -1711,13 +1711,27 @@ extension SchemaObjectTests {
     }
 
     func test_decodeAny() {
-        // TODO: add test
+        let anyData = """
+{
+    "anyOf": [
+        { "type": "boolean" },
+        { "type": "object" }
+    ]
+}
+""".data(using: .utf8)!
+
+        let any = try! testDecoder.decode(JSONSchemaObject.self, from: anyData)
+
+        XCTAssertEqual(any, JSONSchemaObject.any(of: [
+            .boolean(.init(format: .generic, required: false)),
+            .object(.init(format: .generic, required: false), .init(properties: [:]))
+        ]))
     }
 
     func test_encodeNot() {
-        let allOf = JSONSchemaObject.not(.object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])))
+        let not = JSONSchemaObject.not(.object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])))
 
-        testEncodingPropertyLines(entity: allOf, propertyLines: [
+        testEncodingPropertyLines(entity: not, propertyLines: [
             "\"not\" : {",
             "  \"properties\" : {",
             "    \"hello\" : {",
@@ -1730,7 +1744,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNot() {
-        // TODO: add test
+        let notData = """
+{
+    "not": {
+        "type": "boolean"
+    }
+}
+""".data(using: .utf8)!
+
+        let not = try! testDecoder.decode(JSONSchemaObject.self, from: notData)
+
+        XCTAssertEqual(not, JSONSchemaObject.not(.boolean(.init(format: .generic, required: false))))
     }
 
     func test_encodeFileReference() {
@@ -1746,8 +1770,8 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNodeReference() {
-        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
-                                            parameters: [:])
+//        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
+//                                            parameters: [:])
         let nodeRef = JSONSchemaObject.reference(.node(.init(type: \.schemas, selector: "requiredBool")))
 
         testEncodingPropertyLines(entity: nodeRef, propertyLines: [

@@ -21,4 +21,16 @@ extension OpenAPI {
         case invalidNode
         case unknownNodeType(Any.Type)
     }
+
+    public enum DecodingError: Swift.Error, CustomDebugStringConvertible {
+        case missingKeyword(underlyingError: String?)
+
+        public var debugDescription: String {
+            switch self {
+            case .missingKeyword(underlyingError: let err):
+                return "When parsing Open API JSON, an expected keyword was missing. Carefully read your JSON keys to make sure all keys required by OpenAPI are spelled correctly. Underlying error: "
+                    + (err ?? "")
+            }
+        }
+    }
 }

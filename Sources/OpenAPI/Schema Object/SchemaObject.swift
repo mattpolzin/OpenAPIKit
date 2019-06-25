@@ -301,7 +301,12 @@ extension JSONSchemaObject: Decodable {
 
         let hintContainer = try decoder.container(keyedBy: HintCodingKeys.self)
 
-        let type = try hintContainer.decode(JSONType.self, forKey: .type)
+        let type: JSONType
+        do {
+            type = try hintContainer.decode(JSONType.self, forKey: .type)
+        } catch {
+            throw OpenAPI.DecodingError.missingKeyword(underlyingError: "A JSON Schema object is expected to be `oneOf`, `anyOf`, `allOf`, `not`, or have a `type` key.")
+        }
 
         switch type {
         case .boolean:
