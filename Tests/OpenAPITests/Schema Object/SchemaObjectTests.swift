@@ -236,11 +236,61 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withInitalAllowedValues() {
-        // TODO:
+        let boolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true, allowedValues: [false]))
+        let object = JSONSchemaObject.object(.init(format: .unspecified, required: true, allowedValues: [[:]]), .init(properties: [:]))
+        let array = JSONSchemaObject.array(.init(format: .unspecified, required: true, allowedValues: [[false]]), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchemaObject.number(.init(format: .unspecified, required: true, allowedValues: [2.5]), .init())
+        let integer = JSONSchemaObject.integer(.init(format: .unspecified, required: true, allowedValues: [5]), .init())
+        let string = JSONSchemaObject.string(.init(format: .unspecified, required: true, allowedValues: ["hello"]), .init())
+
+        XCTAssertEqual(boolean.allowedValues, [false])
+        XCTAssertEqual(object.allowedValues, [[:]])
+//        XCTAssertEqual(array.allowedValues, [[false]])
+        XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(number.allowedValues, [2.5])
+        XCTAssertEqual(integer.allowedValues, [5])
+        XCTAssertEqual(string.allowedValues, ["hello"])
     }
 
     func test_withAddedAllowedValues() {
-        // TODO:
+        let boolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true))
+            .with(allowedValues: [false])
+        let object = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+            .with(allowedValues: [[:]])
+        let array = JSONSchemaObject.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+            .with(allowedValues: [[false]])
+        let number = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init())
+            .with(allowedValues: [2.5])
+        let integer = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init())
+            .with(allowedValues: [5])
+        let string = JSONSchemaObject.string(.init(format: .unspecified, required: true), .init())
+            .with(allowedValues: ["hello"])
+
+        // nonesense:
+        let allOf = JSONSchemaObject.all(of: [boolean])
+            .with(allowedValues: ["hello"])
+        let anyOf = JSONSchemaObject.any(of: [boolean])
+            .with(allowedValues: ["hello"])
+        let oneOf = JSONSchemaObject.one(of: [boolean])
+            .with(allowedValues: ["hello"])
+        let not = JSONSchemaObject.not(boolean)
+            .with(allowedValues: ["hello"])
+        let reference = JSONSchemaObject.reference(.file("hello/world.json#/hello"))
+            .with(allowedValues: ["hello"])
+
+        XCTAssertEqual(boolean.allowedValues, [false])
+        XCTAssertEqual(object.allowedValues, [AnyCodable([:])])
+        //        XCTAssertEqual(array.allowedValues, [[false]])
+        XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(number.allowedValues, [2.5])
+        XCTAssertEqual(integer.allowedValues, [5])
+        XCTAssertEqual(string.allowedValues, ["hello"])
+
+        XCTAssertNil(allOf.allowedValues)
+        XCTAssertNil(anyOf.allowedValues)
+        XCTAssertNil(oneOf.allowedValues)
+        XCTAssertNil(not.allowedValues)
+        XCTAssertNil(reference.allowedValues)
     }
 
     func test_withInitialExample() {

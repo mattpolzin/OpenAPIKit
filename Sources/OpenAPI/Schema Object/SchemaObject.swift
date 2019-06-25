@@ -56,15 +56,30 @@ public enum JSONSchemaObject: Equatable {
 
     public var nullable: Bool {
         switch self {
-            case .boolean(let context as JSONSchemaObjectContext),
-                 .object(let context as JSONSchemaObjectContext, _),
-                 .array(let context as JSONSchemaObjectContext, _),
-                 .number(let context as JSONSchemaObjectContext, _),
-                 .integer(let context as JSONSchemaObjectContext, _),
-                 .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaObjectContext),
+             .object(let context as JSONSchemaObjectContext, _),
+             .array(let context as JSONSchemaObjectContext, _),
+             .number(let context as JSONSchemaObjectContext, _),
+             .integer(let context as JSONSchemaObjectContext, _),
+             .string(let context as JSONSchemaObjectContext, _):
             return context.nullable
         case .all, .one, .any, .not, .reference:
             return false
+        }
+    }
+
+    /// Allowed values, if specified. If unspecified, returns `nil`.
+    public var allowedValues: [AnyCodable]? {
+        switch self {
+        case .boolean(let context as JSONSchemaObjectContext),
+             .object(let context as JSONSchemaObjectContext, _),
+             .array(let context as JSONSchemaObjectContext, _),
+             .number(let context as JSONSchemaObjectContext, _),
+             .integer(let context as JSONSchemaObjectContext, _),
+             .string(let context as JSONSchemaObjectContext, _):
+            return context.allowedValues
+        case .all, .one, .any, .not, .reference:
+            return nil
         }
     }
 }

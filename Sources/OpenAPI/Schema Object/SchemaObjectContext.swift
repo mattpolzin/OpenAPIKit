@@ -14,6 +14,7 @@ import Poly
 public protocol JSONSchemaObjectContext {
     var required: Bool { get }
     var nullable: Bool { get }
+    var allowedValues: [AnyCodable]? { get }
 }
 
 extension JSONSchemaObject {
