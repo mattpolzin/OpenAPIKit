@@ -424,23 +424,23 @@ extension SchemaObjectTests {
 
     func test_decodeObject() {
         let objectData = """
-{
-    "type": "object"
-}
-""".data(using: .utf8)!
+        {
+            "type": "object"
+        }
+        """.data(using: .utf8)!
         let nullableObjectData = """
-{
-    "type": "object",
-    "nullable": true
-}
-""".data(using: .utf8)!
+        {
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
         let allowedValueObjectData = """
-{
-    "type": "object",
-    "properties": {"hello": { "type": "boolean"}},
-    "enum": [{"hello": false}]
-}
-""".data(using: .utf8)!
+        {
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
 
         let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
         let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
@@ -1712,13 +1712,13 @@ extension SchemaObjectTests {
 
     func test_decodeAny() {
         let anyData = """
-{
-    "anyOf": [
-        { "type": "boolean" },
-        { "type": "object" }
-    ]
-}
-""".data(using: .utf8)!
+        {
+            "anyOf": [
+                { "type": "boolean" },
+                { "type": "object" }
+            ]
+        }
+        """.data(using: .utf8)!
 
         let any = try! testDecoder.decode(JSONSchemaObject.self, from: anyData)
 
@@ -1745,12 +1745,12 @@ extension SchemaObjectTests {
 
     func test_decodeNot() {
         let notData = """
-{
-    "not": {
-        "type": "boolean"
-    }
-}
-""".data(using: .utf8)!
+        {
+            "not": {
+                "type": "boolean"
+            }
+        }
+        """.data(using: .utf8)!
 
         let not = try! testDecoder.decode(JSONSchemaObject.self, from: notData)
 
