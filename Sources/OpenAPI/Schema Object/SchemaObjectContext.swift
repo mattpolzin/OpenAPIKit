@@ -24,6 +24,9 @@ extension JSONSchemaObject {
         public let required: Bool
         public let nullable: Bool
 
+        public let title: String?
+        public let description: String?
+
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
 //        public let constantValue: Format.SwiftType?
@@ -51,12 +54,16 @@ extension JSONSchemaObject {
                     required: Bool = true,
                     nullable: Bool = false,
 //                    constantValue: Format.SwiftType? = nil,
+                    title: String? = nil,
+                    description: String? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
             self.required = required
             self.nullable = nullable
 //            self.constantValue = constantValue
+            self.title = title
+            self.description = description
             self.allowedValues = allowedValues
             self.example = example
                 .flatMap { try? $0.encoder.encode($0.codable)}
@@ -239,6 +246,8 @@ extension JSONSchemaObject.Context {
     private enum CodingKeys: String, CodingKey {
         case type
         case format
+        case title
+        case description
         case allowedValues = "enum"
         case nullable
         case example
@@ -264,6 +273,14 @@ extension JSONSchemaObject.Context: Encodable {
 //            try container.encode(constantValue, forKey: .constantValue)
 //        }
 
+        if title != nil {
+            try container.encode(title, forKey: .title)
+        }
+
+        if description != nil {
+            try container.encode(description, forKey: .description)
+        }
+
         // nullable is false if omitted
         if nullable {
             try container.encode(nullable, forKey: .nullable)
@@ -285,6 +302,9 @@ extension JSONSchemaObject.Context: Decodable {
         // decoders farther upstream to mark this as required if needed
         // using `.requiredContext()`.
         required = false
+
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
 
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
 

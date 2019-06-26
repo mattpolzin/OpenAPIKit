@@ -219,6 +219,8 @@ extension JSONSchemaObject {
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchemaObject {
@@ -226,6 +228,8 @@ extension JSONSchemaObject {
             format: format,
             required: required,
             nullable: nullable,
+            title: title,
+            description: description,
             allowedValues: allowedValues,
             example: example
         )
@@ -240,6 +244,8 @@ extension JSONSchemaObject {
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -250,6 +256,8 @@ extension JSONSchemaObject {
             format: format,
             required: required,
             nullable: nullable,
+            title: title,
+            description: description,
             allowedValues: allowedValues,
             example: example
         )
@@ -269,6 +277,8 @@ extension JSONSchemaObject {
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -279,6 +289,8 @@ extension JSONSchemaObject {
             format: format,
             required: required,
             nullable: nullable,
+            title: title,
+            description: description,
             allowedValues: allowedValues,
             example: example
         )
@@ -298,6 +310,8 @@ extension JSONSchemaObject {
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -308,6 +322,8 @@ extension JSONSchemaObject {
             format: format,
             required: required,
             nullable: nullable,
+            title: title,
+            description: description,
             allowedValues: allowedValues,
             example: example
         )
@@ -327,6 +343,8 @@ extension JSONSchemaObject {
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
         properties: [String: JSONSchemaObject] = [:],
@@ -338,6 +356,8 @@ extension JSONSchemaObject {
             format: format,
             required: required,
             nullable: nullable,
+            title: title,
+            description: description,
             allowedValues: allowedValues,
             example: example
         )
