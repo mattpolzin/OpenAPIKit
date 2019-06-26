@@ -7,13 +7,14 @@
 
 import Foundation
 import AnyCodable
+import Poly
 
 public enum JSONSchemaObject: Equatable {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
     indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
-    case integer(Context<JSONTypeFormat.IntegerFormat>, NumericContext)
+    case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
     indirect case all(of: [JSONSchemaObject])
     indirect case one(of: [JSONSchemaObject])
@@ -211,6 +212,149 @@ extension JSONSchemaObject {
     }
 }
 
+// MARK: - Convenience
+
+extension JSONSchemaObject {
+    public static func boolean(
+        format: JSONTypeFormat.BooleanFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchemaObject {
+        let context = JSONSchemaObject.Context<JSONTypeFormat.BooleanFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            allowedValues: allowedValues,
+            example: example
+        )
+        return .boolean(context)
+    }
+
+    public static var boolean: JSONSchemaObject {
+        return .boolean()
+    }
+
+    public static func string(
+        format: JSONTypeFormat.StringFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        minLength: Int = 0,
+        maxLength: Int? = nil,
+        pattern: String? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchemaObject {
+        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.StringFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            allowedValues: allowedValues,
+            example: example
+        )
+        let stringContext = JSONSchemaObject.StringContext(
+            maxLength: maxLength,
+            minLength: minLength,
+            pattern: pattern
+        )
+        return .string(genericContext, stringContext)
+    }
+
+    public static var string: JSONSchemaObject {
+        return .string()
+    }
+
+    public static func number(
+        format: JSONTypeFormat.NumberFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        multipleOf: Double? = nil,
+        maximum: (Double, exclusive: Bool)? = nil,
+        minimum: (Double, exclusive: Bool)? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchemaObject {
+        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.NumberFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            allowedValues: allowedValues,
+            example: example
+        )
+        let numbericContext = JSONSchemaObject.NumericContext(
+            multipleOf: multipleOf,
+            maximum: maximum.map { ($0.0, exclusive: $0.exclusive) },
+            minimum: minimum.map { ($0.0, exclusive: $0.exclusive) }
+        )
+        return .number(genericContext, numbericContext)
+    }
+
+    public static var number: JSONSchemaObject {
+        return .number()
+    }
+
+    public static func integer(
+        format: JSONTypeFormat.IntegerFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        multipleOf: Int? = nil,
+        maximum: (Int, exclusive: Bool)? = nil,
+        minimum: (Int, exclusive: Bool)? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchemaObject {
+        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.IntegerFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            allowedValues: allowedValues,
+            example: example
+        )
+        let integerContext = JSONSchemaObject.IntegerContext(
+            multipleOf: multipleOf,
+            maximum: maximum.map { ($0.0, exclusive: $0.exclusive) },
+            minimum: minimum.map { ($0.0, exclusive: $0.exclusive) }
+        )
+        return .integer(genericContext, integerContext)
+    }
+
+    public static var integer: JSONSchemaObject {
+        return .integer()
+    }
+
+    public static func object(
+        format: JSONTypeFormat.ObjectFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        minProperties: Int = 0,
+        maxProperties: Int? = nil,
+        properties: [String: JSONSchemaObject] = [:],
+        additionalProperties: Either<Bool, JSONSchemaObject>? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        ) -> JSONSchemaObject {
+        let generalContext = JSONSchemaObject.Context<JSONTypeFormat.ObjectFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            allowedValues: allowedValues,
+            example: example
+        )
+        let objectContext = JSONSchemaObject.ObjectContext(
+            properties: properties,
+            additionalProperties: additionalProperties,
+            maxProperties: maxProperties,
+            minProperties: minProperties
+        )
+        return .object(generalContext, objectContext)
+    }
+
+    public static var object: JSONSchemaObject {
+        return .object()
+    }
+}
+
 // MARK: - Codable
 
 extension JSONSchemaObject {
@@ -322,7 +466,7 @@ extension JSONSchemaObject: Decodable {
                            try NumericContext(from: decoder))
         case .integer:
             self = .integer(try Context<JSONTypeFormat.IntegerFormat>(from: decoder),
-                           try NumericContext(from: decoder))
+                           try IntegerContext(from: decoder))
         case .string:
             self = .string(try Context<JSONTypeFormat.StringFormat>(from: decoder),
                            try StringContext(from: decoder))

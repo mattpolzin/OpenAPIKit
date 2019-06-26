@@ -47,8 +47,8 @@ extension JSONSchemaObject {
         // have to do.
         public let example: String?
 
-        public init(format: Format,
-                    required: Bool,
+        public init(format: Format = .unspecified,
+                    required: Bool = true,
                     nullable: Bool = false,
 //                    constantValue: Format.SwiftType? = nil,
                     allowedValues: [AnyCodable]? = nil,
@@ -119,23 +119,42 @@ extension JSONSchemaObject.Context {
 
 extension JSONSchemaObject {
     public struct NumericContext: Equatable {
+        public struct Bound: Equatable {
+            public let value: Double
+            public let exclusive: Bool
+        }
+
         /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
         public let multipleOf: Double?
-        public let maximum: Double?
-        public let exclusiveMaximum: Double?
-        public let minimum: Double?
-        public let exclusiveMinimum: Double?
+        public let maximum: Bound?
+        public let minimum: Bound?
 
         public init(multipleOf: Double? = nil,
-                    maximum: Double? = nil,
-                    exclusiveMaximum: Double? = nil,
-                    minimum: Double? = nil,
-                    exclusiveMinimum: Double? = nil) {
+                    maximum: (Double, exclusive: Bool)? = nil,
+                    minimum: (Double, exclusive: Bool)? = nil) {
             self.multipleOf = multipleOf
-            self.maximum = maximum
-            self.exclusiveMaximum = exclusiveMaximum
-            self.minimum = minimum
-            self.exclusiveMinimum = exclusiveMinimum
+            self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+            self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+        }
+    }
+
+    public struct IntegerContext: Equatable {
+        public struct Bound: Equatable {
+            public let value: Int
+            public let exclusive: Bool
+        }
+
+        /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
+        public let multipleOf: Int?
+        public let maximum: Bound?
+        public let minimum: Bound?
+
+        public init(multipleOf: Int? = nil,
+                    maximum: (Int, exclusive: Bool)? = nil,
+                    minimum: (Int, exclusive: Bool)? = nil) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+            self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
         }
     }
 
@@ -295,26 +314,86 @@ extension JSONSchemaObject.NumericContext: Encodable {
             try container.encode(multipleOf, forKey: .multipleOf)
         }
 
-        if maximum != nil {
-            try container.encode(maximum, forKey: .maximum)
+        if let max = maximum {
+            try container.encode(max.value, forKey: .maximum)
+            if max.exclusive {
+                try container.encode(true, forKey: .exclusiveMaximum)
+            }
         }
 
-        if exclusiveMaximum != nil {
-            try container.encode(exclusiveMaximum, forKey: .exclusiveMaximum)
-        }
-
-        if minimum != nil {
-            try container.encode(minimum, forKey: .minimum)
-        }
-
-        if exclusiveMinimum != nil {
-            try container.encode(exclusiveMinimum, forKey: .exclusiveMinimum)
+        if let min =  minimum {
+            try container.encode(min.value, forKey: .minimum)
+            if min.exclusive {
+                try container.encode(true, forKey: .exclusiveMinimum)
+            }
         }
     }
 }
 
 extension JSONSchemaObject.NumericContext: Decodable {
-    // default implementation works
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
+
+        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
+        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
+
+        maximum = (try container.decodeIfPresent(Double.self, forKey: .maximum))
+            .map { Bound(value: $0, exclusive: exclusiveMaximum) }
+        minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
+            .map { Bound(value: $0, exclusive: exclusiveMinimum) }
+    }
+}
+
+extension JSONSchemaObject.IntegerContext {
+    private enum CodingKeys: String, CodingKey {
+        case multipleOf
+        case maximum
+        case exclusiveMaximum
+        case minimum
+        case exclusiveMinimum
+    }
+}
+
+extension JSONSchemaObject.IntegerContext: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        if multipleOf != nil {
+            try container.encode(multipleOf, forKey: .multipleOf)
+        }
+
+        if let max = maximum {
+            try container.encode(max.value, forKey: .maximum)
+            if max.exclusive {
+                try container.encode(true, forKey: .exclusiveMaximum)
+            }
+        }
+
+        if let min =  minimum {
+            try container.encode(min.value, forKey: .minimum)
+            if min.exclusive {
+                try container.encode(true, forKey: .exclusiveMinimum)
+            }
+        }
+    }
+}
+
+extension JSONSchemaObject.IntegerContext: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
+
+        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
+        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
+
+        maximum = (try container.decodeIfPresent(Int.self, forKey: .maximum))
+            .map { Bound(value: $0, exclusive: exclusiveMaximum) }
+        minimum = (try container.decodeIfPresent(Int.self, forKey: .minimum))
+            .map { Bound(value: $0, exclusive: exclusiveMinimum) }
+    }
 }
 
 extension JSONSchemaObject.StringContext {
