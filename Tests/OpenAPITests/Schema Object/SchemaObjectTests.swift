@@ -190,6 +190,16 @@ final class SchemaObjectTests: XCTestCase {
             .requiredSchemaObject()
         let string = JSONSchemaObject.string(.init(format: .unspecified, required: false), .init())
             .requiredSchemaObject()
+        let allOf = JSONSchemaObject.all(of: [boolean])
+            .requiredSchemaObject()
+        let anyOf = JSONSchemaObject.any(of: [boolean])
+            .requiredSchemaObject()
+        let oneOf = JSONSchemaObject.one(of: [boolean])
+            .requiredSchemaObject()
+        let not = JSONSchemaObject.not(boolean)
+            .requiredSchemaObject()
+        let reference = JSONSchemaObject.reference(.file("hello/world.json#/hello"))
+            .requiredSchemaObject()
 
         XCTAssertTrue(boolean.required)
         XCTAssertTrue(object.required)
@@ -197,6 +207,11 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(number.required)
         XCTAssertTrue(integer.required)
         XCTAssertTrue(string.required)
+        XCTAssertTrue(allOf.required)
+        XCTAssertTrue(anyOf.required)
+        XCTAssertTrue(oneOf.required)
+        XCTAssertTrue(not.required)
+        XCTAssertTrue(reference.required)
     }
 
     func test_notNullableToNullable() {
@@ -329,6 +344,19 @@ final class SchemaObjectTests: XCTestCase {
 // MARK: - Codable
 
 extension SchemaObjectTests {
+
+    func test_decodeingFailsForTypo() {
+        let oneOfData = """
+        {
+            "oneOff": [
+                { "type": "string" },
+                { "type": "boolean" }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaObject.self, from: oneOfData))
+    }
 
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchemaObject.boolean(.init(format: .unspecified, required: true))
@@ -528,7 +556,42 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithMaxProperties() {
-        // TODO: add test
+        let objectData = """
+        {
+            "maxProperties": 1,
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "maxProperties": 1,
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "maxProperties": 1,
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: [:], maxProperties: 1)))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:], maxProperties: 1)))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], maxProperties: 1))
     }
 
     func test_encodeObjectWithMinProperties() {
@@ -600,10 +663,45 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithMinProperties() {
-        // TODO: add test
+        let objectData = """
+        {
+            "minProperties": 1,
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "minProperties": 1,
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "minProperties": 1,
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: [:], minProperties: 1)))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:], minProperties: 1)))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], minProperties: 1))
     }
 
-    func test_encodeObjectWithAdditionalPropertiesTrue() {
+    func test_encodeObjectWithAdditionalPropertiesBoolean() {
         let requiredObject = JSONSchemaObject.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
         ], additionalProperties: .init(true)))
@@ -671,8 +769,43 @@ extension SchemaObjectTests {
         ])
     }
 
-    func test_decodeObjectWithAdditionalPropertiesTrue() {
-        // TODO: add test
+    func test_decodeObjectWithAdditionalPropertiesBoolean() {
+        let objectData = """
+        {
+            "additionalProperties": true,
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "additionalProperties": true,
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: [:], additionalProperties: .init(true))))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:], additionalProperties: .init(true))))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(true)))
     }
 
     func test_encodeObjectWithAdditionalPropertiesObject() {
@@ -752,7 +885,42 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithAdditionalPropertiesObject() {
-        // TODO: add test
+        let objectData = """
+        {
+            "additionalProperties": { "type": "string" },
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: [:], additionalProperties: .init(.string(required: false)))))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:], additionalProperties: .init(.string(required: false)))))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(.string(required: false))))
     }
 
     func test_encodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
@@ -801,10 +969,6 @@ extension SchemaObjectTests {
                                     "],",
                                     "\"type\" : \"object\""
         ])
-    }
-
-    func test_decodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
-        // TODO: add test
     }
 
     func test_encodeObjectWithRequiredProperties() {
@@ -888,7 +1052,44 @@ extension SchemaObjectTests {
     }
 
     func test_decodeObjectWithRequiredProperties() {
-        // TODO: add test
+        let objectData = """
+        {
+            "required": ["hello"],
+            "properties": {"hello": { "type": "boolean"}},
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "required": ["hello"],
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "required": ["hello"],
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchemaObject.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchemaObject.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchemaObject.object(.init(format: .generic, required: false), .init(properties: ["hello": .boolean(.init(format: .generic, required: true))])))
+        XCTAssertEqual(nullableObject, JSONSchemaObject.object(.init(format: .generic, required: false, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic, required: true))])))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: true))]))
     }
 
     func test_encodeArray() {
@@ -1712,7 +1913,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithMaxLength() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "maxLength": 5}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "maxLength": 5, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "maxLength": 5, "enum": ["hello", "world"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .generic, required: false), .init(maxLength: 5)))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .generic, required: false, nullable: true), .init(maxLength: 5)))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .generic, required: false, allowedValues: ["hello", "world"]), .init(maxLength: 5)))
     }
 
     func test_encodeStringWithMinLength() {
@@ -1752,7 +1963,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithMinLength() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "minLength": 3}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "minLength": 3, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "minLength": 3, "enum": ["hello", "world"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .generic, required: false), .init(minLength: 3)))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .generic, required: false, nullable: true), .init(minLength: 3)))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .generic, required: false, allowedValues: ["hello", "world"]), .init(minLength: 3)))
     }
 
     func test_encodeStringWithPattern() {
@@ -1792,7 +2013,17 @@ extension SchemaObjectTests {
     }
 
     func test_decodeStringWithPattern() {
-        // TODO: add test
+        let stringData = #"{"type": "string", "pattern": ".*"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": "string", "pattern": ".*", "nullable": true}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "pattern": ".*", "enum": ["hello", "world"]}"#.data(using: .utf8)!
+
+        let string = try! testDecoder.decode(JSONSchemaObject.self, from: stringData)
+        let nullableString = try! testDecoder.decode(JSONSchemaObject.self, from: nullableStringData)
+        let allowedValueString = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueStringData)
+
+        XCTAssertEqual(string, JSONSchemaObject.string(.init(format: .generic, required: false), .init(pattern: ".*")))
+        XCTAssertEqual(nullableString, JSONSchemaObject.string(.init(format: .generic, required: false, nullable: true), .init(pattern: ".*")))
+        XCTAssertEqual(allowedValueString, JSONSchemaObject.string(.init(format: .generic, required: false, allowedValues: ["hello", "world"]), .init(pattern: ".*")))
     }
 
     func test_encodeAll() {
@@ -2069,6 +2300,7 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
 
 extension SchemaObjectTests {
     func test_boolean() {
+        let _: JSONSchemaObject = .boolean
         let _ = JSONSchemaObject.boolean(
             required: true,
             nullable: true
@@ -2083,7 +2315,44 @@ extension SchemaObjectTests {
         )
     }
 
+    func test_number() {
+        let _: JSONSchemaObject = .number
+        let _ = JSONSchemaObject.number(
+            required: true,
+            nullable: true
+        )
+        let _ = JSONSchemaObject.number(
+            required: false,
+            nullable: false,
+            description: "A small number",
+            multipleOf: 9.5 / 2
+        )
+        let _ = JSONSchemaObject.number(
+            maximum: (9.5, exclusive: false),
+            minimum: (2, exclusive: true)
+        )
+    }
+
+    func test_integer() {
+        let _: JSONSchemaObject = .integer
+        let _ = JSONSchemaObject.integer(
+            required: true,
+            nullable: true
+        )
+        let _ = JSONSchemaObject.integer(
+            required: false,
+            nullable: false,
+            title: "count",
+            multipleOf: 3
+        )
+        let _ = JSONSchemaObject.integer(
+            maximum: (10, exclusive: true),
+            minimum: (3, exclusive: false)
+        )
+    }
+
     func test_object() {
+        let _: JSONSchemaObject = .object
         let _ = JSONSchemaObject.object(
             required: true,
             nullable: true
