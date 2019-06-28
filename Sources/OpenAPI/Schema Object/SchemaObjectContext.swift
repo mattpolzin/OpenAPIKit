@@ -133,6 +133,7 @@ extension JSONSchemaObject {
 
         /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
         public let multipleOf: Double?
+
         public let maximum: Bound?
         public let minimum: Bound?
 
@@ -153,6 +154,7 @@ extension JSONSchemaObject {
 
         /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
         public let multipleOf: Int?
+
         public let maximum: Bound?
         public let minimum: Bound?
 
