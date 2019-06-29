@@ -14,6 +14,8 @@ import Poly
 public protocol JSONSchemaObjectContext {
     var required: Bool { get }
     var nullable: Bool { get }
+    var title: String? { get }
+    var description: String? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: String? { get }
 }
@@ -80,8 +82,10 @@ extension JSONSchemaObject.Context {
         return .init(format: format,
                      required: false,
                      nullable: nullable,
+                     title: title,
+                     description: description,
 //                         constantValue: constantValue,
-            allowedValues: allowedValues)
+                    allowedValues: allowedValues)
     }
 
     /// Return the required version of this context
@@ -89,8 +93,10 @@ extension JSONSchemaObject.Context {
         return .init(format: format,
                      required: true,
                      nullable: nullable,
+                     title: title,
+                     description: description,
 //                         constantValue: constantValue,
-            allowedValues: allowedValues)
+                    allowedValues: allowedValues)
     }
 
     /// Return the nullable version of this context
@@ -98,8 +104,10 @@ extension JSONSchemaObject.Context {
         return .init(format: format,
                      required: required,
                      nullable: true,
+                     title: title,
+                     description: description,
 //                         constantValue: constantValue,
-            allowedValues: allowedValues)
+                    allowedValues: allowedValues)
     }
 
     /// Return this context with the given list of possible values
@@ -107,8 +115,10 @@ extension JSONSchemaObject.Context {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
+                     title: title,
+                     description: description,
 //                         constantValue: constantValue,
-            allowedValues: allowedValues)
+                    allowedValues: allowedValues)
     }
 
     /// Return this context with the given example
@@ -116,9 +126,11 @@ extension JSONSchemaObject.Context {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
+                     title: title,
+                     description: description,
 //                         constantValue: constantValue,
-            allowedValues: allowedValues,
-            example: (codable: example, encoder: encoder))
+                    allowedValues: allowedValues,
+                    example: (codable: example, encoder: encoder))
     }
 }
 

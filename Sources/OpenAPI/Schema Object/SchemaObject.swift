@@ -9,7 +9,7 @@ import Foundation
 import AnyCodable
 import Poly
 
-public enum JSONSchemaObject: Equatable {
+public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
     indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
@@ -66,6 +66,34 @@ public enum JSONSchemaObject: Equatable {
             return context.nullable
         case .all, .one, .any, .not, .reference:
             return false
+        }
+    }
+
+    public var title: String? {
+        switch self {
+        case .boolean(let context as JSONSchemaObjectContext),
+             .object(let context as JSONSchemaObjectContext, _),
+             .array(let context as JSONSchemaObjectContext, _),
+             .number(let context as JSONSchemaObjectContext, _),
+             .integer(let context as JSONSchemaObjectContext, _),
+             .string(let context as JSONSchemaObjectContext, _):
+            return context.title
+        case .all, .one, .any, .not, .reference:
+            return nil
+        }
+    }
+
+    public var description: String? {
+        switch self {
+        case .boolean(let context as JSONSchemaObjectContext),
+             .object(let context as JSONSchemaObjectContext, _),
+             .array(let context as JSONSchemaObjectContext, _),
+             .number(let context as JSONSchemaObjectContext, _),
+             .integer(let context as JSONSchemaObjectContext, _),
+             .string(let context as JSONSchemaObjectContext, _):
+            return context.description
+        case .all, .one, .any, .not, .reference:
+            return nil
         }
     }
 
