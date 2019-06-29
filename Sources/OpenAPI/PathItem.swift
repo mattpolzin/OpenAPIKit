@@ -111,7 +111,7 @@ extension OpenAPI {
                 public let summary: String?
                 public let description: String?
                 //            public let externalDocs:
-                public let operationId: String
+                public let operationId: String?
                 public let parameters: ParameterArray
                 public let requestBody: Request?
                 public let responses: ResponseMap
@@ -123,7 +123,7 @@ extension OpenAPI {
                 public init(tags: [String]? = nil,
                             summary: String? = nil,
                             description: String? = nil,
-                            operationId: String,
+                            operationId: String? = nil,
                             parameters: ParameterArray,
                             requestBody: Request? = nil,
                             responses: ResponseMap,
@@ -230,7 +230,9 @@ extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
             try container.encode(description, forKey: .description)
         }
 
-        try container.encode(operationId, forKey: .operationId)
+        if operationId != nil {
+            try container.encode(operationId, forKey: .operationId)
+        }
 
         try container.encode(parameters, forKey: .parameters)
 
@@ -260,9 +262,9 @@ extension OpenAPI.PathItem.PathProperties.Operation: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        operationId = try container.decode(String.self, forKey: .operationId)
+        operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 
-        parameters = try container.decode(OpenAPI.PathItem.PathProperties.ParameterArray.self, forKey: .parameters)
+        parameters = try container.decodeIfPresent(OpenAPI.PathItem.PathProperties.ParameterArray.self, forKey: .parameters) ?? []
 
         requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
 
