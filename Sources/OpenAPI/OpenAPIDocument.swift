@@ -32,11 +32,11 @@ extension OpenAPI {
             self.components = components
         }
 
-        public enum Version: String, Encodable {
+        public enum Version: String, Codable {
             case v3_0_0 = "3.0.0"
         }
 
-        public struct Info: Encodable {
+        public struct Info: Codable {
             public let title: String
             public let description: String?
             public let termsOfService: URL?
@@ -55,7 +55,7 @@ extension OpenAPI {
             }
         }
 
-        public struct PathComponents: RawRepresentable, Encodable, Equatable, Hashable {
+        public struct PathComponents: RawRepresentable, Equatable, Hashable {
             public let components: [String]
 
             public init(_ components: [String]) {
@@ -69,12 +69,6 @@ extension OpenAPI {
             public var rawValue: String {
                 return "/\(components.joined(separator: "/"))"
             }
-
-            public func encode(to encoder: Encoder) throws {
-                var container = encoder.singleValueContainer()
-
-                try container.encode(rawValue)
-            }
         }
     }
 }
@@ -83,7 +77,25 @@ extension OpenAPI {
 
 // MARK: - Codable
 
-extension OpenAPI.Document: Encodable {
+extension OpenAPI.Document.PathComponents: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        try container.encode(rawValue)
+    }
+}
+
+extension OpenAPI.Document.PathComponents: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        let rawValue = try container.decode(String.self)
+
+        components = rawValue.split(separator: "/").map(String.init)
+    }
+}
+
+extension OpenAPI.Document {
     private enum CodingKeys: String, CodingKey {
         case openAPIVersion = "openapi"
         case info
@@ -94,6 +106,9 @@ extension OpenAPI.Document: Encodable {
         case tags
         case externalDocs
     }
+}
+
+extension OpenAPI.Document: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -111,5 +126,19 @@ extension OpenAPI.Document: Encodable {
         try container.encode(stringKeyedDict, forKey: .paths)
 
         try container.encode(components, forKey: .components)
+    }
+}
+
+extension OpenAPI.Document: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
+
+        info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
+
+        paths = try container.decode([PathComponents: OpenAPI.PathItem].self, forKey: .paths)
+
+        components = try container.decode(OpenAPI.Components.self, forKey: .components)
     }
 }

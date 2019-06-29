@@ -8,7 +8,7 @@
 import Foundation
 
 extension OpenAPI {
-    public struct Response: Equatable {
+    public struct Response: Equatable, Decodable {
         public let description: String
         //    public let headers:
         public let content: PathItem.PathProperties.Operation.ContentMap
@@ -52,9 +52,9 @@ extension OpenAPI {
 extension OpenAPI.Response: Encodable {
     private enum CodingKeys: String, CodingKey {
         case description
-        case headers
+//        case headers
         case content
-        case links
+//        case links
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -72,6 +72,10 @@ extension OpenAPI.Response: Encodable {
     }
 }
 
+//extension OpenAPI.Response: Decodable {
+    // we get this for free
+//}
+
 extension OpenAPI.Response.StatusCode: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
@@ -86,5 +90,18 @@ extension OpenAPI.Response.StatusCode: Encodable {
         }
 
         try container.encode(string)
+    }
+}
+
+extension OpenAPI.Response.StatusCode: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let val = Self(rawValue: try container.decode(String.self))
+
+        guard let value = val else {
+            throw OpenAPI.DecodingError.unknown
+        }
+
+        self = value
     }
 }

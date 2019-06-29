@@ -8,7 +8,7 @@
 import Foundation
 
 extension OpenAPI {
-    public struct Request: Equatable {
+    public struct Request: Equatable, Decodable {
         public let description: String?
         public let content: PathItem.PathProperties.Operation.ContentMap
         public let required: Bool
@@ -50,3 +50,7 @@ extension OpenAPI.Request: Encodable {
         try container.encode(required, forKey: .required)
     }
 }
+
+//extension OpenAPI.Request: Decodable {
+    // we get this for free
+//}

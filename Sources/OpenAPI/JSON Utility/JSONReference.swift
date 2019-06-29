@@ -22,7 +22,7 @@ public protocol ReferenceDict: RefName {
 /// A RefDict knows what to call itself (Name) and where to
 /// look for itself (Root) and it stores a dictionary of
 /// JSONReferenceObjects (some of which might be other references).
-public struct RefDict<Root: ReferenceRoot, Name: RefName, RefType: Equatable & Encodable>: ReferenceDict, Equatable {
+public struct RefDict<Root: ReferenceRoot, Name: RefName, RefType: Equatable & Codable>: ReferenceDict, Equatable {
     public static var refName: String { return Name.refName }
 
     public typealias Value = RefType
@@ -69,11 +69,13 @@ public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable {
 
 // MARK: - Codable
 
-extension JSONReference: Encodable {
+extension JSONReference {
     private enum CodingKeys: String, CodingKey {
         case ref = "$ref"
     }
+}
 
+extension JSONReference: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -90,10 +92,33 @@ extension JSONReference: Encodable {
     }
 }
 
+extension JSONReference: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        let referenceString = try container.decode(String.self, forKey: .ref)
+
+        if referenceString.first == "#" {
+            // TODO: parse local ref
+            fatalError("not implemented")
+        } else {
+            self = .file(referenceString)
+        }
+    }
+}
+
 extension RefDict: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
         try container.encode(dict)
+    }
+}
+
+extension RefDict: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        dict = try container.decode([String : RefType].self)
     }
 }

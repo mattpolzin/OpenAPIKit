@@ -11,7 +11,7 @@ extension OpenAPI {
     /// What the spec calls the "Components Object".
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
-    public struct Components: Equatable, Encodable, ReferenceRoot {
+    public struct Components: Equatable, Codable, ReferenceRoot {
         public static var refName: String { return "components" }
 
         public let schemas: SchemasDict

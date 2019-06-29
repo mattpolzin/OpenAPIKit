@@ -9,11 +9,11 @@ import Foundation
 import Poly
 
 extension OpenAPI {
-    public enum ContentType: String, Encodable, Equatable, Hashable {
+    public enum ContentType: String, Codable, Equatable, Hashable {
         case json = "application/json"
     }
 
-    public struct Content: Encodable, Equatable {
+    public struct Content: Codable, Equatable {
         public let schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
         //        public let example:
         //        public let examples:
@@ -31,7 +31,7 @@ extension OpenAPI {
         case reference(JSONReference<Components, PathItem>)
         case operations(PathProperties)
 
-        public struct PathProperties: Equatable {
+        public struct PathProperties: Equatable, Decodable {
             public let summary: String?
             public let description: String?
             //        public let servers:
@@ -106,7 +106,7 @@ extension OpenAPI {
                 }
             }
 
-            public struct Operation: Equatable {
+            public struct Operation: Equatable, Decodable {
                 public let tags: [String]?
                 public let summary: String?
                 public let description: String?
@@ -164,22 +164,43 @@ extension OpenAPI.PathItem: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
+extension OpenAPI.PathItem: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        let maybeRef = try? container.decode(JSONReference<OpenAPI.Components, Self>.self)
+        let maybeOperations = try? container.decode(PathProperties.self)
+
+        switch (maybeRef, maybeOperations) {
+        case (let ref?, _):
+            self = .reference(ref)
+        case (_, let operations?):
+            self = .operations(operations)
+        default:
+            throw OpenAPI.DecodingError.foundNeither(option1: "$ref",
+                                                     option2: "Operations")
+        }
+    }
+}
+
+extension OpenAPI.PathItem.PathProperties.Operation {
     private enum CodingKeys: String, CodingKey {
         case tags
         case summary
         case description
-        case externalDocs
+//        case externalDocs
         case operationId
         case parameters
         case requestBody
         case responses
-        case callbacks
+//        case callbacks
         case deprecated
-        case security
-        case servers
+//        case security
+//        case servers
     }
+}
 
+extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -215,7 +236,11 @@ extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
+//extension OpenAPI.PathItem.PathProperties.Operation: Decodable {
+    // This comes for free
+//}
+
+extension OpenAPI.PathItem.PathProperties.Parameter {
     private enum CodingKeys: String, CodingKey {
         case name
         case parameterLocation = "in"
@@ -228,26 +253,35 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
         case schema
     }
 
+    private enum LocationString: String, Codable {
+        case query
+        case header
+        case path
+        case cookie
+    }
+}
+
+extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(name, forKey: .name)
 
         let required: Bool?
-        let location: String
+        let location: LocationString
         switch parameterLocation {
         case .query(required: let req):
             required = req
-            location = "query"
+            location = .query
         case .header(required: let req):
             required = req
-            location = "header"
+            location = .header
         case .path:
             required = true
-            location = "path"
+            location = .path
         case .cookie(required: let req):
             required = req
-            location = "cookie"
+            location = .cookie
         }
         try container.encode(location, forKey: .parameterLocation)
 
@@ -274,11 +308,52 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.PathProperties: Encodable {
+extension OpenAPI.PathItem.PathProperties.Parameter: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        name = try container.decode(String.self, forKey: .name)
+
+        let required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
+        let location = try container.decode(LocationString.self, forKey: .parameterLocation)
+
+        switch location {
+        case .query:
+            parameterLocation = .query(required: required)
+        case .header:
+            parameterLocation = .header(required: required)
+        case .path:
+            if !required {
+                throw OpenAPI.DecodingError.unsatisfied(requirement: "positional path parameters must be explicitly set to required.")
+            }
+            parameterLocation = .path
+        case .cookie:
+            parameterLocation = .cookie(required: required)
+        }
+
+        let maybeContent = try container.decodeIfPresent(OpenAPI.PathItem.PathProperties.Operation.ContentMap.self, forKey: .content)
+        let maybeSchema = try container.decodeIfPresent(SchemaProperty.self, forKey: .schema)
+
+        switch (maybeContent, maybeSchema) {
+        case (let content?, _):
+            schemaOrContent = .init(content)
+        case (_, let schema?):
+            schemaOrContent = .init(schema)
+        default:
+            throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.")
+        }
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        deprecated = try container.decode(Bool.self, forKey: .deprecated)
+    }
+}
+
+extension OpenAPI.PathItem.PathProperties {
     private enum CodingKeys: String, CodingKey {
         case summary
         case description
-        case servers
+//        case servers
         case parameters
 
         case get
@@ -290,7 +365,9 @@ extension OpenAPI.PathItem.PathProperties: Encodable {
         case patch
         case trace
     }
+}
 
+extension OpenAPI.PathItem.PathProperties: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -337,3 +414,7 @@ extension OpenAPI.PathItem.PathProperties: Encodable {
         }
     }
 }
+
+//extension OpenAPI.PathItem.PathProperties: Decodable {
+    // we get this for free
+//}
