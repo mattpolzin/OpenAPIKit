@@ -342,7 +342,9 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Encodable {
             try container.encode(description, forKey: .description)
         }
 
-        try container.encode(deprecated, forKey: .deprecated)
+        if deprecated {
+            try container.encode(deprecated, forKey: .deprecated)
+        }
     }
 }
 
@@ -383,7 +385,7 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        deprecated = try container.decode(Bool.self, forKey: .deprecated)
+        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
     }
 }
 
