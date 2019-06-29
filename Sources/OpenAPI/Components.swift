@@ -30,6 +30,10 @@ extension OpenAPI {
             self.parameters = ParametersDict(parameters)
         }
 
+        public static var noComponents: Components {
+            return .init(schemas: [:], parameters: [:])
+        }
+
         public enum SchemasName: RefName {
             public static var refName: String { return "schemas" }
         }

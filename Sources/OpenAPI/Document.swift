@@ -143,6 +143,6 @@ extension OpenAPI.Document: Decodable {
             OpenAPI.Document.PathComponents(rawValue: pathString).map { ($0, pathItem) } },
                            uniquingKeysWith: { $1 })
 
-        components = try container.decode(OpenAPI.Components.self, forKey: .components)
+        components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
     }
 }
