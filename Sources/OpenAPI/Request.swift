@@ -8,7 +8,7 @@
 import Foundation
 
 extension OpenAPI {
-    public struct Request: Equatable, Decodable {
+    public struct Request: Equatable {
         public let description: String?
         public let content: PathItem.PathProperties.Operation.ContentMap
         public let required: Bool
@@ -47,10 +47,24 @@ extension OpenAPI.Request: Encodable {
         )
         try container.encode(stringKeyedDict, forKey: .content)
 
-        try container.encode(required, forKey: .required)
+        if required {
+            try container.encode(required, forKey: .required)
+        }
     }
 }
 
-//extension OpenAPI.Request: Decodable {
-    // we get this for free
-//}
+extension OpenAPI.Request: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        // hacky workaround for Dictionary decoding bug
+        let contentDict = try container.decode([String: OpenAPI.Content].self, forKey: .content)
+        content = Dictionary(contentDict.compactMap { contentTypeString, content in
+            OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
+                             uniquingKeysWith: { $1 })
+
+        required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
+    }
+}
