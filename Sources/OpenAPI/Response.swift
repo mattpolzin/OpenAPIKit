@@ -66,13 +66,15 @@ extension OpenAPI.Response: Encodable {
             try container.encode(desc, forKey: .description)
         }
 
-        // Hack to work around Dictionary encoding
-        // itself as an array in this case:
-        let stringKeyedDict = Dictionary(
-            content.map { ($0.key.rawValue, $0.value) },
-            uniquingKeysWith: { $1 }
-        )
-        try container.encode(stringKeyedDict, forKey: .content)
+        if content.count > 0 {
+            // Hack to work around Dictionary encoding
+            // itself as an array in this case:
+            let stringKeyedDict = Dictionary(
+                content.map { ($0.key.rawValue, $0.value) },
+                uniquingKeysWith: { $1 }
+            )
+            try container.encode(stringKeyedDict, forKey: .content)
+        }
     }
 }
 
@@ -83,10 +85,12 @@ extension OpenAPI.Response: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         // hacky workaround for Dictionary decoding bug
-        let contentDict = try container.decode([String: OpenAPI.Content].self, forKey: .content)
-        content = Dictionary(contentDict.compactMap { contentTypeString, content in
-            OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
-                               uniquingKeysWith: { $1 })
+        let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)
+        content = maybeContentDict.map { contentDict in
+            Dictionary(contentDict.compactMap { contentTypeString, content in
+                OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
+                       uniquingKeysWith: { $1 })
+        } ?? [:]
     }
 }
 
