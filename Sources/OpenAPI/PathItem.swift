@@ -31,7 +31,7 @@ extension OpenAPI {
         case reference(JSONReference<Components, PathItem>)
         case operations(PathProperties)
 
-        public struct PathProperties: Equatable, Decodable {
+        public struct PathProperties: Equatable {
             public let summary: String?
             public let description: String?
             //        public let servers:
@@ -453,6 +453,23 @@ extension OpenAPI.PathItem.PathProperties: Encodable {
     }
 }
 
-//extension OpenAPI.PathItem.PathProperties: Decodable {
-    // we get this for free
-//}
+extension OpenAPI.PathItem.PathProperties: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        parameters = try container.decodeIfPresent(ParameterArray.self, forKey: .parameters) ?? []
+
+        get = try container.decodeIfPresent(Operation.self, forKey: .get)
+        put = try container.decodeIfPresent(Operation.self, forKey: .put)
+        post = try container.decodeIfPresent(Operation.self, forKey: .post)
+        delete = try container.decodeIfPresent(Operation.self, forKey: .delete)
+        options = try container.decodeIfPresent(Operation.self, forKey: .options)
+        head = try container.decodeIfPresent(Operation.self, forKey: .head)
+        patch = try container.decodeIfPresent(Operation.self, forKey: .patch)
+        trace = try container.decodeIfPresent(Operation.self, forKey: .trace)
+    }
+}
