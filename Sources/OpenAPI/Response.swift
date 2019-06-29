@@ -8,8 +8,8 @@
 import Foundation
 
 extension OpenAPI {
-    public struct Response: Equatable, Decodable {
-        public let description: String
+    public struct Response: Equatable {
+        public let description: String?
         //    public let headers:
         public let content: PathItem.PathProperties.Operation.ContentMap
         //    public let links:
@@ -49,18 +49,22 @@ extension OpenAPI {
 
 // MARK: - Codable
 
-extension OpenAPI.Response: Encodable {
+extension OpenAPI.Response {
     private enum CodingKeys: String, CodingKey {
         case description
-//        case headers
+        //        case headers
         case content
-//        case links
+        //        case links
     }
+}
 
+extension OpenAPI.Response: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(description, forKey: .description)
+        if let desc = description {
+            try container.encode(desc, forKey: .description)
+        }
 
         // Hack to work around Dictionary encoding
         // itself as an array in this case:
@@ -72,9 +76,19 @@ extension OpenAPI.Response: Encodable {
     }
 }
 
-//extension OpenAPI.Response: Decodable {
-    // we get this for free
-//}
+extension OpenAPI.Response: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        // hacky workaround for Dictionary decoding bug
+        let contentDict = try container.decode([String: OpenAPI.Content].self, forKey: .content)
+        content = Dictionary(contentDict.compactMap { contentTypeString, content in
+            OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
+                               uniquingKeysWith: { $1 })
+    }
+}
 
 extension OpenAPI.Response.StatusCode: Encodable {
     public func encode(to encoder: Encoder) throws {

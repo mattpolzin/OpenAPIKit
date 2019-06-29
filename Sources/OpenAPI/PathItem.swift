@@ -371,7 +371,14 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Decodable {
             parameterLocation = .cookie(required: required)
         }
 
-        let maybeContent = try container.decodeIfPresent(OpenAPI.PathItem.PathProperties.Operation.ContentMap.self, forKey: .content)
+        // hacky workaround for Dictionary decoding bug
+        let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)
+        let maybeContent = maybeContentDict.map { contentDict in
+            Dictionary(contentDict.compactMap { contentTypeString, content in
+                OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
+                       uniquingKeysWith: { $1 })
+        }
+
         let maybeSchema = try container.decodeIfPresent(SchemaProperty.self, forKey: .schema)
 
         switch (maybeContent, maybeSchema) {
