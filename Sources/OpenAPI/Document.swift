@@ -1,5 +1,5 @@
 //
-//  OpenAPITypes.swift
+//  Document.swift
 //  OpenAPI
 //
 //  Created by Mathew Polzin on 1/13/19.
@@ -137,7 +137,11 @@ extension OpenAPI.Document: Decodable {
 
         info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
 
-        paths = try container.decode([PathComponents: OpenAPI.PathItem].self, forKey: .paths)
+        // hacky workaround for Dictionary bug
+        let pathsDict = try container.decode([String: OpenAPI.PathItem].self, forKey: .paths)
+        paths = Dictionary(pathsDict.compactMap { pathString, pathItem in
+            OpenAPI.Document.PathComponents(rawValue: pathString).map { ($0, pathItem) } },
+                           uniquingKeysWith: { $1 })
 
         components = try container.decode(OpenAPI.Components.self, forKey: .components)
     }
