@@ -168,18 +168,31 @@ extension OpenAPI.PathItem: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        let maybeRef = try? container.decode(JSONReference<OpenAPI.Components, Self>.self)
-        let maybeOperations = try? container.decode(PathProperties.self)
+        let maybeRef: Result<JSONReference<OpenAPI.Components, Self>, Swift.Error>
+        do {
+            maybeRef = .success(try container.decode(JSONReference<OpenAPI.Components, Self>.self))
+        } catch let err {
+            maybeRef = .failure(err)
+        }
+
+        let maybeOperations: Result<PathProperties, Swift.Error>
+        do {
+            maybeOperations = .success(try container.decode(PathProperties.self))
+        } catch let err {
+            maybeOperations = .failure(err)
+        }
 
         switch (maybeRef, maybeOperations) {
-        case (let ref?, _):
+        case (.success(let ref), _):
             self = .reference(ref)
-        case (_, let operations?):
+        case (_, .success(let operations)):
             self = .operations(operations)
         default:
             throw OpenAPI.DecodingError.foundNeither(option1: "$ref",
                                                      option2: "Operations",
-                                                     codingPath: decoder.codingPath)
+                                                     codingPath: decoder.codingPath,
+                                                     notOption1Because: maybeRef.error,
+                                                     notOption2Because: maybeOperations.error)
         }
     }
 }
