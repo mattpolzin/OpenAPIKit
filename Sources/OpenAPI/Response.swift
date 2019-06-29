@@ -99,7 +99,7 @@ extension OpenAPI.Response.StatusCode: Decodable {
         let val = Self(rawValue: try container.decode(String.self))
 
         guard let value = val else {
-            throw OpenAPI.DecodingError.unknown
+            throw OpenAPI.DecodingError.unknown(codingPath: decoder.codingPath)
         }
 
         self = value

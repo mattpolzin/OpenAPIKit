@@ -497,7 +497,7 @@ extension JSONSchemaObject: Decodable {
         do {
             type = try hintContainer.decode(JSONType.self, forKey: .type)
         } catch {
-            throw OpenAPI.DecodingError.missingKeyword(underlyingError: "A JSON Schema object is expected to be `oneOf`, `anyOf`, `allOf`, `not`, or have a `type` key.")
+            throw OpenAPI.DecodingError.missingKeyword(underlyingError: "A JSON Schema object is expected to be `oneOf`, `anyOf`, `allOf`, `not`, or have a `type` key.", codingPath: decoder.codingPath)
         }
 
         switch type {

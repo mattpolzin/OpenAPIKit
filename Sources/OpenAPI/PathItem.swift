@@ -106,7 +106,7 @@ extension OpenAPI {
                 }
             }
 
-            public struct Operation: Equatable, Decodable {
+            public struct Operation: Equatable {
                 public let tags: [String]?
                 public let summary: String?
                 public let description: String?
@@ -178,7 +178,8 @@ extension OpenAPI.PathItem: Decodable {
             self = .operations(operations)
         default:
             throw OpenAPI.DecodingError.foundNeither(option1: "$ref",
-                                                     option2: "Operations")
+                                                     option2: "Operations",
+                                                     codingPath: decoder.codingPath)
         }
     }
 }
@@ -236,9 +237,31 @@ extension OpenAPI.PathItem.PathProperties.Operation: Encodable {
     }
 }
 
-//extension OpenAPI.PathItem.PathProperties.Operation: Decodable {
-    // This comes for free
-//}
+extension OpenAPI.PathItem.PathProperties.Operation: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        operationId = try container.decode(String.self, forKey: .operationId)
+
+        parameters = try container.decode(OpenAPI.PathItem.PathProperties.ParameterArray.self, forKey: .parameters)
+
+        requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
+
+        // hack to workaround Dictionary bug
+        let responsesDict = try container.decode([String: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>].self, forKey: .responses)
+        responses = Dictionary(responsesDict.compactMap { statusCodeString, response in
+            OpenAPI.Response.StatusCode(rawValue: statusCodeString).map { ($0, response) } },
+                           uniquingKeysWith: { $1 })
+
+        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+    }
+}
 
 extension OpenAPI.PathItem.PathProperties.Parameter {
     private enum CodingKeys: String, CodingKey {
@@ -324,7 +347,7 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Decodable {
             parameterLocation = .header(required: required)
         case .path:
             if !required {
-                throw OpenAPI.DecodingError.unsatisfied(requirement: "positional path parameters must be explicitly set to required.")
+                throw OpenAPI.DecodingError.unsatisfied(requirement: "positional path parameters must be explicitly set to required.", codingPath: decoder.codingPath)
             }
             parameterLocation = .path
         case .cookie:
@@ -340,7 +363,7 @@ extension OpenAPI.PathItem.PathProperties.Parameter: Decodable {
         case (_, let schema?):
             schemaOrContent = .init(schema)
         default:
-            throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.")
+            throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.", codingPath: decoder.codingPath)
         }
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
