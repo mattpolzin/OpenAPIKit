@@ -2708,7 +2708,11 @@ extension SchemaObjectTests {
     }
 
     func test_decodeFileReference() {
-        // TODO: add test
+        let fileRefData = #"{ "$ref": "./other_file.json#/hello" }"#.data(using: .utf8)!
+
+        let fileRef = try! testDecoder.decode(JSONSchemaObject.self, from: fileRefData)
+
+        XCTAssertEqual(fileRef, JSONSchemaObject.reference(.file("./other_file.json#/hello")))
     }
 
     func test_encodeNodeReference() {

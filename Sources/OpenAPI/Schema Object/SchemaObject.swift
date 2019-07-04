@@ -466,7 +466,10 @@ extension JSONSchemaObject: Decodable {
     public init(from decoder: Decoder) throws {
 
         if let singleValueContainer = try? decoder.singleValueContainer() {
-            // will want to try to decode a reference here.
+            if let ref = try? singleValueContainer.decode(JSONReference<OpenAPI.Components, JSONSchemaObject>.self) {
+                self = .reference(ref)
+                return
+            }
         }
 
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
