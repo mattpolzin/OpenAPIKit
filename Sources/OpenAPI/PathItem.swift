@@ -9,21 +9,6 @@ import Foundation
 import Poly
 
 extension OpenAPI {
-    public enum ContentType: String, Codable, Equatable, Hashable {
-        case json = "application/json"
-    }
-
-    public struct Content: Codable, Equatable {
-        public let schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
-        //        public let example:
-        //        public let examples:
-        //        public let encoding:
-
-        public init(schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>) {
-            self.schema = schema
-        }
-    }
-
     /// An OpenAPI Path Item
     /// This type describes the endpoints a server has
     /// bound to a particular path.
@@ -35,7 +20,7 @@ extension OpenAPI {
             public let summary: String?
             public let description: String?
             //        public let servers:
-            public let parameters: ParameterArray
+            public let parameters: Parameter.Array
 
             public let get: Operation?
             public let put: Operation?
@@ -48,7 +33,7 @@ extension OpenAPI {
 
             public init(summary: String? = nil,
                         description: String? = nil,
-                        parameters: ParameterArray = [],
+                        parameters: Parameter.Array = [],
                         get: Operation? = nil,
                         put: Operation? = nil,
                         post: Operation? = nil,
@@ -71,28 +56,24 @@ extension OpenAPI {
                 self.trace = trace
             }
 
-            public typealias ParameterArray = [Either<Parameter, JSONReference<Components, Parameter>>]
-
-            public typealias ResponseMap = [Response.StatusCode: Either<Response, JSONReference<Components, Response>>]
-
-            public typealias ContentMap = [ContentType: Content]
-
             public struct Parameter: Equatable {
                 public let name: String
                 public let parameterLocation: Location
                 public let description: String?
                 public let deprecated: Bool // default is false
-                public let schemaOrContent: Either<SchemaProperty, ContentMap>
+                public let schemaOrContent: Either<SchemaProperty, Content.Map>
                 // TODO: serialization rules
                 /*
                  Serialization Rules
                  */
 
+                public typealias Array = [Either<Parameter, JSONReference<Components, Parameter>>]
+
                 public typealias SchemaProperty = Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
 
                 public init(name: String,
                             parameterLocation: Location,
-                            schemaOrContent: Either<SchemaProperty, ContentMap>,
+                            schemaOrContent: Either<SchemaProperty, Content.Map>,
                             description: String? = nil,
                             deprecated: Bool = false) {
                     self.name = name
@@ -116,9 +97,9 @@ extension OpenAPI {
                 public let description: String?
                 //            public let externalDocs:
                 public let operationId: String?
-                public let parameters: ParameterArray
+                public let parameters: Parameter.Array
                 public let requestBody: Request?
-                public let responses: ResponseMap
+                public let responses: Response.Map
                 //            public let callbacks:
                 public let deprecated: Bool // default is false
                 //            public let security:
@@ -128,9 +109,9 @@ extension OpenAPI {
                             summary: String? = nil,
                             description: String? = nil,
                             operationId: String? = nil,
-                            parameters: ParameterArray,
+                            parameters: Parameter.Array,
                             requestBody: Request? = nil,
-                            responses: ResponseMap,
+                            responses: Response.Map,
                             deprecated: Bool = false) {
                     self.tags = tags
                     self.summary = summary
@@ -264,7 +245,7 @@ extension OpenAPI.PathItem.PathProperties.Operation: Decodable {
 
         operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 
-        parameters = try container.decodeIfPresent(OpenAPI.PathItem.PathProperties.ParameterArray.self, forKey: .parameters) ?? []
+        parameters = try container.decodeIfPresent(OpenAPI.PathItem.PathProperties.Parameter.Array.self, forKey: .parameters) ?? []
 
         requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
 
@@ -470,7 +451,7 @@ extension OpenAPI.PathItem.PathProperties: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        parameters = try container.decodeIfPresent(ParameterArray.self, forKey: .parameters) ?? []
+        parameters = try container.decodeIfPresent(Parameter.Array.self, forKey: .parameters) ?? []
 
         get = try container.decodeIfPresent(Operation.self, forKey: .get)
         put = try container.decodeIfPresent(Operation.self, forKey: .put)

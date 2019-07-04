@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import Poly
 
 extension OpenAPI {
     public struct Response: Equatable {
         public let description: String?
         //    public let headers:
-        public let content: PathItem.PathProperties.ContentMap
+        public let content: Content.Map
         //    public let links:
 
         public init(description: String,
-                    content: PathItem.PathProperties.ContentMap) {
+                    content: Content.Map) {
             self.description = description
             self.content = content
         }
@@ -47,6 +48,8 @@ extension OpenAPI.Response {
             }
         }
     }
+
+    public typealias Map = [StatusCode: Either<Self, JSONReference<OpenAPI.Components, Self>>]
 }
 
 // MARK: - Codable
