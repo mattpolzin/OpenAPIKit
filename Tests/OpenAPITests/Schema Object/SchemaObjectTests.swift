@@ -1554,11 +1554,11 @@ extension SchemaObjectTests {
     }
 
     func test_encodeArrayWithAdditionalItemsDefinition() {
-        // TODO: add test
+        // TODO: implement feature, add test
     }
 
     func test_decodeArrayWithAdditionalItemsDefinition() {
-        // TODO: add test
+        // TODO: implement feature, add test
     }
 
     func test_encodeArrayWithUniqueItems() {
@@ -1875,32 +1875,32 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNumberWithMaximum() {
-        let requiredInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: false)))
-        let optionalInteger = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(maximum: (11.5, exclusive: false)))
-        let nullableInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11.5, exclusive: false)))
-        let allowedValueInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: false)))
+        let requiredNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: false)))
+        let optionalNumber = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(maximum: (11.5, exclusive: false)))
+        let nullableNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11.5, exclusive: false)))
+        let allowedValueNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: false)))
             .with(allowedValues: [10])
 
-        testEncodingPropertyLines(entity: requiredInteger,
+        testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
                                     "\"maximum\" : 11.5,",
                                     "\"type\" : \"number\"",
         ])
 
-        testEncodingPropertyLines(entity: optionalInteger,
+        testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
                                     "\"maximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: nullableInteger,
+        testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"maximum\" : 11.5,",
                                     "\"nullable\" : true,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: allowedValueInteger,
+        testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
                                     "\"enum\" : [",
                                     "  10",
@@ -1925,27 +1925,27 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNumberWithExclusiveMaximum() {
-        let requiredInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: true)))
-        let optionalInteger = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(maximum: (11.5, exclusive: true)))
-        let nullableInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11.5, exclusive: true)))
-        let allowedValueInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: true)))
+        let requiredNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: true)))
+        let optionalNumber = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(maximum: (11.5, exclusive: true)))
+        let nullableNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11.5, exclusive: true)))
+        let allowedValueNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(maximum: (11.5, exclusive: true)))
             .with(allowedValues: [10])
 
-        testEncodingPropertyLines(entity: requiredInteger,
+        testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
                                     "\"exclusiveMaximum\" : true,",
                                     "\"maximum\" : 11.5,",
                                     "\"type\" : \"number\"",
         ])
 
-        testEncodingPropertyLines(entity: optionalInteger,
+        testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
                                     "\"exclusiveMaximum\" : true,",
                                     "\"maximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: nullableInteger,
+        testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"exclusiveMaximum\" : true,",
                                     "\"maximum\" : 11.5,",
@@ -1953,7 +1953,7 @@ extension SchemaObjectTests {
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: allowedValueInteger,
+        testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
                                     "\"enum\" : [",
                                     "  10",
@@ -1979,32 +1979,32 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNumberWithMinimum() {
-        let requiredInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: false)))
-        let optionalInteger = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(minimum: (0.5, exclusive: false)))
-        let nullableInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (0.5, exclusive: false)))
-        let allowedValueInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: false)))
+        let requiredNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: false)))
+        let optionalNumber = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(minimum: (0.5, exclusive: false)))
+        let nullableNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (0.5, exclusive: false)))
+        let allowedValueNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: false)))
             .with(allowedValues: [10])
 
-        testEncodingPropertyLines(entity: requiredInteger,
+        testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
                                     "\"minimum\" : 0.5,",
                                     "\"type\" : \"number\"",
         ])
 
-        testEncodingPropertyLines(entity: optionalInteger,
+        testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
                                     "\"minimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: nullableInteger,
+        testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"minimum\" : 0.5,",
                                     "\"nullable\" : true,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: allowedValueInteger,
+        testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
                                     "\"enum\" : [",
                                     "  10",
@@ -2029,27 +2029,27 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNumberWithExclusivceMinimum() {
-        let requiredInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: true)))
-        let optionalInteger = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(minimum: (0.5, exclusive: true)))
-        let nullableInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (0.5, exclusive: true)))
-        let allowedValueInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: true)))
+        let requiredNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: true)))
+        let optionalNumber = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(minimum: (0.5, exclusive: true)))
+        let nullableNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (0.5, exclusive: true)))
+        let allowedValueNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(minimum: (0.5, exclusive: true)))
             .with(allowedValues: [10])
 
-        testEncodingPropertyLines(entity: requiredInteger,
+        testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
                                     "\"exclusiveMinimum\" : true,",
                                     "\"minimum\" : 0.5,",
                                     "\"type\" : \"number\"",
         ])
 
-        testEncodingPropertyLines(entity: optionalInteger,
+        testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
                                     "\"exclusiveMinimum\" : true,",
                                     "\"minimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: nullableInteger,
+        testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"exclusiveMinimum\" : true,",
                                     "\"minimum\" : 0.5,",
@@ -2057,7 +2057,7 @@ extension SchemaObjectTests {
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: allowedValueInteger,
+        testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
                                     "\"enum\" : [",
                                     "  10",
@@ -2172,35 +2172,211 @@ extension SchemaObjectTests {
     }
 
     func test_encodeIntegerWithMaximum() {
-        // TODO: write test
+        let requiredInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(maximum: (11, exclusive: false)))
+        let optionalInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: false), .init(maximum: (11, exclusive: false)))
+        let nullableInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11, exclusive: false)))
+        let allowedValueInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(maximum: (11, exclusive: false)))
+            .with(allowedValues: [10])
+
+        testEncodingPropertyLines(entity: requiredInteger,
+                                  propertyLines: [
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\"",
+            ])
+
+        testEncodingPropertyLines(entity: optionalInteger,
+                                  propertyLines: [
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: nullableInteger,
+                                  propertyLines: [
+                                    "\"maximum\" : 11,",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: allowedValueInteger,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  10",
+                                    "],",
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
     }
 
     func test_decodeIntegerWithMaximum() {
-        // TODO: write test
+        let integerData = #"{"type": "integer", "maximum": 1}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": "integer", "maximum": 1, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "maximum": 2, "enum": [1, 2]}"#.data(using: .utf8)!
+
+        let integer = try! testDecoder.decode(JSONSchemaObject.self, from: integerData)
+        let nullableInteger = try! testDecoder.decode(JSONSchemaObject.self, from: nullableIntegerData)
+        let allowedValueInteger = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueIntegerData)
+
+        XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .generic, required: false), .init(maximum: (1, exclusive:false))))
+        XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, nullable: true), .init(maximum: (1, exclusive:false))))
+        XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, allowedValues: [1, 2]), .init(maximum: (2, exclusive:false))))
     }
 
     func test_encodeIntegerWithExclusiveMaximum() {
-        // TODO: write test
+        let requiredInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(maximum: (11, exclusive: true)))
+        let optionalInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: false), .init(maximum: (11, exclusive: true)))
+        let nullableInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true, nullable: true), .init(maximum: (11, exclusive: true)))
+        let allowedValueInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(maximum: (11, exclusive: true)))
+            .with(allowedValues: [10])
+
+        testEncodingPropertyLines(entity: requiredInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMaximum\" : true,",
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\"",
+            ])
+
+        testEncodingPropertyLines(entity: optionalInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMaximum\" : true,",
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: nullableInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMaximum\" : true,",
+                                    "\"maximum\" : 11,",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: allowedValueInteger,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  10",
+                                    "],",
+                                    "\"exclusiveMaximum\" : true,",
+                                    "\"maximum\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
     }
 
     func test_decodeIntegerWithExclusiveMaximum() {
-        // TODO: write test
+        let integerData = #"{"type": "integer", "maximum": 1, "exclusiveMaximum": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": "integer", "maximum": 1, "exclusiveMaximum": true, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "maximum": 5, "exclusiveMaximum": true, "enum": [2, 3]}"#.data(using: .utf8)!
+
+        let integer = try! testDecoder.decode(JSONSchemaObject.self, from: integerData)
+        let nullableInteger = try! testDecoder.decode(JSONSchemaObject.self, from: nullableIntegerData)
+        let allowedValueInteger = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueIntegerData)
+
+        XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .generic, required: false), .init(maximum: (1, exclusive:true))))
+        XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, nullable: true), .init(maximum: (1, exclusive:true))))
+        XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, allowedValues: [2, 3]), .init(maximum: (5, exclusive:true))))
     }
 
     func test_encodeIntegerWithMinimum() {
-        // TODO: write test
+        let requiredInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(minimum: (5, exclusive: false)))
+        let optionalInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: false), .init(minimum: (5, exclusive: false)))
+        let nullableInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (5, exclusive: false)))
+        let allowedValueInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(minimum: (5, exclusive: false)))
+            .with(allowedValues: [5])
+
+        testEncodingPropertyLines(entity: requiredInteger,
+                                  propertyLines: [
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\"",
+            ])
+
+        testEncodingPropertyLines(entity: optionalInteger,
+                                  propertyLines: [
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: nullableInteger,
+                                  propertyLines: [
+                                    "\"minimum\" : 5,",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: allowedValueInteger,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  5",
+                                    "],",
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\""
+            ])
     }
 
     func test_decodeIntegerWithMinimum() {
-        // TODO: write test
+        let integerData = #"{"type": "integer", "minimum": 1}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": "integer", "minimum": 1, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "minimum": 1, "enum": [1, 2]}"#.data(using: .utf8)!
+
+        let integer = try! testDecoder.decode(JSONSchemaObject.self, from: integerData)
+        let nullableInteger = try! testDecoder.decode(JSONSchemaObject.self, from: nullableIntegerData)
+        let allowedValueInteger = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueIntegerData)
+
+        XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .generic, required: false), .init(minimum: (1, exclusive:false))))
+        XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, nullable: true), .init(minimum: (1, exclusive:false))))
+        XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, allowedValues: [1, 2]), .init(minimum: (1, exclusive:false))))
     }
 
     func test_encodeIntegerWithExclusiveMinimum() {
-        // TODO: write test
+        let requiredInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(minimum: (5, exclusive: true)))
+        let optionalInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: false), .init(minimum: (5, exclusive: true)))
+        let nullableInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true, nullable: true), .init(minimum: (5, exclusive: true)))
+        let allowedValueInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(minimum: (5, exclusive: true)))
+            .with(allowedValues: [10])
+
+        testEncodingPropertyLines(entity: requiredInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMinimum\" : true,",
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\"",
+            ])
+
+        testEncodingPropertyLines(entity: optionalInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMinimum\" : true,",
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: nullableInteger,
+                                  propertyLines: [
+                                    "\"exclusiveMinimum\" : true,",
+                                    "\"minimum\" : 5,",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: allowedValueInteger,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  10",
+                                    "],",
+                                    "\"exclusiveMinimum\" : true,",
+                                    "\"minimum\" : 5,",
+                                    "\"type\" : \"integer\""
+            ])
     }
 
     func test_decodeIntegerWithExclusiveMinimum() {
-        // TODO: write test
+        let integerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true, "enum": [2, 3]}"#.data(using: .utf8)!
+
+        let integer = try! testDecoder.decode(JSONSchemaObject.self, from: integerData)
+        let nullableInteger = try! testDecoder.decode(JSONSchemaObject.self, from: nullableIntegerData)
+        let allowedValueInteger = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueIntegerData)
+
+        XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .generic, required: false), .init(minimum: (1, exclusive:true))))
+        XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, nullable: true), .init(minimum: (1, exclusive:true))))
+        XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, allowedValues: [2, 3]), .init(minimum: (1, exclusive:true))))
     }
 
     func test_encodeString() {
@@ -2726,7 +2902,7 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNodeReference() {
-        // TODO: add test
+        // TODO: implement feature, add test
     }
 }
 
