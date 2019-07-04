@@ -11,37 +11,39 @@ extension OpenAPI {
     public struct Response: Equatable {
         public let description: String?
         //    public let headers:
-        public let content: PathItem.PathProperties.Operation.ContentMap
+        public let content: PathItem.PathProperties.ContentMap
         //    public let links:
 
         public init(description: String,
-                    content: PathItem.PathProperties.Operation.ContentMap) {
+                    content: PathItem.PathProperties.ContentMap) {
             self.description = description
             self.content = content
         }
+    }
+}
 
-        public enum StatusCode: RawRepresentable, Equatable, Hashable {
-            public typealias RawValue = String
+extension OpenAPI.Response {
+    public enum StatusCode: RawRepresentable, Equatable, Hashable {
+        public typealias RawValue = String
 
-            case `default`
-            case status(code: Int)
+        case `default`
+        case status(code: Int)
 
-            public var rawValue: String {
-                switch self {
-                case .default:
-                    return "default"
+        public var rawValue: String {
+            switch self {
+            case .default:
+                return "default"
 
-                case .status(code: let code):
-                    return String(code)
-                }
+            case .status(code: let code):
+                return String(code)
             }
+        }
 
-            public init?(rawValue: String) {
-                if let val = Int(rawValue) {
-                    self = .status(code: val)
-                } else {
-                    self = .default
-                }
+        public init?(rawValue: String) {
+            if let val = Int(rawValue) {
+                self = .status(code: val)
+            } else {
+                self = .default
             }
         }
     }

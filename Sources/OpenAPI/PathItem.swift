@@ -73,12 +73,16 @@ extension OpenAPI {
 
             public typealias ParameterArray = [Either<Parameter, JSONReference<Components, Parameter>>]
 
+            public typealias ResponseMap = [Response.StatusCode: Either<Response, JSONReference<Components, Response>>]
+
+            public typealias ContentMap = [ContentType: Content]
+
             public struct Parameter: Equatable {
                 public let name: String
                 public let parameterLocation: Location
                 public let description: String?
                 public let deprecated: Bool // default is false
-                public let schemaOrContent: Either<SchemaProperty, Operation.ContentMap>
+                public let schemaOrContent: Either<SchemaProperty, ContentMap>
                 // TODO: serialization rules
                 /*
                  Serialization Rules
@@ -88,7 +92,7 @@ extension OpenAPI {
 
                 public init(name: String,
                             parameterLocation: Location,
-                            schemaOrContent: Either<SchemaProperty, Operation.ContentMap>,
+                            schemaOrContent: Either<SchemaProperty, ContentMap>,
                             description: String? = nil,
                             deprecated: Bool = false) {
                     self.name = name
@@ -137,10 +141,6 @@ extension OpenAPI {
                     self.responses = responses
                     self.deprecated = deprecated
                 }
-
-                public typealias ResponseMap = [Response.StatusCode: Either<Response, JSONReference<Components, Response>>]
-
-                public typealias ContentMap = [ContentType: Content]
             }
         }
     }

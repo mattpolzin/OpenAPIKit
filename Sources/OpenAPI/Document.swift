@@ -31,49 +31,49 @@ extension OpenAPI {
             self.paths = paths
             self.components = components
         }
-
-        public enum Version: String, Codable {
-            case v3_0_0 = "3.0.0"
-        }
-
-        public struct Info: Codable {
-            public let title: String
-            public let description: String?
-            public let termsOfService: URL?
-            //        public let contact:
-            //        public let license:
-            public let version: String
-
-            public init(title: String,
-                        description: String? = nil,
-                        termsOfService: URL? = nil,
-                        version: String) {
-                self.title = title
-                self.description = description
-                self.termsOfService = termsOfService
-                self.version = version
-            }
-        }
-
-        public struct PathComponents: RawRepresentable, Equatable, Hashable {
-            public let components: [String]
-
-            public init(_ components: [String]) {
-                self.components = components
-            }
-
-            public init?(rawValue: String) {
-                components = rawValue.split(separator: "/").map(String.init)
-            }
-
-            public var rawValue: String {
-                return "/\(components.joined(separator: "/"))"
-            }
-        }
     }
 }
 
+extension OpenAPI.Document {
+    public enum Version: String, Codable {
+        case v3_0_0 = "3.0.0"
+    }
 
+    public struct Info: Codable {
+        public let title: String
+        public let description: String?
+        public let termsOfService: URL?
+        //        public let contact:
+        //        public let license:
+        public let version: String
+
+        public init(title: String,
+                    description: String? = nil,
+                    termsOfService: URL? = nil,
+                    version: String) {
+            self.title = title
+            self.description = description
+            self.termsOfService = termsOfService
+            self.version = version
+        }
+    }
+
+    public struct PathComponents: RawRepresentable, Equatable, Hashable {
+        public let components: [String]
+
+        public init(_ components: [String]) {
+            self.components = components
+        }
+
+        public init?(rawValue: String) {
+            components = rawValue.split(separator: "/").map(String.init)
+        }
+
+        public var rawValue: String {
+            return "/\(components.joined(separator: "/"))"
+        }
+    }
+}
 
 // MARK: - Codable
 

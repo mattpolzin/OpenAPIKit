@@ -10,11 +10,11 @@ import Foundation
 extension OpenAPI {
     public struct Request: Equatable {
         public let description: String?
-        public let content: PathItem.PathProperties.Operation.ContentMap
+        public let content: PathItem.PathProperties.ContentMap
         public let required: Bool
 
         public init(description: String? = nil,
-                    content: PathItem.PathProperties.Operation.ContentMap,
+                    content: PathItem.PathProperties.ContentMap,
                     required: Bool = true) {
             self.description = description
             self.content = content
