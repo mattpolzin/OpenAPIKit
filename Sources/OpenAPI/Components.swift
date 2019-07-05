@@ -44,6 +44,6 @@ extension OpenAPI {
             public static var refName: String { return "parameters" }
         }
 
-        public typealias ParametersDict = RefDict<Components, ParametersName, PathItem.PathProperties.Parameter>
+        public typealias ParametersDict = RefDict<Components, ParametersName, PathItem.Properties.Parameter>
     }
 }
