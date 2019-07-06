@@ -371,6 +371,50 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(not.example)
         XCTAssertNil(reference.example)
     }
+
+    func test_minObjectProperties() {
+        let obj1 = JSONSchemaObject.ObjectContext(properties: [:],
+                                                 additionalProperties: .init(true),
+                                                 minProperties: 2)
+
+        XCTAssertEqual(obj1.minProperties, 2)
+
+        let obj2 = JSONSchemaObject.ObjectContext(properties: [:],
+                                                  additionalProperties: .init(true))
+
+        XCTAssertEqual(obj2.minProperties, 0)
+
+        let obj3 = JSONSchemaObject.ObjectContext(properties: [
+            "hello": .string
+            ],
+                                                  additionalProperties: .init(true))
+
+        XCTAssertEqual(obj3.minProperties, 1)
+
+        let obj4 = JSONSchemaObject.ObjectContext(properties: [
+            "hello": .string(required: false)
+            ],
+                                                  additionalProperties: .init(true))
+
+        XCTAssertEqual(obj4.minProperties, 0)
+
+        let obj5 = JSONSchemaObject.ObjectContext(properties: [
+            "hello": .string
+            ],
+                                                  additionalProperties: .init(true),
+                                                  minProperties: 3)
+
+        XCTAssertEqual(obj5.minProperties, 3)
+
+        let obj6 = JSONSchemaObject.ObjectContext(properties: [
+            "hello": .string,
+            "world": .boolean
+            ],
+                                                  additionalProperties: .init(true),
+                                                  minProperties: 1)
+
+        XCTAssertEqual(obj6.minProperties, 2)
+    }
 }
 
 // MARK: - Codable
@@ -1825,32 +1869,32 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNumberWithMultipleOf() {
-        let requiredInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(multipleOf: 11))
-        let optionalInteger = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(multipleOf: 11))
-        let nullableInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(multipleOf: 11))
-        let allowedValueInteger = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(multipleOf: 11))
+        let requiredNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(multipleOf: 11))
+        let optionalNumber = JSONSchemaObject.number(.init(format: .unspecified, required: false), .init(multipleOf: 11))
+        let nullableNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true, nullable: true), .init(multipleOf: 11))
+        let allowedValueNumber = JSONSchemaObject.number(.init(format: .unspecified, required: true), .init(multipleOf: 11))
             .with(allowedValues: [10])
 
-        testEncodingPropertyLines(entity: requiredInteger,
+        testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
                                     "\"multipleOf\" : 11,",
                                     "\"type\" : \"number\"",
         ])
 
-        testEncodingPropertyLines(entity: optionalInteger,
+        testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
                                     "\"multipleOf\" : 11,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: nullableInteger,
+        testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"multipleOf\" : 11,",
                                     "\"nullable\" : true,",
                                     "\"type\" : \"number\""
         ])
 
-        testEncodingPropertyLines(entity: allowedValueInteger,
+        testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
                                     "\"enum\" : [",
                                     "  10",
@@ -2169,6 +2213,56 @@ extension SchemaObjectTests {
         XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .int64, required: false), .init()))
         XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .int64, required: false, nullable: true), .init()))
         XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .int64, required: false, allowedValues: [1, 2]), .init()))
+    }
+
+    func test_encodeIntegerWithMultipleOf() {
+        let requiredInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(multipleOf: 11))
+        let optionalInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: false), .init(multipleOf: 11))
+        let nullableInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true, nullable: true), .init(multipleOf: 11))
+        let allowedValueInteger = JSONSchemaObject.integer(.init(format: .unspecified, required: true), .init(multipleOf: 11))
+            .with(allowedValues: [10])
+
+        testEncodingPropertyLines(entity: requiredInteger,
+                                  propertyLines: [
+                                    "\"multipleOf\" : 11,",
+                                    "\"type\" : \"integer\"",
+            ])
+
+        testEncodingPropertyLines(entity: optionalInteger,
+                                  propertyLines: [
+                                    "\"multipleOf\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: nullableInteger,
+                                  propertyLines: [
+                                    "\"multipleOf\" : 11,",
+                                    "\"nullable\" : true,",
+                                    "\"type\" : \"integer\""
+            ])
+
+        testEncodingPropertyLines(entity: allowedValueInteger,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  10",
+                                    "],",
+                                    "\"multipleOf\" : 11,",
+                                    "\"type\" : \"integer\""
+            ])
+    }
+
+    func test_decodeIntegerWithMultipleOf() {
+        let integerData = #"{"type": "integer", "multipleOf": 2}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": "integer", "multipleOf": 2, "nullable": true}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "multipleOf": 2, "enum": [4]}"#.data(using: .utf8)!
+
+        let integer = try! testDecoder.decode(JSONSchemaObject.self, from: integerData)
+        let nullableInteger = try! testDecoder.decode(JSONSchemaObject.self, from: nullableIntegerData)
+        let allowedValueInteger = try! testDecoder.decode(JSONSchemaObject.self, from: allowedValueIntegerData)
+
+        XCTAssertEqual(integer, JSONSchemaObject.integer(.init(format: .generic, required: false), .init(multipleOf: 2)))
+        XCTAssertEqual(nullableInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, nullable: true), .init(multipleOf: 2)))
+        XCTAssertEqual(allowedValueInteger, JSONSchemaObject.integer(.init(format: .generic, required: false, allowedValues: [4]), .init(multipleOf: 2)))
     }
 
     func test_encodeIntegerWithMaximum() {
