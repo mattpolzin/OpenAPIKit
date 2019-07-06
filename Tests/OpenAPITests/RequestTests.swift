@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 import OpenAPI
 
-public final class RequestTests: XCTestCase {
+final class RequestTests: XCTestCase {
     let simpleSchema = JSONSchemaObject.object(
         properties: [
             "hello": .string

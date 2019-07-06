@@ -10,7 +10,7 @@ import Poly
 
 extension OpenAPI {
     public struct Response: Equatable {
-        public let description: String?
+        public let description: String
         //    public let headers:
         public let content: Content.Map
         //    public let links:
@@ -67,9 +67,7 @@ extension OpenAPI.Response: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if let desc = description {
-            try container.encode(desc, forKey: .description)
-        }
+        try container.encode(description, forKey: .description)
 
         if content.count > 0 {
             // Hack to work around Dictionary encoding
@@ -87,7 +85,7 @@ extension OpenAPI.Response: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        description = try container.decodeIfPresent(String.self, forKey: .description)
+        description = try container.decode(String.self, forKey: .description)
 
         // hacky workaround for Dictionary decoding bug
         let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)
