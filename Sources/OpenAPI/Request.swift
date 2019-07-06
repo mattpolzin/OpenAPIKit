@@ -15,7 +15,7 @@ extension OpenAPI {
 
         public init(description: String? = nil,
                     content: Content.Map,
-                    required: Bool = true) {
+                    required: Bool = false) {
             self.description = description
             self.content = content
             self.required = required

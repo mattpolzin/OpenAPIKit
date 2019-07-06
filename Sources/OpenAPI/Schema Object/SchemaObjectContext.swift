@@ -540,8 +540,8 @@ extension JSONSchemaObject.ObjectContext: Encodable {
             try container.encode(requiredProperties, forKey: .required)
         }
 
-        if minProperties > 0 {
-            try container.encode(minProperties, forKey: .minProperties)
+        if _minProperties > 0 {
+            try container.encode(_minProperties, forKey: .minProperties)
         }
     }
 }

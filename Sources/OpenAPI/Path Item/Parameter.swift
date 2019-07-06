@@ -22,7 +22,7 @@ extension OpenAPI.PathItem.Properties {
 
         public typealias Array = [Either<Parameter, JSONReference<OpenAPI.Components, Parameter>>]
 
-        public typealias SchemaProperty = Either<JSONSchemaObject, JSONReference<OpenAPI.Components, JSONSchemaObject>>
+        public typealias SchemaProperty = Either<JSONReference<OpenAPI.Components, JSONSchemaObject>, JSONSchemaObject>
 
         public init(name: String,
                     parameterLocation: Location,

@@ -11,15 +11,17 @@ import Poly
 extension OpenAPI {
     public enum ContentType: String, Codable, Equatable, Hashable {
         case json = "application/json"
+        case xml = "application/xml"
+        case form = "application/x-www-form-urlencoded"
     }
 
     public struct Content: Codable, Equatable {
-        public let schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>
+        public let schema: Either<JSONReference<Components, JSONSchemaObject>, JSONSchemaObject>
         //        public let example:
         //        public let examples:
         //        public let encoding:
 
-        public init(schema: Either<JSONSchemaObject, JSONReference<Components, JSONSchemaObject>>) {
+        public init(schema: Either<JSONReference<Components, JSONSchemaObject>, JSONSchemaObject>) {
             self.schema = schema
         }
     }
