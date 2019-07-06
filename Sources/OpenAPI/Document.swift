@@ -16,7 +16,7 @@ extension OpenAPI {
         public let openAPIVersion: Version
         public let info: Info
         //    public let servers:
-        public let paths: [PathComponents: PathItem]
+        public let paths: PathItem.Map
         public let components: OpenAPI.Components
         //    public let security:
         //    public let tags:
@@ -24,7 +24,7 @@ extension OpenAPI {
 
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,
-                    paths: [PathComponents: PathItem],
+                    paths: PathItem.Map,
                     components: OpenAPI.Components) {
             self.openAPIVersion = openAPIVersion
             self.info = info
@@ -59,43 +59,9 @@ extension OpenAPI.Document {
             self.version = version
         }
     }
-
-    public struct PathComponents: RawRepresentable, Equatable, Hashable {
-        public let components: [String]
-
-        public init(_ components: [String]) {
-            self.components = components
-        }
-
-        public init?(rawValue: String) {
-            components = rawValue.split(separator: "/").map(String.init)
-        }
-
-        public var rawValue: String {
-            return "/\(components.joined(separator: "/"))"
-        }
-    }
 }
 
 // MARK: - Codable
-
-extension OpenAPI.Document.PathComponents: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        try container.encode(rawValue)
-    }
-}
-
-extension OpenAPI.Document.PathComponents: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-
-        let rawValue = try container.decode(String.self)
-
-        components = rawValue.split(separator: "/").map(String.init)
-    }
-}
 
 extension OpenAPI.Document {
     private enum CodingKeys: String, CodingKey {
@@ -141,8 +107,12 @@ extension OpenAPI.Document: Decodable {
 
         // hacky workaround for Dictionary bug
         let pathsDict = try container.decode([String: OpenAPI.PathItem].self, forKey: .paths)
-        paths = Dictionary(pathsDict.compactMap { pathString, pathItem in
-            OpenAPI.Document.PathComponents(rawValue: pathString).map { ($0, pathItem) } },
+        paths = Dictionary(pathsDict.compactMap { args in
+            let (pathString, pathItem) = args
+
+            return OpenAPI.PathComponents(rawValue: pathString)
+                .map { ($0, pathItem) }
+            },
                            uniquingKeysWith: { $1 })
 
         components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents

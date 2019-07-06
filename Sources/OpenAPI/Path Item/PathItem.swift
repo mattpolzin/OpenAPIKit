@@ -9,12 +9,30 @@ import Foundation
 import Poly
 
 extension OpenAPI {
+    public struct PathComponents: RawRepresentable, Equatable, Hashable {
+        public let components: [String]
+
+        public init(_ components: [String]) {
+            self.components = components
+        }
+
+        public init?(rawValue: String) {
+            components = rawValue.split(separator: "/").map(String.init)
+        }
+
+        public var rawValue: String {
+            return "/\(components.joined(separator: "/"))"
+        }
+    }
+
     /// An OpenAPI Path Item
     /// This type describes the endpoints a server has
     /// bound to a particular path.
     public enum PathItem: Equatable {
         case reference(JSONReference<Components, PathItem>)
         case operations(Properties)
+
+        public typealias Map = [PathComponents: PathItem]
     }
 }
 
@@ -65,6 +83,24 @@ extension OpenAPI.PathItem {
 }
 
 // MARK: - Codable
+
+extension OpenAPI.PathComponents: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        try container.encode(rawValue)
+    }
+}
+
+extension OpenAPI.PathComponents: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        let rawValue = try container.decode(String.self)
+
+        components = rawValue.split(separator: "/").map(String.init)
+    }
+}
 
 extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {

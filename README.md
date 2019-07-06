@@ -63,7 +63,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] links
 - [ ] callbacks
 
-### Paths Object (`[OpenAPI.PathComponents: OpenAPI.PathItem]`)
+### Paths Object (`OpenAPI.PathItem.Map`)
 - [x] *dictionary*
 
 ### Path Item Object (`OpenAPI.PathItem`)
