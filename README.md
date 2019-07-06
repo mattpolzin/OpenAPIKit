@@ -2,7 +2,7 @@
 
 # OpenAPI
 
-A library that encodes to- and decodes from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents.
+A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
