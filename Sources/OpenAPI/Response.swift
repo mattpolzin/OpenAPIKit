@@ -49,7 +49,7 @@ extension OpenAPI.Response {
         }
     }
 
-    public typealias Map = [StatusCode: Either<Self, JSONReference<OpenAPI.Components, Self>>]
+    public typealias Map = [StatusCode: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>]
 }
 
 // MARK: - Codable
@@ -117,7 +117,7 @@ extension OpenAPI.Response.StatusCode: Encodable {
 extension OpenAPI.Response.StatusCode: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let val = Self(rawValue: try container.decode(String.self))
+        let val = OpenAPI.Response.StatusCode(rawValue: try container.decode(String.self))
 
         guard let value = val else {
             throw OpenAPI.DecodingError.unknown(codingPath: decoder.codingPath)

@@ -28,5 +28,5 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Content {
-    public typealias Map = [OpenAPI.ContentType: Self]
+    public typealias Map = [OpenAPI.ContentType: OpenAPI.Content]
 }

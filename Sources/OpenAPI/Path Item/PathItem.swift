@@ -120,9 +120,9 @@ extension OpenAPI.PathItem: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        let maybeRef: Result<JSONReference<OpenAPI.Components, Self>, Swift.Error>
+        let maybeRef: Result<JSONReference<OpenAPI.Components, OpenAPI.PathItem>, Swift.Error>
         do {
-            maybeRef = .success(try container.decode(JSONReference<OpenAPI.Components, Self>.self))
+            maybeRef = .success(try container.decode(JSONReference<OpenAPI.Components, OpenAPI.PathItem>.self))
         } catch let err {
             maybeRef = .failure(err)
         }

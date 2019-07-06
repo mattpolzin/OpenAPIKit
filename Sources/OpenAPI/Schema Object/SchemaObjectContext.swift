@@ -78,7 +78,7 @@ extension JSONSchema {
 
 extension JSONSchema.Context {
     /// Return the optional version of this Context
-    public func optionalContext() -> Self {
+    public func optionalContext() -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: false,
                      nullable: nullable,
@@ -89,7 +89,7 @@ extension JSONSchema.Context {
     }
 
     /// Return the required version of this context
-    public func requiredContext() -> Self {
+    public func requiredContext() -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: true,
                      nullable: nullable,
@@ -100,7 +100,7 @@ extension JSONSchema.Context {
     }
 
     /// Return the nullable version of this context
-    public func nullableContext() -> Self {
+    public func nullableContext() -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: required,
                      nullable: true,
@@ -111,7 +111,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given list of possible values
-    public func with(allowedValues: [AnyCodable]) -> Self {
+    public func with(allowedValues: [AnyCodable]) -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
@@ -122,7 +122,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given example
-    public func with(example: AnyCodable, using encoder: JSONEncoder) -> Self {
+    public func with(example: AnyCodable, using encoder: JSONEncoder) -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
