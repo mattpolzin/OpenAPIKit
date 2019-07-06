@@ -8,7 +8,7 @@
 import Foundation
 import Poly
 
-extension OpenAPI.PathItem.Properties {
+extension OpenAPI.PathItem {
     public struct Operation: Equatable {
         public let tags: [String]?
         public let summary: String?
@@ -45,7 +45,7 @@ extension OpenAPI.PathItem.Properties {
 
 // MARK: - Codable
 
-extension OpenAPI.PathItem.Properties.Operation {
+extension OpenAPI.PathItem.Operation {
     private enum CodingKeys: String, CodingKey {
         case tags
         case summary
@@ -62,7 +62,7 @@ extension OpenAPI.PathItem.Properties.Operation {
     }
 }
 
-extension OpenAPI.PathItem.Properties.Operation: Encodable {
+extension OpenAPI.PathItem.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -100,7 +100,7 @@ extension OpenAPI.PathItem.Properties.Operation: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Properties.Operation: Decodable {
+extension OpenAPI.PathItem.Operation: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -112,7 +112,7 @@ extension OpenAPI.PathItem.Properties.Operation: Decodable {
 
         operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 
-        parameters = try container.decodeIfPresent(OpenAPI.PathItem.Properties.Parameter.Array.self, forKey: .parameters) ?? []
+        parameters = try container.decodeIfPresent(OpenAPI.PathItem.Parameter.Array.self, forKey: .parameters) ?? []
 
         requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
 

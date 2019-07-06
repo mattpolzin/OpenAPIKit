@@ -8,17 +8,13 @@
 import Foundation
 import Poly
 
-extension OpenAPI.PathItem.Properties {
+extension OpenAPI.PathItem {
     public struct Parameter: Equatable {
         public let name: String
         public let parameterLocation: Location
         public let description: String?
         public let deprecated: Bool // default is false
         public let schemaOrContent: Either<SchemaProperty, OpenAPI.Content.Map>
-        // TODO: serialization rules
-        /*
-         Serialization Rules
-         */
 
         public typealias Array = [Either<Parameter, JSONReference<OpenAPI.Components, Parameter>>]
 
@@ -38,7 +34,7 @@ extension OpenAPI.PathItem.Properties {
     }
 }
 
-extension OpenAPI.PathItem.Properties.Parameter {
+extension OpenAPI.PathItem.Parameter {
     public enum Location: Equatable {
         case query(required: Bool?)
         case header(required: Bool?)
@@ -49,7 +45,7 @@ extension OpenAPI.PathItem.Properties.Parameter {
 
 // MARK: - Codable
 
-extension OpenAPI.PathItem.Properties.Parameter {
+extension OpenAPI.PathItem.Parameter {
     private enum CodingKeys: String, CodingKey {
         case name
         case parameterLocation = "in"
@@ -70,7 +66,7 @@ extension OpenAPI.PathItem.Properties.Parameter {
     }
 }
 
-extension OpenAPI.PathItem.Properties.Parameter: Encodable {
+extension OpenAPI.PathItem.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -119,7 +115,7 @@ extension OpenAPI.PathItem.Properties.Parameter: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Properties.Parameter: Decodable {
+extension OpenAPI.PathItem.Parameter: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

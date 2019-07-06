@@ -37,6 +37,8 @@ extension OpenAPI {
 extension OpenAPI.Document {
     public enum Version: String, Codable {
         case v3_0_0 = "3.0.0"
+        case v3_0_1 = "3.0.1"
+        case v3_0_2 = "3.0.2"
     }
 
     public struct Info: Codable {

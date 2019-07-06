@@ -34,6 +34,9 @@ extension OpenAPI.PathItem {
         public let patch: Operation?
         public let trace: Operation?
 
+        public typealias Operation = OpenAPI.PathItem.Operation
+        public typealias Parameter = OpenAPI.PathItem.Parameter
+
         public init(summary: String? = nil,
                     description: String? = nil,
                     parameters: Parameter.Array = [],
