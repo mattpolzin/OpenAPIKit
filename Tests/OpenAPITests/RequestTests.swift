@@ -10,7 +10,7 @@ import XCTest
 import OpenAPI
 
 final class RequestTests: XCTestCase {
-    let simpleSchema = JSONSchemaObject.object(
+    let simpleSchema = JSONSchema.object(
         properties: [
             "hello": .string
         ]
@@ -91,7 +91,7 @@ extension RequestTests {
     }
 
     func test_onlySchemaContent_encode() {
-        let schema = JSONSchemaObject.object(
+        let schema = JSONSchema.object(
             properties: [
                 "hello": .string
             ]
@@ -219,7 +219,7 @@ extension RequestTests {
 
 extension RequestTests {
     func test_xml_onlySchemaContent_encode() {
-        let schema = JSONSchemaObject.object(
+        let schema = JSONSchema.object(
             properties: [
                 "hello": .string
             ]
@@ -279,7 +279,7 @@ extension RequestTests {
     }
 
     func test_form_onlySchemaContent_encode() {
-        let schema = JSONSchemaObject.object(
+        let schema = JSONSchema.object(
             properties: [
                 "hello": .string
             ]

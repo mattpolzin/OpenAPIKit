@@ -16,12 +16,12 @@ extension OpenAPI {
     }
 
     public struct Content: Codable, Equatable {
-        public let schema: Either<JSONReference<Components, JSONSchemaObject>, JSONSchemaObject>
+        public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         //        public let example:
         //        public let examples:
         //        public let encoding:
 
-        public init(schema: Either<JSONReference<Components, JSONSchemaObject>, JSONSchemaObject>) {
+        public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>) {
             self.schema = schema
         }
     }

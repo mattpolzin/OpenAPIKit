@@ -11,7 +11,7 @@ import Poly
 
 // MARK: - Generic Context
 
-public protocol JSONSchemaObjectContext {
+public protocol JSONSchemaContext {
     var required: Bool { get }
     var nullable: Bool { get }
     var title: String? { get }
@@ -20,8 +20,8 @@ public protocol JSONSchemaObjectContext {
     var example: String? { get }
 }
 
-extension JSONSchemaObject {
-    public struct Context<Format: OpenAPIFormat>: JSONSchemaObjectContext, Equatable {
+extension JSONSchema {
+    public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
         public let required: Bool
         public let nullable: Bool
@@ -76,7 +76,7 @@ extension JSONSchemaObject {
 
 // MARK: - Transformations
 
-extension JSONSchemaObject.Context {
+extension JSONSchema.Context {
     /// Return the optional version of this Context
     public func optionalContext() -> Self {
         return .init(format: format,
@@ -136,7 +136,7 @@ extension JSONSchemaObject.Context {
 
 // MARK: - Specific Contexts
 
-extension JSONSchemaObject {
+extension JSONSchema {
     public struct NumericContext: Equatable {
         public struct Bound: Equatable {
             public let value: Double
@@ -198,7 +198,7 @@ extension JSONSchemaObject {
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
-        public let items: JSONSchemaObject?
+        public let items: JSONSchema?
 
         /// Maximum number of items in array.
         public let maxItems: Int?
@@ -212,7 +212,7 @@ extension JSONSchemaObject {
         /// to be unique. Defaults to false.
         public let uniqueItems: Bool
 
-        public init(items: JSONSchemaObject? = nil,
+        public init(items: JSONSchema? = nil,
                     maxItems: Int? = nil,
                     minItems: Int = 0,
                     uniqueItems: Bool = false) {
@@ -226,8 +226,8 @@ extension JSONSchemaObject {
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
         let _minProperties: Int
-        public let properties: [String: JSONSchemaObject]
-        public let additionalProperties: Either<Bool, JSONSchemaObject>?
+        public let properties: [String: JSONSchema]
+        public let additionalProperties: Either<Bool, JSONSchema>?
 
         // NOTE that an object's required properties
         // array is determined by looking at its properties'
@@ -242,8 +242,8 @@ extension JSONSchemaObject {
             return max(_minProperties, requiredProperties.count)
         }
 
-        public init(properties: [String: JSONSchemaObject],
-                    additionalProperties: Either<Bool, JSONSchemaObject>? = nil,
+        public init(properties: [String: JSONSchema],
+                    additionalProperties: Either<Bool, JSONSchema>? = nil,
                     maxProperties: Int? = nil,
                     minProperties: Int = 0) {
             self.properties = properties
@@ -256,7 +256,7 @@ extension JSONSchemaObject {
 
 // MARK: - Codable
 
-extension JSONSchemaObject.Context {
+extension JSONSchema.Context {
     private enum CodingKeys: String, CodingKey {
         case type
         case format
@@ -269,7 +269,7 @@ extension JSONSchemaObject.Context {
     }
 }
 
-extension JSONSchemaObject.Context: Encodable {
+extension JSONSchema.Context: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -306,7 +306,7 @@ extension JSONSchemaObject.Context: Encodable {
     }
 }
 
-extension JSONSchemaObject.Context: Decodable {
+extension JSONSchema.Context: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -330,7 +330,7 @@ extension JSONSchemaObject.Context: Decodable {
     }
 }
 
-extension JSONSchemaObject.NumericContext {
+extension JSONSchema.NumericContext {
     private enum CodingKeys: String, CodingKey {
         case multipleOf
         case maximum
@@ -340,7 +340,7 @@ extension JSONSchemaObject.NumericContext {
     }
 }
 
-extension JSONSchemaObject.NumericContext: Encodable {
+extension JSONSchema.NumericContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -364,7 +364,7 @@ extension JSONSchemaObject.NumericContext: Encodable {
     }
 }
 
-extension JSONSchemaObject.NumericContext: Decodable {
+extension JSONSchema.NumericContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -380,7 +380,7 @@ extension JSONSchemaObject.NumericContext: Decodable {
     }
 }
 
-extension JSONSchemaObject.IntegerContext {
+extension JSONSchema.IntegerContext {
     private enum CodingKeys: String, CodingKey {
         case multipleOf
         case maximum
@@ -390,7 +390,7 @@ extension JSONSchemaObject.IntegerContext {
     }
 }
 
-extension JSONSchemaObject.IntegerContext: Encodable {
+extension JSONSchema.IntegerContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -414,7 +414,7 @@ extension JSONSchemaObject.IntegerContext: Encodable {
     }
 }
 
-extension JSONSchemaObject.IntegerContext: Decodable {
+extension JSONSchema.IntegerContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -430,7 +430,7 @@ extension JSONSchemaObject.IntegerContext: Decodable {
     }
 }
 
-extension JSONSchemaObject.StringContext {
+extension JSONSchema.StringContext {
     private enum CodingKeys: String, CodingKey {
         case maxLength
         case minLength
@@ -438,7 +438,7 @@ extension JSONSchemaObject.StringContext {
     }
 }
 
-extension JSONSchemaObject.StringContext: Encodable {
+extension JSONSchema.StringContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -456,7 +456,7 @@ extension JSONSchemaObject.StringContext: Encodable {
     }
 }
 
-extension JSONSchemaObject.StringContext: Decodable {
+extension JSONSchema.StringContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -466,7 +466,7 @@ extension JSONSchemaObject.StringContext: Decodable {
     }
 }
 
-extension JSONSchemaObject.ArrayContext {
+extension JSONSchema.ArrayContext {
     private enum CodingKeys: String, CodingKey {
         case items
         case maxItems
@@ -475,7 +475,7 @@ extension JSONSchemaObject.ArrayContext {
     }
 }
 
-extension JSONSchemaObject.ArrayContext: Encodable {
+extension JSONSchema.ArrayContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -499,18 +499,18 @@ extension JSONSchemaObject.ArrayContext: Encodable {
     }
 }
 
-extension JSONSchemaObject.ArrayContext: Decodable {
+extension JSONSchema.ArrayContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        items = try container.decodeIfPresent(JSONSchemaObject.self, forKey: .items)
+        items = try container.decodeIfPresent(JSONSchema.self, forKey: .items)
         maxItems = try container.decodeIfPresent(Int.self, forKey: .maxItems)
         minItems = try container.decodeIfPresent(Int.self, forKey: .minItems) ?? 0
         uniqueItems = try container.decodeIfPresent(Bool.self, forKey: .uniqueItems) ?? false
     }
 }
 
-extension JSONSchemaObject.ObjectContext {
+extension JSONSchema.ObjectContext {
     private enum CodingKeys: String, CodingKey {
         case maxProperties
         case minProperties
@@ -520,7 +520,7 @@ extension JSONSchemaObject.ObjectContext {
     }
 }
 
-extension JSONSchemaObject.ObjectContext: Encodable {
+extension JSONSchema.ObjectContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -546,17 +546,17 @@ extension JSONSchemaObject.ObjectContext: Encodable {
     }
 }
 
-extension JSONSchemaObject.ObjectContext: Decodable {
+extension JSONSchema.ObjectContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         maxProperties = try container.decodeIfPresent(Int.self, forKey: .maxProperties)
         _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties) ?? 0
-        additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchemaObject>.self, forKey: .additionalProperties)
+        additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
 
-        var decodedProperties = try container.decodeIfPresent([String: JSONSchemaObject].self, forKey: .properties) ?? [:]
+        var decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
 
         decodedProperties.forEach { (propertyName, property) in
             if requiredArray.contains(propertyName) {

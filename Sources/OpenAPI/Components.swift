@@ -38,7 +38,7 @@ extension OpenAPI {
             public static var refName: String { return "schemas" }
         }
 
-        public typealias SchemasDict = RefDict<Components, SchemasName, JSONSchemaObject>
+        public typealias SchemasDict = RefDict<Components, SchemasName, JSONSchema>
 
         public enum ParametersName: RefName {
             public static var refName: String { return "parameters" }

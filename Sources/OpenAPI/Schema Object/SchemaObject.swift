@@ -9,18 +9,18 @@ import Foundation
 import AnyCodable
 import Poly
 
-public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
+public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
     indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case all(of: [JSONSchemaObject])
-    indirect case one(of: [JSONSchemaObject])
-    indirect case any(of: [JSONSchemaObject])
-    indirect case not(JSONSchemaObject)
-    case reference(JSONReference<OpenAPI.Components, JSONSchemaObject>)
+    indirect case all(of: [JSONSchema])
+    indirect case one(of: [JSONSchema])
+    indirect case any(of: [JSONSchema])
+    indirect case not(JSONSchema)
+    case reference(JSONReference<OpenAPI.Components, JSONSchema>)
 
     public var jsonTypeFormat: JSONTypeFormat? {
         switch self {
@@ -43,12 +43,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
 
     public var required: Bool {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.required
         case .all, .one, .any, .not, .reference:
             return true
@@ -57,12 +57,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
 
     public var nullable: Bool {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.nullable
         case .all, .one, .any, .not, .reference:
             return false
@@ -71,12 +71,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
 
     public var title: String? {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.title
         case .all, .one, .any, .not, .reference:
             return nil
@@ -85,12 +85,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
 
     public var description: String? {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.description
         case .all, .one, .any, .not, .reference:
             return nil
@@ -100,12 +100,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
     /// Allowed values, if specified. If unspecified, returns `nil`.
     public var allowedValues: [AnyCodable]? {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.allowedValues
         case .all, .one, .any, .not, .reference:
             return nil
@@ -115,12 +115,12 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
     /// An example, encoded as a `String`, if specified. If unspecified, returns `nil`.
     public var example: String? {
         switch self {
-        case .boolean(let context as JSONSchemaObjectContext),
-             .object(let context as JSONSchemaObjectContext, _),
-             .array(let context as JSONSchemaObjectContext, _),
-             .number(let context as JSONSchemaObjectContext, _),
-             .integer(let context as JSONSchemaObjectContext, _),
-             .string(let context as JSONSchemaObjectContext, _):
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
             return context.example
         case .all, .one, .any, .not, .reference:
             return nil
@@ -129,9 +129,9 @@ public enum JSONSchemaObject: Equatable, JSONSchemaObjectContext {
 }
 
 // MARK: - Transformations
-extension JSONSchemaObject {
-    /// Return the optional version of this `JSONSchemaObject`
-    public func optionalSchemaObject() -> JSONSchemaObject {
+extension JSONSchema {
+    /// Return the optional version of this `JSONSchema`
+    public func optionalSchemaObject() -> JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context.optionalContext())
@@ -150,8 +150,8 @@ extension JSONSchemaObject {
         }
     }
 
-    /// Return the required version of this `JSONSchemaObject`
-    public func requiredSchemaObject() -> JSONSchemaObject {
+    /// Return the required version of this `JSONSchema`
+    public func requiredSchemaObject() -> JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context.requiredContext())
@@ -170,8 +170,8 @@ extension JSONSchemaObject {
         }
     }
 
-    /// Return the nullable version of this `JSONSchemaObject`
-    public func nullableSchemaObject() -> JSONSchemaObject {
+    /// Return the nullable version of this `JSONSchema`
+    public func nullableSchemaObject() -> JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context.nullableContext())
@@ -190,9 +190,9 @@ extension JSONSchemaObject {
         }
     }
 
-    /// Return a version of this `JSONSchemaObject` that only allows the given
+    /// Return a version of this `JSONSchema` that only allows the given
     /// values.
-    public func with(allowedValues: [AnyCodable]) -> JSONSchemaObject {
+    public func with(allowedValues: [AnyCodable]) -> JSONSchema {
 
         switch self {
         case .boolean(let context):
@@ -213,7 +213,7 @@ extension JSONSchemaObject {
     }
 
     public func with<T: Encodable>(example codableExample: T,
-                                   using encoder: JSONEncoder) throws -> JSONSchemaObject {
+                                   using encoder: JSONEncoder) throws -> JSONSchema {
         let example: AnyCodable
         if let goodToGo = codableExample as? AnyCodable {
             example = goodToGo
@@ -242,7 +242,7 @@ extension JSONSchemaObject {
 
 // MARK: - Convenience
 
-extension JSONSchemaObject {
+extension JSONSchema {
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -251,8 +251,8 @@ extension JSONSchemaObject {
         description: String? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-    ) -> JSONSchemaObject {
-        let context = JSONSchemaObject.Context<JSONTypeFormat.BooleanFormat>(
+    ) -> JSONSchema {
+        let context = JSONSchema.Context<JSONTypeFormat.BooleanFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -264,7 +264,7 @@ extension JSONSchemaObject {
         return .boolean(context)
     }
 
-    public static var boolean: JSONSchemaObject {
+    public static var boolean: JSONSchema {
         return .boolean()
     }
 
@@ -279,8 +279,8 @@ extension JSONSchemaObject {
         pattern: String? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-    ) -> JSONSchemaObject {
-        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.StringFormat>(
+    ) -> JSONSchema {
+        let genericContext = JSONSchema.Context<JSONTypeFormat.StringFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -289,7 +289,7 @@ extension JSONSchemaObject {
             allowedValues: allowedValues,
             example: example
         )
-        let stringContext = JSONSchemaObject.StringContext(
+        let stringContext = JSONSchema.StringContext(
             maxLength: maxLength,
             minLength: minLength,
             pattern: pattern
@@ -297,7 +297,7 @@ extension JSONSchemaObject {
         return .string(genericContext, stringContext)
     }
 
-    public static var string: JSONSchemaObject {
+    public static var string: JSONSchema {
         return .string()
     }
 
@@ -312,8 +312,8 @@ extension JSONSchemaObject {
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-    ) -> JSONSchemaObject {
-        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.NumberFormat>(
+    ) -> JSONSchema {
+        let genericContext = JSONSchema.Context<JSONTypeFormat.NumberFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -322,7 +322,7 @@ extension JSONSchemaObject {
             allowedValues: allowedValues,
             example: example
         )
-        let numbericContext = JSONSchemaObject.NumericContext(
+        let numbericContext = JSONSchema.NumericContext(
             multipleOf: multipleOf,
             maximum: maximum.map { ($0.0, exclusive: $0.exclusive) },
             minimum: minimum.map { ($0.0, exclusive: $0.exclusive) }
@@ -330,7 +330,7 @@ extension JSONSchemaObject {
         return .number(genericContext, numbericContext)
     }
 
-    public static var number: JSONSchemaObject {
+    public static var number: JSONSchema {
         return .number()
     }
 
@@ -345,8 +345,8 @@ extension JSONSchemaObject {
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-    ) -> JSONSchemaObject {
-        let genericContext = JSONSchemaObject.Context<JSONTypeFormat.IntegerFormat>(
+    ) -> JSONSchema {
+        let genericContext = JSONSchema.Context<JSONTypeFormat.IntegerFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -355,7 +355,7 @@ extension JSONSchemaObject {
             allowedValues: allowedValues,
             example: example
         )
-        let integerContext = JSONSchemaObject.IntegerContext(
+        let integerContext = JSONSchema.IntegerContext(
             multipleOf: multipleOf,
             maximum: maximum.map { ($0.0, exclusive: $0.exclusive) },
             minimum: minimum.map { ($0.0, exclusive: $0.exclusive) }
@@ -363,7 +363,7 @@ extension JSONSchemaObject {
         return .integer(genericContext, integerContext)
     }
 
-    public static var integer: JSONSchemaObject {
+    public static var integer: JSONSchema {
         return .integer()
     }
 
@@ -375,12 +375,12 @@ extension JSONSchemaObject {
         description: String? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
-        properties: [String: JSONSchemaObject] = [:],
-        additionalProperties: Either<Bool, JSONSchemaObject>? = nil,
+        properties: [String: JSONSchema] = [:],
+        additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-        ) -> JSONSchemaObject {
-        let generalContext = JSONSchemaObject.Context<JSONTypeFormat.ObjectFormat>(
+        ) -> JSONSchema {
+        let generalContext = JSONSchema.Context<JSONTypeFormat.ObjectFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -389,7 +389,7 @@ extension JSONSchemaObject {
             allowedValues: allowedValues,
             example: example
         )
-        let objectContext = JSONSchemaObject.ObjectContext(
+        let objectContext = JSONSchema.ObjectContext(
             properties: properties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
@@ -398,14 +398,14 @@ extension JSONSchemaObject {
         return .object(generalContext, objectContext)
     }
 
-    public static var object: JSONSchemaObject {
+    public static var object: JSONSchema {
         return .object()
     }
 }
 
 // MARK: - Codable
 
-extension JSONSchemaObject {
+extension JSONSchema {
     private enum SubschemaCodingKeys: String, CodingKey {
         case allOf
         case oneOf
@@ -414,7 +414,7 @@ extension JSONSchemaObject {
     }
 }
 
-extension JSONSchemaObject: Encodable {
+extension JSONSchema: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
@@ -457,7 +457,7 @@ extension JSONSchemaObject: Encodable {
     }
 }
 
-extension JSONSchemaObject: Decodable {
+extension JSONSchema: Decodable {
 
     private enum HintCodingKeys: String, CodingKey {
         case type
@@ -466,7 +466,7 @@ extension JSONSchemaObject: Decodable {
     public init(from decoder: Decoder) throws {
 
         if let singleValueContainer = try? decoder.singleValueContainer() {
-            if let ref = try? singleValueContainer.decode(JSONReference<OpenAPI.Components, JSONSchemaObject>.self) {
+            if let ref = try? singleValueContainer.decode(JSONReference<OpenAPI.Components, JSONSchema>.self) {
                 self = .reference(ref)
                 return
             }
@@ -475,22 +475,22 @@ extension JSONSchemaObject: Decodable {
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            self = .all(of: try container.decode([JSONSchemaObject].self, forKey: .allOf))
+            self = .all(of: try container.decode([JSONSchema].self, forKey: .allOf))
             return
         }
 
         if container.contains(.anyOf) {
-            self = .any(of: try container.decode([JSONSchemaObject].self, forKey: .anyOf))
+            self = .any(of: try container.decode([JSONSchema].self, forKey: .anyOf))
             return
         }
 
         if container.contains(.oneOf) {
-            self = .one(of: try container.decode([JSONSchemaObject].self, forKey: .oneOf))
+            self = .one(of: try container.decode([JSONSchema].self, forKey: .oneOf))
             return
         }
 
         if container.contains(.not) {
-            self = .not(try container.decode(JSONSchemaObject.self, forKey: .not))
+            self = .not(try container.decode(JSONSchema.self, forKey: .not))
             return
         }
 

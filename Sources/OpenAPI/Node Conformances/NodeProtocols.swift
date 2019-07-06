@@ -15,18 +15,18 @@ import Sampleable
 /// Anything conforming to `OpenAPINodeType` can provide an
 /// OpenAPI schema representing itself.
 public protocol OpenAPINodeType {
-    static func openAPINode() throws -> JSONSchemaObject
+    static func openAPINode() throws -> JSONSchema
 }
 
 /// Anything conforming to `OpenAPIEncodedNodeType` can provide an
 /// OpenAPI schema representing itself but it may need an Encoder
 /// to do its job.
 public protocol OpenAPIEncodedNodeType {
-    static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchemaObject
+    static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchema
 }
 
 extension OpenAPIEncodedNodeType where Self: Sampleable, Self: Encodable {
-    public static func openAPINodeWithExample(using encoder: JSONEncoder = JSONEncoder()) throws -> JSONSchemaObject {
+    public static func openAPINodeWithExample(using encoder: JSONEncoder = JSONEncoder()) throws -> JSONSchema {
         return try openAPINode(using: encoder).with(example: Self.successSample ?? Self.sample, using: encoder)
     }
 }
@@ -38,7 +38,7 @@ extension OpenAPIEncodedNodeType where Self: Sampleable, Self: Encodable {
 /// different schema. The "different" conditions have to do
 /// with Raw Representability, hence the name of this protocol.
 public protocol RawOpenAPINodeType {
-    static func rawOpenAPINode() throws -> JSONSchemaObject
+    static func rawOpenAPINode() throws -> JSONSchema
 }
 
 /// Anything conforming to `RawOpenAPINodeType` can provide an
@@ -48,7 +48,7 @@ public protocol RawOpenAPINodeType {
 /// different schema. The "different" conditions have to do
 /// with Optionality, hence the name of this protocol.
 public protocol WrappedRawOpenAPIType {
-    static func wrappedOpenAPINode() throws -> JSONSchemaObject
+    static func wrappedOpenAPINode() throws -> JSONSchema
 }
 
 /// Anything conforming to `RawOpenAPINodeType` can provide an
@@ -61,17 +61,17 @@ public protocol DoubleWrappedRawOpenAPIType {
     // NOTE: This is definitely a rabbit hole... hopefully I
     // will realize I've been missing something obvious
     // and dig my way back out at some point...
-    static func wrappedOpenAPINode() throws -> JSONSchemaObject
+    static func wrappedOpenAPINode() throws -> JSONSchema
 }
 
 /// A GenericOpenAPINodeType can take a stab at
 /// determining its OpenAPINode because it is sampleable.
 public protocol GenericOpenAPINodeType {
-    static func genericOpenAPINode(using encoder: JSONEncoder) throws -> JSONSchemaObject
+    static func genericOpenAPINode(using encoder: JSONEncoder) throws -> JSONSchema
 }
 
 /// Anything conforming to `DateOpenAPINodeType` is
 /// able to attempt to represent itself as a date OpenAPINode
 public protocol DateOpenAPINodeType {
-    static func dateOpenAPINodeGuess(using encoder: JSONEncoder) -> JSONSchemaObject?
+    static func dateOpenAPINodeGuess(using encoder: JSONEncoder) -> JSONSchema?
 }

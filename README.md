@@ -7,7 +7,7 @@ A library that encodes to and decodes from [OpenAPI](https://github.com/OAI/Open
 This library *is* opinionated about a few defaults when you use the Swift types, however encoding and decoding stays true to the spec. Some key things to note:
 
 1. Within schemas, `required` is specified on the property rather than being specified on the parent object (encoding/decoding still follows the OpenAPI spec).
-    * ex `JSONSchemaObject.object(properties: [ "val": .string(required: true)])` is an "object" type with a required "string" type property.
+    * ex `JSONSchema.object(properties: [ "val": .string(required: true)])` is an "object" type with a required "string" type property.
 2. Within schemas, `required` defaults to `true` on initialization (again, encoding/decoding still follows the OpenAPI spec).
-    * ex. `JSONSchemaObject.string` is a required "string" type.
-    * ex. `JSONSchemaObject.string(required: false)` is an optional "string" type.
+    * ex. `JSONSchema.string` is a required "string" type.
+    * ex. `JSONSchema.string(required: false)` is an optional "string" type.
