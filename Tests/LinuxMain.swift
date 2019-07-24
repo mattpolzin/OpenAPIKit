@@ -1,8 +1,8 @@
 import XCTest
 
-import OpenAPITests
+import OpenAPIKitTests
 
 var tests = [XCTestCaseEntry]()
-tests += OpenAPITests.__allTests()
+tests += OpenAPIKitTests.__allTests()
 
 XCTMain(tests)

@@ -7,7 +7,7 @@
 
 import Foundation
 import XCTest
-import OpenAPI
+import OpenAPIKit
 
 final class ContentTests: XCTestCase {
     func test_init() {

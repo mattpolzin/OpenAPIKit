@@ -4,15 +4,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenAPI",
+    name: "OpenAPIKit",
     platforms: [
         .macOS(.v10_13),
         .iOS(.v11)
     ],
     products: [
         .library(
-            name: "OpenAPI",
-            targets: ["OpenAPI"]),
+            name: "OpenAPIKit",
+            targets: ["OpenAPIKit"]),
     ],
     dependencies: [
         .package(url: "https://github.com/mattpolzin/Poly.git", .upToNextMajor(from: "2.0.0")),
@@ -21,11 +21,11 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenAPI",
+            name: "OpenAPIKit",
             dependencies: ["Poly", "Sampleable", "AnyCodable"]),
         .testTarget(
-            name: "OpenAPITests",
-            dependencies: ["OpenAPI"]),
+            name: "OpenAPIKitTests",
+            dependencies: ["OpenAPIKit"]),
     ],
     swiftLanguageVersions: [ .v5 ]
 )

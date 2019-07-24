@@ -1,6 +1,6 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT) [![Swift 5.0](http://img.shields.io/badge/Swift-5.0-blue.svg)](https://swift.org) [![Build Status](https://app.bitrise.io/app/2f7379e33723d853/status.svg?token=Jx4X3su3oE59z_rJBRC_og&branch=master)](https://app.bitrise.io/app/2f7379e33723d853)
 
-# OpenAPI
+# OpenAPIKit
 
 A library that encodes to- and decodes from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents.
 
