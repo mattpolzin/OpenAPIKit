@@ -341,12 +341,14 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(reference.allowedValues)
     }
 
+    @available(OSX 10.13, *)
     func test_withInitialExample() {
         let object = JSONSchema.object(.init(format: .unspecified, required: true, example: (codable: [:], encoder: testEncoder)), .init(properties: [:]))
 
         XCTAssertEqual(object.example, "{\n\n}")
     }
 
+    @available(OSX 10.13, *)
     func test_withAddedExample() {
         let object = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
             .with(example: [String: String](), using: testEncoder)
@@ -418,7 +420,7 @@ final class SchemaObjectTests: XCTestCase {
 }
 
 // MARK: - Codable
-
+@available(OSX 10.13, *)
 extension SchemaObjectTests {
 
     func test_decodeingFailsForTypo() {
@@ -3000,6 +3002,7 @@ extension SchemaObjectTests {
     }
 }
 
+@available(OSX 10.13, *)
 private func testEncodingPropertyLines<T: Encodable>(entity: T, propertyLines: [String]) {
     var expectedString = "{\n"
     for line in propertyLines {
@@ -3010,6 +3013,7 @@ private func testEncodingPropertyLines<T: Encodable>(entity: T, propertyLines: [
     XCTAssertEqual(try? testStringFromEncoding(of: entity), expectedString)
 }
 
+@available(OSX 10.13, *)
 private func testAllSharedSimpleContextEncoding<T: Encodable>(
     typeName: String,
     requiredEntity: T,
@@ -3039,6 +3043,7 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
     ])
 }
 
+@available(OSX 10.13, *)
 private func testAllSharedFormattedContextEncoding<T: Encodable>(
     typeName: String,
     formatName: String,
