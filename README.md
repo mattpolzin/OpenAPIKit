@@ -192,9 +192,11 @@ This library *is* opinionated about a few defaults when you use the Swift types,
     - [x] local (same file) reference (`node` case)
         - [x] encode
         - [ ] decode
+        - [ ] dereference
     - [x] remote (different file) reference (`file` case)
         - [x] encode
         - [x] decode
+        - [ ] dereference
 
 ### Schema Object (`JSONSchema`)
 - [x] Mostly complete support for JSON Schema inherited keywords
