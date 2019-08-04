@@ -14,7 +14,7 @@ public protocol AnyJSONCaseIterable {
     static func allCases(using encoder: JSONEncoder) -> [AnyCodable]
 }
 
-extension AnyJSONCaseIterable {
+public extension AnyJSONCaseIterable {
     /// Given an array of Codable values, retrieve an array of AnyCodables.
     static func allCases<T: Codable>(from input: [T], using encoder: JSONEncoder) throws -> [AnyCodable] {
         if let alreadyGoodToGo = input as? [AnyCodable] {
