@@ -31,18 +31,18 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] title
 - [x] description
 - [x] termsOfService
-- [ ] contact
-- [ ] license
+- [x] contact
+- [x] license
 - [x] version
 
-### Contact Object
-- [ ] name
-- [ ] url
-- [ ] email
+### Contact Object (`OpenAPI.Document.Info.Contact`)
+- [x] name
+- [x] url
+- [x] email
 
-### License Object
-- [ ] name
-- [ ] url
+### License Object (`OpenAPI.Document.Info.License`)
+- [x] name
+- [x] url
 
 ### Server Object
 - [ ] url
@@ -107,7 +107,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] description
 - [x] required (part of `parameterLocation`)
 - [x] deprecated
-- [ ] allowEmptyValue
+- [x] allowEmptyValue (part of `parameterLocation`)
 - [x] content (`schemaOrContent`)
 - [x] schema (`schemaOrContent`)
     - [ ] style

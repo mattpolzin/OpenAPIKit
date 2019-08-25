@@ -45,18 +45,33 @@ extension OpenAPI.Document {
         public let title: String
         public let description: String?
         public let termsOfService: URL?
-        //        public let contact:
-        //        public let license:
+        public let contact: Contact?
+        public let license: License?
         public let version: String
 
         public init(title: String,
                     description: String? = nil,
                     termsOfService: URL? = nil,
+                    contact: Contact? = nil,
+                    license: License? = nil,
                     version: String) {
             self.title = title
             self.description = description
             self.termsOfService = termsOfService
+            self.contact = contact
+            self.license = license
             self.version = version
+        }
+
+        public struct Contact: Codable {
+            let name: String?
+            let url: String?
+            let email: String?
+        }
+
+        public struct License: Codable {
+            let name: String
+            let url: String?
         }
     }
 }
