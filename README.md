@@ -80,7 +80,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] head (`operations` case)
 - [x] patch (`operations` case)
 - [x] trace (`operations` case)
-- [ ] servers (`operations` case)
+- [x] servers (`operations` case)
 - [x] parameters (`operations` case)
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
@@ -95,7 +95,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] callbacks
 - [x] deprecated
 - [ ] security
-- [ ] servers
+- [x] servers
 
 ### External Document Object (`OpenAPI.ExternalDoc`)
 - [x] description

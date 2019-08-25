@@ -81,7 +81,7 @@ extension OpenAPI.Document {
 }
 
 extension OpenAPI {
-    public struct Server: Codable {
+    public struct Server: Codable, Equatable {
         let url: URL
         let description: String
 //        let variables: [String: Variable]

@@ -40,7 +40,7 @@ extension OpenAPI.PathItem {
     public struct Properties: Equatable {
         public let summary: String?
         public let description: String?
-        //        public let servers:
+        public let servers: [OpenAPI.Server]?
         public let parameters: Parameter.Array
 
         public let get: Operation?
@@ -57,6 +57,7 @@ extension OpenAPI.PathItem {
 
         public init(summary: String? = nil,
                     description: String? = nil,
+                    servers: [OpenAPI.Server]? = nil,
                     parameters: Parameter.Array = [],
                     get: Operation? = nil,
                     put: Operation? = nil,
@@ -68,6 +69,7 @@ extension OpenAPI.PathItem {
                     trace: Operation? = nil) {
             self.summary = summary
             self.description = description
+            self.servers = servers
             self.parameters = parameters
 
             self.get = get
@@ -153,7 +155,7 @@ extension OpenAPI.PathItem.Properties {
     private enum CodingKeys: String, CodingKey {
         case summary
         case description
-//        case servers
+        case servers
         case parameters
 
         case get
@@ -177,6 +179,10 @@ extension OpenAPI.PathItem.Properties: Encodable {
 
         if description != nil {
             try container.encode(description, forKey: .description)
+        }
+
+        if servers != nil {
+            try container.encode(servers, forKey: .servers)
         }
 
         try container.encode(parameters, forKey: .parameters)
@@ -222,6 +228,8 @@ extension OpenAPI.PathItem.Properties: Decodable {
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
 
         parameters = try container.decodeIfPresent(Parameter.Array.self, forKey: .parameters) ?? []
 

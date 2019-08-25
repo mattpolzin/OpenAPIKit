@@ -21,7 +21,7 @@ extension OpenAPI.PathItem {
         //            public let callbacks:
         public let deprecated: Bool // default is false
         //            public let security:
-        //            public let servers:
+        public let servers: [OpenAPI.Server]?
 
         public init(tags: [String]? = nil,
                     summary: String? = nil,
@@ -31,7 +31,8 @@ extension OpenAPI.PathItem {
                     parameters: Parameter.Array,
                     requestBody: OpenAPI.Request? = nil,
                     responses: OpenAPI.Response.Map,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    servers: [OpenAPI.Server]? = nil) {
             self.tags = tags
             self.summary = summary
             self.description = description
@@ -41,6 +42,7 @@ extension OpenAPI.PathItem {
             self.requestBody = requestBody
             self.responses = responses
             self.deprecated = deprecated
+            self.servers = servers
         }
     }
 }
@@ -60,7 +62,7 @@ extension OpenAPI.PathItem.Operation {
         //        case callbacks
         case deprecated
         //        case security
-        //        case servers
+        case servers
     }
 }
 
@@ -103,6 +105,10 @@ extension OpenAPI.PathItem.Operation: Encodable {
         try container.encode(stringKeyedDict, forKey: .responses)
 
         try container.encode(deprecated, forKey: .deprecated)
+
+        if servers != nil {
+            try container.encode(servers, forKey: .servers)
+        }
     }
 }
 
@@ -131,5 +137,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
                                uniquingKeysWith: { $1 })
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+
+        servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
     }
 }
