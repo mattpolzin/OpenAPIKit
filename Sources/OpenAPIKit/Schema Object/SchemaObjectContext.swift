@@ -52,6 +52,25 @@ extension JSONSchema {
         // have to do.
         public let example: String?
 
+        public init<T: Encodable>(format: Format = .unspecified,
+                                  required: Bool = true,
+                                  nullable: Bool = false,
+                                  title: String? = nil,
+                                  description: String? = nil,
+                                  allowedValues: [AnyCodable]? = nil,
+                                  example: (codable: T, encoder: JSONEncoder)) {
+            self.format = format
+            self.required = required
+            self.nullable = nullable
+//            self.constantValue = constantValue
+            self.title = title
+            self.description = description
+            self.allowedValues = allowedValues
+            self.example = (try? example.encoder.encode(example.codable))
+                .flatMap { String(data: $0, encoding: .utf8) }
+                ?? JSONSchema.fragmentString(from: example.codable)
+        }
+
         public init(format: Format = .unspecified,
                     required: Bool = true,
                     nullable: Bool = false,
@@ -122,7 +141,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given example
-    public func with(example: AnyCodable, using encoder: JSONEncoder) -> JSONSchema.Context<Format> {
+    public func with<T: Encodable>(example: T, using encoder: JSONEncoder) -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: required,
                      nullable: nullable,

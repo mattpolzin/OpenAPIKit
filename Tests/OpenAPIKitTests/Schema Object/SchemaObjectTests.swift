@@ -148,12 +148,24 @@ final class SchemaObjectTests: XCTestCase {
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, title: "hello"), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, title: "hello"), .init())
 
+        let allOf = JSONSchema.all(of: [boolean])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+
         XCTAssertEqual(boolean.title, "hello")
         XCTAssertEqual(object.title, "hello")
         XCTAssertEqual(array.title, "hello")
         XCTAssertEqual(number.title, "hello")
         XCTAssertEqual(integer.title, "hello")
         XCTAssertEqual(string.title, "hello")
+
+        XCTAssertNil(allOf.title)
+        XCTAssertNil(anyOf.title)
+        XCTAssertNil(oneOf.title)
+        XCTAssertNil(not.title)
+        XCTAssertNil(reference.title)
     }
 
     func test_description() {
@@ -164,12 +176,24 @@ final class SchemaObjectTests: XCTestCase {
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, description: "hello"), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, description: "hello"), .init())
 
+        let allOf = JSONSchema.all(of: [boolean])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+
         XCTAssertEqual(boolean.description, "hello")
         XCTAssertEqual(object.description, "hello")
         XCTAssertEqual(array.description, "hello")
         XCTAssertEqual(number.description, "hello")
         XCTAssertEqual(integer.description, "hello")
         XCTAssertEqual(string.description, "hello")
+
+        XCTAssertNil(allOf.description)
+        XCTAssertNil(anyOf.description)
+        XCTAssertNil(oneOf.description)
+        XCTAssertNil(not.description)
+        XCTAssertNil(reference.description)
     }
 
     func test_requiredToOptional() {
@@ -345,33 +369,60 @@ final class SchemaObjectTests: XCTestCase {
     func test_withInitialExample() {
         let object = JSONSchema.object(.init(format: .unspecified, required: true, example: (codable: [:], encoder: testEncoder)), .init(properties: [:]))
 
+        // nonsense
+        let all = JSONSchema.all(of: [])
+        let one = JSONSchema.one(of: [])
+        let any = JSONSchema.any(of: [])
+        let not = JSONSchema.not(.string)
+        let ref = JSONSchema.reference(.file("hello.yml"))
+
         XCTAssertEqual(object.example, "{\n\n}")
+
+        XCTAssertNil(all.example)
+        XCTAssertNil(one.example)
+        XCTAssertNil(any.example)
+        XCTAssertNil(not.example)
+        XCTAssertNil(ref.example)
     }
 
     @available(OSX 10.13, *)
     func test_withAddedExample() {
         let object = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
             .with(example: [String: String](), using: testEncoder)
+        let array = try! JSONSchema.array(.init(), .init())
+            .with(example: ["hello"], using: testEncoder)
 
-        // nonesense:
-        let allOf = JSONSchema.all(of: [object])
-            .with(allowedValues: ["hello"])
-        let anyOf = JSONSchema.any(of: [object])
-            .with(allowedValues: ["hello"])
-        let oneOf = JSONSchema.one(of: [object])
-            .with(allowedValues: ["hello"])
-        let not = JSONSchema.not(object)
-            .with(allowedValues: ["hello"])
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
-            .with(allowedValues: ["hello"])
+        let boolean = try! JSONSchema.boolean(.init(format: .unspecified, required: true))
+            .with(example: true, using: testEncoder)
+        let double = try! JSONSchema.number
+            .with(example: 10.5, using: testEncoder)
+        let float = try! JSONSchema.number
+            .with(example: Float(2.5), using: testEncoder)
+        let integer = try! JSONSchema.integer
+            .with(example: 3, using: testEncoder)
+        let string = try! JSONSchema.string
+            .with(example: "hello world", using: testEncoder)
+
+        // nonsense:
+        XCTAssertThrowsError(try JSONSchema.all(of: [object])
+            .with(example: ["hello"], using: testEncoder))
+        XCTAssertThrowsError(try JSONSchema.any(of: [object])
+            .with(example: ["hello"], using: testEncoder))
+        XCTAssertThrowsError(try JSONSchema.one(of: [object])
+            .with(example: ["hello"], using: testEncoder))
+        XCTAssertThrowsError(try JSONSchema.not(object)
+            .with(example: ["hello"], using: testEncoder))
+        XCTAssertThrowsError(try JSONSchema.reference(.file("hello/world.json#/hello"))
+            .with(example: ["hello"], using: testEncoder))
 
         XCTAssertEqual(object.example, "{\n\n}")
+        XCTAssertEqual(array.example, "[\n  \"hello\"\n]")
 
-        XCTAssertNil(allOf.example)
-        XCTAssertNil(anyOf.example)
-        XCTAssertNil(oneOf.example)
-        XCTAssertNil(not.example)
-        XCTAssertNil(reference.example)
+        XCTAssertEqual(boolean.example, "true")
+        XCTAssertEqual(double.example, "10.5")
+        XCTAssertEqual(float.example, "2.5")
+        XCTAssertEqual(integer.example, "3")
+        XCTAssertEqual(string.example, "\"hello world\"")
     }
 
     func test_minObjectProperties() {

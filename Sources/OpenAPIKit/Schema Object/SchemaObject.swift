@@ -214,28 +214,43 @@ extension JSONSchema {
 
     public func with<T: Encodable>(example codableExample: T,
                                    using encoder: JSONEncoder) throws -> JSONSchema {
-        let example: AnyCodable
-        if let goodToGo = codableExample as? AnyCodable {
-            example = goodToGo
-        } else {
-            example = AnyCodable(try JSONSerialization.jsonObject(with: encoder.encode(codableExample), options: []))
-        }
-
         switch self {
         case .boolean(let context):
-            return .boolean(context.with(example: example, using: encoder))
+            return .boolean(context.with(example: codableExample, using: encoder))
         case .object(let contextA, let contextB):
-            return .object(contextA.with(example: example, using: encoder), contextB)
+            return .object(contextA.with(example: codableExample, using: encoder), contextB)
         case .array(let contextA, let contextB):
-            return .array(contextA.with(example: example, using: encoder), contextB)
+            return .array(contextA.with(example: codableExample, using: encoder), contextB)
         case .number(let context, let contextB):
-            return .number(context.with(example: example, using: encoder), contextB)
+            return .number(context.with(example: codableExample, using: encoder), contextB)
         case .integer(let context, let contextB):
-            return .integer(context.with(example: example, using: encoder), contextB)
+            return .integer(context.with(example: codableExample, using: encoder), contextB)
         case .string(let context, let contextB):
-            return .string(context.with(example: example, using: encoder), contextB)
+            return .string(context.with(example: codableExample, using: encoder), contextB)
         case .all, .one, .any, .not, .reference:
-            return self
+            throw OpenAPI.CodableError.exampleNotSupported("examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
+        }
+    }
+}
+
+// MARK: - Fragment Handling
+private protocol _Dictionary {}
+extension Dictionary: _Dictionary {}
+
+private protocol _Array {}
+extension Array: _Array {}
+
+extension JSONSchema {
+    /// Attempts to create a String from a JSON fragment (e.g. Bool, Double, String, etc.)
+    internal static func fragmentString(from value: Any) -> String? {
+        switch type(of: value).self {
+        case is _Dictionary.Type,
+             is _Array.Type:
+            return nil
+        case is String.Type:
+            return "\"\(value)\""
+        default:
+            return "\(value)"
         }
     }
 }

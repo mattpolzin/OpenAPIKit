@@ -15,6 +15,7 @@ extension OpenAPI {
         case allCasesArrayNotCodable
         case exampleNotCodable
         case primitiveGuessFailed
+        case exampleNotSupported(String)
     }
 
     public enum TypeError: Swift.Error {
