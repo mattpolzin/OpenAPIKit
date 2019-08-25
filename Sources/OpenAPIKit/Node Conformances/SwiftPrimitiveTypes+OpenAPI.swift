@@ -21,7 +21,7 @@ Any sequence of octets:
 RFC3339 full-date:
 .string(.date)
 
-RFC3339 date-time:
+RFC3339 date-time: (note this is somewhat covered in `Date+OpenAPI.swift`)
 .string(.dateTime)
 
 A hint to UIs to obscure input:
@@ -51,9 +51,9 @@ extension Optional: WrappedRawOpenAPIType where Wrapped: RawOpenAPINodeType {
 }
 
 extension Optional: DoubleWrappedRawOpenAPIType where Wrapped: WrappedRawOpenAPIType {
-	static public func wrappedOpenAPINode() throws -> JSONSchema {
-		return try Wrapped.wrappedOpenAPINode().optionalSchemaObject()
-	}
+    static public func doubleWrappedOpenAPINode() throws -> JSONSchema {
+        return try Wrapped.wrappedOpenAPINode().optionalSchemaObject()
+    }
 }
 
 extension Optional: AnyJSONCaseIterable where Wrapped: CaseIterable, Wrapped: Codable {
@@ -68,6 +68,14 @@ extension Optional: DateOpenAPINodeType where Wrapped: DateOpenAPINodeType {
 	}
 }
 
+extension Array: OpenAPINodeType where Element: OpenAPINodeType {
+    static public func openAPINode() throws -> JSONSchema {
+        return .array(.init(format: .generic,
+                            required: true),
+                      .init(items: try Element.openAPINode()))
+    }
+}
+
 extension String: OpenAPINodeType {
 	static public func openAPINode() throws -> JSONSchema {
 		return .string(.init(format: .generic,
@@ -80,14 +88,6 @@ extension Bool: OpenAPINodeType {
 	static public func openAPINode() throws -> JSONSchema {
 		return .boolean(.init(format: .generic,
 							  required: true))
-	}
-}
-
-extension Array: OpenAPINodeType where Element: OpenAPINodeType {
-	static public func openAPINode() throws -> JSONSchema {
-		return .array(.init(format: .generic,
-							required: true),
-					  .init(items: try Element.openAPINode()))
 	}
 }
 

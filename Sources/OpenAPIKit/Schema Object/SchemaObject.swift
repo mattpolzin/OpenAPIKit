@@ -416,6 +416,37 @@ extension JSONSchema {
     public static var object: JSONSchema {
         return .object()
     }
+
+    public static func array(format: JSONTypeFormat.ArrayFormat = .unspecified,
+                             required: Bool = true,
+                             nullable: Bool = false,
+                             title: String? = nil,
+                             description: String? = nil,
+                             minItems: Int = 0,
+                             maxItems: Int? = nil,
+                             uniqueItems: Bool = false,
+                             items: JSONSchema? = nil,
+                             allowedValues: [AnyCodable]? = nil,
+                             example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        ) -> JSONSchema {
+        let generalContext = JSONSchema.Context<JSONTypeFormat.ArrayFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            title: title,
+            description: description,
+            allowedValues: allowedValues,
+            example: example
+        )
+
+        let arrayContext = JSONSchema.ArrayContext(
+            items: items,
+            maxItems: maxItems,
+            minItems: minItems,
+            uniqueItems: uniqueItems
+        )
+        return .array(generalContext, arrayContext)
+    }
 }
 
 // MARK: - Codable

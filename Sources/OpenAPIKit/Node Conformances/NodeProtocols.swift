@@ -41,6 +41,12 @@ public protocol RawOpenAPINodeType {
     static func rawOpenAPINode() throws -> JSONSchema
 }
 
+extension RawOpenAPINodeType where Self: RawRepresentable, RawValue: OpenAPINodeType {
+    public static func rawOpenAPINode() throws -> JSONSchema {
+        return try RawValue.openAPINode()
+    }
+}
+
 /// Anything conforming to `RawOpenAPINodeType` can provide an
 /// OpenAPI schema representing itself. This third protocol is
 /// necessary so that one type can conditionally provide a
@@ -61,7 +67,7 @@ public protocol DoubleWrappedRawOpenAPIType {
     // NOTE: This is definitely a rabbit hole... hopefully I
     // will realize I've been missing something obvious
     // and dig my way back out at some point...
-    static func wrappedOpenAPINode() throws -> JSONSchema
+    static func doubleWrappedOpenAPINode() throws -> JSONSchema
 }
 
 /// A GenericOpenAPINodeType can take a stab at

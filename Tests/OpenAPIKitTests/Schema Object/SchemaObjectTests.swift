@@ -34,6 +34,7 @@ final class SchemaObjectTests: XCTestCase {
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
 
+        // JSONTypeFormat
         XCTAssertEqual(boolean.jsonTypeFormat, .boolean(.unspecified))
         XCTAssertEqual(object.jsonTypeFormat, .object(.unspecified))
         XCTAssertEqual(array.jsonTypeFormat, .array(.unspecified))
@@ -54,6 +55,23 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.jsonTypeFormat)
         XCTAssertNil(not.jsonTypeFormat)
         XCTAssertNil(reference.jsonTypeFormat)
+
+        // JSONType
+        XCTAssertEqual(boolean.jsonTypeFormat?.jsonType, .boolean)
+        XCTAssertEqual(object.jsonTypeFormat?.jsonType, .object)
+        XCTAssertEqual(array.jsonTypeFormat?.jsonType, .array)
+        XCTAssertEqual(number.jsonTypeFormat?.jsonType, .number)
+        XCTAssertEqual(floatNumber.jsonTypeFormat?.jsonType, .number)
+        XCTAssertEqual(doubleNumber.jsonTypeFormat?.jsonType, .number)
+        XCTAssertEqual(integer.jsonTypeFormat?.jsonType, .integer)
+        XCTAssertEqual(integer32.jsonTypeFormat?.jsonType, .integer)
+        XCTAssertEqual(integer64.jsonTypeFormat?.jsonType, .integer)
+        XCTAssertEqual(string.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(byteString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(binaryString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(dateString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(dateTimeString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(passwordString.jsonTypeFormat?.jsonType, .string)
     }
 
     func test_required() {

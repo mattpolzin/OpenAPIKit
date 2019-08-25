@@ -17,7 +17,7 @@ internal extension Result {
         }
     }
 
-    var error: Error? {
+    var error: Failure? {
         switch self {
         case .failure(let error):
             return error
