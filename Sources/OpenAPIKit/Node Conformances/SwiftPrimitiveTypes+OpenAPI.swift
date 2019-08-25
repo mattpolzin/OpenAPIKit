@@ -1,6 +1,6 @@
 //
-//  PrimitiveTypes.swift
-//  OpenAPI
+//  SwiftPrimitiveTypes+OpenAPI.swift
+//  OpenAPIKit
 //
 //  Created by Mathew Polzin on 01/13/19.
 //

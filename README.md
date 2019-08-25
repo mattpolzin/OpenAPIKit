@@ -60,7 +60,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] parameters
 - [ ] examples
 - [ ] requestBodies
-- [ ] headers
+- [x] headers
 - [ ] securitySchemes
 - [ ] links
 - [ ] callbacks
@@ -132,23 +132,23 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 
 ### Media Type Object (`OpenAPI.Content`)
 - [x] schema
-- [ ] example
+- [x] example
 - [ ] examples
-- [ ] encoding
+- [x] encoding
 
-### Encoding Object
-- [ ] contentType
-- [ ] headers
+### Encoding Object (`OpenAPI.Content.Encoding`)
+- [x] contentType
+- [x] headers
 - [ ] style
 - [ ] explode
-- [ ] allowReserved
+- [x] allowReserved
 
 ### Responses Object (`OpenAPI.Response.Map`)
 - [x] *dictionary*
 
 ### Response Object (`OpenAPI.Response`)
 - [x] description
-- [ ] headers
+- [x] headers
 - [x] content
 - [ ] links
 
@@ -170,12 +170,11 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] server
 
 ### Header Object
-- [ ] description
-- [ ] required
-- [ ] deprecated
-- [ ] allowEmptyValue
-- [ ] content
-- [ ] schema
+- [x] description
+- [x] required
+- [x] deprecated
+- [x] content
+- [x] schema
     - [ ] style
     - [ ] explode
     - [ ] allowReserved

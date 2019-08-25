@@ -11,13 +11,15 @@ import Poly
 extension OpenAPI {
     public struct Response: Equatable {
         public let description: String
-        //    public let headers:
+        public let headers: Header.Map?
         public let content: Content.Map
         //    public let links:
 
         public init(description: String,
+                    headers: Header.Map? = nil,
                     content: Content.Map) {
             self.description = description
+            self.headers = headers
             self.content = content
         }
     }
@@ -71,7 +73,7 @@ extension OpenAPI.Response.StatusCode: ExpressibleByIntegerLiteral {
 extension OpenAPI.Response {
     private enum CodingKeys: String, CodingKey {
         case description
-        //        case headers
+        case headers
         case content
         //        case links
     }
@@ -82,6 +84,10 @@ extension OpenAPI.Response: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(description, forKey: .description)
+
+        if headers != nil {
+            try container.encode(headers, forKey: .headers)
+        }
 
         if content.count > 0 {
             // Hack to work around Dictionary encoding
@@ -100,6 +106,8 @@ extension OpenAPI.Response: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         description = try container.decode(String.self, forKey: .description)
+
+        headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
 
         // hacky workaround for Dictionary decoding bug
         let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)

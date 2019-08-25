@@ -19,19 +19,23 @@ extension OpenAPI {
         public let parameters: ParametersDict
         //    public let examples:
         //    public let requestBodies:
-        //    public let headers:
-        //    public let headers:
+        public let headers: HeadersDict
         //    public let securitySchemas:
         //    public let links:
         //    public let callbacks:
 
-        public init(schemas: [String: SchemasDict.Value], parameters: [String: ParametersDict.Value]) {
+        public init(schemas: [String: SchemasDict.Value],
+                    parameters: [String: ParametersDict.Value],
+                    headers: [String: HeadersDict.Value]) {
             self.schemas = SchemasDict(schemas)
             self.parameters = ParametersDict(parameters)
+            self.headers = HeadersDict(headers)
         }
 
         public static var noComponents: Components {
-            return .init(schemas: [:], parameters: [:])
+            return .init(schemas: [:],
+                         parameters: [:],
+                         headers: [:])
         }
 
         public enum SchemasName: RefName {
@@ -45,5 +49,11 @@ extension OpenAPI {
         }
 
         public typealias ParametersDict = RefDict<Components, ParametersName, PathItem.Parameter>
+
+        public enum HeadersName: RefName {
+            public static var refName: String { return "headers" }
+        }
+
+        public typealias HeadersDict = RefDict<Components, HeadersName, Header>
     }
 }

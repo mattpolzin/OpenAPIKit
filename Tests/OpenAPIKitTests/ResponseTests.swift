@@ -14,11 +14,16 @@ final class ResponseTests: XCTestCase {
         let r1 = OpenAPI.Response(description: "hello world",
                                   content: [:])
         XCTAssertEqual(r1.description, "hello world")
+        XCTAssertNil(r1.headers)
+        XCTAssertEqual(r1.content, [:])
 
         let content = OpenAPI.Content(schema: .init(JSONReference<OpenAPI.Components, JSONSchema>.file("hello.yml")))
+        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string)))
         let r2 = OpenAPI.Response(description: "",
+                                  headers: ["hello": .init(header)],
                                   content: [.json: content])
         XCTAssertEqual(r2.description, "")
+        XCTAssertEqual(r2.headers?["hello"]?.a, header)
         XCTAssertEqual(r2.content, [.json: content])
     }
 }
@@ -68,6 +73,20 @@ extension ResponseTests {
 }
 """
                        )
+
+        let response2 = OpenAPI.Response(description: "", headers: [:], content: [:])
+        let encodedResponse2 = try! testStringFromEncoding(of: response2)
+
+        XCTAssertEqual(encodedResponse2,
+"""
+{
+  "description" : "",
+  "headers" : {
+
+  }
+}
+"""
+        )
     }
 
     func test_emptyDescriptionEmptyContent_decode() {
@@ -91,11 +110,26 @@ extension ResponseTests {
         let response2 = try! testDecoder.decode(OpenAPI.Response.self, from: responseData2)
 
         XCTAssertEqual(response2, OpenAPI.Response(description: "", content: [:]))
+
+        let responseData3 =
+            """
+{
+  "content": {},
+  "description" : "",
+  "headers": {}
+}
+""".data(using: .utf8)!
+        let response3 = try! testDecoder.decode(OpenAPI.Response.self, from: responseData3)
+
+        XCTAssertEqual(response3, OpenAPI.Response(description: "", headers: [:], content: [:]))
     }
 
     func test_populatedDescriptionPopulatedContent_encode() {
         let content = OpenAPI.Content(schema: .init(.string))
-        let response = OpenAPI.Response(description: "hello world", content: [.json: content])
+        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string)))
+        let response = OpenAPI.Response(description: "hello world",
+                                        headers: ["hello": .init(header)],
+                                        content: [.json: content])
 
         let encodedResponse = try! testStringFromEncoding(of: response)
 
@@ -109,7 +143,14 @@ extension ResponseTests {
       }
     }
   },
-  "description" : "hello world"
+  "description" : "hello world",
+  "headers" : {
+    "hello" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  }
 }
 """
                        )
@@ -120,14 +161,20 @@ extension ResponseTests {
 """
 {
     "description": "hello world",
-    "content": { "application/json": { "schema": { "type": "string" } } }
+    "content": { "application/json": { "schema": { "type": "string" } } },
+    "headers": {
+        "hello": { "schema" : { "type" : "string" } }
+    }
 }
 """.data(using: .utf8)!
 
         let response = try! testDecoder.decode(OpenAPI.Response.self, from: responseData)
 
         let content = OpenAPI.Content(schema: .init(.string(required: false)))
-        XCTAssertEqual(response, OpenAPI.Response(description: "hello world", content: [.json: content]))
+        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string(required: false))))
+        XCTAssertEqual(response, OpenAPI.Response(description: "hello world",
+                                                  headers: ["hello": .init(header)],
+                                                  content: [.json: content]))
     }
 }
 
