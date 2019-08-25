@@ -24,6 +24,11 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Response {
+    public typealias Map = [StatusCode: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>]
+}
+
+// MARK: - Status Code
+extension OpenAPI.Response {
     public enum StatusCode: RawRepresentable, Equatable, Hashable {
         public typealias RawValue = String
 
@@ -43,13 +48,22 @@ extension OpenAPI.Response {
         public init?(rawValue: String) {
             if let val = Int(rawValue) {
                 self = .status(code: val)
-            } else {
+
+            } else if rawValue == OpenAPI.Response.StatusCode.default.rawValue {
                 self = .default
+
+            } else {
+                return nil
             }
         }
     }
+}
 
-    public typealias Map = [StatusCode: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>]
+extension OpenAPI.Response.StatusCode: ExpressibleByIntegerLiteral {
+
+    public init(integerLiteral value: Int) {
+        self = .status(code: value)
+    }
 }
 
 // MARK: - Codable

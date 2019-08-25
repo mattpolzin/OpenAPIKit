@@ -34,7 +34,7 @@ extension OpenAPI {
                 return "When parsing Open API JSON, an expected keyword was missing. Carefully read your JSON keys to make sure all keys required by OpenAPI are spelled correctly. Underlying error: "
                     + (err ?? "") + ". PATH: \(path)"
             case .foundNeither(option1: let option1, option2: let option2, codingPath: let path, notOption1Because: let reason1, notOption2Because: let reason2):
-                return "Found neither of two expected things. Expected either \(option1) or \(option2). \n\nPATH: \(path).\n\n Could not have been \(option1) because: \(reason1).\n\n Could not have been \(option2) because: \(reason2)"
+                return "Found neither of two expected things. Expected either \(option1) or \(option2). \n\nPATH: \(path).\n\n Could not have been \(option1) because: \(String(describing:reason1)).\n\n Could not have been \(option2) because: \(String(describing:reason2))"
             case .unsatisfied(requirement: let requirement, codingPath: let path):
                 return "Unsatisfied OpenAPI requirement: \(requirement). PATH: \(path)"
             case .unknown(codingPath: let path):
