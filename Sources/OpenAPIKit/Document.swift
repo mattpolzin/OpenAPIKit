@@ -68,28 +68,43 @@ extension OpenAPI.Document {
         }
 
         public struct Contact: Codable {
-            let name: String?
-            let url: String?
-            let email: String?
+            public let name: String?
+            public let url: URL?
+            public let email: String?
+
+            public init(name: String? = nil,
+                        url: URL? = nil,
+                        email: String? = nil) {
+                self.name = name
+                self.url = url
+                self.email = email
+            }
         }
 
         public struct License: Codable {
-            let name: String
-            let url: String?
+            public let name: String
+            public let url: URL?
+
+            public init(name: String,
+                        url: URL? = nil) {
+                self.name = name
+                self.url = url
+            }
         }
     }
 }
 
 extension OpenAPI {
-    public struct Server: Codable, Equatable {
-        let url: URL
-        let description: String
-//        let variables: [String: Variable]
-    }
 
     public struct ExternalDoc: Codable, Equatable {
-        let description: String?
-        let url: URL
+        public let description: String?
+        public let url: URL
+
+        public init(description: String? = nil,
+                    url: URL) {
+            self.description = description
+            self.url = url
+        }
     }
 }
 

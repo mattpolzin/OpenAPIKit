@@ -47,12 +47,12 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 ### Server Object (`OpenAPI.Server`)
 - [x] url
 - [x] description
-- [ ] variables
+- [x] variables
 
 ### Server Variable Object
-- [ ] enum
-- [ ] default
-- [ ] description
+- [x] enum
+- [x] default
+- [x] description
 
 ### Components Object (`OpenAPI.Components`)
 - [x] schemas
