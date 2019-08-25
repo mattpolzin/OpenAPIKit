@@ -20,12 +20,12 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 ### OpenAPI Object (`OpenAPI.Document`)
 - [x] openapi (`openAPIVersion`)
 - [x] info
-- [ ] servers
+- [x] servers
 - [x] paths
 - [x] components
 - [ ] security
 - [ ] tags
-- [ ] externalDocs
+- [x] externalDocs
 
 ### Info Object (`OpenAPI.Document.Info`)
 - [x] title
@@ -44,9 +44,9 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] name
 - [x] url
 
-### Server Object
-- [ ] url
-- [ ] description
+### Server Object (`OpenAPI.Server`)
+- [x] url
+- [x] description
 - [ ] variables
 
 ### Server Variable Object
@@ -87,7 +87,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] tags
 - [x] summary
 - [x] description
-- [ ] externalDocs
+- [x] externalDocs
 - [x] operationId
 - [x] parameters
 - [x] requestBody
@@ -97,9 +97,9 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] security
 - [ ] servers
 
-### External Document Object
-- [ ] description
-- [ ] url
+### External Document Object (`OpenAPI.ExternalDoc`)
+- [x] description
+- [x] url
 
 ### Parameter Object (`OpenAPI.PathItem.Parameter`)
 - [x] name

@@ -13,7 +13,7 @@ extension OpenAPI.PathItem {
         public let tags: [String]?
         public let summary: String?
         public let description: String?
-        //            public let externalDocs:
+        public let externalDocs: OpenAPI.ExternalDoc?
         public let operationId: String?
         public let parameters: Parameter.Array
         public let requestBody: OpenAPI.Request?
@@ -26,6 +26,7 @@ extension OpenAPI.PathItem {
         public init(tags: [String]? = nil,
                     summary: String? = nil,
                     description: String? = nil,
+                    externalDocs: OpenAPI.ExternalDoc? = nil,
                     operationId: String? = nil,
                     parameters: Parameter.Array,
                     requestBody: OpenAPI.Request? = nil,
@@ -34,6 +35,7 @@ extension OpenAPI.PathItem {
             self.tags = tags
             self.summary = summary
             self.description = description
+            self.externalDocs = externalDocs
             self.operationId = operationId
             self.parameters = parameters
             self.requestBody = requestBody
@@ -50,7 +52,7 @@ extension OpenAPI.PathItem.Operation {
         case tags
         case summary
         case description
-        //        case externalDocs
+        case externalDocs
         case operationId
         case parameters
         case requestBody
@@ -76,6 +78,10 @@ extension OpenAPI.PathItem.Operation: Encodable {
 
         if description != nil {
             try container.encode(description, forKey: .description)
+        }
+
+        if externalDocs != nil {
+            try container.encode(externalDocs, forKey: .externalDocs)
         }
 
         if operationId != nil {
@@ -109,6 +115,8 @@ extension OpenAPI.PathItem.Operation: Decodable {
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
 
         operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 

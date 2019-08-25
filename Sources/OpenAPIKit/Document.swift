@@ -15,21 +15,25 @@ extension OpenAPI {
     public struct Document {
         public let openAPIVersion: Version
         public let info: Info
-        //    public let servers:
+        public let servers: [Server]
         public let paths: PathItem.Map
         public let components: OpenAPI.Components
         //    public let security:
         //    public let tags:
-        //    public let externalDocs:
+        public let externalDocs: ExternalDoc?
 
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,
+                    servers: [Server],
                     paths: PathItem.Map,
-                    components: OpenAPI.Components) {
+                    components: OpenAPI.Components,
+                    externalDocs: ExternalDoc? = nil) {
             self.openAPIVersion = openAPIVersion
             self.info = info
+            self.servers = servers
             self.paths = paths
             self.components = components
+            self.externalDocs = externalDocs
         }
     }
 }
@@ -76,6 +80,19 @@ extension OpenAPI.Document {
     }
 }
 
+extension OpenAPI {
+    public struct Server: Codable {
+        let url: URL
+        let description: String
+//        let variables: [String: Variable]
+    }
+
+    public struct ExternalDoc: Codable, Equatable {
+        let description: String?
+        let url: URL
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Document {
@@ -100,6 +117,10 @@ extension OpenAPI.Document: Encodable {
 
         try container.encode(info, forKey: .info)
 
+        if servers.count > 0 {
+            try container.encode(servers, forKey: .servers)
+        }
+
         // Hack to work around Dictionary encoding
         // itself as an array in this case:
         let stringKeyedDict = Dictionary(
@@ -109,6 +130,10 @@ extension OpenAPI.Document: Encodable {
         try container.encode(stringKeyedDict, forKey: .paths)
 
         try container.encode(components, forKey: .components)
+
+        if externalDocs != nil {
+            try container.encode(externalDocs, forKey: .externalDocs)
+        }
     }
 }
 
@@ -119,6 +144,8 @@ extension OpenAPI.Document: Decodable {
         openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
 
         info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
+
+        servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
         // hacky workaround for Dictionary bug
         let pathsDict = try container.decode([String: OpenAPI.PathItem].self, forKey: .paths)
@@ -131,5 +158,7 @@ extension OpenAPI.Document: Decodable {
                            uniquingKeysWith: { $1 })
 
         components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
+
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
     }
 }
