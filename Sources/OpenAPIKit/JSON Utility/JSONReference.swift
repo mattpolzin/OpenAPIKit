@@ -42,14 +42,37 @@ public struct RefDict<Root: ReferenceRoot, Name: RefName, RefType: Equatable & C
 /// A Reference is the combination of
 /// a path to a reference dictionary
 /// and a selector that the dictionary is keyed off of.
-public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable {
+public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable, CustomStringConvertible {
 
-    case node(InternalReference)
-    case file(FileReference)
+    case `internal`(Local)
+    case external(FileReference, Local?)
+
+    public static func external(_ ref: FileReference) -> JSONReference {
+        let parts = ref.split(separator: "#")
+
+        return .external(String(parts[0]), parts.count > 1 ? .unsafe("#" + String(parts[1])) : nil)
+    }
 
     public typealias FileReference = String
 
-    public struct InternalReference: Equatable {
+    public enum Local: Equatable, CustomStringConvertible {
+        case node(InternalReference)
+        case unsafe(String)
+
+        public var description: String {
+            switch self {
+            case .node(let reference):
+                return reference.description
+            case .unsafe(let string):
+                guard string.starts(with: "#") else {
+                    return "#/" + string
+                }
+                return string
+            }
+        }
+    }
+
+    public struct InternalReference: Equatable, CustomStringConvertible {
         public let path: PartialKeyPath<Root>
         public let selector: String
 
@@ -63,6 +86,19 @@ public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable {
                                                  selector: String) where RD.Value == RefType {
             self.path = type
             self.selector = selector
+        }
+
+        public var description: String {
+            return "#/\(Root.refName)/\(refName)/\(selector)"
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case .external(let file, let path):
+            return path.map { file + $0.description } ?? file
+        case .internal(let reference):
+            return reference.description
         }
     }
 }
@@ -79,16 +115,7 @@ extension JSONReference: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        let referenceString: String = {
-            switch self {
-            case .file(let reference):
-                return reference
-            case .node(let reference):
-                return "#/\(Root.refName)/\(reference.refName)/\(reference.selector)"
-            }
-        }()
-
-        try container.encode(referenceString, forKey: .ref)
+        try container.encode(description, forKey: .ref)
     }
 }
 
@@ -99,10 +126,10 @@ extension JSONReference: Decodable {
         let referenceString = try container.decode(String.self, forKey: .ref)
 
         if referenceString.first == "#" {
-            // TODO: parse local ref
-            fatalError("not implemented")
+            // TODO: try to parse ref to components
+            self = .internal(.unsafe(referenceString))
         } else {
-            self = .file(referenceString)
+            self = .external(referenceString)
         }
     }
 }

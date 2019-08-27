@@ -37,7 +37,7 @@ final class RequestTests: XCTestCase {
             ])
 
         let _ = OpenAPI.Request(content: [
-            .json: .init(schema: .init(.file("hello.json#/world")))
+            .json: .init(schema: .init(.external("hello.json#/world")))
             ])
     }
 }
@@ -62,7 +62,7 @@ extension RequestTests {
 
     func test_onlyReferenceContent_encode() {
         let request = OpenAPI.Request(content: [
-            .json: .init(schema: .init(.file("hello.json#/world")))
+            .json: .init(schema: .init(.external("hello.json#/world")))
             ])
         let encodedString = try! testStringFromEncoding(of: request)
 
@@ -86,7 +86,7 @@ extension RequestTests {
         let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [
-            .json : .init(schema: .init(.file("hello.json#/world")))
+            .json : .init(schema: .init(.external("hello.json#/world")))
             ]))
     }
 

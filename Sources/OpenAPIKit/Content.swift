@@ -38,13 +38,13 @@ extension OpenAPI.Content {
 
 extension OpenAPI.Content {
     public struct Encoding: Codable, Equatable {
-        public let contentType: String?
+        public let contentType: OpenAPI.ContentType?
         public let headers: OpenAPI.Header.Map?
 //        public let style: String?
 //        public let explode: Bool (defaults for this need to be tied to style making style a good candidate for abstraction)
         public let allowReserved: Bool
 
-        public init(contentType: String? = nil,
+        public init(contentType: OpenAPI.ContentType? = nil,
                     headers: OpenAPI.Header.Map? = nil,
                     allowReserved: Bool = false) {
             self.contentType = contentType

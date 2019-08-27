@@ -32,7 +32,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         // JSONTypeFormat
         XCTAssertEqual(boolean.jsonTypeFormat, .boolean(.unspecified))
@@ -85,7 +85,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         XCTAssertTrue(boolean.required)
         XCTAssertTrue(object.required)
@@ -143,7 +143,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         XCTAssertFalse(boolean.nullable)
         XCTAssertFalse(object.nullable)
@@ -170,7 +170,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         XCTAssertEqual(boolean.title, "hello")
         XCTAssertEqual(object.title, "hello")
@@ -198,7 +198,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         XCTAssertEqual(boolean.description, "hello")
         XCTAssertEqual(object.description, "hello")
@@ -235,7 +235,7 @@ final class SchemaObjectTests: XCTestCase {
             .optionalSchemaObject()
         let not = JSONSchema.not(boolean)
             .optionalSchemaObject()
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
             .optionalSchemaObject()
 
         XCTAssertFalse(boolean.required)
@@ -272,7 +272,7 @@ final class SchemaObjectTests: XCTestCase {
             .requiredSchemaObject()
         let not = JSONSchema.not(boolean)
             .requiredSchemaObject()
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
             .requiredSchemaObject()
 
         XCTAssertTrue(boolean.required)
@@ -309,7 +309,7 @@ final class SchemaObjectTests: XCTestCase {
             .nullableSchemaObject()
         let not = JSONSchema.not(boolean)
             .nullableSchemaObject()
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
             .nullableSchemaObject()
 
         XCTAssertTrue(boolean.nullable)
@@ -365,7 +365,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(allowedValues: ["hello"])
         let not = JSONSchema.not(boolean)
             .with(allowedValues: ["hello"])
-        let reference = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
             .with(allowedValues: ["hello"])
 
         XCTAssertEqual(boolean.allowedValues, [false])
@@ -392,7 +392,7 @@ final class SchemaObjectTests: XCTestCase {
         let one = JSONSchema.one(of: [])
         let any = JSONSchema.any(of: [])
         let not = JSONSchema.not(.string)
-        let ref = JSONSchema.reference(.file("hello.yml"))
+        let ref = JSONSchema.reference(.external("hello.yml"))
 
         XCTAssertEqual(object.example, "{\n\n}")
 
@@ -430,7 +430,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(example: ["hello"], using: testEncoder))
         XCTAssertThrowsError(try JSONSchema.not(object)
             .with(example: ["hello"], using: testEncoder))
-        XCTAssertThrowsError(try JSONSchema.reference(.file("hello/world.json#/hello"))
+        XCTAssertThrowsError(try JSONSchema.reference(.external("hello/world.json#/hello"))
             .with(example: ["hello"], using: testEncoder))
 
         XCTAssertEqual(object.example, "{\n\n}")
@@ -3041,7 +3041,7 @@ extension SchemaObjectTests {
     }
 
     func test_encodeFileReference() {
-        let fileRef = JSONSchema.reference(.file("hello/world.json#/hello"))
+        let fileRef = JSONSchema.reference(.external("hello/world.json#/hello"))
 
         testEncodingPropertyLines(entity: fileRef, propertyLines: [
             "\"$ref\" : \"hello\\/world.json#\\/hello\""
@@ -3053,13 +3053,13 @@ extension SchemaObjectTests {
 
         let fileRef = try! testDecoder.decode(JSONSchema.self, from: fileRefData)
 
-        XCTAssertEqual(fileRef, JSONSchema.reference(.file("./other_file.json#/hello")))
+        XCTAssertEqual(fileRef, JSONSchema.reference(.external("./other_file.json#/hello")))
     }
 
     func test_encodeNodeReference() {
 //        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
 //                                            parameters: [:])
-        let nodeRef = JSONSchema.reference(.node(.init(type: \.schemas, selector: "requiredBool")))
+        let nodeRef = JSONSchema.reference(.internal(.node(.init(type: \.schemas, selector: "requiredBool"))))
 
         testEncodingPropertyLines(entity: nodeRef, propertyLines: [
             "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\""
