@@ -46,6 +46,23 @@ public enum JSONTypeFormat: Equatable {
             return .string
         }
     }
+
+    public var swiftType: Any.Type {
+        switch self {
+        case .boolean(let format):
+            return type(of: format).SwiftType.self
+        case .object(let format):
+            return type(of: format).SwiftType.self
+        case .array(let format):
+            return type(of: format).SwiftType.self
+        case .number(let format):
+            return type(of: format).SwiftType.self
+        case .integer(let format):
+            return type(of: format).SwiftType.self
+        case .string(let format):
+            return type(of: format).SwiftType.self
+        }
+    }
 }
 
 // MARK: Formats

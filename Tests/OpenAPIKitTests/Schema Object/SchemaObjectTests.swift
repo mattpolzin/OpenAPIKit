@@ -72,6 +72,23 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(dateString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(dateTimeString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(passwordString.jsonTypeFormat?.jsonType, .string)
+
+        // SwiftType
+        XCTAssert(boolean.jsonTypeFormat?.swiftType == Bool.self)
+        XCTAssert(object.jsonTypeFormat?.swiftType == AnyCodable.self)
+        XCTAssert(array.jsonTypeFormat?.swiftType == [AnyCodable].self)
+        XCTAssert(number.jsonTypeFormat?.swiftType == Double.self)
+        XCTAssert(floatNumber.jsonTypeFormat?.swiftType == Double.self)
+        XCTAssert(doubleNumber.jsonTypeFormat?.swiftType == Double.self)
+        XCTAssert(integer.jsonTypeFormat?.swiftType == Int.self)
+        XCTAssert(integer32.jsonTypeFormat?.swiftType == Int.self)
+        XCTAssert(integer64.jsonTypeFormat?.swiftType == Int.self)
+        XCTAssert(string.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(byteString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(binaryString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(dateString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(dateTimeString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(passwordString.jsonTypeFormat?.swiftType == String.self)
     }
 
     func test_required() {
