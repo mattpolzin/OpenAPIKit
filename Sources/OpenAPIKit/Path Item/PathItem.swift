@@ -9,7 +9,7 @@ import Foundation
 import Poly
 
 extension OpenAPI {
-    public enum HttpVerb: String {
+    public enum HttpVerb: String, CaseIterable {
         case get = "GET"
         case post = "POST"
         case patch = "PATCH"
