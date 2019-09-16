@@ -9,6 +9,18 @@ import Foundation
 import Poly
 
 extension OpenAPI {
+    public enum HttpVerb: String {
+        case get = "GET"
+        case post = "POST"
+        case patch = "PATCH"
+        case put = "PUT"
+        case delete = "DELETE"
+        case head = "HEAD"
+        case options = "OPTIONS"
+    }
+}
+
+extension OpenAPI {
     public struct PathComponents: RawRepresentable, Equatable, Hashable {
         public let components: [String]
 
@@ -80,6 +92,27 @@ extension OpenAPI.PathItem {
             self.head = head
             self.patch = patch
             self.trace = trace
+        }
+    }
+}
+
+extension OpenAPI.PathItem.Properties {
+    public func `for`(_ verb: OpenAPI.HttpVerb) -> Operation? {
+        switch verb {
+        case .delete:
+            return self.delete
+        case .get:
+            return self.get
+        case .head:
+            return self.head
+        case .options:
+            return self.options
+        case .patch:
+            return self.patch
+        case .post:
+            return self.post
+        case .put:
+            return self.put
         }
     }
 }
