@@ -8,6 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
+import AnyCodable
 
 final class ContentTests: XCTestCase {
     func test_init() {
@@ -113,6 +114,86 @@ extension ContentTests {
         let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false))))
+    }
+
+    func test_exampleAndSchemaContent_encode() {
+        // TODO: write test
+    }
+
+    func test_exampleAndSchemaContent_decode() {
+        // TODO: write test
+    }
+
+    func test_encodingAndSchema_encode() {
+        // TODO: write test
+    }
+
+    func test_encodingAndSchema_decode() {
+        // TODO: write test
+    }
+
+    func test_vendorExtensions_encode() {
+        let content = OpenAPI.Content(schema: .init(.string),
+                                      vendorExtensions: [ "x-hello": [ "world": 123 ] ])
+
+        let encodedContent = try! testStringFromEncoding(of: content)
+
+        XCTAssertEqual(encodedContent,
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : {
+    "world" : 123
+  }
+}
+"""
+        )
+    }
+
+    func test_vendorExtensions_encode_fixKey() {
+        let content = OpenAPI.Content(schema: .init(.string),
+                                      vendorExtensions: [ "hello": [ "world": 123 ] ])
+
+        let encodedContent = try! testStringFromEncoding(of: content)
+
+        XCTAssertEqual(encodedContent,
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : {
+    "world" : 123
+  }
+}
+"""
+        )
+    }
+
+    func test_vendorExtensions_decode() {
+        let contentData =
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : {
+    "world" : 123
+  }
+}
+""".data(using: .utf8)!
+        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+
+        let contentToMatch = OpenAPI.Content(schema: .init(.string(required: false)),
+                                             vendorExtensions: ["x-hello": AnyCodable(["world": 123])])
+
+        // needs to be broken down due to difficulties with equality comparing of AnyCodable
+        // created from code with a semantically equivalent AnyCodable from Data.
+        XCTAssertEqual(content.schema, contentToMatch.schema)
+        XCTAssertEqual(content.vendorExtensions.keys, contentToMatch.vendorExtensions.keys)
+        XCTAssertEqual(content.vendorExtensions["x-hello"]?.value as? [String: Int], contentToMatch.vendorExtensions["x-hello"]?.value as? [String: Int]?)
     }
 }
 

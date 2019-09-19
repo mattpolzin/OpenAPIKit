@@ -135,6 +135,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] example
 - [ ] examples
 - [x] encoding
+- [x] specification extensions (`vendorExtensions`)
 
 ### Encoding Object (`OpenAPI.Content.Encoding`)
 - [x] contentType
