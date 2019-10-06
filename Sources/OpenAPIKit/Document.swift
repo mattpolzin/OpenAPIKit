@@ -19,7 +19,7 @@ extension OpenAPI {
         public let paths: PathItem.Map
         public let components: OpenAPI.Components
         //    public let security:
-        //    public let tags:
+        public let tags: [Tag]?
         public let externalDocs: ExternalDoc?
 
         public init(openAPIVersion: Version = .v3_0_0,
@@ -27,12 +27,14 @@ extension OpenAPI {
                     servers: [Server],
                     paths: PathItem.Map,
                     components: OpenAPI.Components,
+                    tags: [Tag]? = nil,
                     externalDocs: ExternalDoc? = nil) {
             self.openAPIVersion = openAPIVersion
             self.info = info
             self.servers = servers
             self.paths = paths
             self.components = components
+            self.tags = tags
             self.externalDocs = externalDocs
         }
     }
@@ -146,6 +148,10 @@ extension OpenAPI.Document: Encodable {
 
         try container.encode(components, forKey: .components)
 
+        if let encodableTags = tags {
+            try container.encode(encodableTags, forKey: .tags)
+        }
+
         if externalDocs != nil {
             try container.encode(externalDocs, forKey: .externalDocs)
         }
@@ -173,6 +179,8 @@ extension OpenAPI.Document: Decodable {
                            uniquingKeysWith: { $1 })
 
         components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
+
+        tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
 
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
     }

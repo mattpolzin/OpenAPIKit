@@ -24,7 +24,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] paths
 - [x] components
 - [ ] security
-- [ ] tags
+- [x] tags
 - [x] externalDocs
 
 ### Info Object (`OpenAPI.Document.Info`)
@@ -184,9 +184,9 @@ This library *is* opinionated about a few defaults when you use the Swift types,
     - [ ] examples
 
 ### Tag Object
-- [ ] name
-- [ ] description
-- [ ] externalDocs
+- [x] name
+- [x] description
+- [x] externalDocs
 
 ### Reference Object (`JSONReference`)
 - [x] $ref
