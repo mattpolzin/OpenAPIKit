@@ -96,13 +96,19 @@ extension OpenAPI.Content: Decodable {
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
         encoding = try container.decodeIfPresent([String: Encoding].self, forKey: .encoding)
 
-        let decodedAny = (try AnyCodable(from: decoder)).value as? [String: Any]
+        guard let decodedAny = (try AnyCodable(from: decoder)).value as? [String: Any] else {
+            throw ContentDecodingError.foundNonStringKeys
+        }
 
-        vendorExtensions = decodedAny?.filter {
-            guard let key = CodingKeys(stringValue: $0.key) else { return false }
+        vendorExtensions = decodedAny.filter {
+            let key = CodingKeys(stringValue: $0.key)
 
             return !CodingKeys.allBuiltinCases.contains(key)
-        }.mapValues(AnyCodable.init) ?? [:]
+        }.mapValues(AnyCodable.init)
+    }
+
+    public enum ContentDecodingError: Swift.Error {
+        case foundNonStringKeys
     }
 }
 
@@ -113,7 +119,7 @@ extension OpenAPI.Content {
         case encoding
         case extended(String)
 
-        init?(stringValue: String) {
+        init(stringValue: String) {
             switch stringValue {
             case "schema":
                 self = .schema

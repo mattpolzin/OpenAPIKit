@@ -70,7 +70,7 @@ extension ContentTests {
   }
 }
 """
-                       )
+        )
     }
 
     func test_referenceContent_decode() {
@@ -117,19 +117,100 @@ extension ContentTests {
     }
 
     func test_exampleAndSchemaContent_encode() {
-        // TODO: write test
+        let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
+                                      example: [ "hello": "world" ])
+        let encodedContent = try! testStringFromEncoding(of: content)
+
+        XCTAssertEqual(encodedContent,
+"""
+{
+  "example" : {
+    "hello" : "world"
+  },
+  "schema" : {
+    "properties" : {
+      "hello" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "hello"
+    ],
+    "type" : "object"
+  }
+}
+"""
+        )
     }
 
     func test_exampleAndSchemaContent_decode() {
-        // TODO: write test
+        let contentData =
+"""
+{
+  "example" : {
+    "hello" : "world"
+  },
+  "schema" : {
+    "properties" : {
+      "hello" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "hello"
+    ],
+    "type" : "object"
+  }
+}
+""".data(using: .utf8)!
+        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
+
+        XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_encodingAndSchema_encode() {
-        // TODO: write test
+        let content = OpenAPI.Content(schema: .init(.string),
+                                      encoding: ["json": .init(contentType: .json)])
+        let encodedContent = try! testStringFromEncoding(of: content)
+
+        XCTAssertEqual(encodedContent,
+"""
+{
+  "encoding" : {
+    "json" : {
+      "allowReserved" : false,
+      "contentType" : "application\\/json"
+    }
+  },
+  "schema" : {
+    "type" : "string"
+  }
+}
+"""
+        )
     }
 
     func test_encodingAndSchema_decode() {
-        // TODO: write test
+        let contentData =
+"""
+{
+  "encoding" : {
+    "json" : {
+      "allowReserved" : false,
+      "contentType" : "application\\/json"
+    }
+  },
+  "schema" : {
+    "type" : "string"
+  }
+}
+""".data(using: .utf8)!
+        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false)),
+                                                encoding: ["json": .init(contentType: .json)]))
     }
 
     func test_vendorExtensions_encode() {
@@ -194,6 +275,22 @@ extension ContentTests {
         XCTAssertEqual(content.schema, contentToMatch.schema)
         XCTAssertEqual(content.vendorExtensions.keys, contentToMatch.vendorExtensions.keys)
         XCTAssertEqual(content.vendorExtensions["x-hello"]?.value as? [String: Int], contentToMatch.vendorExtensions["x-hello"]?.value as? [String: Int]?)
+    }
+
+    func test_nonStringKeyNonesenseDecodeFailure() {
+        let contentData =
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : {
+    "world" : 123
+  },
+  10: "hello"
+}
+""".data(using: .utf8)!
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Content.self, from: contentData))
     }
 }
 
