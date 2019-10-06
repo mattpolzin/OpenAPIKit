@@ -23,19 +23,52 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public let vendorExtensions: [String: AnyCodable]
+
+        public init(summary: String? = nil,
+                    description: String? = nil,
+                    value: Either<URL, AnyCodable>,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.summary = summary
+            self.description = description
+            self.value = value
+            self.vendorExtensions = vendorExtensions
+        }
     }
 }
 
 // MARK: - Codable
 extension OpenAPI.Example: Encodable {
     public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
 
+        if summary != nil {
+            try container.encode(summary, forKey: .summary)
+        }
+
+        if description != nil {
+            try container.encode(description, forKey: .description)
+        }
+
+        switch value {
+        case .a(let url):
+            try container.encode(url, forKey: .externalValue)
+        case .b(let example):
+            try container.encode(example, forKey: .value)
+        }
+
+        for (key, value) in vendorExtensions {
+            try container.encode(value, forKey: .extended(key))
+        }
     }
 }
 
 extension OpenAPI.Example: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        guard !(container.contains(.externalValue) && container.contains(.value)) else {
+            throw Error.foundBothInternalAndExternalExamples
+        }
 
         let externalValue = try container.decodeIfPresent(URL.self, forKey: .externalValue)
 
@@ -47,6 +80,10 @@ extension OpenAPI.Example: Decodable {
             ?? .init( container.decode(AnyCodable.self, forKey: .value))
 
         vendorExtensions = try Self.extensions(from: decoder)
+    }
+
+    public enum Error: Swift.Error {
+        case foundBothInternalAndExternalExamples
     }
 }
 
