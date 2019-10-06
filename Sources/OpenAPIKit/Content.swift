@@ -16,7 +16,7 @@ extension OpenAPI {
         case form = "application/x-www-form-urlencoded"
     }
 
-    public struct Content: Equatable {
+    public struct Content: Equatable, VendorExtendable {
         public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         public let example: AnyCodable?
         //        public let examples:
@@ -96,30 +96,26 @@ extension OpenAPI.Content: Decodable {
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
         encoding = try container.decodeIfPresent([String: Encoding].self, forKey: .encoding)
 
-        guard let decodedAny = (try AnyCodable(from: decoder)).value as? [String: Any] else {
-            throw ContentDecodingError.foundNonStringKeys
-        }
-
-        vendorExtensions = decodedAny.filter {
-            let key = CodingKeys(stringValue: $0.key)
-
-            return !CodingKeys.allBuiltinCases.contains(key)
-        }.mapValues(AnyCodable.init)
-    }
-
-    public enum ContentDecodingError: Swift.Error {
-        case foundNonStringKeys
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
 extension OpenAPI.Content {
-    private enum CodingKeys: CodingKey, Equatable {
+    enum CodingKeys: ExtendableCodingKey {
         case schema
         case example
         case encoding
         case extended(String)
 
-        init(stringValue: String) {
+        static var allBuiltinKeys: [CodingKeys] {
+            return [.schema, .example, .encoding]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
             switch stringValue {
             case "schema":
                 self = .schema
@@ -151,10 +147,6 @@ extension OpenAPI.Content {
 
         var intValue: Int? {
             return nil
-        }
-
-        static var allBuiltinCases: [CodingKeys] {
-            return [.schema, .example, .encoding]
         }
     }
 }
