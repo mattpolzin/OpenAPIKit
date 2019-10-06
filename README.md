@@ -212,8 +212,8 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] deprecated
 
 ### Discriminator Object
-- [ ] propertyName
-- [ ] mapping
+- [x] propertyName
+- [x] mapping
 
 ### XML Object
 - [ ] name

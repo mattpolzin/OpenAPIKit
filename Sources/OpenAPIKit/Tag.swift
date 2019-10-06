@@ -12,5 +12,13 @@ extension OpenAPI {
         public let name: String
         public let description: String?
         public let externalDocs: ExternalDoc?
+
+        public init(name: String,
+                    description: String? = nil,
+                    externalDocs: ExternalDoc? = nil) {
+            self.name = name
+            self.description = description
+            self.externalDocs = externalDocs
+        }
     }
 }
