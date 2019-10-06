@@ -16,11 +16,22 @@ final class ContentTests: XCTestCase {
 
         let _ = OpenAPI.Content(schema: .init(.string))
 
-        let _ = OpenAPI.Content(schema: .init(.string),
-                                example: "hello",
-                                encoding: [
-                                    "json": .init()
+        let withExample = OpenAPI.Content(schema: .init(.string),
+                                          example: "hello",
+                                          encoding: [
+                                            "json": .init()
             ])
+        XCTAssertNotNil(withExample.example)
+        XCTAssertNil(withExample.examples)
+
+        let withExamples = OpenAPI.Content(schema: .init(.string),
+                                           examples: [
+                                            "hello": .a(.init(value: .init("world"))),
+                                            "bbbb": .a(.init(value: .b("pick me"))),
+                                            "aaaa": .a(.init(value: .a(URL(string: "http://google.com")!)))
+        ])
+        XCTAssertNotNil(withExamples.examples)
+        XCTAssertEqual(withExamples.example?.value as? String, "pick me")
 
         let _ = OpenAPI.Content(schema: .init(.string),
                                 example: nil,
@@ -36,8 +47,13 @@ final class ContentTests: XCTestCase {
     func test_contentMap() {
         let _: OpenAPI.Content.Map = [
             .json: .init(schema: .init(.string)),
+            .jsonapi: .init(schema: .init(.string)),
             .xml: .init(schema: .init(.external("hello.json#/world"))),
-            .form: .init(schema: .init(.object(properties: ["hello": .string])))
+            .form: .init(schema: .init(.object(properties: ["hello": .string]))),
+            .rar: .init(schema: .init(.integer)),
+            .tar: .init(schema: .init(.boolean)),
+            .txt: .init(schema: .init(.number)),
+            .zip: .init(schema: .init(.string))
         ]
     }
 
@@ -168,6 +184,99 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
+    }
+
+    func test_examplesAndSchemaContent_encode() {
+        let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
+                                      examples: ["hello": .a(OpenAPI.Example(value: .init([ "hello": "world" ])))])
+        let encodedContent = try! testStringFromEncoding(of: content)
+
+        XCTAssertEqual(encodedContent,
+"""
+{
+  "examples" : {
+    "hello" : {
+      "value" : {
+        "hello" : "world"
+      }
+    }
+  },
+  "schema" : {
+    "properties" : {
+      "hello" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "hello"
+    ],
+    "type" : "object"
+  }
+}
+"""
+        )
+    }
+
+    func test_examplesAndSchemaContent_decode() {
+        let contentData =
+"""
+{
+  "examples" : {
+    "hello": {
+        "value": {
+            "hello" : "world"
+        }
+    }
+  },
+  "schema" : {
+    "properties" : {
+      "hello" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "hello"
+    ],
+    "type" : "object"
+  }
+}
+""".data(using: .utf8)!
+        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
+
+        XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.a?.value.b?.value as? [String: String], [ "hello": "world" ])
+    }
+
+    func test_decodeFailureForBothExampleAndExamples() {
+        let contentData =
+"""
+{
+  "examples" : {
+    "hello": {
+        "value": {
+            "hello" : "world"
+        }
+    }
+  },
+  "example" : {
+    "hello" : "world"
+  },
+  "schema" : {
+    "properties" : {
+      "hello" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "hello"
+    ],
+    "type" : "object"
+  }
+}
+""".data(using: .utf8)!
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Content.self, from: contentData))
     }
 
     func test_encodingAndSchema_encode() {

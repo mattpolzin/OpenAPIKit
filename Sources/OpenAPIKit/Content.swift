@@ -95,7 +95,8 @@ extension OpenAPI.Content {
     private static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
             .sorted { $0.key < $1.key }
-            .first?.value.a?.value.b
+            .compactMap { $0.value.a?.value.b }
+            .first
     }
 }
 
