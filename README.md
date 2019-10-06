@@ -157,10 +157,11 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] *{expression}*
 
 ### Example Object
-- [ ] summary
-- [ ] description
-- [ ] value
-- [ ] externalValue
+- [x] summary
+- [x] description
+- [x] value
+- [x] externalValue (part of `value`)
+- [x] specification extensions (`vendorExtensions`)
 
 ### Link Object
 - [ ] operationRef
