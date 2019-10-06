@@ -58,7 +58,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] schemas
 - [ ] responses
 - [x] parameters
-- [ ] examples
+- [x] examples
 - [ ] requestBodies
 - [x] headers
 - [ ] securitySchemes
@@ -133,7 +133,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 ### Media Type Object (`OpenAPI.Content`)
 - [x] schema
 - [x] example
-- [ ] examples
+- [x] examples
 - [x] encoding
 - [x] specification extensions (`vendorExtensions`)
 

@@ -35,7 +35,7 @@ extension OpenAPI {
     public struct Content: Equatable, VendorExtendable {
         public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         public let example: AnyCodable?
-        //        public let examples:
+        public let examples: Example.Map?
         public let encoding: [String: Encoding]?
 
         /// Dictionary of vendor extensions.
@@ -51,6 +51,18 @@ extension OpenAPI {
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = schema
             self.example = example
+            self.examples = nil
+            self.encoding = encoding
+            self.vendorExtensions = vendorExtensions
+        }
+
+        public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
+                    examples: Example.Map?,
+                    encoding: [String: Encoding]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.schema = schema
+            self.examples = examples
+            self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding
             self.vendorExtensions = vendorExtensions
         }
@@ -79,6 +91,14 @@ extension OpenAPI.Content {
     }
 }
 
+extension OpenAPI.Content {
+    private static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
+        return exampleDict
+            .sorted { $0.key < $1.key }
+            .first?.value.a?.value.b
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Content: Encodable {
@@ -87,7 +107,11 @@ extension OpenAPI.Content: Encodable {
 
         try container.encode(schema, forKey: .schema)
 
-        if example != nil {
+        // only encode `examples` if non-nil,
+        // otherwise encode `example` if non-nil
+        if examples != nil {
+            try container.encode(examples, forKey: .examples)
+        } else if example != nil {
             try container.encode(example, forKey: .example)
         }
 
@@ -108,11 +132,27 @@ extension OpenAPI.Content: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
+        guard !(container.contains(.examples) && container.contains(.example)) else {
+            throw Error.foundBothExampleAndExamples
+        }
+
         schema = try container.decode(Either<JSONReference<OpenAPI.Components, JSONSchema>, JSONSchema>.self, forKey: .schema)
-        example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
         encoding = try container.decodeIfPresent([String: Encoding].self, forKey: .encoding)
 
+        if container.contains(.example) {
+            example = try container.decode(AnyCodable.self, forKey: .example)
+            examples = nil
+        } else {
+            let examplesMap = try container.decodeIfPresent(OpenAPI.Example.Map.self, forKey: .examples)
+            examples = examplesMap
+            example = examplesMap.flatMap(Self.firstExample(from:))
+        }
+
         vendorExtensions = try Self.extensions(from: decoder)
+    }
+
+    public enum Error: Swift.Error {
+        case foundBothExampleAndExamples
     }
 }
 
@@ -120,11 +160,12 @@ extension OpenAPI.Content {
     enum CodingKeys: ExtendableCodingKey {
         case schema
         case example
+        case examples // `example` and `examples` are mutually exclusive
         case encoding
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
-            return [.schema, .example, .encoding]
+            return [.schema, .example, .examples, .encoding]
         }
 
         static func extendedKey(for value: String) -> CodingKeys {
@@ -137,6 +178,8 @@ extension OpenAPI.Content {
                 self = .schema
             case "example":
                 self = .example
+            case "examples":
+                self = .examples
             case "encoding":
                 self = .encoding
             default:
@@ -154,6 +197,8 @@ extension OpenAPI.Content {
                 return "schema"
             case .example:
                 return "example"
+            case .examples:
+                return "examples"
             case .encoding:
                 return "encoding"
             case .extended(let key):

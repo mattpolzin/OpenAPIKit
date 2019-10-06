@@ -36,6 +36,10 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.Example {
+    public typealias Map = [String: Either<OpenAPI.Example, JSONReference<OpenAPI.Components, OpenAPI.Example>>]
+}
+
 // MARK: - Codable
 extension OpenAPI.Example: Encodable {
     public func encode(to encoder: Encoder) throws {
