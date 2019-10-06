@@ -12,8 +12,24 @@ import AnyCodable
 extension OpenAPI {
     public enum ContentType: String, Codable, Equatable, Hashable {
         case json = "application/json"
+
+        /// JSON:API
+        case jsonapi = "application/vnd.api+json"
+
         case xml = "application/xml"
+
         case form = "application/x-www-form-urlencoded"
+
+        /// RAR archive
+        case rar = "application/x-rar-compressed"
+
+        /// Tape Archive (TAR)
+        case tar = "application/x-tar"
+
+        case txt = "text/plain"
+
+        /// ZIP archive
+        case zip = "application/zip"
     }
 
     public struct Content: Equatable, VendorExtendable {
