@@ -61,6 +61,29 @@ extension OpenAPI.PathItem.Parameter {
         public static var header: Location { return .header(required: false) }
 
         public static var cookie: Location { return .cookie(required: false) }
+
+        public var isQuery: Bool {
+            guard case .query = self else {
+                return false
+            }
+            return true
+        }
+
+        public var isHeader: Bool {
+            guard case .header = self else {
+                return false
+            }
+            return true
+        }
+
+        public var isPath: Bool { return self == .path }
+
+        public var isCookie: Bool {
+            guard case .cookie = self else {
+                return false
+            }
+            return true
+        }
     }
 }
 
