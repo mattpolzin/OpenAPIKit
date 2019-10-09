@@ -31,6 +31,17 @@ extension OpenAPI.PathItem {
             self.description = description
             self.deprecated = deprecated
         }
+
+        public var required: Bool {
+            switch parameterLocation {
+            case .query(required: let required, allowEmptyValue: _),
+                 .header(required: let required),
+                 .cookie(required: let required):
+                return required
+            case .path:
+                return true
+            }
+        }
     }
 }
 
