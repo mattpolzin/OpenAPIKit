@@ -118,7 +118,7 @@ extension OpenAPI.Example {
             case "externalValue":
                 self = .externalValue
             default:
-                self = .extended(stringValue)
+                self = .extendedKey(for: stringValue)
             }
         }
 

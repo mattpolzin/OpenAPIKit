@@ -46,7 +46,9 @@ extension OpenAPI.Document {
         case v3_0_1 = "3.0.1"
         case v3_0_2 = "3.0.2"
     }
+}
 
+extension OpenAPI.Document {
     public struct Info: Codable {
         public let title: String
         public let description: String?
@@ -97,7 +99,6 @@ extension OpenAPI.Document {
 }
 
 extension OpenAPI {
-
     public struct ExternalDoc: Codable, Equatable {
         public let description: String?
         public let url: URL
@@ -126,7 +127,6 @@ extension OpenAPI.Document {
 }
 
 extension OpenAPI.Document: Encodable {
-
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
