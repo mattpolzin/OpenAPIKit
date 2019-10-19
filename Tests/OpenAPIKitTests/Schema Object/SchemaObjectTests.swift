@@ -1830,11 +1830,15 @@ extension SchemaObjectTests {
     }
 
     func test_encodeArrayWithAdditionalItemsDefinition() {
-        // TODO: implement feature, add test
+        // NOTE: NOT SUPPORTED BY OPENAPI SPEC
+
+        // UNIMPLEMENTED
     }
 
     func test_decodeArrayWithAdditionalItemsDefinition() {
-        // TODO: implement feature, add test
+        // NOTE: NOT SUPPORTED BY OPENAPI SPEC
+
+        // UNIMPLEMENTED
     }
 
     func test_encodeArrayWithUniqueItems() {
