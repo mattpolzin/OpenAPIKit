@@ -15,29 +15,35 @@ extension OpenAPI {
         public static var refName: String { return "components" }
 
         public let schemas: SchemasDict
-        //    public let responses:
+        public let responses: ResponsesDict
         public let parameters: ParametersDict
         public let examples: ExamplesDict
-        //    public let requestBodies:
+        public let requestBodies: RequestBodiesDict
         public let headers: HeadersDict
         //    public let securitySchemas:
         //    public let links:
         //    public let callbacks:
 
         public init(schemas: [String: SchemasDict.Value],
+                    responses: [String: ResponsesDict.Value],
                     parameters: [String: ParametersDict.Value],
                     examples: [String: ExamplesDict.Value],
+                    requestBodies: [String: RequestBodiesDict.Value],
                     headers: [String: HeadersDict.Value]) {
             self.schemas = SchemasDict(schemas)
+            self.responses = ResponsesDict(responses)
             self.parameters = ParametersDict(parameters)
             self.examples = ExamplesDict(examples)
+            self.requestBodies = RequestBodiesDict(requestBodies)
             self.headers = HeadersDict(headers)
         }
 
         public static var noComponents: Components {
             return .init(schemas: [:],
+                         responses: [:],
                          parameters: [:],
                          examples: [:],
+                         requestBodies: [:],
                          headers: [:])
         }
 
@@ -46,6 +52,12 @@ extension OpenAPI {
         }
 
         public typealias SchemasDict = RefDict<Components, SchemasName, JSONSchema>
+
+        public enum ResponsesName: RefName {
+            public static var refName: String { return "responses" }
+        }
+
+        public typealias ResponsesDict = RefDict<Components, ResponsesName, JSONSchema>
 
         public enum ParametersName: RefName {
             public static var refName: String { return "parameters" }
@@ -58,6 +70,12 @@ extension OpenAPI {
         }
 
         public typealias ExamplesDict = RefDict<Components, ExamplesName, OpenAPI.Example>
+
+        public enum RequestBodiesName: RefName {
+            public static var refName: String { return "requestBodies" }
+        }
+
+        public typealias RequestBodiesDict = RefDict<Components, RequestBodiesName, OpenAPI.Example>
 
         public enum HeadersName: RefName {
             public static var refName: String { return "headers" }
