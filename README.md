@@ -207,7 +207,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] readOnly
 - [ ] writeOnly
 - [ ] xml
-- [ ] externalDocs
+- [x] externalDocs
 - [x] example
 - [ ] deprecated
 

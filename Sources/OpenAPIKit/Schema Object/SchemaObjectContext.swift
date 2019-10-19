@@ -16,6 +16,7 @@ public protocol JSONSchemaContext {
     var nullable: Bool { get }
     var title: String? { get }
     var description: String? { get }
+    var externalDocs: OpenAPI.ExternalDoc? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: String? { get }
 }
@@ -28,6 +29,7 @@ extension JSONSchema {
 
         public let title: String?
         public let description: String?
+        public let externalDocs: OpenAPI.ExternalDoc?
 
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
@@ -57,14 +59,15 @@ extension JSONSchema {
                                   nullable: Bool = false,
                                   title: String? = nil,
                                   description: String? = nil,
+                                  externalDocs: OpenAPI.ExternalDoc? = nil,
                                   allowedValues: [AnyCodable]? = nil,
                                   example: (codable: T, encoder: JSONEncoder)) {
             self.format = format
             self.required = required
             self.nullable = nullable
-//            self.constantValue = constantValue
             self.title = title
             self.description = description
+            self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.example = (try? example.encoder.encode(example.codable))
                 .flatMap { String(data: $0, encoding: .utf8) }
@@ -74,21 +77,39 @@ extension JSONSchema {
         public init(format: Format = .unspecified,
                     required: Bool = true,
                     nullable: Bool = false,
-//                    constantValue: Format.SwiftType? = nil,
                     title: String? = nil,
                     description: String? = nil,
+                    externalDocs: OpenAPI.ExternalDoc? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
             self.required = required
             self.nullable = nullable
-//            self.constantValue = constantValue
             self.title = title
             self.description = description
+            self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.example = example
                 .flatMap { try? $0.encoder.encode($0.codable)}
                 .flatMap { String(data: $0, encoding: .utf8) }
+        }
+
+        private init(format: Format = .unspecified,
+                     required: Bool = true,
+                     nullable: Bool = false,
+                     title: String? = nil,
+                     description: String? = nil,
+                     externalDocs: OpenAPI.ExternalDoc? = nil,
+                     allowedValues: [AnyCodable]? = nil,
+                     example: String?) {
+            self.format = format
+            self.required = required
+            self.nullable = nullable
+            self.title = title
+            self.description = description
+            self.externalDocs = externalDocs
+            self.allowedValues = allowedValues
+            self.example = example
         }
     }
 }
@@ -103,8 +124,9 @@ extension JSONSchema.Context {
                      nullable: nullable,
                      title: title,
                      description: description,
-//                         constantValue: constantValue,
-                    allowedValues: allowedValues)
+                     externalDocs: externalDocs,
+                     allowedValues: allowedValues,
+                     example: example)
     }
 
     /// Return the required version of this context
@@ -114,8 +136,9 @@ extension JSONSchema.Context {
                      nullable: nullable,
                      title: title,
                      description: description,
-//                         constantValue: constantValue,
-                    allowedValues: allowedValues)
+                     externalDocs: externalDocs,
+                     allowedValues: allowedValues,
+                     example: example)
     }
 
     /// Return the nullable version of this context
@@ -125,8 +148,9 @@ extension JSONSchema.Context {
                      nullable: true,
                      title: title,
                      description: description,
-//                         constantValue: constantValue,
-                    allowedValues: allowedValues)
+                     externalDocs: externalDocs,
+                     allowedValues: allowedValues,
+                     example: example)
     }
 
     /// Return this context with the given list of possible values
@@ -136,8 +160,9 @@ extension JSONSchema.Context {
                      nullable: nullable,
                      title: title,
                      description: description,
-//                         constantValue: constantValue,
-                    allowedValues: allowedValues)
+                     externalDocs: externalDocs,
+                     allowedValues: allowedValues,
+                     example: example)
     }
 
     /// Return this context with the given example
@@ -147,9 +172,9 @@ extension JSONSchema.Context {
                      nullable: nullable,
                      title: title,
                      description: description,
-//                         constantValue: constantValue,
-                    allowedValues: allowedValues,
-                    example: (codable: example, encoder: encoder))
+                     externalDocs: externalDocs,
+                     allowedValues: allowedValues,
+                     example: (codable: example, encoder: encoder))
     }
 }
 
@@ -281,6 +306,7 @@ extension JSONSchema.Context {
         case format
         case title
         case description
+        case externalDocs
         case allowedValues = "enum"
         case nullable
         case example
@@ -302,16 +328,16 @@ extension JSONSchema.Context: Encodable {
             try container.encode(allowedValues, forKey: .allowedValues)
         }
 
-//        if constantValue != nil {
-//            try container.encode(constantValue, forKey: .constantValue)
-//        }
-
         if title != nil {
             try container.encode(title, forKey: .title)
         }
 
         if description != nil {
             try container.encode(description, forKey: .description)
+        }
+
+        if externalDocs != nil {
+            try container.encode(externalDocs, forKey: .externalDocs)
         }
 
         // nullable is false if omitted
@@ -339,9 +365,9 @@ extension JSONSchema.Context: Decodable {
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
 
-//        constantValue = container.decodeIfPresent(Format.SwiftType, forKey: .constantValue)
+        allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
 
         nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
 

@@ -231,6 +231,34 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(reference.description)
     }
 
+    func test_externalDocs() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
+
+        let allOf = JSONSchema.all(of: [boolean])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
+
+        XCTAssertEqual(boolean.externalDocs, .init(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(object.externalDocs, .init(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(array.externalDocs, .init(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(number.externalDocs, .init(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(integer.externalDocs, .init(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(string.externalDocs, .init(url: URL(string: "http://google.com")!))
+
+        XCTAssertNil(allOf.externalDocs)
+        XCTAssertNil(anyOf.externalDocs)
+        XCTAssertNil(oneOf.externalDocs)
+        XCTAssertNil(not.externalDocs)
+        XCTAssertNil(reference.externalDocs)
+    }
+
     func test_requiredToOptional() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .optionalSchemaObject()
@@ -859,6 +887,122 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.description, "hello")
+
+        guard case let .object(_, contextB) = allowedValueObject else {
+            XCTFail("expected object to be parsed as object")
+            return
+        }
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+    }
+
+    func test_encodeObjectWithExternalDocs() {
+        let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(allowedValues: [
+                AnyCodable(["hello": false])
+            ])
+
+        testEncodingPropertyLines(entity: requiredObject,
+                                  propertyLines: [
+                                    "\"externalDocs\" : {",
+                                    "  \"url\" : \"http:\\/\\/google.com\"",
+                                    "},",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: optionalObject,
+                                  propertyLines: [
+                                    "\"externalDocs\" : {",
+                                    "  \"url\" : \"http:\\/\\/google.com\"",
+                                    "},",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: nullableObject,
+                                  propertyLines: [
+                                    "\"externalDocs\" : {",
+                                    "  \"url\" : \"http:\\/\\/google.com\"",
+                                    "},",
+                                    "\"nullable\" : true,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: allowedValueObject,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  {",
+                                    "    \"hello\" : false",
+                                    "  }",
+                                    "],",
+                                    "\"externalDocs\" : {",
+                                    "  \"url\" : \"http:\\/\\/google.com\"",
+                                    "},",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+    }
+
+    func test_decodeObjectWithExternalDocs() {
+        let objectData = """
+        {
+            "externalDocs": { "url": "http://google.com" },
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+        let nullableObjectData = """
+        {
+            "externalDocs": { "url": "http://google.com" },
+            "type": "object",
+            "nullable": true
+        }
+        """.data(using: .utf8)!
+        let allowedValueObjectData = """
+        {
+            "externalDocs": { "url": "http://google.com" },
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "enum": [{"hello": false}]
+        }
+        """.data(using: .utf8)!
+
+        let object = try! testDecoder.decode(JSONSchema.self, from: objectData)
+        let nullableObject = try! testDecoder.decode(JSONSchema.self, from: nullableObjectData)
+        let allowedValueObject = try! testDecoder.decode(JSONSchema.self, from: allowedValueObjectData)
+
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, required: false, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, required: false, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
+        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+        XCTAssertEqual(allowedValueObject.externalDocs, .init(url: URL(string: "http://google.com")!))
 
         guard case let .object(_, contextB) = allowedValueObject else {
             XCTFail("expected object to be parsed as object")

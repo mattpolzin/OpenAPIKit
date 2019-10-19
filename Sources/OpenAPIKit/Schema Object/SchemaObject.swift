@@ -97,6 +97,20 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    public var externalDocs: OpenAPI.ExternalDoc? {
+        switch self {
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
+            return context.externalDocs
+        case .all, .one, .any, .not, .reference:
+            return nil
+        }
+    }
+
     /// Allowed values, if specified. If unspecified, returns `nil`.
     public var allowedValues: [AnyCodable]? {
         switch self {
@@ -264,6 +278,7 @@ extension JSONSchema {
         nullable: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchema {
@@ -273,6 +288,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
@@ -289,6 +305,7 @@ extension JSONSchema {
         nullable: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -301,6 +318,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
@@ -322,6 +340,7 @@ extension JSONSchema {
         nullable: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -334,6 +353,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
@@ -355,6 +375,7 @@ extension JSONSchema {
         nullable: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -367,6 +388,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
@@ -388,6 +410,7 @@ extension JSONSchema {
         nullable: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
         properties: [String: JSONSchema] = [:],
@@ -401,6 +424,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
@@ -422,6 +446,7 @@ extension JSONSchema {
                              nullable: Bool = false,
                              title: String? = nil,
                              description: String? = nil,
+                             externalDocs: OpenAPI.ExternalDoc? = nil,
                              minItems: Int = 0,
                              maxItems: Int? = nil,
                              uniqueItems: Bool = false,
@@ -435,6 +460,7 @@ extension JSONSchema {
             nullable: nullable,
             title: title,
             description: description,
+            externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
         )
