@@ -17,6 +17,7 @@ extension OpenAPI {
         case delete = "DELETE"
         case head = "HEAD"
         case options = "OPTIONS"
+        case trace = "TRACE"
     }
 }
 
@@ -113,6 +114,8 @@ extension OpenAPI.PathItem.Properties {
             return self.post
         case .put:
             return self.put
+        case .trace:
+            return self.trace
         }
     }
 }
