@@ -37,7 +37,15 @@ extension OpenAPI {
             return "/\(components.joined(separator: "/"))"
         }
     }
+}
 
+extension OpenAPI.PathComponents: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        components = value.split(separator: "/").map(String.init)
+    }
+}
+
+extension OpenAPI {
     /// An OpenAPI Path Item
     /// This type describes the endpoints a server has
     /// bound to a particular path.
