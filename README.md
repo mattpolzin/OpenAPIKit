@@ -72,6 +72,8 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] $ref (`reference` case)
 - [x] summary (`operations` case)
 - [x] description (`operations` case)
+- [x] servers (`operations` case)
+- [x] parameters (`operations` case)
 - [x] get (`operations` case)
 - [x] put (`operations` case)
 - [x] post (`operations` case)
@@ -80,8 +82,6 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] head (`operations` case)
 - [x] patch (`operations` case)
 - [x] trace (`operations` case)
-- [x] servers (`operations` case)
-- [x] parameters (`operations` case)
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
 - [x] tags
