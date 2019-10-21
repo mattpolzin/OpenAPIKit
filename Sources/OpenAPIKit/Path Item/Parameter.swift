@@ -87,6 +87,21 @@ extension OpenAPI.PathItem.Parameter {
     }
 }
 
+// MARK: `Either` convenience methods
+extension Either where A == OpenAPI.PathItem.Parameter.SchemaProperty, B == OpenAPI.Content.Map {
+    public static func content(_ map: OpenAPI.Content.Map) -> Self {
+        return .b(map)
+    }
+
+    public static func schema(_ schema: JSONSchema) -> Self {
+        return .a(.b(schema))
+    }
+
+    public static func schema(reference: JSONReference<OpenAPI.Components, JSONSchema>) -> Self {
+        return .a(.a(reference))
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.PathItem.Parameter {
