@@ -56,11 +56,55 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
+        public init(schemaReference: JSONReference<Components, JSONSchema>,
+                    example: AnyCodable? = nil,
+                    encoding: [String: Encoding]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.schema = .init(schemaReference)
+            self.example = example
+            self.examples = nil
+            self.encoding = encoding
+            self.vendorExtensions = vendorExtensions
+        }
+
+        public init(schema: JSONSchema,
+                    example: AnyCodable? = nil,
+                    encoding: [String: Encoding]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.schema = .init(schema)
+            self.example = example
+            self.examples = nil
+            self.encoding = encoding
+            self.vendorExtensions = vendorExtensions
+        }
+
         public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
                     examples: Example.Map?,
                     encoding: [String: Encoding]? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = schema
+            self.examples = examples
+            self.example = examples.flatMap(Self.firstExample(from:))
+            self.encoding = encoding
+            self.vendorExtensions = vendorExtensions
+        }
+
+        public init(schemaReference: JSONReference<Components, JSONSchema>,
+                    examples: Example.Map?,
+                    encoding: [String: Encoding]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.schema = .init(schemaReference)
+            self.examples = examples
+            self.example = examples.flatMap(Self.firstExample(from:))
+            self.encoding = encoding
+            self.vendorExtensions = vendorExtensions
+        }
+
+        public init(schema: JSONSchema,
+                    examples: Example.Map?,
+                    encoding: [String: Encoding]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
+            self.schema = .init(schema)
             self.examples = examples
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding

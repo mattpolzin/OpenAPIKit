@@ -29,8 +29,11 @@ extension OpenAPI {
             self.components = components
         }
 
-        public init?(rawValue: String) {
-            components = rawValue.split(separator: "/").map(String.init)
+        public init(rawValue: String) {
+            let pathComponents = rawValue.split(separator: "/").map(String.init)
+            components = pathComponents.count > 0 && pathComponents[0].isEmpty
+                ? Array(pathComponents.dropFirst())
+                : pathComponents
         }
 
         public var rawValue: String {
@@ -41,24 +44,12 @@ extension OpenAPI {
 
 extension OpenAPI.PathComponents: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
-        components = value.split(separator: "/").map(String.init)
+        self.init(rawValue: value)
     }
 }
 
 extension OpenAPI {
-    /// An OpenAPI Path Item
-    /// This type describes the endpoints a server has
-    /// bound to a particular path.
-    public enum PathItem: Equatable {
-        case reference(JSONReference<Components, PathItem>)
-        case operations(Properties)
-
-        public typealias Map = [PathComponents: PathItem]
-    }
-}
-
-extension OpenAPI.PathItem {
-    public struct Properties: Equatable {
+    public struct PathItem: Equatable {
         public let summary: String?
         public let description: String?
         public let servers: [OpenAPI.Server]?
@@ -72,9 +63,6 @@ extension OpenAPI.PathItem {
         public let head: Operation?
         public let patch: Operation?
         public let trace: Operation?
-
-        public typealias Operation = OpenAPI.PathItem.Operation
-        public typealias Parameter = OpenAPI.PathItem.Parameter
 
         public init(summary: String? = nil,
                     description: String? = nil,
@@ -102,10 +90,22 @@ extension OpenAPI.PathItem {
             self.patch = patch
             self.trace = trace
         }
+
+        public typealias Map = [PathComponents: Either<JSONReference<Components, PathItem>, PathItem>]
     }
 }
 
-extension OpenAPI.PathItem.Properties {
+extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.PathItem>, B == OpenAPI.PathItem {
+    public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self {
+        return .b(pathItem)
+    }
+
+    public static func pathItem(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem>) -> Self {
+        return .a(reference)
+    }
+}
+
+extension OpenAPI.PathItem {
     public func `for`(_ verb: OpenAPI.HttpVerb) -> Operation? {
         switch verb {
         case .delete:
@@ -148,54 +148,7 @@ extension OpenAPI.PathComponents: Decodable {
     }
 }
 
-extension OpenAPI.PathItem: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        switch self {
-        case .reference(let reference):
-            try container.encode(reference)
-
-        case .operations(let operations):
-            try container.encode(operations)
-        }
-    }
-}
-
-extension OpenAPI.PathItem: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-
-        let maybeRef: Result<JSONReference<OpenAPI.Components, OpenAPI.PathItem>, Swift.Error>
-        do {
-            maybeRef = .success(try container.decode(JSONReference<OpenAPI.Components, OpenAPI.PathItem>.self))
-        } catch let err {
-            maybeRef = .failure(err)
-        }
-
-        let maybeOperations: Result<Properties, Swift.Error>
-        do {
-            maybeOperations = .success(try container.decode(Properties.self))
-        } catch let err {
-            maybeOperations = .failure(err)
-        }
-
-        switch (maybeRef, maybeOperations) {
-        case (.success(let ref), _):
-            self = .reference(ref)
-        case (_, .success(let operations)):
-            self = .operations(operations)
-        default:
-            throw OpenAPI.DecodingError.foundNeither(option1: "$ref",
-                                                     option2: "Operations",
-                                                     codingPath: decoder.codingPath,
-                                                     notOption1Because: maybeRef.error,
-                                                     notOption2Because: maybeOperations.error)
-        }
-    }
-}
-
-extension OpenAPI.PathItem.Properties {
+extension OpenAPI.PathItem {
     private enum CodingKeys: String, CodingKey {
         case summary
         case description
@@ -213,7 +166,7 @@ extension OpenAPI.PathItem.Properties {
     }
 }
 
-extension OpenAPI.PathItem.Properties: Encodable {
+extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -265,7 +218,7 @@ extension OpenAPI.PathItem.Properties: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Properties: Decodable {
+extension OpenAPI.PathItem: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

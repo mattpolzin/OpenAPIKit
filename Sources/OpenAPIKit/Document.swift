@@ -98,6 +98,26 @@ extension OpenAPI.Document {
     }
 }
 
+extension OpenAPI.Document.Info.License {
+    // MARK: MIT License
+    public static func MIT(url: URL) -> Self {
+        return .init(name: "MIT", url: url)
+    }
+
+    public static var MIT: Self {
+        return .init(name: "MIT")
+    }
+
+    // MARK: Apache License
+    public static func apache2(url: URL) -> Self {
+        return .init(name: "Apache 2.0", url: url)
+    }
+
+    public static var apache2: Self {
+        return .init(name: "Apache 2.0")
+    }
+}
+
 extension OpenAPI {
     public struct ExternalDoc: Codable, Equatable {
         public let description: String?
@@ -169,13 +189,12 @@ extension OpenAPI.Document: Decodable {
         servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
         // hacky workaround for Dictionary bug
-        let pathsDict = try container.decode([String: OpenAPI.PathItem].self, forKey: .paths)
-        paths = Dictionary(pathsDict.compactMap { args in
+        let pathsDict = try container.decode([String: Either<JSONReference<OpenAPI.Components, OpenAPI.PathItem>, OpenAPI.PathItem>].self, forKey: .paths)
+        paths = Dictionary(pathsDict.map { args in
             let (pathString, pathItem) = args
 
-            return OpenAPI.PathComponents(rawValue: pathString)
-                .map { ($0, pathItem) }
-            },
+            return (OpenAPI.PathComponents(rawValue: pathString), pathItem)
+        },
                            uniquingKeysWith: { $1 })
 
         components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents

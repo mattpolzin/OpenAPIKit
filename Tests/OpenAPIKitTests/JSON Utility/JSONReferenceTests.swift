@@ -26,7 +26,7 @@ final class JSONReferenceTests: XCTestCase {
     func test_initialization() {
         let _ = JSONReference<Root, JSONSchema>.internal(.unsafe("#/hello"))
 
-        let _ = JSONReference<Root, JSONSchema>.internal(.node(.init(type: \.thing, selector: "hello")))
+        let _ = JSONReference<Root, JSONSchema>.internal(.node(.init(path: \.thing, selector: "hello")))
 
         let _ = JSONReference<Root, JSONSchema>.external("hello.yml", nil)
 
@@ -34,7 +34,7 @@ final class JSONReferenceTests: XCTestCase {
 
         let _ = JSONReference<Root, JSONSchema>.external("hello.yml", .unsafe("hello"))
 
-        let _ = JSONReference<Root, JSONSchema>.external("hello.yml", .node(.init(type: \.thing, selector: "hello")))
+        let _ = JSONReference<Root, JSONSchema>.external("hello.yml", .node(.init(path: \.thing, selector: "hello")))
 
         let ref = JSONReference<Root, JSONSchema>.external("hello.yml#/hello")
 
@@ -46,7 +46,7 @@ final class JSONReferenceTests: XCTestCase {
 
         XCTAssertEqual(JSONReference<Root, JSONSchema>.internal(.unsafe("hello")).description, "#/hello")
 
-        XCTAssertEqual(JSONReference<Root, JSONSchema>.internal(.node(.init(type: \.thing, selector: "hello"))).description, "#/root/thing/hello")
+        XCTAssertEqual(JSONReference<Root, JSONSchema>.internal(.node(.init(path: \.thing, selector: "hello"))).description, "#/root/thing/hello")
 
         XCTAssertEqual(JSONReference<Root, JSONSchema>.external("hello.yml", nil).description, "hello.yml")
 
@@ -54,7 +54,7 @@ final class JSONReferenceTests: XCTestCase {
 
         XCTAssertEqual(JSONReference<Root, JSONSchema>.external("hello.yml", .unsafe("hello")).description, "hello.yml#/hello")
 
-        XCTAssertEqual(JSONReference<Root, JSONSchema>.external("hello.yml", .node(.init(type: \.thing, selector: "hello"))).description, "hello.yml#/root/thing/hello")
+        XCTAssertEqual(JSONReference<Root, JSONSchema>.external("hello.yml", .node(.init(path: \.thing, selector: "hello"))).description, "hello.yml#/root/thing/hello")
 
         XCTAssertEqual(JSONReference<Root, JSONSchema>.external("hello.yml#/hello").description, "hello.yml#/hello")
     }

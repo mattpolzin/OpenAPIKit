@@ -3224,7 +3224,7 @@ extension SchemaObjectTests {
     func test_encodeNodeReference() {
 //        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
 //                                            parameters: [:])
-        let nodeRef = JSONSchema.reference(.internal(.node(.init(type: \.schemas, selector: "requiredBool"))))
+        let nodeRef = JSONSchema.reference(.internal(.node(.init(path: \.schemas, selector: "requiredBool"))))
 
         testEncodingPropertyLines(entity: nodeRef, propertyLines: [
             "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\""

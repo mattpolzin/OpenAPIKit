@@ -32,6 +32,42 @@ extension OpenAPI.PathItem {
             self.deprecated = deprecated
         }
 
+        public init(name: String,
+                    parameterLocation: Location,
+                    schema: JSONSchema,
+                    description: String? = nil,
+                    deprecated: Bool = false) {
+            self.name = name
+            self.parameterLocation = parameterLocation
+            self.schemaOrContent = .init(.init(schema))
+            self.description = description
+            self.deprecated = deprecated
+        }
+
+        public init(name: String,
+                    parameterLocation: Location,
+                    schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+                    description: String? = nil,
+                    deprecated: Bool = false) {
+            self.name = name
+            self.parameterLocation = parameterLocation
+            self.schemaOrContent = .init(.init(schemaReference))
+            self.description = description
+            self.deprecated = deprecated
+        }
+
+        public init(name: String,
+                    parameterLocation: Location,
+                    content: OpenAPI.Content.Map,
+                    description: String? = nil,
+                    deprecated: Bool = false) {
+            self.name = name
+            self.parameterLocation = parameterLocation
+            self.schemaOrContent = .init(content)
+            self.description = description
+            self.deprecated = deprecated
+        }
+
         public var required: Bool {
             switch parameterLocation {
             case .query(required: let required, allowEmptyValue: _),
@@ -88,6 +124,18 @@ extension OpenAPI.PathItem.Parameter {
 }
 
 // MARK: `Either` convenience methods
+// OpenAPI.PathItem.Array.Element =>
+extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter> {
+    public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self {
+        return .a(parameter)
+    }
+
+    public static func parameter(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter>) -> Self {
+        return .b(reference)
+    }
+}
+
+// OpenAPI.PathItem.SchemaProperty =>
 extension Either where A == OpenAPI.PathItem.Parameter.SchemaProperty, B == OpenAPI.Content.Map {
     public static func content(_ map: OpenAPI.Content.Map) -> Self {
         return .b(map)

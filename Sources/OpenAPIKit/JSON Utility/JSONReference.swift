@@ -59,6 +59,10 @@ public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable, C
         case node(InternalReference)
         case unsafe(String)
 
+        public static func node<RD: RefName & ReferenceDict>(_ path: KeyPath<Root, RD>, named name: String) -> Self where RD.Value == RefType {
+            return .node(.init(path: path, selector: name))
+        }
+
         public var description: String {
             switch self {
             case .node(let reference):
@@ -82,9 +86,9 @@ public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable, C
             return (type(of: path).valueType as! RefName.Type).refName
         }
 
-        public init<RD: RefName & ReferenceDict>(type: KeyPath<Root, RD>,
+        public init<RD: RefName & ReferenceDict>(path: KeyPath<Root, RD>,
                                                  selector: String) where RD.Value == RefType {
-            self.path = type
+            self.path = path
             self.selector = selector
         }
 
