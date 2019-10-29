@@ -48,7 +48,7 @@ final class EaseOfUseTests: XCTestCase {
                         summary: "Get Test",
                         description: "Get Test description",
                         parameters: [
-                            .parameter(reference: .internal(.node(\.parameters, named: "global_param"))),
+                            .parameter(reference: .internal(.node(\.parameters, named: "filter"))),
                             .parameter(.init(
                                 name: "Content-Type",
                                 parameterLocation: .header(required: false),
@@ -115,10 +115,19 @@ final class EaseOfUseTests: XCTestCase {
                 ],
                 responses: [:],
                 parameters: [
-                    "global_param": .init(
-                        name: "global_param",
+                    "filter": .init(
+                        name: "filter",
                         parameterLocation: .query(required: false),
-                        schema: .string
+                        schema: .init(
+                            .object(
+                                properties: [
+                                    "size": .integer,
+                                    "shape": .string(allowedValues: [ "round", "square" ])
+                                ]
+                            ),
+                            style: .deepObject,
+                            explode: true
+                        )
                     )
                 ],
                 examples: [:],

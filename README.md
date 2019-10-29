@@ -56,10 +56,10 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 
 ### Components Object (`OpenAPI.Components`)
 - [x] schemas
-- [ ] responses
+- [x] responses
 - [x] parameters
 - [x] examples
-- [ ] requestBodies
+- [x] requestBodies
 - [x] headers
 - [ ] securitySchemes
 - [ ] links
@@ -110,20 +110,11 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] allowEmptyValue (part of `parameterLocation`)
 - [x] content (`schemaOrContent`)
 - [x] schema (`schemaOrContent`)
-    - [ ] style
-    - [ ] explode
-    - [ ] allowReserved
-    - [ ] example
-    - [ ] examples
-
-#### Style Values
-- [ ] matrix
-- [ ] label
-- [ ] form
-- [ ] simple
-- [ ] spaceDelimited
-- [ ] pipeDelimited
-- [ ] deepObject
+    - [x] style
+    - [x] explode
+    - [x] allowReserved
+    - [x] example
+    - [x] examples
 
 ### Request Body Object (`OpenAPI.Request`)
 - [x] description

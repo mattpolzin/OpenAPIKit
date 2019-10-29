@@ -136,7 +136,7 @@ extension OpenAPI.Content {
 }
 
 extension OpenAPI.Content {
-    private static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
+    internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
             .sorted { $0.key < $1.key }
             .compactMap { $0.value.a?.value.b }
