@@ -228,7 +228,7 @@ extension OpenAPI.Content {
             case "encoding":
                 self = .encoding
             default:
-                self = .extended(stringValue)
+                self = .extendedKey(for: stringValue)
             }
         }
 

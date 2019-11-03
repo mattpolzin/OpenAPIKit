@@ -57,6 +57,18 @@ extension OpenAPI.PathItem {
 
         public init(name: String,
                     parameterLocation: Location,
+                    schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+                    description: String? = nil,
+                    deprecated: Bool = false) {
+            self.name = name
+            self.parameterLocation = parameterLocation
+            self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: parameterLocation)))
+            self.description = description
+            self.deprecated = deprecated
+        }
+
+        public init(name: String,
+                    parameterLocation: Location,
                     content: OpenAPI.Content.Map,
                     description: String? = nil,
                     deprecated: Bool = false) {

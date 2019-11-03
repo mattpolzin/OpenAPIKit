@@ -26,6 +26,18 @@ final class ResponseTests: XCTestCase {
         XCTAssertEqual(r2.headers?["hello"]?.a, header)
         XCTAssertEqual(r2.content, [.json: content])
     }
+
+    func test_responseMap() {
+        let responseMap: OpenAPI.Response.Map = [
+            200: .response(.init(description: "hello world", content: [:])),
+            404: .response(reference: .external("hello.json#/world"))
+        ]
+
+        XCTAssertNotNil(responseMap[200]?.a)
+        XCTAssertNil(responseMap[200]?.b)
+        XCTAssertNotNil(responseMap[404]?.b)
+        XCTAssertNil(responseMap[404]?.a)
+    }
 }
 
 // MARK: Response Status Code

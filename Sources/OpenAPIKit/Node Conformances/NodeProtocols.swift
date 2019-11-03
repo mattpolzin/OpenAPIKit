@@ -52,7 +52,7 @@ extension RawOpenAPINodeType where Self: RawRepresentable, RawValue: OpenAPINode
 /// necessary so that one type can conditionally provide a
 /// schema and then (under different conditions) provide a
 /// different schema. The "different" conditions have to do
-/// with Optionality, hence the name of this protocol.
+/// with Optionality (a wrapping type), hence the name of this protocol.
 public protocol WrappedRawOpenAPIType {
     static func wrappedOpenAPINode() throws -> JSONSchema
 }
@@ -62,7 +62,7 @@ public protocol WrappedRawOpenAPIType {
 /// necessary so that one type can conditionally provide a
 /// schema and then (under different conditions) provide a
 /// different schema. The "different" conditions have to do
-/// with Optionality, hence the name of this protocol.
+/// with Optionality (a wrapping type), hence the name of this protocol.
 public protocol DoubleWrappedRawOpenAPIType {
     // NOTE: This is definitely a rabbit hole... hopefully I
     // will realize I've been missing something obvious

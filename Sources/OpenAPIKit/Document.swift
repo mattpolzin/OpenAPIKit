@@ -118,19 +118,6 @@ extension OpenAPI.Document.Info.License {
     }
 }
 
-extension OpenAPI {
-    public struct ExternalDoc: Codable, Equatable {
-        public let description: String?
-        public let url: URL
-
-        public init(description: String? = nil,
-                    url: URL) {
-            self.description = description
-            self.url = url
-        }
-    }
-}
-
 // MARK: - Codable
 
 extension OpenAPI.Document {

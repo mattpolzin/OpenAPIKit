@@ -1,5 +1,5 @@
 //
-//  EaseOfUseTests.swift
+//  DeclarativeEaseOfUseTests.swift
 //  
 //
 //  Created by Mathew Polzin on 10/27/19.
@@ -9,7 +9,7 @@ import Foundation
 import OpenAPIKit
 import XCTest
 
-final class EaseOfUseTests: XCTestCase {
+final class DeclarativeEaseOfUseTests: XCTestCase {
     func test_wholeBoi() {
         let _ = OpenAPI.Document(
             openAPIVersion: .v3_0_0,
@@ -138,6 +138,67 @@ final class EaseOfUseTests: XCTestCase {
                 description: "External Docs",
                 url: URL(string: "http://externaldocs.com")!
             )
+        )
+    }
+
+    func test_JSONSchema() {
+        /*
+
+         {
+            "data": [
+                {
+                    "id": "1234",
+                    "type": "test_thing",
+                    "attributes": {
+                        "name": "Thing",
+                        "age": 10,
+                        "created_at": "2019-11-03T05:24:55Z"
+                    },
+                    "relationships": {
+                        "other": {
+                            "data": null
+                        }
+                    }
+                }
+            ]
+         }
+
+         */
+        let _ = JSONSchema.object(
+            properties: [
+                "data": .array(
+                    items: .object(
+                        properties: [
+                            "id": .string,
+                            "type": .string(allowedValues: ["test_thing"]),
+
+                            "attributes": .object(
+                                properties: [
+                                    "name": .string,
+                                    "age": .integer,
+                                    "created_at": .string(format: .dateTime)
+                                ]
+                            ),
+
+                            "relationships": .object(
+                                properties: [
+                                    "other": .object(
+                                        properties: [
+                                            "data": .object(
+                                                nullable: true,
+                                                properties: [
+                                                    "type": .string,
+                                                    "id": .string
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ]
         )
     }
 }

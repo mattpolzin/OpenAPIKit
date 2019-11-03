@@ -12,9 +12,17 @@ import AnyCodable
 
 final class ContentTests: XCTestCase {
     func test_init() {
-        let _ = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
+        let t1 = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
+        XCTAssertNotNil(t1.schema.a)
+        XCTAssertNil(t1.schema.b)
 
-        let _ = OpenAPI.Content(schema: .init(.string))
+        let t2 = OpenAPI.Content(schema: .init(.string))
+        XCTAssertNotNil(t2.schema.b)
+        XCTAssertNil(t2.schema.a)
+
+        let t3 = OpenAPI.Content(schemaReference: .external("hello.json#/world"))
+        XCTAssertNotNil(t3.schema.a)
+        XCTAssertNil(t3.schema.b)
 
         let withExample = OpenAPI.Content(schema: .init(.string),
                                           example: "hello",
@@ -32,6 +40,16 @@ final class ContentTests: XCTestCase {
         ])
         XCTAssertNotNil(withExamples.examples)
         XCTAssertEqual(withExamples.example?.value as? String, "pick me")
+
+        let t4 = OpenAPI.Content(schemaReference: .external("hello.json#/world"),
+                                examples: nil)
+        XCTAssertNotNil(t4.schema.a)
+        XCTAssertNil(t4.schema.b)
+
+        let t5 = OpenAPI.Content(schema: .string,
+                                examples: nil)
+        XCTAssertNotNil(t5.schema.b)
+        XCTAssertNil(t5.schema.a)
 
         let _ = OpenAPI.Content(schema: .init(.string),
                                 example: nil,
