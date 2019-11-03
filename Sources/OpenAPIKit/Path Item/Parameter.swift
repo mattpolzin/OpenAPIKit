@@ -374,9 +374,7 @@ extension OpenAPI.PathItem.Parameter: Encodable {
             try container.encode(stringKeyedDict, forKey: .content)
         }
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)
