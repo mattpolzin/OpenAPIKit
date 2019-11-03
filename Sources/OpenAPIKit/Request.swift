@@ -35,9 +35,7 @@ extension OpenAPI.Request: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
         // Hack to work around Dictionary encoding
         // itself as an array in this case:

@@ -58,7 +58,7 @@ extension ExternalDocTests {
         let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
 
         XCTAssertEqual(encodedExternalDoc,
-                       """
+"""
 {
   "url" : "http:\\/\\/google.com"
 }
@@ -68,7 +68,7 @@ extension ExternalDocTests {
 
     func test_onlyUrl_decode() {
         let externalDocsData =
-            """
+"""
 {
   "url" : "http:\\/\\/google.com"
 }

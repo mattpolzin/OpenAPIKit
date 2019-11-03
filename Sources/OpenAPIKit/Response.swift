@@ -96,9 +96,7 @@ extension OpenAPI.Response: Encodable {
 
         try container.encode(description, forKey: .description)
 
-        if headers != nil {
-            try container.encode(headers, forKey: .headers)
-        }
+        try headers.encodeIfNotNil(to: &container, forKey: .headers)
 
         if content.count > 0 {
             // Hack to work around Dictionary encoding

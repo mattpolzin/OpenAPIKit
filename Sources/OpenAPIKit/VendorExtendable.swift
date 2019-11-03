@@ -59,4 +59,11 @@ extension VendorExtendable {
             return !CodingKeys.allBuiltinKeys.contains(key)
         }.mapValues(AnyCodable.init)
     }
+
+    public func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {
+        for (key, value) in vendorExtensions {
+            let xKey = key.starts(with: "x-") ? key : "x-\(key)"
+            try container.encode(value, forKey: .extendedKey(for: xKey))
+        }
+    }
 }
