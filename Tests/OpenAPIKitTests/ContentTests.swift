@@ -307,7 +307,6 @@ extension ContentTests {
 {
   "encoding" : {
     "json" : {
-      "allowReserved" : false,
       "contentType" : "application\\/json"
     }
   },

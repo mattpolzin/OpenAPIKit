@@ -70,31 +70,19 @@ extension OpenAPI.PathItem.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if tags != nil {
-            try container.encode(tags, forKey: .tags)
-        }
+        try tags.encodeIfNotNil(to: &container, forKey: .tags)
 
-        if summary != nil {
-            try container.encode(summary, forKey: .summary)
-        }
+        try summary.encodeIfNotNil(to: &container, forKey: .summary)
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
-        if externalDocs != nil {
-            try container.encode(externalDocs, forKey: .externalDocs)
-        }
+        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
 
-        if operationId != nil {
-            try container.encode(operationId, forKey: .operationId)
-        }
+        try operationId.encodeIfNotNil(to: &container, forKey: .operationId)
 
         try container.encode(parameters, forKey: .parameters)
 
-        if requestBody != nil {
-            try container.encode(requestBody, forKey: .requestBody)
-        }
+        try requestBody.encodeIfNotNil(to: &container, forKey: .requestBody)
 
         // Hack to work around Dictionary encoding
         // itself as an array in this case:
@@ -106,9 +94,7 @@ extension OpenAPI.PathItem.Operation: Encodable {
 
         try container.encode(deprecated, forKey: .deprecated)
 
-        if servers != nil {
-            try container.encode(servers, forKey: .servers)
-        }
+        try servers.encodeIfNotNil(to: &container, forKey: .servers)
     }
 }
 

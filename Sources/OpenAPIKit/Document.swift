@@ -159,9 +159,7 @@ extension OpenAPI.Document: Encodable {
             try container.encode(encodableTags, forKey: .tags)
         }
 
-        if externalDocs != nil {
-            try container.encode(externalDocs, forKey: .externalDocs)
-        }
+        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
     }
 }
 

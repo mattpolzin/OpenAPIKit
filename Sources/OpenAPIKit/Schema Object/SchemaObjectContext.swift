@@ -324,30 +324,20 @@ extension JSONSchema.Context: Encodable {
             try container.encode(format, forKey: .format)
         }
 
-        if allowedValues != nil {
-            try container.encode(allowedValues, forKey: .allowedValues)
-        }
+        try allowedValues.encodeIfNotNil(to: &container, forKey: .allowedValues)
 
-        if title != nil {
-            try container.encode(title, forKey: .title)
-        }
+        try title.encodeIfNotNil(to: &container, forKey: .title)
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
-        if externalDocs != nil {
-            try container.encode(externalDocs, forKey: .externalDocs)
-        }
+        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
 
         // nullable is false if omitted
         if nullable {
             try container.encode(nullable, forKey: .nullable)
         }
 
-        if example != nil {
-            try container.encode(example, forKey: .example)
-        }
+        try example.encodeIfNotNil(to: &container, forKey: .example)
     }
 }
 
@@ -389,9 +379,7 @@ extension JSONSchema.NumericContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if multipleOf != nil {
-            try container.encode(multipleOf, forKey: .multipleOf)
-        }
+        try multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
 
         if let max = maximum {
             try container.encode(max.value, forKey: .maximum)
@@ -439,9 +427,7 @@ extension JSONSchema.IntegerContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if multipleOf != nil {
-            try container.encode(multipleOf, forKey: .multipleOf)
-        }
+        try multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
 
         if let max = maximum {
             try container.encode(max.value, forKey: .maximum)
@@ -487,17 +473,13 @@ extension JSONSchema.StringContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if maxLength != nil {
-            try container.encode(maxLength, forKey: .maxLength)
-        }
+        try maxLength.encodeIfNotNil(to: &container, forKey: .maxLength)
 
         if minLength > 0 {
             try container.encode(minLength, forKey: .minLength)
         }
 
-        if pattern != nil {
-            try container.encode(pattern, forKey: .pattern)
-        }
+        try pattern.encodeIfNotNil(to: &container, forKey: .pattern)
     }
 }
 
@@ -524,13 +506,9 @@ extension JSONSchema.ArrayContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if items != nil {
-            try container.encode(items, forKey: .items)
-        }
+        try items.encodeIfNotNil(to: &container, forKey: .items)
 
-        if maxItems != nil {
-            try container.encode(maxItems, forKey: .maxItems)
-        }
+        try maxItems.encodeIfNotNil(to: &container, forKey: .maxItems)
 
         if minItems > 0 {
             // omission is the same as 0
@@ -569,17 +547,13 @@ extension JSONSchema.ObjectContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if maxProperties != nil {
-            try container.encode(maxProperties, forKey: .maxProperties)
-        }
+        try maxProperties.encodeIfNotNil(to: &container, forKey: .maxProperties)
 
         if properties.count > 0 {
             try container.encode(properties, forKey: .properties)
         }
 
-        if additionalProperties != nil {
-            try container.encode(additionalProperties, forKey: .additionalProperties)
-        }
+        try additionalProperties.encodeIfNotNil(to: &container, forKey: .additionalProperties)
 
         if !requiredProperties.isEmpty {
             try container.encode(requiredProperties, forKey: .required)

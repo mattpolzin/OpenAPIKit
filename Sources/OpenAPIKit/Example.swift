@@ -45,13 +45,9 @@ extension OpenAPI.Example: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if summary != nil {
-            try container.encode(summary, forKey: .summary)
-        }
+        try summary.encodeIfNotNil(to: &container, forKey: .summary)
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
         switch value {
         case .a(let url):
@@ -60,9 +56,7 @@ extension OpenAPI.Example: Encodable {
             try container.encode(example, forKey: .value)
         }
 
-        for (key, value) in vendorExtensions {
-            try container.encode(value, forKey: .extended(key))
-        }
+        try encodeExtensions(to: &container)
     }
 }
 

@@ -43,20 +43,42 @@ protocol VendorExtendable {
 }
 
 enum VendorExtensionDecodingError: Swift.Error {
+    case selfIsArrayNotDict
     case foundNonStringKeys
+    case foundExtensionsWithoutXPrefix
 }
 
 extension VendorExtendable {
 
     public static func extensions(from decoder: Decoder) throws -> VendorExtensions {
-        guard let decodedAny = (try AnyCodable(from: decoder)).value as? [String: Any] else {
+
+        let decoded = try AnyCodable(from: decoder).value
+
+        guard (decoded as? [Any]) == nil else {
+            throw VendorExtensionDecodingError.selfIsArrayNotDict
+        }
+
+        guard let decodedAny = decoded as? [String: Any] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 
-        return decodedAny.filter {
+        let extensions = decodedAny.filter {
             let key = CodingKeys.key(for: $0.key)
 
             return !CodingKeys.allBuiltinKeys.contains(key)
-        }.mapValues(AnyCodable.init)
+        }
+
+        guard extensions.keys.allSatisfy({ $0.lowercased().starts(with: "x-") }) else {
+            throw VendorExtensionDecodingError.foundExtensionsWithoutXPrefix
+        }
+
+        return extensions.mapValues(AnyCodable.init)
+    }
+
+    public func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {
+        for (key, value) in vendorExtensions {
+            let xKey = key.starts(with: "x-") ? key : "x-\(key)"
+            try container.encode(value, forKey: .extendedKey(for: xKey))
+        }
     }
 }

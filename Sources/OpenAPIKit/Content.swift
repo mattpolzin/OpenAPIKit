@@ -118,20 +118,39 @@ extension OpenAPI.Content {
 }
 
 extension OpenAPI.Content {
-    public struct Encoding: Codable, Equatable {
+    public struct Encoding: Equatable {
+        public typealias Style = OpenAPI.PathItem.Parameter.Schema.Style
+
         public let contentType: OpenAPI.ContentType?
         public let headers: OpenAPI.Header.Map?
-//        public let style: String?
-//        public let explode: Bool (defaults for this need to be tied to style making style a good candidate for abstraction)
+        public let style: Style
+        public let explode: Bool
         public let allowReserved: Bool
 
         public init(contentType: OpenAPI.ContentType? = nil,
                     headers: OpenAPI.Header.Map? = nil,
+                    style: Style = Self.defaultStyle,
                     allowReserved: Bool = false) {
             self.contentType = contentType
             self.headers = headers
+            self.style = style
+            self.explode = style.defaultExplode
             self.allowReserved = allowReserved
         }
+
+        public init(contentType: OpenAPI.ContentType? = nil,
+                    headers: OpenAPI.Header.Map? = nil,
+                    style: Style = Self.defaultStyle,
+                    explode: Bool,
+                    allowReserved: Bool = false) {
+            self.contentType = contentType
+            self.headers = headers
+            self.style = style
+            self.explode = explode
+            self.allowReserved = allowReserved
+        }
+
+        public static let defaultStyle: Style = .default(for: .query)
     }
 }
 
@@ -160,16 +179,9 @@ extension OpenAPI.Content: Encodable {
             try container.encode(example, forKey: .example)
         }
 
-        if encoding != nil {
-            try container.encode(encoding, forKey: .encoding)
-        }
+        try encoding.encodeIfNotNil(to: &container, forKey: .encoding)
 
-        if vendorExtensions != [:] {
-            for (key, value) in vendorExtensions {
-                let xKey = key.starts(with: "x-") ? key : "x-\(key)"
-                try container.encode(value, forKey: .extended(xKey))
-            }
-        }
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -254,5 +266,56 @@ extension OpenAPI.Content {
         var intValue: Int? {
             return nil
         }
+    }
+}
+
+// MARK: Content.Encoding
+
+extension OpenAPI.Content.Encoding: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try contentType.encodeIfNotNil(to: &container, forKey: .contentType)
+
+        try headers.encodeIfNotNil(to: &container, forKey: .headers)
+
+        if style != Self.defaultStyle {
+            try container.encode(style, forKey: .style)
+        }
+
+        if explode != style.defaultExplode {
+            try container.encode(explode, forKey: .explode)
+        }
+
+        if allowReserved != false {
+            try container.encode(allowReserved, forKey: .allowReserved)
+        }
+    }
+}
+
+extension OpenAPI.Content.Encoding: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        contentType = try container.decodeIfPresent(OpenAPI.ContentType.self, forKey: .contentType)
+
+        headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
+
+        let style: Style = try container.decodeIfPresent(Style.self, forKey: .style) ?? Self.defaultStyle
+        self.style = style
+
+        explode = try container.decodeIfPresent(Bool.self, forKey: .explode) ?? style.defaultExplode
+
+        allowReserved = try container.decodeIfPresent(Bool.self, forKey: .allowReserved) ?? false
+    }
+}
+
+extension OpenAPI.Content.Encoding {
+    private enum CodingKeys: String, CodingKey {
+        case contentType
+        case headers
+        case style
+        case explode
+        case allowReserved
     }
 }

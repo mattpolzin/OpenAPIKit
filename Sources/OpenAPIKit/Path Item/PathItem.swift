@@ -170,51 +170,22 @@ extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if summary != nil {
-            try container.encode(summary, forKey: .summary)
-        }
+        try summary.encodeIfNotNil(to: &container, forKey: .summary)
 
-        if description != nil {
-            try container.encode(description, forKey: .description)
-        }
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
-        if servers != nil {
-            try container.encode(servers, forKey: .servers)
-        }
+        try servers.encodeIfNotNil(to: &container, forKey: .servers)
 
         try container.encode(parameters, forKey: .parameters)
 
-        if get != nil {
-            try container.encode(get, forKey: .get)
-        }
-
-        if put != nil {
-            try container.encode(put, forKey: .put)
-        }
-
-        if post != nil {
-            try container.encode(post, forKey: .post)
-        }
-
-        if delete != nil {
-            try container.encode(delete, forKey: .delete)
-        }
-
-        if options != nil {
-            try container.encode(options, forKey: .options)
-        }
-
-        if head != nil {
-            try container.encode(head, forKey: .head)
-        }
-
-        if patch != nil {
-            try container.encode(patch, forKey: .patch)
-        }
-
-        if trace != nil {
-            try container.encode(trace, forKey: .trace)
-        }
+        try get.encodeIfNotNil(to: &container, forKey: .get)
+        try put.encodeIfNotNil(to: &container, forKey: .put)
+        try post.encodeIfNotNil(to: &container, forKey: .post)
+        try delete.encodeIfNotNil(to: &container, forKey: .delete)
+        try options.encodeIfNotNil(to: &container, forKey: .options)
+        try head.encodeIfNotNil(to: &container, forKey: .head)
+        try patch.encodeIfNotNil(to: &container, forKey: .patch)
+        try trace.encodeIfNotNil(to: &container, forKey: .trace)
     }
 }
 

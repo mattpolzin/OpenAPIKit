@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Result+Value.swift
 //  
 //
 //  Created by Mathew Polzin on 6/28/19.
