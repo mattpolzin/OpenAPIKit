@@ -41,3 +41,13 @@ extension Date: DateOpenAPINodeType {
         }
 	}
 }
+
+extension Date: OpenAPIEncodedNodeType {
+    public static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchema {
+        guard let dateSchema: JSONSchema = try openAPINodeGuess(for: Date(), using: encoder) else {
+            throw OpenAPITypeError.unknownNodeType(type(of: self))
+        }
+
+        return dateSchema
+    }
+}

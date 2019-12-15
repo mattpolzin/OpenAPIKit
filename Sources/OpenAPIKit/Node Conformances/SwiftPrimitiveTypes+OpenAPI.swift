@@ -56,10 +56,16 @@ extension Optional: DoubleWrappedRawOpenAPIType where Wrapped: WrappedRawOpenAPI
     }
 }
 
-extension Optional: AnyJSONCaseIterable where Wrapped: CaseIterable, Wrapped: Codable {
+extension Optional: AnyRawRepresentable, AnyJSONCaseIterable where Wrapped: CaseIterable, Wrapped: Codable {
 	public static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
 		return (try? allCases(from: Array(Wrapped.allCases), using: encoder)) ?? []
 	}
+}
+
+extension Optional: AnyWrappedJSONCaseIterable where Wrapped: AnyJSONCaseIterable, Wrapped: Codable {
+    public static func wrappedAllCases(using encoder: JSONEncoder) -> [AnyCodable] {
+        return Wrapped.allCases(using: encoder)
+    }
 }
 
 extension Optional: DateOpenAPINodeType where Wrapped: DateOpenAPINodeType {
@@ -73,6 +79,41 @@ extension Array: OpenAPINodeType where Element: OpenAPINodeType {
         return .array(.init(format: .generic,
                             required: true),
                       .init(items: try Element.openAPINode()))
+    }
+}
+
+extension Array: OpenAPIEncodedNodeType where Element: OpenAPIEncodedNodeType {
+    public static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchema {
+        return .array(.init(format: .generic,
+                            required: true),
+                      .init(items: try Element.openAPINode(using: encoder)))
+    }
+}
+
+extension Dictionary: OpenAPINodeType where Key == String, Value: OpenAPINodeType {
+    static public func openAPINode() throws -> JSONSchema {
+        return .object(.init(format: .generic,
+                             required: true),
+                       .init(properties: [:],
+                             additionalProperties: .init(try Value.openAPINode())))
+    }
+}
+
+extension Dictionary: RawOpenAPINodeType where Key: RawRepresentable, Key.RawValue == String, Value: OpenAPINodeType {
+    static public func rawOpenAPINode() throws -> JSONSchema {
+        return .object(.init(format: .generic,
+                             required: true),
+                       .init(properties: [:],
+                             additionalProperties: .init(try Value.openAPINode())))
+    }
+}
+
+extension Dictionary: OpenAPIEncodedNodeType where Key == String, Value: OpenAPIEncodedNodeType {
+    public static func openAPINode(using encoder: JSONEncoder) throws -> JSONSchema {
+        return .object(.init(format: .generic,
+                             required: true),
+                       .init(properties: [:],
+                             additionalProperties: .init(try Value.openAPINode(using: encoder))))
     }
 }
 
