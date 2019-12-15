@@ -23,7 +23,7 @@ extension Sampleable where Self: Encodable {
     }
 }
 
-public func genericOpenAPINode<T: Encodable>(for value: T, using encoder: JSONEncoder) throws -> JSONSchema {
+public func genericOpenAPINode<T>(for value: T, using encoder: JSONEncoder) throws -> JSONSchema {
 
     let mirror = Mirror(reflecting: value)
     let properties: [(String, JSONSchema)] = try mirror.children.compactMap { child in
@@ -41,9 +41,8 @@ public func genericOpenAPINode<T: Encodable>(for value: T, using encoder: JSONEn
         }()
 
         // try to snag an OpenAPI Node
-        guard let openAPINode: JSONSchema = try openAPINodeGuess(for: child.value, using: encoder) else {
-            throw OpenAPITypeError.unknownNodeType(type(of: value))
-        }
+        let openAPINode: JSONSchema = try openAPINodeGuess(for: child.value, using: encoder)
+            ?? genericOpenAPINode(for: child.value, using: encoder)
 
         // put it all together
         let newNode: JSONSchema
@@ -56,11 +55,8 @@ public func genericOpenAPINode<T: Encodable>(for value: T, using encoder: JSONEn
         return zip(child.label, newNode) { ($0, $1) }
     }
 
-    // if there are no properties, let's see if we are dealing
-    // with a primitive.
-    if properties.count == 0,
-        let primitive = try primitiveGuess(for: value, using: encoder) {
-        return primitive
+    if properties.count != mirror.children.count {
+        throw OpenAPITypeError.unknownNodeType(type(of: value))
     }
 
     // There should not be any duplication of keys since these are

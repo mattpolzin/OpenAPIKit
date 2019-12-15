@@ -9,14 +9,27 @@ import XCTest
 import OpenAPIKit
 
 final class GenericOpenAPINodeTests: XCTestCase {
-    func test_failsAsUnknown() {
-        XCTAssertThrowsError(try FailsAsUnknown.genericOpenAPINode(using: JSONEncoder())) { error in
-            guard let err = error as? OpenAPITypeError,
-                case .unknownNodeType = err else {
-                XCTFail("Expected unknown node type error")
-                return
-            }
-        }
+//    func test_failsAsUnknown() {
+//        XCTAssertThrowsError(try FailsAsUnknown.genericOpenAPINode(using: JSONEncoder())) { error in
+//            guard let err = error as? OpenAPITypeError,
+//                case .unknownNodeType = err else {
+//                XCTFail("Expected unknown node type error")
+//                return
+//            }
+//        }
+//    }
+
+    func test_emptyObject() throws {
+        let node = try EmptyObjectType.genericOpenAPINode(using: JSONEncoder())
+
+        XCTAssertEqual(
+            node,
+            JSONSchema.object(
+                properties: [
+                    "empty": .object
+                ]
+            )
+        )
     }
 
     func test_basicTypes() throws {
@@ -139,6 +152,15 @@ final class GenericOpenAPINodeTests: XCTestCase {
                         items: .object(
                             additionalProperties: .init(.number(format: .double))
                         )
+                    ),
+                    "structure": .object(
+                        properties: [
+                            "bool": .boolean,
+                            "array": .array(items: .string),
+                            "dict": .object(
+                                additionalProperties: .init(.integer)
+                            )
+                        ]
                     )
                 ]
             )
@@ -244,14 +266,23 @@ extension GenericOpenAPINodeTests {
 
         let arrayDict: [[String: Date]]
 
+        let structure: Structure
+
+        struct Structure: Codable {
+            let bool: Bool
+            let array: [String]
+            let dict: [String: Int]
+        }
+
         static let sample: Nested = .init(
-            array1: ["hello"],
-            array2: [10.5],
-            array3: [Date()],
-            dict1: ["hello": "world"],
-            dict2: ["is it?" : true],
-            dictArray: ["this" : [1234]],
-            arrayDict: [["now" : Date()]]
+            array1: [],
+            array2: [],
+            array3: [],
+            dict1: [:],
+            dict2: [:],
+            dictArray: [:],
+            arrayDict: [],
+            structure: .init(bool: true, array: [], dict: [:])
         )
     }
 
@@ -348,12 +379,12 @@ extension GenericOpenAPINodeTests {
         )
     }
 
-    struct FailsAsUnknown: Codable, SampleableOpenAPIType {
-        let unknown: Unknown
+    struct EmptyObjectType: Codable, SampleableOpenAPIType {
+        let empty: EmptyObject
 
-        struct Unknown: Codable {}
+        struct EmptyObject: Codable {}
 
-        static let sample: FailsAsUnknown = .init(unknown: .init())
+        static let sample: EmptyObjectType = .init(empty: .init())
     }
 
 //    struct EncodesAsPrimitive: Codable, SampleableOpenAPIType {
