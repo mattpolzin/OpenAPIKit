@@ -64,28 +64,21 @@ final class ContentTests: XCTestCase {
 
     func test_contentMap() {
         let _: OpenAPI.Content.Map = [
+            .css: .init(schema: .init(.string)),
+            .csv: .init(schema: .init(.string)),
+            .form: .init(schema: .init(.object(properties: ["hello": .string]))),
+            .html: .init(schema: .init(.string)),
+            .javascript: .init(schema: .init(.string)),
             .json: .init(schema: .init(.string)),
             .jsonapi: .init(schema: .init(.string)),
-            .xml: .init(schema: .init(.external("hello.json#/world"))),
-            .form: .init(schema: .init(.object(properties: ["hello": .string]))),
+            .multipartForm: .init(schema: .init(.string)),
+            .pdf: .init(schema: .init(.string)),
             .rar: .init(schema: .init(.integer)),
             .tar: .init(schema: .init(.boolean)),
             .txt: .init(schema: .init(.number)),
+            .xml: .init(schema: .init(.external("hello.json#/world"))),
             .zip: .init(schema: .init(.string))
         ]
-    }
-
-    func test_encodingInit() {
-        let _ = OpenAPI.Content.Encoding()
-
-        let _ = OpenAPI.Content.Encoding(contentType: .json)
-
-        let _ = OpenAPI.Content.Encoding(headers: ["special": .b(.external("hello.yml"))])
-
-        let _ = OpenAPI.Content.Encoding(allowReserved: true)
-
-        let _ = OpenAPI.Content.Encoding(contentType: .form,
-                                         headers: ["special": .b(.external("hello.yml"))], allowReserved: true)
     }
 }
 
@@ -421,6 +414,27 @@ extension ContentTests {
 }
 
 // MARK: Content.Encoding
+extension ContentTests {
+    func test_encodingInit() {
+        let _ = OpenAPI.Content.Encoding()
+
+        let _ = OpenAPI.Content.Encoding(contentType: .json)
+
+        let _ = OpenAPI.Content.Encoding(headers: ["special": .b(.external("hello.yml"))])
+
+        let _ = OpenAPI.Content.Encoding(allowReserved: true)
+
+        let _ = OpenAPI.Content.Encoding(contentType: .form,
+                                         headers: ["special": .b(.external("hello.yml"))],
+                                         allowReserved: true)
+        let _ = OpenAPI.Content.Encoding(contentType: .json,
+                                         style: .form)
+        let _ = OpenAPI.Content.Encoding(contentType: .json,
+                                         style: .form,
+                                         explode: true)
+    }
+}
+
 @available(OSX 10.13, *)
 extension ContentTests {
     // TODO: write tests

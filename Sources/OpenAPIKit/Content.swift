@@ -11,14 +11,24 @@ import AnyCodable
 
 extension OpenAPI {
     public enum ContentType: String, Codable, Equatable, Hashable {
+        case css = "text/css"
+
+        case csv = "text/csv"
+
+        case form = "application/x-www-form-urlencoded"
+
+        case html = "text/html"
+
+        case javascript = "application/javascript"
+
         case json = "application/json"
 
         /// JSON:API
         case jsonapi = "application/vnd.api+json"
 
-        case xml = "application/xml"
+        case multipartForm = "multipart/form-data"
 
-        case form = "application/x-www-form-urlencoded"
+        case pdf = "application/pdf"
 
         /// RAR archive
         case rar = "application/x-rar-compressed"
@@ -26,7 +36,10 @@ extension OpenAPI {
         /// Tape Archive (TAR)
         case tar = "application/x-tar"
 
+        /// Plaintext
         case txt = "text/plain"
+
+        case xml = "application/xml"
 
         /// ZIP archive
         case zip = "application/zip"
