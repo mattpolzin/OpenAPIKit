@@ -272,6 +272,7 @@ extension JSONSchema {
 // MARK: - Convenience
 
 extension JSONSchema {
+    // array allowedValues
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -295,10 +296,34 @@ extension JSONSchema {
         return .boolean(context)
     }
 
+    // variadic allowedValues
+    public static func boolean(
+        format: JSONTypeFormat.BooleanFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
+        allowedValues: AnyCodable...,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchema {
+        return .boolean(
+            format: format,
+            required: required,
+            nullable: nullable,
+            title: title,
+            description: description,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
+
     public static var boolean: JSONSchema {
         return .boolean()
     }
 
+    // array allowedValues
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
@@ -330,10 +355,40 @@ extension JSONSchema {
         return .string(genericContext, stringContext)
     }
 
+    // variadic allowedValues
+    public static func string(
+        format: JSONTypeFormat.StringFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
+        minLength: Int = 0,
+        maxLength: Int? = nil,
+        pattern: String? = nil,
+        allowedValues: AnyCodable...,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchema {
+        return .string(
+            format: format,
+            required: required,
+            nullable: nullable,
+            title: title,
+            description: description,
+            externalDocs: externalDocs,
+            minLength: minLength,
+            maxLength: maxLength,
+            pattern: pattern,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
+
     public static var string: JSONSchema {
         return .string()
     }
 
+    // array allowedValues
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
@@ -365,10 +420,40 @@ extension JSONSchema {
         return .number(genericContext, numbericContext)
     }
 
+    // variadic allowedValues
+    public static func number(
+        format: JSONTypeFormat.NumberFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
+        multipleOf: Double? = nil,
+        maximum: (Double, exclusive: Bool)? = nil,
+        minimum: (Double, exclusive: Bool)? = nil,
+        allowedValues: AnyCodable...,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchema {
+        return .number(
+            format: format,
+            required: required,
+            nullable: nullable,
+            title: title,
+            description: description,
+            externalDocs: externalDocs,
+            multipleOf: multipleOf,
+            maximum: maximum,
+            minimum: minimum,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
+
     public static var number: JSONSchema {
         return .number()
     }
 
+    // array allowedValues
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
@@ -400,10 +485,40 @@ extension JSONSchema {
         return .integer(genericContext, integerContext)
     }
 
+    // variadic allowedValues
+    public static func integer(
+        format: JSONTypeFormat.IntegerFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
+        multipleOf: Int? = nil,
+        maximum: (Int, exclusive: Bool)? = nil,
+        minimum: (Int, exclusive: Bool)? = nil,
+        allowedValues: AnyCodable...,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchema {
+        return .integer(
+            format: format,
+            required: required,
+            nullable: nullable,
+            title: title,
+            description: description,
+            externalDocs: externalDocs,
+            multipleOf: multipleOf,
+            maximum: maximum,
+            minimum: minimum,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
+
     public static var integer: JSONSchema {
         return .integer()
     }
 
+    // array allowedValues
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
@@ -441,6 +556,7 @@ extension JSONSchema {
         return .object()
     }
 
+    // array allowedValues
     public static func array(format: JSONTypeFormat.ArrayFormat = .unspecified,
                              required: Bool = true,
                              nullable: Bool = false,
@@ -472,6 +588,18 @@ extension JSONSchema {
             uniqueItems: uniqueItems
         )
         return .array(generalContext, arrayContext)
+    }
+
+    public static func all(of schemas: JSONSchema...) -> JSONSchema {
+        return .all(of: schemas)
+    }
+
+    public static func one(of schemas: JSONSchema...) -> JSONSchema {
+        return .one(of: schemas)
+    }
+
+    public static func any(of schemas: JSONSchema...) -> JSONSchema {
+        return .any(of: schemas)
     }
 }
 

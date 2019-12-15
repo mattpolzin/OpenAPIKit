@@ -3222,8 +3222,6 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNodeReference() {
-//        let components = OpenAPI.Components(schemas: ["requiredBool": .boolean(.init(format: .unspecified, required: true))],
-//                                            parameters: [:])
         let nodeRef = JSONSchema.reference(.internal(.node(.init(path: \.schemas, selector: "requiredBool"))))
 
         testEncodingPropertyLines(entity: nodeRef, propertyLines: [
@@ -3350,6 +3348,10 @@ extension SchemaObjectTests {
             maximum: (9.5, exclusive: false),
             minimum: (2, exclusive: true)
         )
+        let _ = JSONSchema.number(
+            format: .double,
+            allowedValues: 5.5
+        )
     }
 
     func test_integer() {
@@ -3368,6 +3370,10 @@ extension SchemaObjectTests {
             maximum: (10, exclusive: true),
             minimum: (3, exclusive: false)
         )
+        let _ = JSONSchema.integer(
+            required: true,
+            allowedValues: 1, 2, 3
+        )
     }
 
     func test_string() {
@@ -3380,6 +3386,9 @@ extension SchemaObjectTests {
             required: false,
             nullable: false,
             pattern: "ab..efgh"
+        )
+        let _ = JSONSchema.string(
+            allowedValues: "hello", "world"
         )
     }
 
@@ -3422,5 +3431,47 @@ extension SchemaObjectTests {
                                 "created_at": .string(format: .dateTime),
                                 "bio": .string(nullable: true)
         ])])])
+    }
+
+    func test_allOf() {
+        let t1: JSONSchema = .all(of:
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+        )
+        let t2: JSONSchema = .all(of: [
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+            ]
+        )
+
+        XCTAssertEqual(t1, t2)
+    }
+
+    func test_oneOf() {
+        let t1: JSONSchema = .one(of:
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+        )
+        let t2: JSONSchema = .one(of: [
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+            ]
+        )
+
+        XCTAssertEqual(t1, t2)
+    }
+
+    func test_anyOf() {
+        let t1: JSONSchema = .any(of:
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+        )
+        let t2: JSONSchema = .any(of: [
+            .object(properties: ["hello": .string]),
+            .object(properties: ["world": .boolean])
+            ]
+        )
+
+        XCTAssertEqual(t1, t2)
     }
 }

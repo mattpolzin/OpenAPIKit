@@ -44,7 +44,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         )
                     ],
                     get: .init(
-                        tags: ["Test"],
+                        tags: "Test",
                         summary: "Get Test",
                         description: "Get Test description",
                         parameters: [
@@ -77,7 +77,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         ]
                     ),
                     post: .init(
-                        tags: ["Test"],
+                        tags: "Test",
                         summary: "Post Test",
                         description: "Post Test description",
                         parameters: [],
@@ -170,7 +170,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     items: .object(
                         properties: [
                             "id": .string,
-                            "type": .string(allowedValues: ["test_thing"]),
+                            "type": .string(allowedValues: "test_thing"),
 
                             "attributes": .object(
                                 properties: [

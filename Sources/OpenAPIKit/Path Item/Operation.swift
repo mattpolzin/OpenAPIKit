@@ -44,6 +44,30 @@ extension OpenAPI.PathItem {
             self.deprecated = deprecated
             self.servers = servers
         }
+
+        public init(tags: String...,
+                    summary: String? = nil,
+                    description: String? = nil,
+                    externalDocs: OpenAPI.ExternalDoc? = nil,
+                    operationId: String? = nil,
+                    parameters: Parameter.Array,
+                    requestBody: OpenAPI.Request? = nil,
+                    responses: OpenAPI.Response.Map,
+                    deprecated: Bool = false,
+                    servers: [OpenAPI.Server]? = nil) {
+            self.init(
+                tags: tags,
+                summary: summary,
+                description: description,
+                externalDocs: externalDocs,
+                operationId: operationId,
+                parameters: parameters,
+                requestBody: requestBody,
+                responses: responses,
+                deprecated: deprecated,
+                servers: servers
+            )
+        }
     }
 }
 
