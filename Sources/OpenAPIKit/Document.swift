@@ -37,6 +37,25 @@ extension OpenAPI {
             self.tags = tags
             self.externalDocs = externalDocs
         }
+
+        // variadic servers
+        public init(openAPIVersion: Version = .v3_0_0,
+                    info: Info,
+                    servers: Server...,
+                    paths: PathItem.Map,
+                    components: OpenAPI.Components,
+                    tags: [Tag]? = nil,
+                    externalDocs: ExternalDoc? = nil) {
+            self.init(
+                openAPIVersion: openAPIVersion,
+                info: info,
+                servers: servers,
+                paths: paths,
+                components: components,
+                tags: tags,
+                externalDocs: externalDocs
+            )
+        }
     }
 }
 
