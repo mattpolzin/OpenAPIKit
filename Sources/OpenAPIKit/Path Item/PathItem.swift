@@ -9,19 +9,6 @@ import Foundation
 import Poly
 
 extension OpenAPI {
-    public enum HttpVerb: String, CaseIterable {
-        case get = "GET"
-        case post = "POST"
-        case patch = "PATCH"
-        case put = "PUT"
-        case delete = "DELETE"
-        case head = "HEAD"
-        case options = "OPTIONS"
-        case trace = "TRACE"
-    }
-}
-
-extension OpenAPI {
     public struct PathComponents: RawRepresentable, Equatable, Hashable {
         public let components: [String]
 
@@ -176,7 +163,9 @@ extension OpenAPI.PathItem: Encodable {
 
         try servers.encodeIfNotNil(to: &container, forKey: .servers)
 
-        try container.encode(parameters, forKey: .parameters)
+        if !parameters.isEmpty {
+            try container.encode(parameters, forKey: .parameters)
+        }
 
         try get.encodeIfNotNil(to: &container, forKey: .get)
         try put.encodeIfNotNil(to: &container, forKey: .put)

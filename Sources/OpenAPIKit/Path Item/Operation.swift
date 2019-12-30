@@ -104,7 +104,9 @@ extension OpenAPI.PathItem.Operation: Encodable {
 
         try operationId.encodeIfNotNil(to: &container, forKey: .operationId)
 
-        try container.encode(parameters, forKey: .parameters)
+        if !parameters.isEmpty {
+            try container.encode(parameters, forKey: .parameters)
+        }
 
         try requestBody.encodeIfNotNil(to: &container, forKey: .requestBody)
 
@@ -116,7 +118,9 @@ extension OpenAPI.PathItem.Operation: Encodable {
         )
         try container.encode(stringKeyedDict, forKey: .responses)
 
-        try container.encode(deprecated, forKey: .deprecated)
+        if deprecated {
+            try container.encode(deprecated, forKey: .deprecated)
+        }
 
         try servers.encodeIfNotNil(to: &container, forKey: .servers)
     }
