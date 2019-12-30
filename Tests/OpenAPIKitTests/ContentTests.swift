@@ -64,19 +64,28 @@ final class ContentTests: XCTestCase {
 
     func test_contentMap() {
         let _: OpenAPI.Content.Map = [
+            .bmp: .init(schema: .init(.string(format: .binary))),
             .css: .init(schema: .init(.string)),
             .csv: .init(schema: .init(.string)),
             .form: .init(schema: .init(.object(properties: ["hello": .string]))),
             .html: .init(schema: .init(.string)),
             .javascript: .init(schema: .init(.string)),
+            .jpg: .init(schema: .init(.string(format: .binary))),
             .json: .init(schema: .init(.string)),
             .jsonapi: .init(schema: .init(.string)),
+            .mov: .init(schema: .init(.string(format: .binary))),
+            .mp3: .init(schema: .init(.string(format: .binary))),
+            .mp4: .init(schema: .init(.string(format: .binary))),
+            .mpg: .init(schema: .init(.string(format: .binary))),
             .multipartForm: .init(schema: .init(.string)),
             .pdf: .init(schema: .init(.string)),
             .rar: .init(schema: .init(.integer)),
+            .rtf: .init(schema: .init(.string)),
             .tar: .init(schema: .init(.boolean)),
+            .tif: .init(schema: .init(.string(format: .binary))),
             .txt: .init(schema: .init(.number)),
             .xml: .init(schema: .init(.external("hello.json#/world"))),
+            .yaml: .init(schema: .init(.string)),
             .zip: .init(schema: .init(.string))
         ]
     }
@@ -413,7 +422,7 @@ extension ContentTests {
     }
 }
 
-// MARK: Content.Encoding
+// MARK: - Content.Encoding
 extension ContentTests {
     func test_encodingInit() {
         let _ = OpenAPI.Content.Encoding()
@@ -437,5 +446,185 @@ extension ContentTests {
 
 @available(OSX 10.13, *)
 extension ContentTests {
-    // TODO: write tests
+    func test_encoding_minimal_encode() throws {
+        let encoding = OpenAPI.Content.Encoding()
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+
+}
+"""
+        )
+    }
+
+    func test_encoding_minimal_decode() throws {
+        let encodingData =
+"""
+{}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(encoding, OpenAPI.Content.Encoding())
+    }
+
+    func test_encoding_contentType_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(contentType: .csv)
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+  "contentType" : "text\\/csv"
+}
+"""
+        )
+    }
+
+    func test_encoding_contentType_decode() throws {
+        let encodingData =
+"""
+{
+    "contentType": "text/csv"
+}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentType: .csv))
+    }
+
+    func test_encoding_headers_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(headers: [
+            "X-CustomThing": .init(OpenAPI.Header(schema: .string))
+        ])
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+  "headers" : {
+    "X-CustomThing" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_encoding_headers_decode() throws {
+        let encodingData =
+"""
+{
+  "headers" : {
+    "X-CustomThing" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  }
+}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(
+            encoding,
+            OpenAPI.Content.Encoding(headers: [
+                "X-CustomThing": .init(OpenAPI.Header(schema: .string(required: false)))
+            ])
+        )
+    }
+
+    func test_encoding_style_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(style: .pipeDelimited)
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+  "style" : "pipeDelimited"
+}
+"""
+        )
+    }
+
+    func test_encoding_style_decode() throws {
+        let encodingData =
+"""
+{
+  "style" : "pipeDelimited"
+}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(
+            encoding,
+            OpenAPI.Content.Encoding(style: .pipeDelimited)
+        )
+    }
+
+    func test_encoding_explode_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(explode: false)
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+  "explode" : false
+}
+"""
+        )
+    }
+
+    func test_encoding_explode_decode() throws {
+        let encodingData =
+"""
+{
+  "explode" : false
+}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(
+            encoding,
+            OpenAPI.Content.Encoding(explode: false)
+        )
+    }
+
+    func test_encoding_allowReserved_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(allowReserved: true)
+
+        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+
+        XCTAssertEqual(encodedEncoding,
+"""
+{
+  "allowReserved" : true
+}
+"""
+        )
+    }
+
+    func test_encoding_allowReserved_decode() throws {
+        let encodingData =
+"""
+{
+  "allowReserved" : true
+}
+""".data(using: .utf8)!
+        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(
+            encoding,
+            OpenAPI.Content.Encoding(allowReserved: true)
+        )
+    }
 }

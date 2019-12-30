@@ -28,6 +28,36 @@ extension OpenAPI {
             self.required = required
             self.deprecated = deprecated
         }
+
+        public init(schema: JSONSchema,
+                    description: String? = nil,
+                    required: Bool = false,
+                    deprecated: Bool = false) {
+            self.schemaOrContent = .init(.init(schema))
+            self.description = description
+            self.required = required
+            self.deprecated = deprecated
+        }
+
+        public init(schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+                    description: String? = nil,
+                    required: Bool = false,
+                    deprecated: Bool = false) {
+            self.schemaOrContent = .init(.init(schemaReference))
+            self.description = description
+            self.required = required
+            self.deprecated = deprecated
+        }
+
+        public init(content: OpenAPI.Content.Map,
+                    description: String? = nil,
+                    required: Bool = false,
+                    deprecated: Bool = false) {
+            self.schemaOrContent = .init(content)
+            self.description = description
+            self.required = required
+            self.deprecated = deprecated
+        }
     }
 }
 
