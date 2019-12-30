@@ -131,8 +131,8 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 ### Encoding Object (`OpenAPI.Content.Encoding`)
 - [x] contentType
 - [x] headers
-- [ ] style
-- [ ] explode
+- [x] style
+- [x] explode
 - [x] allowReserved
 
 ### Responses Object (`OpenAPI.Response.Map`)
