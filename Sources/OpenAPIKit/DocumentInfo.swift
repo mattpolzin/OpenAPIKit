@@ -8,7 +8,7 @@
 import Foundation
 
 extension OpenAPI.Document {
-    public struct Info: Codable {
+    public struct Info: Equatable {
         public let title: String
         public let description: String?
         public let termsOfService: URL?
@@ -30,7 +30,7 @@ extension OpenAPI.Document {
             self.version = version
         }
 
-        public struct Contact: Codable {
+        public struct Contact: Equatable {
             public let name: String?
             public let url: URL?
             public let email: String?
@@ -105,6 +105,81 @@ extension OpenAPI.Document.Info.License {
     }
 }
 
-// TODO: Contacts codable
+extension OpenAPI.Document.Info.Contact: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
 
-// TODO: Info codable
+        try name.encodeIfNotNil(to: &container, forKey: .name)
+
+        try url.encodeIfNotNil(to: &container, forKey: .url)
+
+        try email.encodeIfNotNil(to: &container, forKey: .email)
+    }
+}
+
+extension OpenAPI.Document.Info.Contact: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        name = try container.decodeIfPresent(String.self, forKey: .name)
+
+        url = try container.decodeIfPresent(URL.self, forKey: .url)
+
+        email = try container.decodeIfPresent(String.self, forKey: .email)
+    }
+}
+
+extension OpenAPI.Document.Info.Contact {
+    enum CodingKeys: String, CodingKey {
+        case name
+        case url
+        case email
+    }
+}
+
+extension OpenAPI.Document.Info: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(title, forKey: .title)
+
+        try description.encodeIfNotNil(to: &container, forKey: .description)
+
+        try termsOfService.encodeIfNotNil(to: &container, forKey: .termsOfService)
+
+        try contact.encodeIfNotNil(to: &container, forKey: .contact)
+
+        try license.encodeIfNotNil(to: &container, forKey: .license)
+
+        try container.encode(version, forKey: .version)
+    }
+}
+
+extension OpenAPI.Document.Info: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        title = try container.decode(String.self, forKey: .title)
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        termsOfService = try container.decodeIfPresent(URL.self, forKey: .termsOfService)
+
+        contact = try container.decodeIfPresent(Contact.self, forKey: .contact)
+
+        license = try container.decodeIfPresent(License.self, forKey: .license)
+
+        version = try container.decode(String.self, forKey: .version)
+    }
+}
+
+extension OpenAPI.Document.Info {
+    enum CodingKeys: String, CodingKey {
+        case title
+        case description
+        case termsOfService
+        case contact
+        case license
+        case version
+    }
+}
