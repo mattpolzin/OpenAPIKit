@@ -11,7 +11,7 @@ extension OpenAPI {
     /// What the spec calls the "Components Object".
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
-    public struct Components: Equatable, Codable, ReferenceRoot {
+    public struct Components: Equatable, ReferenceRoot {
         public static var refName: String { return "components" }
 
         public let schemas: SchemasDict
@@ -82,5 +82,74 @@ extension OpenAPI {
         }
 
         public typealias HeadersDict = RefDict<Components, HeadersName, Header>
+    }
+}
+
+// MARK: - Codable
+extension OpenAPI.Components: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        if !schemas.dict.isEmpty {
+            try container.encode(schemas, forKey: .schemas)
+        }
+
+        if !responses.dict.isEmpty {
+            try container.encode(responses, forKey: .responses)
+        }
+
+        if !parameters.dict.isEmpty {
+            try container.encode(parameters, forKey: .parameters)
+        }
+
+        if !examples.dict.isEmpty {
+            try container.encode(examples, forKey: .examples)
+        }
+
+        if !requestBodies.dict.isEmpty {
+            try container.encode(requestBodies, forKey: .requestBodies)
+        }
+
+        if !headers.dict.isEmpty {
+            try container.encode(headers, forKey: .headers)
+        }
+    }
+}
+
+extension OpenAPI.Components: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        schemas = try container.decodeIfPresent(SchemasDict.self, forKey: .schemas)
+            ?? SchemasDict([:])
+
+        responses = try container.decodeIfPresent(ResponsesDict.self, forKey: .responses)
+            ?? ResponsesDict([:])
+
+        parameters = try container.decodeIfPresent(ParametersDict.self, forKey: .parameters)
+            ?? ParametersDict([:])
+
+        examples = try container.decodeIfPresent(ExamplesDict.self, forKey: .examples)
+            ?? ExamplesDict([:])
+
+        requestBodies = try container.decodeIfPresent(RequestBodiesDict.self, forKey: .requestBodies)
+            ?? RequestBodiesDict([:])
+
+        headers = try container.decodeIfPresent(HeadersDict.self, forKey: .headers)
+            ?? HeadersDict([:])
+    }
+}
+
+extension OpenAPI.Components {
+    enum CodingKeys: String, CodingKey {
+        case schemas
+        case responses
+        case parameters
+        case examples
+        case requestBodies
+        case headers
+        // case securitySchemas
+        // case links
+        // case callbacks
     }
 }
