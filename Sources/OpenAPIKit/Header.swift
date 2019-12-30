@@ -121,9 +121,9 @@ extension OpenAPI.Header: Decodable {
         let maybeSchema = try container.decodeIfPresent(SchemaProperty.self, forKey: .schema)
 
         switch (maybeContent, maybeSchema) {
-        case (let content?, _):
+        case (let content?, nil):
             schemaOrContent = .init(content)
-        case (_, let schema?):
+        case (nil, let schema?):
             schemaOrContent = .init(schema)
         default:
             throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.", codingPath: decoder.codingPath)
