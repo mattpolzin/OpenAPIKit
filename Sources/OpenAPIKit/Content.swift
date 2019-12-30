@@ -10,46 +10,6 @@ import Poly
 import AnyCodable
 
 extension OpenAPI {
-    public enum ContentType: String, Codable, Equatable, Hashable {
-        /// Bitmap image
-        case bmp = "image/bmp"
-        case css = "text/css"
-        case csv = "text/csv"
-        /// URL-encoded form data. See also: `multipartForm`.
-        case form = "application/x-www-form-urlencoded"
-        case html = "text/html"
-        case javascript = "application/javascript"
-        /// JPEG image
-        case jpg = "image/jpeg"
-        case json = "application/json"
-        /// JSON:API Document
-        case jsonapi = "application/vnd.api+json"
-        /// Quicktime video
-        case mov = "video/quicktime"
-        /// MP3 audio
-        case mp3 = "audio/mpeg"
-        /// MP4 video
-        case mp4 = "video/mp4"
-        /// MPEG video
-        case mpg = "video/mpeg"
-        /// Multipart form data. See also: `form`.
-        case multipartForm = "multipart/form-data"
-        case pdf = "application/pdf"
-        /// RAR archive
-        case rar = "application/x-rar-compressed"
-        case rtf = "application/rtf"
-        /// Tape Archive (TAR)
-        case tar = "application/x-tar"
-        /// TIF image
-        case tif = "image/tiff"
-        /// Plaintext
-        case txt = "text/plain"
-        case xml = "application/xml"
-        case yaml = "application/x-yaml"
-        /// ZIP archive
-        case zip = "application/zip"
-    }
-
     public struct Content: Equatable, VendorExtendable {
         public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         public let example: AnyCodable?
@@ -135,42 +95,7 @@ extension OpenAPI.Content {
     public typealias Map = [OpenAPI.ContentType: OpenAPI.Content]
 }
 
-extension OpenAPI.Content {
-    public struct Encoding: Equatable {
-        public typealias Style = OpenAPI.PathItem.Parameter.Schema.Style
 
-        public let contentType: OpenAPI.ContentType?
-        public let headers: OpenAPI.Header.Map?
-        public let style: Style
-        public let explode: Bool
-        public let allowReserved: Bool
-
-        public init(contentType: OpenAPI.ContentType? = nil,
-                    headers: OpenAPI.Header.Map? = nil,
-                    style: Style = Self.defaultStyle,
-                    allowReserved: Bool = false) {
-            self.contentType = contentType
-            self.headers = headers
-            self.style = style
-            self.explode = style.defaultExplode
-            self.allowReserved = allowReserved
-        }
-
-        public init(contentType: OpenAPI.ContentType? = nil,
-                    headers: OpenAPI.Header.Map? = nil,
-                    style: Style = Self.defaultStyle,
-                    explode: Bool,
-                    allowReserved: Bool = false) {
-            self.contentType = contentType
-            self.headers = headers
-            self.style = style
-            self.explode = explode
-            self.allowReserved = allowReserved
-        }
-
-        public static let defaultStyle: Style = .default(for: .query)
-    }
-}
 
 extension OpenAPI.Content {
     internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
@@ -284,56 +209,5 @@ extension OpenAPI.Content {
         var intValue: Int? {
             return nil
         }
-    }
-}
-
-// MARK: Content.Encoding
-
-extension OpenAPI.Content.Encoding: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try contentType.encodeIfNotNil(to: &container, forKey: .contentType)
-
-        try headers.encodeIfNotNil(to: &container, forKey: .headers)
-
-        if style != Self.defaultStyle {
-            try container.encode(style, forKey: .style)
-        }
-
-        if explode != style.defaultExplode {
-            try container.encode(explode, forKey: .explode)
-        }
-
-        if allowReserved != false {
-            try container.encode(allowReserved, forKey: .allowReserved)
-        }
-    }
-}
-
-extension OpenAPI.Content.Encoding: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        contentType = try container.decodeIfPresent(OpenAPI.ContentType.self, forKey: .contentType)
-
-        headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
-
-        let style: Style = try container.decodeIfPresent(Style.self, forKey: .style) ?? Self.defaultStyle
-        self.style = style
-
-        explode = try container.decodeIfPresent(Bool.self, forKey: .explode) ?? style.defaultExplode
-
-        allowReserved = try container.decodeIfPresent(Bool.self, forKey: .allowReserved) ?? false
-    }
-}
-
-extension OpenAPI.Content.Encoding {
-    private enum CodingKeys: String, CodingKey {
-        case contentType
-        case headers
-        case style
-        case explode
-        case allowReserved
     }
 }
