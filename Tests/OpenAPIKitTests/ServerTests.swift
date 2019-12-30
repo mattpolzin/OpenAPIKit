@@ -48,8 +48,6 @@ class ServerTests: XCTestCase {
 }
 
 // MARK: - Codable
-
-@available(OSX 10.13, *)
 extension ServerTests {
     func test_minimalServer_decode() {
         let serverData =

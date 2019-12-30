@@ -72,7 +72,6 @@ extension ResponseTests {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension ResponseTests {
     func test_emptyDescriptionEmptyContent_encode() {
         let response = OpenAPI.Response(description: "", content: [:])
@@ -191,7 +190,6 @@ extension ResponseTests {
 }
 
 // MARK: Response Status Code
-@available(OSX 10.13, *)
 extension ResponseTests {
 
     struct StatusCodeWrapper: Codable, Equatable {

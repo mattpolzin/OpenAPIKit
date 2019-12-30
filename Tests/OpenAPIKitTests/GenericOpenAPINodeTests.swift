@@ -62,10 +62,15 @@ final class GenericOpenAPINodeTests: XCTestCase {
         )
     }
 
-    @available(macOS 10.13, *)
     func test_dateTypeFormats() throws {
         let e1 = JSONEncoder()
+        #if os(Linux)
         e1.dateEncodingStrategy = .iso8601
+        #else
+        if #available(macOS 10.12, *) {
+            e1.dateEncodingStrategy = .iso8601
+        }
+        #endif
 
         let node1 = try DateType.genericOpenAPINode(using: e1)
 

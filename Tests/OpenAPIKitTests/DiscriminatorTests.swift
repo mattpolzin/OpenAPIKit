@@ -23,7 +23,6 @@ final class DiscriminatorTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension DiscriminatorTests {
     func test_noMapping_encode() {
         let discriminator = OpenAPI.Discriminator(propertyName: "hello")

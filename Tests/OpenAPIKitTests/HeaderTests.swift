@@ -44,7 +44,6 @@ final class HeaderTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(macOS 10.13, *)
 extension HeaderTests {
     func test_header_contentMap_encode() throws {
         let header = OpenAPI.Header(content: [

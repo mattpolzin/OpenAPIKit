@@ -110,7 +110,6 @@ class SwiftPrimitiveTypesTests: XCTestCase {
         XCTAssertEqual(RawRepStringEnum?.allCases(using: SwiftPrimitiveTypesTests.localTestEncoder).count, 2)
     }
 
-    @available(OSX 10.13, *)
     func test_OptionalDateNodeType() {
         XCTAssertEqual(Date?.dateOpenAPINodeGuess(using: testEncoder), .string(format: .dateTime, required: false))
     }

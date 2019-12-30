@@ -20,7 +20,6 @@ final class ExternalDocTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension ExternalDocTests {
     func test_descriptionAndUrl_encode() {
         let externalDoc = OpenAPI.ExternalDoc(description: "hello world",

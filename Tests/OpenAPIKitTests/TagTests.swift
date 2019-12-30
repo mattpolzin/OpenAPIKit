@@ -27,8 +27,6 @@ final class TagTests: XCTestCase {
 }
 
 // MARK: - Codable
-
-@available(OSX 10.13, *)
 extension TagTests {
     func test_onlyName_encode() {
         let tag = OpenAPI.Tag(name: "hello")

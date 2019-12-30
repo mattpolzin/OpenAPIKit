@@ -40,7 +40,6 @@ final class ExampleTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension ExampleTests {
     func test_summaryAndExternalExample_encode() {
         let example = OpenAPI.Example(summary: "hello",

@@ -92,7 +92,6 @@ final class ContentTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension ContentTests {
     func test_referenceContent_encode() {
         let content = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
@@ -444,7 +443,6 @@ extension ContentTests {
     }
 }
 
-@available(OSX 10.13, *)
 extension ContentTests {
     func test_encoding_minimal_encode() throws {
         let encoding = OpenAPI.Content.Encoding()

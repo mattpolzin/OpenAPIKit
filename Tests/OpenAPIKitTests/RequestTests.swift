@@ -43,7 +43,6 @@ final class RequestTests: XCTestCase {
 }
 
 // MARK: - Codable
-@available(OSX 10.13, *)
 extension RequestTests {
     func test_onlyEmptyContent_encode() {
         let content: OpenAPI.Content.Map = [:]
@@ -216,7 +215,6 @@ extension RequestTests {
 }
 
 // MARK: Other Content Types
-@available(OSX 10.13, *)
 extension RequestTests {
     func test_xml_onlySchemaContent_encode() {
         let schema = JSONSchema.object(

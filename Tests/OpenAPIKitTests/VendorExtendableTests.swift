@@ -80,7 +80,6 @@ final class VendorExtendableTests: XCTestCase {
     }
 }
 
-@available(OSX 10.13, *)
 extension VendorExtendableTests {
     func test_encode() throws {
         let test = TestStruct(vendorExtensions: [
