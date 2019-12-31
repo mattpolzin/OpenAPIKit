@@ -31,13 +31,7 @@ class AnyJSONCaseIterableTests: XCTestCase {
     }
 }
 
-enum CodableEnum: String, CaseIterable, Codable {
+enum CodableEnum: String, CaseIterable, AnyJSONCaseIterable, Codable {
     case one
     case two
-}
-
-extension CodableEnum: AnyJSONCaseIterable {
-    static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
-        return (try? allCases(from: allCases, using: encoder)) ?? []
-    }
 }

@@ -4,6 +4,186 @@
 
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
+<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Usage](#usage)
+	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
+	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
+	- [Generating OpenAPI Documents](#generating-openapi-documents)
+	- [OpenAPI Document structure](#openapi-document-structure)
+- [Notes](#notes)
+- [Project Status](#project-status)
+	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
+	- [Info Object (`OpenAPI.Document.Info`)](#info-object-openapidocumentinfo)
+	- [Contact Object (`OpenAPI.Document.Info.Contact`)](#contact-object-openapidocumentinfocontact)
+	- [License Object (`OpenAPI.Document.Info.License`)](#license-object-openapidocumentinfolicense)
+	- [Server Object (`OpenAPI.Server`)](#server-object-openapiserver)
+	- [Server Variable Object](#server-variable-object)
+	- [Components Object (`OpenAPI.Components`)](#components-object-openapicomponents)
+	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
+	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
+	- [Operation Object (`OpenAPI.PathItem.Operation`)](#operation-object-openapipathitemoperation)
+	- [External Document Object (`OpenAPI.ExternalDoc`)](#external-document-object-openapiexternaldoc)
+	- [Parameter Object (`OpenAPI.PathItem.Parameter`)](#parameter-object-openapipathitemparameter)
+	- [Request Body Object (`OpenAPI.Request`)](#request-body-object-openapirequest)
+	- [Media Type Object (`OpenAPI.Content`)](#media-type-object-openapicontent)
+	- [Encoding Object (`OpenAPI.Content.Encoding`)](#encoding-object-openapicontentencoding)
+	- [Responses Object (`OpenAPI.Response.Map`)](#responses-object-openapiresponsemap)
+	- [Response Object (`OpenAPI.Response`)](#response-object-openapiresponse)
+	- [Callback Object](#callback-object)
+	- [Example Object](#example-object)
+	- [Link Object](#link-object)
+	- [Header Object](#header-object)
+	- [Tag Object](#tag-object)
+	- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
+	- [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
+	- [Discriminator Object](#discriminator-object)
+	- [XML Object](#xml-object)
+	- [Security Scheme Object](#security-scheme-object)
+	- [OAuth Flows Object](#oauth-flows-object)
+	- [OAuth Flow Object](#oauth-flow-object)
+	- [Security Requirement Object](#security-requirement-object)
+
+<!-- /TOC -->
+
+## Usage
+
+### Decoding OpenAPI Documents
+
+You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
+```swift
+let decoder = ... // JSONDecoder() or YAMLDecoder()
+let openAPIDoc = try decoder.decode(OpenAPI.Document, from: ...)
+```
+
+### Encoding OpenAPI Documents
+
+You can encode a JSON OpenAPI document (i.e. using the `JSONEncoder` from the **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLEncoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
+```swift
+let openAPIDoc = ...
+let encoder = ... // JSONEncoder() or YAMLEncoder()
+let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
+```
+
+### Generating OpenAPI Documents
+
+See [**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) for an example of generating OpenAPI from a Vapor application's routes.
+
+See [**JSONAPI+OpenAPI**](https://github.com/mattpolzin/jsonapi-openapi) for an example of generating OpenAPI response schemas from JSON:API response documents.
+
+### OpenAPI Document structure
+The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)  version 3.0.2. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
+
+#### Document Root
+At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
+
+#### Routes
+Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of this dictionary are the paths for each route (i.e. `/widgets`). The values of this dictionary are `OpenAPI.PathItems` which define any combination of endpoints (i.e. `GET`, `POST`, `PATCH`, etc.) that the given route supports.
+
+#### Endpoints
+Each endpoint on a route is defined by an `OpenAPI.PathItem.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
+
+#### Request/Response Bodies
+Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the `JSONSchema` type for such schema definitions.
+
+#### Schemas
+**Fundamental types** are specified as `JSONSchema.integer`, `JSONSchema.string`, `JSONSchema.boolean`, etc.
+
+**Properties** are given as arguments to static constructors. By default, types are **non-nullable**, **required**, and **generic**.
+
+A type can be made **optional** (i.e. it can be omitted) with `JSONSchema.integer(required: false)` or `JSONSchema.integer.optionalSchemaObject()`. A type can be made **nullable** with `JSONSchema.number(nullable: true)` or `JSONSchema.number.nullableSchemaObject()`.
+
+A type's **format** can be further specified, for example `JSONSchema.number(format: .double)` or `JSONSchema.string(format: .dateTime)`.
+
+You can specify a schema's **allowed values** (e.g. for an enumerated type) with `JSONSchema.string(allowedValues: "hello", "world")`.
+
+Each type has its own additional set of properties that can be specified. For example, integers can have a **minimum value**: `JSONSchema.integer(minimum: (0, exclusive: true))` (where exclusive means the number must be greater than 0, not greater-than-or-equal-to 0).
+
+Compound objects can be built with `JSONSchema.array`, `JSONSchema.object`, `JSONSchema.all(of:)`, etc.
+
+For example, perhaps a person is represented by the schema:
+```swift
+JSONSchema.object(
+  title: "Person",
+  properties: [
+    "first_name": .string(minLength: 2),
+    "last_name": .string(nullable: true),
+    "age": .integer,
+    "favorite_color": .string(allowedValues: "red", "green", "blue")
+  ]
+)
+```
+
+##### Generating Schemas
+
+Some schemas can be easily generated from Swift types. Many of the fundamental Swift types support schema representations out-of-box.
+
+For example, the following are true
+```swift
+String.openAPINode() == JSONSchema.string
+
+Bool.openAPINode() == JSONSchema.boolean
+
+Double.openAPINode() == JSONSchema.number(format: .double)
+
+Float.openAPINode() == JSONSchema.number(format: .float)
+...
+```
+
+`Array` and `Optional` are supported out-of-box. For example, the following are true
+```swift
+[String].openAPINode() == .array(items: .string)
+
+[Int].openAPINode() == .array(items: .integer)
+
+Int32?.openAPINode() == .integer(format: .int32, required: false)
+
+[String?].openAPINode() == .array(items: .string(required: false))
+...
+```
+
+###### AnyCodable
+
+A subset of supported Swift types require a `JSONEncoder` either to make an educated guess at the `JSONSchema` for the type or in order to turn arbitrary types into `AnyCodable` for use as schema examples or allowed values.
+
+Swift enums produce schemas with **allowed values** specified as long as they conform to `CaseIterable`, `Encodable`, and `AnyJSONCaseIterable` (the last of which is free given the former two).
+```swift
+enum CodableEnum: String, CaseIterable, AnyJSONCaseIterable, Codable {
+    case one
+    case two
+}
+
+let schema = CodableEnum.genericOpenAPINode(using: JSONEncoder())
+// ^ equivalent, although not equatable, to:
+let sameSchema = JSONSchema.string(
+  allowedValues: "one", "two"
+)
+```
+
+Swift structs produce a best-guess schema as long as they conform to `Sampleable` and `Encodable`
+```swift
+struct Nested: Encodable, Sampleable {
+  let string: String
+  let array: [Int]
+
+  // `Sampleable` just enables mirroring, although you could use it to produce
+  // OpenAPI examples as well.
+  static let sample: Self = .init(
+    string: "",
+    array: []
+  )
+}
+
+let schema = Nested.genericOpenAPINode(using: JSONEncoder())
+// ^ equivalent and indeed equatable to:
+let sameSchema = JSONSchema.object(
+  properties: [
+    "string": .string,
+    "array": .array(items: .integer)
+  ]
+)
+```
+
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
 

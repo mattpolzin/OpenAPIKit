@@ -3328,10 +3328,14 @@ extension SchemaObjectTests {
 
     func test_number() {
         let _: JSONSchema = .number
-        let _ = JSONSchema.number(
+        let t1 = JSONSchema.number(
             required: true,
             nullable: true
         )
+        let t2 = JSONSchema.number
+            .requiredSchemaObject()
+            .nullableSchemaObject()
+        XCTAssertEqual(t1, t2)
         let _ = JSONSchema.number(
             required: false,
             nullable: false,

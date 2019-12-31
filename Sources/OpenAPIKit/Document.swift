@@ -17,7 +17,7 @@ extension OpenAPI {
         public let info: Info
         public let servers: [Server]
         public let paths: PathItem.Map
-        public let components: OpenAPI.Components
+        public let components: Components
         //    public let security:
         public let tags: [Tag]?
         public let externalDocs: ExternalDoc?
@@ -26,7 +26,7 @@ extension OpenAPI {
                     info: Info,
                     servers: [Server],
                     paths: PathItem.Map,
-                    components: OpenAPI.Components,
+                    components: Components,
                     tags: [Tag]? = nil,
                     externalDocs: ExternalDoc? = nil) {
             self.openAPIVersion = openAPIVersion
