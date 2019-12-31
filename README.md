@@ -67,7 +67,7 @@ let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 
 ### Generating OpenAPI Documents
 
-See [**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) for an example of generating OpenAPI from a Vapor application's routes.
+See [**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) / [VaporOpenAPIExample](https://github.com/mattpolzin/VaporOpenAPIExample) for an example of generating OpenAPI from a Vapor application's routes.
 
 See [**JSONAPI+OpenAPI**](https://github.com/mattpolzin/jsonapi-openapi) for an example of generating OpenAPI response schemas from JSON:API response documents.
 
