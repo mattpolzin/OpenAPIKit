@@ -18,7 +18,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Contact Object (`OpenAPI.Document.Info.Contact`)](#contact-object-openapidocumentinfocontact)
 	- [License Object (`OpenAPI.Document.Info.License`)](#license-object-openapidocumentinfolicense)
 	- [Server Object (`OpenAPI.Server`)](#server-object-openapiserver)
-	- [Server Variable Object](#server-variable-object)
+	- [Server Variable Object (`OpenAPI.Server.Variable`)](#server-variable-object-openapiservervariable)
 	- [Components Object (`OpenAPI.Components`)](#components-object-openapicomponents)
 	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
 	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
@@ -31,13 +31,13 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Responses Object (`OpenAPI.Response.Map`)](#responses-object-openapiresponsemap)
 	- [Response Object (`OpenAPI.Response`)](#response-object-openapiresponse)
 	- [Callback Object](#callback-object)
-	- [Example Object](#example-object)
+	- [Example Object (`OpenAPI.Example`)](#example-object-openapiexample)
 	- [Link Object](#link-object)
-	- [Header Object](#header-object)
-	- [Tag Object](#tag-object)
+	- [Header Object (`OpenAPI.Header`)](#header-object-openapiheader)
+	- [Tag Object (`OpenAPI.Tag`)](#tag-object-openapitag)
 	- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
 	- [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
-	- [Discriminator Object](#discriminator-object)
+	- [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
 	- [XML Object](#xml-object)
 	- [Security Scheme Object](#security-scheme-object)
 	- [OAuth Flows Object](#oauth-flows-object)
@@ -229,7 +229,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] description
 - [x] variables
 
-### Server Variable Object
+### Server Variable Object (`OpenAPI.Server.Variable`)
 - [x] enum
 - [x] default
 - [x] description
@@ -327,7 +327,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 ### Callback Object
 - [ ] *{expression}*
 
-### Example Object
+### Example Object (`OpenAPI.Example`)
 - [x] summary
 - [x] description
 - [x] value
@@ -342,7 +342,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] description
 - [ ] server
 
-### Header Object
+### Header Object (`OpenAPI.Header`)
 - [x] description
 - [x] required
 - [x] deprecated
@@ -354,7 +354,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
     - [ ] example
     - [ ] examples
 
-### Tag Object
+### Tag Object (`OpenAPI.Tag`)
 - [x] name
 - [x] description
 - [x] externalDocs
@@ -382,7 +382,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] example
 - [ ] deprecated
 
-### Discriminator Object
+### Discriminator Object (`OpenAPI.Discriminator`)
 - [x] propertyName
 - [x] mapping
 
