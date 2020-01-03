@@ -33,7 +33,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 )
             ],
             paths: [
-                "/test/api/endpoint/{param}": .pathItem(.init(
+                "/test/api/endpoint/{param}": .pathItem(
                     summary: "Test Endpoint",
                     description: "Test Endpoint description",
                     parameters: [
@@ -48,7 +48,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         summary: "Get Test",
                         description: "Get Test description",
                         parameters: [
-                            .parameter(reference: .internal(.node(\.parameters, named: "filter"))),
+                            .parameter(reference: .internal(\.parameters, named: "filter")),
                             .parameter(.init(
                                 name: "Content-Type",
                                 parameterLocation: .header(required: false),
@@ -106,7 +106,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                 ]
                             ))
                         ]
-                    ))
+                    )
                 )
             ],
             components: .init(
@@ -132,8 +132,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 ],
                 examples: [:],
                 requestBodies: [:],
-                headers: [:]
+                headers: [:],
+                securitySchemes: [:]
             ),
+            security: [],
             externalDocs: .init(
                 description: "External Docs",
                 url: URL(string: "http://externaldocs.com")!
@@ -168,7 +170,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             summary: "Get Test",
             description: "Get Test description",
             parameters: [
-                .parameter(reference: .internal(.node(\.parameters, named: "filter"))),
+                .parameter(reference: .internal(\.parameters, named: "filter")),
                 .parameter(.init(
                     name: "Content-Type",
                     parameterLocation: .header(required: false),
@@ -266,7 +268,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             ],
             examples: [:],
             requestBodies: [:],
-            headers: [:]
+            headers: [:],
+            securitySchemes: [:]
         )
 
         let _ = OpenAPI.Document(
@@ -277,6 +280,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 "/test/api/endpoint/{param}": .pathItem(testRoute)
             ],
             components: components,
+            security: [],
             externalDocs: .init(
                 description: "External Docs",
                 url: URL(string: "http://externaldocs.com")!
@@ -342,6 +346,33 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     )
                 )
             ]
+        )
+    }
+
+    func test_securityRequirements() {
+        let components = OpenAPI.Components(
+            schemas: [:],
+            responses: [:],
+            parameters: [:],
+            examples: [:],
+            requestBodies: [:],
+            headers: [:],
+            securitySchemes: [
+                "basic_auth": .init(type: .http(scheme: "basic", bearerFormat: nil), description: "Basic Auth")
+        ])
+
+        let securityRequirements: [OpenAPI.Document.SecurityRequirement] = [
+            [
+                .internal(\.securitySchemes, named: "basic_auth"): []
+            ]
+        ]
+
+        let _ = OpenAPI.Document(
+            info: .init(title: "Secured API", version: "1.0"),
+            servers: OpenAPI.Server(url: URL(string: "http://google.com")!),
+            paths: [:],
+            components: components,
+            security: securityRequirements
         )
     }
 }

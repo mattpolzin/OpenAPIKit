@@ -87,6 +87,36 @@ extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.PathItem>,
         return .b(pathItem)
     }
 
+    public static func pathItem(summary: String? = nil,
+                                description: String? = nil,
+                                servers: [OpenAPI.Server]? = nil,
+                                parameters: OpenAPI.PathItem.Parameter.Array = [],
+                                get: OpenAPI.PathItem.Operation? = nil,
+                                put: OpenAPI.PathItem.Operation? = nil,
+                                post: OpenAPI.PathItem.Operation? = nil,
+                                delete: OpenAPI.PathItem.Operation? = nil,
+                                options: OpenAPI.PathItem.Operation? = nil,
+                                head: OpenAPI.PathItem.Operation? = nil,
+                                patch: OpenAPI.PathItem.Operation? = nil,
+                                trace: OpenAPI.PathItem.Operation? = nil) -> Self {
+        return .b(
+            OpenAPI.PathItem(
+                summary: summary,
+                description: description,
+                servers: servers,
+                parameters: parameters,
+                get: get,
+                put: put,
+                post: post,
+                delete: delete,
+                options: options,
+                head: head,
+                patch: patch,
+                trace: trace
+            )
+        )
+    }
+
     public static func pathItem(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem>) -> Self {
         return .a(reference)
     }

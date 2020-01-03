@@ -20,7 +20,7 @@ extension OpenAPI {
         public let examples: ExamplesDict
         public let requestBodies: RequestBodiesDict
         public let headers: HeadersDict
-        //    public let securitySchemas:
+        public let securitySchemes: SecuritySchemesDict
         //    public let links:
         //    public let callbacks:
 
@@ -29,13 +29,15 @@ extension OpenAPI {
                     parameters: [String: ParametersDict.Value],
                     examples: [String: ExamplesDict.Value],
                     requestBodies: [String: RequestBodiesDict.Value],
-                    headers: [String: HeadersDict.Value]) {
+                    headers: [String: HeadersDict.Value],
+                    securitySchemes: [String: SecuritySchemesDict.Value]) {
             self.schemas = SchemasDict(schemas)
             self.responses = ResponsesDict(responses)
             self.parameters = ParametersDict(parameters)
             self.examples = ExamplesDict(examples)
             self.requestBodies = RequestBodiesDict(requestBodies)
             self.headers = HeadersDict(headers)
+            self.securitySchemes = SecuritySchemesDict(securitySchemes)
         }
 
         public static var noComponents: Components {
@@ -44,7 +46,8 @@ extension OpenAPI {
                          parameters: [:],
                          examples: [:],
                          requestBodies: [:],
-                         headers: [:])
+                         headers: [:],
+                         securitySchemes: [:])
         }
 
         public enum SchemasName: RefName {
@@ -82,6 +85,52 @@ extension OpenAPI {
         }
 
         public typealias HeadersDict = RefDict<Components, HeadersName, Header>
+
+        public enum SecuritySchemesName: RefName {
+            public static var refName: String { return "securitySchemes" }
+        }
+
+        public typealias SecuritySchemesDict = RefDict<Components, SecuritySchemesName, SecurityScheme>
+    }
+}
+
+extension OpenAPI.Components {
+    /// Check if the `Components` contains the given reference or not.
+    ///
+    /// Look up a reference in this components dictionary. If you want a
+    /// non-throwing alternative, you can pull a `JSONReference.InternalReference`
+    /// out of your `JSONReference` and pass that to `contains`
+    /// instead.
+    ///
+    /// - throws: If the given reference cannot be checked against `Components`
+    ///     then this method will throw `ReferenceError`. This could be because
+    ///     the given reference is a remote file reference with no local component or
+    ///     an unsafe local reference.
+    public func contains<Ref: Equatable>(_ ref: JSONReference<Self, Ref>) throws -> Bool {
+        let localRef: JSONReference<Self, Ref>.Local
+        if case .internal(let local) = ref {
+            localRef = local
+        } else if case .external(_, let local?) = ref {
+            localRef = local
+        } else {
+            throw ReferenceError.cannotLookupRemoteReference
+        }
+
+        guard case .node(let internalRef) = localRef else {
+            throw ReferenceError.cannotLookupUnsafeReference
+        }
+
+        return contains(internalRef)
+    }
+
+    /// Check if the `Components` contains the given internal reference or not.
+    public func contains<Ref: Equatable>(_ ref: JSONReference<Self, Ref>.InternalReference) -> Bool {
+        return ref.contained(by: self)
+    }
+
+    public enum ReferenceError: Swift.Error, Equatable {
+        case cannotLookupRemoteReference
+        case cannotLookupUnsafeReference
     }
 }
 
@@ -113,6 +162,10 @@ extension OpenAPI.Components: Encodable {
         if !headers.dict.isEmpty {
             try container.encode(headers, forKey: .headers)
         }
+
+        if !securitySchemes.dict.isEmpty {
+            try container.encode(securitySchemes, forKey: .securitySchemes)
+        }
     }
 }
 
@@ -137,6 +190,8 @@ extension OpenAPI.Components: Decodable {
 
         headers = try container.decodeIfPresent(HeadersDict.self, forKey: .headers)
             ?? HeadersDict([:])
+
+        securitySchemes = try container.decodeIfPresent(SecuritySchemesDict.self, forKey: .securitySchemes) ?? SecuritySchemesDict([:])
     }
 }
 
@@ -148,7 +203,7 @@ extension OpenAPI.Components {
         case examples
         case requestBodies
         case headers
-        // case securitySchemas
+         case securitySchemes
         // case links
         // case callbacks
     }

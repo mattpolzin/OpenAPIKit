@@ -13,9 +13,14 @@ fileprivate struct Root: ReferenceRoot {
     static var refName: String { return "root" }
 
     struct Thing: ReferenceDict {
+
         typealias Value = JSONSchema
 
         static var refName: String { return "thing" }
+
+        func contains(_ key: String) -> Bool {
+            return true
+        }
     }
 
     let thing: Thing
