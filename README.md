@@ -203,7 +203,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] servers
 - [x] paths
 - [x] components
-- [ ] security
+- [x] security
 - [x] tags
 - [x] externalDocs
 
@@ -249,19 +249,18 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] *dictionary*
 
 ### Path Item Object (`OpenAPI.PathItem`)
-- [x] $ref (`reference` case)
-- [x] summary (`operations` case)
-- [x] description (`operations` case)
-- [x] servers (`operations` case)
-- [x] parameters (`operations` case)
-- [x] get (`operations` case)
-- [x] put (`operations` case)
-- [x] post (`operations` case)
-- [x] delete (`operations` case)
-- [x] options (`operations` case)
-- [x] head (`operations` case)
-- [x] patch (`operations` case)
-- [x] trace (`operations` case)
+- [x] summary
+- [x] description
+- [x] servers
+- [x] parameters
+- [x] get
+- [x] put
+- [x] post
+- [x] delete
+- [x] options
+- [x] head
+- [x] patch
+- [x] trace
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
 - [x] tags
@@ -393,15 +392,15 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] attribute
 - [ ] wrapped
 
-### Security Scheme Object
-- [ ] type
-- [ ] description
-- [ ] name
-- [ ] in
-- [ ] scheme
-- [ ] bearerFormat
+### Security Scheme Object (`OpenAPI.SecurityScheme`)
+- [x] type
+- [x] description
+- [x] name (`SecurityType` `.apiKey` case)
+- [x] in (`location` in `SecurityType` `.apiKey` case)
+- [x] scheme (`SecurityType` `.http` case)
+- [x] bearerFormat (`SecurityType` `.http` case)
 - [ ] flows
-- [ ] openIdConnectUrl
+- [x] openIdConnectUrl (`SecurityType` `.openIdConnect` case)
 
 ### OAuth Flows Object
 - [ ] implicit
@@ -415,5 +414,5 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [ ] refreshUrl
 - [ ] scopes
 
-### Security Requirement Object
-- [ ] *{name}*
+### Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)
+- [x] *{name}* (using `JSONReferences` instead of a stringy API)
