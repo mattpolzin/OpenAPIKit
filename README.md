@@ -241,7 +241,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] examples
 - [x] requestBodies
 - [x] headers
-- [ ] securitySchemes
+- [x] securitySchemes
 - [ ] links
 - [ ] callbacks
 
