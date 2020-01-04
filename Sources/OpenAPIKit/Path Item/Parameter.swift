@@ -90,6 +90,42 @@ extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenA
         return .a(parameter)
     }
 
+    public static func parameter(
+        name: String,
+        parameterLocation: OpenAPI.PathItem.Parameter.Location,
+        schema: JSONSchema,
+        description: String? = nil,
+        deprecated: Bool = false
+    ) -> Self {
+        return .a(
+            .init(
+                name: name,
+                parameterLocation: parameterLocation,
+                schema: schema,
+                description: description,
+                deprecated: deprecated
+            )
+        )
+    }
+
+    public static func parameter(
+        name: String,
+        parameterLocation: OpenAPI.PathItem.Parameter.Location,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false
+    ) -> Self {
+        return .a(
+            .init(
+                name: name,
+                parameterLocation: parameterLocation,
+                content: content,
+                description: description,
+                deprecated: deprecated
+            )
+        )
+    }
+
     public static func parameter(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter>) -> Self {
         return .b(reference)
     }

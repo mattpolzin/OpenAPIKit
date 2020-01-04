@@ -70,8 +70,19 @@ extension OpenAPI.Response.StatusCode: ExpressibleByIntegerLiteral {
 
 // MARK: `Either` convenience methods
 extension Either where A == OpenAPI.Response, B == JSONReference<OpenAPI.Components, OpenAPI.Response> {
-    public static func response(_ response: OpenAPI.Response) -> Self {
-        return .a(response)
+
+    public static func response(
+        description: String,
+        headers: OpenAPI.Header.Map? = nil,
+        content: OpenAPI.Content.Map
+    ) -> Self {
+        return .a(
+            .init(
+                description: description,
+                headers: headers,
+                content: content
+            )
+        )
     }
 
     public static func response(reference: JSONReference<OpenAPI.Components, OpenAPI.Response>) -> Self {

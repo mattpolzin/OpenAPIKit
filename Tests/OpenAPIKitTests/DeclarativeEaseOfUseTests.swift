@@ -37,10 +37,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     summary: "Test Endpoint",
                     description: "Test Endpoint description",
                     parameters: [
-                        .parameter(.init(
+                        .parameter(
                             name: "param",
                             parameterLocation: .path,
-                            schema: .string)
+                            schema: .string
                         )
                     ],
                     get: .init(
@@ -49,7 +49,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         description: "Get Test description",
                         parameters: [
                             .parameter(reference: .internal(\.parameters, named: "filter")),
-                            .parameter(.init(
+                            .parameter(
                                 name: "Content-Type",
                                 parameterLocation: .header(required: false),
                                 schema: .string(
@@ -58,10 +58,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                         .init(OpenAPI.ContentType.txt.rawValue)
                                     ]
                                 )
-                            ))
+                            )
                         ],
                         responses: [
-                            200: .response(.init(
+                            200: .response(
                                 description: "Successful Retrieve",
                                 content: [
                                     .json: .init(
@@ -73,7 +73,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                         example: #"{ "hello": "world" }"#
                                     )
                                 ]
-                            ))
+                            )
                         ]
                     ),
                     post: .init(
@@ -93,7 +93,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             ]
                         ),
                         responses: [
-                            202: .response(.init(
+                            202: .response(
                                 description: "Successful Create",
                                 content: [
                                     .json: .init(
@@ -104,7 +104,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                         )
                                     )
                                 ]
-                            ))
+                            )
                         ]
                     )
                 )
@@ -166,7 +166,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             description: "Get Test description",
             parameters: [
                 .parameter(reference: .internal(\.parameters, named: "filter")),
-                .parameter(.init(
+                .parameter(
                     name: "Content-Type",
                     parameterLocation: .header(required: false),
                     schema: .string(
@@ -175,10 +175,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             .init(OpenAPI.ContentType.txt.rawValue)
                         ]
                     )
-                ))
+                )
             ],
             responses: [
-                200: .response(.init(
+                200: .response(
                     description: "Successful Retrieve",
                     content: [
                         .json: .init(
@@ -190,7 +190,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             example: #"{ "hello": "world" }"#
                         )
                     ]
-                ))
+                )
             ]
         )
 
@@ -211,7 +211,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 ]
             ),
             responses: [
-                202: .response(.init(
+                202: .response(
                     description: "Successful Create",
                     content: [
                         .json: .init(
@@ -222,7 +222,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             )
                         )
                     ]
-                    ))
+                )
             ]
         )
 
@@ -230,10 +230,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             summary: "Test Endpoint",
             description: "Test Endpoint description",
             parameters: [
-                .parameter(.init(
+                .parameter(
                     name: "param",
                     parameterLocation: .path,
-                    schema: .string)
+                    schema: .string
                 )
             ],
             get: testSHOW_endpoint,

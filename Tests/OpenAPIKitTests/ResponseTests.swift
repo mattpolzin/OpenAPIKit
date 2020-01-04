@@ -29,7 +29,7 @@ final class ResponseTests: XCTestCase {
 
     func test_responseMap() {
         let responseMap: OpenAPI.Response.Map = [
-            200: .response(.init(description: "hello world", content: [:])),
+            200: .response(description: "hello world", content: [:]),
             404: .response(reference: .external("hello.json#/world"))
         ]
 
