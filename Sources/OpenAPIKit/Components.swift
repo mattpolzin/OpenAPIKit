@@ -24,13 +24,13 @@ extension OpenAPI {
         //    public let links:
         //    public let callbacks:
 
-        public init(schemas: [String: SchemasDict.Value],
-                    responses: [String: ResponsesDict.Value],
-                    parameters: [String: ParametersDict.Value],
-                    examples: [String: ExamplesDict.Value],
-                    requestBodies: [String: RequestBodiesDict.Value],
-                    headers: [String: HeadersDict.Value],
-                    securitySchemes: [String: SecuritySchemesDict.Value]) {
+        public init(schemas: [String: SchemasDict.Value] = [:],
+                    responses: [String: ResponsesDict.Value] = [:],
+                    parameters: [String: ParametersDict.Value] = [:],
+                    examples: [String: ExamplesDict.Value] = [:],
+                    requestBodies: [String: RequestBodiesDict.Value] = [:],
+                    headers: [String: HeadersDict.Value] = [:],
+                    securitySchemes: [String: SecuritySchemesDict.Value] = [:]) {
             self.schemas = SchemasDict(schemas)
             self.responses = ResponsesDict(responses)
             self.parameters = ParametersDict(parameters)

@@ -10,10 +10,10 @@ import Foundation
 extension OpenAPI {
     public struct SecurityScheme: Equatable {
         public let type: SecurityType
-        public let description: String
+        public let description: String?
 
         public init(type: SecurityType,
-                    description: String) {
+                    description: String?) {
             self.type = type
             self.description = description
         }
@@ -38,7 +38,7 @@ extension OpenAPI.SecurityScheme: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(description, forKey: .description)
+        try description.encodeIfNotNil(to: &container, forKey: .description)
 
         switch type {
         case .apiKey(name: let name, location: let location):
@@ -60,7 +60,7 @@ extension OpenAPI.SecurityScheme: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        description = try container.decode(String.self, forKey: .description)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
 
         let typeName = try container.decode(SecurityTypeName.self, forKey: .type)
 

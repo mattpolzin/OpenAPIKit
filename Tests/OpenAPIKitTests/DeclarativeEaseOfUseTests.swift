@@ -113,7 +113,6 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 schemas: [
                     "string_schema": .string
                 ],
-                responses: [:],
                 parameters: [
                     "filter": .init(
                         name: "filter",
@@ -129,11 +128,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             explode: true
                         )
                     )
-                ],
-                examples: [:],
-                requestBodies: [:],
-                headers: [:],
-                securitySchemes: [:]
+                ]
             ),
             security: [],
             externalDocs: .init(
@@ -249,7 +244,6 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             schemas: [
                 "string_schema": .string
             ],
-            responses: [:],
             parameters: [
                 "filter": .init(
                     name: "filter",
@@ -265,17 +259,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         explode: true
                     )
                 )
-            ],
-            examples: [:],
-            requestBodies: [:],
-            headers: [:],
-            securitySchemes: [:]
+            ]
         )
 
         let _ = OpenAPI.Document(
             openAPIVersion: .v3_0_0,
             info: apiInfo,
-            servers: server,
+            servers: [server],
             paths: [
                 "/test/api/endpoint/{param}": .pathItem(testRoute)
             ],
@@ -351,14 +341,11 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
     func test_securityRequirements() {
         let components = OpenAPI.Components(
-            schemas: [:],
-            responses: [:],
-            parameters: [:],
-            examples: [:],
-            requestBodies: [:],
-            headers: [:],
             securitySchemes: [
-                "basic_auth": .init(type: .http(scheme: "basic", bearerFormat: nil), description: "Basic Auth")
+                "basic_auth": .init(
+                    type: .http(scheme: "basic", bearerFormat: nil),
+                    description: "Basic Auth"
+                )
         ])
 
         let securityRequirements: [OpenAPI.Document.SecurityRequirement] = [
@@ -369,7 +356,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let _ = OpenAPI.Document(
             info: .init(title: "Secured API", version: "1.0"),
-            servers: OpenAPI.Server(url: URL(string: "http://google.com")!),
+            servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
             paths: [:],
             components: components,
             security: securityRequirements

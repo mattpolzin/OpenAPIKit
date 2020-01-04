@@ -45,6 +45,7 @@ extension OpenAPI.PathItem {
             self.servers = servers
         }
 
+        // variadic tags
         public init(tags: String...,
                     summary: String? = nil,
                     description: String? = nil,
