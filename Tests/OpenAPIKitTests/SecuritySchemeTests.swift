@@ -11,3 +11,8 @@ import OpenAPIKit
 final class SecuritySchemeTests: XCTestCase {
     // TODO: write tests
 }
+
+// MARK: - Codable
+extension SecuritySchemeTests {
+    // TODO: write tests
+}

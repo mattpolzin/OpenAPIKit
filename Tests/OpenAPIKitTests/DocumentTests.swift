@@ -11,7 +11,7 @@ import XCTest
 
 final class DocumentTests: XCTestCase {
     func test_init() {
-        
+        // TODO: write test
     }
 
     func test_existingSecuritySchemeSuccess() {
@@ -72,4 +72,9 @@ final class DocumentTests: XCTestCase {
             XCTAssertEqual(context.debugDescription, "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
         }
     }
+}
+
+// MARK: - Codable
+extension DocumentTests {
+    // TODO: write tests
 }

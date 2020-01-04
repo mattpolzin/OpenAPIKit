@@ -22,27 +22,38 @@ extension OpenAPI.PathItem.Parameter {
 
         public static var cookie: Location { return .cookie(required: false) }
 
-        public var isQuery: Bool {
+        public var inQuery: Bool {
             guard case .query = self else {
                 return false
             }
             return true
         }
 
-        public var isHeader: Bool {
+        public var inHeader: Bool {
             guard case .header = self else {
                 return false
             }
             return true
         }
 
-        public var isPath: Bool { return self == .path }
+        public var inPath: Bool { return self == .path }
 
-        public var isCookie: Bool {
+        public var inCookie: Bool {
             guard case .cookie = self else {
                 return false
             }
             return true
+        }
+
+        public var required: Bool {
+            switch self {
+            case .query(required: let required, allowEmptyValue: _),
+                 .header(required: let required),
+                 .cookie(required: let required):
+                return required
+            case .path:
+                return true
+            }
         }
     }
 }
