@@ -76,5 +76,64 @@ final class DocumentTests: XCTestCase {
 
 // MARK: - Codable
 extension DocumentTests {
-    // TODO: write tests
+    func test_minimal_encode() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            security: []
+        )
+        let encodedDocument = try testStringFromEncoding(of: document)
+
+        XCTAssertEqual(
+            encodedDocument,
+"""
+{
+  "components" : {
+
+  },
+  "info" : {
+    "title" : "API",
+    "version" : "1.0"
+  },
+  "openapi" : "3.0.0",
+  "paths" : {
+
+  }
+}
+"""
+        )
+    }
+
+    func test_minimal_decode() throws {
+        let documentData =
+"""
+{
+  "components" : {
+
+  },
+  "info" : {
+    "title" : "API",
+    "version" : "1.0"
+  },
+  "openapi" : "3.0.0",
+  "paths" : {
+
+  }
+}
+""".data(using: .utf8)!
+        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents,
+                security: []
+            )
+        )
+    }
 }

@@ -12,7 +12,7 @@ import Sampleable
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
-    public struct Document {
+    public struct Document: Equatable {
         public let openAPIVersion: Version
         public let info: Info
         public let servers: [Server]
