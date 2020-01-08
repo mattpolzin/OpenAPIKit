@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Poly.git",
         "state": {
           "branch": null,
-          "revision": "b24fd3b41bf3126d4c6dede3708135182172af60",
-          "version": "2.2.0"
+          "revision": "0c9c08204142babc480938d704a23513d11420e5",
+          "version": "2.3.1"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/mattpolzin/Sampleable.git",
         "state": {
           "branch": null,
-          "revision": "8a88ca056a58587daa99c33a04c63c9d59429932",
-          "version": "2.0.0"
+          "revision": "df44bf1a860481109dcf455e3c6daf0a0f1bc259",
+          "version": "2.1.0"
         }
       }
     ]
