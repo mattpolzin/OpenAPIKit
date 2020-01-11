@@ -9,21 +9,21 @@ import Foundation
 import AnyCodable
 import Sampleable
 
-public typealias SampleableOpenAPIType = Sampleable & GenericOpenAPINodeType
+public typealias SampleableOpenAPIType = Sampleable & GenericOpenAPISchemaType
 
 extension Sampleable where Self: Encodable {
-    public static func genericOpenAPINode(using encoder: JSONEncoder) throws -> JSONSchema {
+    public static func genericOpenAPISchemaGuess(using encoder: JSONEncoder) throws -> JSONSchema {
         // short circuit for dates
         if let dateType = self as? Date.Type,
-            let node = try dateType.dateOpenAPINodeGuess(using: encoder) ?? primitiveGuess(for: Self.sample, using: encoder) {
+            let node = try dateType.dateOpenAPISchemaGuess(using: encoder) ?? primitiveGuess(for: Self.sample, using: encoder) {
             return node
         }
 
-        return try OpenAPIKit.genericOpenAPINode(for: Self.sample, using: encoder)
+        return try OpenAPIKit.genericOpenAPISchemaGuess(for: Self.sample, using: encoder)
     }
 }
 
-public func genericOpenAPINode<T>(for value: T, using encoder: JSONEncoder) throws -> JSONSchema {
+public func genericOpenAPISchemaGuess<T>(for value: T, using encoder: JSONEncoder) throws -> JSONSchema {
 
     let mirror = Mirror(reflecting: value)
     let properties: [(String, JSONSchema)] = try mirror.children.compactMap { child in
@@ -42,7 +42,7 @@ public func genericOpenAPINode<T>(for value: T, using encoder: JSONEncoder) thro
 
         // try to snag an OpenAPI Node
         let openAPINode: JSONSchema = try openAPINodeGuess(for: child.value, using: encoder)
-            ?? genericOpenAPINode(for: child.value, using: encoder)
+            ?? genericOpenAPISchemaGuess(for: child.value, using: encoder)
 
         // put it all together
         let newNode: JSONSchema
@@ -87,26 +87,20 @@ internal func openAPINodeGuess(for value: Any, using encoder: JSONEncoder) throw
     // ideally the type specifies how to get an OpenAPI node from itself.
     let nodeGuess: JSONSchema? = try {
         switch type(of: value) {
-        case let valType as OpenAPINodeType.Type:
-            return try valType.openAPINode()
+        case let valType as OpenAPISchemaType.Type:
+            return try valType.openAPISchema()
 
-        case let valType as RawOpenAPINodeType.Type:
-            return try valType.rawOpenAPINode()
+        case let valType as RawOpenAPISchemaType.Type:
+            return try valType.rawOpenAPISchema()
 
-        case let valType as WrappedRawOpenAPIType.Type:
-            return try valType.wrappedOpenAPINode()
+        case let valType as DateOpenAPISchemaType.Type:
+            return valType.dateOpenAPISchemaGuess(using: encoder)
 
-        case let valType as DoubleWrappedRawOpenAPIType.Type:
-            return try valType.doubleWrappedOpenAPINode()
+        case let valType as GenericOpenAPISchemaType.Type:
+            return try valType.genericOpenAPISchemaGuess(using: encoder)
 
-        case let valType as DateOpenAPINodeType.Type:
-            return valType.dateOpenAPINodeGuess(using: encoder)
-
-        case let valType as GenericOpenAPINodeType.Type:
-            return try valType.genericOpenAPINode(using: encoder)
-
-        case let valType as OpenAPIEncodedNodeType.Type:
-            return try valType.openAPINode(using: encoder)
+        case let valType as OpenAPIEncodedSchemaType.Type:
+            return try valType.openAPISchema(using: encoder)
 
         default:
             return nil
