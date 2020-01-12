@@ -47,13 +47,6 @@ extension RawOpenAPISchemaType where Self: RawRepresentable, RawValue: OpenAPISc
     }
 }
 
-/// A `GenericOpenAPISchemaType` can take a stab at
-/// determining its `JSONSchema` but results are not
-/// as certain as with `OpenAPINodeType`.
-public protocol GenericOpenAPISchemaType {
-    static func genericOpenAPISchemaGuess(using encoder: JSONEncoder) throws -> JSONSchema
-}
-
 /// Anything conforming to `DateOpenAPISchemaType` is
 /// able to attempt to represent itself as a date `JSONSchema`
 public protocol DateOpenAPISchemaType {

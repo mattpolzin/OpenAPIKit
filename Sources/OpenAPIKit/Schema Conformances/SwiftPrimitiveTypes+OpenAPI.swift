@@ -44,12 +44,6 @@ extension Optional: RawOpenAPISchemaType where Wrapped: RawOpenAPISchemaType {
     }
 }
 
-extension Optional: GenericOpenAPISchemaType where Wrapped: GenericOpenAPISchemaType {
-    public static func genericOpenAPISchemaGuess(using encoder: JSONEncoder) throws -> JSONSchema {
-        return try Wrapped.genericOpenAPISchemaGuess(using: encoder).optionalSchemaObject()
-    }
-}
-
 extension Optional: AnyRawRepresentable where Wrapped: AnyRawRepresentable {
     public static var rawValueType: Any.Type { Wrapped.rawValueType }
 }

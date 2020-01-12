@@ -7,6 +7,7 @@
 
 import XCTest
 import OpenAPIKit
+import Sampleable
 
 final class GenericOpenAPISchemaTests: XCTestCase {
 //    func test_failsAsUnknown() {
@@ -246,12 +247,23 @@ final class GenericOpenAPISchemaTests: XCTestCase {
             XCTAssertEqual(err as? OpenAPI.CodableError, .exampleNotCodable)
         }
     }
+
+    func test_sampleableInSampleable() throws {
+        XCTAssertEqual(
+            try SampleableInSampleable.genericOpenAPISchemaGuess(using: JSONEncoder()),
+            .object(
+                properties: [
+                    "sampleable": .string
+                ]
+            )
+        )
+    }
 }
 
 // MARK: - Test Types
 
 extension GenericOpenAPISchemaTests {
-    struct BasicTypes: Codable, SampleableOpenAPIType {
+    struct BasicTypes: Codable, Sampleable {
         let string: String
         let int: Int
         let double: Double
@@ -261,13 +273,13 @@ extension GenericOpenAPISchemaTests {
         static let sample: BasicTypes = .init(string: "hello", int: 10, double: 2.3, float: 1.1, bool: true)
     }
 
-    struct DateType: Codable, SampleableOpenAPIType {
+    struct DateType: Codable, Sampleable {
         let date: Date
 
         static let sample: DateType = .init(date: Date())
     }
 
-    struct Nested: Codable, SampleableOpenAPIType {
+    struct Nested: Codable, Sampleable {
         let array1: [String]
         let array2: [Double]
         let array3: [Date]
@@ -299,7 +311,7 @@ extension GenericOpenAPISchemaTests {
         )
     }
 
-    struct EnumTypes: Codable, SampleableOpenAPIType {
+    struct EnumTypes: Codable, Sampleable {
         let stringEnum: StringEnum
         let intEnum: IntEnum
         let doubleEnum: DoubleEnum
@@ -353,7 +365,7 @@ extension GenericOpenAPISchemaTests {
         )
     }
 
-    struct AllowedValues: Codable, SampleableOpenAPIType {
+    struct AllowedValues: Codable, Sampleable {
         let stringEnum: StringEnum
         let optionalStringEnum: StringEnum?
 
@@ -392,7 +404,7 @@ extension GenericOpenAPISchemaTests {
         )
     }
 
-    struct EmptyObjectType: Codable, SampleableOpenAPIType {
+    struct EmptyObjectType: Codable, Sampleable {
         let empty: EmptyObject
 
         struct EmptyObject: Codable {}
@@ -410,6 +422,19 @@ extension GenericOpenAPISchemaTests {
 
         static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
             []
+        }
+    }
+
+    struct SampleableInSampleable: Codable, Sampleable {
+        let sampleable: NestedSampleable
+
+        static let sample: Self = .init(sampleable: .sample)
+
+        enum NestedSampleable: String, Codable, CaseIterable, Sampleable, AnyRawRepresentable {
+            case one
+            case two
+
+            static let sample: Self = .one
         }
     }
 

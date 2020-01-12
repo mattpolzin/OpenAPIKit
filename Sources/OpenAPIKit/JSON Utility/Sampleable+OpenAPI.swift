@@ -9,8 +9,6 @@ import Foundation
 import AnyCodable
 import Sampleable
 
-public typealias SampleableOpenAPIType = Sampleable & GenericOpenAPISchemaType
-
 extension Sampleable where Self: Encodable {
     public static func genericOpenAPISchemaGuess(using encoder: JSONEncoder) throws -> JSONSchema {
         // short circuit for dates
@@ -98,9 +96,6 @@ internal func openAPISchemaGuess(for type: Any.Type, using encoder: JSONEncoder)
         case let valType as DateOpenAPISchemaType.Type:
             return valType.dateOpenAPISchemaGuess(using: encoder)
 
-        case let valType as GenericOpenAPISchemaType.Type:
-            return try valType.genericOpenAPISchemaGuess(using: encoder)
-
         case let valType as OpenAPIEncodedSchemaType.Type:
             return try valType.openAPISchema(using: encoder)
 
@@ -114,6 +109,7 @@ internal func openAPISchemaGuess(for type: Any.Type, using encoder: JSONEncoder)
             } else {
                 return nil
             }
+
         default:
             return nil
         }
