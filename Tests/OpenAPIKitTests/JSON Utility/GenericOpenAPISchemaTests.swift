@@ -8,7 +8,7 @@
 import XCTest
 import OpenAPIKit
 
-final class GenericOpenAPINodeTests: XCTestCase {
+final class GenericOpenAPISchemaTests: XCTestCase {
 //    func test_failsAsUnknown() {
 //        XCTAssertThrowsError(try FailsAsUnknown.genericOpenAPINode(using: JSONEncoder())) { error in
 //            guard let err = error as? OpenAPITypeError,
@@ -20,7 +20,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
 //    }
 
     func test_emptyObject() throws {
-        let node = try EmptyObjectType.genericOpenAPINode(using: JSONEncoder())
+        let node = try EmptyObjectType.genericOpenAPISchemaGuess(using: JSONEncoder())
 
         XCTAssertEqual(
             node,
@@ -33,7 +33,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
     }
 
     func test_basicTypes() throws {
-        let node = try BasicTypes.genericOpenAPINode(using: JSONEncoder())
+        let node = try BasicTypes.genericOpenAPISchemaGuess(using: JSONEncoder())
 
         XCTAssertEqual(
             node,
@@ -50,7 +50,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
     }
 
     func test_dateType() throws {
-        let node = try DateType.genericOpenAPINode(using: JSONEncoder())
+        let node = try DateType.genericOpenAPISchemaGuess(using: JSONEncoder())
 
         XCTAssertEqual(
             node,
@@ -72,7 +72,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
         }
         #endif
 
-        let node1 = try DateType.genericOpenAPINode(using: e1)
+        let node1 = try DateType.genericOpenAPISchemaGuess(using: e1)
 
         XCTAssertEqual(
             node1,
@@ -88,8 +88,8 @@ final class GenericOpenAPINodeTests: XCTestCase {
         let e3 = JSONEncoder()
         e3.dateEncodingStrategy = .millisecondsSince1970
 
-        let node2 = try DateType.genericOpenAPINode(using: e2)
-        let node3 = try DateType.genericOpenAPINode(using: e3)
+        let node2 = try DateType.genericOpenAPISchemaGuess(using: e2)
+        let node3 = try DateType.genericOpenAPISchemaGuess(using: e3)
 
         XCTAssertEqual(node2, node3)
         XCTAssertEqual(
@@ -106,7 +106,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
         df1.timeStyle = .none
         e4.dateEncodingStrategy = .formatted(df1)
 
-        let node4 = try DateType.genericOpenAPINode(using: e4)
+        let node4 = try DateType.genericOpenAPISchemaGuess(using: e4)
 
         XCTAssertEqual(
             node4,
@@ -122,7 +122,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
         df2.timeStyle = .full
         e5.dateEncodingStrategy = .formatted(df2)
 
-        let node5 = try DateType.genericOpenAPINode(using: e5)
+        let node5 = try DateType.genericOpenAPISchemaGuess(using: e5)
 
         XCTAssertEqual(
             node5,
@@ -135,7 +135,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
     }
 
     func test_nested() throws {
-        let node = try Nested.genericOpenAPINode(using: JSONEncoder())
+        let node = try Nested.genericOpenAPISchemaGuess(using: JSONEncoder())
 
         XCTAssertEqual(
             node,
@@ -173,27 +173,27 @@ final class GenericOpenAPINodeTests: XCTestCase {
     }
 
     func test_enumTypes() throws {
-        let node = try EnumTypes.genericOpenAPINode(using: JSONEncoder())
+        let node = try EnumTypes.genericOpenAPISchemaGuess(using: JSONEncoder())
 
-        XCTAssertEqual(
-            node,
-            JSONSchema.object(
-                properties: [
-                    "stringEnum": .string,
-                    "intEnum": .integer,
-                    "doubleEnum": .number(format: .double),
-                    "boolEnum": .boolean,
-                    "optionalStringEnum": .string(required: false),
-                    "optionalIntEnum": .integer(required: false),
-                    "optionalDoubleEnum": .number(format: .double, required: false),
-                    "optionalBoolEnum": .boolean(required: false)
-                ]
-            )
-        )
+        XCTAssertEqual(node.jsonTypeFormat, .object(.generic))
+
+        guard case .object(_, let ctx) = node else {
+            XCTFail("Expected object")
+            return
+        }
+
+        XCTAssertEqual(ctx.properties["stringEnum"], .string)
+        XCTAssertEqual(ctx.properties["intEnum"], .integer)
+        XCTAssertEqual(ctx.properties["doubleEnum"], .number(format: .double))
+        XCTAssertEqual(ctx.properties["boolEnum"], .boolean)
+        XCTAssertEqual(ctx.properties["optionalStringEnum"], .string(required: false))
+        XCTAssertEqual(ctx.properties["optionalIntEnum"], .integer(required: false))
+        XCTAssertEqual(ctx.properties["optionalDoubleEnum"], .number(format: .double, required: false))
+        XCTAssertEqual(ctx.properties["optionalBoolEnum"], .boolean(required: false))
     }
 
     func test_allowedValues() throws {
-        let node = try AllowedValues.genericOpenAPINode(using: JSONEncoder())
+        let node = try AllowedValues.genericOpenAPISchemaGuess(using: JSONEncoder())
 
         guard case let .object(_, objCtx) = node else {
             XCTFail("Expected object")
@@ -242,7 +242,7 @@ final class GenericOpenAPINodeTests: XCTestCase {
 
 // MARK: - Test Types
 
-extension GenericOpenAPINodeTests {
+extension GenericOpenAPISchemaTests {
     struct BasicTypes: Codable, SampleableOpenAPIType {
         let string: String
         let int: Int

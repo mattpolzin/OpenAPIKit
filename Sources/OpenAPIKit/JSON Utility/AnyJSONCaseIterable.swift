@@ -25,12 +25,6 @@ public protocol AnyJSONCaseIterable: AnyRawRepresentable {
     static func allCases(using encoder: JSONEncoder) -> [AnyCodable]
 }
 
-extension AnyJSONCaseIterable {
-    /// The default `rawValueType` of a `AnyJSONCaseIterable` is just the
-    /// type of `Self`.
-    public static var rawValueType: Any.Type { return Self.self }
-}
-
 extension AnyJSONCaseIterable where Self: RawRepresentable {
     /// The default `rawValueType` of a `RawRepresentable` is just the
     /// type of `Self.RawValue`.
@@ -67,15 +61,4 @@ fileprivate func allCases<T: Encodable>(from input: [T], using encoder: JSONEnco
         throw OpenAPI.CodableError.allCasesArrayNotCodable
     }
     return arrayOfCodables.map(AnyCodable.init)
-}
-
-/// Anything conforming to `AnyJSONCaseIterable` can provide a
-/// list of its possible values. This second protocol is
-/// necessary so that one type can conditionally provide a
-/// list of possible values and then (under different conditions)
-/// provide a different list of possible values.
-/// The "different" conditions have to do
-/// with Optionality, hence the name of this protocol.
-public protocol AnyWrappedJSONCaseIterable {
-    static func wrappedAllCases(using encoder: JSONEncoder) -> [AnyCodable]
 }

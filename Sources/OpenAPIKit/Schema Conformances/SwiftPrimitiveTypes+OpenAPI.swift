@@ -38,40 +38,26 @@ extension Optional: OpenAPISchemaType where Wrapped: OpenAPISchemaType {
 	}
 }
 
-extension Optional where Wrapped: RawRepresentable, Wrapped.RawValue: OpenAPISchemaType {
-	static public func rawOpenAPISchema() throws -> JSONSchema {
-		return try Wrapped.RawValue.openAPISchema().optionalSchemaObject()
-	}
-}
-
 extension Optional: RawOpenAPISchemaType where Wrapped: RawOpenAPISchemaType {
     static public func rawOpenAPISchema() throws -> JSONSchema {
         return try Wrapped.rawOpenAPISchema().optionalSchemaObject()
     }
 }
 
-extension Optional: AnyRawRepresentable, AnyJSONCaseIterable where Wrapped: CaseIterable, Wrapped: Codable {
-	public static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
-		return (try? allCases(from: Array(Wrapped.allCases), using: encoder)) ?? []
-	}
+extension Optional: AnyRawRepresentable where Wrapped: AnyRawRepresentable {
+    public static var rawValueType: Any.Type { Wrapped.rawValueType }
 }
 
-extension Optional: AnyWrappedJSONCaseIterable where Wrapped: AnyJSONCaseIterable, Wrapped: Codable {
-    public static func wrappedAllCases(using encoder: JSONEncoder) -> [AnyCodable] {
-        return Wrapped.allCases(using: encoder)
-    }
+extension Optional: AnyJSONCaseIterable where Wrapped: AnyJSONCaseIterable {
+	public static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
+		return Wrapped.allCases(using: encoder)
+	}
 }
 
 extension Optional: DateOpenAPISchemaType where Wrapped: DateOpenAPISchemaType {
 	static public func dateOpenAPISchemaGuess(using encoder: JSONEncoder) -> JSONSchema? {
 		return Wrapped.dateOpenAPISchemaGuess(using: encoder)?.optionalSchemaObject()
 	}
-}
-
-extension RawRepresentable where RawValue: OpenAPISchemaType {
-    static public func rawOpenAPISchema() throws -> JSONSchema {
-        return try RawValue.openAPISchema()
-    }
 }
 
 extension Array: OpenAPISchemaType where Element: OpenAPISchemaType {

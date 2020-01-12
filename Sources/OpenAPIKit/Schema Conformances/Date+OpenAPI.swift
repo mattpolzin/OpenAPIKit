@@ -44,7 +44,7 @@ extension Date: DateOpenAPISchemaType {
 
 extension Date: OpenAPIEncodedSchemaType {
     public static func openAPISchema(using encoder: JSONEncoder) throws -> JSONSchema {
-        guard let dateSchema: JSONSchema = try openAPINodeGuess(for: Date(), using: encoder) else {
+        guard let dateSchema: JSONSchema = try openAPISchemaGuess(for: Date(), using: encoder) else {
             throw OpenAPITypeError.unknownNodeType(type(of: self))
         }
 
