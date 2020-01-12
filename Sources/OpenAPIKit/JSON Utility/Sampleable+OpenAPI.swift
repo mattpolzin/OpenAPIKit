@@ -23,6 +23,10 @@ extension Sampleable where Self: Encodable {
 
 public func genericOpenAPISchemaGuess<T>(for value: T, using encoder: JSONEncoder) throws -> JSONSchema {
 
+    if let schema = try openAPISchemaGuess(for: value, using: encoder) {
+        return schema
+    }
+
     let mirror = Mirror(reflecting: value)
     let properties: [(String, JSONSchema)] = try mirror.children.compactMap { child in
 
@@ -55,17 +59,12 @@ public func genericOpenAPISchemaGuess<T>(for value: T, using encoder: JSONEncode
         throw OpenAPITypeError.unknownNodeType(type(of: value))
     }
 
-    let propertylessSchemaGuess: JSONSchema? = properties.count == 0
-        ? try openAPISchemaGuess(for: value, using: encoder)
-        : nil
-
     // There should not be any duplication of keys since these are
     // property names, but rather than risk runtime exception, we just
     // fail to the newer value arbitrarily
     let propertiesDict = Dictionary(properties) { _, value2 in value2 }
 
-    return propertylessSchemaGuess ??
-        .object(.init(format: .generic,
+    return .object(.init(format: .generic,
                          required: true),
                    .init(properties: propertiesDict))
 }
@@ -158,7 +157,7 @@ internal func openAPISchemaGuess(for value: Any, using encoder: JSONEncoder) thr
                                  required: true),
                            .init())
 
-        case is Date:
+        case is DateOpenAPISchemaType:
             // we don't know what Date will end up looking like without
             // trying it out. Most likely a `.string` or `.number(format: .double)`
             return try OpenAPIKit.reencodedSchemaGuess(for: Date(), using: encoder)
