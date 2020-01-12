@@ -153,7 +153,7 @@ enum CodableEnum: String, CaseIterable, AnyJSONCaseIterable, Codable {
     case two
 }
 
-let schema = CodableEnum.genericOpenAPINode(using: JSONEncoder())
+let schema = CodableEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder())
 // ^ equivalent, although not equatable, to:
 let sameSchema = JSONSchema.string(
   allowedValues: "one", "two"
@@ -174,7 +174,7 @@ struct Nested: Encodable, Sampleable {
   )
 }
 
-let schema = Nested.genericOpenAPINode(using: JSONEncoder())
+let schema = Nested.genericOpenAPISchemaGuess(using: JSONEncoder())
 // ^ equivalent and indeed equatable to:
 let sameSchema = JSONSchema.object(
   properties: [

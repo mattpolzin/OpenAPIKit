@@ -238,6 +238,14 @@ final class GenericOpenAPISchemaTests: XCTestCase {
         XCTAssert(ctx5.allowedValues?.contains("there") ?? false)
         XCTAssertFalse(ctx5.required)
     }
+
+    func test_enumDirectly() throws {
+        XCTAssertEqual(try AllowedValues.StringEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder()), .string)
+
+        XCTAssertThrowsError(try CaselessEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder())) { err in
+            XCTAssertEqual(err as? OpenAPI.CodableError, .exampleNotCodable)
+        }
+    }
 }
 
 // MARK: - Test Types
@@ -390,6 +398,19 @@ extension GenericOpenAPISchemaTests {
         struct EmptyObject: Codable {}
 
         static let sample: EmptyObjectType = .init(empty: .init())
+    }
+
+    enum CaselessEnum: RawRepresentable, CaseIterable, AnyJSONCaseIterable {
+        init?(rawValue: String) {
+            return nil
+        }
+        var rawValue: String { "" }
+
+        typealias RawValue = String
+
+        static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
+            []
+        }
     }
 
 //    struct EncodesAsPrimitive: Codable, SampleableOpenAPIType {
