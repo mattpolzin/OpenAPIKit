@@ -2,7 +2,7 @@
 
 # OpenAPIKit
 
-:warning: This repository was recently renamed `mattpolzin/openapikit` in order to align the repository and package names. For now, GitHub appears to be redirecting `mattpolzin/openapi` to the new location, but I recommend updating your package configurations anyway.
+:warning: This repository was recently renamed `mattpolzin/OpenAPIKit` in order to align the repository and package names. For now, GitHub appears to be redirecting `mattpolzin/OpenAPI` to the new location, but I recommend updating your package configurations anyway.
 
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
