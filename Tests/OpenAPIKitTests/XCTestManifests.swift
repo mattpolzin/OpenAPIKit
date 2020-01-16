@@ -114,6 +114,18 @@ extension DocumentTests {
         ("test_minimal_decode", test_minimal_decode),
         ("test_minimal_encode", test_minimal_encode),
         ("test_missingSecuritySchemeError", test_missingSecuritySchemeError),
+        ("test_specifyExternalDocs_decode", test_specifyExternalDocs_decode),
+        ("test_specifyExternalDocs_encode", test_specifyExternalDocs_encode),
+        ("test_specifyOpenAPIVersion_decode", test_specifyOpenAPIVersion_decode),
+        ("test_specifyOpenAPIVersion_encode", test_specifyOpenAPIVersion_encode),
+        ("test_specifyPaths_decode", test_specifyPaths_decode),
+        ("test_specifyPaths_encode", test_specifyPaths_encode),
+        ("test_specifySecurity_decode", test_specifySecurity_decode),
+        ("test_specifySecurity_encode", test_specifySecurity_encode),
+        ("test_specifyServers_decode", test_specifyServers_decode),
+        ("test_specifyServers_encode", test_specifyServers_encode),
+        ("test_specifyTags_decode", test_specifyTags_decode),
+        ("test_specifyTags_encode", test_specifyTags_encode),
     ]
 }
 
