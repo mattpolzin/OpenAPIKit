@@ -20,7 +20,7 @@ extension OpenAPI.PathItem {
         public let responses: OpenAPI.Response.Map
         //            public let callbacks:
         public let deprecated: Bool // default is false
-        //            public let security:
+        public let security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
         public let servers: [OpenAPI.Server]?
 
         public init(tags: [String]? = nil,
@@ -32,6 +32,7 @@ extension OpenAPI.PathItem {
                     requestBody: OpenAPI.Request? = nil,
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
+                    security: [OpenAPI.SecurityRequirement]? = nil,
                     servers: [OpenAPI.Server]? = nil) {
             self.tags = tags
             self.summary = summary
@@ -42,6 +43,7 @@ extension OpenAPI.PathItem {
             self.requestBody = requestBody
             self.responses = responses
             self.deprecated = deprecated
+            self.security = security
             self.servers = servers
         }
 
@@ -55,6 +57,7 @@ extension OpenAPI.PathItem {
                     requestBody: OpenAPI.Request? = nil,
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
+                    security: [OpenAPI.SecurityRequirement]? = nil,
                     servers: [OpenAPI.Server]? = nil) {
             self.init(
                 tags: tags,
@@ -66,6 +69,7 @@ extension OpenAPI.PathItem {
                 requestBody: requestBody,
                 responses: responses,
                 deprecated: deprecated,
+                security: security,
                 servers: servers
             )
         }
@@ -86,7 +90,7 @@ extension OpenAPI.PathItem.Operation {
         case responses
         //        case callbacks
         case deprecated
-        //        case security
+        case security
         case servers
     }
 }
@@ -123,6 +127,10 @@ extension OpenAPI.PathItem.Operation: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
+        if let securityRequirements = security {
+            try encodeSecurity(requirements: securityRequirements, to: &container, forKey: .security)
+        }
+
         try servers.encodeIfNotNil(to: &container, forKey: .servers)
     }
 }
@@ -146,12 +154,17 @@ extension OpenAPI.PathItem.Operation: Decodable {
         requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
 
         // hack to workaround Dictionary bug
-        let responsesDict = try container.decode([String: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>].self, forKey: .responses)
+        let responsesDict = try container.decode([String: Either<JSONReference<OpenAPI.Components, OpenAPI.Response>, OpenAPI.Response>].self, forKey: .responses)
         responses = Dictionary(responsesDict.compactMap { statusCodeString, response in
             OpenAPI.Response.StatusCode(rawValue: statusCodeString).map { ($0, response) } },
                                uniquingKeysWith: { $1 })
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+
+        // TODO: would be ideal to validate against components from here, but not
+        //      sure off the top of my head the best way to go about that other than
+        // perhaps storing a copy of components in the userInfo for the decoder.
+        security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
         servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
     }

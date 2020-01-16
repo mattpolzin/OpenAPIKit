@@ -17,7 +17,7 @@ extension OpenAPI.PathItem {
         public let deprecated: Bool // default is false
         public let schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
-        public typealias Array = [Either<Parameter, JSONReference<OpenAPI.Components, Parameter>>]
+        public typealias Array = [Either<JSONReference<OpenAPI.Components, Parameter>, Parameter>]
 
         public init(name: String,
                     parameterLocation: Location,
@@ -85,9 +85,9 @@ extension OpenAPI.PathItem {
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
-extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter> {
+extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
     public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self {
-        return .a(parameter)
+        return .b(parameter)
     }
 
     public static func parameter(
@@ -97,7 +97,7 @@ extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenA
         description: String? = nil,
         deprecated: Bool = false
     ) -> Self {
-        return .a(
+        return .b(
             .init(
                 name: name,
                 parameterLocation: parameterLocation,
@@ -115,7 +115,7 @@ extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenA
         description: String? = nil,
         deprecated: Bool = false
     ) -> Self {
-        return .a(
+        return .b(
             .init(
                 name: name,
                 parameterLocation: parameterLocation,
@@ -127,7 +127,7 @@ extension Either where A == OpenAPI.PathItem.Parameter, B == JSONReference<OpenA
     }
 
     public static func parameter(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem.Parameter>) -> Self {
-        return .b(reference)
+        return .a(reference)
     }
 }
 

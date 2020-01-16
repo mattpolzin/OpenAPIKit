@@ -26,7 +26,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Response {
-    public typealias Map = [StatusCode: Either<OpenAPI.Response, JSONReference<OpenAPI.Components, OpenAPI.Response>>]
+    public typealias Map = [StatusCode: Either<JSONReference<OpenAPI.Components, OpenAPI.Response>, OpenAPI.Response>]
 }
 
 // MARK: - Status Code
@@ -69,14 +69,14 @@ extension OpenAPI.Response.StatusCode: ExpressibleByIntegerLiteral {
 }
 
 // MARK: `Either` convenience methods
-extension Either where A == OpenAPI.Response, B == JSONReference<OpenAPI.Components, OpenAPI.Response> {
+extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.Response>, B == OpenAPI.Response {
 
     public static func response(
         description: String,
         headers: OpenAPI.Header.Map? = nil,
         content: OpenAPI.Content.Map
     ) -> Self {
-        return .a(
+        return .b(
             .init(
                 description: description,
                 headers: headers,
@@ -86,7 +86,7 @@ extension Either where A == OpenAPI.Response, B == JSONReference<OpenAPI.Compone
     }
 
     public static func response(reference: JSONReference<OpenAPI.Components, OpenAPI.Response>) -> Self {
-        return .b(reference)
+        return .a(reference)
     }
 }
 

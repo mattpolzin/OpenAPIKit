@@ -348,7 +348,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 )
         ])
 
-        let securityRequirements: [OpenAPI.Document.SecurityRequirement] = [
+        let securityRequirements: [OpenAPI.SecurityRequirement] = [
             [
                 .internal(\.securitySchemes, named: "basic_auth"): []
             ]

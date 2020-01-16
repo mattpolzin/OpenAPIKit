@@ -22,14 +22,12 @@ extension OpenAPI {
         public let tags: [Tag]?
         public let externalDocs: ExternalDoc?
 
-        public typealias SecurityRequirement = [JSONReference<Components, SecurityScheme>: [String]]
-
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,
                     servers: [Server],
                     paths: PathItem.Map,
                     components: Components,
-                    security: [SecurityRequirement],
+                    security: [SecurityRequirement] = [],
                     tags: [Tag]? = nil,
                     externalDocs: ExternalDoc? = nil) {
             self.openAPIVersion = openAPIVersion
@@ -42,6 +40,10 @@ extension OpenAPI {
             self.externalDocs = externalDocs
         }
     }
+}
+
+extension OpenAPI {
+    public typealias SecurityRequirement = [JSONReference<Components, SecurityScheme>: [String]]
 }
 
 extension OpenAPI.Document {
@@ -92,16 +94,7 @@ extension OpenAPI.Document: Encodable {
         // A real mess here because we've got an Array of non-string-keyed
         // Dictionaries.
         if !security.isEmpty {
-            var securityContainer = container.nestedUnkeyedContainer(forKey: .security)
-            for securityRequirement in security {
-                let securityKeysAndValues = securityRequirement
-                    .compactMap { keyValue in keyValue.key.selector.map { ($0, keyValue.value) } }
-                let securityStringKeyedDict = Dictionary(
-                    securityKeysAndValues,
-                    uniquingKeysWith: { $1 }
-                )
-                try securityContainer.encode(securityStringKeyedDict)
-            }
+            try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
         if let encodableTags = tags {
@@ -136,39 +129,62 @@ extension OpenAPI.Document: Decodable {
 
         // A real mess here because we've got an Array of non-string-keyed
         // Dictionaries.
-        if container.contains(.security) {
-            var securityContainer = try container.nestedUnkeyedContainer(forKey: .security)
+        security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
 
-            var securityRequirements = [SecurityRequirement]()
-            while !securityContainer.isAtEnd {
-                let securityStringKeyedDict = try securityContainer.decode([String: [String]].self)
+        tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
 
-                // convert to JSONReference keys
-                let securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
-                    (
-                        key: JSONReference<OpenAPI.Components, OpenAPI.SecurityScheme>.internal(.node(\.securitySchemes, named: key)),
-                        value: value
-                    )
-                }
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+    }
+}
 
+internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [OpenAPI.SecurityRequirement], to container: inout KeyedEncodingContainer<CodingKeys>, forKey key: CodingKeys) throws {
+    // A real mess here because we've got an Array of non-string-keyed
+    // Dictionaries.
+    var securityContainer = container.nestedUnkeyedContainer(forKey: key)
+    for securityRequirement in security {
+        let securityKeysAndValues = securityRequirement
+            .compactMap { keyValue in keyValue.key.selector.map { ($0, keyValue.value) } }
+        let securityStringKeyedDict = Dictionary(
+            securityKeysAndValues,
+            uniquingKeysWith: { $1 }
+        )
+        try securityContainer.encode(securityStringKeyedDict)
+    }
+}
+
+internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys, given optionalComponents: OpenAPI.Components?) throws -> [OpenAPI.SecurityRequirement]? {
+    // A real mess here because we've got an Array of non-string-keyed
+    // Dictionaries.
+    if container.contains(key) {
+        var securityContainer = try container.nestedUnkeyedContainer(forKey: key)
+
+        var securityRequirements = [OpenAPI.SecurityRequirement]()
+        while !securityContainer.isAtEnd {
+            let securityStringKeyedDict = try securityContainer.decode([String: [String]].self)
+
+            // convert to JSONReference keys
+            let securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
+                (
+                    key: JSONReference<OpenAPI.Components, OpenAPI.SecurityScheme>.internal(.node(\.securitySchemes, named: key)),
+                    value: value
+                )
+            }
+
+            if let components = optionalComponents {
                 // check each key for validity against components.
                 let foundInComponents = { (ref: JSONReference<OpenAPI.Components, OpenAPI.SecurityScheme>) -> Bool in
                     return (try? components.contains(ref)) ?? false
                 }
                 guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
-                    throw DecodingError.dataCorruptedError(forKey: .security, in: container, debugDescription: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
+                    throw DecodingError.dataCorruptedError(forKey: key, in: container, debugDescription: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
                 }
-
-                securityRequirements.append(Dictionary(securityKeysAndValues, uniquingKeysWith: { $1 }))
             }
 
-            security = securityRequirements
-        } else {
-            security = []
+            securityRequirements.append(Dictionary(securityKeysAndValues, uniquingKeysWith: { $1 }))
         }
 
-        tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
-
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+        return securityRequirements
+    } else {
+        return nil
     }
 }

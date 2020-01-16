@@ -23,7 +23,7 @@ final class ResponseTests: XCTestCase {
                                   headers: ["hello": .init(header)],
                                   content: [.json: content])
         XCTAssertEqual(r2.description, "")
-        XCTAssertEqual(r2.headers?["hello"]?.a, header)
+        XCTAssertEqual(r2.headers?["hello"]?.b, header)
         XCTAssertEqual(r2.content, [.json: content])
     }
 
@@ -33,10 +33,10 @@ final class ResponseTests: XCTestCase {
             404: .response(reference: .external("hello.json#/world"))
         ]
 
-        XCTAssertNotNil(responseMap[200]?.a)
-        XCTAssertNil(responseMap[200]?.b)
-        XCTAssertNotNil(responseMap[404]?.b)
-        XCTAssertNil(responseMap[404]?.a)
+        XCTAssertNotNil(responseMap[200]?.b)
+        XCTAssertNil(responseMap[200]?.a)
+        XCTAssertNotNil(responseMap[404]?.a)
+        XCTAssertNil(responseMap[404]?.b)
     }
 }
 

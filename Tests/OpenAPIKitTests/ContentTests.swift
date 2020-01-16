@@ -34,9 +34,9 @@ final class ContentTests: XCTestCase {
 
         let withExamples = OpenAPI.Content(schema: .init(.string),
                                            examples: [
-                                            "hello": .a(.init(value: .init("world"))),
-                                            "bbbb": .a(.init(value: .b("pick me"))),
-                                            "aaaa": .a(.init(value: .a(URL(string: "http://google.com")!)))
+                                            "hello": .b(.init(value: .init("world"))),
+                                            "bbbb": .b(.init(value: .b("pick me"))),
+                                            "aaaa": .b(.init(value: .a(URL(string: "http://google.com")!)))
         ])
         XCTAssertNotNil(withExamples.examples)
         XCTAssertEqual(withExamples.example?.value as? String, "pick me")
@@ -207,7 +207,7 @@ extension ContentTests {
 
     func test_examplesAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
-                                      examples: ["hello": .a(OpenAPI.Example(value: .init([ "hello": "world" ])))])
+                                      examples: ["hello": .b(OpenAPI.Example(value: .init([ "hello": "world" ])))])
         let encodedContent = try! testStringFromEncoding(of: content)
 
         XCTAssertEqual(encodedContent,
@@ -265,7 +265,7 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.a?.value.b?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.b?.value.b?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {
@@ -428,12 +428,12 @@ extension ContentTests {
 
         let _ = OpenAPI.Content.Encoding(contentType: .json)
 
-        let _ = OpenAPI.Content.Encoding(headers: ["special": .b(.external("hello.yml"))])
+        let _ = OpenAPI.Content.Encoding(headers: ["special": .a(.external("hello.yml"))])
 
         let _ = OpenAPI.Content.Encoding(allowReserved: true)
 
         let _ = OpenAPI.Content.Encoding(contentType: .form,
-                                         headers: ["special": .b(.external("hello.yml"))],
+                                         headers: ["special": .a(.external("hello.yml"))],
                                          allowReserved: true)
         let _ = OpenAPI.Content.Encoding(contentType: .json,
                                          style: .form)

@@ -15,7 +15,7 @@ extension OpenAPI {
         public let deprecated: Bool // default is false
         public let schemaOrContent: Either<SchemaProperty, OpenAPI.Content.Map>
 
-        public typealias Map = [String: Either<Header, JSONReference<OpenAPI.Components, Header>>]
+        public typealias Map = [String: Either<JSONReference<OpenAPI.Components, Header>, Header>]
 
         public typealias SchemaProperty = Either<JSONReference<OpenAPI.Components, JSONSchema>, JSONSchema>
 

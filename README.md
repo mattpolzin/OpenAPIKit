@@ -275,7 +275,7 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] responses
 - [ ] callbacks
 - [x] deprecated
-- [ ] security
+- [x] security
 - [x] servers
 
 ### External Document Object (`OpenAPI.ExternalDoc`)
