@@ -13,7 +13,7 @@ extension OpenAPI {
         public let description: String?
 
         public init(type: SecurityType,
-                    description: String?) {
+                    description: String? = nil) {
             self.type = type
             self.description = description
         }

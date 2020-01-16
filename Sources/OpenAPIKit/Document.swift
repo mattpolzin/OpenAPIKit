@@ -89,7 +89,9 @@ extension OpenAPI.Document: Encodable {
         )
         try container.encode(pathsStringKeyedDict, forKey: .paths)
 
-        try container.encode(components, forKey: .components)
+        if !components.isEmpty {
+            try container.encode(components, forKey: .components)
+        }
 
         // A real mess here because we've got an Array of non-string-keyed
         // Dictionaries.
@@ -97,9 +99,7 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        if let encodableTags = tags {
-            try container.encode(encodableTags, forKey: .tags)
-        }
+        try tags.encodeIfNotNil(to: &container, forKey: .tags)
 
         try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
     }
@@ -184,7 +184,7 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
         }
 
         return securityRequirements
-    } else {
-        return nil
     }
+
+    return nil
 }

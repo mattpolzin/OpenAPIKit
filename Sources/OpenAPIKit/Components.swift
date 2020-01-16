@@ -40,14 +40,18 @@ extension OpenAPI {
             self.securitySchemes = SecuritySchemesDict(securitySchemes)
         }
 
-        public static var noComponents: Components {
-            return .init(schemas: [:],
-                         responses: [:],
-                         parameters: [:],
-                         examples: [:],
-                         requestBodies: [:],
-                         headers: [:],
-                         securitySchemes: [:])
+        public static let noComponents: Components = .init(
+            schemas: [:],
+            responses: [:],
+            parameters: [:],
+            examples: [:],
+            requestBodies: [:],
+            headers: [:],
+            securitySchemes: [:]
+        )
+
+        var isEmpty: Bool {
+            return self == .noComponents
         }
 
         public enum SchemasName: RefName {
