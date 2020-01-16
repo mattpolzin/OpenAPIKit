@@ -46,7 +46,7 @@ extension ExampleTests {
                                       value: .init(URL(string: "https://google.com")!))
         let encodedExample = try! testStringFromEncoding(of: example)
 
-        XCTAssertEqual(encodedExample,
+        assertJSONEquivalent(encodedExample,
 """
 {
   "externalValue" : "https:\\/\\/google.com",
@@ -75,7 +75,7 @@ extension ExampleTests {
                                       value: .init("world"))
         let encodedExample = try! testStringFromEncoding(of: example)
 
-        XCTAssertEqual(encodedExample,
+        assertJSONEquivalent(encodedExample,
 """
 {
   "description" : "hello",
@@ -104,7 +104,7 @@ extension ExampleTests {
                                       vendorExtensions: ["x-hello": 10])
         let encodedExample = try! testStringFromEncoding(of: example)
 
-        XCTAssertEqual(encodedExample,
+        assertJSONEquivalent(encodedExample,
                        """
 {
   "value" : "world",
@@ -132,7 +132,7 @@ extension ExampleTests {
         let example = OpenAPI.Example(value: .init("world"))
         let encodedExample = try! testStringFromEncoding(of: example)
 
-        XCTAssertEqual(encodedExample,
+        assertJSONEquivalent(encodedExample,
                        """
 {
   "value" : "world"
@@ -157,7 +157,7 @@ extension ExampleTests {
         let example = OpenAPI.Example(value: .init(URL(string: "https://google.com")!))
         let encodedExample = try! testStringFromEncoding(of: example)
 
-        XCTAssertEqual(encodedExample,
+        assertJSONEquivalent(encodedExample,
 """
 {
   "externalValue" : "https:\\/\\/google.com"

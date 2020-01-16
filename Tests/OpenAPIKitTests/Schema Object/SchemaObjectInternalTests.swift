@@ -18,18 +18,18 @@ class SchemaObjectInternalTests: XCTestCase {
 
     func test_fragmentValue() {
         let f1 = JSONSchema.fragmentString(from: true)
-        XCTAssertEqual(f1, "true")
+        assertJSONEquivalent(f1, "true")
 
         let f2 = JSONSchema.fragmentString(from: 10)
-        XCTAssertEqual(f2, "10")
+        assertJSONEquivalent(f2, "10")
 
         let f3 = JSONSchema.fragmentString(from: 11.3)
-        XCTAssertEqual(f3, "11.3")
+        assertJSONEquivalent(f3, "11.3")
 
         let f4 = JSONSchema.fragmentString(from: Float(3.4))
-        XCTAssertEqual(f4, "3.4")
+        assertJSONEquivalent(f4, "3.4")
 
         let f5 = JSONSchema.fragmentString(from: "hello world")
-        XCTAssertEqual(f5, "\"hello world\"")
+        assertJSONEquivalent(f5, "\"hello world\"")
     }
 }

@@ -49,7 +49,7 @@ extension RequestTests {
         let request = OpenAPI.Request(content: content)
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString, "{\n  \"content\" : {\n\n  }\n}")
+        assertJSONEquivalent(encodedString, "{\n  \"content\" : {\n\n  }\n}")
     }
 
     func test_onlyEmptyContent_decode() {
@@ -65,7 +65,7 @@ extension RequestTests {
             ])
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
 """
 {
   "content" : {
@@ -100,7 +100,7 @@ extension RequestTests {
         ])
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
 """
 {
   "content" : {
@@ -154,7 +154,7 @@ extension RequestTests {
                                       content: [:])
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
 """
 {
   "content" : {
@@ -186,7 +186,7 @@ extension RequestTests {
                                       required: true)
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
 """
 {
   "content" : {
@@ -227,7 +227,7 @@ extension RequestTests {
             ])
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
                        """
 {
   "content" : {
@@ -287,7 +287,7 @@ extension RequestTests {
             ])
         let encodedString = try! testStringFromEncoding(of: request)
 
-        XCTAssertEqual(encodedString,
+        assertJSONEquivalent(encodedString,
                        """
 {
   "content" : {

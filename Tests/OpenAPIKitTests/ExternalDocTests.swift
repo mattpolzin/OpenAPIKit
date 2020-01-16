@@ -27,7 +27,7 @@ extension ExternalDocTests {
 
         let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
 
-        XCTAssertEqual(encodedExternalDoc,
+        assertJSONEquivalent(encodedExternalDoc,
 """
 {
   "description" : "hello world",
@@ -56,7 +56,7 @@ extension ExternalDocTests {
 
         let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
 
-        XCTAssertEqual(encodedExternalDoc,
+        assertJSONEquivalent(encodedExternalDoc,
 """
 {
   "url" : "http:\\/\\/google.com"

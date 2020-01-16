@@ -77,7 +77,7 @@ extension ResponseTests {
         let response = OpenAPI.Response(description: "", content: [:])
         let encodedResponse = try! testStringFromEncoding(of: response)
 
-        XCTAssertEqual(encodedResponse,
+        assertJSONEquivalent(encodedResponse,
 """
 {
   "description" : ""
@@ -88,7 +88,7 @@ extension ResponseTests {
         let response2 = OpenAPI.Response(description: "", headers: [:], content: [:])
         let encodedResponse2 = try! testStringFromEncoding(of: response2)
 
-        XCTAssertEqual(encodedResponse2,
+        assertJSONEquivalent(encodedResponse2,
 """
 {
   "description" : "",
@@ -144,7 +144,7 @@ extension ResponseTests {
 
         let encodedResponse = try! testStringFromEncoding(of: response)
 
-        XCTAssertEqual(encodedResponse,
+        assertJSONEquivalent(encodedResponse,
 """
 {
   "content" : {
@@ -200,7 +200,7 @@ extension ResponseTests {
         let status = StatusCodeWrapper(status: .default)
         let encodedStatus = try! testStringFromEncoding(of: status)
 
-        XCTAssertEqual(encodedStatus,
+        assertJSONEquivalent(encodedStatus,
 """
 {
   "status" : "default"
@@ -224,7 +224,7 @@ extension ResponseTests {
         let status = StatusCodeWrapper(status: 123)
         let encodedStatus = try! testStringFromEncoding(of: status)
 
-        XCTAssertEqual(encodedStatus,
+        assertJSONEquivalent(encodedStatus,
 """
 {
   "status" : "123"

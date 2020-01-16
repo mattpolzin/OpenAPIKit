@@ -438,7 +438,7 @@ final class SchemaObjectTests: XCTestCase {
         let not = JSONSchema.not(.string)
         let ref = JSONSchema.reference(.external("hello.yml"))
 
-        XCTAssertEqual(object.example, "{\n\n}")
+        assertJSONEquivalent(object.example, "{\n\n}")
 
         XCTAssertNil(all.example)
         XCTAssertNil(one.example)
@@ -476,8 +476,8 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertThrowsError(try JSONSchema.reference(.external("hello/world.json#/hello"))
             .with(example: ["hello"], using: testEncoder))
 
-        XCTAssertEqual(object.example, "{\n\n}")
-        XCTAssertEqual(array.example, "[\n  \"hello\"\n]")
+        assertJSONEquivalent(object.example, "{\n\n}")
+        assertJSONEquivalent(array.example, "[\n  \"hello\"\n]")
 
         XCTAssertEqual(boolean.example, "true")
         XCTAssertEqual(double.example, "10.5")
@@ -3231,14 +3231,14 @@ extension SchemaObjectTests {
     }
 }
 
-private func testEncodingPropertyLines<T: Encodable>(entity: T, propertyLines: [String]) {
+private func testEncodingPropertyLines<T: Encodable>(entity: T, propertyLines: [String], file: StaticString = #file, line: UInt = #line) {
     var expectedString = "{\n"
     for line in propertyLines {
         expectedString += "  " + line + "\n"
     }
     expectedString += "}"
 
-    XCTAssertEqual(try? testStringFromEncoding(of: entity), expectedString)
+    assertJSONEquivalent(try? testStringFromEncoding(of: entity), expectedString, file: file, line: line)
 }
 
 private func testAllSharedSimpleContextEncoding<T: Encodable>(

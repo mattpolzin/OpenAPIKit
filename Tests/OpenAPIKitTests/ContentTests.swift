@@ -97,7 +97,7 @@ extension ContentTests {
         let content = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "schema" : {
@@ -126,7 +126,7 @@ extension ContentTests {
         let content = OpenAPI.Content(schema: .init(.string))
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "schema" : {
@@ -156,7 +156,7 @@ extension ContentTests {
                                       example: [ "hello": "world" ])
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "example" : {
@@ -210,7 +210,7 @@ extension ContentTests {
                                       examples: ["hello": .b(OpenAPI.Example(value: .init([ "hello": "world" ])))])
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "examples" : {
@@ -303,7 +303,7 @@ extension ContentTests {
                                       encoding: ["json": .init(contentType: .json)])
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "encoding" : {
@@ -346,7 +346,7 @@ extension ContentTests {
 
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "schema" : {
@@ -366,7 +366,7 @@ extension ContentTests {
 
         let encodedContent = try! testStringFromEncoding(of: content)
 
-        XCTAssertEqual(encodedContent,
+        assertJSONEquivalent(encodedContent,
 """
 {
   "schema" : {
@@ -449,7 +449,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
 
@@ -473,7 +473,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
   "contentType" : "text\\/csv"
@@ -501,7 +501,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
   "headers" : {
@@ -544,7 +544,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
   "style" : "pipeDelimited"
@@ -573,7 +573,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
   "explode" : false
@@ -602,7 +602,7 @@ extension ContentTests {
 
         let encodedEncoding = try! testStringFromEncoding(of: encoding)
 
-        XCTAssertEqual(encodedEncoding,
+        assertJSONEquivalent(encodedEncoding,
 """
 {
   "allowReserved" : true

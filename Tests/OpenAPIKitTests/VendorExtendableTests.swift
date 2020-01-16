@@ -95,7 +95,7 @@ extension VendorExtendableTests {
 
         let encoded = try testStringFromEncoding(of: test)
 
-        XCTAssertEqual(encoded,
+        assertJSONEquivalent(encoded,
 """
 {
   "one" : "world",

@@ -69,7 +69,7 @@ final class DocumentTests: XCTestCase {
                     XCTFail("Expected data corrupted decoding error")
                     return
             }
-            XCTAssertEqual(context.debugDescription, "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
+            assertJSONEquivalent(context.debugDescription, "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
         }
     }
 }
@@ -86,7 +86,7 @@ extension DocumentTests {
         )
         let encodedDocument = try testStringFromEncoding(of: document)
 
-        XCTAssertEqual(
+        assertJSONEquivalent(
             encodedDocument,
 """
 {

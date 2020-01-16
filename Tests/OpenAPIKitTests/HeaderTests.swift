@@ -52,7 +52,7 @@ extension HeaderTests {
 
         let headerEncoding = try testStringFromEncoding(of: header)
 
-        XCTAssertEqual(headerEncoding,
+        assertJSONEquivalent(headerEncoding,
 """
 {
   "content" : {
@@ -95,7 +95,7 @@ extension HeaderTests {
 
         let headerEncoding = try testStringFromEncoding(of: header)
 
-        XCTAssertEqual(headerEncoding,
+        assertJSONEquivalent(headerEncoding,
 """
 {
   "schema" : {
@@ -133,7 +133,7 @@ extension HeaderTests {
 
         let headerEncoding = try testStringFromEncoding(of: header)
 
-        XCTAssertEqual(headerEncoding,
+        assertJSONEquivalent(headerEncoding,
 """
 {
   "content" : {
@@ -186,7 +186,7 @@ extension HeaderTests {
 
         let headerEncoding = try testStringFromEncoding(of: header)
 
-        XCTAssertEqual(headerEncoding,
+        assertJSONEquivalent(headerEncoding,
 """
 {
   "content" : {
@@ -239,7 +239,7 @@ extension HeaderTests {
 
         let headerEncoding = try testStringFromEncoding(of: header)
 
-        XCTAssertEqual(headerEncoding,
+        assertJSONEquivalent(headerEncoding,
 """
 {
   "content" : {

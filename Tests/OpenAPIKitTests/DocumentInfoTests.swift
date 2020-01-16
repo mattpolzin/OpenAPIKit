@@ -40,7 +40,7 @@ extension DocumentInfoTests {
 
         let encodedLicense = try testStringFromEncoding(of: license)
 
-        XCTAssertEqual(encodedLicense,
+        assertJSONEquivalent(encodedLicense,
 """
 {
   "name" : "MIT"
@@ -69,7 +69,7 @@ extension DocumentInfoTests {
 
         let encodedLicense = try testStringFromEncoding(of: license)
 
-        XCTAssertEqual(encodedLicense,
+        assertJSONEquivalent(encodedLicense,
 """
 {
   "name" : "MIT",
@@ -100,7 +100,7 @@ extension DocumentInfoTests {
 
         let encodedContact = try testStringFromEncoding(of: contact)
 
-        XCTAssertEqual(encodedContact,
+        assertJSONEquivalent(encodedContact,
 """
 {
   "name" : "contact"
@@ -129,7 +129,7 @@ extension DocumentInfoTests {
 
         let encodedContact = try testStringFromEncoding(of: contact)
 
-        XCTAssertEqual(encodedContact,
+        assertJSONEquivalent(encodedContact,
 """
 {
   "url" : "http:\\/\\/google.com"
@@ -158,7 +158,7 @@ extension DocumentInfoTests {
 
         let encodedContact = try testStringFromEncoding(of: contact)
 
-        XCTAssertEqual(encodedContact,
+        assertJSONEquivalent(encodedContact,
 """
 {
   "email" : "email"
@@ -187,7 +187,7 @@ extension DocumentInfoTests {
 
         let encodedInfo = try testStringFromEncoding(of: info)
 
-        XCTAssertEqual(encodedInfo,
+        assertJSONEquivalent(encodedInfo,
 """
 {
   "title" : "title",
@@ -222,7 +222,7 @@ extension DocumentInfoTests {
 
         let encodedInfo = try testStringFromEncoding(of: info)
 
-        XCTAssertEqual(encodedInfo,
+        assertJSONEquivalent(encodedInfo,
 """
 {
   "description" : "description",
@@ -263,7 +263,7 @@ extension DocumentInfoTests {
 
         let encodedInfo = try testStringFromEncoding(of: info)
 
-        XCTAssertEqual(encodedInfo,
+        assertJSONEquivalent(encodedInfo,
 """
 {
   "termsOfService" : "http:\\/\\/google.com",
@@ -304,7 +304,7 @@ extension DocumentInfoTests {
 
         let encodedInfo = try testStringFromEncoding(of: info)
 
-        XCTAssertEqual(encodedInfo,
+        assertJSONEquivalent(encodedInfo,
                        """
 {
   "contact" : {
@@ -349,7 +349,7 @@ extension DocumentInfoTests {
 
         let encodedInfo = try testStringFromEncoding(of: info)
 
-        XCTAssertEqual(encodedInfo,
+        assertJSONEquivalent(encodedInfo,
 """
 {
   "license" : {

@@ -27,7 +27,7 @@ extension XMLTests {
         let xml = OpenAPI.XML()
         let encodedXML = try testStringFromEncoding(of: xml)
 
-        XCTAssertEqual(
+        assertJSONEquivalent(
             encodedXML,
 """
 {
@@ -63,7 +63,7 @@ extension XMLTests {
         )
         let encodedXML = try testStringFromEncoding(of: xml)
 
-        XCTAssertEqual(
+        assertJSONEquivalent(
             encodedXML,
 """
 {

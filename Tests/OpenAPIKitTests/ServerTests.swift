@@ -66,7 +66,7 @@ extension ServerTests {
         let server = Server(url: URL(string: "https://hello.com")!)
         let encodedServer = try! testStringFromEncoding(of: server)
 
-        XCTAssertEqual(encodedServer,
+        assertJSONEquivalent(encodedServer,
 """
 {
   "url" : "https:\\/\\/hello.com"
@@ -112,7 +112,7 @@ extension ServerTests {
             ])
         let encodedServer = try! testStringFromEncoding(of: server)
 
-        XCTAssertEqual(encodedServer,
+        assertJSONEquivalent(encodedServer,
 """
 {
   "description" : "hello world",

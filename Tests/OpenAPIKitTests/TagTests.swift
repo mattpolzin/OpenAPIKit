@@ -32,7 +32,7 @@ extension TagTests {
         let tag = OpenAPI.Tag(name: "hello")
         let encodedTag = try! testStringFromEncoding(of: tag)
 
-        XCTAssertEqual(encodedTag,
+        assertJSONEquivalent(encodedTag,
 """
 {
   "name" : "hello"
@@ -58,7 +58,7 @@ extension TagTests {
                               description: "world")
         let encodedTag = try! testStringFromEncoding(of: tag)
 
-        XCTAssertEqual(encodedTag,
+        assertJSONEquivalent(encodedTag,
 """
 {
   "description" : "world",
@@ -87,7 +87,7 @@ extension TagTests {
                               externalDocs: .init(url: URL(string: "http://google.com")!))
         let encodedTag = try! testStringFromEncoding(of: tag)
 
-        XCTAssertEqual(encodedTag,
+        assertJSONEquivalent(encodedTag,
 """
 {
   "description" : "world",

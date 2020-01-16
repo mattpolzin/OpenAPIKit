@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import XCTest
 
 let testEncoder = { () -> JSONEncoder in
     let encoder = JSONEncoder()
@@ -38,3 +39,24 @@ let testDecoder = { () -> JSONDecoder in
     #endif
     return decoder
 }()
+
+func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString = #file, line: UInt = #line) {
+
+    // when testing on Linux, pretty printing has slightly different
+    // meaning so the tests pass on OS X as written but need whitespace
+    // stripped to pass on Linux
+    #if os(Linux)
+    var str1 = str1
+    var str2 = str2
+
+    str1?.removeAll { $0.isWhitespace }
+    str2?.removeAll { $0.isWhitespace }
+    #endif
+
+    XCTAssertEqual(
+        str1,
+        str2,
+        file: file,
+        line: line
+    )
+}

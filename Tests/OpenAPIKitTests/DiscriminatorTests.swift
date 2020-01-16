@@ -28,7 +28,7 @@ extension DiscriminatorTests {
         let discriminator = OpenAPI.Discriminator(propertyName: "hello")
         let encodedDiscriminator = try! testStringFromEncoding(of: discriminator)
 
-        XCTAssertEqual(encodedDiscriminator,
+        assertJSONEquivalent(encodedDiscriminator,
 """
 {
   "propertyName" : "hello"
@@ -54,7 +54,7 @@ extension DiscriminatorTests {
                                                   mapping: ["hello": "world"])
         let encodedDiscriminator = try! testStringFromEncoding(of: discriminator)
 
-        XCTAssertEqual(encodedDiscriminator,
+        assertJSONEquivalent(encodedDiscriminator,
 """
 {
   "mapping" : {
