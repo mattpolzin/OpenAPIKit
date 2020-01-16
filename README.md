@@ -40,7 +40,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
 	- [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
 	- [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
-	- [XML Object](#xml-object)
+	- [XML Object (`OpenAPI.XML`)](#xml-object-openapixml)
 	- [Security Scheme Object (`OpenAPI.SecurityScheme`)](#security-scheme-object-openapisecurityscheme)
 	- [OAuth Flows Object](#oauth-flows-object)
 	- [OAuth Flow Object](#oauth-flow-object)
@@ -387,12 +387,12 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 - [x] propertyName
 - [x] mapping
 
-### XML Object
-- [ ] name
-- [ ] namespace
-- [ ] prefix
-- [ ] attribute
-- [ ] wrapped
+### XML Object (`OpenAPI.XML`)
+- [x] name
+- [x] namespace
+- [x] prefix
+- [x] attribute
+- [x] wrapped
 
 ### Security Scheme Object (`OpenAPI.SecurityScheme`)
 - [x] type
