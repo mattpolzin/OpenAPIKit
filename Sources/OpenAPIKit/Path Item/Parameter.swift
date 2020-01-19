@@ -202,13 +202,7 @@ extension OpenAPI.PathItem.Parameter: Encodable {
         case .a(let schema):
             try schema.encode(to: encoder, for: parameterLocation)
         case .b(let contentMap):
-            // Hack to work around Dictionary encoding
-            // itself as an array in this case:
-            let stringKeyedDict = Dictionary(
-                contentMap.map { ($0.key.rawValue, $0.value) },
-                uniquingKeysWith: { $1 }
-            )
-            try container.encode(stringKeyedDict, forKey: .content)
+            try container.encode(contentMap, forKey: .content)
         }
 
         try description.encodeIfNotNil(to: &container, forKey: .description)
@@ -243,13 +237,7 @@ extension OpenAPI.PathItem.Parameter: Decodable {
             parameterLocation = .cookie(required: required)
         }
 
-        // hacky workaround for Dictionary decoding bug
-        let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)
-        let maybeContent = maybeContentDict.map { contentDict in
-            Dictionary(contentDict.compactMap { contentTypeString, content in
-                OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
-                       uniquingKeysWith: { $1 })
-        }
+        let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
 
         let maybeSchema: Schema?
         if container.contains(.schema) {

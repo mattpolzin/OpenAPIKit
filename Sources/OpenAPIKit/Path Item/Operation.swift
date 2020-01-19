@@ -28,7 +28,7 @@ extension OpenAPI.PathItem {
                     description: String? = nil,
                     externalDocs: OpenAPI.ExternalDoc? = nil,
                     operationId: String? = nil,
-                    parameters: Parameter.Array,
+                    parameters: Parameter.Array = [],
                     requestBody: OpenAPI.Request? = nil,
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
@@ -115,13 +115,7 @@ extension OpenAPI.PathItem.Operation: Encodable {
 
         try requestBody.encodeIfNotNil(to: &container, forKey: .requestBody)
 
-        // Hack to work around Dictionary encoding
-        // itself as an array in this case:
-        let stringKeyedDict = Dictionary(
-            responses.map { ($0.key.rawValue, $0.value) },
-            uniquingKeysWith: { $1 }
-        )
-        try container.encode(stringKeyedDict, forKey: .responses)
+        try container.encode(responses, forKey: .responses)
 
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)
@@ -153,11 +147,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
         requestBody = try container.decodeIfPresent(OpenAPI.Request.self, forKey: .requestBody)
 
-        // hack to workaround Dictionary bug
-        let responsesDict = try container.decode([String: Either<JSONReference<OpenAPI.Components, OpenAPI.Response>, OpenAPI.Response>].self, forKey: .responses)
-        responses = Dictionary(responsesDict.compactMap { statusCodeString, response in
-            OpenAPI.Response.StatusCode(rawValue: statusCodeString).map { ($0, response) } },
-                               uniquingKeysWith: { $1 })
+        responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 

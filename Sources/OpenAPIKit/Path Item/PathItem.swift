@@ -78,7 +78,7 @@ extension OpenAPI {
             self.trace = trace
         }
 
-        public typealias Map = [PathComponents: Either<JSONReference<Components, PathItem>, PathItem>]
+        public typealias Map = OrderedDictionary<PathComponents, Either<JSONReference<Components, PathItem>, PathItem>>
     }
 }
 
