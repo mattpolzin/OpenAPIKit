@@ -72,6 +72,7 @@ final class OrderedDictionaryTests: XCTestCase {
 
 // MARK: - Codable
 extension OrderedDictionaryTests {
+    // Sadly JSONEncoder does not retain order for Linux Foundation
     func test_stringKeyEncode() throws {
         let dict: OrderedDictionary = [
             "hello": "world",
@@ -79,14 +80,17 @@ extension OrderedDictionaryTests {
         ]
 
         let encodedDict = String(
-            data: try JSONEncoder().encode(dict),
+            data: try FineJSONEncoder().encode(dict),
             encoding: .utf8
         )!
 
         XCTAssertEqual(
             encodedDict,
 """
-{"hello":"world","a":"thing"}
+{
+  "hello": "world",
+  "a": "thing"
+}
 """
         )
 
@@ -96,14 +100,17 @@ extension OrderedDictionaryTests {
         ]
 
         let encodedDict2 = String(
-            data: try JSONEncoder().encode(dict2),
+            data: try FineJSONEncoder().encode(dict2),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedDict2,
 """
-{"a":"world","hello":"thing"}
+{
+  "a": "world",
+  "hello": "thing"
+}
 """
         )
     }
@@ -166,6 +173,7 @@ hello: thing
         )
     }
 
+    // Sadly JSONEncoder does not retain order for Linux Foundation
     func test_doubleKeyEncode() throws {
 //        // should use lossless
 //        let dict: OrderedDictionary = [
@@ -196,14 +204,17 @@ hello: thing
         ]
 
         let encodedDict2 = String(
-            data: try JSONEncoder().encode(dict2),
+            data: try FineJSONEncoder().encode(dict2),
             encoding: .utf8
         )!
 
         XCTAssertEqual(
             encodedDict2,
 """
-{"1.0":"world","7.0":"thing"}
+{
+  "1.0": "world",
+  "7.0": "thing"
+}
 """
         )
 
@@ -214,14 +225,17 @@ hello: thing
         ]
 
         let encodedDict3 = String(
-            data: try JSONEncoder().encode(dict3),
+            data: try FineJSONEncoder().encode(dict3),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedDict3,
 """
-{"100.5":"world","8.5":"thing"}
+{
+  "100.5": "world",
+  "8.5": "thing"
+}
 """
         )
     }
@@ -284,6 +298,7 @@ hello: thing
         )
     }
 
+    // Sadly JSONEncoder does not retain order for Linux Foundation
     func test_intKeyEncode() throws {
         // should use lossless
         let dict: OrderedDictionary = [
@@ -292,14 +307,17 @@ hello: thing
         ]
 
         let encodedDict = String(
-            data: try JSONEncoder().encode(dict),
+            data: try FineJSONEncoder().encode(dict),
             encoding: .utf8
         )!
 
         XCTAssertEqual(
             encodedDict,
 """
-{"3":"world","2":"thing"}
+{
+  "3": "world",
+  "2": "thing"
+}
 """
         )
 
@@ -309,14 +327,17 @@ hello: thing
         ]
 
         let encodedDict2 = String(
-            data: try JSONEncoder().encode(dict2),
+            data: try FineJSONEncoder().encode(dict2),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedDict2,
 """
-{"2":"world","3":"thing"}
+{
+  "2": "world",
+  "3": "thing"
+}
 """
         )
 
@@ -326,14 +347,17 @@ hello: thing
         ]
 
         let encodedDict3 = String(
-            data: try JSONEncoder().encode(dict3),
+            data: try FineJSONEncoder().encode(dict3),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedDict3,
 """
-{"20":"world","3":"thing"}
+{
+  "20": "world",
+  "3": "thing"
+}
 """
         )
     }
@@ -396,6 +420,7 @@ hello: thing
         )
     }
 
+    // Sadly JSONEncoder does not retain order for Linux Foundation
     func test_stringEnumKeyEncode() throws {
         let dict: OrderedDictionary = [
             TestKey.hello: "here",
@@ -403,14 +428,17 @@ hello: thing
         ]
 
         let encodedDict = String(
-            data: try JSONEncoder().encode(dict),
+            data: try FineJSONEncoder().encode(dict),
             encoding: .utf8
         )!
 
         XCTAssertEqual(
             encodedDict,
 """
-{"hello":"here","world":"there"}
+{
+  "hello": "here",
+  "world": "there"
+}
 """
         )
 
@@ -420,14 +448,17 @@ hello: thing
         ]
 
         let encodedDict2 = String(
-            data: try JSONEncoder().encode(dict2),
+            data: try FineJSONEncoder().encode(dict2),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedDict2,
 """
-{"world":"here","hello":"there"}
+{
+  "world": "here",
+  "hello": "there"
+}
 """
         )
     }

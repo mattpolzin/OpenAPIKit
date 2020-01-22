@@ -8,6 +8,7 @@
 import XCTest
 import OpenAPIKit
 import Yams
+import FineJSON
 
 final class OperationTests: XCTestCase {
     func test_init() {
@@ -18,6 +19,7 @@ final class OperationTests: XCTestCase {
 // MARK: - Codable Tests
 extension OperationTests {
 
+    // Note that JSONEncoder for Linux Foundation does not respect order
     func test_responseOrder_encode() throws {
         let operation = OpenAPI.PathItem.Operation(
             responses: [
@@ -27,14 +29,23 @@ extension OperationTests {
         )
 
         let encodedOperation = String(
-            data: try JSONEncoder().encode(operation),
+            data: try FineJSONEncoder().encode(operation),
             encoding: .utf8
         )!
 
         XCTAssertEqual(
             encodedOperation,
 """
-{"responses":{"404":{"$ref":"#\\/components\\/responses\\/404"},"200":{"$ref":"#\\/components\\/responses\\/200"}}}
+{
+  "responses": {
+    "404": {
+      "$ref": "#/components/responses/404"
+    },
+    "200": {
+      "$ref": "#/components/responses/200"
+    }
+  }
+}
 """
         )
 
@@ -46,19 +57,28 @@ extension OperationTests {
         )
 
         let encodedOperation2 = String(
-            data: try JSONEncoder().encode(operation2),
+            data: try FineJSONEncoder().encode(operation2),
             encoding: .utf8
             )!
 
         XCTAssertEqual(
             encodedOperation2,
             """
-{"responses":{"200":{"$ref":"#\\/components\\/responses\\/200"},"404":{"$ref":"#\\/components\\/responses\\/404"}}}
+{
+  "responses": {
+    "200": {
+      "$ref": "#/components/responses/200"
+    },
+    "404": {
+      "$ref": "#/components/responses/404"
+    }
+  }
+}
 """
         )
     }
 
-    // Note that only the YAML decoder respects ordering currently
+    // Note that JSONDecoder does not respect order
     func test_responseOrder_decode() throws {
         let operationString =
 """
