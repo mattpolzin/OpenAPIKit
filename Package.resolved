@@ -11,12 +11,30 @@
         }
       },
       {
+        "package": "FineJSON",
+        "repositoryURL": "https://github.com/omochi/FineJSON.git",
+        "state": {
+          "branch": null,
+          "revision": "05101709243cb66d80c92e645210a3b80cf4e17f",
+          "version": "1.14.0"
+        }
+      },
+      {
         "package": "Poly",
         "repositoryURL": "https://github.com/mattpolzin/Poly.git",
         "state": {
           "branch": null,
           "revision": "0c9c08204142babc480938d704a23513d11420e5",
           "version": "2.3.1"
+        }
+      },
+      {
+        "package": "RichJSONParser",
+        "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
+        "state": {
+          "branch": null,
+          "revision": "263e2ecfe88d0500fa99e4cbc8c948529d335534",
+          "version": "3.0.0"
         }
       },
       {

@@ -5,10 +5,10 @@
 //  Created by Mathew Polzin on 1/17/20.
 //
 
-//import OpenAPIKit
 import OpenAPIKit
 import XCTest
 import Yams
+import FineJSON
 
 final class OrderedDictionaryTests: XCTestCase {
     func test_keySubscriptGet() {
@@ -108,7 +108,7 @@ extension OrderedDictionaryTests {
         )
     }
 
-    // sadly, ordering works for YAMLDecoder, but not JSONDecoder
+    // sadly, ordering works for YAMLDecoder and FineJSON, not JSONDecoder
     func test_stringKeyDecode() throws {
         let dictString =
 """
@@ -130,6 +130,35 @@ hello: thing
 """
 
         let dict2 = try YAMLDecoder().decode(OrderedDictionary<String, String>.self, from: dictString2)
+
+        XCTAssertEqual(
+            dict2,
+            ["a": "world", "hello": "thing"]
+        )
+    }
+
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
+    func test_stringKeyDecode2() throws {
+        let dictData =
+"""
+{"hello": "world",
+"a": "thing"}
+""".data(using: .utf8)!
+
+        let dict = try FineJSONDecoder().decode(OrderedDictionary<String, String>.self, from: dictData)
+
+        XCTAssertEqual(
+            dict,
+            ["hello": "world", "a": "thing"]
+        )
+
+        let dictData2 =
+"""
+{"a": "world",
+"hello": "thing"}
+""".data(using: .utf8)!
+
+        let dict2 = try FineJSONDecoder().decode(OrderedDictionary<String, String>.self, from: dictData2)
 
         XCTAssertEqual(
             dict2,
@@ -191,16 +220,16 @@ hello: thing
 
         XCTAssertEqual(
             encodedDict3,
-            """
+"""
 {"100.5":"world","8.5":"thing"}
 """
         )
     }
 
-    // sadly, ordering works for YAMLDecoder, but not JSONDecoder
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
     func test_doubleKeyDecode() throws {
         let dictString =
-        """
+"""
 1.0: world
 7.0: thing
 """
@@ -213,12 +242,41 @@ hello: thing
         )
 
         let dictString2 =
-        """
+"""
 100.5: world
 8.5: thing
 """
 
         let dict2 = try YAMLDecoder().decode(OrderedDictionary<Double, String>.self, from: dictString2)
+
+        XCTAssertEqual(
+            dict2,
+            [100.5: "world", 8.5: "thing"]
+        )
+    }
+
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
+    func test_doubleKeyDecode2() throws {
+        let dictData =
+"""
+{"1.0": "world",
+"7.0": "thing"}
+""".data(using: .utf8)!
+
+        let dict = try FineJSONDecoder().decode(OrderedDictionary<Double, String>.self, from: dictData)
+
+        XCTAssertEqual(
+            dict,
+            [1.0: "world", 7.0: "thing"]
+        )
+
+        let dictData2 =
+"""
+{"100.5": "world",
+"8.5": "thing"}
+""".data(using: .utf8)!
+
+        let dict2 = try FineJSONDecoder().decode(OrderedDictionary<Double, String>.self, from: dictData2)
 
         XCTAssertEqual(
             dict2,
@@ -274,16 +332,16 @@ hello: thing
 
         XCTAssertEqual(
             encodedDict3,
-            """
+"""
 {"20":"world","3":"thing"}
 """
         )
     }
 
-    // sadly, ordering works for YAMLDecoder, but not JSONDecoder
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
     func test_intKeyDecode() throws {
         let dictString =
-        """
+"""
 1: world
 7: thing
 """
@@ -296,12 +354,41 @@ hello: thing
         )
 
         let dictString2 =
-        """
+"""
 100: world
 8: thing
 """
 
         let dict2 = try YAMLDecoder().decode(OrderedDictionary<Int, String>.self, from: dictString2)
+
+        XCTAssertEqual(
+            dict2,
+            [100: "world", 8: "thing"]
+        )
+    }
+
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
+    func test_intKeyDecode2() throws {
+        let dictData =
+"""
+{"1": "world",
+"7": "thing"}
+""".data(using: .utf8)!
+
+        let dict = try FineJSONDecoder().decode(OrderedDictionary<Int, String>.self, from: dictData)
+
+        XCTAssertEqual(
+            dict,
+            [1: "world", 7: "thing"]
+        )
+
+        let dictData2 =
+"""
+{"100": "world",
+"8": "thing"}
+""".data(using: .utf8)!
+
+        let dict2 = try FineJSONDecoder().decode(OrderedDictionary<Int, String>.self, from: dictData2)
 
         XCTAssertEqual(
             dict2,
@@ -345,7 +432,7 @@ hello: thing
         )
     }
 
-    // sadly, ordering works for YAMLDecoder, but not JSONDecoder
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
     func test_stringEnumKeyDecode() throws {
         let dictString =
 """
@@ -367,6 +454,35 @@ hello: thing
 """
 
         let dict2 = try YAMLDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictString2)
+
+        XCTAssertEqual(
+            dict2,
+            [.world: "world", .hello: "thing"]
+        )
+    }
+
+    // sadly, ordering works for YAMLDecoder and FineJSONDecoder, not JSONDecoder
+    func test_stringEnumKeyDecode2() throws {
+        let dictData =
+"""
+{"hello": "world",
+"world": "thing"}
+""".data(using: .utf8)!
+
+        let dict = try FineJSONDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictData)
+
+        XCTAssertEqual(
+            dict,
+            [.hello: "world", .world: "thing"]
+        )
+
+        let dictData2 =
+"""
+{"world": "world",
+"hello": "thing"}
+""".data(using: .utf8)!
+
+        let dict2 = try FineJSONDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictData2)
 
         XCTAssertEqual(
             dict2,
@@ -458,6 +574,42 @@ hello
 """.data(using: .utf8)!
 
         let dict2 = try JSONDecoder().decode(OrderedDictionary<TestKey2, String>.self, from: dictData2)
+
+        XCTAssertEqual(
+            dict2,
+            [TestKey2("y"): "there", TestKey2("x"): "hello"]
+        )
+    }
+
+    func test_otherKeyDecodeFineJSON() throws {
+        let dictData =
+"""
+[
+{"x": "x"},
+"hello",
+{"x": "y"},
+"there"
+]
+""".data(using: .utf8)!
+
+        let dict = try FineJSONDecoder().decode(OrderedDictionary<TestKey2, String>.self, from: dictData)
+
+        XCTAssertEqual(
+            dict,
+            [TestKey2("x"): "hello", TestKey2("y"): "there"]
+        )
+
+        let dictData2 =
+"""
+[
+{"x": "y"},
+"there",
+{"x": "x"},
+"hello"
+]
+""".data(using: .utf8)!
+
+        let dict2 = try FineJSONDecoder().decode(OrderedDictionary<TestKey2, String>.self, from: dictData2)
 
         XCTAssertEqual(
             dict2,
