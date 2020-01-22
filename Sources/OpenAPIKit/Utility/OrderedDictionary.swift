@@ -47,9 +47,73 @@ public struct OrderedDictionary<Key, Value> where Key: Hashable {
         }
     }
 
+    /// Get the keys in this dictionary in order.
+    public var keys: [Key] {
+        return map { $0.0 }
+    }
+
     /// Get the values in this dictionary in order.
     public var values: [Value] {
         return map { $0.1 }
+    }
+
+    /// Returns whether this dictionary contains a key fulfilling the given predicate.
+    public func contains(where predicate: (Key) throws -> Bool) rethrows -> Bool {
+        return try keys.contains(where: predicate)
+    }
+
+    /// Returns whether the dictionary contains the given key.
+    public func contains(key: Key) -> Bool {
+        return keys.contains(key)
+    }
+
+    /// Returns a new dictionary containing the keys of this dictionary with the
+    /// values transformed by the given closure.
+    ///
+    /// - Parameter transform: A closure that transforms a value. `transform`
+    ///   accepts each value of the dictionary as its parameter and returns a
+    ///   transformed value of the same or of a different type.
+    /// - Returns: A dictionary containing the keys and transformed values of
+    ///   this dictionary.
+    public func mapValues<T>(_ transform: (Value) throws -> T) rethrows -> OrderedDictionary<Key, T> {
+        var ret = OrderedDictionary<Key, T>()
+        for key in orderedKeys {
+            ret[key] = try transform(unorderedHash[key]!)
+        }
+        return ret
+    }
+
+    /// Returns a new dictionary containing only the key-value pairs that have
+    /// non-`nil` values as the result of transformation by the given closure.
+    ///
+    /// Use this method to receive a dictionary with non-optional values when
+    /// your transformation produces optional values.
+    ///
+    /// In this example, note the difference in the result of using `mapValues`
+    /// and `compactMapValues` with a transformation that returns an optional
+    /// `Int` value.
+    ///
+    ///     let data = ["a": "1", "b": "three", "c": "///4///"]
+    ///
+    ///     let m: [String: Int?] = data.mapValues { str in Int(str) }
+    ///     // ["a": 1, "b": nil, "c": nil]
+    ///
+    ///     let c: [String: Int] = data.compactMapValues { str in Int(str) }
+    ///     // ["a": 1]
+    ///
+    /// - Parameter transform: A closure that transforms a value. `transform`
+    ///   accepts each value of the dictionary as its parameter and returns an
+    ///   optional transformed value of the same or of a different type.
+    /// - Returns: A dictionary containing the keys and non-`nil` transformed
+    ///   values of this dictionary.
+    public func compactMapValues<T>(_ transform: (Value) throws -> T?) rethrows -> OrderedDictionary<Key, T> {
+        var ret = OrderedDictionary<Key, T>()
+        for key in orderedKeys {
+            if let value = try transform(unorderedHash[key]!) {
+                ret[key] = value
+            }
+        }
+        return ret
     }
 }
 

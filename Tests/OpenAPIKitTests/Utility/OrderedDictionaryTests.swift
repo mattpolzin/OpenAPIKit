@@ -67,7 +67,57 @@ final class OrderedDictionaryTests: XCTestCase {
         XCTAssert(dict[3] == ("the", "best"))
     }
 
-    // TODO: write tests
+    func test_mapValues() {
+        let dict: OrderedDictionary = [
+            "hello": "1",
+            "hi": "2",
+            "a": "3",
+            "the": "4"
+        ]
+
+        let dict2 = dict.mapValues { Int($0)! }
+
+        XCTAssertEqual(dict2.values, [1, 2, 3, 4])
+    }
+
+    func test_compactMapValues() {
+        let dict: OrderedDictionary = [
+            "hello": "1",
+            "hi": "2",
+            "a": "hi",
+            "the": "4"
+        ]
+
+        let dict2 = dict.compactMapValues { Int($0) }
+
+        XCTAssertEqual(dict2.count, 3)
+        XCTAssertEqual(dict2.values, [1, 2, 4])
+        XCTAssertEqual(dict2.keys, ["hello", "hi", "the"])
+    }
+
+    func test_containsWhereKey() {
+        let dict: OrderedDictionary = [
+            "hello": "1",
+            "hi": "2",
+            "a": "hi",
+            "the": "4"
+        ]
+
+        XCTAssertTrue(dict.contains { $0 == "hello" })
+        XCTAssertFalse(dict.contains { $0 == "there" })
+    }
+
+    func test_containsKey() {
+        let dict: OrderedDictionary = [
+            "hello": "1",
+            "hi": "2",
+            "a": "hi",
+            "the": "4"
+        ]
+
+        XCTAssertTrue(dict.contains(key: "hello"))
+        XCTAssertFalse(dict.contains(key: "there"))
+    }
 }
 
 // MARK: - Codable
