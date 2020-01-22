@@ -236,6 +236,9 @@ extension OrderedDictionaryTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__OrderedDictionaryTests = [
+        ("test_compactMapValues", test_compactMapValues),
+        ("test_containsKey", test_containsKey),
+        ("test_containsWhereKey", test_containsWhereKey),
         ("test_doubleKeyDecode2", test_doubleKeyDecode2),
         ("test_doubleKeyDecode", test_doubleKeyDecode),
         ("test_doubleKeyEncode", test_doubleKeyEncode),
@@ -245,6 +248,7 @@ extension OrderedDictionaryTests {
         ("test_intKeyEncode", test_intKeyEncode),
         ("test_keySubscriptGet", test_keySubscriptGet),
         ("test_keySubscriptSet", test_keySubscriptSet),
+        ("test_mapValues", test_mapValues),
         ("test_otherKeyDecodeFineJSON", test_otherKeyDecodeFineJSON),
         ("test_otherKeyDecodeJSON", test_otherKeyDecodeJSON),
         ("test_otherKeyDecodeYAML", test_otherKeyDecodeYAML),
