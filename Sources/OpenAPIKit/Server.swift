@@ -11,11 +11,11 @@ extension OpenAPI {
     public struct Server: Equatable {
         public let url: URL
         public let description: String?
-        public let variables: [String: Variable]
+        public let variables: OrderedDictionary<String, Variable>
 
         public init(url: URL,
                     description: String? = nil,
-                    variables: [String: Variable] = [:]) {
+                    variables: OrderedDictionary<String, Variable> = [:]) {
             self.url = url
             self.description = description
             self.variables = variables
@@ -52,7 +52,7 @@ extension OpenAPI.Server: Codable {
 
         url = try container.decode(URL.self, forKey: .url)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-        variables = try container.decodeIfPresent([String: Variable].self, forKey: .variables) ?? [:]
+        variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
     }
 
     public func encode(to encoder: Encoder) throws {

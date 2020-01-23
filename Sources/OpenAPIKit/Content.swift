@@ -14,7 +14,7 @@ extension OpenAPI {
         public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         public let example: AnyCodable?
         public let examples: Example.Map?
-        public let encoding: [String: Encoding]?
+        public let encoding: OrderedDictionary<String, Encoding>?
 
         /// Dictionary of vendor extensions.
         ///
@@ -25,7 +25,7 @@ extension OpenAPI {
 
         public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
                     example: AnyCodable? = nil,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = schema
             self.example = example
@@ -36,7 +36,7 @@ extension OpenAPI {
 
         public init(schemaReference: JSONReference<Components, JSONSchema>,
                     example: AnyCodable? = nil,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = .init(schemaReference)
             self.example = example
@@ -47,7 +47,7 @@ extension OpenAPI {
 
         public init(schema: JSONSchema,
                     example: AnyCodable? = nil,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = .init(schema)
             self.example = example
@@ -58,7 +58,7 @@ extension OpenAPI {
 
         public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
                     examples: Example.Map?,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = schema
             self.examples = examples
@@ -69,7 +69,7 @@ extension OpenAPI {
 
         public init(schemaReference: JSONReference<Components, JSONSchema>,
                     examples: Example.Map?,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = .init(schemaReference)
             self.examples = examples
@@ -80,7 +80,7 @@ extension OpenAPI {
 
         public init(schema: JSONSchema,
                     examples: Example.Map?,
-                    encoding: [String: Encoding]? = nil,
+                    encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.schema = .init(schema)
             self.examples = examples
@@ -92,10 +92,8 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Content {
-    public typealias Map = [OpenAPI.ContentType: OpenAPI.Content]
+    public typealias Map = OrderedDictionary<OpenAPI.ContentType, OpenAPI.Content>
 }
-
-
 
 extension OpenAPI.Content {
     internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
@@ -137,7 +135,7 @@ extension OpenAPI.Content: Decodable {
         }
 
         schema = try container.decode(Either<JSONReference<OpenAPI.Components, JSONSchema>, JSONSchema>.self, forKey: .schema)
-        encoding = try container.decodeIfPresent([String: Encoding].self, forKey: .encoding)
+        encoding = try container.decodeIfPresent(OrderedDictionary<String, Encoding>.self, forKey: .encoding)
 
         if container.contains(.example) {
             example = try container.decode(AnyCodable.self, forKey: .example)

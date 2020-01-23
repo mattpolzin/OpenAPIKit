@@ -37,13 +37,7 @@ extension OpenAPI.Request: Encodable {
 
         try description.encodeIfNotNil(to: &container, forKey: .description)
 
-        // Hack to work around Dictionary encoding
-        // itself as an array in this case:
-        let stringKeyedDict = Dictionary(
-            content.map { ($0.key.rawValue, $0.value) },
-            uniquingKeysWith: { $1 }
-        )
-        try container.encode(stringKeyedDict, forKey: .content)
+        try container.encode(content, forKey: .content)
 
         if required {
             try container.encode(required, forKey: .required)
@@ -57,11 +51,7 @@ extension OpenAPI.Request: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        // hacky workaround for Dictionary decoding bug
-        let contentDict = try container.decode([String: OpenAPI.Content].self, forKey: .content)
-        content = Dictionary(contentDict.compactMap { contentTypeString, content in
-            OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
-                             uniquingKeysWith: { $1 })
+        content = try container.decode(OpenAPI.Content.Map.self, forKey: .content)
 
         required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
     }

@@ -37,7 +37,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Example {
-    public typealias Map = [String: Either<JSONReference<OpenAPI.Components, OpenAPI.Example>, OpenAPI.Example>]
+    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Components, OpenAPI.Example>, OpenAPI.Example>>
 }
 
 // MARK: - Codable

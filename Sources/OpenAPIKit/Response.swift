@@ -26,7 +26,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Response {
-    public typealias Map = [StatusCode: Either<JSONReference<OpenAPI.Components, OpenAPI.Response>, OpenAPI.Response>]
+    public typealias Map = OrderedDictionary<StatusCode, Either<JSONReference<OpenAPI.Components, OpenAPI.Response>, OpenAPI.Response>>
 }
 
 // MARK: - Status Code
@@ -110,13 +110,7 @@ extension OpenAPI.Response: Encodable {
         try headers.encodeIfNotNil(to: &container, forKey: .headers)
 
         if content.count > 0 {
-            // Hack to work around Dictionary encoding
-            // itself as an array in this case:
-            let stringKeyedDict = Dictionary(
-                content.map { ($0.key.rawValue, $0.value) },
-                uniquingKeysWith: { $1 }
-            )
-            try container.encode(stringKeyedDict, forKey: .content)
+            try container.encode(content, forKey: .content)
         }
     }
 }
@@ -129,13 +123,7 @@ extension OpenAPI.Response: Decodable {
 
         headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
 
-        // hacky workaround for Dictionary decoding bug
-        let maybeContentDict = try container.decodeIfPresent([String: OpenAPI.Content].self, forKey: .content)
-        content = maybeContentDict.map { contentDict in
-            Dictionary(contentDict.compactMap { contentTypeString, content in
-                OpenAPI.ContentType(rawValue: contentTypeString).map { ($0, content) } },
-                       uniquingKeysWith: { $1 })
-        } ?? [:]
+        content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
     }
 }
 

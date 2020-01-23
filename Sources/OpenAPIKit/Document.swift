@@ -81,13 +81,7 @@ extension OpenAPI.Document: Encodable {
             try container.encode(servers, forKey: .servers)
         }
 
-        // Hack to work around Dictionary encoding
-        // itself as an array in this case:
-        let pathsStringKeyedDict = Dictionary(
-            paths.map { ($0.key.rawValue, $0.value) },
-            uniquingKeysWith: { $1 }
-        )
-        try container.encode(pathsStringKeyedDict, forKey: .paths)
+        try container.encode(paths, forKey: .paths)
 
         if !components.isEmpty {
             try container.encode(components, forKey: .components)
@@ -115,14 +109,7 @@ extension OpenAPI.Document: Decodable {
 
         servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
-        // hacky workaround for Dictionary bug
-        let pathsDict = try container.decode([String: Either<JSONReference<OpenAPI.Components, OpenAPI.PathItem>, OpenAPI.PathItem>].self, forKey: .paths)
-        paths = Dictionary(pathsDict.map { args in
-            let (pathString, pathItem) = args
-
-            return (OpenAPI.PathComponents(rawValue: pathString), pathItem)
-        },
-                           uniquingKeysWith: { $1 })
+        paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
 
         let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
         self.components = components

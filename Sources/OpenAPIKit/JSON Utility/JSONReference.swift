@@ -32,9 +32,9 @@ public struct RefDict<Root: ReferenceRoot, Name: RefName, RefType: Equatable & C
     public typealias Value = RefType
     public typealias Key = String
 
-    let dict: [String: RefType]
+    let dict: OrderedDictionary<String, RefType>
 
-    public init(_ dict: [String: RefType]) {
+    public init(_ dict: OrderedDictionary<String, RefType>) {
         self.dict = dict
     }
 
@@ -155,6 +155,14 @@ extension JSONReference: Decodable {
 
         let referenceString = try container.decode(String.self, forKey: .ref)
 
+        guard referenceString.count > 0 else {
+            throw DecodingError.dataCorruptedError(forKey: .ref, in: container, debugDescription: "Expected a reference string, but found an empty string instead.")
+        }
+
+        guard referenceString.contains("#") else {
+            throw DecodingError.dataCorruptedError(forKey: .ref, in: container, debugDescription: "Expected a reference string to contain '#', but found \"\(referenceString)\" instead.")
+        }
+
         if referenceString.first == "#" {
             // TODO: try to parse ref to components
             self = .internal(.unsafe(referenceString))
@@ -176,6 +184,6 @@ extension RefDict: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        dict = try container.decode([String : RefType].self)
+        dict = try container.decode(OrderedDictionary<String, RefType>.self)
     }
 }

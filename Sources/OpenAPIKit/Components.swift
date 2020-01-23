@@ -24,13 +24,13 @@ extension OpenAPI {
         //    public let links:
         //    public let callbacks:
 
-        public init(schemas: [String: SchemasDict.Value] = [:],
-                    responses: [String: ResponsesDict.Value] = [:],
-                    parameters: [String: ParametersDict.Value] = [:],
-                    examples: [String: ExamplesDict.Value] = [:],
-                    requestBodies: [String: RequestBodiesDict.Value] = [:],
-                    headers: [String: HeadersDict.Value] = [:],
-                    securitySchemes: [String: SecuritySchemesDict.Value] = [:]) {
+        public init(schemas: OrderedDictionary<String, SchemasDict.Value> = [:],
+                    responses: OrderedDictionary<String, ResponsesDict.Value> = [:],
+                    parameters: OrderedDictionary<String, ParametersDict.Value> = [:],
+                    examples: OrderedDictionary<String, ExamplesDict.Value> = [:],
+                    requestBodies: OrderedDictionary<String, RequestBodiesDict.Value> = [:],
+                    headers: OrderedDictionary<String, HeadersDict.Value> = [:],
+                    securitySchemes: OrderedDictionary<String, SecuritySchemesDict.Value> = [:]) {
             self.schemas = SchemasDict(schemas)
             self.responses = ResponsesDict(responses)
             self.parameters = ParametersDict(parameters)
@@ -64,7 +64,7 @@ extension OpenAPI {
             public static var refName: String { return "responses" }
         }
 
-        public typealias ResponsesDict = RefDict<Components, ResponsesName, JSONSchema>
+        public typealias ResponsesDict = RefDict<Components, ResponsesName, OpenAPI.Response>
 
         public enum ParametersName: RefName {
             public static var refName: String { return "parameters" }
@@ -82,7 +82,7 @@ extension OpenAPI {
             public static var refName: String { return "requestBodies" }
         }
 
-        public typealias RequestBodiesDict = RefDict<Components, RequestBodiesName, OpenAPI.Example>
+        public typealias RequestBodiesDict = RefDict<Components, RequestBodiesName, OpenAPI.Request>
 
         public enum HeadersName: RefName {
             public static var refName: String { return "headers" }

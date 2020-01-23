@@ -11,6 +11,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 - [Usage](#usage)
 	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
 	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
+	- [A note on dictionary ordering](#a-note-on-dictionary-ordering)
 	- [Generating OpenAPI Documents](#generating-openapi-documents)
 	- [OpenAPI Document structure](#openapi-document-structure)
 - [Notes](#notes)
@@ -66,6 +67,11 @@ let openAPIDoc = ...
 let encoder = ... // JSONEncoder() or YAMLEncoder()
 let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 ```
+
+### A note on dictionary ordering
+The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a totally different order.
+
+If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
 
 ### Generating OpenAPI Documents
 
@@ -196,6 +202,8 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 2. Within schemas, `required` defaults to `true` on initialization (again, encoding/decoding still follows the OpenAPI spec).
     * ex. `JSONSchema.string` is a required "string" type.
     * ex. `JSONSchema.string(required: false)` is an optional "string" type.
+
+See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before deciding on an encoder/decoder to use with this library.
 
 ## Project Status
 
