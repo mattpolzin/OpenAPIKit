@@ -1,0 +1,401 @@
+//
+//  OAuthFlowsTests.swift
+//  
+//
+//  Created by Mathew Polzin on 1/23/20.
+//
+
+import OpenAPIKit
+import XCTest
+
+final class OAuthFlowsTests: XCTestCase {
+    let testUrl = URL(string: "http://google.com")!
+
+    func test_initialize() {
+
+        let scopes: OrderedDictionary<String, String> = [
+            "read:test": "read things",
+            "write:test": "write things"
+        ]
+
+        let implicitFlow = OpenAPI.OAuthFlows.Implicit(
+            authorizationUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(implicitFlow.authorizationUrl, testUrl)
+        XCTAssertEqual(implicitFlow.refreshUrl, testUrl)
+        XCTAssertEqual(implicitFlow.scopes, scopes)
+
+        let passwordFlow = OpenAPI.OAuthFlows.Password(
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(passwordFlow.tokenUrl, testUrl)
+        XCTAssertEqual(passwordFlow.refreshUrl, testUrl)
+        XCTAssertEqual(passwordFlow.scopes, scopes)
+
+        let clientCredentialsFlow = OpenAPI.OAuthFlows.ClientCredentials(
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(clientCredentialsFlow.tokenUrl, testUrl)
+        XCTAssertEqual(clientCredentialsFlow.refreshUrl, testUrl)
+        XCTAssertEqual(clientCredentialsFlow.scopes, scopes)
+
+        let authorizationCodeFlow = OpenAPI.OAuthFlows.AuthorizationCode(
+            authorizationUrl: testUrl,
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(authorizationCodeFlow.authorizationUrl, testUrl)
+        XCTAssertEqual(authorizationCodeFlow.tokenUrl, testUrl)
+        XCTAssertEqual(authorizationCodeFlow.refreshUrl, testUrl)
+        XCTAssertEqual(authorizationCodeFlow.scopes, scopes)
+
+        _ = OpenAPI.OAuthFlows(
+            implicit: implicitFlow,
+            password: passwordFlow,
+            clientCredentials: clientCredentialsFlow,
+            authorizationCode: authorizationCodeFlow
+        )
+    }
+}
+
+// MARK: - Codable Tests
+extension OAuthFlowsTests {
+    func test_minimal_encode() throws {
+        let oauthFlows = OpenAPI.OAuthFlows()
+
+        let encodedFlows = try testStringFromEncoding(of: oauthFlows)
+
+        assertJSONEquivalent(
+            encodedFlows,
+"""
+{
+
+}
+"""
+            )
+    }
+
+    func test_minimal_decode() throws {
+        let oauthFlowsData =
+"""
+{}
+""".data(using: .utf8)!
+
+        let oauthFlows = try testDecoder.decode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
+
+        XCTAssertEqual(oauthFlows, OpenAPI.OAuthFlows())
+    }
+
+    func test_maximal_encode() throws {
+        let scopes: OrderedDictionary<String, String> = [
+            "read:test": "read things",
+            "write:test": "write things"
+        ]
+
+        let oauthFlows = OpenAPI.OAuthFlows(
+            implicit: OpenAPI.OAuthFlows.Implicit(
+                authorizationUrl: testUrl,
+                refreshUrl: testUrl,
+                scopes: scopes
+            ),
+            password: OpenAPI.OAuthFlows.Password(
+                tokenUrl: testUrl,
+                refreshUrl: testUrl,
+                scopes: scopes
+            ),
+            clientCredentials: OpenAPI.OAuthFlows.ClientCredentials(
+                tokenUrl: testUrl,
+                refreshUrl: testUrl,
+                scopes: scopes
+            ),
+            authorizationCode: OpenAPI.OAuthFlows.AuthorizationCode(
+                authorizationUrl: testUrl,
+                tokenUrl: testUrl,
+                refreshUrl: testUrl,
+                scopes: scopes
+            )
+        )
+
+        let encodedFlows = try testStringFromEncoding(of: oauthFlows)
+
+        assertJSONEquivalent(
+            encodedFlows,
+"""
+{
+  "authorizationCode" : {
+    "authorizationUrl" : "http:\\/\\/google.com",
+    "refreshUrl" : "http:\\/\\/google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http:\\/\\/google.com"
+  },
+  "clientCredentials" : {
+    "refreshUrl" : "http:\\/\\/google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http:\\/\\/google.com"
+  },
+  "implicit" : {
+    "authorizationUrl" : "http:\\/\\/google.com",
+    "refreshUrl" : "http:\\/\\/google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    }
+  },
+  "password" : {
+    "refreshUrl" : "http:\\/\\/google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http:\\/\\/google.com"
+  }
+}
+"""
+            )
+    }
+
+    func test_maximal_decode() throws {
+        let oauthFlowsData =
+"""
+{
+  "authorizationCode" : {
+    "authorizationUrl" : "http://google.com",
+    "refreshUrl" : "http://google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http://google.com"
+  },
+  "clientCredentials" : {
+    "refreshUrl" : "http://google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http://google.com"
+  },
+  "implicit" : {
+    "authorizationUrl" : "http://google.com",
+    "refreshUrl" : "http://google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    }
+  },
+  "password" : {
+    "refreshUrl" : "http://google.com",
+    "scopes" : {
+      "read:test" : "read things",
+      "write:test" : "write things"
+    },
+    "tokenUrl" : "http://google.com"
+  }
+}
+""".data(using: .utf8)!
+
+        let oauthFlows = try testDecoder.decode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
+
+        // can't compare whole object because of ordering of the ordered dictionary
+
+        XCTAssertEqual(oauthFlows.implicit?.authorizationUrl, testUrl)
+        XCTAssertEqual(oauthFlows.implicit?.refreshUrl, testUrl)
+        XCTAssertEqual(oauthFlows.implicit?.scopes["read:test"], "read things")
+        XCTAssertEqual(oauthFlows.implicit?.scopes["write:test"], "write things")
+
+        XCTAssertEqual(oauthFlows.password?.tokenUrl, testUrl)
+        XCTAssertEqual(oauthFlows.password?.refreshUrl, testUrl)
+        XCTAssertEqual(oauthFlows.password?.scopes["read:test"], "read things")
+        XCTAssertEqual(oauthFlows.password?.scopes["write:test"], "write things")
+
+        XCTAssertEqual(oauthFlows.clientCredentials?.tokenUrl, testUrl)
+        XCTAssertEqual(oauthFlows.clientCredentials?.refreshUrl, testUrl)
+        XCTAssertEqual(oauthFlows.clientCredentials?.scopes["read:test"], "read things")
+        XCTAssertEqual(oauthFlows.clientCredentials?.scopes["write:test"], "write things")
+
+        XCTAssertEqual(oauthFlows.authorizationCode?.authorizationUrl, testUrl)
+        XCTAssertEqual(oauthFlows.authorizationCode?.tokenUrl, testUrl)
+        XCTAssertEqual(oauthFlows.authorizationCode?.refreshUrl, testUrl)
+        XCTAssertEqual(oauthFlows.authorizationCode?.scopes["read:test"], "read things")
+        XCTAssertEqual(oauthFlows.authorizationCode?.scopes["write:test"], "write things")
+    }
+
+    func test_implicitFlow_encode() throws {
+        let implicitFlow1 = OpenAPI.OAuthFlows.Implicit(
+            authorizationUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: [:]
+        )
+
+        let encodedFlow1 = try testStringFromEncoding(of: implicitFlow1)
+
+        assertJSONEquivalent(
+            encodedFlow1,
+"""
+{
+  "authorizationUrl" : "http:\\/\\/google.com",
+  "refreshUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  }
+}
+"""
+        )
+
+        let implicitFlow2 = OpenAPI.OAuthFlows.Implicit(
+            authorizationUrl: testUrl,
+            scopes: [:]
+        )
+
+        let encodedFlow2 = try testStringFromEncoding(of: implicitFlow2)
+
+        assertJSONEquivalent(
+            encodedFlow2,
+"""
+{
+  "authorizationUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  }
+}
+"""
+            )
+    }
+
+    func test_implicitFlow_decode() throws {
+        let implicitFlow1Data =
+"""
+{
+  "authorizationUrl" : "http:\\/\\/google.com",
+  "refreshUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  }
+}
+""".data(using: .utf8)!
+
+        let implicitFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow1Data)
+
+        XCTAssertEqual(
+            implicitFlow1,
+            OpenAPI.OAuthFlows.Implicit(authorizationUrl: testUrl, refreshUrl: testUrl, scopes: [:])
+            )
+
+        let implicitFlow2Data =
+"""
+{
+  "authorizationUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  }
+}
+""".data(using: .utf8)!
+
+        let implicitFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow2Data)
+
+        XCTAssertEqual(
+            implicitFlow2,
+            OpenAPI.OAuthFlows.Implicit(authorizationUrl: testUrl, scopes: [:])
+        )
+    }
+
+    func test_passwordFlow_encode() throws {
+        let passwordFlow1 = OpenAPI.OAuthFlows.Password(
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: [:]
+        )
+
+        let encodedFlow1 = try testStringFromEncoding(of: passwordFlow1)
+
+        assertJSONEquivalent(
+            encodedFlow1,
+"""
+{
+  "refreshUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  },
+  "tokenUrl" : "http:\\/\\/google.com"
+}
+"""
+        )
+
+        let passwordFlow2 = OpenAPI.OAuthFlows.Password(
+            tokenUrl: testUrl,
+            scopes: [:]
+        )
+
+        let encodedFlow2 = try testStringFromEncoding(of: passwordFlow2)
+
+        assertJSONEquivalent(
+            encodedFlow2,
+"""
+{
+  "scopes" : {
+
+  },
+  "tokenUrl" : "http:\\/\\/google.com"
+}
+"""
+        )
+    }
+
+    func test_passwordFlow_decode() throws {
+        let passwordFlow1Data =
+"""
+{
+  "refreshUrl" : "http:\\/\\/google.com",
+  "scopes" : {
+
+  },
+  "tokenUrl" : "http:\\/\\/google.com"
+}
+""".data(using: .utf8)!
+
+        let passwordFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow1Data)
+
+        XCTAssertEqual(
+            passwordFlow1,
+            OpenAPI.OAuthFlows.Password(tokenUrl: testUrl, refreshUrl: testUrl, scopes: [:])
+        )
+
+        let passwordFlow2Data =
+"""
+{
+  "scopes" : {
+
+  },
+  "tokenUrl" : "http:\\/\\/google.com"
+}
+""".data(using: .utf8)!
+
+        let passwordFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow2Data)
+
+        XCTAssertEqual(
+            passwordFlow2,
+            OpenAPI.OAuthFlows.Password(tokenUrl: testUrl, scopes: [:])
+        )
+    }
+
+    // TODO: encode/decode ClientCredentials
+
+    // TODO: encode/decode AuthorizationCode
+}
