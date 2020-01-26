@@ -43,8 +43,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
 	- [XML Object (`OpenAPI.XML`)](#xml-object-openapixml)
 	- [Security Scheme Object (`OpenAPI.SecurityScheme`)](#security-scheme-object-openapisecurityscheme)
-	- [OAuth Flows Object](#oauth-flows-object)
-	- [OAuth Flow Object](#oauth-flow-object)
+	- [OAuth Flows Object (`OpenAPI.OauthFlows`)](#oauth-flows-object-openapioauthflows)
+	- [OAuth Flow Object (`OpenAPI.OauthFlows.*`)](#oauth-flow-object-openapioauthflows)
 	- [Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)](#security-requirement-object-openapidocumentsecurityrequirement)
 
 <!-- /TOC -->
