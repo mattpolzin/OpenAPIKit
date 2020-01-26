@@ -397,6 +397,10 @@ extension ContentTests {
         let contentToMatch = OpenAPI.Content(schema: .init(.string(required: false)),
                                              vendorExtensions: ["x-hello": AnyCodable(["world": 123])])
 
+        // make sure we don't lose VendorExtendable existential support
+        let ve = content as VendorExtendable
+        XCTAssertEqual(ve.vendorExtensions.count, 1)
+
         // needs to be broken down due to difficulties with equality comparing of AnyCodable
         // created from code with a semantically equivalent AnyCodable from Data.
         XCTAssertEqual(content.schema, contentToMatch.schema)

@@ -10,7 +10,7 @@ import Poly
 import AnyCodable
 
 extension OpenAPI {
-    public struct Example: Equatable, VendorExtendable {
+    public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?
         /// Represents the OpenAPI `externalValue` as a URL _or_

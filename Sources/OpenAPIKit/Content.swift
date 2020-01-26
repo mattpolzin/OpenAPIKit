@@ -10,7 +10,7 @@ import Poly
 import AnyCodable
 
 extension OpenAPI {
-    public struct Content: Equatable, VendorExtendable {
+    public struct Content: Equatable, CodableVendorExtendable {
         public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
         public let example: AnyCodable?
         public let examples: Example.Map?

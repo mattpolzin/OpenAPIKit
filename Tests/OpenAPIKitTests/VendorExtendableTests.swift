@@ -114,7 +114,7 @@ extension VendorExtendableTests {
     }
 }
 
-private struct TestStruct: Codable, VendorExtendable {
+private struct TestStruct: Codable, CodableVendorExtendable {
     enum CodingKeys: ExtendableCodingKey {
         case one
         case two
