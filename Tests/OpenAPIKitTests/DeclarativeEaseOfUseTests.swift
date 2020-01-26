@@ -345,12 +345,27 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 "basic_auth": .init(
                     type: .http(scheme: "basic", bearerFormat: nil),
                     description: "Basic Auth"
+                ),
+                "oauth_flow": .init(
+                    type: .oauth2(
+                        flows: .init(
+                            authorizationCode: .init(
+                                authorizationUrl: URL(string: "https://address1.com")!,
+                                tokenUrl: URL(string: "https://address2.com")!,
+                                scopes: [
+                                    "read:widgets" : "read those widgets"
+                                ]
+                            )
+                        )
+                    ),
+                    description: "OAuth Flows"
                 )
         ])
 
         let securityRequirements: [OpenAPI.SecurityRequirement] = [
             [
-                .internal(\.securitySchemes, named: "basic_auth"): []
+                .internal(\.securitySchemes, named: "basic_auth"): [],
+                .internal(\.securitySchemes, named: "oauth_flow"): ["read:widgets"]
             ]
         ]
 
