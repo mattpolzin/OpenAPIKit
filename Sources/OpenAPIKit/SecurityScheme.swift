@@ -21,7 +21,7 @@ extension OpenAPI {
         public enum SecurityType: Equatable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
-//            case oauth2(flows: )
+            case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
         }
 
@@ -52,6 +52,9 @@ extension OpenAPI.SecurityScheme: Encodable {
         case .openIdConnect(openIdConnectUrl: let url):
             try container.encode(SecurityTypeName.openIdConnect, forKey: .type)
             try container.encode(url, forKey: .openIdConnectUrl)
+        case .oauth2(flows: let flows):
+            try container.encode(SecurityTypeName.oauth2, forKey: .type)
+            try container.encode(flows, forKey: .flows)
         }
     }
 }
@@ -67,15 +70,24 @@ extension OpenAPI.SecurityScheme: Decodable {
         switch typeName {
         case .apiKey:
             let (name, location) = try Self.decodeAPIKey(from: container)
-            type = .apiKey(name: name, location: location)
+            type = .apiKey(
+                name: name,
+                location: location
+            )
         case .http:
             let (scheme, bearerFormat) = try Self.decodeHTTP(from: container)
-            type = .http(scheme: scheme, bearerFormat: bearerFormat)
-//        case .oauth2:
-//            flows = try decodeOauth(from: container)
+            type = .http(
+                scheme: scheme,
+                bearerFormat: bearerFormat
+            )
+        case .oauth2:
+            type = .oauth2(
+                flows: try container.decode(OpenAPI.OAuthFlows.self, forKey: .flows)
+            )
         case .openIdConnect:
-            let openIdConnectUrl = try Self.decodeOpenIdConnect(from: container)
-            type = .openIdConnect(openIdConnectUrl: openIdConnectUrl)
+            type = .openIdConnect(
+                openIdConnectUrl: try container.decode(URL.self, forKey: .openIdConnectUrl)
+            )
         }
     }
 
@@ -92,10 +104,6 @@ extension OpenAPI.SecurityScheme: Decodable {
             bearerFormat: container.decodeIfPresent(String.self, forKey: .bearerFormat)
         )
     }
-
-    static func decodeOpenIdConnect(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> URL {
-        return try container.decode(URL.self, forKey: .openIdConnectUrl)
-    }
 }
 
 extension OpenAPI.SecurityScheme {
@@ -106,14 +114,14 @@ extension OpenAPI.SecurityScheme {
         case location = "in"
         case scheme
         case bearerFormat
-//        case flows
+        case flows
         case openIdConnectUrl
     }
 
     enum SecurityTypeName: String, Codable {
         case apiKey
         case http
-//        case oauth2
+        case oauth2
         case openIdConnect
     }
 }

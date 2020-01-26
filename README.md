@@ -409,20 +409,24 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] in (`location` in `SecurityType` `.apiKey` case)
 - [x] scheme (`SecurityType` `.http` case)
 - [x] bearerFormat (`SecurityType` `.http` case)
-- [ ] flows
+- [x] flows (`SecurityType` `.oauth2` case)
 - [x] openIdConnectUrl (`SecurityType` `.openIdConnect` case)
 
-### OAuth Flows Object
-- [ ] implicit
-- [ ] password
-- [ ] clientCredentials
-- [ ] authorizationCode
+### OAuth Flows Object (`OpenAPI.OauthFlows`)
+- [x] implicit
+- [x] password
+- [x] clientCredentials
+- [x] authorizationCode
 
-### OAuth Flow Object
-- [ ] authorizationUrl
-- [ ] tokenUrl
-- [ ] refreshUrl
-- [ ] scopes
+### OAuth Flow Object (`OpenAPI.OauthFlows.*`)
+- `OpenAPI.OauthFlows.Implicit`
+- `OpenAPI.OauthFlows.Password`
+- `OpenAPI.OauthFlows.ClientCredentials`
+- `OpenAPI.OauthFlows.AuthorizationCode`
+- [x] authorizationUrl
+- [x] tokenUrl
+- [x] refreshUrl
+- [x] scopes
 
 ### Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)
 - [x] *{name}* (using `JSONReferences` instead of a stringy API)
