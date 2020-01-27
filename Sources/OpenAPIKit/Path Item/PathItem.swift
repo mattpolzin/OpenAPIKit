@@ -175,6 +175,27 @@ extension OpenAPI.PathItem {
             return self.trace
         }
     }
+
+    public mutating func set(operation: Operation, for verb: OpenAPI.HttpVerb) {
+        switch verb {
+        case .delete:
+            self.delete(operation)
+        case .get:
+            self.get(operation)
+        case .head:
+            self.head(operation)
+        case .options:
+            self.options(operation)
+        case .patch:
+            self.patch(operation)
+        case .post:
+            self.post(operation)
+        case .put:
+            self.put(operation)
+        case .trace:
+            self.trace(operation)
+        }
+    }
 }
 
 // MARK: - Codable
