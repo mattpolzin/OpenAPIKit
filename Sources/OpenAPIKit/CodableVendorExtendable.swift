@@ -29,9 +29,7 @@ extension ExtendableCodingKey {
     }
 }
 
-protocol VendorExtendable {
-    associatedtype CodingKeys: ExtendableCodingKey
-
+public protocol VendorExtendable {
     typealias VendorExtensions = [String: AnyCodable]
 
     /// Dictionary of vendor extensions.
@@ -42,13 +40,17 @@ protocol VendorExtendable {
     var vendorExtensions: VendorExtensions { get }
 }
 
+protocol CodableVendorExtendable: VendorExtendable {
+    associatedtype CodingKeys: ExtendableCodingKey
+}
+
 enum VendorExtensionDecodingError: Swift.Error {
     case selfIsArrayNotDict
     case foundNonStringKeys
     case foundExtensionsWithoutXPrefix
 }
 
-extension VendorExtendable {
+extension CodableVendorExtendable {
 
     public static func extensions(from decoder: Decoder) throws -> VendorExtensions {
 
