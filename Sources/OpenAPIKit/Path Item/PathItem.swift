@@ -78,35 +78,35 @@ extension OpenAPI {
             self.trace = trace
         }
 
-        public mutating func get(_ op: Operation) {
+        public mutating func get(_ op: Operation?) {
             get = op
         }
 
-        public mutating func put(_ op: Operation) {
+        public mutating func put(_ op: Operation?) {
             put = op
         }
 
-        public mutating func post(_ op: Operation) {
+        public mutating func post(_ op: Operation?) {
             post = op
         }
 
-        public mutating func delete(_ op: Operation) {
+        public mutating func delete(_ op: Operation?) {
             delete = op
         }
 
-        public mutating func options(_ op: Operation) {
+        public mutating func options(_ op: Operation?) {
             options = op
         }
 
-        public mutating func head(_ op: Operation) {
+        public mutating func head(_ op: Operation?) {
             head = op
         }
 
-        public mutating func patch(_ op: Operation) {
+        public mutating func patch(_ op: Operation?) {
             patch = op
         }
 
-        public mutating func trace(_ op: Operation) {
+        public mutating func trace(_ op: Operation?) {
             trace = op
         }
 
@@ -176,7 +176,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public mutating func set(operation: Operation, for verb: OpenAPI.HttpVerb) {
+    public mutating func set(operation: Operation?, for verb: OpenAPI.HttpVerb) {
         switch verb {
         case .delete:
             self.delete(operation)
@@ -194,6 +194,15 @@ extension OpenAPI.PathItem {
             self.put(operation)
         case .trace:
             self.trace(operation)
+        }
+    }
+
+    public subscript(verb: OpenAPI.HttpVerb) -> Operation? {
+        get {
+            return `for`(verb)
+        }
+        set {
+            set(operation: newValue, for: verb)
         }
     }
 }
