@@ -11,17 +11,17 @@ import AnyCodable
 
 extension OpenAPI {
     public struct Content: Equatable, CodableVendorExtendable {
-        public let schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
-        public let example: AnyCodable?
-        public let examples: Example.Map?
-        public let encoding: OrderedDictionary<String, Encoding>?
+        public var schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
+        public var example: AnyCodable?
+        public var examples: Example.Map?
+        public var encoding: OrderedDictionary<String, Encoding>?
 
         /// Dictionary of vendor extensions.
         ///
         /// These should be of the form:
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
-        public let vendorExtensions: [String: AnyCodable]
+        public var vendorExtensions: [String: AnyCodable]
 
         public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
                     example: AnyCodable? = nil,

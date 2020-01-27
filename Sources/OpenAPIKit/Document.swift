@@ -13,14 +13,14 @@ import Sampleable
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     public struct Document: Equatable {
-        public let openAPIVersion: Version
-        public let info: Info
-        public let servers: [Server]
-        public let paths: PathItem.Map
-        public let components: Components
-        public let security: [SecurityRequirement]
-        public let tags: [Tag]?
-        public let externalDocs: ExternalDoc?
+        public var openAPIVersion: Version
+        public var info: Info
+        public var servers: [Server]
+        public var paths: PathItem.Map
+        public var components: Components
+        public var security: [SecurityRequirement]
+        public var tags: [Tag]?
+        public var externalDocs: ExternalDoc?
 
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,

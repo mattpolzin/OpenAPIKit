@@ -14,15 +14,15 @@ extension OpenAPI {
     public struct Components: Equatable, ReferenceRoot {
         public static var refName: String { return "components" }
 
-        public let schemas: SchemasDict
-        public let responses: ResponsesDict
-        public let parameters: ParametersDict
-        public let examples: ExamplesDict
-        public let requestBodies: RequestBodiesDict
-        public let headers: HeadersDict
-        public let securitySchemes: SecuritySchemesDict
-        //    public let links:
-        //    public let callbacks:
+        public var schemas: SchemasDict
+        public var responses: ResponsesDict
+        public var parameters: ParametersDict
+        public var examples: ExamplesDict
+        public var requestBodies: RequestBodiesDict
+        public var headers: HeadersDict
+        public var securitySchemes: SecuritySchemesDict
+        //    public var links:
+        //    public var callbacks:
 
         public init(schemas: OrderedDictionary<String, SchemasDict.Value> = [:],
                     responses: OrderedDictionary<String, ResponsesDict.Value> = [:],

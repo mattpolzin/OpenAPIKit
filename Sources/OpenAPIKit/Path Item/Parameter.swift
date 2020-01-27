@@ -11,11 +11,11 @@ import AnyCodable
 
 extension OpenAPI.PathItem {
     public struct Parameter: Equatable {
-        public let name: String
-        public let parameterLocation: Location
-        public let description: String?
-        public let deprecated: Bool // default is false
-        public let schemaOrContent: Either<Schema, OpenAPI.Content.Map>
+        public var name: String
+        public var parameterLocation: Location
+        public var description: String?
+        public var deprecated: Bool // default is false
+        public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
         public typealias Array = [Either<JSONReference<OpenAPI.Components, Parameter>, Parameter>]
 

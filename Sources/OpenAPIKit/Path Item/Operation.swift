@@ -10,18 +10,18 @@ import Poly
 
 extension OpenAPI.PathItem {
     public struct Operation: Equatable {
-        public let tags: [String]?
-        public let summary: String?
-        public let description: String?
-        public let externalDocs: OpenAPI.ExternalDoc?
-        public let operationId: String?
-        public let parameters: Parameter.Array
-        public let requestBody: OpenAPI.Request?
-        public let responses: OpenAPI.Response.Map
+        public var tags: [String]?
+        public var summary: String?
+        public var description: String?
+        public var externalDocs: OpenAPI.ExternalDoc?
+        public var operationId: String?
+        public var parameters: Parameter.Array
+        public var requestBody: OpenAPI.Request?
+        public var responses: OpenAPI.Response.Map
         //            public let callbacks:
-        public let deprecated: Bool // default is false
-        public let security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
-        public let servers: [OpenAPI.Server]?
+        public var deprecated: Bool // default is false
+        public var security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
+        public var servers: [OpenAPI.Server]?
 
         public init(tags: [String]? = nil,
                     summary: String? = nil,
