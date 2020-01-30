@@ -11,7 +11,34 @@ import XCTest
 
 final class DocumentTests: XCTestCase {
     func test_init() {
-        // TODO: write test
+        let _ = OpenAPI.Document(
+            info: .init(title: "hi", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let _ = OpenAPI.Document(
+            openAPIVersion: .v3_0_2,
+            info: .init(title: "hi", version: "1.0"),
+            servers: [
+                .init(url: URL(string: "https://google.com")!)
+            ],
+            paths: [
+                "/hi/there": .pathItem(
+                    parameters: [],
+                    get: .init(
+                        tags: "hi",
+                        parameters: [],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .init(schemas: ["hello": .string]),
+            security: [],
+            tags: ["hi"],
+            externalDocs: .init(url: URL(string: "https://google.com")!)
+        )
     }
 
     func test_existingSecuritySchemeSuccess() {

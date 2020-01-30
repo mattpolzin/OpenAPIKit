@@ -23,6 +23,12 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.Tag: ExpressibleByStringLiteral {
+    public init(stringLiteral: String) {
+        self.init(name: stringLiteral)
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Tag: Encodable {
