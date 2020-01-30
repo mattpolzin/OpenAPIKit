@@ -80,11 +80,144 @@ extension OperationTests {
     }
 
     func test_maximal_encode() throws {
-        // TODO: write test
+        let operation = OpenAPI.PathItem.Operation(
+            tags: ["hi", "hello"],
+            summary: "summary",
+            description: "description",
+            externalDocs: .init(url: URL(string: "https://google.com")!),
+            operationId: "123",
+            parameters: [
+                .parameter(reference: .internal(\.parameters, named: "hello"))
+            ],
+            requestBody: .init(content: [.json: .init(schema: .init(.string))]),
+            responses: [200: .response(reference: .internal(\.responses, named: "test"))],
+            deprecated: true,
+            security: [[.internal(\.securitySchemes, named: "security"): []]],
+            servers: [.init(url: URL(string: "https://google.com")!)]
+        )
+
+        let encodedOperation = try testStringFromEncoding(of: operation)
+
+        assertJSONEquivalent(
+            encodedOperation,
+"""
+{
+  "deprecated" : true,
+  "description" : "description",
+  "externalDocs" : {
+    "url" : "https:\\/\\/google.com"
+  },
+  "operationId" : "123",
+  "parameters" : [
+    {
+      "$ref" : "#\\/components\\/parameters\\/hello"
+    }
+  ],
+  "requestBody" : {
+    "content" : {
+      "application\\/json" : {
+        "schema" : {
+          "type" : "string"
+        }
+      }
+    }
+  },
+  "responses" : {
+    "200" : {
+      "$ref" : "#\\/components\\/responses\\/test"
+    }
+  },
+  "security" : [
+    {
+      "security" : [
+
+      ]
+    }
+  ],
+  "servers" : [
+    {
+      "url" : "https:\\/\\/google.com"
+    }
+  ],
+  "summary" : "summary",
+  "tags" : [
+    "hi",
+    "hello"
+  ]
+}
+"""
+        )
     }
 
     func test_maximal_decode() throws {
-        // TODO: write test
+        let operationData =
+"""
+{
+  "deprecated" : true,
+  "description" : "description",
+  "externalDocs" : {
+    "url" : "https://google.com"
+  },
+  "operationId" : "123",
+  "parameters" : [
+    {
+      "$ref" : "#/components/parameters/hello"
+    }
+  ],
+  "requestBody" : {
+    "content" : {
+      "application\\/json" : {
+        "schema" : {
+          "type" : "string"
+        }
+      }
+    }
+  },
+  "responses" : {
+    "200" : {
+      "$ref" : "#/components/responses/test"
+    }
+  },
+  "security" : [
+    {
+      "security" : [
+
+      ]
+    }
+  ],
+  "servers" : [
+    {
+      "url" : "https://google.com"
+    }
+  ],
+  "summary" : "summary",
+  "tags" : [
+    "hi",
+    "hello"
+  ]
+}
+""".data(using: .utf8)!
+
+        let operation = try testDecoder.decode(OpenAPI.PathItem.Operation.self, from: operationData)
+
+        XCTAssertEqual(
+            operation,
+            OpenAPI.PathItem.Operation(
+                tags: ["hi", "hello"],
+                summary: "summary",
+                description: "description",
+                externalDocs: .init(url: URL(string: "https://google.com")!),
+                operationId: "123",
+                parameters: [
+                    .parameter(reference: .internal(.unsafe("#/components/parameters/hello")))
+                ],
+                requestBody: .init(content: [.json: .init(schema: .init(.string(required:false)))]),
+                responses: [200: .response(reference: .internal(.unsafe("#/components/responses/test")))],
+                deprecated: true,
+                security: [[.internal(\.securitySchemes, named: "security"): []]],
+                servers: [.init(url: URL(string: "https://google.com")!)]
+            )
+        )
     }
 
     // Note that JSONEncoder for Linux Foundation does not respect order
