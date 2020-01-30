@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OrderedDictionary
 
 extension OpenAPI {
     public struct OAuthFlows: Equatable {

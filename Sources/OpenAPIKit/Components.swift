@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OrderedDictionary
 
 extension OpenAPI {
     /// What the spec calls the "Components Object".

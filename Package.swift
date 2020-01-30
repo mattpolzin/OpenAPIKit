@@ -17,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/mattpolzin/Poly.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/mattpolzin/Sampleable.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/mattpolzin/OrderedDictionary.git", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"), // just for tests
         .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
@@ -24,7 +25,7 @@ let package = Package(
     targets: [
         .target(
             name: "OpenAPIKit",
-            dependencies: ["Poly", "Sampleable", "AnyCodable"]),
+            dependencies: ["Poly", "Sampleable", "AnyCodable", "OrderedDictionary"]),
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),

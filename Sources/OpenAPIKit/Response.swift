@@ -7,6 +7,7 @@
 
 import Foundation
 import Poly
+import OrderedDictionary
 
 extension OpenAPI {
     public struct Response: Equatable {

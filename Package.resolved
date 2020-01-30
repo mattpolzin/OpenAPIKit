@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "OrderedDictionary",
+        "repositoryURL": "https://github.com/mattpolzin/OrderedDictionary.git",
+        "state": {
+          "branch": null,
+          "revision": "0ae556a691ca71e3221ecaf21ce448d3283fdf8b",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "Poly",
         "repositoryURL": "https://github.com/mattpolzin/Poly.git",
         "state": {

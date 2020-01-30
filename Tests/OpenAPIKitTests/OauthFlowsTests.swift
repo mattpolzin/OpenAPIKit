@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKit
+import OrderedDictionary
 import XCTest
 
 final class OAuthFlowsTests: XCTestCase {

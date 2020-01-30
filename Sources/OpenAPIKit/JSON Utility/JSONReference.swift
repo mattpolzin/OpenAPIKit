@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OrderedDictionary
 
 /// Anything conforming to RefName knows what to call itself
 /// in the context of JSON References.
