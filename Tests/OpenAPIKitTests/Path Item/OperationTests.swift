@@ -12,12 +12,80 @@ import FineJSON
 
 final class OperationTests: XCTestCase {
     func test_init() {
-        // TODO: write tests
+        // minimum
+        let _ = OpenAPI.PathItem.Operation(
+            responses: [:]
+        )
+
+        // all things
+        let _ = OpenAPI.PathItem.Operation(
+            tags: ["hello"],
+            summary: "summary",
+            description: "description",
+            externalDocs: .init(url: URL(string: "https://google.com")!),
+            operationId: "123",
+            parameters: [.parameter(name: "hi", parameterLocation: .query, schema: .string)],
+            requestBody: .init(content: [:]),
+            responses: [:],
+            deprecated: false,
+            security: [],
+            servers: []
+        )
+
+        // variadic tags
+        let _ = OpenAPI.PathItem.Operation(
+            tags: "hi", "hello",
+            parameters: [],
+            responses: [:]
+        )
     }
 }
 
 // MARK: - Codable Tests
 extension OperationTests {
+
+    func test_minimal_encode() throws {
+        let operation = OpenAPI.PathItem.Operation(
+            responses: [:]
+        )
+
+        let encodedOperation = try testStringFromEncoding(of: operation)
+
+        assertJSONEquivalent(
+            encodedOperation,
+"""
+{
+  "responses" : {
+
+  }
+}
+"""
+        )
+    }
+
+    func test_minimal_decode() throws {
+        let operationData =
+"""
+{
+  "responses" : {}
+}
+""".data(using: .utf8)!
+
+        let operation = try testDecoder.decode(OpenAPI.PathItem.Operation.self, from: operationData)
+
+        XCTAssertEqual(
+            operation,
+            OpenAPI.PathItem.Operation(responses: [:])
+        )
+    }
+
+    func test_maximal_encode() throws {
+        // TODO: write test
+    }
+
+    func test_maximal_decode() throws {
+        // TODO: write test
+    }
 
     // Note that JSONEncoder for Linux Foundation does not respect order
     func test_responseOrder_encode() throws {
@@ -122,6 +190,4 @@ responses:
             )
         )
     }
-
-    // TODO: write tests
 }
