@@ -18,6 +18,22 @@ extension OpenAPI {
             self.description = description
         }
 
+        public static func apiKey(name: String, location: Location, description: String? = nil) -> SecurityScheme {
+            return .init(type: .apiKey(name: name, location: location), description: description)
+        }
+
+        public static func http(scheme: String, bearerFormat: String? = nil, description: String? = nil) -> SecurityScheme {
+            return .init(type: .http(scheme: scheme, bearerFormat: bearerFormat), description: description)
+        }
+
+        public static func oauth2(flows: OAuthFlows, description: String? = nil) -> SecurityScheme {
+            return .init(type: .oauth2(flows: flows), description: description)
+        }
+
+        public static func openIdConnect(url: URL, description: String? = nil) -> SecurityScheme {
+            return .init(type: .openIdConnect(openIdConnectUrl: url), description: description)
+        }
+
         public enum SecurityType: Equatable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
