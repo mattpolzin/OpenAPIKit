@@ -33,7 +33,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 )
             ],
             paths: [
-                "/test/api/endpoint/{param}": .pathItem(
+                "/test/api/endpoint/{param}": .init(
                     summary: "Test Endpoint",
                     description: "Test Endpoint description",
                     parameters: [
@@ -267,7 +267,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             info: apiInfo,
             servers: [server],
             paths: [
-                "/test/api/endpoint/{param}": .pathItem(testRoute)
+                "/test/api/endpoint/{param}": testRoute
             ],
             components: components,
             security: [],

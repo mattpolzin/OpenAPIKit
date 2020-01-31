@@ -111,47 +111,7 @@ extension OpenAPI {
             trace = op
         }
 
-        public typealias Map = OrderedDictionary<PathComponents, Either<JSONReference<Components, PathItem>, PathItem>>
-    }
-}
-
-extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.PathItem>, B == OpenAPI.PathItem {
-    public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self {
-        return .b(pathItem)
-    }
-
-    public static func pathItem(summary: String? = nil,
-                                description: String? = nil,
-                                servers: [OpenAPI.Server]? = nil,
-                                parameters: OpenAPI.PathItem.Parameter.Array = [],
-                                get: OpenAPI.PathItem.Operation? = nil,
-                                put: OpenAPI.PathItem.Operation? = nil,
-                                post: OpenAPI.PathItem.Operation? = nil,
-                                delete: OpenAPI.PathItem.Operation? = nil,
-                                options: OpenAPI.PathItem.Operation? = nil,
-                                head: OpenAPI.PathItem.Operation? = nil,
-                                patch: OpenAPI.PathItem.Operation? = nil,
-                                trace: OpenAPI.PathItem.Operation? = nil) -> Self {
-        return .b(
-            OpenAPI.PathItem(
-                summary: summary,
-                description: description,
-                servers: servers,
-                parameters: parameters,
-                get: get,
-                put: put,
-                post: post,
-                delete: delete,
-                options: options,
-                head: head,
-                patch: patch,
-                trace: trace
-            )
-        )
-    }
-
-    public static func pathItem(reference: JSONReference<OpenAPI.Components, OpenAPI.PathItem>) -> Self {
-        return .a(reference)
+        public typealias Map = OrderedDictionary<PathComponents, PathItem>
     }
 }
 
@@ -224,7 +184,7 @@ extension OpenAPI.PathComponents: Decodable {
 
         let rawValue = try container.decode(String.self)
 
-        components = rawValue.split(separator: "/").map(String.init)
+        self.init(rawValue: rawValue)
     }
 }
 

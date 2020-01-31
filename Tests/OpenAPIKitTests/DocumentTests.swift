@@ -25,7 +25,7 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": .pathItem(
+                "/hi/there": .init(
                     parameters: [],
                     get: .init(
                         tags: "hi",
@@ -278,7 +278,7 @@ extension DocumentTests {
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),
             servers: [],
-            paths: ["test": .pathItem(summary: "hi")],
+            paths: ["test": .init(summary: "hi")],
             components: .noComponents
         )
         let encodedDocument = try testStringFromEncoding(of: document)
@@ -325,7 +325,7 @@ extension DocumentTests {
             OpenAPI.Document(
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
-                paths: ["test": .pathItem(summary: "hi")],
+                paths: ["test": .init(summary: "hi")],
                 components: .noComponents
             )
         )
