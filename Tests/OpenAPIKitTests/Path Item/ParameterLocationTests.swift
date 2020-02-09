@@ -45,6 +45,8 @@ final class ParameterLocationTests: XCTestCase {
         XCTAssertFalse(t1.inQuery)
         XCTAssertFalse(t1.inPath)
         XCTAssertFalse(t1.inCookie)
+
+        XCTAssertTrue(Location.header(required: true).required)
     }
 
     func test_cookie() {
@@ -55,6 +57,8 @@ final class ParameterLocationTests: XCTestCase {
         XCTAssertFalse(t1.inQuery)
         XCTAssertFalse(t1.inPath)
         XCTAssertFalse(t1.inHeader)
+
+        XCTAssertTrue(Location.cookie(required: true).required)
     }
 
     func test_path() {
