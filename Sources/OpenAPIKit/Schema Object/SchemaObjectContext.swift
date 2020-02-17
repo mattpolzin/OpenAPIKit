@@ -19,13 +19,19 @@ public protocol JSONSchemaContext {
     var externalDocs: OpenAPI.ExternalDoc? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: String? { get }
+    var readOnly: Bool { get }
+    var writeOnly: Bool { get }
+    var deprecated: Bool { get }
 }
 
 extension JSONSchema {
     public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
-        public let required: Bool
-        public let nullable: Bool
+        public let required: Bool // default true (except on decode, where required depends on whether there is a parent schema scope to contain a 'required' property)
+        public let nullable: Bool // default false
+
+        public let permissions: Permissions // default `.readWrite`
+        public let deprecated: Bool // default false
 
         public let title: String?
         public let description: String?
@@ -54,9 +60,14 @@ extension JSONSchema {
         // have to do.
         public let example: String?
 
+        public var readOnly: Bool { permissions == .readOnly }
+        public var writeOnly: Bool { permissions == .writeOnly }
+
         public init<T: Encodable>(format: Format = .unspecified,
                                   required: Bool = true,
                                   nullable: Bool = false,
+                                  permissions: Permissions = .readWrite,
+                                  deprecated: Bool = false,
                                   title: String? = nil,
                                   description: String? = nil,
                                   externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -65,6 +76,8 @@ extension JSONSchema {
             self.format = format
             self.required = required
             self.nullable = nullable
+            self.permissions = permissions
+            self.deprecated = deprecated
             self.title = title
             self.description = description
             self.externalDocs = externalDocs
@@ -77,6 +90,8 @@ extension JSONSchema {
         public init(format: Format = .unspecified,
                     required: Bool = true,
                     nullable: Bool = false,
+                    permissions: Permissions = .readWrite,
+                    deprecated: Bool = false,
                     title: String? = nil,
                     description: String? = nil,
                     externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -85,6 +100,8 @@ extension JSONSchema {
             self.format = format
             self.required = required
             self.nullable = nullable
+            self.permissions = permissions
+            self.deprecated = deprecated
             self.title = title
             self.description = description
             self.externalDocs = externalDocs
@@ -97,6 +114,8 @@ extension JSONSchema {
         private init(format: Format = .unspecified,
                      required: Bool = true,
                      nullable: Bool = false,
+                     permissions: Permissions = .readWrite,
+                     deprecated: Bool = false,
                      title: String? = nil,
                      description: String? = nil,
                      externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -105,11 +124,19 @@ extension JSONSchema {
             self.format = format
             self.required = required
             self.nullable = nullable
+            self.permissions = permissions
+            self.deprecated = deprecated
             self.title = title
             self.description = description
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.example = example
+        }
+
+        public enum Permissions: String, Codable {
+            case readOnly
+            case writeOnly
+            case readWrite
         }
     }
 }
@@ -122,6 +149,8 @@ extension JSONSchema.Context {
         return .init(format: format,
                      required: false,
                      nullable: nullable,
+                     permissions: permissions,
+                     deprecated: deprecated,
                      title: title,
                      description: description,
                      externalDocs: externalDocs,
@@ -134,6 +163,8 @@ extension JSONSchema.Context {
         return .init(format: format,
                      required: true,
                      nullable: nullable,
+                     permissions: permissions,
+                     deprecated: deprecated,
                      title: title,
                      description: description,
                      externalDocs: externalDocs,
@@ -146,6 +177,8 @@ extension JSONSchema.Context {
         return .init(format: format,
                      required: required,
                      nullable: true,
+                     permissions: permissions,
+                     deprecated: deprecated,
                      title: title,
                      description: description,
                      externalDocs: externalDocs,
@@ -158,6 +191,8 @@ extension JSONSchema.Context {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
+                     permissions: permissions,
+                     deprecated: deprecated,
                      title: title,
                      description: description,
                      externalDocs: externalDocs,
@@ -170,6 +205,8 @@ extension JSONSchema.Context {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
+                     permissions: permissions,
+                     deprecated: deprecated,
                      title: title,
                      description: description,
                      externalDocs: externalDocs,
@@ -310,6 +347,9 @@ extension JSONSchema.Context {
         case allowedValues = "enum"
         case nullable
         case example
+        case readOnly
+        case writeOnly
+        case deprecated
 //        case constantValue = "const"
     }
 }
@@ -337,6 +377,19 @@ extension JSONSchema.Context: Encodable {
             try container.encode(nullable, forKey: .nullable)
         }
 
+        switch permissions {
+        case .readOnly:
+            try container.encode(true, forKey: .readOnly)
+        case .writeOnly:
+            try container.encode(true, forKey: .writeOnly)
+        case .readWrite:
+            break
+        }
+
+        if deprecated {
+            try container.encode(deprecated, forKey: .deprecated)
+        }
+
         try example.encodeIfNotNil(to: &container, forKey: .example)
     }
 }
@@ -360,6 +413,21 @@ extension JSONSchema.Context: Decodable {
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
 
         nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
+
+        let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly) ?? false
+        let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly) ?? false
+        switch (readOnly, writeOnly) {
+        case (false, false):
+            permissions = .readWrite
+        case (false, true):
+            permissions = .writeOnly
+        case (true, false):
+            permissions = .readOnly
+        case (true, true):
+            throw OpenAPI.DecodingError.unsatisfied(requirement: "Either readOnly or writeOnly can be true but not both.", codingPath: decoder.codingPath)
+        }
+
+        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
         example = try container.decodeIfPresent(String.self, forKey: .example)
     }

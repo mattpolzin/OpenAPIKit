@@ -401,12 +401,12 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] Mostly complete support for JSON Schema inherited keywords
 - [x] nullable
 - [ ] discriminator
-- [ ] readOnly
-- [ ] writeOnly
+- [x] readOnly (`permissions` `.readOnly` case)
+- [x] writeOnly (`permissions` `.writeOnly` case)
 - [ ] xml
 - [x] externalDocs
 - [x] example
-- [ ] deprecated
+- [x] deprecated
 - [ ] specification extensions
 
 ### Discriminator Object (`OpenAPI.Discriminator`)

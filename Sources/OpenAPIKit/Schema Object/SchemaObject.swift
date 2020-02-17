@@ -69,6 +69,48 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    public var readOnly: Bool {
+        switch self {
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
+            return context.readOnly
+        case .all, .one, .any, .not, .reference:
+            return false
+        }
+    }
+
+    public var writeOnly: Bool {
+        switch self {
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
+            return context.writeOnly
+        case .all, .one, .any, .not, .reference:
+            return false
+        }
+    }
+
+    public var deprecated: Bool {
+        switch self {
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
+            return context.deprecated
+        case .all, .one, .any, .not, .reference:
+            return false
+        }
+    }
+
     public var title: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -277,6 +319,8 @@ extension JSONSchema {
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -287,6 +331,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -301,6 +347,8 @@ extension JSONSchema {
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -311,6 +359,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -328,6 +378,8 @@ extension JSONSchema {
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -341,6 +393,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -360,6 +414,8 @@ extension JSONSchema {
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -373,6 +429,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -393,6 +451,8 @@ extension JSONSchema {
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -406,6 +466,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -425,6 +487,8 @@ extension JSONSchema {
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -438,6 +502,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -458,6 +524,8 @@ extension JSONSchema {
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -471,6 +539,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -490,6 +560,8 @@ extension JSONSchema {
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -503,6 +575,8 @@ extension JSONSchema {
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -523,6 +597,8 @@ extension JSONSchema {
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.ObjectFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDoc? = nil,
@@ -532,11 +608,13 @@ extension JSONSchema {
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-        ) -> JSONSchema {
+    ) -> JSONSchema {
         let generalContext = JSONSchema.Context<JSONTypeFormat.ObjectFormat>(
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
@@ -557,23 +635,28 @@ extension JSONSchema {
     }
 
     // array allowedValues
-    public static func array(format: JSONTypeFormat.ArrayFormat = .unspecified,
-                             required: Bool = true,
-                             nullable: Bool = false,
-                             title: String? = nil,
-                             description: String? = nil,
-                             externalDocs: OpenAPI.ExternalDoc? = nil,
-                             minItems: Int = 0,
-                             maxItems: Int? = nil,
-                             uniqueItems: Bool = false,
-                             items: JSONSchema? = nil,
-                             allowedValues: [AnyCodable]? = nil,
-                             example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
-        ) -> JSONSchema {
+    public static func array(
+        format: JSONTypeFormat.ArrayFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool = false,
+        permissions: JSONSchema.Context<JSONTypeFormat.ArrayFormat>.Permissions = .readWrite,
+        deprecated: Bool = false,
+        title: String? = nil,
+        description: String? = nil,
+        externalDocs: OpenAPI.ExternalDoc? = nil,
+        minItems: Int = 0,
+        maxItems: Int? = nil,
+        uniqueItems: Bool = false,
+        items: JSONSchema? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+    ) -> JSONSchema {
         let generalContext = JSONSchema.Context<JSONTypeFormat.ArrayFormat>(
             format: format,
             required: required,
             nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
             title: title,
             description: description,
             externalDocs: externalDocs,
