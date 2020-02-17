@@ -214,5 +214,372 @@ final class ParameterSchemaTests: XCTestCase {
 
 // MARK: - Codable Tests
 extension ParameterSchemaTests {
-    // TODO: write tests
+    func test_allDefaultsNoExamples_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .default(for: .path)
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_allDefaultsNoExamples_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .default(for: .path)
+            )
+        )
+    }
+
+    func test_allDefaultsOneExample_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .default(for: .path),
+            example: "hello"
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "example" : "hello",
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_allDefaultsOneExample_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "example" : "hello",
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .default(for: .path),
+                example: "hello"
+            )
+        )
+    }
+
+    func test_allDefaultsExamples_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .default(for: .path),
+            examples: [
+                "one": .example(value: .init("hello"))
+            ]
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "examples" : {
+      "one" : {
+        "value" : "hello"
+      }
+    },
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_allDefaultsExamples_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "examples" : {
+      "one" : {
+        "value" : "hello"
+      }
+    },
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .default(for: .path),
+                examples: [
+                    "one": .example(value: .init("hello"))
+                ]
+            )
+        )
+    }
+
+    func test_styleOverride_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .form
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "schema" : {
+      "type" : "string"
+    },
+    "style" : "form"
+  }
+}
+"""
+        )
+    }
+
+    func test_styleOverride_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "schema" : {
+      "type" : "string"
+    },
+    "style" : "form"
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .form
+            )
+        )
+    }
+
+    func test_explodeOverride_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .default(for: .path),
+            explode: true
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "explode" : true,
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_explodeOverride_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "explode" : true,
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .default(for: .path),
+                explode: true
+            )
+        )
+    }
+
+    func test_allowReservedOverride_encode() throws {
+        let schema = Schema(
+            .string,
+            style: .default(for: .path),
+            allowReserved: true
+        )
+
+        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+
+        assertJSONEquivalent(
+            encodedSchema,
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "allowReserved" : true,
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_allowReservedOverride_decode() throws {
+        let schemaData =
+"""
+{
+  "location" : "path",
+  "schema" : {
+    "allowReserved" : true,
+    "schema" : {
+      "type" : "string"
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+
+        XCTAssertEqual(
+            schema,
+            Schema(
+                .string(required: false),
+                style: .default(for: .path),
+                allowReserved: true
+            )
+        )
+    }
+}
+
+fileprivate struct SchemaWrapper: Codable {
+    let location: TestLocation
+    let schema: OpenAPI.PathItem.Parameter.Schema
+
+    init(location: OpenAPI.PathItem.Parameter.Location, schema: OpenAPI.PathItem.Parameter.Schema) {
+        self.location = .init(location)
+        self.schema = schema
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case location
+        case schema
+    }
+
+    enum TestLocation: String, Codable {
+        case query
+        case header
+        case path
+        case cookie
+
+        var paramLoc: OpenAPI.PathItem.Parameter.Location {
+            switch self {
+            case .query: return .query
+            case .header: return .header
+            case .path: return .path
+            case .cookie: return .cookie
+            }
+        }
+
+        init(_ paramLoc: OpenAPI.PathItem.Parameter.Location) {
+            switch paramLoc {
+            case .query: self = .query
+            case .header: self = .header
+            case .path: self = .path
+            case .cookie: self = .cookie
+            }
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(location, forKey: .location)
+
+        try schema.encode(to: container.superEncoder(forKey: .schema), for: location.paramLoc)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        let location = try container.decode(TestLocation.self, forKey: .location)
+        self.location = location
+
+        schema = try OpenAPI.PathItem.Parameter.Schema(from: container.superDecoder(forKey: .schema), for: location.paramLoc)
+    }
 }
