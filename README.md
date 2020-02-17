@@ -355,11 +355,11 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] deprecated
 - [x] content
 - [x] schema
-    - [ ] style
-    - [ ] explode
-    - [ ] allowReserved
-    - [ ] example
-    - [ ] examples
+    - [x] style
+    - [x] explode
+    - [x] allowReserved
+    - [x] example
+    - [x] examples
 
 ### Tag Object (`OpenAPI.Tag`)
 - [x] name
