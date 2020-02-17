@@ -401,8 +401,8 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] Mostly complete support for JSON Schema inherited keywords
 - [x] nullable
 - [ ] discriminator
-- [x] readOnly
-- [x] writeOnly
+- [x] readOnly (`permissions` `.readOnly` case)
+- [x] writeOnly (`permissions` `.writeOnly` case)
 - [ ] xml
 - [x] externalDocs
 - [x] example
