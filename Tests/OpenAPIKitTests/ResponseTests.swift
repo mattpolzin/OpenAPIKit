@@ -18,7 +18,7 @@ final class ResponseTests: XCTestCase {
         XCTAssertEqual(r1.content, [:])
 
         let content = OpenAPI.Content(schema: .init(JSONReference<OpenAPI.Components, JSONSchema>.external("hello.yml")))
-        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string)))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],
                                   content: [.json: content])
@@ -137,7 +137,7 @@ extension ResponseTests {
 
     func test_populatedDescriptionPopulatedContent_encode() {
         let content = OpenAPI.Content(schema: .init(.string))
-        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string)))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let response = OpenAPI.Response(description: "hello world",
                                         headers: ["hello": .init(header)],
                                         content: [.json: content])
@@ -167,7 +167,7 @@ extension ResponseTests {
                        )
     }
 
-    func test_populatedDescriptionPopulatedContent_decode() {
+    func test_populatedDescriptionPopulatedContent_decode() throws {
         let responseData =
 """
 {
@@ -179,10 +179,10 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        let response = try! testDecoder.decode(OpenAPI.Response.self, from: responseData)
+        let response = try testDecoder.decode(OpenAPI.Response.self, from: responseData)
 
         let content = OpenAPI.Content(schema: .init(.string(required: false)))
-        let header = OpenAPI.Header(schemaOrContent: .init(.init(.string(required: false))))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
         XCTAssertEqual(response, OpenAPI.Response(description: "hello world",
                                                   headers: ["hello": .init(header)],
                                                   content: [.json: content]))
@@ -196,9 +196,9 @@ extension ResponseTests {
         let status: OpenAPI.Response.StatusCode
     }
 
-    func test_defaultStatusCode_encode() {
+    func test_defaultStatusCode_encode() throws {
         let status = StatusCodeWrapper(status: .default)
-        let encodedStatus = try! testStringFromEncoding(of: status)
+        let encodedStatus = try testStringFromEncoding(of: status)
 
         assertJSONEquivalent(encodedStatus,
 """
@@ -209,7 +209,7 @@ extension ResponseTests {
                        )
     }
 
-    func test_defaultStatusCode_decode() {
+    func test_defaultStatusCode_decode() throws {
         let statusCodeData =
 """
 {
@@ -217,12 +217,12 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertEqual(try! testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: .default))
+        XCTAssertEqual(try testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: .default))
     }
 
-    func test_numberStatusCode_encode() {
+    func test_numberStatusCode_encode() throws {
         let status = StatusCodeWrapper(status: 123)
-        let encodedStatus = try! testStringFromEncoding(of: status)
+        let encodedStatus = try testStringFromEncoding(of: status)
 
         assertJSONEquivalent(encodedStatus,
 """
@@ -233,7 +233,7 @@ extension ResponseTests {
         )
     }
 
-    func test_numberStatusCode_decode() {
+    func test_numberStatusCode_decode() throws {
         let statusCodeData =
 """
 {
@@ -241,7 +241,7 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertEqual(try! testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
+        XCTAssertEqual(try testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
     }
 
     func test_nonesenseStatusCode_decode_throws() {

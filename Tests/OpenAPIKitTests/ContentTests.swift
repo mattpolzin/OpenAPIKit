@@ -56,7 +56,7 @@ final class ContentTests: XCTestCase {
                                 encoding: [
                                     "hello": .init(contentType: .json,
                                                    headers: [
-                                                    "world": .init(OpenAPI.Header(schemaOrContent: .init(.init(.string))))
+                                                    "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
                                         ],
                                                    allowReserved: true)
             ])
@@ -533,7 +533,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(
             encoding,
@@ -546,7 +546,7 @@ extension ContentTests {
     func test_encoding_style_encode() throws {
         let encoding = OpenAPI.Content.Encoding(style: .pipeDelimited)
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try testStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
