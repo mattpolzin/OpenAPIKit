@@ -10,3 +10,8 @@ import XCTest
 final class ComponentsTests: XCTestCase {
     // TODO: write tests
 }
+
+// MARK: - Codable Tests
+extension ComponentsTests {
+    // TODO: write tests
+}

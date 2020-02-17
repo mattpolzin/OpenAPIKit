@@ -41,6 +41,29 @@ extension OpenAPI.Example {
     public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Components, OpenAPI.Example>, OpenAPI.Example>>
 }
 
+// MARK: - Either Convenience
+extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.Example>, B == OpenAPI.Example {
+    public static func example(
+        summary: String? = nil,
+        description: String? = nil,
+        value: Either<URL, AnyCodable>,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        return .b(
+            .init(
+                summary: summary,
+                description: description,
+                value: value,
+                vendorExtensions: vendorExtensions
+            )
+        )
+    }
+
+    public static func example(reference: JSONReference<OpenAPI.Components, OpenAPI.Example>) -> Self {
+        return .a(reference)
+    }
+}
+
 // MARK: - Codable
 extension OpenAPI.Example: Encodable {
     public func encode(to encoder: Encoder) throws {
