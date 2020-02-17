@@ -149,6 +149,131 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(string.nullable)
     }
 
+    func test_readableAndWritable() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+        let allOf = JSONSchema.all(of: [boolean])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
+
+        XCTAssertFalse(boolean.readOnly)
+        XCTAssertFalse(boolean.writeOnly)
+        XCTAssertFalse(object.readOnly)
+        XCTAssertFalse(object.writeOnly)
+        XCTAssertFalse(array.readOnly)
+        XCTAssertFalse(array.writeOnly)
+        XCTAssertFalse(number.readOnly)
+        XCTAssertFalse(number.writeOnly)
+        XCTAssertFalse(integer.readOnly)
+        XCTAssertFalse(integer.writeOnly)
+        XCTAssertFalse(string.readOnly)
+        XCTAssertFalse(string.writeOnly)
+
+        XCTAssertFalse(allOf.readOnly)
+        XCTAssertFalse(allOf.writeOnly)
+        XCTAssertFalse(anyOf.readOnly)
+        XCTAssertFalse(anyOf.writeOnly)
+        XCTAssertFalse(oneOf.readOnly)
+        XCTAssertFalse(oneOf.writeOnly)
+        XCTAssertFalse(not.readOnly)
+        XCTAssertFalse(not.writeOnly)
+        XCTAssertFalse(reference.readOnly)
+        XCTAssertFalse(reference.writeOnly)
+    }
+
+    func test_readOnly() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .readOnly))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .readOnly), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .readOnly), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+
+        XCTAssertTrue(boolean.readOnly)
+        XCTAssertFalse(boolean.writeOnly)
+        XCTAssertTrue(object.readOnly)
+        XCTAssertFalse(object.writeOnly)
+        XCTAssertTrue(array.readOnly)
+        XCTAssertFalse(array.writeOnly)
+        XCTAssertTrue(number.readOnly)
+        XCTAssertFalse(number.writeOnly)
+        XCTAssertTrue(integer.readOnly)
+        XCTAssertFalse(integer.writeOnly)
+        XCTAssertTrue(string.readOnly)
+        XCTAssertFalse(string.writeOnly)
+    }
+
+    func test_writeOnly() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .writeOnly))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+
+        XCTAssertFalse(boolean.readOnly)
+        XCTAssertTrue(boolean.writeOnly)
+        XCTAssertFalse(object.readOnly)
+        XCTAssertTrue(object.writeOnly)
+        XCTAssertFalse(array.readOnly)
+        XCTAssertTrue(array.writeOnly)
+        XCTAssertFalse(number.readOnly)
+        XCTAssertTrue(number.writeOnly)
+        XCTAssertFalse(integer.readOnly)
+        XCTAssertTrue(integer.writeOnly)
+        XCTAssertFalse(string.readOnly)
+        XCTAssertTrue(string.writeOnly)
+    }
+
+    func test_notDeprecated() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+        let allOf = JSONSchema.all(of: [boolean])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external("hello/world.json#/hello"))
+
+        XCTAssertFalse(boolean.deprecated)
+        XCTAssertFalse(object.deprecated)
+        XCTAssertFalse(array.deprecated)
+        XCTAssertFalse(number.deprecated)
+        XCTAssertFalse(integer.deprecated)
+        XCTAssertFalse(string.deprecated)
+
+        XCTAssertFalse(allOf.deprecated)
+        XCTAssertFalse(anyOf.deprecated)
+        XCTAssertFalse(oneOf.deprecated)
+        XCTAssertFalse(not.deprecated)
+        XCTAssertFalse(reference.deprecated)
+    }
+
+    func test_deprecated() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, deprecated: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, deprecated: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true, deprecated: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true, deprecated: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true, deprecated: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true, deprecated: true), .init())
+
+        XCTAssertTrue(boolean.deprecated)
+        XCTAssertTrue(object.deprecated)
+        XCTAssertTrue(array.deprecated)
+        XCTAssertTrue(number.deprecated)
+        XCTAssertTrue(integer.deprecated)
+        XCTAssertTrue(string.deprecated)
+    }
+
     func test_notNullable() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
@@ -380,7 +505,6 @@ final class SchemaObjectTests: XCTestCase {
 
         XCTAssertEqual(boolean.allowedValues, [false])
         XCTAssertEqual(object.allowedValues, [[:]])
-//        XCTAssertEqual(array.allowedValues, [[false]])
         XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
@@ -415,7 +539,6 @@ final class SchemaObjectTests: XCTestCase {
 
         XCTAssertEqual(boolean.allowedValues, [false])
         XCTAssertEqual(object.allowedValues, [AnyCodable([:])])
-        //        XCTAssertEqual(array.allowedValues, [[false]])
         XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
@@ -547,10 +670,25 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: oneOfData))
     }
 
+    func test_decodingFailsForReadOnlyAndWriteOnly() {
+        let readOnlyWriteOnlyData = """
+        {
+            "type": "string",
+            "readOnly": true,
+            "writeOnly": true
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: readOnlyWriteOnlyData))
+    }
+
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let optionalBoolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
         let nullableBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, nullable: true))
+        let readOnlyBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .readOnly))
+        let writeOnlyBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .writeOnly))
+        let deprecatedBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, deprecated: true))
         let allowedValueBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(allowedValues: [true])
 
@@ -558,6 +696,9 @@ extension SchemaObjectTests {
                                            requiredEntity: requiredBoolean,
                                            optionalEntity: optionalBoolean,
                                            nullableEntity: nullableBoolean,
+                                           readOnlyEntity: readOnlyBoolean,
+                                           writeOnlyEntity: writeOnlyBoolean,
+                                           deprecatedEntity: deprecatedBoolean,
                                            allowedValues: (entity: allowedValueBoolean,
                                                            value: "true"))
     }
@@ -565,14 +706,23 @@ extension SchemaObjectTests {
     func test_decodeBoolean() {
         let booleanData = #"{"type": "boolean"}"#.data(using: .utf8)!
         let nullableBooleanData = #"{"type": "boolean", "nullable": true}"#.data(using: .utf8)!
+        let readOnlyBooleanData = #"{"type": "boolean", "readOnly": true}"#.data(using: .utf8)!
+        let writeOnlyBooleanData = #"{"type": "boolean", "writeOnly": true}"#.data(using: .utf8)!
+        let deprecatedBooleanData = #"{"type": "boolean", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueBooleanData = #"{"type": "boolean", "enum": [false]}"#.data(using: .utf8)!
 
         let boolean = try! testDecoder.decode(JSONSchema.self, from: booleanData)
         let nullableBoolean = try! testDecoder.decode(JSONSchema.self, from: nullableBooleanData)
+        let readOnlyBoolean = try! testDecoder.decode(JSONSchema.self, from: readOnlyBooleanData)
+        let writeOnlyBoolean = try! testDecoder.decode(JSONSchema.self, from: writeOnlyBooleanData)
+        let deprecatedBoolean = try! testDecoder.decode(JSONSchema.self, from: deprecatedBooleanData)
         let allowedValueBoolean = try! testDecoder.decode(JSONSchema.self, from: allowedValueBooleanData)
 
         XCTAssertEqual(boolean, JSONSchema.boolean(.init(format: .generic, required: false)))
         XCTAssertEqual(nullableBoolean, JSONSchema.boolean(.init(format: .generic, required: false, nullable: true)))
+        XCTAssertEqual(readOnlyBoolean, JSONSchema.boolean(.init(format: .generic, required: false, permissions: .readOnly)))
+        XCTAssertEqual(writeOnlyBoolean, JSONSchema.boolean(.init(format: .generic, required: false, permissions: .writeOnly)))
+        XCTAssertEqual(deprecatedBoolean, JSONSchema.boolean(.init(format: .generic, required: false, deprecated: true)))
         XCTAssertEqual(allowedValueBoolean, JSONSchema.boolean(.init(format: .generic, required: false, allowedValues: [false])))
     }
 
@@ -584,6 +734,15 @@ extension SchemaObjectTests {
             "hello": .boolean(.init(format: .unspecified, required: false))
         ]))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let readOnlyObject = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .readOnly), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let writeOnlyObject = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let deprecatedObject = JSONSchema.object(.init(format: .unspecified, required: true, deprecated: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
         ]))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
@@ -624,6 +783,39 @@ extension SchemaObjectTests {
                                     "\"type\" : \"object\""
         ])
 
+        testEncodingPropertyLines(entity: readOnlyObject,
+                                  propertyLines: [
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"readOnly\" : true,",
+                                    "\"type\" : \"object\""
+        ])
+
+        testEncodingPropertyLines(entity: writeOnlyObject,
+                                  propertyLines: [
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\",",
+                                    "\"writeOnly\" : true"
+        ])
+
+        testEncodingPropertyLines(entity: deprecatedObject,
+                                  propertyLines: [
+                                    "\"deprecated\" : true,",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
                                     "\"enum\" : [",
@@ -652,6 +844,24 @@ extension SchemaObjectTests {
             "nullable": true
         }
         """.data(using: .utf8)!
+        let readOnlyObjectData = """
+        {
+            "type": "object",
+            "readOnly": true
+        }
+        """.data(using: .utf8)!
+        let writeOnlyObjectData = """
+        {
+            "type": "object",
+            "writeOnly": true
+        }
+        """.data(using: .utf8)!
+        let deprecatedObjectData = """
+        {
+            "type": "object",
+            "deprecated": true
+        }
+        """.data(using: .utf8)!
         let allowedValueObjectData = """
         {
             "type": "object",
@@ -662,10 +872,16 @@ extension SchemaObjectTests {
 
         let object = try! testDecoder.decode(JSONSchema.self, from: objectData)
         let nullableObject = try! testDecoder.decode(JSONSchema.self, from: nullableObjectData)
+        let readOnlyObject = try! testDecoder.decode(JSONSchema.self, from: readOnlyObjectData)
+        let writeOnlyObject = try! testDecoder.decode(JSONSchema.self, from: writeOnlyObjectData)
+        let deprecatedObject = try! testDecoder.decode(JSONSchema.self, from: deprecatedObjectData)
         let allowedValueObject = try! testDecoder.decode(JSONSchema.self, from: allowedValueObjectData)
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, required: false), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:])))
+        XCTAssertEqual(readOnlyObject, JSONSchema.object(.init(format: .generic, required: false, permissions: .readOnly), .init(properties: [:])))
+        XCTAssertEqual(writeOnlyObject, JSONSchema.object(.init(format: .generic, required: false, permissions: .writeOnly), .init(properties: [:])))
+        XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, required: false, deprecated: true), .init(properties: [:])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -1729,6 +1945,9 @@ extension SchemaObjectTests {
         let requiredArray = JSONSchema.array(.init(format: .unspecified, required: true), .init())
         let optionalArray = JSONSchema.array(.init(format: .unspecified, required: false), .init())
         let nullableArray = JSONSchema.array(.init(format: .unspecified, required: true, nullable: true), .init())
+        let readOnlyArray = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let writeOnlyArray = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let deprecatedArray = JSONSchema.array(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueArray = JSONSchema.array(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [[10]])
 
@@ -1736,6 +1955,9 @@ extension SchemaObjectTests {
                                            requiredEntity: requiredArray,
                                            optionalEntity: optionalArray,
                                            nullableEntity: nullableArray,
+                                           readOnlyEntity: readOnlyArray,
+                                           writeOnlyEntity: writeOnlyArray,
+                                           deprecatedEntity: deprecatedArray,
                                            allowedValues: (entity: allowedValueArray,
                                                            value: "[\n      10\n    ]"))
     }
@@ -1743,14 +1965,23 @@ extension SchemaObjectTests {
     func test_decodeArray() {
         let arrayData = #"{"type": "array"}"#.data(using: .utf8)!
         let nullableArrayData = #"{"type": "array", "nullable": true}"#.data(using: .utf8)!
+        let readOnlyArrayData = #"{"type": "array", "readOnly": true}"#.data(using: .utf8)!
+        let writeOnlyArrayData = #"{"type": "array", "writeOnly": true}"#.data(using: .utf8)!
+        let deprecatedArrayData = #"{"type": "array", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
 
         let array = try! testDecoder.decode(JSONSchema.self, from: arrayData)
         let nullableArray = try! testDecoder.decode(JSONSchema.self, from: nullableArrayData)
+        let readOnlyArray = try! testDecoder.decode(JSONSchema.self, from: readOnlyArrayData)
+        let writeOnlyArray = try! testDecoder.decode(JSONSchema.self, from: writeOnlyArrayData)
+        let deprecatedArray = try! testDecoder.decode(JSONSchema.self, from: deprecatedArrayData)
         let allowedValueArray = try! testDecoder.decode(JSONSchema.self, from: allowedValueArrayData)
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, required: false, nullable: true), .init()))
+        XCTAssertEqual(readOnlyArray, JSONSchema.array(.init(format: .generic, required: false, permissions: .readOnly), .init()))
+        XCTAssertEqual(writeOnlyArray, JSONSchema.array(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
+        XCTAssertEqual(deprecatedArray, JSONSchema.array(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
 
         guard case let .array(_, contextB) = allowedValueArray else {
@@ -2016,6 +2247,9 @@ extension SchemaObjectTests {
         let requiredNumber = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let optionalNumber = JSONSchema.number(.init(format: .unspecified, required: false), .init())
         let nullableNumber = JSONSchema.number(.init(format: .unspecified, required: true, nullable: true), .init())
+        let readOnlyNumber = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let writeOnlyNumber = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let deprecatedNumber = JSONSchema.number(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueNumber = JSONSchema.number(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [10.5])
 
@@ -2023,6 +2257,9 @@ extension SchemaObjectTests {
                                            requiredEntity: requiredNumber,
                                            optionalEntity: optionalNumber,
                                            nullableEntity: nullableNumber,
+                                           readOnlyEntity: readOnlyNumber,
+                                           writeOnlyEntity: writeOnlyNumber,
+                                           deprecatedEntity: deprecatedNumber,
                                            allowedValues: (entity: allowedValueNumber,
                                                            value: "10.5"))
     }
@@ -2030,14 +2267,23 @@ extension SchemaObjectTests {
     func test_decodeNumber() {
         let numberData = #"{"type": "number"}"#.data(using: .utf8)!
         let nullableNumberData = #"{"type": "number", "nullable": true}"#.data(using: .utf8)!
+        let readOnlyNumberData = #"{"type": "number", "readOnly": true}"#.data(using: .utf8)!
+        let writeOnlyNumberData = #"{"type": "number", "writeOnly": true}"#.data(using: .utf8)!
+        let deprecatedNumberData = #"{"type": "number", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "enum": [1, 2]}"#.data(using: .utf8)!
 
         let number = try! testDecoder.decode(JSONSchema.self, from: numberData)
         let nullableNumber = try! testDecoder.decode(JSONSchema.self, from: nullableNumberData)
+        let readOnlyNumber = try! testDecoder.decode(JSONSchema.self, from: readOnlyNumberData)
+        let writeOnlyNumber = try! testDecoder.decode(JSONSchema.self, from: writeOnlyNumberData)
+        let deprecatedNumber = try! testDecoder.decode(JSONSchema.self, from: deprecatedNumberData)
         let allowedValueNumber = try! testDecoder.decode(JSONSchema.self, from: allowedValueNumberData)
 
         XCTAssertEqual(number, JSONSchema.number(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableNumber, JSONSchema.number(.init(format: .generic, required: false, nullable: true), .init()))
+        XCTAssertEqual(readOnlyNumber, JSONSchema.number(.init(format: .generic, required: false, permissions: .readOnly), .init()))
+        XCTAssertEqual(writeOnlyNumber, JSONSchema.number(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
+        XCTAssertEqual(deprecatedNumber, JSONSchema.number(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueNumber, JSONSchema.number(.init(format: .generic, required: false, allowedValues: [1, 2]), .init()))
     }
 
@@ -2045,6 +2291,9 @@ extension SchemaObjectTests {
         let requiredNumber = JSONSchema.number(.init(format: .float, required: true), .init())
         let optionalNumber = JSONSchema.number(.init(format: .float, required: false), .init())
         let nullableNumber = JSONSchema.number(.init(format: .float, required: true, nullable: true), .init())
+        let readOnlyNumber = JSONSchema.number(.init(format: .float, required: true, permissions: .readOnly), .init())
+        let writeOnlyNumber = JSONSchema.number(.init(format: .float, required: true, permissions: .writeOnly), .init())
+        let deprecatedNumber = JSONSchema.number(.init(format: .float, required: true, deprecated: true), .init())
         let allowedValueNumber = JSONSchema.number(.init(format: .float, required: true), .init())
             .with(allowedValues: [11.5])
 
@@ -2053,6 +2302,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredNumber,
                                               optionalEntity: optionalNumber,
                                               nullableEntity: nullableNumber,
+                                              readOnlyEntity: readOnlyNumber,
+                                              writeOnlyEntity: writeOnlyNumber,
+                                              deprecatedEntity: deprecatedNumber,
                                               allowedValues: (entity: allowedValueNumber,
                                                               value: "11.5"))
     }
@@ -2075,6 +2327,9 @@ extension SchemaObjectTests {
         let requiredNumber = JSONSchema.number(.init(format: .double, required: true), .init())
         let optionalNumber = JSONSchema.number(.init(format: .double, required: false), .init())
         let nullableNumber = JSONSchema.number(.init(format: .double, required: true, nullable: true), .init())
+        let readOnlyNumber = JSONSchema.number(.init(format: .double, required: true, permissions: .readOnly), .init())
+        let writeOnlyNumber = JSONSchema.number(.init(format: .double, required: true, permissions: .writeOnly), .init())
+        let deprecatedNumber = JSONSchema.number(.init(format: .double, required: true, deprecated: true), .init())
         let allowedValueNumber = JSONSchema.number(.init(format: .double, required: true), .init())
             .with(allowedValues: [12.5])
 
@@ -2083,6 +2338,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredNumber,
                                               optionalEntity: optionalNumber,
                                               nullableEntity: nullableNumber,
+                                              readOnlyEntity: readOnlyNumber,
+                                              writeOnlyEntity: writeOnlyNumber,
+                                              deprecatedEntity: deprecatedNumber,
                                               allowedValues: (entity: allowedValueNumber,
                                                               value: "12.5"))
     }
@@ -2363,6 +2621,9 @@ extension SchemaObjectTests {
         let requiredInteger = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
         let optionalInteger = JSONSchema.integer(.init(format: .unspecified, required: false), .init())
         let nullableInteger = JSONSchema.integer(.init(format: .unspecified, required: true, nullable: true), .init())
+        let readOnlyInteger = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let writeOnlyInteger = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let deprecatedInteger = JSONSchema.integer(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueInteger = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [10])
 
@@ -2370,6 +2631,9 @@ extension SchemaObjectTests {
                                            requiredEntity: requiredInteger,
                                            optionalEntity: optionalInteger,
                                            nullableEntity: nullableInteger,
+                                           readOnlyEntity: readOnlyInteger,
+                                           writeOnlyEntity: writeOnlyInteger,
+                                           deprecatedEntity: deprecatedInteger,
                                            allowedValues: (entity: allowedValueInteger,
                                                            value: "10"))
     }
@@ -2377,14 +2641,23 @@ extension SchemaObjectTests {
     func test_decodeInteger() {
         let integerData = #"{"type": "integer"}"#.data(using: .utf8)!
         let nullableIntegerData = #"{"type": "integer", "nullable": true}"#.data(using: .utf8)!
+        let readOnlyIntegerData = #"{"type": "integer", "readOnly": true}"#.data(using: .utf8)!
+        let writeOnlyIntegerData = #"{"type": "integer", "writeOnly": true}"#.data(using: .utf8)!
+        let deprecatedIntegerData = #"{"type": "integer", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "enum": [1, 2]}"#.data(using: .utf8)!
 
         let integer = try! testDecoder.decode(JSONSchema.self, from: integerData)
         let nullableInteger = try! testDecoder.decode(JSONSchema.self, from: nullableIntegerData)
+        let readOnlyInteger = try! testDecoder.decode(JSONSchema.self, from: readOnlyIntegerData)
+        let writeOnlyInteger = try! testDecoder.decode(JSONSchema.self, from: writeOnlyIntegerData)
+        let deprecatedInteger = try! testDecoder.decode(JSONSchema.self, from: deprecatedIntegerData)
         let allowedValueInteger = try! testDecoder.decode(JSONSchema.self, from: allowedValueIntegerData)
 
         XCTAssertEqual(integer, JSONSchema.integer(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableInteger, JSONSchema.integer(.init(format: .generic, required: false, nullable: true), .init()))
+        XCTAssertEqual(readOnlyInteger, JSONSchema.integer(.init(format: .generic, required: false, permissions: .readOnly), .init()))
+        XCTAssertEqual(writeOnlyInteger, JSONSchema.integer(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
+        XCTAssertEqual(deprecatedInteger, JSONSchema.integer(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueInteger, JSONSchema.integer(.init(format: .generic, required: false, allowedValues: [1, 2]), .init()))
     }
 
@@ -2392,6 +2665,9 @@ extension SchemaObjectTests {
         let requiredInteger = JSONSchema.integer(.init(format: .int32, required: true), .init())
         let optionalInteger = JSONSchema.integer(.init(format: .int32, required: false), .init())
         let nullableInteger = JSONSchema.integer(.init(format: .int32, required: true, nullable: true), .init())
+        let readOnlyInteger = JSONSchema.integer(.init(format: .int32, required: true, permissions: .readOnly), .init())
+        let writeOnlyInteger = JSONSchema.integer(.init(format: .int32, required: true, permissions: .writeOnly), .init())
+        let deprecatedInteger = JSONSchema.integer(.init(format: .int32, required: true, deprecated: true), .init())
         let allowedValueInteger = JSONSchema.integer(.init(format: .int32, required: true), .init())
             .with(allowedValues: [11])
 
@@ -2400,6 +2676,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredInteger,
                                               optionalEntity: optionalInteger,
                                               nullableEntity: nullableInteger,
+                                              readOnlyEntity: readOnlyInteger,
+                                              writeOnlyEntity: writeOnlyInteger,
+                                              deprecatedEntity: deprecatedInteger,
                                               allowedValues: (entity: allowedValueInteger,
                                                               value: "11"))
     }
@@ -2422,6 +2701,9 @@ extension SchemaObjectTests {
         let requiredInteger = JSONSchema.integer(.init(format: .int64, required: true), .init())
         let optionalInteger = JSONSchema.integer(.init(format: .int64, required: false), .init())
         let nullableInteger = JSONSchema.integer(.init(format: .int64, required: true, nullable: true), .init())
+        let readOnlyInteger = JSONSchema.integer(.init(format: .int64, required: true, permissions: .readOnly), .init())
+        let writeOnlyInteger = JSONSchema.integer(.init(format: .int64, required: true, permissions: .writeOnly), .init())
+        let deprecatedInteger = JSONSchema.integer(.init(format: .int64, required: true, deprecated: true), .init())
         let allowedValueInteger = JSONSchema.integer(.init(format: .int64, required: true), .init())
             .with(allowedValues: [12])
 
@@ -2430,6 +2712,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredInteger,
                                               optionalEntity: optionalInteger,
                                               nullableEntity: nullableInteger,
+                                              readOnlyEntity: readOnlyInteger,
+                                              writeOnlyEntity: writeOnlyInteger,
+                                              deprecatedEntity: deprecatedInteger,
                                               allowedValues: (entity: allowedValueInteger,
                                                               value: "12"))
     }
@@ -2710,6 +2995,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .unspecified, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .unspecified, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .unspecified, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2717,6 +3005,9 @@ extension SchemaObjectTests {
                                            requiredEntity: requiredString,
                                            optionalEntity: optionalString,
                                            nullableEntity: nullableString,
+                                           readOnlyEntity: readOnlyString,
+                                           writeOnlyEntity: writeOnlyString,
+                                           deprecatedEntity: deprecatedString,
                                            allowedValues: (entity: allowedValueString,
                                                            value: "\"hello\""))
     }
@@ -2724,14 +3015,23 @@ extension SchemaObjectTests {
     func test_decodeString() {
         let stringData = #"{"type": "string"}"#.data(using: .utf8)!
         let nullableStringData = #"{"type": "string", "nullable": true}"#.data(using: .utf8)!
+        let readOnlyStringData = #"{"type": "string", "readOnly": true}"#.data(using: .utf8)!
+        let writeOnlyStringData = #"{"type": "string", "writeOnly": true}"#.data(using: .utf8)!
+        let deprecatedStringData = #"{"type": "string", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! testDecoder.decode(JSONSchema.self, from: stringData)
         let nullableString = try! testDecoder.decode(JSONSchema.self, from: nullableStringData)
+        let readOnlyString = try! testDecoder.decode(JSONSchema.self, from: readOnlyStringData)
+        let writeOnlyString = try! testDecoder.decode(JSONSchema.self, from: writeOnlyStringData)
+        let deprecatedString = try! testDecoder.decode(JSONSchema.self, from: deprecatedStringData)
         let allowedValueString = try! testDecoder.decode(JSONSchema.self, from: allowedValueStringData)
 
         XCTAssertEqual(string, JSONSchema.string(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .generic, required: false, nullable: true), .init()))
+        XCTAssertEqual(readOnlyString, JSONSchema.string(.init(format: .generic, required: false, permissions: .readOnly), .init()))
+        XCTAssertEqual(writeOnlyString, JSONSchema.string(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
+        XCTAssertEqual(deprecatedString, JSONSchema.string(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .generic, required: false, allowedValues: ["hello"]), .init()))
     }
 
@@ -2739,6 +3039,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .byte, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .byte, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .byte, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .byte, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .byte, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .byte, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .byte, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2747,6 +3050,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredString,
                                               optionalEntity: optionalString,
                                               nullableEntity: nullableString,
+                                              readOnlyEntity: readOnlyString,
+                                              writeOnlyEntity: writeOnlyString,
+                                              deprecatedEntity: deprecatedString,
                                               allowedValues: (entity: allowedValueString,
                                                               value: "\"hello\""))
     }
@@ -2769,6 +3075,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .binary, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .binary, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .binary, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .binary, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .binary, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .binary, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .binary, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2777,6 +3086,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredString,
                                               optionalEntity: optionalString,
                                               nullableEntity: nullableString,
+                                              readOnlyEntity: readOnlyString,
+                                              writeOnlyEntity: writeOnlyString,
+                                              deprecatedEntity: deprecatedString,
                                               allowedValues: (entity: allowedValueString,
                                                               value: "\"hello\""))
     }
@@ -2799,6 +3111,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .date, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .date, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .date, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .date, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .date, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .date, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .date, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2807,6 +3122,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredString,
                                               optionalEntity: optionalString,
                                               nullableEntity: nullableString,
+                                              readOnlyEntity: readOnlyString,
+                                              writeOnlyEntity: writeOnlyString,
+                                              deprecatedEntity: deprecatedString,
                                               allowedValues: (entity: allowedValueString,
                                                               value: "\"hello\""))
     }
@@ -2829,6 +3147,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .dateTime, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .dateTime, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .dateTime, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .dateTime, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .dateTime, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .dateTime, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .dateTime, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2837,6 +3158,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredString,
                                               optionalEntity: optionalString,
                                               nullableEntity: nullableString,
+                                              readOnlyEntity: readOnlyString,
+                                              writeOnlyEntity: writeOnlyString,
+                                              deprecatedEntity: deprecatedString,
                                               allowedValues: (entity: allowedValueString,
                                                               value: "\"hello\""))
     }
@@ -2859,6 +3183,9 @@ extension SchemaObjectTests {
         let requiredString = JSONSchema.string(.init(format: .password, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .password, required: false), .init())
         let nullableString = JSONSchema.string(.init(format: .password, required: true, nullable: true), .init())
+        let readOnlyString = JSONSchema.string(.init(format: .password, required: true, permissions: .readOnly), .init())
+        let writeOnlyString = JSONSchema.string(.init(format: .password, required: true, permissions: .writeOnly), .init())
+        let deprecatedString = JSONSchema.string(.init(format: .password, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .password, required: true), .init())
             .with(allowedValues: ["hello"])
 
@@ -2867,6 +3194,9 @@ extension SchemaObjectTests {
                                               requiredEntity: requiredString,
                                               optionalEntity: optionalString,
                                               nullableEntity: nullableString,
+                                              readOnlyEntity: readOnlyString,
+                                              writeOnlyEntity: writeOnlyString,
+                                              deprecatedEntity: deprecatedString,
                                               allowedValues: (entity: allowedValueString,
                                                               value: "\"hello\""))
     }
@@ -3246,6 +3576,9 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
     requiredEntity: T,
     optionalEntity: T,
     nullableEntity: T,
+    readOnlyEntity: T,
+    writeOnlyEntity: T,
+    deprecatedEntity: T,
     allowedValues: (entity: T, value: String)
     ) {
     testEncodingPropertyLines(entity: requiredEntity,
@@ -3257,6 +3590,24 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
     testEncodingPropertyLines(entity: nullableEntity,
                               propertyLines: [
                                 "\"nullable\" : true,",
+                                "\"type\" : \"\(typeName)\""
+    ])
+
+    testEncodingPropertyLines(entity: readOnlyEntity,
+                              propertyLines: [
+                                "\"readOnly\" : true,",
+                                "\"type\" : \"\(typeName)\""
+    ])
+
+    testEncodingPropertyLines(entity: writeOnlyEntity,
+                              propertyLines: [
+                                "\"type\" : \"\(typeName)\",",
+                                "\"writeOnly\" : true"
+    ])
+
+    testEncodingPropertyLines(entity: deprecatedEntity,
+                              propertyLines: [
+                                "\"deprecated\" : true,",
                                 "\"type\" : \"\(typeName)\""
     ])
 
@@ -3276,6 +3627,9 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
     requiredEntity: T,
     optionalEntity: T,
     nullableEntity: T,
+    readOnlyEntity: T,
+    writeOnlyEntity: T,
+    deprecatedEntity: T,
     allowedValues: (entity: T, value: String)
     ) {
     testEncodingPropertyLines(entity: requiredEntity,
@@ -3294,6 +3648,27 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
                               propertyLines: [
                                 "\"format\" : \"\(formatName)\",",
                                 "\"nullable\" : true,",
+                                "\"type\" : \"\(typeName)\""
+    ])
+
+    testEncodingPropertyLines(entity: readOnlyEntity,
+                              propertyLines: [
+                                "\"format\" : \"\(formatName)\",",
+                                "\"readOnly\" : true,",
+                                "\"type\" : \"\(typeName)\""
+    ])
+
+    testEncodingPropertyLines(entity: writeOnlyEntity,
+                              propertyLines: [
+                                "\"format\" : \"\(formatName)\",",
+                                "\"type\" : \"\(typeName)\",",
+                                "\"writeOnly\" : true"
+    ])
+
+    testEncodingPropertyLines(entity: deprecatedEntity,
+                              propertyLines: [
+                                "\"deprecated\" : true,",
+                                "\"format\" : \"\(formatName)\",",
                                 "\"type\" : \"\(typeName)\""
     ])
 
