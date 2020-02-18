@@ -1,6 +1,6 @@
 //
-//  GoogleBooksAPI.swift
-//  
+//  TomTomAPI.swift
+//
 //
 //  Created by Mathew Polzin on 2/17/20.
 //
@@ -13,26 +13,26 @@ import Foundation
 import FoundationNetworking
 #endif
 
-final class GoogleBooksAPICampatibilityTests: XCTestCase {
-    var booksAPI: Result<OpenAPI.Document, Error>? = nil
+final class TomTomAPICampatibilityTests: XCTestCase {
+    var tomtomAPI: Result<OpenAPI.Document, Error>? = nil
     var apiDoc: OpenAPI.Document? {
-        guard case .success(let document) = booksAPI else { return nil }
+        guard case .success(let document) = tomtomAPI else { return nil }
         return document
     }
 
     override func setUp() {
-        if booksAPI == nil {
-            booksAPI = Result {
+        if tomtomAPI == nil {
+            tomtomAPI = Result {
                 try YAMLDecoder().decode(
                     OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/APIs-guru/openapi-directory/master/APIs/googleapis.com/books/v1/openapi.yaml")!)
+                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/APIs-guru/openapi-directory/c9190db19e5cb151592d44f0d4482839e1e5a8e0/APIs/tomtom.com/search/1.0.0/openapi.yaml")!)
                 )
             }
         }
     }
 
     func test_successfullyParsedDocument() {
-        switch booksAPI {
+        switch tomtomAPI {
         case nil:
             XCTFail("Did not attempt to pull Google Books API documentation like expected.")
         case .failure(let error as DecodingError):
@@ -60,20 +60,17 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     func test_successfullyParsedBasicMetadata() {
         guard let apiDoc = apiDoc else { return }
 
-        // title is Books
-        XCTAssertEqual(apiDoc.info.title, "Books")
+        // title is Search
+        XCTAssertEqual(apiDoc.info.title, "Search")
 
         // description is set
         XCTAssertFalse(apiDoc.info.description?.isEmpty ?? true)
 
-        // contact name is Google
-        XCTAssertEqual(apiDoc.info.contact?.name, "Google")
+        // contact name is "Contact Us"
+        XCTAssertEqual(apiDoc.info.contact?.name, "Contact Us")
 
         // no contact email is provided
         XCTAssert(apiDoc.info.contact?.email?.isEmpty ?? true)
-
-        // there is at least one tag defined
-        XCTAssertFalse(apiDoc.tags?.isEmpty ?? true)
 
         // server is specified
         XCTAssertNotNil(apiDoc.servers.first)
@@ -83,34 +80,34 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/addBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/deleteBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/updateBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/dictionary/listOfflineMetadata"))
-        XCTAssert(apiDoc.paths.contains(key: "/familysharing/getFamilyInfo"))
-        XCTAssert(apiDoc.paths.contains(key: "/familysharing/share"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/additionalData.{ext}"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/cS/{category}.{ext}"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/categorySearch/{query}.{ext}"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/geocode/{query}.{ext}"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/geometryFilter.{ext}"))
+        XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/geometrySearch/{query}.{ext}"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/cloudloading/addBook"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/dictionary/listOfflineMetadata"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/dictionary/listOfflineMetadata"]?.parameters.isEmpty ?? true)
+        XCTAssertFalse(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.parameters.isEmpty ?? true)
     }
 
     func test_successfullyParsedComponents() {
         guard let apiDoc = apiDoc else { return }
 
         // check for a known parameter
-        XCTAssertNotNil(apiDoc.components.parameters["alt"])
-        XCTAssertTrue(apiDoc.components.parameters["alt"]?.parameterLocation.inQuery ?? false)
+        XCTAssertNotNil(apiDoc.components.parameters["btmRight"])
+        XCTAssertTrue(apiDoc.components.parameters["btmRight"]?.parameterLocation.inQuery ?? false)
 
-        // check for known schema
-        XCTAssertNotNil(apiDoc.components.schemas["Annotation"])
+        // check for known response
+        XCTAssertNotNil(apiDoc.components.responses["200"])
 
-        // check for oauth flow
-        XCTAssertNotNil(apiDoc.components.securitySchemes["Oauth2"])
+        // check for known security scheme
+        XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
     }
 }

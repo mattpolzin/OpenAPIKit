@@ -282,15 +282,23 @@ extension JSONTypeFormat {
 }
 
 extension JSONTypeFormat.StringFormat {
-    public enum Extended {
-        public static let uuid: JSONTypeFormat.StringFormat = .other("uuid")
-        public static let email: JSONTypeFormat.StringFormat = .other("email")
+    public enum Extended: String, Equatable {
+        case uuid = "uuid"
+        case email = "email"
+    }
+
+    public static func extended(_ format: Extended) -> Self {
+        return .other(format.rawValue)
     }
 }
 
 extension JSONTypeFormat.IntegerFormat {
-    public enum Extended {
-        public static let uint32: JSONTypeFormat.IntegerFormat = .other("uint32")
-        public static let uint64: JSONTypeFormat.IntegerFormat = .other("uint64")
+    public enum Extended: String, Equatable {
+        case uint32 = "uint32"
+        case uint64 = "uint64"
+    }
+
+    public static func extended(_ format: Extended) -> Self {
+        return .other(format.rawValue)
     }
 }
