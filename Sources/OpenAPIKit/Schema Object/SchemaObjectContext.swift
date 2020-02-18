@@ -429,7 +429,15 @@ extension JSONSchema.Context: Decodable {
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
-        example = try container.decodeIfPresent(String.self, forKey: .example)
+        if let decodedExample = try container.decodeIfPresent(AnyCodable.self, forKey: .example) {
+            if let fragment = decodedExample.value as? String {
+                example = fragment
+            } else {
+                example = try String(data: JSONEncoder().encode(decodedExample), encoding: .utf8)!
+            }
+        } else {
+            example = nil
+        }
     }
 }
 
