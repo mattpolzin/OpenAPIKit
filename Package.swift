@@ -29,6 +29,9 @@ let package = Package(
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "OpenAPIKitCompatibilitySuite",
+            dependencies: ["OpenAPIKit", "Yams"]),
     ],
     swiftLanguageVersions: [ .v5 ]
 )

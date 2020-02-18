@@ -682,6 +682,58 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: readOnlyWriteOnlyData))
     }
 
+    func test_decodeUndefined() throws {
+        let undefinedData = """
+        {}
+        """.data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: undefinedData)
+
+        XCTAssertEqual(decoded, .undefined(description: nil))
+    }
+
+    func test_encodeUndefined() throws {
+        let undefined = JSONSchema.undefined(description: nil)
+
+        let encoded = try testStringFromEncoding(of: undefined)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+
+}
+"""
+        )
+    }
+
+    func test_decodeUndefinedWithDescription() throws {
+        let undefinedWithDescriptionData = """
+        {
+          "description": "hello world"
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: undefinedWithDescriptionData)
+
+        XCTAssertEqual(decoded, .undefined(description: "hello world"))
+    }
+
+    func test_encodeUndefinedWithDescription() throws {
+        let undefinedWithDescription = JSONSchema.undefined(description: "hello world")
+
+        let encoded = try testStringFromEncoding(of: undefinedWithDescription)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+  "description" : "hello world"
+}
+"""
+        )
+    }
+
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let optionalBoolean = JSONSchema.boolean(.init(format: .unspecified, required: false))

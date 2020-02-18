@@ -73,8 +73,24 @@ public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
 }
 
 extension JSONTypeFormat {
-    public enum BooleanFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
+    public enum BooleanFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = Bool
 
@@ -87,8 +103,24 @@ extension JSONTypeFormat {
         }
     }
 
-    public enum ObjectFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
+    public enum ObjectFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = AnyCodable
 
@@ -101,8 +133,24 @@ extension JSONTypeFormat {
         }
     }
 
-    public enum ArrayFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
+    public enum ArrayFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = [AnyCodable]
 
@@ -115,10 +163,30 @@ extension JSONTypeFormat {
         }
     }
 
-    public enum NumberFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
-        case float = "float"
-        case double = "double"
+    public enum NumberFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case float
+        case double
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .float: return "float"
+            case .double: return "double"
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            case "float": self = .float
+            case "double": self = .double
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = Double
 
@@ -131,10 +199,30 @@ extension JSONTypeFormat {
         }
     }
 
-    public enum IntegerFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
-        case int32 = "int32"
-        case int64 = "int64"
+    public enum IntegerFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case int32
+        case int64
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .int32: return "int32"
+            case .int64: return "int64"
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            case "int32": self = .int32
+            case "int64": self = .int64
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = Int
 
@@ -147,13 +235,39 @@ extension JSONTypeFormat {
         }
     }
 
-    public enum StringFormat: String, Equatable, OpenAPIFormat {
-        case generic = ""
-        case byte = "byte"
-        case binary = "binary"
-        case date = "date"
-        case dateTime = "date-time"
-        case password = "password"
+    public enum StringFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case byte
+        case binary
+        case date
+        case dateTime
+        case password
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .byte: return "byte"
+            case .binary: return "binary"
+            case .date: return "date"
+            case .dateTime: return "date-time"
+            case .password: return "password"
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            case "byte": self = .byte
+            case "binary": self = .binary
+            case "date": self = .date
+            case "date-time": self = .dateTime
+            case "password": self = .password
+            default: self = .other(rawValue)
+            }
+        }
 
         public typealias SwiftType = String
 
@@ -164,5 +278,19 @@ extension JSONTypeFormat {
         public var jsonType: JSONType {
             return .string
         }
+    }
+}
+
+extension JSONTypeFormat.StringFormat {
+    public enum Extended {
+        public static let uuid: JSONTypeFormat.StringFormat = .other("uuid")
+        public static let email: JSONTypeFormat.StringFormat = .other("email")
+    }
+}
+
+extension JSONTypeFormat.IntegerFormat {
+    public enum Extended {
+        public static let uint32: JSONTypeFormat.IntegerFormat = .other("uint32")
+        public static let uint64: JSONTypeFormat.IntegerFormat = .other("uint64")
     }
 }
