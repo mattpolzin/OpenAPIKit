@@ -41,7 +41,7 @@ extension OpenAPI.Error.Decoding.Document {
         case .generic, .inconsistency:
             return relativeCodingPathString.isEmpty
                 ? "in the root Document object"
-                : "at Document\(relativeCodingPathString)"
+                : "in Document\(relativeCodingPathString)"
         }
     }
 

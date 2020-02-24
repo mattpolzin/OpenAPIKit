@@ -24,7 +24,7 @@ info:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `paths` key in the root Document object to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `paths` key in the root Document object but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
         }
     }

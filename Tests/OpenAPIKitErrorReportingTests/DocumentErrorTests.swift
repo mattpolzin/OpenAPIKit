@@ -25,7 +25,7 @@ paths: {}
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `openapi` key in the root Document object to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `openapi` key in the root Document object but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
         }
     }
@@ -100,7 +100,7 @@ paths: {}
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `info` key in the root Document object to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `info` key in the root Document object but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
         }
     }
@@ -153,7 +153,7 @@ paths: {}
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `title` key at Document.info to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `title` key in Document.info but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "info"
             ])
@@ -178,7 +178,7 @@ tags:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `name` key at Document.tags[1] to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `name` key in Document.tags[1] but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map {$0.stringValue }, [
                 "tags",
                 "Index 1"

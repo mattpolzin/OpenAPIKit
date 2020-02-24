@@ -27,7 +27,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `responses` key in the **GET** endpoint under `/hello/world` to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `responses` key for the **GET** endpoint under `/hello/world` but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
@@ -54,7 +54,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `tags` value in the **GET** endpoint under `/hello/world` to be parsable as Sequence but it was not.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected `tags` value for the **GET** endpoint under `/hello/world` to be parsable as Sequence but it was not.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
@@ -85,13 +85,47 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `url` key at .servers[1] in the **GET** endpoint under `/hello/world` to be present but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `url` key in .servers[1] for the **GET** endpoint under `/hello/world` but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
                 "get",
                 "servers",
                 "Index 1"
+            ])
+        }
+    }
+}
+
+extension OperationErrorTests {
+    func test_missingResponseFromSSWGPitchConversation() {
+        let documentYML =
+"""
+openapi: 3.0.0
+info:
+  title: API
+  version: 1.0.0
+paths:
+  /all-items:
+    summary: Get all items
+    get:
+      responses:
+        "200":
+          description: All items
+  /one-item:
+    get:
+      summary: Get one item
+"""
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `responses` key for the **GET** endpoint under `/one-item` but it is missing.")
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
+                "paths",
+                "/one-item",
+                "get"
             ])
         }
     }

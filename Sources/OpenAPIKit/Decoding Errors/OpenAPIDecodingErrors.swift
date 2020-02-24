@@ -39,7 +39,7 @@ public extension OpenAPIError {
             case .missing(let kv):
                 switch kv {
                 case .key:
-                    return " to be present but it is missing"
+                    return " but it is missing"
                 case .value:
                     return " to be non-null but it is null"
                 }
@@ -55,7 +55,7 @@ public extension OpenAPIError {
             case .missing(let kv):
                 switch kv {
                 case .key:
-                    return "Expected `\(subjectName)` key"
+                    return "Expected to find `\(subjectName)` key"
                 case .value:
                     return "Expected `\(subjectName)` value"
                 }
