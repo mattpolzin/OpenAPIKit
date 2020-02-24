@@ -43,4 +43,33 @@ extension OpenAPI {
             }
         }
     }
+
+    public struct Error: Swift.Error {
+
+        public let localizedDescription: String
+        public let codingPath: [CodingKey]
+        public let underlyingError: Swift.Error
+
+        public init(from underlyingError: Swift.Error) {
+            self.underlyingError = underlyingError
+            if let openAPIError = underlyingError as? OpenAPIError {
+                localizedDescription = openAPIError.localizedDescription
+                codingPath = openAPIError.codingPath
+
+            } else if let decodingError = underlyingError as? Swift.DecodingError {
+
+                if let openAPIError = decodingError.underlyingError as? OpenAPIError {
+                    localizedDescription = openAPIError.localizedDescription
+                    codingPath = openAPIError.codingPath
+                } else {
+                    localizedDescription = decodingError.localizedDescription
+                    codingPath = decodingError.codingPath
+                }
+
+            } else {
+                localizedDescription = underlyingError.localizedDescription
+                codingPath = []
+            }
+        }
+    }
 }
