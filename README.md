@@ -57,6 +57,17 @@ let decoder = ... // JSONDecoder() or YAMLDecoder()
 let openAPIDoc = try decoder.decode(OpenAPI.Document, from: ...)
 ```
 
+#### Decoding Errors
+You can wrap any error you get back from a decoder in `OpenAPI.Error` to get a friendlier human-readable description from `localizedDescription`.
+
+```swift
+do {
+  try decoder.docode(OpenAPI.Document, from: ...)
+} catch let error {
+  print(OpenAPI.Error(from: error).localizedDescription)  
+}
+```
+
 ### Encoding OpenAPI Documents
 
 You can encode a JSON OpenAPI document (i.e. using the `JSONEncoder` from the **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLEncoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
