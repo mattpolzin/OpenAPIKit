@@ -260,17 +260,27 @@ extension OpenAPI.PathItem: Decodable {
             throw OpenAPI.Error.Decoding.Path(
                 path: route,
                 context: .endpoint(error),
-                codingPath: error.codingPath
+                relativeCodingPath: Array(codingPath)
             )
         } catch let error as DecodingError {
+
+            var codingPath = error.codingPathWithoutSubject.dropFirst()
+            let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+
+            throw OpenAPI.Error.Decoding.Path(
+                path: route,
+                context: .generic(error),
+                relativeCodingPath: Array(codingPath)
+            )
+        } catch let error as PolyDecodeNoTypesMatchedError {
 
             var codingPath = error.codingPath.dropFirst()
             let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
 
             throw OpenAPI.Error.Decoding.Path(
                 path: route,
-                context: .generic(error.replacingPath(with: Array(codingPath))),
-                codingPath: error.codingPath
+                context: .neither(error),
+                relativeCodingPath: Array(codingPath)
             )
         }
     }

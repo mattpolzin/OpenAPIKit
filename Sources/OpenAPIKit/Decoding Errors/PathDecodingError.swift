@@ -6,16 +6,18 @@
 //
 
 import Foundation
+import Poly
 
 extension OpenAPI.Error.Decoding {
     public struct Path: OpenAPIError {
         public let path: OpenAPI.PathComponents
         public let context: Context
-        public let codingPath: [CodingKey]
+        internal let relativeCodingPath: [CodingKey]
 
         public enum Context {
             case endpoint(Operation)
             case generic(Swift.DecodingError)
+            case neither(PolyDecodeNoTypesMatchedError)
         }
     }
 }
@@ -27,6 +29,8 @@ extension OpenAPI.Error.Decoding.Path {
             return endpointError.subjectName
         case .generic(let decodingError):
             return decodingError.subjectName
+        case .neither(let polyError):
+            return polyError.subjectName
         }
     }
 
@@ -37,7 +41,7 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return "\(relativeCodingPath)for the **\(endpointError.contextString)** endpoint under `\(path.rawValue)`"
-        case .generic:
+        case .generic, .neither:
             return "\(relativeCodingPath)under the `\(path.rawValue)` path"
         }
     }
@@ -48,6 +52,19 @@ extension OpenAPI.Error.Decoding.Path {
             return endpointError.errorCategory
         case .generic(let decodingError):
             return decodingError.errorCategory
+        case .neither(let polyError):
+            return polyError.errorCategory
+        }
+    }
+
+    public var codingPath: [CodingKey] {
+        switch context {
+        case .endpoint(let endpointError):
+            return endpointError.codingPath
+        case .generic(let decodingError):
+            return decodingError.codingPath
+        case .neither(let polyError):
+            return polyError.codingPath
         }
     }
 
@@ -55,8 +72,8 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.relativeCodingPathString
-        case .generic(let decodingError):
-            return decodingError.relativeCodingPathString
+        case .generic, .neither:
+            return relativeCodingPath.stringValue
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Poly
 
 extension OpenAPI.Error {
     public enum Decoding {}
@@ -13,6 +14,7 @@ extension OpenAPI.Error {
 
 public enum ErrorCategory {
     case typeMismatch(expectedTypeName: String)
+    case typeMismatch2(possibleTypeName1: String, possibleTypeName2: String, details: String)
     case missing(KeyValue)
     case dataCorrupted
     case inconsistency(details: String)
@@ -31,11 +33,18 @@ public protocol OpenAPIError: Swift.Error {
 }
 
 public extension OpenAPIError {
+    /// Description of error given in the structure:
+    /// `subject` `context` `error`: `details`
+    ///
+    /// A subject, context, and error are all guaranteed.
+    /// The details are only provided in certain contexts.
     var localizedDescription: String {
         let errorTypeString: String = {
             switch errorCategory {
             case .typeMismatch(expectedTypeName: let typeName):
                 return " to be parsable as \(typeName) but it was not"
+            case .typeMismatch2(possibleTypeName1: _, possibleTypeName2: _, details: let details):
+                return " but found neither: \(details)"
             case .missing(let kv):
                 switch kv {
                 case .key:
@@ -59,8 +68,10 @@ public extension OpenAPIError {
                 case .value:
                     return "Expected `\(subjectName)` value"
                 }
-            case .typeMismatch:
+            case .typeMismatch(expectedTypeName: _):
                 return "Expected `\(subjectName)` value"
+            case .typeMismatch2(possibleTypeName1: let t1, possibleTypeName2: let t2, details: _):
+                return "Expected to find either a \(t1) or a \(t2)"
             case .dataCorrupted:
                 return "Could not parse `\(subjectName)`"
             case .inconsistency(details: _):
@@ -81,6 +92,24 @@ internal extension Swift.Array where Element == CodingKey {
             return ".\(key.stringValue)"
         }.joined()
     }
+}
+
+internal struct OpenAPIDecodingError: OpenAPIError {
+    let decodingError: Swift.DecodingError
+
+    var subjectName: String { decodingError.subjectName }
+
+    var contextString: String {
+        let relativeCodingPathString = decodingError.relativeCodingPathString
+
+        return relativeCodingPathString.isEmpty
+            ? ""
+            : "in \(relativeCodingPathString)"
+    }
+
+    var errorCategory: ErrorCategory { decodingError.errorCategory }
+
+    var codingPath: [CodingKey] { decodingError.codingPath }
 }
 
 internal extension Swift.DecodingError {
@@ -160,6 +189,41 @@ internal extension Swift.DecodingError {
         @unknown default:
             return .dataCorrupted(.init(codingPath: codingPath, debugDescription: "unknown error"))
         }
+    }
+}
+
+internal extension PolyDecodeNoTypesMatchedError {
+    var subjectName: String {
+        return codingPath.last?.stringValue ?? "[unknown object]"
+    }
+
+    var codingPathWithoutSubject: [CodingKey] {
+        return codingPath.count > 0 ? codingPath.dropLast() : []
+    }
+
+    var relativeCodingPathString: String {
+        return codingPathWithoutSubject.stringValue
+    }
+
+    var errorCategory: ErrorCategory {
+        guard let f1 = individualTypeFailures.first, let f2 = individualTypeFailures.dropFirst().first else {
+            return .dataCorrupted
+        }
+        func typeString(_ t: Any.Type) -> String {
+            if (t as? Reference.Type) != nil {
+                return "$ref"
+            }
+            return String(describing: t)
+        }
+        return .typeMismatch2(
+            possibleTypeName1: typeString(f1.type),
+            possibleTypeName2: typeString(f2.type),
+            details: "\n\n" + individualTypeFailures.map {
+                let type = $0.type
+                let error = OpenAPIDecodingError(decodingError:  $0.error).localizedDescription
+                return "\(String(describing: type)) could not be decoded because:\n\(error)"
+            }.joined(separator: "\n\n")
+        )
     }
 }
 

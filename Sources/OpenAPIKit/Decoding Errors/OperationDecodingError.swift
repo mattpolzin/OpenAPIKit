@@ -11,7 +11,7 @@ extension OpenAPI.Error.Decoding {
     public struct Operation: OpenAPIError {
         public let endpoint: OpenAPI.HttpVerb
         public let context: Context
-        public let codingPath: [CodingKey]
+        internal let relativeCodingPath: [CodingKey]
 
         public enum Context {
             case generic(Swift.DecodingError)
@@ -36,10 +36,10 @@ extension OpenAPI.Error.Decoding.Operation {
         }
     }
 
-    internal var relativeCodingPath: [CodingKey] {
+    public var codingPath: [CodingKey] {
         switch context {
         case .generic(let decodingError):
-            return decodingError.codingPathWithoutSubject
+            return decodingError.codingPath
         }
     }
 
