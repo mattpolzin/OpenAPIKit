@@ -75,7 +75,7 @@ final class VendorExtendableTests: XCTestCase {
 """.data(using: .utf8)!
 
         XCTAssertThrowsError(try JSONDecoder().decode(TestStruct.self, from: data)) { error in
-            XCTAssert(error as? VendorExtensionDecodingError == VendorExtensionDecodingError.foundExtensionsWithoutXPrefix)
+            XCTAssertNotNil(error as? InconsistencyError)
         }
     }
 }

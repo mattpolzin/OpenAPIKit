@@ -160,14 +160,13 @@ extension OpenAPI.PathItem.Operation: Decodable {
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
         } catch let error as DecodingError {
 
-            var codingPath = error.codingPathWithoutSubject.dropFirst(2)
-            let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+            throw OpenAPI.Error.Decoding.Operation(error)
+        } catch let error as InconsistencyError {
 
-            throw OpenAPI.Error.Decoding.Operation(
-                endpoint: verb,
-                context: .generic(error),
-                relativeCodingPath: Array(codingPath)
-            )
+            throw OpenAPI.Error.Decoding.Operation(error)
+        } catch let error as PolyDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
         }
     }
 }

@@ -424,7 +424,11 @@ extension JSONSchema.Context: Decodable {
         case (true, false):
             permissions = .readOnly
         case (true, true):
-            throw OpenAPI.DecodingError.unsatisfied(requirement: "Either readOnly or writeOnly can be true but not both.", codingPath: decoder.codingPath)
+            throw InconsistencyError(
+                subjectName: "JSONSchema",
+                details: "Either `readOnly` or `writeOnly` can be true but not both",
+                codingPath: decoder.codingPath
+            )
         }
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false

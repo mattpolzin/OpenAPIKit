@@ -127,20 +127,14 @@ extension OpenAPI.Document: Decodable {
 
             externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
         } catch let error as OpenAPI.Error.Decoding.Path {
-            throw OpenAPI.Error.Decoding.Document(
-                context: .path(error),
-                codingPath: error.codingPath
-            )
+
+            throw OpenAPI.Error.Decoding.Document(error)
         } catch let error as InconsistencyError {
-            throw OpenAPI.Error.Decoding.Document(
-                context: .inconsistency(subjectName: error.subjectName, details: error.details),
-                codingPath: error.codingPath
-            )
+
+            throw OpenAPI.Error.Decoding.Document(error)
         } catch let error as DecodingError {
-            throw OpenAPI.Error.Decoding.Document(
-                context: .generic(error),
-                codingPath: error.codingPath
-            )
+
+            throw OpenAPI.Error.Decoding.Document(error)
         }
     }
 }

@@ -47,7 +47,6 @@ protocol CodableVendorExtendable: VendorExtendable {
 enum VendorExtensionDecodingError: Swift.Error {
     case selfIsArrayNotDict
     case foundNonStringKeys
-    case foundExtensionsWithoutXPrefix
 }
 
 extension CodableVendorExtendable {
@@ -71,7 +70,11 @@ extension CodableVendorExtendable {
         }
 
         guard extensions.keys.allSatisfy({ $0.lowercased().starts(with: "x-") }) else {
-            throw VendorExtensionDecodingError.foundExtensionsWithoutXPrefix
+            throw InconsistencyError(
+                subjectName: "Vendor Extension",
+                details: "Found a vendor extension property that does not begin with the required 'x-' prefix",
+                codingPath: decoder.codingPath
+            )
         }
 
         return extensions.mapValues(AnyCodable.init)

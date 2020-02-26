@@ -14,7 +14,7 @@ extension OpenAPI.Error.Decoding {
 
         public enum Context {
             case path(Path)
-            case inconsistency(subjectName: String, details: String)
+            case inconsistency(InconsistencyError)
             case generic(Swift.DecodingError)
         }
     }
@@ -29,8 +29,8 @@ extension OpenAPI.Error.Decoding.Document {
         case .generic(let decodingError):
             return decodingError.subjectName
 
-        case .inconsistency(subjectName: let name, details: _):
-            return name
+        case .inconsistency(let error):
+            return error.subjectName
         }
     }
 
@@ -51,8 +51,8 @@ extension OpenAPI.Error.Decoding.Document {
             return pathError.errorCategory
         case .generic(let error):
             return error.errorCategory
-        case .inconsistency(subjectName: _, details: let details):
-            return .inconsistency(details: details)
+        case .inconsistency(let error):
+            return .inconsistency(details: error.details)
         }
     }
 
@@ -65,5 +65,20 @@ extension OpenAPI.Error.Decoding.Document {
         case .path(let pathError):
             return pathError.relativeCodingPathString
         }
+    }
+
+    internal init(_ error: DecodingError) {
+        context = .generic(error)
+        codingPath = error.codingPath
+    }
+
+    internal init(_ error: InconsistencyError) {
+        context = .inconsistency(error)
+        codingPath = error.codingPath
+    }
+
+    internal init(_ error: OpenAPI.Error.Decoding.Path) {
+        context = .path(error)
+        codingPath = error.codingPath
     }
 }

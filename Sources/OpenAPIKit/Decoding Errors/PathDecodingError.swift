@@ -76,4 +76,31 @@ extension OpenAPI.Error.Decoding.Path {
             return relativeCodingPath.stringValue
         }
     }
+
+    internal init(_ error: DecodingError) {
+        var codingPath = error.codingPathWithoutSubject.dropFirst()
+        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+
+        path = route
+        context = .generic(error)
+        relativeCodingPath = Array(codingPath)
+    }
+
+    internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
+        var codingPath = polyError.codingPath.dropFirst()
+        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+
+        path = route
+        context = .neither(polyError)
+        relativeCodingPath = Array(codingPath)
+    }
+
+    internal init(_ error: OpenAPI.Error.Decoding.Operation) {
+        var codingPath = error.codingPath.dropFirst()
+        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+
+        path = route
+        context = .endpoint(error)
+        relativeCodingPath = Array(codingPath)
+    }
 }
