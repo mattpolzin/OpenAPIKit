@@ -34,7 +34,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a JSONSchema in .requestBody.content['application/json'].schema for the **GET** endpoint under `/hello/world` but found neither. \n\nJSONReference<Components, JSONSchema> could not be decoded because:\nExpected to find `$ref` key but it is missing.\n\nJSONSchema could not be decoded because:\nExpected value to be parsable as JSONSchema but it was not..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a JSONSchema in .requestBody.content['application/json'].schema for the **GET** endpoint under `/hello/world` but found neither. \n\nJSONSchema could not be decoded because:\nExpected value to be parsable as JSONSchema but it was not..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

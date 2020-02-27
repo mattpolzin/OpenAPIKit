@@ -58,7 +58,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Request in .requestBody for the **GET** endpoint under `/hello/world` but found neither. \n\nJSONReference<Components, Request> could not be decoded because:\nExpected to find `$ref` key but it is missing.\n\nRequest could not be decoded because:\nExpected to find `content` key but it is missing..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Request in .requestBody for the **GET** endpoint under `/hello/world` but found neither. \n\nRequest could not be decoded because:\nExpected to find `content` key but it is missing..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
@@ -88,7 +88,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Request in .requestBody for the **GET** endpoint under `/hello/world` but found neither. \n\nJSONReference<Components, Request> could not be decoded because:\nExpected to find `$ref` key but it is missing.\n\nRequest could not be decoded because:\nExpected `content` value to be parsable as Mapping but it was not..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Request in .requestBody for the **GET** endpoint under `/hello/world` but found neither. \n\nRequest could not be decoded because:\nExpected `content` value to be parsable as Mapping but it was not..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

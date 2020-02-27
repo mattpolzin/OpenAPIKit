@@ -36,13 +36,33 @@ internal extension PolyDecodeNoTypesMatchedError {
                 return .dataCorrupted(underlying: self)
         }
 
-        let error1 = OpenAPI.Error(from: f1.error.replacingPath(with: f1.codingPath(relativeTo: codingPath))).localizedDescription
-        let error2 = OpenAPI.Error(from: f2.error.replacingPath(with: f2.codingPath(relativeTo: codingPath))).localizedDescription
+        func isRefKeyNotFoundError(_ failure: IndividualFailure) -> Bool {
+            guard case .keyNotFound(let key, _) = failure.error else {
+                return false
+            }
+            return key.stringValue == "$ref"
+        }
 
-        let details1 = "\(String(describing: f1.type)) could not be decoded because:\n\(error1)"
-        let details2 = "\(String(describing: f2.type)) could not be decoded because:\n\(error2)"
+        // We want to omit details if the problem is a missing '$ref' key.
+        // If the intention was to write a reference, this error will be obvious.
+        // If the intention was not to use a reference, this error will be superfluous.
+        let error1 = isRefKeyNotFoundError(f1)
+            ? nil
+            : OpenAPI.Error(from: f1.error.replacingPath(with: f1.codingPath(relativeTo: codingPath))).localizedDescription
+        let error2 = isRefKeyNotFoundError(f2)
+            ? nil
+            : OpenAPI.Error(from: f2.error.replacingPath(with: f2.codingPath(relativeTo: codingPath))).localizedDescription
 
-        let details = "\n\n" + details1 + "\n\n" + details2
+        let details1 = error1
+            .map { "\(String(describing: f1.type)) could not be decoded because:\n\($0)" }
+            .map { "\n\n" + $0 }
+            ?? ""
+        let details2 = error2
+            .map { "\(String(describing: f2.type)) could not be decoded because:\n\($0)" }
+            .map { "\n\n" + $0 }
+            ?? ""
+
+        let details = details1 + details2
 
         return .typeMismatch2(
             possibleTypeName1: f1.typeString,
