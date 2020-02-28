@@ -289,7 +289,7 @@ extension JSONSchema {
         case .string(let context, let contextB):
             return .string(context.with(example: codableExample, using: encoder), contextB)
         case .all, .one, .any, .not, .reference, .undefined:
-            throw OpenAPI.CodableError.exampleNotSupported("examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
+            throw OpenAPI.EncodableError.exampleNotSupported("examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
         }
     }
 }
@@ -801,22 +801,17 @@ extension JSONSchema: Decodable {
 
         let hintContainer = try decoder.container(keyedBy: HintCodingKeys.self)
 
+        let containerCount = hintContainer.allKeys.count
         // This means there is no type specified which is hopefully only found for truly
         // undefined schemas (i.e. "{}"); there has been known to be a "description" even
         // without a "type" specified.
-        let containerCount = hintContainer.allKeys.count
         if containerCount == 0 || (containerCount == 1 && hintContainer.contains(.description))  {
             let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)
             self = .undefined(description: description)
             return
         }
 
-        let type: JSONType
-        do {
-            type = try hintContainer.decode(JSONType.self, forKey: .type)
-        } catch {
-            throw OpenAPI.DecodingError.missingKeyword(underlyingError: "A JSON Schema object is expected to be `oneOf`, `anyOf`, `allOf`, `not`, or have a `type` key.", codingPath: decoder.codingPath)
-        }
+        let type = try hintContainer.decode(JSONType.self, forKey: .type)
 
         switch type {
         case .boolean:

@@ -148,10 +148,15 @@ extension OpenAPI.Response.StatusCode: Encodable {
 extension OpenAPI.Response.StatusCode: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let val = OpenAPI.Response.StatusCode(rawValue: try container.decode(String.self))
+        let strVal = try container.decode(String.self)
+        let val = OpenAPI.Response.StatusCode(rawValue: strVal)
 
         guard let value = val else {
-            throw OpenAPI.DecodingError.unknown(codingPath: decoder.codingPath)
+            throw InconsistencyError(
+                subjectName: "status code",
+                details: "Expected the status code to be either an Int or 'default' but found \(strVal) instead",
+                codingPath: decoder.codingPath
+            )
         }
 
         self = value
