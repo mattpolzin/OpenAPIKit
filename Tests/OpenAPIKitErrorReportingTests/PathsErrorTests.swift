@@ -118,11 +118,75 @@ paths:
         }
     }
 
-    func test_noContentOrSchemaPathParam() {
-        // TODO: write test
+    func test_noContentOrSchemaParam() {
+        let documentYML =
+"""
+openapi: "3.0.0"
+info:
+    title: test
+    version: 1.0
+paths:
+    /hello/world:
+        summary: hello
+        parameters:
+            - name: world
+              in: query
+"""
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Parameter in .parameters[0] under the `/hello/world` path but found neither. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A single path parameter must specify one but not both `content` and `schema`.."
+            )
+            XCTAssertEqual(
+                openAPIError.codingPath.map { $0.stringValue },
+                [
+                    "paths",
+                    "/hello/world",
+                    "parameters",
+                    "Index 0"
+                ]
+            )
+        }
     }
 
-    func test_bothContentAndSchemaPathParam() {
-        // TODO: write test
+    func test_bothContentAndSchemaParam() {
+        let documentYML =
+"""
+openapi: "3.0.0"
+info:
+    title: test
+    version: 1.0
+paths:
+    /hello/world:
+        summary: hello
+        parameters:
+            - name: world
+              in: query
+              schema:
+                type: string
+              content:
+                application/json:
+                    schema:
+                        type: string
+"""
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Parameter in .parameters[0] under the `/hello/world` path but found neither. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A single path parameter must specify one but not both `content` and `schema`.."
+            )
+            XCTAssertEqual(
+                openAPIError.codingPath.map { $0.stringValue },
+                [
+                    "paths",
+                    "/hello/world",
+                    "parameters",
+                    "Index 0"
+                ]
+            )
+        }
     }
 }
