@@ -97,6 +97,9 @@ internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
         if let err = error.underlyingError as? PolyDecodeNoTypesMatchedError {
             return err.codingPath
         }
+        if let err = error.underlyingError as? OpenAPIError {
+            return err.codingPath
+        }
         return error.codingPath
     }
 }

@@ -1,21 +1,20 @@
 //
-//  OperationDecodingError.swift
+//  ResponseDecodingError.swift
 //  
 //
-//  Created by Mathew Polzin on 2/23/20.
+//  Created by Mathew Polzin on 2/28/20.
 //
 
 import Foundation
 import Poly
 
 extension OpenAPI.Error.Decoding {
-    public struct Operation: OpenAPIError {
-        public let endpoint: OpenAPI.HttpVerb
+    public struct Response: OpenAPIError {
+        public let statusCode: OpenAPI.Response.StatusCode
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
         public enum Context {
-            case response(Response)
             case inconsistency(InconsistencyError)
             case generic(Swift.DecodingError)
             case neither(PolyDecodeNoTypesMatchedError)
@@ -23,11 +22,9 @@ extension OpenAPI.Error.Decoding {
     }
 }
 
-extension OpenAPI.Error.Decoding.Operation {
+extension OpenAPI.Error.Decoding.Response {
     public var subjectName: String {
         switch context {
-        case .response(let error):
-            return error.subjectName
         case .inconsistency(let error):
             return error.subjectName
         case .generic(let decodingError):
@@ -37,12 +34,10 @@ extension OpenAPI.Error.Decoding.Operation {
         }
     }
 
-    public var contextString: String { endpoint.rawValue }
+    public var contextString: String { statusCode.rawValue }
 
     public var errorCategory: ErrorCategory {
         switch context {
-        case .response(let error):
-            return error.errorCategory
         case .inconsistency(let error):
             return .inconsistency(details: error.details)
         case .generic(let decodingError):
@@ -54,8 +49,6 @@ extension OpenAPI.Error.Decoding.Operation {
 
     public var codingPath: [CodingKey] {
         switch context {
-        case .response(let error):
-            return error.codingPath
         case .inconsistency(let error):
             return error.codingPath
         case .generic(let decodingError):
@@ -69,29 +62,27 @@ extension OpenAPI.Error.Decoding.Operation {
         relativeCodingPath.stringValue
     }
 
-    internal init(_ error: OpenAPI.Error.Decoding.Response) {
-        var codingPath = error.codingPath.dropFirst(2)
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
-
-        endpoint = verb
-        context = .response(error)
-        relativeCodingPath = Array(codingPath)
+    internal static func relativePath(from path: [CodingKey]) -> [CodingKey] {
+        guard let responsesIdx = path.firstIndex(where: { $0.stringValue == "responses" }) else {
+            return path
+        }
+        return Array(path.dropFirst(responsesIdx.advanced(by: 1)))
     }
 
     internal init(_ error: InconsistencyError) {
-        var codingPath = error.codingPath.dropFirst(2)
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        var codingPath = Self.relativePath(from: error.codingPath)
+        let code = codingPath.removeFirst().stringValue.lowercased()
 
-        endpoint = verb
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .inconsistency(error)
         relativeCodingPath = Array(codingPath)
     }
 
     internal init(_ error: Swift.DecodingError) {
-        var codingPath = error.codingPathWithoutSubject.dropFirst(2)
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        var codingPath = Self.relativePath(from: error.codingPath)
+        let code = codingPath.removeFirst().stringValue.lowercased()
 
-        endpoint = verb
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .generic(error)
         relativeCodingPath = Array(codingPath)
     }
@@ -99,8 +90,6 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
-        } else if let responseError = error.underlyingError as? OpenAPI.Error.Decoding.Response {
-            self = Self(responseError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
             self = Self(inconsistencyError)
         } else if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
@@ -121,10 +110,10 @@ extension OpenAPI.Error.Decoding.Operation {
             }
         }
 
-        var codingPath = polyError.codingPath.dropFirst(2)
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        var codingPath = Self.relativePath(from: polyError.codingPath)
+        let code = codingPath.removeFirst().stringValue.lowercased()
 
-        endpoint = verb
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .neither(polyError)
         relativeCodingPath = Array(codingPath)
     }

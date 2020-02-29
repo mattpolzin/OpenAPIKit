@@ -55,7 +55,7 @@ public extension OpenAPIError {
                     return "Expected `\(subjectName)` value"
                 }
             case .typeMismatch2(possibleTypeName1: let t1, possibleTypeName2: let t2, details: _):
-                return "Expected to find either a \(t1) or a \(t2)"
+                return "Found neither a \(t1) nor a \(t2)"
             case .dataCorrupted:
                 return "Could not parse `\(subjectName)`"
             case .inconsistency(details: _):
@@ -70,7 +70,7 @@ public extension OpenAPIError {
             case .typeMismatch(expectedTypeName: let typeName):
                 return " to be parsable as \(typeName) but it was not"
             case .typeMismatch2(possibleTypeName1: _, possibleTypeName2: _, details: let details):
-                return " but found neither. \(details)"
+                return ". \(details)"
             case .missing(let kv):
                 switch kv {
                 case .key:

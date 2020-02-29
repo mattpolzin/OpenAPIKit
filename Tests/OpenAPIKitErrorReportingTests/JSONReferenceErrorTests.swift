@@ -30,7 +30,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find either a $ref or a Parameter in .parameters[0] for the **GET** endpoint under `/hello/world` but found neither. \n\nJSONReference<Components, Parameter> could not be decoded because:\nCould not parse `$ref`.\n\nParameter could not be decoded because:\nExpected to find `name` key but it is missing..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] for the **GET** endpoint under `/hello/world`. \n\nJSONReference<Components, Parameter> could not be decoded because:\nCould not parse `$ref`.\n\nParameter could not be decoded because:\nExpected to find `name` key but it is missing..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

@@ -40,7 +40,15 @@ extension OpenAPI.Error.Decoding.Path {
             : "in \(relativeCodingPathString) "
         switch context {
         case .endpoint(let endpointError):
-            return "\(relativeCodingPath)for the **\(endpointError.contextString)** endpoint under `\(path.rawValue)`"
+            switch endpointError.context {
+            case .response(let responseError):
+                let responseContext = responseError.contextString == "default"
+                    ? "default"
+                    : "status code '\(responseError.contextString)'"
+                return "\(relativeCodingPath)for the \(responseContext) response of the **\(endpointError.contextString)** endpoint under `\(path.rawValue)`"
+            case .generic, .inconsistency, .neither:
+                return "\(relativeCodingPath)for the **\(endpointError.contextString)** endpoint under `\(path.rawValue)`"
+            }
         case .generic, .neither:
             return "\(relativeCodingPath)under the `\(path.rawValue)` path"
         }
@@ -71,7 +79,12 @@ extension OpenAPI.Error.Decoding.Path {
     internal var relativeCodingPathString: String {
         switch context {
         case .endpoint(let endpointError):
-            return endpointError.relativeCodingPathString
+            switch endpointError.context {
+            case .response(let responseError):
+                return responseError.relativeCodingPathString
+            case .generic, .inconsistency, .neither:
+                return endpointError.relativeCodingPathString
+            }
         case .generic, .neither:
             return relativeCodingPath.stringValue
         }
