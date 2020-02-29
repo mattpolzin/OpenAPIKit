@@ -178,7 +178,11 @@ extension OpenAPI.Header: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         default:
-            throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.", codingPath: decoder.codingPath)
+            throw InconsistencyError(
+                subjectName: "Header",
+                details: "A single path parameter must specify one but not both `content` and `schema`",
+                codingPath: decoder.codingPath
+            )
         }
 
         description = try container.decodeIfPresent(String.self, forKey: .description)

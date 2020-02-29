@@ -54,6 +54,7 @@ extension OpenAPI.Document {
         case v3_0_0 = "3.0.0"
         case v3_0_1 = "3.0.1"
         case v3_0_2 = "3.0.2"
+        case v3_0_3 = "3.0.3"
     }
 }
 
@@ -106,24 +107,35 @@ extension OpenAPI.Document: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
+        do {
+            openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
 
-        info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
+            info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
 
-        servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
+            servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
-        paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
+            paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
 
-        let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
-        self.components = components
+            let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
+            self.components = components
 
-        // A real mess here because we've got an Array of non-string-keyed
-        // Dictionaries.
-        security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
+            // A real mess here because we've got an Array of non-string-keyed
+            // Dictionaries.
+            security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
 
-        tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
+            tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
 
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+        } catch let error as OpenAPI.Error.Decoding.Path {
+
+            throw OpenAPI.Error.Decoding.Document(error)
+        } catch let error as InconsistencyError {
+
+            throw OpenAPI.Error.Decoding.Document(error)
+        } catch let error as DecodingError {
+
+            throw OpenAPI.Error.Decoding.Document(error)
+        }
     }
 }
 
@@ -166,7 +178,11 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
                     return (try? components.contains(ref)) ?? false
                 }
                 guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
-                    throw DecodingError.dataCorruptedError(forKey: key, in: container, debugDescription: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
+                    throw InconsistencyError(
+                        subjectName: key.stringValue,
+                        details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
+                        codingPath: container.codingPath + [key]
+                    )
                 }
             }
 

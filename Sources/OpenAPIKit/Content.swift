@@ -132,10 +132,15 @@ extension OpenAPI.Content: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.examples) && container.contains(.example)) else {
-            throw Error.foundBothExampleAndExamples
+            throw InconsistencyError(
+                subjectName: "Example and Examples",
+                details: "Only one of `example` and `examples` is allowed in the Media Type Object (`OpenAPI.Content`).",
+                codingPath: container.codingPath
+            )
         }
 
         schema = try container.decode(Either<JSONReference<OpenAPI.Components, JSONSchema>, JSONSchema>.self, forKey: .schema)
+
         encoding = try container.decodeIfPresent(OrderedDictionary<String, Encoding>.self, forKey: .encoding)
 
         if container.contains(.example) {
@@ -148,10 +153,6 @@ extension OpenAPI.Content: Decodable {
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
-    }
-
-    public enum Error: Swift.Error {
-        case foundBothExampleAndExamples
     }
 }
 

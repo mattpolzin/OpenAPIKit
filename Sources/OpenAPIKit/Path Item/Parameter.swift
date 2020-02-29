@@ -217,7 +217,8 @@ extension OpenAPI.PathItem.Parameter: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        name = try container.decode(String.self, forKey: .name)
+        let name = try container.decode(String.self, forKey: .name)
+        self.name = name
 
         let required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
         let location = try container.decode(LocationString.self, forKey: .parameterLocation)
@@ -230,7 +231,11 @@ extension OpenAPI.PathItem.Parameter: Decodable {
             parameterLocation = .header(required: required)
         case .path:
             if !required {
-                throw OpenAPI.DecodingError.unsatisfied(requirement: "positional path parameters must be explicitly set to required.", codingPath: decoder.codingPath)
+                throw InconsistencyError(
+                    subjectName: name,
+                    details: "positional path parameters must be explicitly set to required",
+                    codingPath: decoder.codingPath
+                )
             }
             parameterLocation = .path
         case .cookie:
@@ -252,7 +257,11 @@ extension OpenAPI.PathItem.Parameter: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         default:
-            throw OpenAPI.DecodingError.unsatisfied(requirement: "A single path parameter must specify one but not both 'content' and 'schema'.", codingPath: decoder.codingPath)
+            throw InconsistencyError(
+                subjectName: name,
+                details: "A single path parameter must specify one but not both `content` and `schema`",
+                codingPath: decoder.codingPath
+            )
         }
 
         description = try container.decodeIfPresent(String.self, forKey: .description)

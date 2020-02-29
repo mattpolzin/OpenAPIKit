@@ -11,7 +11,7 @@ import Foundation
 public enum OpenAPI {}
 
 extension OpenAPI {
-    public enum CodableError: Swift.Error, Equatable {
+    public enum EncodableError: Swift.Error, Equatable {
         case allCasesArrayNotCodable
         case exampleNotCodable
         case primitiveGuessFailed
@@ -23,23 +23,34 @@ extension OpenAPI {
         case unknownNodeType(Any.Type)
     }
 
-    public enum DecodingError: Swift.Error, CustomDebugStringConvertible {
-        case missingKeyword(underlyingError: String?, codingPath: [CodingKey])
-        case foundNeither(option1: String, option2: String, codingPath: [CodingKey], notOption1Because: Swift.Error?, notOption2Because: Swift.Error?)
-        case unsatisfied(requirement: String, codingPath: [CodingKey])
-        case unknown(codingPath: [CodingKey])
+    public struct Error: Swift.Error {
 
-        public var debugDescription: String {
-            switch self {
-            case .missingKeyword(underlyingError: let err, codingPath: let path):
-                return "When parsing Open API JSON, an expected keyword was missing. Carefully read your JSON keys to make sure all keys required by OpenAPI are spelled correctly. Underlying error: "
-                    + (err ?? "") + ". PATH: \(path)"
-            case .foundNeither(option1: let option1, option2: let option2, codingPath: let path, notOption1Because: let reason1, notOption2Because: let reason2):
-                return "Found neither of two expected things. Expected either \(option1) or \(option2). \n\nPATH: \(path).\n\n Could not have been \(option1) because: \(String(describing:reason1)).\n\n Could not have been \(option2) because: \(String(describing:reason2))"
-            case .unsatisfied(requirement: let requirement, codingPath: let path):
-                return "Unsatisfied OpenAPI requirement: \(requirement). PATH: \(path)"
-            case .unknown(codingPath: let path):
-                return "An unknown error has occurred. That sucks. PATH: \(path)"
+        public let localizedDescription: String
+        public let codingPath: [CodingKey]
+        public let underlyingError: Swift.Error
+
+        public var codingPathString: String { codingPath.stringValue }
+
+        public init(from underlyingError: Swift.Error) {
+            self.underlyingError = underlyingError
+            if let openAPIError = underlyingError as? OpenAPIError {
+                localizedDescription = openAPIError.localizedDescription
+                codingPath = openAPIError.codingPath
+
+            } else if let decodingError = underlyingError as? Swift.DecodingError {
+
+                if let openAPIError = decodingError.underlyingError as? OpenAPIError {
+                    localizedDescription = openAPIError.localizedDescription
+                    codingPath = openAPIError.codingPath
+                } else {
+                    let wrappedError = DecodingErrorWrapper(decodingError: decodingError)
+                    localizedDescription = wrappedError.localizedDescription
+                    codingPath = wrappedError.codingPath
+                }
+
+            } else {
+                localizedDescription = underlyingError.localizedDescription
+                codingPath = []
             }
         }
     }

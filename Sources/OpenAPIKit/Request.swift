@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Poly
 
 extension OpenAPI {
     public struct Request: Equatable {
@@ -49,10 +50,21 @@ extension OpenAPI.Request: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        description = try container.decodeIfPresent(String.self, forKey: .description)
+        do {
+            description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        content = try container.decode(OpenAPI.Content.Map.self, forKey: .content)
+            content = try container.decode(OpenAPI.Content.Map.self, forKey: .content)
 
-        required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
+            required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
+        } catch let error as InconsistencyError {
+
+            throw OpenAPI.Error.Decoding.Request(error)
+        } catch let error as Swift.DecodingError {
+
+            throw OpenAPI.Error.Decoding.Request(error)
+        } catch let error as PolyDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Request(error)
+        }
     }
 }

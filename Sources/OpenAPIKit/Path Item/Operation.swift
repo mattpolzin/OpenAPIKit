@@ -133,29 +133,46 @@ extension OpenAPI.PathItem.Operation: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        do {
+            tags = try container.decodeIfPresent([String].self, forKey: .tags)
 
-        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+            summary = try container.decodeIfPresent(String.self, forKey: .summary)
 
-        description = try container.decodeIfPresent(String.self, forKey: .description)
+            description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
 
-        operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
+            operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 
-        parameters = try container.decodeIfPresent(OpenAPI.PathItem.Parameter.Array.self, forKey: .parameters) ?? []
+            parameters = try container.decodeIfPresent(OpenAPI.PathItem.Parameter.Array.self, forKey: .parameters) ?? []
 
-        requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Components, OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
+            requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Components, OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
-        responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
+            responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
 
-        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+            deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
-        // TODO: would be ideal to validate against components from here, but not
-        //      sure off the top of my head the best way to go about that other than
-        // perhaps storing a copy of components in the userInfo for the decoder.
-        security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
+            // TODO: would be ideal to validate against components from here, but not
+            //      sure off the top of my head the best way to go about that other than
+            // perhaps storing a copy of components in the userInfo for the decoder.
+            security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
-        servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
+            servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
+        } catch let error as OpenAPI.Error.Decoding.Request {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
+        } catch let error as OpenAPI.Error.Decoding.Response {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
+        } catch let error as DecodingError {
+
+            throw OpenAPI.Error.Decoding.Operation(unwrapping: error)
+        } catch let error as InconsistencyError {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
+        } catch let error as PolyDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
+        }
     }
 }

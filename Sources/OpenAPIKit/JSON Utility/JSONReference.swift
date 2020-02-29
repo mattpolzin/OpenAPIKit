@@ -24,6 +24,8 @@ public protocol ReferenceDict: AbstractReferenceDict {
     associatedtype Value
 }
 
+internal protocol Reference {}
+
 /// A RefDict knows what to call itself (Name) and where to
 /// look for itself (Root) and it stores a dictionary of
 /// JSONReferenceObjects (some of which might be other references).
@@ -51,7 +53,7 @@ public struct RefDict<Root: ReferenceRoot, Name: RefName, RefType: Equatable & C
 /// A Reference is the combination of
 /// a path to a reference dictionary
 /// and a selector that the dictionary is keyed off of.
-public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable, Hashable, CustomStringConvertible {
+public enum JSONReference<Root: ReferenceRoot, RefType: Equatable>: Equatable, Hashable, CustomStringConvertible, Reference {
 
     case `internal`(Local)
     case external(FileReference, Local?)

@@ -244,7 +244,7 @@ final class GenericOpenAPISchemaTests: XCTestCase {
         XCTAssertEqual(try AllowedValues.StringEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder()), .string)
 
         XCTAssertThrowsError(try CaselessEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder())) { err in
-            XCTAssertEqual(err as? OpenAPI.CodableError, .exampleNotCodable)
+            XCTAssertEqual(err as? OpenAPI.EncodableError, .exampleNotCodable)
         }
     }
 

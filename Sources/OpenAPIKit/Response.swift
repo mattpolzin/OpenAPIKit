@@ -120,11 +120,23 @@ extension OpenAPI.Response: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        description = try container.decode(String.self, forKey: .description)
+        do {
+            description = try container.decode(String.self, forKey: .description)
 
-        headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
+            headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
 
-        content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
+            content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
+
+        } catch let error as InconsistencyError {
+
+            throw OpenAPI.Error.Decoding.Response(error)
+        } catch let error as PolyDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Response(error)
+        } catch let error as DecodingError {
+
+            throw OpenAPI.Error.Decoding.Response(error)
+        }
     }
 }
 
@@ -148,10 +160,15 @@ extension OpenAPI.Response.StatusCode: Encodable {
 extension OpenAPI.Response.StatusCode: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let val = OpenAPI.Response.StatusCode(rawValue: try container.decode(String.self))
+        let strVal = try container.decode(String.self)
+        let val = OpenAPI.Response.StatusCode(rawValue: strVal)
 
         guard let value = val else {
-            throw OpenAPI.DecodingError.unknown(codingPath: decoder.codingPath)
+            throw InconsistencyError(
+                subjectName: "status code",
+                details: "Expected the status code to be either an Int or 'default' but found \(strVal) instead",
+                codingPath: decoder.codingPath
+            )
         }
 
         self = value
