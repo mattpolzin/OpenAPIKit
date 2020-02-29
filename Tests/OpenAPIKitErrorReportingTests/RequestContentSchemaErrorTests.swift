@@ -34,7 +34,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a JSONSchema in .requestBody.content['application/json'].schema for the **GET** endpoint under `/hello/world`. \n\nJSONSchema could not be decoded because:\nExpected `type` value to be parsable as Scalar but it was not..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a JSONSchema in .content['application/json'].schema for the request body of the **GET** endpoint under `/hello/world`. \n\nJSONSchema could not be decoded because:\nExpected `type` value to be parsable as Scalar but it was not..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

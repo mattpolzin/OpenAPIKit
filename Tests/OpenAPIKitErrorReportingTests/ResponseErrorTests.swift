@@ -35,8 +35,6 @@ paths:
                                         type: string
 """
 
-        
-
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
             let openAPIError = OpenAPI.Error(from: error)

@@ -29,6 +29,8 @@ extension OpenAPI {
         public let codingPath: [CodingKey]
         public let underlyingError: Swift.Error
 
+        public var codingPathString: String { codingPath.stringValue }
+
         public init(from underlyingError: Swift.Error) {
             self.underlyingError = underlyingError
             if let openAPIError = underlyingError as? OpenAPIError {

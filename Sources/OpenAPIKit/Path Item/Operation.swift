@@ -158,6 +158,9 @@ extension OpenAPI.PathItem.Operation: Decodable {
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
+        } catch let error as OpenAPI.Error.Decoding.Request {
+
+            throw OpenAPI.Error.Decoding.Operation(error)
         } catch let error as OpenAPI.Error.Decoding.Response {
 
             throw OpenAPI.Error.Decoding.Operation(error)

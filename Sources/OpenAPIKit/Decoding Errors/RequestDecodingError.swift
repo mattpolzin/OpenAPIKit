@@ -1,5 +1,5 @@
 //
-//  ResponseDecodingError.swift
+//  RequestDecodingError.swift
 //  
 //
 //  Created by Mathew Polzin on 2/28/20.
@@ -9,8 +9,7 @@ import Foundation
 import Poly
 
 extension OpenAPI.Error.Decoding {
-    public struct Response: OpenAPIError {
-        public let statusCode: OpenAPI.Response.StatusCode
+    public struct Request: OpenAPIError {
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
@@ -22,7 +21,7 @@ extension OpenAPI.Error.Decoding {
     }
 }
 
-extension OpenAPI.Error.Decoding.Response {
+extension OpenAPI.Error.Decoding.Request {
     public var subjectName: String {
         switch context {
         case .inconsistency(let error):
@@ -34,7 +33,7 @@ extension OpenAPI.Error.Decoding.Response {
         }
     }
 
-    public var contextString: String { statusCode.rawValue }
+    public var contextString: String { "" }
 
     public var errorCategory: ErrorCategory {
         switch context {
@@ -63,28 +62,20 @@ extension OpenAPI.Error.Decoding.Response {
     }
 
     internal static func relativePath(from path: [CodingKey]) -> [CodingKey] {
-        guard let responsesIdx = path.firstIndex(where: { $0.stringValue == "responses" }) else {
+        guard let responsesIdx = path.firstIndex(where: { $0.stringValue == "requestBody" }) else {
             return path
         }
         return Array(path.dropFirst(responsesIdx.advanced(by: 1)))
     }
 
     internal init(_ error: InconsistencyError) {
-        var codingPath = Self.relativePath(from: error.codingPath)
-        let code = codingPath.removeFirst().stringValue.lowercased()
-
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .inconsistency(error)
-        relativeCodingPath = Array(codingPath)
+        relativeCodingPath = Self.relativePath(from: error.codingPath)
     }
 
     internal init(_ error: Swift.DecodingError) {
-        var codingPath = Self.relativePath(from: error.codingPathWithoutSubject)
-        let code = codingPath.removeFirst().stringValue.lowercased()
-
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .generic(error)
-        relativeCodingPath = Array(codingPath)
+        relativeCodingPath = Self.relativePath(from: error.codingPathWithoutSubject)
     }
 
     internal init(unwrapping error: Swift.DecodingError) {
@@ -109,12 +100,8 @@ extension OpenAPI.Error.Decoding.Response {
                 return
             }
         }
-
-        var codingPath = Self.relativePath(from: polyError.codingPath)
-        let code = codingPath.removeFirst().stringValue.lowercased()
-
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .neither(polyError)
-        relativeCodingPath = Array(codingPath)
+        relativeCodingPath = Self.relativePath(from: polyError.codingPath)
     }
 }
+

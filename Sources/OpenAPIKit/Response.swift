@@ -128,10 +128,13 @@ extension OpenAPI.Response: Decodable {
             content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
 
         } catch let error as InconsistencyError {
+
             throw OpenAPI.Error.Decoding.Response(error)
         } catch let error as PolyDecodeNoTypesMatchedError {
+
             throw OpenAPI.Error.Decoding.Response(error)
         } catch let error as DecodingError {
+
             throw OpenAPI.Error.Decoding.Response(error)
         }
     }

@@ -15,6 +15,7 @@ extension OpenAPI.Error.Decoding {
         internal let relativeCodingPath: [CodingKey]
 
         public enum Context {
+            case request(Request)
             case response(Response)
             case inconsistency(InconsistencyError)
             case generic(Swift.DecodingError)
@@ -26,6 +27,8 @@ extension OpenAPI.Error.Decoding {
 extension OpenAPI.Error.Decoding.Operation {
     public var subjectName: String {
         switch context {
+        case .request(let error):
+            return error.subjectName
         case .response(let error):
             return error.subjectName
         case .inconsistency(let error):
@@ -37,10 +40,12 @@ extension OpenAPI.Error.Decoding.Operation {
         }
     }
 
-    public var contextString: String { endpoint.rawValue }
+    public var contextString: String { "" }
 
     public var errorCategory: ErrorCategory {
         switch context {
+        case .request(let error):
+            return error.errorCategory
         case .response(let error):
             return error.errorCategory
         case .inconsistency(let error):
@@ -54,6 +59,8 @@ extension OpenAPI.Error.Decoding.Operation {
 
     public var codingPath: [CodingKey] {
         switch context {
+        case .request(let error):
+            return error.codingPath
         case .response(let error):
             return error.codingPath
         case .inconsistency(let error):
@@ -67,6 +74,15 @@ extension OpenAPI.Error.Decoding.Operation {
 
     internal var relativeCodingPathString: String {
         relativeCodingPath.stringValue
+    }
+
+    internal init(_ error: OpenAPI.Error.Decoding.Request) {
+        var codingPath = error.codingPath.dropFirst(2)
+        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+
+        endpoint = verb
+        context = .request(error)
+        relativeCodingPath = Array(codingPath)
     }
 
     internal init(_ error: OpenAPI.Error.Decoding.Response) {
@@ -99,6 +115,8 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
+        } else if let responseError = error.underlyingError as? OpenAPI.Error.Decoding.Request {
+            self = Self(responseError)
         } else if let responseError = error.underlyingError as? OpenAPI.Error.Decoding.Response {
             self = Self(responseError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
@@ -115,7 +133,7 @@ extension OpenAPI.Error.Decoding.Operation {
             if polyError.individualTypeFailures[0].typeString == "$ref" && polyError.individualTypeFailures[1].codingPath(relativeTo: polyError.codingPath).count > 1 {
                 self = Self(unwrapping: polyError.individualTypeFailures[1].error)
                 return
-            } else if polyError.individualTypeFailures[1].typeString == "$ref" && polyError.individualTypeFailures[0].codingPath(relativeTo: polyError.codingPath).count > 1 {
+            } else if polyError.individualTypeFailures[1].typeString == "$ref" && polyError.individualTypeFailures[0].codingPath(relativeTo: polyError.codingPath).count > 0 {
                 self = Self(unwrapping: polyError.individualTypeFailures[0].error)
                 return
             }

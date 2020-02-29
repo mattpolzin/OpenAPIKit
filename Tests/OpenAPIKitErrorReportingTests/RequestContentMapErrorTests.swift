@@ -71,7 +71,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `schema` key in .requestBody.content['application/json'] for the **GET** endpoint under `/hello/world` but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `schema` key in .content['application/json'] for the request body of the **GET** endpoint under `/hello/world` but it is missing.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
@@ -80,6 +80,7 @@ paths:
                 "content",
                 "application/json"
             ])
+            XCTAssertEqual(openAPIError.codingPathString, ".paths['/hello/world'].get.requestBody.content['application/json']")
         }
     }
 
@@ -103,7 +104,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `application/json` value in .requestBody.content for the **GET** endpoint under `/hello/world` to be parsable as Mapping but it was not.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Expected `application/json` value in .content for the request body of the **GET** endpoint under `/hello/world` to be parsable as Mapping but it was not.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
@@ -139,7 +140,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `Vendor Extension` in .requestBody.content['application/json'] for the **GET** endpoint under `/hello/world`: Found a vendor extension property that does not begin with the required 'x-' prefix.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `Vendor Extension` in .content['application/json'] for the request body of the **GET** endpoint under `/hello/world`: Found a vendor extension property that does not begin with the required 'x-' prefix.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
