@@ -36,12 +36,24 @@ extension OpenAPI.Response {
         public typealias RawValue = String
 
         case `default`
+        case range(Range)
         case status(code: Int)
+
+        public enum Range: String {
+            case _100 = "1XX"
+            case _200 = "2XX"
+            case _300 = "3XX"
+            case _400 = "4XX"
+            case _500 = "5XX"
+        }
 
         public var rawValue: String {
             switch self {
             case .default:
                 return "default"
+
+            case .range(let range):
+                return range.rawValue
 
             case .status(code: let code):
                 return String(code)
@@ -54,6 +66,15 @@ extension OpenAPI.Response {
 
             } else if rawValue == OpenAPI.Response.StatusCode.default.rawValue {
                 self = .default
+
+            } else if let range = Range(rawValue: rawValue.uppercased()) {
+                self = .range(range)
+
+            } else if rawValue.contains("/"),
+                let first = (rawValue.split(separator: "/")).first,
+                let fallback = Self(rawValue: String(first)) {
+                self = fallback
+                print("WARNING: Found non-compliant Status Code '\(rawValue)' but was able to parse as \(first)")
 
             } else {
                 return nil
@@ -144,16 +165,7 @@ extension OpenAPI.Response.StatusCode: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        let string: String
-        switch self {
-        case .`default`:
-            string = "default"
-
-        case .status(code: let code):
-            string = String(code)
-        }
-
-        try container.encode(string)
+        try container.encode(self.rawValue)
     }
 }
 
@@ -166,7 +178,7 @@ extension OpenAPI.Response.StatusCode: Decodable {
         guard let value = val else {
             throw InconsistencyError(
                 subjectName: "status code",
-                details: "Expected the status code to be either an Int or 'default' but found \(strVal) instead",
+                details: "Expected the status code to be either an Int, a range like '1XX', or 'default' but found \(strVal) instead",
                 codingPath: decoder.codingPath
             )
         }

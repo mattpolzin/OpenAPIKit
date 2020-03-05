@@ -35,23 +35,9 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         switch booksAPI {
         case nil:
             XCTFail("Did not attempt to pull Google Books API documentation like expected.")
-        case .failure(let error as DecodingError):
-            let codingPath: String
-            let debugDetails: String
-            let underlyingError: String
-            switch error {
-            case .dataCorrupted(let context), .keyNotFound(_, let context), .typeMismatch(_, let context), .valueNotFound(_, let context):
-                codingPath = context.codingPath.map { $0.stringValue }.joined(separator: " -> ")
-                debugDetails = context.debugDescription
-                underlyingError = context.underlyingError.map { "\n underlying error: " + String(describing: $0) } ?? ""
-            @unknown default:
-                codingPath = ""
-                debugDetails = ""
-                underlyingError = ""
-            }
-            XCTFail(error.failureReason ?? error.errorDescription ?? error.localizedDescription + "\n coding path: " + codingPath + "\n debug description: " + debugDetails + underlyingError)
         case .failure(let error):
-            XCTFail(error.localizedDescription)
+            let prettyError = OpenAPI.Error(from: error)
+            XCTFail(prettyError.localizedDescription + "\n coding path: " + prettyError.codingPathString)
         case .success:
             break
         }
