@@ -8,7 +8,6 @@
 import AnyCodable
 import Foundation
 import Poly
-import Sampleable
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
