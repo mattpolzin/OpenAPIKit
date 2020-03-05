@@ -4,14 +4,19 @@
 
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
-<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
-
 - [Usage](#usage)
 	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
+		- [Decoding Errors](#decoding-errors)
 	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
 	- [A note on dictionary ordering](#a-note-on-dictionary-ordering)
 	- [Generating OpenAPI Documents](#generating-openapi-documents)
 	- [OpenAPI Document structure](#openapi-document-structure)
+		- [Document Root](#document-root)
+		- [Routes](#routes)
+		- [Endpoints](#endpoints)
+		- [Request/Response Bodies](#requestresponse-bodies)
+		- [Schemas](#schemas)
+			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
@@ -44,8 +49,6 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [OAuth Flows Object (`OpenAPI.OauthFlows`)](#oauth-flows-object-openapioauthflows)
 	- [OAuth Flow Object (`OpenAPI.OauthFlows.*`)](#oauth-flow-object-openapioauthflows)
 	- [Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)](#security-requirement-object-openapidocumentsecurityrequirement)
-
-<!-- /TOC -->
 
 ## Usage
 
@@ -131,7 +134,7 @@ JSONSchema.object(
 )
 ```
 
-##### Generating Schemas
+##### Generating Schemas from Swift Types
 
 Some schemas can be easily generated from Swift types. Many of the fundamental Swift types support schema representations out-of-box.
 
@@ -159,47 +162,7 @@ Int32?.openAPINode() == .integer(format: .int32, required: false)
 ...
 ```
 
-###### AnyCodable
-
-A subset of supported Swift types require a `JSONEncoder` either to make an educated guess at the `JSONSchema` for the type or in order to turn arbitrary types into `AnyCodable` for use as schema examples or allowed values.
-
-Swift enums produce schemas with **allowed values** specified as long as they conform to `CaseIterable`, `Encodable`, and `AnyJSONCaseIterable` (the last of which is free given the former two).
-```swift
-enum CodableEnum: String, CaseIterable, AnyJSONCaseIterable, Codable {
-    case one
-    case two
-}
-
-let schema = CodableEnum.caseIterableOpenAPISchemaGuess(using: JSONEncoder())
-// ^ equivalent, although not equatable, to:
-let sameSchema = JSONSchema.string(
-  allowedValues: "one", "two"
-)
-```
-
-Swift structs produce a best-guess schema as long as they conform to `Sampleable` and `Encodable`
-```swift
-struct Nested: Encodable, Sampleable {
-  let string: String
-  let array: [Int]
-
-  // `Sampleable` just enables mirroring, although you could use it to produce
-  // OpenAPI examples as well.
-  static let sample: Self = .init(
-    string: "",
-    array: []
-  )
-}
-
-let schema = Nested.genericOpenAPISchemaGuess(using: JSONEncoder())
-// ^ equivalent and indeed equatable to:
-let sameSchema = JSONSchema.object(
-  properties: [
-    "string": .string,
-    "array": .array(items: .integer)
-  ]
-)
-```
+Additional schema generation support can be found in the [`mattpolzin/OpenAPIReflection`](https://github.com/mattpolzin/OpenAPIReflection) library.
 
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.

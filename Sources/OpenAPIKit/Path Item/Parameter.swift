@@ -7,7 +7,6 @@
 
 import Foundation
 import Poly
-import AnyCodable
 
 extension OpenAPI.PathItem {
     public struct Parameter: Equatable {
