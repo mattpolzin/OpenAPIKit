@@ -18,9 +18,18 @@ extension OpenAPI {
         case exampleNotSupported(String)
     }
 
-    public enum TypeError: Swift.Error {
+    public enum TypeError: Swift.Error, CustomDebugStringConvertible {
         case invalidNode
         case unknownNodeType(Any.Type)
+
+        public var debugDescription: String {
+            switch self {
+            case .invalidNode:
+                return "Invalid Node"
+            case .unknownNodeType(let type):
+                return "Could not determine OpenAPI node type of \(String(describing: type))"
+            }
+        }
     }
 
     public struct Error: Swift.Error {

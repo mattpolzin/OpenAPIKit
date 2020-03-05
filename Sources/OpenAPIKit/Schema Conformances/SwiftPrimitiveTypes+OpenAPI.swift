@@ -44,16 +44,6 @@ extension Optional: RawOpenAPISchemaType where Wrapped: RawOpenAPISchemaType {
     }
 }
 
-extension Optional: AnyRawRepresentable where Wrapped: AnyRawRepresentable {
-    public static var rawValueType: Any.Type { Wrapped.rawValueType }
-}
-
-extension Optional: AnyJSONCaseIterable where Wrapped: AnyJSONCaseIterable {
-	public static func allCases(using encoder: JSONEncoder) -> [AnyCodable] {
-		return Wrapped.allCases(using: encoder)
-	}
-}
-
 extension Optional: DateOpenAPISchemaType where Wrapped: DateOpenAPISchemaType {
 	static public func dateOpenAPISchemaGuess(using encoder: JSONEncoder) -> JSONSchema? {
 		return Wrapped.dateOpenAPISchemaGuess(using: encoder)?.optionalSchemaObject()

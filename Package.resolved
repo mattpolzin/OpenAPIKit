@@ -47,15 +47,6 @@
         }
       },
       {
-        "package": "Sampleable",
-        "repositoryURL": "https://github.com/mattpolzin/Sampleable.git",
-        "state": {
-          "branch": null,
-          "revision": "df44bf1a860481109dcf455e3c6daf0a0f1bc259",
-          "version": "2.1.0"
-        }
-      },
-      {
         "package": "Yams",
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
