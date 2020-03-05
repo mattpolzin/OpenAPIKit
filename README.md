@@ -4,14 +4,19 @@
 
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
-<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
-
 - [Usage](#usage)
 	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
+		- [Decoding Errors](#decoding-errors)
 	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
 	- [A note on dictionary ordering](#a-note-on-dictionary-ordering)
 	- [Generating OpenAPI Documents](#generating-openapi-documents)
 	- [OpenAPI Document structure](#openapi-document-structure)
+		- [Document Root](#document-root)
+		- [Routes](#routes)
+		- [Endpoints](#endpoints)
+		- [Request/Response Bodies](#requestresponse-bodies)
+		- [Schemas](#schemas)
+			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
@@ -44,8 +49,6 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [OAuth Flows Object (`OpenAPI.OauthFlows`)](#oauth-flows-object-openapioauthflows)
 	- [OAuth Flow Object (`OpenAPI.OauthFlows.*`)](#oauth-flow-object-openapioauthflows)
 	- [Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)](#security-requirement-object-openapidocumentsecurityrequirement)
-
-<!-- /TOC -->
 
 ## Usage
 
@@ -159,7 +162,7 @@ Int32?.openAPINode() == .integer(format: .int32, required: false)
 ...
 ```
 
-Additional schema generation support can be found in the soon-to-be-released `mattpolzin/OpenAPIReflection` library.
+Additional schema generation support can be found in the [`mattpolzin/OpenAPIReflection`](https://github.com/mattpolzin/OpenAPIReflection) library.
 
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
