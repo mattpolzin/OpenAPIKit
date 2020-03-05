@@ -44,5 +44,16 @@ extension OpenAPI {
         case yaml = "application/x-yaml"
         /// ZIP archive
         case zip = "application/zip"
+
+
+        // MARK: - patterns
+
+        case applicationAll = "application/*"
+        case audioAll = "audio/*"
+        case imageAll = "image/*"
+        case textAll = "text/*"
+        case videoAll = "video/*"
+
+        case all = "*/*"
     }
 }
