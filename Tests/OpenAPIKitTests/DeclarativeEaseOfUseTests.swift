@@ -377,4 +377,52 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             security: securityRequirements
         )
     }
+
+    func test_simpleDeclaration() {
+        // OpenAPI Info Object
+        // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#info-object
+        let info = OpenAPI.Document.Info(title: "Demo API", version: "1.0")
+
+        // OpenAPI Server Object
+        // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#server-object
+        let server = OpenAPI.Server(url: URL(string: "https://demo.server.com")!)
+
+        // OpenAPI Components Object
+        // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#components-object
+        let components = OpenAPI.Components(
+            schemas: [
+                "hello_string": .string(allowedValues: "hello")
+            ]
+        )
+
+        // OpenAPI Response Object
+        // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#response-object
+        let successfulHelloResponse = OpenAPI.Response(
+            description: "Hello",
+            content: [
+                .txt: .init(schemaReference: .internal(\.schemas, named: "hello_string"))
+            ]
+        )
+
+        // OpenAPI Document Object
+        // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-object
+        let _ = OpenAPI.Document(
+            info: info,
+            servers: [server],
+            paths: [
+                "/hello": .init(
+                    summary: "Say hello",
+                    get: OpenAPI.PathItem.Operation(
+                        tags: ["Greetings"],
+                        summary: "Get a greeting",
+                        description: "An endpoint that says hello to you.",
+                        responses: [
+                            200: .init(successfulHelloResponse)
+                        ]
+                    )
+                )
+            ],
+            components: components
+        )
+    }
 }
