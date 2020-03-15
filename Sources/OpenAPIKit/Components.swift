@@ -9,7 +9,10 @@ import Foundation
 import OrderedDictionary
 
 extension OpenAPI {
-    /// What the spec calls the "Components Object".
+    /// OpenAPI Spec "Components Object".
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#components-object
+    /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
     public struct Components: Equatable {
@@ -50,7 +53,7 @@ extension OpenAPI {
             securitySchemes: [:]
         )
 
-        var isEmpty: Bool {
+        public var isEmpty: Bool {
             return self == .noComponents
         }
     }
@@ -237,7 +240,7 @@ extension OpenAPI.Components: Decodable {
 }
 
 extension OpenAPI.Components {
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case schemas
         case responses
         case parameters

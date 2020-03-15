@@ -10,6 +10,7 @@ import AnyCodable
 import Poly
 
 /// OpenAPI "Schema Object"
+/// 
 /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object
 public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)

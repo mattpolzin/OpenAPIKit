@@ -9,6 +9,7 @@ import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "External Documentation Object"
+    /// 
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#external-documentation-object
     public struct ExternalDocumentation: Equatable {
         public let description: String?

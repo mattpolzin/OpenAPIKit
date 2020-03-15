@@ -11,6 +11,8 @@ import Poly
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
+    /// 
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
     public struct Document: Equatable {
         public var openAPIVersion: Version
         public var info: Info
@@ -45,6 +47,10 @@ extension OpenAPI {
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.
     /// For other security scheme types, the array MUST be empty.
+    ///
+    /// OpenAPI Spec "Security Requirement Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 

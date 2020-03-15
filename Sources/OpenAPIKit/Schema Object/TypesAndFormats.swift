@@ -246,6 +246,9 @@ extension JSONTypeFormat {
         case byte
         case binary
         case date
+        /// A string instance is valid against this attribute if it is a valid
+        /// date representation as defined by
+        /// https://tools.ietf.org/html/rfc3339#section-5.6
         case dateTime
         case password
         case other(String)
@@ -294,6 +297,17 @@ extension JSONTypeFormat.StringFormat {
     public enum Extended: String, Equatable {
         case uuid = "uuid"
         case email = "email"
+        case hostname = "hostname"
+        case ipv4 = "ipv4"
+        case ipv6 = "ipv6"
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uri = "uri"
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uriReference = "uriref"
     }
 
     public static func extended(_ format: Extended) -> Self {

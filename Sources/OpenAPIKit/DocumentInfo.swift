@@ -8,6 +8,9 @@
 import Foundation
 
 extension OpenAPI.Document {
+    /// OpenAPI Spec "Info Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object
     public struct Info: Equatable {
         public let title: String
         public let description: String?
@@ -64,7 +67,7 @@ extension OpenAPI.Document.Info.License {
     }
 
     public static var MIT: Self {
-        return .init(name: "MIT")
+        return .init(name: "MIT", url: URL(string: "https://www.mit.edu/~amini/LICENSE.md")!)
     }
 
     // MARK: Apache License
@@ -73,7 +76,7 @@ extension OpenAPI.Document.Info.License {
     }
 
     public static var apache2: Self {
-        return .init(name: "Apache 2.0")
+        return .init(name: "Apache 2.0", url: URL(string: "https://www.apache.org/licenses/LICENSE-2.0.txt")!)
     }
 }
 
@@ -99,7 +102,7 @@ extension OpenAPI.Document.Info.License: Decodable {
 }
 
 extension OpenAPI.Document.Info.License {
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case name
         case url
     }
@@ -130,7 +133,7 @@ extension OpenAPI.Document.Info.Contact: Decodable {
 }
 
 extension OpenAPI.Document.Info.Contact {
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case name
         case url
         case email
@@ -174,7 +177,7 @@ extension OpenAPI.Document.Info: Decodable {
 }
 
 extension OpenAPI.Document.Info {
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case title
         case description
         case termsOfService

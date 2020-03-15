@@ -32,6 +32,20 @@ extension OpenAPI {
         }
     }
 
+    /// An `OpenAPI.Error` can be constructed from any error thrown while decoding
+    /// an OpenAPI document.  This wrapper provides a superior human-readable error
+    /// and a human readable coding path.
+    ///
+    /// Example:
+    ///
+    ///     do {
+    ///         document = try JSONDecoder().decode(OpenAPI.Document.self, from: ...)
+    ///     } catch let error {
+    ///         let prettyError = OpenAPI.Error(from: error)
+    ///         print(prettyError.localizedDescription)
+    ///         print(prettyError.codingPathString)
+    ///     }
+    ///
     public struct Error: Swift.Error {
 
         public let localizedDescription: String

@@ -11,7 +11,9 @@ import OrderedDictionary
 
 extension OpenAPI {
     /// OpenAPI Spec "Paths Object" path field pattern support.
+    ///
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#paths-object
+    ///
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#patterned-fields
     public struct Path: RawRepresentable, Equatable, Hashable {
         public let components: [String]
@@ -41,6 +43,7 @@ extension OpenAPI.Path: ExpressibleByStringLiteral {
 
 extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
+    /// 
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object
     public struct PathItem: Equatable {
         public var summary: String?

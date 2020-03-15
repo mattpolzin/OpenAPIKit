@@ -8,6 +8,9 @@
 import Foundation
 
 extension OpenAPI {
+    /// OpenAPI Spec "Security Scheme Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object
     public struct SecurityScheme: Equatable {
         public let type: SecurityType
         public let description: String?
@@ -107,14 +110,14 @@ extension OpenAPI.SecurityScheme: Decodable {
         }
     }
 
-    static func decodeAPIKey(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (name: String, location: Location) {
+    internal static func decodeAPIKey(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (name: String, location: Location) {
         return try (
             name: container.decode(String.self, forKey: .name),
             location: container.decode(Location.self, forKey: .location)
         )
     }
 
-    static func decodeHTTP(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (scheme: String, bearerFormat: String?) {
+    internal static func decodeHTTP(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (scheme: String, bearerFormat: String?) {
         return try (
             scheme: container.decode(String.self, forKey: .scheme),
             bearerFormat: container.decodeIfPresent(String.self, forKey: .bearerFormat)
@@ -123,7 +126,7 @@ extension OpenAPI.SecurityScheme: Decodable {
 }
 
 extension OpenAPI.SecurityScheme {
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case type
         case description
         case name
@@ -134,7 +137,7 @@ extension OpenAPI.SecurityScheme {
         case openIdConnectUrl
     }
 
-    enum SecurityTypeName: String, Codable {
+    internal enum SecurityTypeName: String, Codable {
         case apiKey
         case http
         case oauth2

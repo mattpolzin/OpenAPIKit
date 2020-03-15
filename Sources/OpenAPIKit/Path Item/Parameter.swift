@@ -10,6 +10,7 @@ import Poly
 
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
+    /// 
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
     public struct Parameter: Equatable {
         public var name: String

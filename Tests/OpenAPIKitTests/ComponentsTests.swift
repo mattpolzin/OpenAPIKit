@@ -57,6 +57,48 @@ final class ComponentsTests: XCTestCase {
         XCTAssertThrowsError(try components.reference(named: "hello", ofType: OpenAPI.PathItem.Parameter.self))
     }
 
+    func test_lookupEachType() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "one": .string
+            ],
+            responses: [
+                "two": .init(description: "hello", content: [:])
+            ],
+            parameters: [
+                "three": .init(name: "hello", parameterLocation: .query, schema: .string)
+            ],
+            examples: [
+                "four": .init(value: .init(URL(string: "hello.com/hello")!))
+            ],
+            requestBodies: [
+                "five": .init(content: [:])
+            ],
+            headers: [
+                "six": .init(schema: .string)
+            ],
+            securitySchemes: [
+                "seven": .apiKey(name: "hello", location: .cookie)
+            ]
+        )
+
+        let ref1 = try components.reference(named: "one", ofType: JSONSchema.self)
+        let ref2 = try components.reference(named: "two", ofType: OpenAPI.Response.self)
+        let ref3 = try components.reference(named: "three", ofType: OpenAPI.PathItem.Parameter.self)
+        let ref4 = try components.reference(named: "four", ofType: OpenAPI.Example.self)
+        let ref5 = try components.reference(named: "five", ofType: OpenAPI.Request.self)
+        let ref6 = try components.reference(named: "six", ofType: OpenAPI.Header.self)
+        let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
+
+        XCTAssertEqual(components[ref1], .string)
+        XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
+        XCTAssertEqual(components[ref3], .init(name: "hello", parameterLocation: .query, schema: .string))
+        XCTAssertEqual(components[ref4], .init(value: .init(URL(string: "hello.com/hello")!)))
+        XCTAssertEqual(components[ref5], .init(content: [:]))
+        XCTAssertEqual(components[ref6], .init(schema: .string))
+        XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
+    }
+
     // TODO: write tests
 }
 

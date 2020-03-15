@@ -10,6 +10,9 @@ import Poly
 import OrderedDictionary
 
 extension OpenAPI {
+    /// OpenAPI Spec "Response Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#response-object
     public struct Response: Equatable {
         public let description: String
         public let headers: Header.Map?
@@ -40,11 +43,16 @@ extension OpenAPI.Response {
         case status(code: Int)
 
         public enum Range: String {
-            case _100 = "1XX"
-            case _200 = "2XX"
-            case _300 = "3XX"
-            case _400 = "4XX"
-            case _500 = "5XX"
+            /// Status Code `100-199`
+            case information = "1XX"
+            /// Status Code `200-299`
+            case success = "2XX"
+            /// Status Code `300-399`
+            case redirect = "3XX"
+            /// Status Code `400-499`
+            case clientError = "4XX"
+            /// Status Code `500-599`
+            case serverError = "5XX"
         }
 
         public var rawValue: String {

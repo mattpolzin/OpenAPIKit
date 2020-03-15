@@ -10,6 +10,7 @@ import Poly
 
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Operation Object"
+    /// 
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object
     public struct Operation: Equatable {
         public var tags: [String]?

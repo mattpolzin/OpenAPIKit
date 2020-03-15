@@ -10,7 +10,9 @@ import AnyCodable
 
 extension OpenAPI.PathItem.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
+    ///
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
+    /// 
     /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values
     public struct Schema: Equatable {
         public let style: Style
