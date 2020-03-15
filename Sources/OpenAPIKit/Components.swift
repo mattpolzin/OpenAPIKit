@@ -113,7 +113,7 @@ extension OpenAPI.Components {
     /// Check if the `Components` contains the given reference or not.
     ///
     /// Look up a reference in this components dictionary. If you want a
-    /// non-throwing alternative, you can pull a `JSONReference.Reference`
+    /// non-throwing alternative, you can pull a `JSONReference.InternalReference`
     /// out of your `JSONReference` and pass that to `contains`
     /// instead.
     ///
@@ -249,19 +249,3 @@ extension OpenAPI.Components {
         // case callbacks
     }
 }
-
-//extension ComponentDictionary: Encodable {
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.singleValueContainer()
-//
-//        try container.encode(wrappedValue)
-//    }
-//}
-//
-//extension ComponentDictionary: Decodable {
-//    public init(from decoder: Decoder) throws {
-//        let container = try decoder.singleValueContainer()
-//
-//        wrappedValue = try container.decode(OrderedDictionary<String, ReferenceType>.self)
-//    }
-//}

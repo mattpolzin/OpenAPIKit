@@ -138,13 +138,15 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     /// https://tools.ietf.org/html/rfc3986
     public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
 
+        /// The Path's components. In the `rawValue`, these components are joined
+        /// with forward slashes '/' per the JSON Reference specification.
         public var components: [PathComponent]
 
         public var description: String { rawValue }
 
         public var rawValue: String {
             return "/" + components
-                .map(String.init(describing:))
+                .map { $0.rawValue }
                 .joined(separator: "/")
         }
 
@@ -174,23 +176,27 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
 
     /// A JSON Reference path component, as described by the JSON pointer specification
     /// at https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
+    ///
+    /// - Important: The special characters `'~'` and `'/'` are handled as `"~0"` and `"~1"`,
+    ///     respectively.
     public struct PathComponent: CodingKey, LosslessStringConvertible, RawRepresentable, ExpressibleByStringLiteral, Equatable, Hashable {
         private let decodedStringValue: String
 
-        public var rawValue: String { stringValue }
-
-        public var stringValue: String {
+        public var rawValue: String {
             return decodedStringValue
                 .replacingOccurrences(of: "~", with: "~0")
                 .replacingOccurrences(of: "/", with: "~1")
         }
 
+        /// The string value produces the human-readable path component but
+        /// not the proper string encoding of the path component per the
+        /// specification. Use the `rawValue` for a proper spec encoding.
+        public var stringValue: String { decodedStringValue }
+
         /// The description produces the human-readable path component but
         /// not the proper string encoding of the path component per the
         /// specification. Use the `rawValue` for a proper spec encoding.
-        public var description: String {
-            return decodedStringValue
-        }
+        public var description: String { decodedStringValue }
 
         public static func property(named name: String) -> Self {
             return .init(stringValue: name)

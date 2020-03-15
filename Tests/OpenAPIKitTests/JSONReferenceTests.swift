@@ -107,7 +107,7 @@ final class JSONReferenceTests: XCTestCase {
     func test_specialCharacterEscapes() {
         let t1 = JSONReference<JSONSchema>.PathComponent("~0hello~1world")
         XCTAssertEqual(t1.description, "~hello/world")
-        XCTAssertEqual(t1.stringValue, "~0hello~1world")
+        XCTAssertEqual(t1.stringValue, "~hello/world")
         XCTAssertEqual(t1.rawValue, "~0hello~1world")
     }
 }
@@ -252,6 +252,42 @@ extension JSONReferenceTests {
             decoded,
             ReferenceWrapper(reference: .internal(path: "/hello/world"))
         )
+    }
+
+    func test_nonComponentSpecialCharacterLocal_encode() throws {
+        let test = ReferenceWrapper(reference: .internal(path: "/hello~1to/the~0~1world"))
+
+        let encoded = try testStringFromEncoding(of: test)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+  "reference" : {
+    "$ref" : "#\\/hello~1to\\/the~0~1world"
+  }
+}
+"""
+        )
+    }
+
+    func test_nonComponentSpecialCharacterLocal_decode() throws {
+        let test =
+"""
+{
+    "reference" : {
+        "$ref": "#/hello~1to/the~0~1world"
+    }
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+
+        XCTAssertEqual(
+            decoded,
+            ReferenceWrapper(reference: .internal(path: "/hello~1to/the~0~1world"))
+        )
+        XCTAssertEqual(decoded.reference.name, "the~/world")
     }
 
     func test_invalidComponentFailure_decode() {
