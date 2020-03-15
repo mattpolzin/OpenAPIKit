@@ -16,7 +16,7 @@ extension OpenAPI.Error.Decoding {
 
         public enum Context {
             case inconsistency(InconsistencyError)
-            case generic(Swift.DecodingError)
+            case other(Swift.DecodingError)
             case neither(PolyDecodeNoTypesMatchedError)
         }
     }
@@ -27,7 +27,7 @@ extension OpenAPI.Error.Decoding.Response {
         switch context {
         case .inconsistency(let error):
             return error.subjectName
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.subjectName
         case .neither(let polyError):
             return polyError.subjectName
@@ -40,7 +40,7 @@ extension OpenAPI.Error.Decoding.Response {
         switch context {
         case .inconsistency(let error):
             return .inconsistency(details: error.details)
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.errorCategory
         case .neither(let polyError):
             return polyError.errorCategory
@@ -51,7 +51,7 @@ extension OpenAPI.Error.Decoding.Response {
         switch context {
         case .inconsistency(let error):
             return error.codingPath
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.codingPath
         case .neither(let polyError):
             return polyError.codingPath
@@ -63,16 +63,17 @@ extension OpenAPI.Error.Decoding.Response {
     }
 
     internal static func relativePath(from path: [CodingKey]) -> [CodingKey] {
-        guard let responsesIdx = path.firstIndex(where: { $0.stringValue == "responses" }) else {
+        guard let responsesIndex = path.firstIndex(where: { $0.stringValue == "responses" }) else {
             return path
         }
-        return Array(path.dropFirst(responsesIdx.advanced(by: 1)))
+        return Array(path.dropFirst(responsesIndex.advanced(by: 1)))
     }
 
     internal init(_ error: InconsistencyError) {
         var codingPath = Self.relativePath(from: error.codingPath)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
+        // this part of the coding path is structurally guaranteed to be a status code.
         statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .inconsistency(error)
         relativeCodingPath = Array(codingPath)
@@ -82,8 +83,9 @@ extension OpenAPI.Error.Decoding.Response {
         var codingPath = Self.relativePath(from: error.codingPathWithoutSubject)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
+        // this part of the coding path is structurally guaranteed to be a status code.
         statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
-        context = .generic(error)
+        context = .other(error)
         relativeCodingPath = Array(codingPath)
     }
 
@@ -101,10 +103,16 @@ extension OpenAPI.Error.Decoding.Response {
 
     internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
         if polyError.individualTypeFailures.count == 2 {
-            if polyError.individualTypeFailures[0].typeString == "$ref" && polyError.individualTypeFailures[1].codingPath(relativeTo: polyError.codingPath).count > 1 {
+            let firstFailureIsReference = polyError.individualTypeFailures[0].typeString == "$ref"
+            let secondFailureIsReference = polyError.individualTypeFailures[1].typeString == "$ref"
+
+            let firstFailureIsDeeper = polyError.individualTypeFailures[0].codingPath(relativeTo: polyError.codingPath).count > 1
+            let secondFailureIsDeeper = polyError.individualTypeFailures[1].codingPath(relativeTo: polyError.codingPath).count > 1
+
+            if firstFailureIsReference && secondFailureIsDeeper {
                 self = Self(unwrapping: polyError.individualTypeFailures[1].error)
                 return
-            } else if polyError.individualTypeFailures[1].typeString == "$ref" && polyError.individualTypeFailures[0].codingPath(relativeTo: polyError.codingPath).count > 1 {
+            } else if secondFailureIsReference && firstFailureIsDeeper {
                 self = Self(unwrapping: polyError.individualTypeFailures[0].error)
                 return
             }
@@ -113,6 +121,7 @@ extension OpenAPI.Error.Decoding.Response {
         var codingPath = Self.relativePath(from: polyError.codingPath)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
+        // this part of the coding path is structurally guaranteed to be a status code.
         statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
         context = .neither(polyError)
         relativeCodingPath = Array(codingPath)

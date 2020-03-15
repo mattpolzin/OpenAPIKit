@@ -9,6 +9,7 @@ import Foundation
 import Poly
 
 extension OpenAPI.Error {
+    // Just creating a namespace
     public enum Decoding {}
 }
 
@@ -41,8 +42,8 @@ public extension OpenAPIError {
     var localizedDescription: String {
         let subjectString: String = {
             switch errorCategory {
-            case .missing(let kv):
-                switch kv {
+            case .missing(let keyOrValue):
+                switch keyOrValue {
                 case .key:
                     return "Expected to find `\(subjectName)` key"
                 case .value:
@@ -54,8 +55,8 @@ public extension OpenAPIError {
                 } else {
                     return "Expected `\(subjectName)` value"
                 }
-            case .typeMismatch2(possibleTypeName1: let t1, possibleTypeName2: let t2, details: _):
-                return "Found neither a \(t1) nor a \(t2)"
+            case .typeMismatch2(possibleTypeName1: let type1, possibleTypeName2: let type2, details: _):
+                return "Found neither a \(type1) nor a \(type2)"
             case .dataCorrupted:
                 return "Could not parse `\(subjectName)`"
             case .inconsistency(details: _):
@@ -71,8 +72,8 @@ public extension OpenAPIError {
                 return " to be parsable as \(typeName) but it was not"
             case .typeMismatch2(possibleTypeName1: _, possibleTypeName2: _, details: let details):
                 return ". \(details)"
-            case .missing(let kv):
-                switch kv {
+            case .missing(let keyOrValue):
+                switch keyOrValue {
                 case .key:
                     return " but it is missing"
                 case .value:
@@ -92,14 +93,14 @@ public extension OpenAPIError {
 internal extension Swift.Array where Element == CodingKey {
     var stringValue: String {
         return self.map { key in
-            if let intVal = key.intValue {
-                return "[\(intVal)]"
+            if let intValue = key.intValue {
+                return "[\(intValue)]"
             }
-            let strVal = key.stringValue
-            if strVal.contains("/") {
-                return "['\(strVal)']"
+            let strValue = key.stringValue
+            if strValue.contains("/") {
+                return "['\(strValue)']"
             }
-            return ".\(strVal)"
+            return ".\(strValue)"
         }.joined()
     }
 

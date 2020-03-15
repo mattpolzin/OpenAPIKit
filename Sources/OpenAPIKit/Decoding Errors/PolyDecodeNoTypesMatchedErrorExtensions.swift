@@ -30,8 +30,8 @@ internal extension PolyDecodeNoTypesMatchedError {
         //
         guard
             individualTypeFailures.count == 2,
-            let f1 = individualTypeFailures.first,
-            let f2 = individualTypeFailures.dropFirst().first
+            let failure1 = individualTypeFailures.first,
+            let failure2 = individualTypeFailures.dropFirst().first
             else {
                 return .dataCorrupted(underlying: self)
         }
@@ -46,27 +46,27 @@ internal extension PolyDecodeNoTypesMatchedError {
         // We want to omit details if the problem is a missing '$ref' key.
         // If the intention was to write a reference, this error will be obvious.
         // If the intention was not to use a reference, this error will be superfluous.
-        let error1 = isRefKeyNotFoundError(f1)
+        let error1 = isRefKeyNotFoundError(failure1)
             ? nil
-            : OpenAPI.Error(from: f1.error.replacingPath(with: f1.codingPath(relativeTo: codingPath))).localizedDescription
-        let error2 = isRefKeyNotFoundError(f2)
+            : OpenAPI.Error(from: failure1.error.replacingPath(with: failure1.codingPath(relativeTo: codingPath))).localizedDescription
+        let error2 = isRefKeyNotFoundError(failure2)
             ? nil
-            : OpenAPI.Error(from: f2.error.replacingPath(with: f2.codingPath(relativeTo: codingPath))).localizedDescription
+            : OpenAPI.Error(from: failure2.error.replacingPath(with: failure2.codingPath(relativeTo: codingPath))).localizedDescription
 
         let details1 = error1
-            .map { "\(String(describing: f1.type)) could not be decoded because:\n\($0)" }
+            .map { "\(String(describing: failure1.type)) could not be decoded because:\n\($0)" }
             .map { "\n\n" + $0 }
             ?? ""
         let details2 = error2
-            .map { "\(String(describing: f2.type)) could not be decoded because:\n\($0)" }
+            .map { "\(String(describing: failure2.type)) could not be decoded because:\n\($0)" }
             .map { "\n\n" + $0 }
             ?? ""
 
         let details = details1 + details2
 
         return .typeMismatch2(
-            possibleTypeName1: f1.typeString,
-            possibleTypeName2: f2.typeString,
+            possibleTypeName1: failure1.typeString,
+            possibleTypeName2: failure2.typeString,
             details: details
         )
     }
@@ -88,17 +88,17 @@ internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
     /// which will be at least as long if not longer than that of
     /// the `IndividualFailure`
     var fullCodingPath: [CodingKey] {
-        if let err = error.underlyingError as? DecodingError {
-            return err.codingPath
+        if let decodingError = error.underlyingError as? DecodingError {
+            return decodingError.codingPath
         }
-        if let err = error.underlyingError as? InconsistencyError {
-            return err.codingPath
+        if let inconsistencyError = error.underlyingError as? InconsistencyError {
+            return inconsistencyError.codingPath
         }
-        if let err = error.underlyingError as? PolyDecodeNoTypesMatchedError {
-            return err.codingPath
+        if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
+            return polyError.codingPath
         }
-        if let err = error.underlyingError as? OpenAPIError {
-            return err.codingPath
+        if let openApiError = error.underlyingError as? OpenAPIError {
+            return openApiError.codingPath
         }
         return error.codingPath
     }
