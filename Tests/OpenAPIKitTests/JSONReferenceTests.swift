@@ -22,12 +22,12 @@ final class JSONReferenceTests: XCTestCase {
 
         let _ = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
 
-        let t5 = JSONReference<JSONSchema>.Reference("#/hello/world")
-        let t6 = JSONReference<JSONSchema>.Reference(rawValue: "#/hello/world")
+        let t5 = JSONReference<JSONSchema>.InternalReference("#/hello/world")
+        let t6 = JSONReference<JSONSchema>.InternalReference(rawValue: "#/hello/world")
         XCTAssertEqual(t5, t6)
 
-        let t18 = JSONReference<JSONSchema>.Reference("#/components/schemas/hello")
-        let t19 = JSONReference<JSONSchema>.Reference.component(name: "hello")
+        let t18 = JSONReference<JSONSchema>.InternalReference("#/components/schemas/hello")
+        let t19 = JSONReference<JSONSchema>.InternalReference.component(name: "hello")
         XCTAssertEqual(t18, t19)
 
         let t7: JSONReference<JSONSchema>.Path = [
@@ -56,11 +56,11 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t16, t17)
 
         // Reference missing '#'
-        XCTAssertNil(JSONReference<JSONSchema>.Reference("/hello/world"))
+        XCTAssertNil(JSONReference<JSONSchema>.InternalReference("/hello/world"))
         // Reference for components but mismatched component type
-        XCTAssertNil(JSONReference<JSONSchema>.Reference("#/components/responses"))
+        XCTAssertNil(JSONReference<JSONSchema>.InternalReference("#/components/responses"))
         // Reference that incorrectly puts something nested too deeply
-        XCTAssertNil(JSONReference<JSONSchema>.Reference("#/components/schemas/hello/world"))
+        XCTAssertNil(JSONReference<JSONSchema>.InternalReference("#/components/schemas/hello/world"))
     }
 
     func test_stringValues() {
@@ -76,12 +76,12 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t3.name, "there")
         XCTAssertEqual(t3.absoluteString, "#/hello/there")
 
-        let t4 = JSONReference<JSONSchema>.Reference.component(name: "hello")
+        let t4 = JSONReference<JSONSchema>.InternalReference.component(name: "hello")
         XCTAssertEqual(t4.name, "hello")
         XCTAssertEqual(t4.rawValue, "#/components/schemas/hello")
         XCTAssertEqual(t4.description, "#/components/schemas/hello")
 
-        let t5 = JSONReference<JSONSchema>.Reference.path("/hello/there")
+        let t5 = JSONReference<JSONSchema>.InternalReference.path("/hello/there")
         XCTAssertEqual(t5.name, "there")
         XCTAssertEqual(t5.rawValue, "#/hello/there")
         XCTAssertEqual(t5.description, "#/hello/there")

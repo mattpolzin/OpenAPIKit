@@ -24,7 +24,7 @@ internal protocol Reference {}
 /// https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
 public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, Reference {
     /// The reference is internal to the file.
-    case `internal`(Reference)
+    case `internal`(InternalReference)
     /// The reference refers to another file.
     case external(URL)
 
@@ -70,7 +70,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         }
     }
 
-    public enum Reference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
+    public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
         /// The reference refers to some path outside the Components Object.
@@ -265,7 +265,7 @@ extension JSONReference: Decodable {
         }
 
         if referenceString.first == "#" {
-            guard let internalReference = Reference(rawValue: referenceString) else {
+            guard let internalReference = InternalReference(rawValue: referenceString) else {
                 throw InconsistencyError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a JSON Reference from '\(referenceString)'",

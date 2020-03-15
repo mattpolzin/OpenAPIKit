@@ -378,7 +378,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         )
     }
 
-    func test_simpleDeclaration() {
+    func test_simpleDeclaration() throws {
         // OpenAPI Info Object
         // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#info-object
         let info = OpenAPI.Document.Info(title: "Demo API", version: "1.0")
@@ -400,7 +400,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let successfulHelloResponse = OpenAPI.Response(
             description: "Hello",
             content: [
-                .txt: .init(schemaReference: .component( named: "hello_string"))
+                .txt: .init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self))
             ]
         )
 

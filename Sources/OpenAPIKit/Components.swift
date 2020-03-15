@@ -14,25 +14,12 @@ extension OpenAPI {
     /// be referenced from other parts of the spec.
     public struct Components: Equatable {
 
-//        @ComponentDictionary
         public var schemas: OrderedDictionary<String, JSONSchema>
-
-//        @ComponentDictionary
         public var responses: OrderedDictionary<String, Response>
-
-//        @ComponentDictionary
         public var parameters: OrderedDictionary<String, PathItem.Parameter>
-
-//        @ComponentDictionary
         public var examples: OrderedDictionary<String, Example>
-
-//        @ComponentDictionary
         public var requestBodies: OrderedDictionary<String, Request>
-
-//        @ComponentDictionary
         public var headers: OrderedDictionary<String, Header>
-
-//        @ComponentDictionary
         public var securitySchemes: OrderedDictionary<String, SecurityScheme>
         //    public var links:
         //    public var callbacks:
@@ -86,23 +73,7 @@ public protocol AnyStringyContainer {
     func contains(_ key: String) -> Bool
 }
 
-//@propertyWrapper
-//public struct ComponentDictionary<ReferenceType: Equatable & Codable>: Equatable, AnyStringyContainer {
-//
-//    public typealias Value = ReferenceType
-//    public typealias Key = String
-//
-//    public init(wrappedValue: OrderedDictionary<String, ReferenceType>) {
-//        self.wrappedValue = wrappedValue
-//    }
-//
-//    public var wrappedValue: OrderedDictionary<String, ReferenceType>
-//
-//    public func contains(_ key: String) -> Bool {
-//        return wrappedValue.contains(key: key)
-//    }
-//}
-
+// MARK: - Reference Support
 extension JSONSchema: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "schemas" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.schemas }
@@ -158,17 +129,47 @@ extension OpenAPI.Components {
     }
 
     /// Check if the `Components` contains the given internal reference or not.
-    public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.Reference) -> Bool {
+    public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> Bool {
         return reference.name.map { self[keyPath: ReferenceType.openAPIComponentsKeyPath].contains(key: $0) } ?? false
+    }
+
+    /// Retrieve item referenced from the `Components`.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
+        guard case .internal(let localReference) = reference else {
+            return nil
+        }
+
+        return self[localReference]
+    }
+
+    /// Retrieve item referenced from the `Components`.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> ReferenceType? {
+        return reference.name.flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
+    }
+
+    /// Create a `JSONReference`.
+    ///
+    /// - throws: If the given name does not refer to an existing component of the given type.
+    public func reference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType: ReferenceType.Type) throws -> JSONReference<ReferenceType> {
+        let internalReference = JSONReference<ReferenceType>.InternalReference.component(name: name)
+        let reference = JSONReference<ReferenceType>.internal(internalReference)
+
+        guard contains(internalReference) else {
+            throw ReferenceError.missingComponentOnReferenceCreation(name: name, key: ReferenceType.openAPIComponentsKey)
+        }
+        return reference
     }
 
     public enum ReferenceError: Swift.Error, Equatable, CustomStringConvertible {
         case cannotLookupRemoteReference
+        case missingComponentOnReferenceCreation(name: String, key: String)
 
         public var description: String {
             switch self {
             case .cannotLookupRemoteReference:
                 return "You cannot look up remote JSON references in the Components Object local to this file."
+            case .missingComponentOnReferenceCreation(name: let name, key: let key):
+                return "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. '\(name)' was not found in \(key)."
             }
         }
     }
