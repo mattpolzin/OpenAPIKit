@@ -17,6 +17,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Request/Response Bodies](#requestresponse-bodies)
 		- [Schemas](#schemas)
 			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
+		- [JSON References](#json-references)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
