@@ -9,11 +9,17 @@ import Foundation
 import Poly
 
 extension OpenAPI.PathItem {
+    /// OpenAPI Spec "Parameter Object"
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
     public struct Parameter: Equatable {
         public var name: String
+
+        /// OpenAPI Spec "in" property.
         public var parameterLocation: Location
         public var description: String?
         public var deprecated: Bool // default is false
+
+        /// OpenAPI Spec "content" or "schema" properties.
         public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
         public typealias Array = [Either<JSONReference<Parameter>, Parameter>]

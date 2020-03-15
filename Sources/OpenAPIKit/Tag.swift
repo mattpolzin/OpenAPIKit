@@ -11,11 +11,11 @@ extension OpenAPI {
     public struct Tag: Equatable {
         public let name: String
         public let description: String?
-        public let externalDocs: ExternalDoc?
+        public let externalDocs: ExternalDocumentation?
 
         public init(name: String,
                     description: String? = nil,
-                    externalDocs: ExternalDoc? = nil) {
+                    externalDocs: ExternalDocumentation? = nil) {
             self.name = name
             self.description = description
             self.externalDocs = externalDocs
@@ -51,7 +51,7 @@ extension OpenAPI.Tag: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
     }
 }
 

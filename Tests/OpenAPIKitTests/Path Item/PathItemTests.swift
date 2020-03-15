@@ -11,11 +11,11 @@ import FineJSON
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {
-        let t1 = OpenAPI.PathComponents(["hello", "world"])
-        let t2 = OpenAPI.PathComponents(rawValue: "/hello/world")
-        let t3 = OpenAPI.PathComponents(rawValue: "hello/world")
-        let t4: OpenAPI.PathComponents = "/hello/world"
-        let t5: OpenAPI.PathComponents = "hello/world"
+        let t1 = OpenAPI.Path(["hello", "world"])
+        let t2 = OpenAPI.Path(rawValue: "/hello/world")
+        let t3 = OpenAPI.Path(rawValue: "hello/world")
+        let t4: OpenAPI.Path = "/hello/world"
+        let t5: OpenAPI.Path = "hello/world"
 
         XCTAssertEqual(t1, t2)
         XCTAssertEqual(t2, t3)
@@ -368,7 +368,7 @@ extension PathItemTests {
     }
 
     func test_pathComponents_encode() throws {
-        let test: [OpenAPI.PathComponents] = ["/hello/world", "hi/there"]
+        let test: [OpenAPI.Path] = ["/hello/world", "hi/there"]
 
         let encodedTest = try testStringFromEncoding(of: test)
 
@@ -392,7 +392,7 @@ extension PathItemTests {
 ]
 """.data(using: .utf8)!
 
-        let test = try testDecoder.decode([OpenAPI.PathComponents].self, from: testData)
+        let test = try testDecoder.decode([OpenAPI.Path].self, from: testData)
 
         XCTAssertEqual(
             test,

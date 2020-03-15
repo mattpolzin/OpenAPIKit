@@ -144,7 +144,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    public var externalDocs: OpenAPI.ExternalDoc? {
+    public var externalDocs: OpenAPI.ExternalDocumentation? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
@@ -328,7 +328,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchema {
@@ -356,7 +356,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchema {
@@ -387,7 +387,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -423,7 +423,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -460,7 +460,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -496,7 +496,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -533,7 +533,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -569,7 +569,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -606,7 +606,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
         properties: [String: JSONSchema] = [:],
@@ -648,7 +648,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minItems: Int = 0,
         maxItems: Int? = nil,
         uniqueItems: Bool = false,

@@ -16,7 +16,7 @@ public protocol JSONSchemaContext {
     var nullable: Bool { get }
     var title: String? { get }
     var description: String? { get }
-    var externalDocs: OpenAPI.ExternalDoc? { get }
+    var externalDocs: OpenAPI.ExternalDocumentation? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: String? { get }
     var readOnly: Bool { get }
@@ -35,7 +35,7 @@ extension JSONSchema {
 
         public let title: String?
         public let description: String?
-        public let externalDocs: OpenAPI.ExternalDoc?
+        public let externalDocs: OpenAPI.ExternalDocumentation?
 
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
@@ -70,7 +70,7 @@ extension JSONSchema {
                                   deprecated: Bool = false,
                                   title: String? = nil,
                                   description: String? = nil,
-                                  externalDocs: OpenAPI.ExternalDoc? = nil,
+                                  externalDocs: OpenAPI.ExternalDocumentation? = nil,
                                   allowedValues: [AnyCodable]? = nil,
                                   example: (codable: T, encoder: JSONEncoder)) {
             self.format = format
@@ -94,7 +94,7 @@ extension JSONSchema {
                     deprecated: Bool = false,
                     title: String? = nil,
                     description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDoc? = nil,
+                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
@@ -118,7 +118,7 @@ extension JSONSchema {
                      deprecated: Bool = false,
                      title: String? = nil,
                      description: String? = nil,
-                     externalDocs: OpenAPI.ExternalDoc? = nil,
+                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                      allowedValues: [AnyCodable]? = nil,
                      example: String?) {
             self.format = format
@@ -408,7 +408,7 @@ extension JSONSchema.Context: Decodable {
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
 

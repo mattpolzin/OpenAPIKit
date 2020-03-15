@@ -10,10 +10,10 @@ import OpenAPIKit
 
 final class ExternalDocTests: XCTestCase {
     func test_init() {
-        let t1 = OpenAPI.ExternalDoc(url: URL(string: "http://google.com")!)
+        let t1 = OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!)
         XCTAssertNil(t1.description)
 
-        let t2 = OpenAPI.ExternalDoc(description: "hello world",
+        let t2 = OpenAPI.ExternalDocumentation(description: "hello world",
                                      url: URL(string: "http://google.com")!)
         XCTAssertEqual(t2.description, "hello world")
     }
@@ -22,7 +22,7 @@ final class ExternalDocTests: XCTestCase {
 // MARK: - Codable
 extension ExternalDocTests {
     func test_descriptionAndUrl_encode() {
-        let externalDoc = OpenAPI.ExternalDoc(description: "hello world",
+        let externalDoc = OpenAPI.ExternalDocumentation(description: "hello world",
                                               url: URL(string: "http://google.com")!)
 
         let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
@@ -45,14 +45,14 @@ extension ExternalDocTests {
   "url" : "http:\\/\\/google.com"
 }
 """.data(using: .utf8)!
-        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDoc.self, from: externalDocsData)
+        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
-        XCTAssertEqual(externalDocs, OpenAPI.ExternalDoc(description: "hello world",
+        XCTAssertEqual(externalDocs, OpenAPI.ExternalDocumentation(description: "hello world",
                                                 url: URL(string: "http://google.com")!))
     }
 
     func test_onlyUrl_encode() {
-        let externalDoc = OpenAPI.ExternalDoc(url: URL(string: "http://google.com")!)
+        let externalDoc = OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!)
 
         let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
 
@@ -72,8 +72,8 @@ extension ExternalDocTests {
   "url" : "http:\\/\\/google.com"
 }
 """.data(using: .utf8)!
-        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDoc.self, from: externalDocsData)
+        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
-        XCTAssertEqual(externalDocs, OpenAPI.ExternalDoc(url: URL(string: "http://google.com")!))
+        XCTAssertEqual(externalDocs, OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!))
     }
 }

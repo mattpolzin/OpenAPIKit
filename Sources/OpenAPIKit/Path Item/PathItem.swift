@@ -10,7 +10,10 @@ import Poly
 import OrderedDictionary
 
 extension OpenAPI {
-    public struct PathComponents: RawRepresentable, Equatable, Hashable {
+    /// OpenAPI Spec "Paths Object" path field pattern support.
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#paths-object
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#patterned-fields
+    public struct Path: RawRepresentable, Equatable, Hashable {
         public let components: [String]
 
         public init(_ components: [String]) {
@@ -30,13 +33,15 @@ extension OpenAPI {
     }
 }
 
-extension OpenAPI.PathComponents: ExpressibleByStringLiteral {
+extension OpenAPI.Path: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self.init(rawValue: value)
     }
 }
 
 extension OpenAPI {
+    /// OpenAPI Spec "Path Item Object"
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object
     public struct PathItem: Equatable {
         public var summary: String?
         public var description: String?
@@ -111,7 +116,7 @@ extension OpenAPI {
             trace = op
         }
 
-        public typealias Map = OrderedDictionary<PathComponents, PathItem>
+        public typealias Map = OrderedDictionary<Path, PathItem>
     }
 }
 
@@ -170,7 +175,7 @@ extension OpenAPI.PathItem {
 
 // MARK: - Codable
 
-extension OpenAPI.PathComponents: Encodable {
+extension OpenAPI.Path: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
@@ -178,7 +183,7 @@ extension OpenAPI.PathComponents: Encodable {
     }
 }
 
-extension OpenAPI.PathComponents: Decodable {
+extension OpenAPI.Path: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 

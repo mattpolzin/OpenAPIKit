@@ -10,7 +10,7 @@ import Poly
 
 extension OpenAPI.Error.Decoding {
     public struct Path: OpenAPIError {
-        public let path: OpenAPI.PathComponents
+        public let path: OpenAPI.Path
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
@@ -98,7 +98,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: DecodingError) {
         var codingPath = error.codingPathWithoutSubject.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
         context = .other(error)
@@ -107,7 +107,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
         var codingPath = polyError.codingPath.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
         context = .neither(polyError)
@@ -116,7 +116,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: OpenAPI.Error.Decoding.Operation) {
         var codingPath = error.codingPath.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
         context = .endpoint(error)
