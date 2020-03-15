@@ -17,7 +17,7 @@ extension OpenAPI.Error.Decoding {
         public enum Context {
             case endpoint(Operation)
             case other(Swift.DecodingError)
-            case neither(PolyDecodeNoTypesMatchedError)
+            case neither(EitherDecodeNoTypesMatchedError)
         }
     }
 }
@@ -105,7 +105,7 @@ extension OpenAPI.Error.Decoding.Path {
         relativeCodingPath = Array(codingPath)
     }
 
-    internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
+    internal init(_ polyError: EitherDecodeNoTypesMatchedError) {
         var codingPath = polyError.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 

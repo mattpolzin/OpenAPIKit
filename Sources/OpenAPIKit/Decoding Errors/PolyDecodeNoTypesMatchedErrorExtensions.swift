@@ -8,7 +8,7 @@
 import Foundation
 import Poly
 
-internal extension PolyDecodeNoTypesMatchedError {
+internal extension EitherDecodeNoTypesMatchedError {
     var subjectName: String {
         return codingPath.last?.stringValue ?? "[unknown object]"
     }
@@ -72,7 +72,7 @@ internal extension PolyDecodeNoTypesMatchedError {
     }
 }
 
-internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
+internal extension EitherDecodeNoTypesMatchedError.IndividualFailure {
     func codingPath(relativeTo other: [CodingKey]) -> [CodingKey] {
         fullCodingPath.relative(to: other)
     }
@@ -94,7 +94,7 @@ internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
         if let inconsistencyError = error.underlyingError as? InconsistencyError {
             return inconsistencyError.codingPath
         }
-        if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
+        if let polyError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
             return polyError.codingPath
         }
         if let openApiError = error.underlyingError as? OpenAPIError {

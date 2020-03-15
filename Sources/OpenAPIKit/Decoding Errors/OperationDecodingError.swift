@@ -19,7 +19,7 @@ extension OpenAPI.Error.Decoding {
             case response(Response)
             case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)
-            case neither(PolyDecodeNoTypesMatchedError)
+            case neither(EitherDecodeNoTypesMatchedError)
         }
     }
 }
@@ -125,14 +125,14 @@ extension OpenAPI.Error.Decoding.Operation {
             self = Self(responseError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
             self = Self(inconsistencyError)
-        } else if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
+        } else if let polyError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
             self = Self(polyError)
         } else {
             self = Self(error)
         }
     }
 
-    internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
+    internal init(_ polyError: EitherDecodeNoTypesMatchedError) {
         if polyError.individualTypeFailures.count == 2 {
             let firstFailureIsReference = polyError.individualTypeFailures[0].typeString == "$ref"
             let secondFailureIsReference = polyError.individualTypeFailures[1].typeString == "$ref"
