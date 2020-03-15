@@ -9,6 +9,9 @@ import Foundation
 import AnyCodable
 import Poly
 
+/// OpenAPI "Schema Object"
+/// 
+/// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object
 public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
@@ -21,6 +24,10 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     indirect case any(of: [JSONSchema])
     indirect case not(JSONSchema)
     case reference(JSONReference<JSONSchema>)
+    /// This schema does not have a `type` specified. This is allowed
+    /// but does not offer much in the way of documenting the schema
+    /// so it is represented here as "undefined" with an optional
+    /// description.
     case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
 
     public var jsonTypeFormat: JSONTypeFormat? {
@@ -42,6 +49,15 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if values for this schema are required, `false` if they
+    /// are optional (and can therefore be omitted from request/response data).
+    ///
+    /// - Important: This is distinct from the concept of nullability.
+    ///
+    ///     **Nullability:** Whether or not a value can be  `null`.
+    ///
+    ///     **Optionality:** Whether or not a key/value can be entirely
+    ///         omitted from request/response data.
     public var required: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -58,6 +74,14 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if values for this schema can be `null`.
+    ///
+    /// - Important: This is distinct from the concept of optionality.
+    ///
+    ///     **Nullability:** Whether or not a value can be  `null`.
+    ///
+    ///     **Optionality:** Whether or not a key/value can be entirely
+    ///         omitted from request/response data.
     public var nullable: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -72,6 +96,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if this schema can only be read from and is therefore
+    /// unsupported for request data.
     public var readOnly: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -86,6 +112,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if this schema can only be written to and is therefore
+    /// unavailable in response data.
     public var writeOnly: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -100,6 +128,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if this schema is deprecated, `false` otherwise.
     public var deprecated: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -114,6 +143,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// Get the title, if specified. If unspecified, returns `nil`.
     public var title: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -128,6 +158,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// Get the description, if specified. If unspecified, returns `nil`.
     public var description: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -144,7 +175,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    public var externalDocs: OpenAPI.ExternalDoc? {
+    /// Get the external docs, if specified. If unspecified, returns `nil`.
+    public var externalDocs: OpenAPI.ExternalDocumentation? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
@@ -158,7 +190,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Allowed values, if specified. If unspecified, returns `nil`.
+    /// Get the allowed values, if specified. If unspecified, returns `nil`.
     public var allowedValues: [AnyCodable]? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -173,7 +205,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// An example, encoded as a `String`, if specified. If unspecified, returns `nil`.
+    /// Get an example, encoded as a `String`, if specified. If unspecified, returns `nil`.
     public var example: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -273,6 +305,8 @@ extension JSONSchema {
         }
     }
 
+    /// Returns a version of this `JSONSchema` that has the given example
+    /// attached.
     public func with<T: Encodable>(example codableExample: T,
                                    using encoder: JSONEncoder) throws -> JSONSchema {
         switch self {
@@ -328,7 +362,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchema {
@@ -356,7 +390,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
         example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
     ) -> JSONSchema {
@@ -387,7 +421,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -423,7 +457,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
         pattern: String? = nil,
@@ -460,7 +494,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -496,7 +530,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
@@ -533,7 +567,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -569,7 +603,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
@@ -606,7 +640,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
         properties: [String: JSONSchema] = [:],
@@ -648,7 +682,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
-        externalDocs: OpenAPI.ExternalDoc? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minItems: Int = 0,
         maxItems: Int? = nil,
         uniqueItems: Bool = false,

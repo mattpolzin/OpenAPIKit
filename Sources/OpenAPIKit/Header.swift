@@ -11,12 +11,16 @@ import OrderedDictionary
 import AnyCodable
 
 extension OpenAPI {
+    /// OpenAPI Spec "Header Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object
     public struct Header: Equatable {
         public typealias Schema = PathItem.Parameter.Schema
 
         public let description: String?
         public let required: Bool
         public let deprecated: Bool // default is false
+        /// OpenAPI Spec "schema" or "content", which are mutually exclusive.
         public let schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
         public typealias Map = OrderedDictionary<String, Either<JSONReference<Header>, Header>>

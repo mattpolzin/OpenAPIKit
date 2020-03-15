@@ -10,13 +10,13 @@ import Poly
 
 extension OpenAPI.Error.Decoding {
     public struct Path: OpenAPIError {
-        public let path: OpenAPI.PathComponents
+        public let path: OpenAPI.Path
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
         public enum Context {
             case endpoint(Operation)
-            case generic(Swift.DecodingError)
+            case other(Swift.DecodingError)
             case neither(PolyDecodeNoTypesMatchedError)
         }
     }
@@ -27,7 +27,7 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.subjectName
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.subjectName
         case .neither(let polyError):
             return polyError.subjectName
@@ -38,6 +38,7 @@ extension OpenAPI.Error.Decoding.Path {
         let relativeCodingPath = relativeCodingPathString.isEmpty
             ? ""
             : "in \(relativeCodingPathString) "
+
         switch context {
         case .endpoint(let endpointError):
             switch endpointError.context {
@@ -45,13 +46,14 @@ extension OpenAPI.Error.Decoding.Path {
                 let responseContext = responseError.statusCode.rawValue == "default"
                     ? "default"
                     : "status code '\(responseError.statusCode.rawValue)'"
+
                 return "\(relativeCodingPath)for the \(responseContext) response of the **\(endpointError.endpoint.rawValue)** endpoint under `\(path.rawValue)`"
             case .request:
                 return "\(relativeCodingPath)for the request body of the **\(endpointError.endpoint.rawValue)** endpoint under `\(path.rawValue)`"
-            case .generic, .inconsistency, .neither:
+            case .other, .inconsistency, .neither:
                 return "\(relativeCodingPath)for the **\(endpointError.endpoint.rawValue)** endpoint under `\(path.rawValue)`"
             }
-        case .generic, .neither:
+        case .other, .neither:
             return "\(relativeCodingPath)under the `\(path.rawValue)` path"
         }
     }
@@ -60,7 +62,7 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.errorCategory
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.errorCategory
         case .neither(let polyError):
             return polyError.errorCategory
@@ -71,7 +73,7 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.codingPath
-        case .generic(let decodingError):
+        case .other(let decodingError):
             return decodingError.codingPath
         case .neither(let polyError):
             return polyError.codingPath
@@ -86,26 +88,26 @@ extension OpenAPI.Error.Decoding.Path {
                 return responseError.relativeCodingPathString
             case .request(let requestError):
                 return requestError.relativeCodingPathString
-            case .generic, .inconsistency, .neither:
+            case .other, .inconsistency, .neither:
                 return endpointError.relativeCodingPathString
             }
-        case .generic, .neither:
+        case .other, .neither:
             return relativeCodingPath.stringValue
         }
     }
 
     internal init(_ error: DecodingError) {
         var codingPath = error.codingPathWithoutSubject.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
-        context = .generic(error)
+        context = .other(error)
         relativeCodingPath = Array(codingPath)
     }
 
     internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
         var codingPath = polyError.codingPath.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
         context = .neither(polyError)
@@ -114,7 +116,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: OpenAPI.Error.Decoding.Operation) {
         var codingPath = error.codingPath.dropFirst()
-        let route = OpenAPI.PathComponents(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
         context = .endpoint(error)

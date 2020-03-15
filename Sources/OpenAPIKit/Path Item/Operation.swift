@@ -9,11 +9,14 @@ import Foundation
 import Poly
 
 extension OpenAPI.PathItem {
+    /// OpenAPI Spec "Operation Object"
+    /// 
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object
     public struct Operation: Equatable {
         public var tags: [String]?
         public var summary: String?
         public var description: String?
-        public var externalDocs: OpenAPI.ExternalDoc?
+        public var externalDocs: OpenAPI.ExternalDocumentation?
         public var operationId: String?
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
@@ -26,7 +29,7 @@ extension OpenAPI.PathItem {
         public init(tags: [String]? = nil,
                     summary: String? = nil,
                     description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDoc? = nil,
+                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     operationId: String? = nil,
                     parameters: Parameter.Array = [],
                     requestBody: OpenAPI.Request? = nil,
@@ -51,7 +54,7 @@ extension OpenAPI.PathItem {
         public init(tags: String...,
                     summary: String? = nil,
                     description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDoc? = nil,
+                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     operationId: String? = nil,
                     parameters: Parameter.Array,
                     requestBody: OpenAPI.Request? = nil,
@@ -140,7 +143,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
             description = try container.decodeIfPresent(String.self, forKey: .description)
 
-            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
             operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 

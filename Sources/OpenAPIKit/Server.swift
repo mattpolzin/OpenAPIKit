@@ -9,6 +9,9 @@ import Foundation
 import OrderedDictionary
 
 extension OpenAPI {
+    /// OpenAPI Spec "Server Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object
     public struct Server: Equatable {
         public let url: URL
         public let description: String?
@@ -25,6 +28,9 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Server {
+    /// OpenAPI Spec "Server Variable Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object
     public struct Variable: Equatable {
         public let `enum`: [String]
         public let `default`: String
@@ -41,13 +47,7 @@ extension OpenAPI.Server {
 }
 
 // MARK: - Codable
-extension OpenAPI.Server: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case url
-        case description
-        case variables
-    }
-
+extension OpenAPI.Server: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -55,7 +55,9 @@ extension OpenAPI.Server: Codable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
         variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
     }
+}
 
+extension OpenAPI.Server: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -66,6 +68,14 @@ extension OpenAPI.Server: Codable {
         if variables.count > 0 {
             try container.encode(variables, forKey: .variables)
         }
+    }
+}
+
+extension OpenAPI.Server {
+    private enum CodingKeys: String, CodingKey {
+        case url
+        case description
+        case variables
     }
 }
 

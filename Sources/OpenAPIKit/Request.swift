@@ -9,6 +9,9 @@ import Foundation
 import Poly
 
 extension OpenAPI {
+    /// OpenAPI Spec "Request Body Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#request-body-object
     public struct Request: Equatable {
         public let description: String?
         public let content: Content.Map
@@ -26,13 +29,15 @@ extension OpenAPI {
 
 // MARK: - Codable
 
-extension OpenAPI.Request: Encodable {
+extension OpenAPI.Request {
     private enum CodingKeys: String, CodingKey {
         case description
         case content
         case required
     }
+}
 
+extension OpenAPI.Request: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 

@@ -11,6 +11,9 @@ import OrderedDictionary
 import AnyCodable
 
 extension OpenAPI {
+    /// OpenAPI Spec "Media Type Object"
+    /// 
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#media-type-object
     public struct Content: Equatable, CodableVendorExtendable {
         public var schema: Either<JSONReference<JSONSchema>, JSONSchema>
         public var example: AnyCodable?
@@ -157,9 +160,9 @@ extension OpenAPI.Content: Decodable {
 }
 
 extension OpenAPI.Content {
-    enum CodingKeys: ExtendableCodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case schema
-        case example
+        case example  // `example` and `examples` are mutually exclusive
         case examples // `example` and `examples` are mutually exclusive
         case encoding
         case extended(String)

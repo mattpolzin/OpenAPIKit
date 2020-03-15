@@ -11,12 +11,15 @@ import Poly
 
 // MARK: - Generic Context
 
+/// A schema context stores information about a schema.
+/// All schemas can have the contextual information in
+/// this protocol.
 public protocol JSONSchemaContext {
     var required: Bool { get }
     var nullable: Bool { get }
     var title: String? { get }
     var description: String? { get }
-    var externalDocs: OpenAPI.ExternalDoc? { get }
+    var externalDocs: OpenAPI.ExternalDocumentation? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: String? { get }
     var readOnly: Bool { get }
@@ -25,6 +28,7 @@ public protocol JSONSchemaContext {
 }
 
 extension JSONSchema {
+    /// The context that applies to all schemas.
     public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
         public let required: Bool // default true (except on decode, where required depends on whether there is a parent schema scope to contain a 'required' property)
@@ -35,7 +39,7 @@ extension JSONSchema {
 
         public let title: String?
         public let description: String?
-        public let externalDocs: OpenAPI.ExternalDoc?
+        public let externalDocs: OpenAPI.ExternalDocumentation?
 
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
@@ -70,7 +74,7 @@ extension JSONSchema {
                                   deprecated: Bool = false,
                                   title: String? = nil,
                                   description: String? = nil,
-                                  externalDocs: OpenAPI.ExternalDoc? = nil,
+                                  externalDocs: OpenAPI.ExternalDocumentation? = nil,
                                   allowedValues: [AnyCodable]? = nil,
                                   example: (codable: T, encoder: JSONEncoder)) {
             self.format = format
@@ -94,7 +98,7 @@ extension JSONSchema {
                     deprecated: Bool = false,
                     title: String? = nil,
                     description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDoc? = nil,
+                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
             self.format = format
@@ -118,7 +122,7 @@ extension JSONSchema {
                      deprecated: Bool = false,
                      title: String? = nil,
                      description: String? = nil,
-                     externalDocs: OpenAPI.ExternalDoc? = nil,
+                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                      allowedValues: [AnyCodable]? = nil,
                      example: String?) {
             self.format = format
@@ -218,6 +222,7 @@ extension JSONSchema.Context {
 // MARK: - Specific Contexts
 
 extension JSONSchema {
+    /// The context that only applies to `.number` schemas.
     public struct NumericContext: Equatable {
         public struct Bound: Equatable {
             public let value: Double
@@ -239,6 +244,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.integer` schemas.
     public struct IntegerContext: Equatable {
         public struct Bound: Equatable {
             public let value: Int
@@ -260,6 +266,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.string` schemas.
     public struct StringContext: Equatable {
         public let maxLength: Int?
         public let minLength: Int
@@ -276,6 +283,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
@@ -304,6 +312,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.object` schemas.
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
         let _minProperties: Int
@@ -408,7 +417,7 @@ extension JSONSchema.Context: Decodable {
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
 

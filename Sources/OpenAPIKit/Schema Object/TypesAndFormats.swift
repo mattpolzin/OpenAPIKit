@@ -73,6 +73,7 @@ public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
 }
 
 extension JSONTypeFormat {
+    /// The allowed "format" properties for `.boolean` schemas.
     public enum BooleanFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -103,6 +104,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.object` schemas.
     public enum ObjectFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -133,6 +135,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.array` schemas.
     public enum ArrayFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -163,6 +166,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.number` schemas.
     public enum NumberFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case float
@@ -199,6 +203,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.integer` schemas.
     public enum IntegerFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case int32
@@ -235,11 +240,15 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.string` schemas.
     public enum StringFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case byte
         case binary
         case date
+        /// A string instance is valid against this attribute if it is a valid
+        /// date representation as defined by
+        /// https://tools.ietf.org/html/rfc3339#section-5.6
         case dateTime
         case password
         case other(String)
@@ -282,9 +291,23 @@ extension JSONTypeFormat {
 }
 
 extension JSONTypeFormat.StringFormat {
+    /// Popular non-standard "format" properties for `.string` schemas.
+    ///
+    /// Specify with e.g. `.string(format: .extended(.uuid))`
     public enum Extended: String, Equatable {
         case uuid = "uuid"
         case email = "email"
+        case hostname = "hostname"
+        case ipv4 = "ipv4"
+        case ipv6 = "ipv6"
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uri = "uri"
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uriReference = "uriref"
     }
 
     public static func extended(_ format: Extended) -> Self {
@@ -293,6 +316,9 @@ extension JSONTypeFormat.StringFormat {
 }
 
 extension JSONTypeFormat.IntegerFormat {
+    /// Popular non-standard "format" properties for `.integer` schemas.
+    ///
+    /// Specify with e.g. `.integer(format: .extended(.uint32))`
     public enum Extended: String, Equatable {
         case uint32 = "uint32"
         case uint64 = "uint64"

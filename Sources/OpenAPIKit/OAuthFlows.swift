@@ -9,6 +9,9 @@ import Foundation
 import OrderedDictionary
 
 extension OpenAPI {
+    /// OpenAPI Spec "Oauth Flows Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#oauth-flows-object
     public struct OAuthFlows: Equatable {
         public let implicit: Implicit?
         public let password: Password?

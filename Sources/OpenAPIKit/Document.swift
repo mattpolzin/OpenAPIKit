@@ -11,6 +11,8 @@ import Poly
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
+    /// 
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
     public struct Document: Equatable {
         public var openAPIVersion: Version
         public var info: Info
@@ -19,7 +21,7 @@ extension OpenAPI {
         public var components: Components
         public var security: [SecurityRequirement]
         public var tags: [Tag]?
-        public var externalDocs: ExternalDoc?
+        public var externalDocs: ExternalDocumentation?
 
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,
@@ -28,7 +30,7 @@ extension OpenAPI {
                     components: Components,
                     security: [SecurityRequirement] = [],
                     tags: [Tag]? = nil,
-                    externalDocs: ExternalDoc? = nil) {
+                    externalDocs: ExternalDocumentation? = nil) {
             self.openAPIVersion = openAPIVersion
             self.info = info
             self.servers = servers
@@ -45,6 +47,10 @@ extension OpenAPI {
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.
     /// For other security scheme types, the array MUST be empty.
+    ///
+    /// OpenAPI Spec "Security Requirement Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 
@@ -124,7 +130,7 @@ extension OpenAPI.Document: Decodable {
 
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
 
-            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDoc.self, forKey: .externalDocs)
+            externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)

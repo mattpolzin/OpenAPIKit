@@ -132,8 +132,11 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         }
     }
 
-    /// A JSON Reference path, as described by the JSON pointer specification
+    /// A JSON Reference path.
+    ///
+    /// As described by the JSON pointer specification
     /// at https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
+    ///
     /// and following the URI specification for a "fragment" found here:
     /// https://tools.ietf.org/html/rfc3986
     public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {

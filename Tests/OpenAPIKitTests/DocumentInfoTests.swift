@@ -43,7 +43,8 @@ extension DocumentInfoTests {
         assertJSONEquivalent(encodedLicense,
 """
 {
-  "name" : "MIT"
+  "name" : "MIT",
+  "url" : "https:\\/\\/www.mit.edu\\/~amini\\/LICENSE.md"
 }
 """
         )
@@ -53,7 +54,8 @@ extension DocumentInfoTests {
         let licenseData =
 """
 {
-  "name" : "MIT"
+  "name" : "MIT",
+  "url" : "https:\\/\\/www.mit.edu\\/~amini\\/LICENSE.md"
 }
 """.data(using: .utf8)!
         let license = try testDecoder.decode(OpenAPI.Document.Info.License.self, from: licenseData)

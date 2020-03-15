@@ -11,6 +11,9 @@ import OrderedDictionary
 import AnyCodable
 
 extension OpenAPI {
+    /// OpenAPI Spec "Example Object"
+    ///
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#example-object
     public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?
@@ -89,7 +92,11 @@ extension OpenAPI.Example: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.externalValue) && container.contains(.value)) else {
-            throw Error.foundBothInternalAndExternalExamples
+            throw InconsistencyError(
+                subjectName: "example value",
+                details: "Found both `value` and `externalValue` keys in an Example. You must specify one or the other.",
+                codingPath: container.codingPath
+            )
         }
 
         let externalValue = try container.decodeIfPresent(URL.self, forKey: .externalValue)
@@ -103,14 +110,10 @@ extension OpenAPI.Example: Decodable {
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
-
-    public enum Error: Swift.Error {
-        case foundBothInternalAndExternalExamples
-    }
 }
 
 extension OpenAPI.Example {
-    enum CodingKeys: ExtendableCodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case summary
         case description
         case value

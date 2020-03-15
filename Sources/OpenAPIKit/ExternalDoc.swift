@@ -8,7 +8,10 @@
 import Foundation
 
 extension OpenAPI {
-    public struct ExternalDoc: Equatable {
+    /// OpenAPI Spec "External Documentation Object"
+    /// 
+    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#external-documentation-object
+    public struct ExternalDocumentation: Equatable {
         public let description: String?
         public let url: URL
 
@@ -22,7 +25,7 @@ extension OpenAPI {
 
 // MARK: - Codable
 
-extension OpenAPI.ExternalDoc: Encodable {
+extension OpenAPI.ExternalDocumentation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -32,7 +35,7 @@ extension OpenAPI.ExternalDoc: Encodable {
     }
 }
 
-extension OpenAPI.ExternalDoc: Decodable {
+extension OpenAPI.ExternalDocumentation: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -42,7 +45,7 @@ extension OpenAPI.ExternalDoc: Decodable {
     }
 }
 
-extension OpenAPI.ExternalDoc {
+extension OpenAPI.ExternalDocumentation {
     private enum CodingKeys: String, CodingKey {
         case description
         case url
