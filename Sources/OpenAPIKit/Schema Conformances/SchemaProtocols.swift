@@ -11,8 +11,9 @@
 import Foundation
 import AnyCodable
 
-/// Anything conforming to `OpenAPINodeType` can provide an
+/// Anything conforming to `OpenAPISchemaType` can provide an
 /// OpenAPI schema representing itself.
 public protocol OpenAPISchemaType {
+    /// The best `JSONSchema` representation for this type.
     static func openAPISchema() throws -> JSONSchema
 }

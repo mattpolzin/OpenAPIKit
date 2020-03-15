@@ -73,6 +73,7 @@ public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
 }
 
 extension JSONTypeFormat {
+    /// The allowed "format" properties for `.boolean` schemas.
     public enum BooleanFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -103,6 +104,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.object` schemas.
     public enum ObjectFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -133,6 +135,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.array` schemas.
     public enum ArrayFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case other(String)
@@ -163,6 +166,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.number` schemas.
     public enum NumberFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case float
@@ -199,6 +203,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.integer` schemas.
     public enum IntegerFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case int32
@@ -235,6 +240,7 @@ extension JSONTypeFormat {
         }
     }
 
+    /// The allowed "format" properties for `.string` schemas.
     public enum StringFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
         case byte
@@ -282,6 +288,9 @@ extension JSONTypeFormat {
 }
 
 extension JSONTypeFormat.StringFormat {
+    /// Popular non-standard "format" properties for `.string` schemas.
+    ///
+    /// Specify with e.g. `.string(format: .extended(.uuid))`
     public enum Extended: String, Equatable {
         case uuid = "uuid"
         case email = "email"
@@ -293,6 +302,9 @@ extension JSONTypeFormat.StringFormat {
 }
 
 extension JSONTypeFormat.IntegerFormat {
+    /// Popular non-standard "format" properties for `.integer` schemas.
+    ///
+    /// Specify with e.g. `.integer(format: .extended(.uint32))`
     public enum Extended: String, Equatable {
         case uint32 = "uint32"
         case uint64 = "uint64"

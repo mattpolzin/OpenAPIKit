@@ -11,6 +11,9 @@ import Poly
 
 // MARK: - Generic Context
 
+/// A schema context stores information about a schema.
+/// All schemas can have the contextual information in
+/// this protocol.
 public protocol JSONSchemaContext {
     var required: Bool { get }
     var nullable: Bool { get }
@@ -25,6 +28,7 @@ public protocol JSONSchemaContext {
 }
 
 extension JSONSchema {
+    /// The context that applies to all schemas.
     public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
         public let required: Bool // default true (except on decode, where required depends on whether there is a parent schema scope to contain a 'required' property)
@@ -218,6 +222,7 @@ extension JSONSchema.Context {
 // MARK: - Specific Contexts
 
 extension JSONSchema {
+    /// The context that only applies to `.number` schemas.
     public struct NumericContext: Equatable {
         public struct Bound: Equatable {
             public let value: Double
@@ -239,6 +244,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.integer` schemas.
     public struct IntegerContext: Equatable {
         public struct Bound: Equatable {
             public let value: Int
@@ -260,6 +266,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.string` schemas.
     public struct StringContext: Equatable {
         public let maxLength: Int?
         public let minLength: Int
@@ -276,6 +283,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
@@ -304,6 +312,7 @@ extension JSONSchema {
         }
     }
 
+    /// The context that only applies to `.object` schemas.
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
         let _minProperties: Int
