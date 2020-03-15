@@ -55,7 +55,7 @@ final class ParameterTests: XCTestCase {
         let _ = OpenAPI.PathItem.Parameter(
             name: "hello",
             parameterLocation: .cookie,
-            schemaReference: .internal(\.schemas, named: "hello")
+            schemaReference: .component( named: "hello")
         )
 
         let _ = OpenAPI.PathItem.Parameter(
@@ -71,7 +71,7 @@ final class ParameterTests: XCTestCase {
             .parameter(name: "hello", parameterLocation: .cookie, schema: .string),
             .parameter(OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)])),
             .parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)]),
-            .parameter(reference: .internal(\.parameters, named: "hello"))
+            .parameter(reference: .component( named: "hello"))
         ]
 
         XCTAssertEqual(t1[0], t1[1])

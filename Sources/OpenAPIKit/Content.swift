@@ -12,7 +12,7 @@ import AnyCodable
 
 extension OpenAPI {
     public struct Content: Equatable, CodableVendorExtendable {
-        public var schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>
+        public var schema: Either<JSONReference<JSONSchema>, JSONSchema>
         public var example: AnyCodable?
         public var examples: Example.Map?
         public var encoding: OrderedDictionary<String, Encoding>?
@@ -24,7 +24,7 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
+        public init(schema: Either<JSONReference<JSONSchema>, JSONSchema>,
                     example: AnyCodable? = nil,
                     encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -35,7 +35,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(schemaReference: JSONReference<Components, JSONSchema>,
+        public init(schemaReference: JSONReference<JSONSchema>,
                     example: AnyCodable? = nil,
                     encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -57,7 +57,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(schema: Either<JSONReference<Components, JSONSchema>, JSONSchema>,
+        public init(schema: Either<JSONReference<JSONSchema>, JSONSchema>,
                     examples: Example.Map?,
                     encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -68,7 +68,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(schemaReference: JSONReference<Components, JSONSchema>,
+        public init(schemaReference: JSONReference<JSONSchema>,
                     examples: Example.Map?,
                     encoding: OrderedDictionary<String, Encoding>? = nil,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -139,7 +139,7 @@ extension OpenAPI.Content: Decodable {
             )
         }
 
-        schema = try container.decode(Either<JSONReference<OpenAPI.Components, JSONSchema>, JSONSchema>.self, forKey: .schema)
+        schema = try container.decode(Either<JSONReference<JSONSchema>, JSONSchema>.self, forKey: .schema)
 
         encoding = try container.decodeIfPresent(OrderedDictionary<String, Encoding>.self, forKey: .encoding)
 

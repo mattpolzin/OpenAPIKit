@@ -12,7 +12,7 @@ import AnyCodable
 
 final class ContentTests: XCTestCase {
     func test_init() {
-        let t1 = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
+        let t1 = OpenAPI.Content(schema: .init(.external(URL(string:"hello.json#/world")!)))
         XCTAssertNotNil(t1.schema.a)
         XCTAssertNil(t1.schema.b)
 
@@ -20,7 +20,7 @@ final class ContentTests: XCTestCase {
         XCTAssertNotNil(t2.schema.b)
         XCTAssertNil(t2.schema.a)
 
-        let t3 = OpenAPI.Content(schemaReference: .external("hello.json#/world"))
+        let t3 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!))
         XCTAssertNotNil(t3.schema.a)
         XCTAssertNil(t3.schema.b)
 
@@ -41,7 +41,7 @@ final class ContentTests: XCTestCase {
         XCTAssertNotNil(withExamples.examples)
         XCTAssertEqual(withExamples.example?.value as? String, "pick me")
 
-        let t4 = OpenAPI.Content(schemaReference: .external("hello.json#/world"),
+        let t4 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!),
                                 examples: nil)
         XCTAssertNotNil(t4.schema.a)
         XCTAssertNil(t4.schema.b)
@@ -84,7 +84,7 @@ final class ContentTests: XCTestCase {
             .tar: .init(schema: .init(.boolean)),
             .tif: .init(schema: .init(.string(format: .binary))),
             .txt: .init(schema: .init(.number)),
-            .xml: .init(schema: .init(.external("hello.json#/world"))),
+            .xml: .init(schema: .init(.external(URL(string: "hello.json#/world")!))),
             .yaml: .init(schema: .init(.string)),
             .zip: .init(schema: .init(.string))
         ]
@@ -94,7 +94,7 @@ final class ContentTests: XCTestCase {
 // MARK: - Codable
 extension ContentTests {
     func test_referenceContent_encode() {
-        let content = OpenAPI.Content(schema: .init(.external("hello.json#/world")))
+        let content = OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!)))
         let encodedContent = try! testStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
@@ -119,7 +119,7 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.external("hello.json#/world"))))
+        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!))))
     }
 
     func test_schemaContent_encode() {
@@ -432,12 +432,12 @@ extension ContentTests {
 
         let _ = OpenAPI.Content.Encoding(contentType: .json)
 
-        let _ = OpenAPI.Content.Encoding(headers: ["special": .a(.external("hello.yml"))])
+        let _ = OpenAPI.Content.Encoding(headers: ["special": .a(.external(URL(string: "hello.yml")!))])
 
         let _ = OpenAPI.Content.Encoding(allowReserved: true)
 
         let _ = OpenAPI.Content.Encoding(contentType: .form,
-                                         headers: ["special": .a(.external("hello.yml"))],
+                                         headers: ["special": .a(.external(URL(string: "hello.yml")!))],
                                          allowReserved: true)
         let _ = OpenAPI.Content.Encoding(contentType: .json,
                                          style: .form)

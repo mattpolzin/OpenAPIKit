@@ -17,6 +17,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Request/Response Bodies](#requestresponse-bodies)
 		- [Schemas](#schemas)
 			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
+		- [JSON References](#json-references)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
@@ -163,6 +164,15 @@ Int32?.openAPINode() == .integer(format: .int32, required: false)
 ```
 
 Additional schema generation support can be found in the [`mattpolzin/OpenAPIReflection`](https://github.com/mattpolzin/OpenAPIReflection) library.
+
+#### JSON References
+The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. You cannot dereference documents (yet), but you can encode and decode references.
+
+You can create an external reference with `JSONReference.external(URL)`. Internal references usually refer to an object in the Components Object dictionary and are constructed with `JSONReference.component(named:)`. If you need to refer to something in the current file but not in the Components Object, you can use `JSONReference.internal(path:)`.
+
+You can check whether a given `JSONReference` exists in the Components Object with `document.components.contains()`. You can access a referenced object in the Components Object with `document.components[reference]`.
+
+You can create references from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
 
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
@@ -362,11 +372,11 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 
 ### Reference Object (`JSONReference`)
 - [x] $ref
-    - [x] local (same file) reference (`node` case)
+    - [x] local (same file) reference (`internal` case)
         - [x] encode
-        - [ ] decode
+        - [x] decode
         - [ ] dereference
-    - [x] remote (different file) reference (`file` case)
+    - [x] remote (different file) reference (`external` case)
         - [x] encode
         - [x] decode
         - [ ] dereference

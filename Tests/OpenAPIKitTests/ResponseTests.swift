@@ -17,7 +17,7 @@ final class ResponseTests: XCTestCase {
         XCTAssertNil(r1.headers)
         XCTAssertEqual(r1.content, [:])
 
-        let content = OpenAPI.Content(schema: .init(JSONReference<OpenAPI.Components, JSONSchema>.external("hello.yml")))
+        let content = OpenAPI.Content(schema: .init(JSONReference<JSONSchema>.external(URL(string: "hello.yml")!)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],
@@ -30,7 +30,7 @@ final class ResponseTests: XCTestCase {
     func test_responseMap() {
         let responseMap: OpenAPI.Response.Map = [
             200: .response(description: "hello world", content: [:]),
-            404: .response(reference: .external("hello.json#/world"))
+            404: .response(reference: .external(URL(string: "hello.json#/world")!))
         ]
 
         XCTAssertNotNil(responseMap[200]?.b)

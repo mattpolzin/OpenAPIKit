@@ -48,7 +48,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         summary: "Get Test",
                         description: "Get Test description",
                         parameters: [
-                            .parameter(reference: .internal(\.parameters, named: "filter")),
+                            .parameter(reference: .component( named: "filter")),
                             .parameter(
                                 name: "Content-Type",
                                 parameterLocation: .header(required: false),
@@ -165,7 +165,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             summary: "Get Test",
             description: "Get Test description",
             parameters: [
-                .parameter(reference: .internal(\.parameters, named: "filter")),
+                .parameter(reference: .component( named: "filter")),
                 .parameter(
                     name: "Content-Type",
                     parameterLocation: .header(required: false),
@@ -364,8 +364,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let securityRequirements: [OpenAPI.SecurityRequirement] = [
             [
-                .internal(\.securitySchemes, named: "basic_auth"): [],
-                .internal(\.securitySchemes, named: "oauth_flow"): ["read:widgets"]
+                .component( named: "basic_auth"): [],
+                .component( named: "oauth_flow"): ["read:widgets"]
             ]
         ]
 
@@ -378,7 +378,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         )
     }
 
-    func test_simpleDeclaration() {
+    func test_simpleDeclaration() throws {
         // OpenAPI Info Object
         // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#info-object
         let info = OpenAPI.Document.Info(title: "Demo API", version: "1.0")
@@ -400,7 +400,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let successfulHelloResponse = OpenAPI.Response(
             description: "Hello",
             content: [
-                .txt: .init(schemaReference: .internal(\.schemas, named: "hello_string"))
+                .txt: .init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self))
             ]
         )
 

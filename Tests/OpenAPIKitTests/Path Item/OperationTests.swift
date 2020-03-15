@@ -87,12 +87,12 @@ extension OperationTests {
             externalDocs: .init(url: URL(string: "https://google.com")!),
             operationId: "123",
             parameters: [
-                .parameter(reference: .internal(\.parameters, named: "hello"))
+                .parameter(reference: .component(named: "hello"))
             ],
             requestBody: .init(content: [.json: .init(schema: .init(.string))]),
-            responses: [200: .response(reference: .internal(\.responses, named: "test"))],
+            responses: [200: .response(reference: .component(named: "test"))],
             deprecated: true,
-            security: [[.internal(\.securitySchemes, named: "security"): []]],
+            security: [[.component(named: "security"): []]],
             servers: [.init(url: URL(string: "https://google.com")!)]
         )
 
@@ -209,12 +209,12 @@ extension OperationTests {
                 externalDocs: .init(url: URL(string: "https://google.com")!),
                 operationId: "123",
                 parameters: [
-                    .parameter(reference: .internal(.unsafe("#/components/parameters/hello")))
+                    .parameter(reference: .component(named: "hello"))
                 ],
                 requestBody: .init(content: [.json: .init(schema: .init(.string(required:false)))]),
-                responses: [200: .response(reference: .internal(.unsafe("#/components/responses/test")))],
+                responses: [200: .response(reference: .component(named: "test"))],
                 deprecated: true,
-                security: [[.internal(\.securitySchemes, named: "security"): []]],
+                security: [[.component(named: "security"): []]],
                 servers: [.init(url: URL(string: "https://google.com")!)]
             )
         )
@@ -224,8 +224,8 @@ extension OperationTests {
     func test_responseOrder_encode() throws {
         let operation = OpenAPI.PathItem.Operation(
             responses: [
-                404: .response(reference: .internal(\.responses, named: "404")),
-                200: .response(reference: .internal(\.responses, named: "200"))
+                404: .response(reference: .component(named: "404")),
+                200: .response(reference: .component(named: "200"))
             ]
         )
 
@@ -252,8 +252,8 @@ extension OperationTests {
 
         let operation2 = OpenAPI.PathItem.Operation(
             responses: [
-                200: .response(reference: .internal(\.responses, named: "200")),
-                404: .response(reference: .internal(\.responses, named: "404"))
+                200: .response(reference: .component(named: "200")),
+                404: .response(reference: .component(named: "404"))
             ]
         )
 
@@ -296,8 +296,8 @@ responses:
             operation,
             OpenAPI.PathItem.Operation(
                 responses: [
-                    404: .response(reference: .internal(.unsafe("#/components/responses/404"))),
-                    200: .response(reference: .internal(.unsafe("#/components/responses/200")))
+                    404: .response(reference: .component(named: "404")),
+                    200: .response(reference: .component(named: "200"))
                 ]
             )
         )
@@ -317,8 +317,8 @@ responses:
             operation2,
             OpenAPI.PathItem.Operation(
                 responses: [
-                    200: .response(reference: .internal(.unsafe("#/components/responses/200"))),
-                    404: .response(reference: .internal(.unsafe("#/components/responses/404")))
+                    200: .response(reference: .component(named: "200")),
+                    404: .response(reference: .component(named: "404"))
                 ]
             )
         )

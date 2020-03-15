@@ -38,11 +38,11 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Example {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Components, OpenAPI.Example>, OpenAPI.Example>>
+    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Example>, OpenAPI.Example>>
 }
 
 // MARK: - Either Convenience
-extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.Example>, B == OpenAPI.Example {
+extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example {
     public static func example(
         summary: String? = nil,
         description: String? = nil,
@@ -59,7 +59,7 @@ extension Either where A == JSONReference<OpenAPI.Components, OpenAPI.Example>, 
         )
     }
 
-    public static func example(reference: JSONReference<OpenAPI.Components, OpenAPI.Example>) -> Self {
+    public static func example(reference: JSONReference<OpenAPI.Example>) -> Self {
         return .a(reference)
     }
 }

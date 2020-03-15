@@ -16,7 +16,7 @@ extension OpenAPI.PathItem {
         public var externalDocs: OpenAPI.ExternalDoc?
         public var operationId: String?
         public var parameters: Parameter.Array
-        public var requestBody: Either<JSONReference<OpenAPI.Components, OpenAPI.Request>, OpenAPI.Request>?
+        public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
         public var responses: OpenAPI.Response.Map
         //            public let callbacks:
         public var deprecated: Bool // default is false
@@ -146,7 +146,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
             parameters = try container.decodeIfPresent(OpenAPI.PathItem.Parameter.Array.self, forKey: .parameters) ?? []
 
-            requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Components, OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
+            requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
             responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
 
