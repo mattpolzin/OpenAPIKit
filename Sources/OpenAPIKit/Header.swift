@@ -19,7 +19,7 @@ extension OpenAPI {
         public let deprecated: Bool // default is false
         public let schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
-        public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Components, Header>, Header>>
+        public typealias Map = OrderedDictionary<String, Either<JSONReference<Header>, Header>>
 
         public init(schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
                     description: String? = nil,
@@ -51,7 +51,7 @@ extension OpenAPI {
             self.deprecated = deprecated
         }
 
-        public init(schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+        public init(schemaReference: JSONReference<JSONSchema>,
                     description: String? = nil,
                     required: Bool = false,
                     deprecated: Bool = false) {
@@ -86,7 +86,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
         )
     }
 
-    public static func header(schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+    public static func header(schemaReference: JSONReference<JSONSchema>,
                               allowReserved: Bool = false,
                               example: AnyCodable? = nil) -> Self {
         return .init(
@@ -108,7 +108,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
         )
     }
 
-    public static func header(schemaReference: JSONReference<OpenAPI.Components, JSONSchema>,
+    public static func header(schemaReference: JSONReference<JSONSchema>,
                               allowReserved: Bool = false,
                               examples: OpenAPI.Example.Map?) -> Self {
         return .init(

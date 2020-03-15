@@ -20,7 +20,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     indirect case one(of: [JSONSchema])
     indirect case any(of: [JSONSchema])
     indirect case not(JSONSchema)
-    case reference(JSONReference<OpenAPI.Components, JSONSchema>)
+    case reference(JSONReference<JSONSchema>)
     case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
 
     public var jsonTypeFormat: JSONTypeFormat? {
@@ -771,7 +771,7 @@ extension JSONSchema: Decodable {
     public init(from decoder: Decoder) throws {
 
         if let singleValueContainer = try? decoder.singleValueContainer() {
-            if let ref = try? singleValueContainer.decode(JSONReference<OpenAPI.Components, JSONSchema>.self) {
+            if let ref = try? singleValueContainer.decode(JSONReference<JSONSchema>.self) {
                 self = .reference(ref)
                 return
             }

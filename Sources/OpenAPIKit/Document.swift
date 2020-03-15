@@ -45,7 +45,7 @@ extension OpenAPI {
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.
     /// For other security scheme types, the array MUST be empty.
-    public typealias SecurityRequirement = [JSONReference<Components, SecurityScheme>: [String]]
+    public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 
 extension OpenAPI.Document {
@@ -144,7 +144,7 @@ internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [Open
     var securityContainer = container.nestedUnkeyedContainer(forKey: key)
     for securityRequirement in security {
         let securityKeysAndValues = securityRequirement
-            .compactMap { keyValue in keyValue.key.selector.map { ($0, keyValue.value) } }
+            .compactMap { keyValue in keyValue.key.name.map { ($0, keyValue.value) } }
         let securityStringKeyedDict = Dictionary(
             securityKeysAndValues,
             uniquingKeysWith: { $1 }
@@ -166,14 +166,14 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
             // convert to JSONReference keys
             let securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
                 (
-                    key: JSONReference<OpenAPI.Components, OpenAPI.SecurityScheme>.internal(.node(\.securitySchemes, named: key)),
+                    key: JSONReference<OpenAPI.SecurityScheme>.component(named: key),
                     value: value
                 )
             }
 
             if let components = optionalComponents {
                 // check each key for validity against components.
-                let foundInComponents = { (ref: JSONReference<OpenAPI.Components, OpenAPI.SecurityScheme>) -> Bool in
+                let foundInComponents = { (ref: JSONReference<OpenAPI.SecurityScheme>) -> Bool in
                     return (try? components.contains(ref)) ?? false
                 }
                 guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {

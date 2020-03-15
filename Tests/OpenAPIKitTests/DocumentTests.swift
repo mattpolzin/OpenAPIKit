@@ -313,7 +313,7 @@ extension DocumentTests {
                               requestBodies: [:],
                               headers: [:],
                               securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]),
-            security: [[.internal(\.securitySchemes, named: "security"):[]]]
+            security: [[.component( named: "security"):[]]]
         )
         let encodedDocument = try testStringFromEncoding(of: document)
 
@@ -395,7 +395,7 @@ extension DocumentTests {
                                   requestBodies: [:],
                                   headers: [:],
                                   securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]),
-                security: [[.internal(\.securitySchemes, named: "security"):[]]]
+                security: [[.component( named: "security"):[]]]
             )
         )
     }

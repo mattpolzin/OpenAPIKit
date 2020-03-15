@@ -26,8 +26,8 @@ final class HeaderTests: XCTestCase {
         let t3 = OpenAPI.Header(schema: .string)
         XCTAssertEqual(t3.schemaOrContent, .init(.header(.string)))
 
-        let t4 = OpenAPI.Header(schemaReference: .external("hello"))
-        XCTAssertEqual(t4.schemaOrContent, .init(.header(schemaReference: .external("hello"))))
+        let t4 = OpenAPI.Header(schemaReference: .internal(path: "/hello"))
+        XCTAssertEqual(t4.schemaOrContent, .init(.header(schemaReference: .internal(path: "/hello"))))
 
         let t5 = OpenAPI.Header(content: contentMap)
         XCTAssertEqual(t5.schemaOrContent, .init(contentMap))
@@ -52,10 +52,10 @@ final class HeaderTests: XCTestCase {
         let t2 = OpenAPI.Header.Schema.header(.string, examples: nil)
         XCTAssertEqual(t2.style, .default(for: .header))
 
-        let t3 = OpenAPI.Header.Schema.header(schemaReference: .external("hello.yml"))
+        let t3 = OpenAPI.Header.Schema.header(schemaReference: .external(URL(string: "hello.yml")!))
         XCTAssertEqual(t3.style, .default(for: .header))
 
-        let t4 = OpenAPI.Header.Schema.header(schemaReference: .external("hello.yml"), examples: nil)
+        let t4 = OpenAPI.Header.Schema.header(schemaReference: .external(URL(string: "hello.yml")!), examples: nil)
         XCTAssertEqual(t4.style, .default(for: .header))
     }
 }

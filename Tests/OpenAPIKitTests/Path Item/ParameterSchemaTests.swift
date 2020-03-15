@@ -43,12 +43,12 @@ final class ParameterSchemaTests: XCTestCase {
 
         // schema reference override explode
         let t3 = Schema(
-            schemaReference: .external("hello.yml"),
+            schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject,
             explode: true
         )
 
-        XCTAssertEqual(t3.schema, .a(.external("hello.yml")))
+        XCTAssertEqual(t3.schema, .a(.external(URL(string: "hello.yml")!)))
         XCTAssertEqual(t3.style, .deepObject)
         XCTAssertTrue(t3.explode)
         XCTAssertFalse(t3.allowReserved)
@@ -57,11 +57,11 @@ final class ParameterSchemaTests: XCTestCase {
 
         // schema reference default explode
         let t4 = Schema(
-            schemaReference: .external("hello.yml"),
+            schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject
         )
 
-        XCTAssertEqual(t4.schema, .a(.external("hello.yml")))
+        XCTAssertEqual(t4.schema, .a(.external(URL(string: "hello.yml")!)))
         XCTAssertEqual(t4.style, .deepObject)
         XCTAssertFalse(t4.explode)
         XCTAssertFalse(t4.allowReserved)
@@ -136,42 +136,42 @@ final class ParameterSchemaTests: XCTestCase {
 
         // schema reference multiple examples
         let t9 = Schema(
-            schemaReference: .external("hello.yml"),
+            schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject,
             examples: [
                 "one": .example(value: .init("hello")),
-                "two": .example(reference: .external("world.yml"))
+                "two": .example(reference: .external(URL(string: "world.yml")!))
             ]
         )
 
-        XCTAssertEqual(t9.schema, .a(.external("hello.yml")))
+        XCTAssertEqual(t9.schema, .a(.external(URL(string: "hello.yml")!)))
         XCTAssertEqual(t9.style, .deepObject)
         XCTAssertFalse(t9.explode)
         XCTAssertFalse(t9.allowReserved)
         XCTAssertNotNil(t9.example)
         XCTAssertEqual(t9.example?.value as? String, "hello")
         XCTAssertNotNil(t9.examples)
-        XCTAssertEqual(t9.examples?["two"]?.a, .external("world.yml"))
+        XCTAssertEqual(t9.examples?["two"]?.a, .external(URL(string: "world.yml")!))
 
         // schema reference override explode multiple examples
         let t10 = Schema(
-            schemaReference: .external("hello.yml"),
+            schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject,
             explode: true,
             examples: [
                 "one": .example(value: .init("hello")),
-                "two": .example(reference: .external("world.yml"))
+                "two": .example(reference: .external(URL(string: "world.yml")!))
             ]
         )
 
-        XCTAssertEqual(t10.schema, .a(.external("hello.yml")))
+        XCTAssertEqual(t10.schema, .a(.external(URL(string: "hello.yml")!)))
         XCTAssertEqual(t10.style, .deepObject)
         XCTAssertTrue(t10.explode)
         XCTAssertFalse(t10.allowReserved)
         XCTAssertNotNil(t10.example)
         XCTAssertEqual(t10.example?.value as? String, "hello")
         XCTAssertNotNil(t10.examples)
-        XCTAssertEqual(t10.examples?["two"]?.a, .external("world.yml"))
+        XCTAssertEqual(t10.examples?["two"]?.a, .external(URL(string: "world.yml")!))
     }
 
     public func test_style_defaults() {

@@ -78,7 +78,7 @@ internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
     }
 
     var typeString: String {
-        if (type as? Reference.Type) != nil {
+        if (type as? OpenAPIKit.Reference.Type) != nil {
             return "$ref"
         }
         return String(describing: type)
