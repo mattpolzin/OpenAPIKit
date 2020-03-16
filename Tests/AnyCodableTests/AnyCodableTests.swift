@@ -100,6 +100,7 @@ class AnyCodableTests: XCTestCase {
     }
 
     func testEncodeNSNumber() throws {
+        #if os(macOS)
         let dictionary: [String: NSNumber] = [
             "boolean": true,
             "integer": 1,
@@ -116,6 +117,7 @@ class AnyCodableTests: XCTestCase {
 }
 """
         )
+        #endif
     }
 
     let testEncoder: JSONEncoder = {
