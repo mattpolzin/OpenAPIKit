@@ -153,6 +153,9 @@ extension OpenAPI.Components {
     /// Pass a value that can be either a reference to a component or the component itself.
     /// `dereference()` will return the component value if it is found (in the Either wrapper
     /// or in the Components Object).
+    ///
+    /// - Important: Dereferencing an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
     public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
         switch maybeReference {
         case .a(let reference):
