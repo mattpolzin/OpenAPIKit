@@ -66,7 +66,6 @@ class AnyCodableTests: XCTestCase {
         let dictionary: [String: AnyCodable] = [
             "boolean": true,
             "integer": 1,
-            "double": 3.1415926535897931,
             "string": "string",
             "array": [1, 2, 3],
             "nested": [
@@ -88,7 +87,6 @@ class AnyCodableTests: XCTestCase {
     3
   ],
   "boolean" : true,
-  "double" : 3.1415926535897931,
   "integer" : 1,
   "nested" : {
     "a" : "alpha",
@@ -105,7 +103,6 @@ class AnyCodableTests: XCTestCase {
         let dictionary: [String: NSNumber] = [
             "boolean": true,
             "integer": 1,
-            "double": 3.1415926535897931,
         ]
 
         let result = try testStringFromEncoding(of: AnyCodable(dictionary))
@@ -115,7 +112,6 @@ class AnyCodableTests: XCTestCase {
 """
 {
   "boolean" : true,
-  "double" : 3.1415926535897931,
   "integer" : 1
 }
 """
