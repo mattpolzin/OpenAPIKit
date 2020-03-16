@@ -15,14 +15,13 @@ let package = Package(
             targets: ["OpenAPIKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"), // just for tests
         .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
     ],
     targets: [
         .target(
             name: "OpenAPIKit",
-            dependencies: ["AnyCodable"]),
+            dependencies: []),
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
@@ -34,12 +33,13 @@ let package = Package(
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "EitherTests",
-            dependencies: ["OpenAPIKit"]
-        ),
+            dependencies: ["OpenAPIKit"]),
         .testTarget(
             name: "OrderedDictionaryTests",
-            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]
-        )
+            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "AnyCodableTests",
+            dependencies: ["OpenAPIKit"])
     ],
     swiftLanguageVersions: [ .v5 ]
 )

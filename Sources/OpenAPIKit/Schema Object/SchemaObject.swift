@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AnyCodable
 
 /// OpenAPI "Schema Object"
 /// 

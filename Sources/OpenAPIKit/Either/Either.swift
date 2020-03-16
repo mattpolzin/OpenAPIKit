@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AnyCodable
 
 public enum Either<A, B> {
 	case a(A)

@@ -8,7 +8,6 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import AnyCodable
 
 final class ContentTests: XCTestCase {
     func test_init() {

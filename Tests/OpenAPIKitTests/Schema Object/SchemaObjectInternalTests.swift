@@ -7,7 +7,6 @@
 
 import Foundation
 import XCTest
-import AnyCodable
 @testable import OpenAPIKit
 
 class SchemaObjectInternalTests: XCTestCase {

@@ -8,7 +8,6 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import AnyCodable
 
 final class SchemaObjectTests: XCTestCase {
     func test_jsonTypeFormat() {
