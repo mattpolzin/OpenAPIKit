@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"

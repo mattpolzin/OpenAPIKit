@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Operation Object"

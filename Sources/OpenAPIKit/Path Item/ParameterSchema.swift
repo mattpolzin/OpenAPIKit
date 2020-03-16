@@ -5,7 +5,6 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-import Poly
 import AnyCodable
 
 extension OpenAPI.PathItem.Parameter {

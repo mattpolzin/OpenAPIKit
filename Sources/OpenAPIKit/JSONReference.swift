@@ -10,7 +10,7 @@ import OrderedDictionary
 
 /// Used as a quick check internally in this library to determine if a type is
 /// a reference (which only `JSONReference` should be).
-internal protocol Reference {}
+public protocol _OpenAPIReference {}
 
 /// A JSON Reference which represents something like
 ///
@@ -22,7 +22,7 @@ internal protocol Reference {}
 /// The intention, as prescribed by the OpenAPI specification, is
 /// for this type to conform to the logic in
 /// https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
-public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, Reference {
+public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
     /// The reference refers to another file.

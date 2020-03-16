@@ -49,8 +49,8 @@ extension EitherTests {
 
 extension EitherTests {
     func test_DoubleThenInt() {
-        // Poly2<Double, Int> is ambiguous when decoding a number that could be either
-        // a Double or an Int. Poly will pick the first possible match.
+        // Either<Double, Int> is ambiguous when decoding a number that could be either
+        // a Double or an Int. Either will pick the first possible match.
 
         struct Test: Decodable, Equatable {
             let x: Either<Double, Int>
@@ -62,7 +62,7 @@ extension EitherTests {
     }
 
     func test_IntThenDouble() {
-        // Poly2<Int, Double> avoids some ambiguity since a number that could be an Int can also
+        // Either<Int, Double> avoids some ambiguity since a number that could be an Int can also
         // be a Double but not the other way around. If you expect a particular number that is
         // possible to represent as an Int to become a Double, you are still not able to use this
         // type.

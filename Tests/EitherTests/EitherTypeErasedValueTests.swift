@@ -1,5 +1,5 @@
 //
-//  PolyTypeErasedValueTests.swift
+//  EitherTypeErasedValueTests.swift
 //  
 //
 //  Created by Mathew Polzin on 11/4/19.

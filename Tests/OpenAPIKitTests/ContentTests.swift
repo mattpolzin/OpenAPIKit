@@ -13,16 +13,16 @@ import AnyCodable
 final class ContentTests: XCTestCase {
     func test_init() {
         let t1 = OpenAPI.Content(schema: .init(.external(URL(string:"hello.json#/world")!)))
-        XCTAssertNotNil(t1.schema.a)
-        XCTAssertNil(t1.schema.b)
+        XCTAssertNotNil(t1.schema.reference)
+        XCTAssertNil(t1.schema.schemaValue)
 
         let t2 = OpenAPI.Content(schema: .init(.string))
-        XCTAssertNotNil(t2.schema.b)
-        XCTAssertNil(t2.schema.a)
+        XCTAssertNotNil(t2.schema.schemaValue)
+        XCTAssertNil(t2.schema.reference)
 
         let t3 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!))
-        XCTAssertNotNil(t3.schema.a)
-        XCTAssertNil(t3.schema.b)
+        XCTAssertNotNil(t3.schema.reference)
+        XCTAssertNil(t3.schema.schemaValue)
 
         let withExample = OpenAPI.Content(schema: .init(.string),
                                           example: "hello",
@@ -43,13 +43,13 @@ final class ContentTests: XCTestCase {
 
         let t4 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!),
                                 examples: nil)
-        XCTAssertNotNil(t4.schema.a)
-        XCTAssertNil(t4.schema.b)
+        XCTAssertNotNil(t4.schema.reference)
+        XCTAssertNil(t4.schema.schemaValue)
 
         let t5 = OpenAPI.Content(schema: .string,
                                 examples: nil)
-        XCTAssertNotNil(t5.schema.b)
-        XCTAssertNil(t5.schema.a)
+        XCTAssertNotNil(t5.schema.schemaValue)
+        XCTAssertNil(t5.schema.reference)
 
         let _ = OpenAPI.Content(schema: .init(.string),
                                 example: nil,
@@ -265,7 +265,7 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.b?.value.b?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value.codableValue?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {
