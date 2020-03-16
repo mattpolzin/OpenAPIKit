@@ -20,15 +20,6 @@
         }
       },
       {
-        "package": "OrderedDictionary",
-        "repositoryURL": "https://github.com/mattpolzin/OrderedDictionary.git",
-        "state": {
-          "branch": null,
-          "revision": "33a40de47e798d58f42e84e529d087f795f5a9db",
-          "version": "1.1.1"
-        }
-      },
-      {
         "package": "RichJSONParser",
         "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
         "state": {

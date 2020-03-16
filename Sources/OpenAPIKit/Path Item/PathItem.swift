@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import OrderedDictionary
 
 extension OpenAPI {
     /// OpenAPI Spec "Paths Object" path field pattern support.

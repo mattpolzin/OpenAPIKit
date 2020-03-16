@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import OrderedDictionary
 import AnyCodable
 
 extension OpenAPI {

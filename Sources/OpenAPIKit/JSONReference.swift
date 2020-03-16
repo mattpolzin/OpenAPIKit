@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import OrderedDictionary
 
 /// Used as a quick check internally in this library to determine if a type is
 /// a reference (which only `JSONReference` should be).

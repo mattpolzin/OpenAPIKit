@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import OrderedDictionary
 
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
