@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AnyCodable
 
 /// A `VendorExtendable` type is a type that supports arbitrary
 /// additions as long as those additions are keyed by strings starting

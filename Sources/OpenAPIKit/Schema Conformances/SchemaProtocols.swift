@@ -8,9 +8,6 @@
 //  declare themselves able to represent themselves
 //  as an Open API Schema Object.
 
-import Foundation
-import AnyCodable
-
 /// Anything conforming to `OpenAPISchemaType` can provide an
 /// OpenAPI schema representing itself.
 public protocol OpenAPISchemaType {

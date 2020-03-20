@@ -5,7 +5,6 @@
 //  Created by Mathew Polzin on 1/13/19.
 //
 
-import AnyCodable
 import Foundation
 
 extension OpenAPI {

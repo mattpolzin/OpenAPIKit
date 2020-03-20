@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AnyCodable
 
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"

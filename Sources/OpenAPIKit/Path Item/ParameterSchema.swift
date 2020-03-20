@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-import AnyCodable
-
 extension OpenAPI.PathItem.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///

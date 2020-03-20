@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AnyCodable
 
 // MARK: Types
 public protocol SwiftTyped {
