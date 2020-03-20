@@ -15,7 +15,6 @@ let package = Package(
             targets: ["OpenAPIKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/mattpolzin/OrderedDictionary.git", .upToNextMajor(from: "1.1.1")),
         .package(url: "https://github.com/Flight-School/AnyCodable.git", .upToNextMinor(from: "0.2.2")),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"), // just for tests
         .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
@@ -23,7 +22,7 @@ let package = Package(
     targets: [
         .target(
             name: "OpenAPIKit",
-            dependencies: ["AnyCodable", "OrderedDictionary"]),
+            dependencies: ["AnyCodable"]),
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
@@ -36,6 +35,10 @@ let package = Package(
         .testTarget(
             name: "EitherTests",
             dependencies: ["OpenAPIKit"]
+        ),
+        .testTarget(
+            name: "OrderedDictionaryTests",
+            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]
         )
     ],
     swiftLanguageVersions: [ .v5 ]
