@@ -7,7 +7,6 @@
 
 import AnyCodable
 import Foundation
-import Poly
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.

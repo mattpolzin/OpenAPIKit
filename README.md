@@ -174,6 +174,16 @@ You can check whether a given `JSONReference` exists in the Components Object wi
 
 You can create references from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
 
+You can use `document.components.dereference()` to turn an `Either` containing either a reference or a component into an optional value of that component's type (having either pulled it out of the `Either` or looked it up in the Components Object).
+
+For example,
+```swift
+let apiDoc: OpenAPI.Document = ...
+let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
+
+let addBooksParameters: [OpenAPI.PathItem.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+```
+
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
 

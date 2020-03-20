@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.Error.Decoding {
     public struct Operation: OpenAPIError {
@@ -19,7 +18,7 @@ extension OpenAPI.Error.Decoding {
             case response(Response)
             case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)
-            case neither(PolyDecodeNoTypesMatchedError)
+            case neither(EitherDecodeNoTypesMatchedError)
         }
     }
 }
@@ -35,8 +34,8 @@ extension OpenAPI.Error.Decoding.Operation {
             return error.subjectName
         case .other(let decodingError):
             return decodingError.subjectName
-        case .neither(let polyError):
-            return polyError.subjectName
+        case .neither(let eitherError):
+            return eitherError.subjectName
         }
     }
 
@@ -52,8 +51,8 @@ extension OpenAPI.Error.Decoding.Operation {
             return .inconsistency(details: error.details)
         case .other(let decodingError):
             return decodingError.errorCategory
-        case .neither(let polyError):
-            return polyError.errorCategory
+        case .neither(let eitherError):
+            return eitherError.errorCategory
         }
     }
 
@@ -67,8 +66,8 @@ extension OpenAPI.Error.Decoding.Operation {
             return error.codingPath
         case .other(let decodingError):
             return decodingError.codingPath
-        case .neither(let polyError):
-            return polyError.codingPath
+        case .neither(let eitherError):
+            return eitherError.codingPath
         }
     }
 
@@ -125,36 +124,36 @@ extension OpenAPI.Error.Decoding.Operation {
             self = Self(responseError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
             self = Self(inconsistencyError)
-        } else if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
-            self = Self(polyError)
+        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
+            self = Self(eitherError)
         } else {
             self = Self(error)
         }
     }
 
-    internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
-        if polyError.individualTypeFailures.count == 2 {
-            let firstFailureIsReference = polyError.individualTypeFailures[0].typeString == "$ref"
-            let secondFailureIsReference = polyError.individualTypeFailures[1].typeString == "$ref"
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        if eitherError.individualTypeFailures.count == 2 {
+            let firstFailureIsReference = eitherError.individualTypeFailures[0].typeString == "$ref"
+            let secondFailureIsReference = eitherError.individualTypeFailures[1].typeString == "$ref"
 
-            let firstFailureIsDeeper = polyError.individualTypeFailures[0].codingPath(relativeTo: polyError.codingPath).count > 1
-            let secondFailureIsDeeper = polyError.individualTypeFailures[1].codingPath(relativeTo: polyError.codingPath).count > 1
+            let firstFailureIsDeeper = eitherError.individualTypeFailures[0].codingPath(relativeTo: eitherError.codingPath).count > 1
+            let secondFailureIsDeeper = eitherError.individualTypeFailures[1].codingPath(relativeTo: eitherError.codingPath).count > 1
 
             if firstFailureIsReference && secondFailureIsDeeper {
-                self = Self(unwrapping: polyError.individualTypeFailures[1].error)
+                self = Self(unwrapping: eitherError.individualTypeFailures[1].error)
                 return
             } else if secondFailureIsReference && firstFailureIsDeeper {
-                self = Self(unwrapping: polyError.individualTypeFailures[0].error)
+                self = Self(unwrapping: eitherError.individualTypeFailures[0].error)
                 return
             }
         }
 
-        var codingPath = polyError.codingPath.dropFirst(2)
+        var codingPath = eitherError.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
         let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
-        context = .neither(polyError)
+        context = .neither(eitherError)
         relativeCodingPath = Array(codingPath)
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
@@ -146,6 +145,9 @@ extension Either where A == OpenAPI.PathItem.Parameter.Schema, B == OpenAPI.Cont
     public static func schema(_ schema: OpenAPI.PathItem.Parameter.Schema) -> Self {
         return .a(schema)
     }
+
+    /// Retrieve the schema if that is what this property contains.
+    public var schema: A? { a }
 }
 
 // MARK: - Codable

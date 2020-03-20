@@ -112,7 +112,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t7.example)
         XCTAssertEqual(t7.example?.value as? String, "hello")
         XCTAssertNotNil(t7.examples)
-        XCTAssertEqual(t7.examples?["two"]?.b?.value.b?.value as? String, "world")
+        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value.codableValue?.value as? String, "world")
 
         // straight to schema override explode multiple examples
         let t8 = Schema(
@@ -132,7 +132,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t8.example)
         XCTAssertEqual(t8.example?.value as? String, "hello")
         XCTAssertNotNil(t8.examples)
-        XCTAssertEqual(t8.examples?["two"]?.b?.value.b?.value as? String, "world")
+        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value.codableValue?.value as? String, "world")
 
         // schema reference multiple examples
         let t9 = Schema(
@@ -151,7 +151,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t9.example)
         XCTAssertEqual(t9.example?.value as? String, "hello")
         XCTAssertNotNil(t9.examples)
-        XCTAssertEqual(t9.examples?["two"]?.a, .external(URL(string: "world.yml")!))
+        XCTAssertEqual(t9.examples?["two"]?.reference, .external(URL(string: "world.yml")!))
 
         // schema reference override explode multiple examples
         let t10 = Schema(
@@ -171,7 +171,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t10.example)
         XCTAssertEqual(t10.example?.value as? String, "hello")
         XCTAssertNotNil(t10.examples)
-        XCTAssertEqual(t10.examples?["two"]?.a, .external(URL(string: "world.yml")!))
+        XCTAssertEqual(t10.examples?["two"]?.reference, .external(URL(string: "world.yml")!))
     }
 
     public func test_style_defaults() {

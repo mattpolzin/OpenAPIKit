@@ -99,6 +99,10 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
     }
 
+    func test_dereference() {
+        // TODO: write tests
+    }
+
     // TODO: write tests
 }
 

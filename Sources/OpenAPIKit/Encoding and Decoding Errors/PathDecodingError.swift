@@ -1,12 +1,11 @@
 //
-//  File.swift
+//  PathDecodingError.swift
 //  
 //
 //  Created by Mathew Polzin on 2/23/20.
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.Error.Decoding {
     public struct Path: OpenAPIError {
@@ -17,7 +16,7 @@ extension OpenAPI.Error.Decoding {
         public enum Context {
             case endpoint(Operation)
             case other(Swift.DecodingError)
-            case neither(PolyDecodeNoTypesMatchedError)
+            case neither(EitherDecodeNoTypesMatchedError)
         }
     }
 }
@@ -29,8 +28,8 @@ extension OpenAPI.Error.Decoding.Path {
             return endpointError.subjectName
         case .other(let decodingError):
             return decodingError.subjectName
-        case .neither(let polyError):
-            return polyError.subjectName
+        case .neither(let eitherError):
+            return eitherError.subjectName
         }
     }
 
@@ -64,8 +63,8 @@ extension OpenAPI.Error.Decoding.Path {
             return endpointError.errorCategory
         case .other(let decodingError):
             return decodingError.errorCategory
-        case .neither(let polyError):
-            return polyError.errorCategory
+        case .neither(let eitherError):
+            return eitherError.errorCategory
         }
     }
 
@@ -75,8 +74,8 @@ extension OpenAPI.Error.Decoding.Path {
             return endpointError.codingPath
         case .other(let decodingError):
             return decodingError.codingPath
-        case .neither(let polyError):
-            return polyError.codingPath
+        case .neither(let eitherError):
+            return eitherError.codingPath
         }
     }
 
@@ -105,12 +104,12 @@ extension OpenAPI.Error.Decoding.Path {
         relativeCodingPath = Array(codingPath)
     }
 
-    internal init(_ polyError: PolyDecodeNoTypesMatchedError) {
-        var codingPath = polyError.codingPath.dropFirst()
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        var codingPath = eitherError.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 
         path = route
-        context = .neither(polyError)
+        context = .neither(eitherError)
         relativeCodingPath = Array(codingPath)
     }
 

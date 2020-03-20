@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Operation Object"
@@ -173,7 +172,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
         } catch let error as InconsistencyError {
 
             throw OpenAPI.Error.Decoding.Operation(error)
-        } catch let error as PolyDecodeNoTypesMatchedError {
+        } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Operation(error)
         }

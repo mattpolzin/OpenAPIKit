@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 import OrderedDictionary
 
 extension OpenAPI {
@@ -266,7 +265,7 @@ extension OpenAPI.PathItem: Decodable {
         } catch let error as OpenAPI.Error.Decoding.Operation {
 
             throw OpenAPI.Error.Decoding.Path(error)
-        } catch let error as PolyDecodeNoTypesMatchedError {
+        } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Path(error)
         }

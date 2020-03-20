@@ -7,7 +7,6 @@
 
 import Foundation
 import AnyCodable
-import Poly
 
 /// OpenAPI "Schema Object"
 /// 

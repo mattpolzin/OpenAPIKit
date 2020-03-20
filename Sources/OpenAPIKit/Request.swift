@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
@@ -67,7 +66,7 @@ extension OpenAPI.Request: Decodable {
         } catch let error as Swift.DecodingError {
 
             throw OpenAPI.Error.Decoding.Request(error)
-        } catch let error as PolyDecodeNoTypesMatchedError {
+        } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Request(error)
         }

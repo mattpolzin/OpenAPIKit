@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Poly
 
 extension OpenAPI.Error {
     // Just creating a namespace

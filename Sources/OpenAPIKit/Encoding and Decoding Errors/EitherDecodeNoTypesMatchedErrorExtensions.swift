@@ -1,14 +1,13 @@
 //
-//  PolyDecodeNoTypesMatchedErrorExtensions.swift
+//  EitherDecodeNoTypesMatchedErrorExtensions.swift
 //  
 //
 //  Created by Mathew Polzin on 2/26/20.
 //
 
 import Foundation
-import Poly
 
-internal extension PolyDecodeNoTypesMatchedError {
+internal extension EitherDecodeNoTypesMatchedError {
     var subjectName: String {
         return codingPath.last?.stringValue ?? "[unknown object]"
     }
@@ -22,12 +21,6 @@ internal extension PolyDecodeNoTypesMatchedError {
     }
 
     var errorCategory: ErrorCategory {
-        //
-        // We get away with assuming the choice is between either of 2
-        // types currently. Likely we will not need to ever worry about
-        // a Poly3 or beyond when parsing OpenAPI documents (with the notable
-        // exception of parsing OpenAPI schemas)
-        //
         guard
             individualTypeFailures.count == 2,
             let failure1 = individualTypeFailures.first,
@@ -72,13 +65,13 @@ internal extension PolyDecodeNoTypesMatchedError {
     }
 }
 
-internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
+internal extension EitherDecodeNoTypesMatchedError.IndividualFailure {
     func codingPath(relativeTo other: [CodingKey]) -> [CodingKey] {
         fullCodingPath.relative(to: other)
     }
 
     var typeString: String {
-        if (type as? OpenAPIKit.Reference.Type) != nil {
+        if (type as? OpenAPIKit._OpenAPIReference.Type) != nil {
             return "$ref"
         }
         return String(describing: type)
@@ -94,8 +87,8 @@ internal extension PolyDecodeNoTypesMatchedError.IndividualFailure {
         if let inconsistencyError = error.underlyingError as? InconsistencyError {
             return inconsistencyError.codingPath
         }
-        if let polyError = error.underlyingError as? PolyDecodeNoTypesMatchedError {
-            return polyError.codingPath
+        if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
+            return eitherError.codingPath
         }
         if let openApiError = error.underlyingError as? OpenAPIError {
             return openApiError.codingPath

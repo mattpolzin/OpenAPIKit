@@ -99,4 +99,17 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         // check for oauth flow
         XCTAssertNotNil(apiDoc.components.securitySchemes["Oauth2"])
     }
+
+    func test_someReferences() {
+        guard let apiDoc = apiDoc else { return }
+
+        let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
+
+        let addBooksParameters = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+
+        XCTAssertNotNil(addBooksParameters)
+        XCTAssertEqual(addBooksParameters?.count, 7)
+        XCTAssertEqual(addBooksParameters?.first?.description, "Data format for the response.")
+        XCTAssertEqual(addBooksParameters?.first?.parameterLocation, .query)
+    }
 }
