@@ -3887,12 +3887,20 @@ extension SchemaObjectTests {
                 [ "hello": false]
             ]
         )
-        let _ = JSONSchema.object(
+        let addProp1 = JSONSchema.object(
             additionalProperties: .init(true)
         )
-        let _ = JSONSchema.object(
+        let addProp2 = JSONSchema.object(
             additionalProperties: .init(.boolean)
         )
+        let addProp3 = JSONSchema.object(
+            additionalProperties: .boolean(true)
+        )
+        let addProp4 = JSONSchema.object(
+            additionalProperties: .schema(.boolean)
+        )
+        XCTAssertEqual(addProp1, addProp3)
+        XCTAssertEqual(addProp2, addProp4)
 
         // a little respect paid to JSON:API
         let _ = JSONSchema.object(

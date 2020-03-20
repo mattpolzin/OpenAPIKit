@@ -99,3 +99,12 @@ extension Either where B == OpenAPI.Header {
     /// Retrieve the header if that is what this property contains.
     public var headerValue: B? { b }
 }
+
+// MARK: - Convenience constructors
+extension Either where A == Bool {
+    public static func boolean(_ boolean: Bool) -> Self { .a(boolean) }
+}
+
+extension Either where B == JSONSchema {
+    public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
+}
