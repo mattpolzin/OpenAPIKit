@@ -141,25 +141,25 @@ Some schemas can be easily generated from Swift types. Many of the fundamental S
 
 For example, the following are true
 ```swift
-String.openAPINode() == JSONSchema.string
+String.openAPISchema == JSONSchema.string
 
-Bool.openAPINode() == JSONSchema.boolean
+Bool.openAPISchema == JSONSchema.boolean
 
-Double.openAPINode() == JSONSchema.number(format: .double)
+Double.openAPISchema == JSONSchema.number(format: .double)
 
-Float.openAPINode() == JSONSchema.number(format: .float)
+Float.openAPISchema == JSONSchema.number(format: .float)
 ...
 ```
 
 `Array` and `Optional` are supported out-of-box. For example, the following are true
 ```swift
-[String].openAPINode() == .array(items: .string)
+[String].openAPISchema == .array(items: .string)
 
-[Int].openAPINode() == .array(items: .integer)
+[Int].openAPISchema == .array(items: .integer)
 
-Int32?.openAPINode() == .integer(format: .int32, required: false)
+Int32?.openAPISchema == .integer(format: .int32, required: false)
 
-[String?].openAPINode() == .array(items: .string(required: false))
+[String?].openAPISchema == .array(items: .string(required: false))
 ...
 ```
 
