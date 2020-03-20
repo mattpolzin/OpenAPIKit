@@ -108,5 +108,197 @@ final class ComponentsTests: XCTestCase {
 
 // MARK: - Codable Tests
 extension ComponentsTests {
-    // TODO: write tests
+    func test_minimal_encode() throws {
+        let t1 = OpenAPI.Components()
+
+        let encoded = try testStringFromEncoding(of: t1)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+
+}
+"""
+        )
+    }
+
+    func test_minimal_decode() throws {
+        let t1 =
+"""
+{
+
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(OpenAPI.Components.self, from: t1)
+
+        XCTAssertEqual(decoded, OpenAPI.Components())
+    }
+
+    func test_maximal_encode() throws {
+        let t1 = OpenAPI.Components(
+            schemas: [
+                "one": .string
+            ],
+            responses: [
+                "two": .init(description: "hello", content: [:])
+            ],
+            parameters: [
+                "three": .init(name: "hi", parameterLocation: .query, content: [:])
+            ],
+            examples: [
+                "four": .init(value: .init(URL(string: "http://address.com")!))
+            ],
+            requestBodies: [
+                "five": .init(content: [:])
+            ],
+            headers: [
+                "six": .init(schema: .string)
+            ],
+            securitySchemes: [
+                "seven": .http(scheme: "cool")
+            ]
+        )
+
+        let encoded = try testStringFromEncoding(of: t1)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+  "examples" : {
+    "four" : {
+      "externalValue" : "http:\\/\\/address.com"
+    }
+  },
+  "headers" : {
+    "six" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  },
+  "parameters" : {
+    "three" : {
+      "content" : {
+
+      },
+      "in" : "query",
+      "name" : "hi"
+    }
+  },
+  "requestBodies" : {
+    "five" : {
+      "content" : {
+
+      }
+    }
+  },
+  "responses" : {
+    "two" : {
+      "description" : "hello"
+    }
+  },
+  "schemas" : {
+    "one" : {
+      "type" : "string"
+    }
+  },
+  "securitySchemes" : {
+    "seven" : {
+      "scheme" : "cool",
+      "type" : "http"
+    }
+  }
+}
+"""
+        )
+    }
+
+    func test_maximal_decode() throws {
+        // TODO: write tests
+    }
+}
+
+// MARK: ComponentKey
+extension ComponentsTests {
+    func test_acceptableKeys_encode() throws {
+        let t1 = ComponentKeyWrapper(key: "shell0")
+        let t2 = ComponentKeyWrapper(key: "hello_world1234-.")
+
+        let encoded1 = try testStringFromEncoding(of: t1)
+        let encoded2 = try testStringFromEncoding(of: t2)
+
+        assertJSONEquivalent(
+            encoded1,
+"""
+{
+  "key" : "shell0"
+}
+"""
+        )
+
+        assertJSONEquivalent(
+            encoded2,
+"""
+{
+  "key" : "hello_world1234-."
+}
+"""
+        )
+    }
+
+    func test_acceptableKeys_decode() throws {
+        let t1 =
+"""
+{
+    "key": "shell0"
+}
+""".data(using: .utf8)!
+
+        let t2 =
+"""
+{
+    "key": "1234-_."
+}
+""".data(using: .utf8)!
+
+        let decoded1 = try testDecoder.decode(ComponentKeyWrapper.self, from: t1)
+        let decoded2 = try testDecoder.decode(ComponentKeyWrapper.self, from: t2)
+
+        XCTAssertEqual(decoded1.key, "shell0")
+        XCTAssertEqual(decoded2.key, "1234-_.")
+    }
+
+    func test_unacceptableKeys_encode() {
+        let t1 = ComponentKeyWrapper(key: "$hell0")
+        let t2 = ComponentKeyWrapper(key: "hello world")
+
+        XCTAssertThrowsError(try testEncoder.encode(t1))
+        XCTAssertThrowsError(try testEncoder.encode(t2))
+    }
+
+    func test_unacceptableKeys_decode() {
+        let t1 =
+"""
+{
+    "key": "$hell0"
+}
+""".data(using: .utf8)!
+
+        let t2 =
+"""
+{
+    "key": "hello world"
+}
+""".data(using: .utf8)!
+
+        XCTAssertThrowsError(try testDecoder.decode(ComponentKeyWrapper.self, from: t1))
+        XCTAssertThrowsError(try testDecoder.decode(ComponentKeyWrapper.self, from: t2))
+    }
+}
+
+fileprivate struct ComponentKeyWrapper: Codable {
+    let key: OpenAPI.ComponentKey
 }
