@@ -17,23 +17,23 @@ extension OpenAPI {
     /// be referenced from other parts of the spec.
     public struct Components: Equatable {
 
-        public var schemas: OrderedDictionary<String, JSONSchema>
-        public var responses: OrderedDictionary<String, Response>
-        public var parameters: OrderedDictionary<String, PathItem.Parameter>
-        public var examples: OrderedDictionary<String, Example>
-        public var requestBodies: OrderedDictionary<String, Request>
-        public var headers: OrderedDictionary<String, Header>
-        public var securitySchemes: OrderedDictionary<String, SecurityScheme>
+        public var schemas: ComponentDictionary<JSONSchema>
+        public var responses: ComponentDictionary<Response>
+        public var parameters: ComponentDictionary<PathItem.Parameter>
+        public var examples: ComponentDictionary<Example>
+        public var requestBodies: ComponentDictionary<Request>
+        public var headers: ComponentDictionary<Header>
+        public var securitySchemes: ComponentDictionary<SecurityScheme>
         //    public var links:
         //    public var callbacks:
 
-        public init(schemas: OrderedDictionary<String, JSONSchema> = [:],
-                    responses: OrderedDictionary<String, Response> = [:],
-                    parameters: OrderedDictionary<String, PathItem.Parameter> = [:],
-                    examples: OrderedDictionary<String, Example> = [:],
-                    requestBodies: OrderedDictionary<String, Request> = [:],
-                    headers: OrderedDictionary<String, Header> = [:],
-                    securitySchemes: OrderedDictionary<String, SecurityScheme> = [:]) {
+        public init(schemas: ComponentDictionary<JSONSchema> = [:],
+                    responses: ComponentDictionary<Response> = [:],
+                    parameters: ComponentDictionary<PathItem.Parameter> = [:],
+                    examples: ComponentDictionary<Example> = [:],
+                    requestBodies: ComponentDictionary<Request> = [:],
+                    headers: ComponentDictionary<Header> = [:],
+                    securitySchemes: ComponentDictionary<SecurityScheme> = [:]) {
             self.schemas = schemas
             self.responses = responses
             self.parameters = parameters
@@ -59,6 +59,55 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI {
+    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable {
+        public let rawValue: String
+
+        public init(stringLiteral value: StringLiteralType) {
+            self.rawValue = value
+        }
+
+        public init?(rawValue: String) {
+            var allowedCharacters = CharacterSet.alphanumerics
+            allowedCharacters.insert(charactersIn: "-_.")
+            guard CharacterSet(charactersIn: rawValue).isSubset(of: allowedCharacters) else {
+                return nil
+            }
+            self.rawValue = rawValue
+        }
+
+        public init(from decoder: Decoder) throws {
+            let rawValue = try decoder.singleValueContainer().decode(String.self)
+            guard let key = Self(rawValue: rawValue) else {
+                throw InconsistencyError(
+                    subjectName: "Component Key",
+                    details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
+                    codingPath: decoder.codingPath
+                )
+            }
+            self = key
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+
+            // we check for consistency on encode because a string literal
+            // may result in an invalid component key being constructed.
+            guard Self(rawValue: rawValue) != nil else {
+                throw InconsistencyError(
+                    subjectName: "Component Key",
+                    details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
+                    codingPath: container.codingPath
+                )
+            }
+
+            try container.encode(rawValue)
+        }
+    }
+
+    public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
+}
+
 /// Anything conforming to ComponentDictionaryLocatable knows
 /// where to find resources of its type in the Components Dictionary.
 public protocol ComponentDictionaryLocatable {
@@ -67,7 +116,7 @@ public protocol ComponentDictionaryLocatable {
     /// This can be used to create a JSON path
     /// like `#/name1/name2/name3`
     static var openAPIComponentsKey: String { get }
-    static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { get }
+    static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { get }
 }
 
 /// A type conforming to `AnyStringyContainer` can
@@ -79,37 +128,37 @@ public protocol AnyStringyContainer {
 // MARK: - Reference Support
 extension JSONSchema: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "schemas" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.schemas }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.schemas }
 }
 
 extension OpenAPI.Response: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "responses" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.responses }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.responses }
 }
 
 extension OpenAPI.PathItem.Parameter: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "parameters" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.parameters }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.parameters }
 }
 
 extension OpenAPI.Example: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "examples" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.examples }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.examples }
 }
 
 extension OpenAPI.Request: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "requestBodies" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.requestBodies }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.requestBodies }
 }
 
 extension OpenAPI.Header: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "headers" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.headers }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.headers }
 }
 
 extension OpenAPI.SecurityScheme: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "securitySchemes" }
-    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OrderedDictionary<String, Self>> { \.securitySchemes }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.securitySchemes }
 }
 
 extension OpenAPI.Components {
@@ -133,7 +182,10 @@ extension OpenAPI.Components {
 
     /// Check if the `Components` contains the given internal reference or not.
     public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> Bool {
-        return reference.name.map { self[keyPath: ReferenceType.openAPIComponentsKeyPath].contains(key: $0) } ?? false
+        return reference.name
+            .flatMap(OpenAPI.ComponentKey.init(rawValue:))
+            .map { self[keyPath: ReferenceType.openAPIComponentsKeyPath].contains(key: $0) }
+            ?? false
     }
 
     /// Retrieve item referenced from the `Components`.
@@ -147,7 +199,9 @@ extension OpenAPI.Components {
 
     /// Retrieve item referenced from the `Components`.
     public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> ReferenceType? {
-        return reference.name.flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
+        return reference.name
+            .flatMap(OpenAPI.ComponentKey.init(rawValue:))
+            .flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
     }
 
     /// Pass a value that can be either a reference to a component or the component itself.
@@ -232,25 +286,25 @@ extension OpenAPI.Components: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        schemas = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .schemas)
+        schemas = try container.decodeIfPresent(OpenAPI.ComponentDictionary<JSONSchema>.self, forKey: .schemas)
             ?? [:]
 
-        responses = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.Response>.self, forKey: .responses)
+        responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
             ?? [:]
 
-        parameters = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.PathItem.Parameter>.self, forKey: .parameters)
+        parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem.Parameter>.self, forKey: .parameters)
         ?? [:]
 
-        examples = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.Example>.self, forKey: .examples)
+        examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)
             ?? [:]
 
-        requestBodies = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.Request>.self, forKey: .requestBodies)
+        requestBodies = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
             ?? [:]
 
-        headers = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.Header>.self, forKey: .headers)
+        headers = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Header>.self, forKey: .headers)
             ?? [:]
 
-        securitySchemes = try container.decodeIfPresent(OrderedDictionary<String, OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+        securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
     }
 }
 
