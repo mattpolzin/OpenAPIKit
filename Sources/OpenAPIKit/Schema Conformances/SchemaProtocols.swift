@@ -12,5 +12,5 @@
 /// OpenAPI schema representing itself.
 public protocol OpenAPISchemaType {
     /// The best `JSONSchema` representation for this type.
-    static func openAPISchema() throws -> JSONSchema
+    static var openAPISchema: JSONSchema { get }
 }
