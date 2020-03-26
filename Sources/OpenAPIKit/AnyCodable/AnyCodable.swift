@@ -186,7 +186,23 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as String, rhs as String):
             return lhs == rhs
+        case let (lhs as [String: String], rhs as [String: String]):
+            return lhs == rhs
+        case let (lhs as [String: Int], rhs as [String: Int]):
+            return lhs == rhs
+        case let (lhs as [String: Double], rhs as [String: Double]):
+            return lhs == rhs
+        case let (lhs as [String: Bool], rhs as [String: Bool]):
+            return lhs == rhs
         case let (lhs as [String: AnyCodable], rhs as [String: AnyCodable]):
+            return lhs == rhs
+        case let (lhs as [String], rhs as [String]):
+            return lhs == rhs
+        case let (lhs as [Int], rhs as [Int]):
+            return lhs == rhs
+        case let (lhs as [Double], rhs as [Double]):
+            return lhs == rhs
+        case let (lhs as [Bool], rhs as [Bool]):
             return lhs == rhs
         case let (lhs as [AnyCodable], rhs as [AnyCodable]):
             return lhs == rhs
