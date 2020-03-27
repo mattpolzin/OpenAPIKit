@@ -203,8 +203,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Get an example, encoded as a `String`, if specified. If unspecified, returns `nil`.
-    public var example: String? {
+    /// Get an example, if specified. If unspecified, returns `nil`.
+    public var example: AnyCodable? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
@@ -305,21 +305,20 @@ extension JSONSchema {
 
     /// Returns a version of this `JSONSchema` that has the given example
     /// attached.
-    public func with<T: Encodable>(example codableExample: T,
-                                   using encoder: JSONEncoder) throws -> JSONSchema {
+    public func with(example: AnyCodable) throws -> JSONSchema {
         switch self {
         case .boolean(let context):
-            return .boolean(context.with(example: codableExample, using: encoder))
+            return .boolean(context.with(example: example))
         case .object(let contextA, let contextB):
-            return .object(contextA.with(example: codableExample, using: encoder), contextB)
+            return .object(contextA.with(example: example), contextB)
         case .array(let contextA, let contextB):
-            return .array(contextA.with(example: codableExample, using: encoder), contextB)
+            return .array(contextA.with(example: example), contextB)
         case .number(let context, let contextB):
-            return .number(context.with(example: codableExample, using: encoder), contextB)
+            return .number(context.with(example: example), contextB)
         case .integer(let context, let contextB):
-            return .integer(context.with(example: codableExample, using: encoder), contextB)
+            return .integer(context.with(example: example), contextB)
         case .string(let context, let contextB):
-            return .string(context.with(example: codableExample, using: encoder), contextB)
+            return .string(context.with(example: example), contextB)
         case .all, .one, .any, .not, .reference, .undefined:
             throw OpenAPI.EncodableError.exampleNotSupported("examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
         }
@@ -362,7 +361,7 @@ extension JSONSchema {
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let context = JSONSchema.Context<JSONTypeFormat.BooleanFormat>(
             format: format,
@@ -390,7 +389,7 @@ extension JSONSchema {
         description: String? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         return .boolean(
             format: format,
@@ -424,7 +423,7 @@ extension JSONSchema {
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.Context<JSONTypeFormat.StringFormat>(
             format: format,
@@ -460,7 +459,7 @@ extension JSONSchema {
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: AnyCodable...,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         return .string(
             format: format,
@@ -497,7 +496,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.Context<JSONTypeFormat.NumberFormat>(
             format: format,
@@ -533,7 +532,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         return .number(
             format: format,
@@ -570,7 +569,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.Context<JSONTypeFormat.IntegerFormat>(
             format: format,
@@ -606,7 +605,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         return .integer(
             format: format,
@@ -644,7 +643,7 @@ extension JSONSchema {
         properties: [String: JSONSchema] = [:],
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let generalContext = JSONSchema.Context<JSONTypeFormat.ObjectFormat>(
             format: format,
@@ -686,7 +685,7 @@ extension JSONSchema {
         uniqueItems: Bool = false,
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
-        example: (codable: AnyCodable, encoder: JSONEncoder)? = nil
+        example: AnyCodable? = nil
     ) -> JSONSchema {
         let generalContext = JSONSchema.Context<JSONTypeFormat.ArrayFormat>(
             format: format,

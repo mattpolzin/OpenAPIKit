@@ -19,7 +19,7 @@ public protocol JSONSchemaContext {
     var description: String? { get }
     var externalDocs: OpenAPI.ExternalDocumentation? { get }
     var allowedValues: [AnyCodable]? { get }
-    var example: String? { get }
+    var example: AnyCodable? { get }
     var readOnly: Bool { get }
     var writeOnly: Bool { get }
     var deprecated: Bool { get }
@@ -56,25 +56,21 @@ extension JSONSchema {
         /// into an allowed value.
         public let allowedValues: [AnyCodable]?
 
-        // I wanted example to be AnyCodable, but alas that causes
-        // runtime problems when encoding in a very strange way.
-        // For now, a String (which is OK by the OpenAPI spec) will
-        // have to do.
-        public let example: String?
+        public let example: AnyCodable?
 
         public var readOnly: Bool { permissions == .readOnly }
         public var writeOnly: Bool { permissions == .writeOnly }
 
-        public init<T: Encodable>(format: Format = .unspecified,
-                                  required: Bool = true,
-                                  nullable: Bool = false,
-                                  permissions: Permissions = .readWrite,
-                                  deprecated: Bool = false,
-                                  title: String? = nil,
-                                  description: String? = nil,
-                                  externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                                  allowedValues: [AnyCodable]? = nil,
-                                  example: (codable: T, encoder: JSONEncoder)) {
+        public init(format: Format = .unspecified,
+                    required: Bool = true,
+                    nullable: Bool = false,
+                    permissions: Permissions = .readWrite,
+                    deprecated: Bool = false,
+                    title: String? = nil,
+                    description: String? = nil,
+                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
+                    allowedValues: [AnyCodable]? = nil,
+                    example: AnyCodable? = nil) {
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -84,9 +80,7 @@ extension JSONSchema {
             self.description = description
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
-            self.example = (try? example.encoder.encode(example.codable))
-                .flatMap { String(data: $0, encoding: .utf8) }
-                ?? JSONSchema.fragmentString(from: example.codable)
+            self.example = example
         }
 
         public init(format: Format = .unspecified,
@@ -98,7 +92,7 @@ extension JSONSchema {
                     description: String? = nil,
                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     allowedValues: [AnyCodable]? = nil,
-                    example: (codable: AnyCodable, encoder: JSONEncoder)? = nil) {
+                    example: String) {
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -108,31 +102,7 @@ extension JSONSchema {
             self.description = description
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
-            self.example = example
-                .flatMap { try? $0.encoder.encode($0.codable)}
-                .flatMap { String(data: $0, encoding: .utf8) }
-        }
-
-        private init(format: Format = .unspecified,
-                     required: Bool = true,
-                     nullable: Bool = false,
-                     permissions: Permissions = .readWrite,
-                     deprecated: Bool = false,
-                     title: String? = nil,
-                     description: String? = nil,
-                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                     allowedValues: [AnyCodable]? = nil,
-                     example: String?) {
-            self.format = format
-            self.required = required
-            self.nullable = nullable
-            self.permissions = permissions
-            self.deprecated = deprecated
-            self.title = title
-            self.description = description
-            self.externalDocs = externalDocs
-            self.allowedValues = allowedValues
-            self.example = example
+            self.example = AnyCodable(example)
         }
 
         public enum Permissions: String, Codable {
@@ -203,7 +173,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given example
-    public func with<T: Encodable>(example: T, using encoder: JSONEncoder) -> JSONSchema.Context<Format> {
+    public func with(example: AnyCodable) -> JSONSchema.Context<Format> {
         return .init(format: format,
                      required: required,
                      nullable: nullable,
@@ -213,7 +183,7 @@ extension JSONSchema.Context {
                      description: description,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
-                     example: (codable: example, encoder: encoder))
+                     example: example)
     }
 }
 
@@ -440,15 +410,7 @@ extension JSONSchema.Context: Decodable {
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
-        if let decodedExample = try container.decodeIfPresent(AnyCodable.self, forKey: .example) {
-            if let fragment = decodedExample.value as? String {
-                example = fragment
-            } else {
-                example = try String(data: JSONEncoder().encode(decodedExample), encoding: .utf8)!
-            }
-        } else {
-            example = nil
-        }
+        example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
     }
 }
 
