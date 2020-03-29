@@ -1,0 +1,15 @@
+name: Code Coverage
+
+on: [push]
+
+jobs:
+  codecov:
+    container: 
+      image: swift:5.2-bionic
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: swift test --enable-test-discovery --enable-code-coverage
+    - uses: mattpolzin/swift-codecov-action@0.3.0
+      with:
+        MINIMUM_COVERAGE: 98
