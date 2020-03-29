@@ -40,6 +40,15 @@ final class ComponentsTests: XCTestCase {
         XCTAssertThrowsError(try components.contains(ref7))
     }
 
+    func test_failedExternalReferenceLookup() {
+        let components = OpenAPI.Components.noComponents
+        let ref = JSONReference<JSONSchema>.external(URL(string: "hi.json#/hello")!)
+
+        XCTAssertThrowsError(try components.contains(ref)) { error in
+            XCTAssertEqual(String(describing: error), "You cannot look up remote JSON references in the Components Object local to this file.")
+        }
+    }
+
     func test_referenceCreation() throws {
         let components = OpenAPI.Components(
             schemas: [
@@ -55,6 +64,13 @@ final class ComponentsTests: XCTestCase {
 
         XCTAssertThrowsError(try components.reference(named: "missing", ofType: JSONSchema.self))
         XCTAssertThrowsError(try components.reference(named: "hello", ofType: OpenAPI.PathItem.Parameter.self))
+    }
+
+    func test_failedReferenceCreation() {
+        let components = OpenAPI.Components.noComponents
+        XCTAssertThrowsError(try components.reference(named: "hello", ofType: JSONSchema.self)) { error in
+            XCTAssertEqual(String(describing: error), "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. 'hello' was not found in schemas.")
+        }
     }
 
     func test_lookupEachType() throws {
@@ -100,7 +116,20 @@ final class ComponentsTests: XCTestCase {
     }
 
     func test_dereference() {
-        // TODO: write tests
+        let components = OpenAPI.Components(
+            schemas: [
+                "hello": .boolean
+            ]
+        )
+
+        let schemas: [Either<JSONReference<JSONSchema>, JSONSchema>] = [
+            .schema(.string),
+            .reference(.component(named: "hello"))
+        ]
+
+        let resolvedSchemas = schemas.map(components.dereference)
+
+        XCTAssertEqual(resolvedSchemas, [.string, .boolean])
     }
 
     // TODO: write tests

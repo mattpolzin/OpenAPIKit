@@ -105,6 +105,10 @@ extension Either where A == Bool {
     public static func boolean(_ boolean: Bool) -> Self { .a(boolean) }
 }
 
+extension Either where A: _OpenAPIReference {
+    public static func reference(_ reference: A) -> Self { .a(reference) }
+}
+
 extension Either where B == JSONSchema {
     public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
 }
