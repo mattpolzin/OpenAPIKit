@@ -29,26 +29,26 @@ public struct OrderedDictionary<Key, Value> where Key: Hashable {
     }
 
     public init<S>(grouping values: S, by keyForValue: (S.Element) throws -> Key) rethrows where Value == [S.Element], S : Sequence {
-        var dict = Self()
+        var temporaryDictionary = Self()
 
         for value in values {
-            try dict[keyForValue(value), default: [S.Element]()].append(value)
+            try temporaryDictionary[keyForValue(value), default: [S.Element]()].append(value)
         }
-        self = dict
+        self = temporaryDictionary
     }
 
     public init<S>(_ keysAndValues: S, uniquingKeysWith combine: (Value, Value) throws -> Value) rethrows where S : Sequence, S.Element == (Key, Value) {
-        var dict = Self()
+        var temporaryDictionary = Self()
 
         for (key, value) in keysAndValues {
-            if let existing = dict[key] {
-                try dict[key] = combine(existing, value)
+            if let existing = temporaryDictionary[key] {
+                try temporaryDictionary[key] = combine(existing, value)
             } else {
-                dict[key] = value
+                temporaryDictionary[key] = value
             }
         }
 
-        self = dict
+        self = temporaryDictionary
     }
 
     /// Get/Set the value for the given key.
@@ -197,11 +197,11 @@ extension OrderedDictionary: Collection {
 extension OrderedDictionary {
     public struct Iterator: Sequence, IteratorProtocol {
         private var idxReciprocal: Int
-        private let dict: OrderedDictionary
+        private let dictionary: OrderedDictionary
 
-        fileprivate init(_ dict: OrderedDictionary) {
-            self.dict = dict
-            self.idxReciprocal = dict.count
+        fileprivate init(_ dictionary: OrderedDictionary) {
+            self.dictionary = dictionary
+            self.idxReciprocal = dictionary.count
         }
 
         public mutating func next() -> (key: Key, value: Value)? {
@@ -210,8 +210,8 @@ extension OrderedDictionary {
             }
 
             defer { idxReciprocal -= 1 }
-            let key = dict.orderedKeys[dict.orderedKeys.count - idxReciprocal]
-            let value = dict.unorderedHash[key]
+            let key = dictionary.orderedKeys[dictionary.orderedKeys.count - idxReciprocal]
+            let value = dictionary.unorderedHash[key]
 
             return value.map { (key, $0) }
         }
@@ -257,8 +257,8 @@ extension OrderedDictionary: Encodable where Key: Encodable, Value: Encodable {
     public func encode(to encoder: Encoder) throws {
 
         // try for String
-        if let encDict = self as? OrderedDictionary<String, Value> {
-            try encodeStringDict(encDict, to: encoder)
+        if let encodableDictionary = self as? OrderedDictionary<String, Value> {
+            try encodeStringDict(encodableDictionary, to: encoder)
             return
         }
 
@@ -270,8 +270,8 @@ extension OrderedDictionary: Encodable where Key: Encodable, Value: Encodable {
         }
 
         // try for RawRepresentable with String RawValues
-        if let encDict = self as? StringRawKeyEncodable {
-            let kvPairs = zip(encDict.orderedStringKeys, self.values)
+        if let encodableDictionary = self as? StringRawKeyEncodable {
+            let kvPairs = zip(encodableDictionary.orderedStringKeys, self.values)
             try encodeKeyValuePairs(kvPairs, to: encoder)
             return
         }
@@ -355,14 +355,14 @@ extension OrderedDictionary: Decodable where Key: Decodable, Value: Decodable {
         }
 
         // try for LosslessStringConvertible
-        if let decDictType = Self.self as? LosslessStringKeyDecodable.Type {
-            self = try decDictType.decodeLosslessStringDict(from: decoder) as! Self
+        if let decodableDictionaryType = Self.self as? LosslessStringKeyDecodable.Type {
+            self = try decodableDictionaryType.decodeLosslessStringDict(from: decoder) as! Self
             return
         }
 
         // try for RawRepresentable with String RawValues
-        if let decDictType = Self.self as? StringRawKeyDecodable.Type {
-            self = try decDictType.decodeRawStringDict(from: decoder) as! Self
+        if let decodableDictionaryType = Self.self as? StringRawKeyDecodable.Type {
+            self = try decodableDictionaryType.decodeRawStringDict(from: decoder) as! Self
             return
         }
 
@@ -386,16 +386,16 @@ extension OrderedDictionary: Decodable where Key: Decodable, Value: Decodable {
     /// Decode a `String`-keyed OrderedDictionary from a hash.
     internal static func decodeStringDict(
         from decoder: Decoder
-    ) throws -> OrderedDictionary<String, Value> {
+    ) throws -> Any {
         let container = try decoder.container(keyedBy: AnyCodingKey.self)
 
-        var dict = OrderedDictionary<String, Value>()
+        var dictionary = OrderedDictionary<String, Value>()
 
         for key in container.allKeys {
-            dict[key.stringValue] = try container.decode(Value.self, forKey: key)
+            dictionary[key.stringValue] = try container.decode(Value.self, forKey: key)
         }
 
-        return dict
+        return dictionary
     }
 }
 
@@ -405,6 +405,10 @@ private protocol LosslessStringKeyDecodable {
     ) throws -> Any
 }
 
+internal struct KeyDecodingError: Swift.Error {
+    let localizedDescription: String
+}
+
 extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStringConvertible, Value: Decodable {
     /// Decode a `LosslessStringConvertible`-keyed OrderedDictionary from a hash.
     internal static func decodeLosslessStringDict(
@@ -412,16 +416,27 @@ extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStrin
     ) throws -> Any {
         let container = try decoder.container(keyedBy: AnyCodingKey.self)
 
-        var dict = OrderedDictionary<Key, Value>()
+        var dictionary = OrderedDictionary<Key, Value>()
 
         for key in container.allKeys {
-            guard let dictKey = Key(key.stringValue) else {
-                throw DecodingError.typeMismatch(Key.self, DecodingError.Context(codingPath: container.codingPath + [key], debugDescription: "OrderedDictionary key could not be decoded as required type."))
+            guard let dictionaryKey = Key(key.stringValue) else {
+                let errorMessage = (Key.self as? StringConvertibleHintProvider.Type)?
+                    .problem(with: key.stringValue)
+                    ?? "OrderedDictionary key could not be decoded as required type."
+
+                throw DecodingError.typeMismatch(
+                    Key.self,
+                    DecodingError.Context(
+                        codingPath: container.codingPath + [key],
+                        debugDescription: errorMessage,
+                        underlyingError: KeyDecodingError(localizedDescription: errorMessage)
+                    )
+                )
             }
-            dict[dictKey] = try container.decode(Value.self, forKey: key)
+            dictionary[dictionaryKey] = try container.decode(Value.self, forKey: key)
         }
 
-        return dict
+        return dictionary
     }
 }
 
@@ -438,15 +453,26 @@ extension OrderedDictionary: StringRawKeyDecodable where Key: RawRepresentable, 
     ) throws -> Any {
         let container = try decoder.container(keyedBy: AnyCodingKey.self)
 
-        var dict = OrderedDictionary<Key, Value>()
+        var dictionary = OrderedDictionary<Key, Value>()
 
         for key in container.allKeys {
-            guard let dictKey = Key(rawValue: key.stringValue) else {
-                throw DecodingError.typeMismatch(Key.self, DecodingError.Context(codingPath: container.codingPath + [key], debugDescription: "OrderedDictionary key could not be decoded as required type."))
+            guard let dictionaryKey = Key(rawValue: key.stringValue) else {
+                let errorMessage = (Key.self as? StringConvertibleHintProvider.Type)?
+                    .problem(with: key.stringValue)
+                    ?? "OrderedDictionary key could not be decoded as required type."
+
+                throw DecodingError.typeMismatch(
+                    Key.self,
+                    DecodingError.Context(
+                        codingPath: container.codingPath + [key],
+                        debugDescription: errorMessage,
+                        underlyingError: KeyDecodingError(localizedDescription: errorMessage)
+                    )
+                )
             }
-            dict[dictKey] = try container.decode(Value.self, forKey: key)
+            dictionary[dictionaryKey] = try container.decode(Value.self, forKey: key)
         }
 
-        return dict
+        return dictionary
     }
 }

@@ -32,7 +32,7 @@ components:
 
             print(error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected `h#llo` value in Document.components.schemas to be parsable as ComponentKey but it was not.")
+            XCTAssertEqual(openAPIError.localizedDescription, #"Inconsistency encountered when parsing `h#llo` in Document.components.schemas: Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\.\-_]+$`. 'h#llo' does not..."#)
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "schemas", "h#llo"])
         }
     }
