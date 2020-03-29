@@ -59,7 +59,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI {
-    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable {
+    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable, StringConvertibleHintProvider {
         public let rawValue: String
 
         public init(stringLiteral value: StringLiteralType) {
@@ -73,6 +73,13 @@ extension OpenAPI {
                 return nil
             }
             self.rawValue = rawValue
+        }
+
+        public static func problem(with proposedString: String) -> String? {
+            if Self(rawValue: proposedString) == nil {
+                return "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(proposedString)' does not.."
+            }
+            return nil
         }
 
         public init(from decoder: Decoder) throws {
@@ -285,25 +292,36 @@ extension OpenAPI.Components: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        schemas = try container.decodeIfPresent(OpenAPI.ComponentDictionary<JSONSchema>.self, forKey: .schemas)
+        do {
+            schemas = try container.decodeIfPresent(OpenAPI.ComponentDictionary<JSONSchema>.self, forKey: .schemas)
+                ?? [:]
+
+            responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
+                ?? [:]
+
+            parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem.Parameter>.self, forKey: .parameters)
             ?? [:]
 
-        responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
-            ?? [:]
+            examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)
+                ?? [:]
 
-        parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem.Parameter>.self, forKey: .parameters)
-        ?? [:]
+            requestBodies = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
+                ?? [:]
 
-        examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)
-            ?? [:]
+            headers = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Header>.self, forKey: .headers)
+                ?? [:]
 
-        requestBodies = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
-            ?? [:]
-
-        headers = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Header>.self, forKey: .headers)
-            ?? [:]
-
-        securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+            securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+        } catch let error as DecodingError {
+            if let underlyingError = error.underlyingError as? KeyDecodingError {
+                throw InconsistencyError(
+                    subjectName: error.subjectName,
+                    details: underlyingError.localizedDescription,
+                    codingPath: error.codingPath
+                )
+            }
+            throw error
+        }
     }
 }
 

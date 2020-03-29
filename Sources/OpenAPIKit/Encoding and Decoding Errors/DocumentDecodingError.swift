@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DocumentDecodingError.swift
 //  
 //
 //  Created by Mathew Polzin on 2/23/20.
@@ -60,8 +60,10 @@ extension OpenAPI.Error.Decoding.Document {
         switch context {
         case .other(let decodingError):
             return decodingError.relativeCodingPathString
-        case .inconsistency:
-            return ""
+        case .inconsistency(let error):
+            return error.codingPath.isEmpty
+                ? ""
+                : error.codingPath.dropLast().stringValue
         case .path(let pathError):
             return pathError.relativeCodingPathString
         }

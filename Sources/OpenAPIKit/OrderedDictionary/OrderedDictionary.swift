@@ -405,6 +405,10 @@ private protocol LosslessStringKeyDecodable {
     ) throws -> Any
 }
 
+internal struct KeyDecodingError: Swift.Error {
+    let localizedDescription: String
+}
+
 extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStringConvertible, Value: Decodable {
     /// Decode a `LosslessStringConvertible`-keyed OrderedDictionary from a hash.
     internal static func decodeLosslessStringDict(
@@ -416,11 +420,16 @@ extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStrin
 
         for key in container.allKeys {
             guard let dictionaryKey = Key(key.stringValue) else {
+                let errorMessage = (Key.self as? StringConvertibleHintProvider.Type)?
+                    .problem(with: key.stringValue)
+                    ?? "OrderedDictionary key could not be decoded as required type."
+
                 throw DecodingError.typeMismatch(
                     Key.self,
                     DecodingError.Context(
                         codingPath: container.codingPath + [key],
-                        debugDescription: "OrderedDictionary key could not be decoded as required type."
+                        debugDescription: errorMessage,
+                        underlyingError: KeyDecodingError(localizedDescription: errorMessage)
                     )
                 )
             }
@@ -448,11 +457,16 @@ extension OrderedDictionary: StringRawKeyDecodable where Key: RawRepresentable, 
 
         for key in container.allKeys {
             guard let dictionaryKey = Key(rawValue: key.stringValue) else {
+                let errorMessage = (Key.self as? StringConvertibleHintProvider.Type)?
+                    .problem(with: key.stringValue)
+                    ?? "OrderedDictionary key could not be decoded as required type."
+
                 throw DecodingError.typeMismatch(
                     Key.self,
                     DecodingError.Context(
                         codingPath: container.codingPath + [key],
-                        debugDescription: "OrderedDictionary key could not be decoded as required type."
+                        debugDescription: errorMessage,
+                        underlyingError: KeyDecodingError(localizedDescription: errorMessage)
                     )
                 )
             }
