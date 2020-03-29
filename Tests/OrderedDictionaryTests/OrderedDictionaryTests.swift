@@ -657,10 +657,10 @@ hello: thing
         let dictString =
 """
 [
-x: x,
-hello,
-x: y,
-there
+    x: x,
+    hello,
+    x: y,
+    there
 ]
 """
 
@@ -674,10 +674,10 @@ there
         let dictString2 =
 """
 [
-x: y,
-there,
-x: x,
-hello
+    x: y,
+    there,
+    x: x,
+    hello
 ]
 """
 
@@ -693,10 +693,10 @@ hello
         let dictData =
 """
 [
-{"x": "x"},
-"hello",
-{"x": "y"},
-"there"
+    {"x": "x"},
+    "hello",
+    {"x": "y"},
+    "there"
 ]
 """.data(using: .utf8)!
 
@@ -710,10 +710,10 @@ hello
         let dictData2 =
 """
 [
-{"x": "y"},
-"there",
-{"x": "x"},
-"hello"
+    {"x": "y"},
+    "there",
+    {"x": "x"},
+    "hello"
 ]
 """.data(using: .utf8)!
 
@@ -729,10 +729,10 @@ hello
         let dictData =
 """
 [
-{"x": "x"},
-"hello",
-{"x": "y"},
-"there"
+    {"x": "x"},
+    "hello",
+    {"x": "y"},
+    "there"
 ]
 """.data(using: .utf8)!
 
@@ -746,10 +746,10 @@ hello
         let dictData2 =
 """
 [
-{"x": "y"},
-"there",
-{"x": "x"},
-"hello"
+    {"x": "y"},
+    "there",
+    {"x": "x"},
+    "hello"
 ]
 """.data(using: .utf8)!
 
@@ -764,37 +764,36 @@ hello
     func test_failedKeyDecodeYAML() {
         let dictString =
 """
-[
 x: x
-]
 """
 
         XCTAssertThrowsError(try YAMLDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictString))
+        XCTAssertThrowsError(try YAMLDecoder().decode(OrderedDictionary<TestKey3, String>.self, from: dictString))
     }
 
     func test_failedKeyDecodeJSON() {
         let dictData =
 """
-[
 {"x": "x"}
-]
 """.data(using: .utf8)!
 
         XCTAssertThrowsError(try JSONDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictData))
+        XCTAssertThrowsError(try JSONDecoder().decode(OrderedDictionary<TestKey3, String>.self, from: dictData))
     }
 
     func test_failedKeyDecodeFineJSON() {
         let dictData =
 """
 [
-{"x": "x"},
-"hello",
-{"x": "y"},
-"there"
+    {"x": "x"},
+    "hello",
+    {"x": "y"},
+    "there"
 ]
 """.data(using: .utf8)!
 
         XCTAssertThrowsError(try FineJSONDecoder().decode(OrderedDictionary<TestKey, String>.self, from: dictData))
+        XCTAssertThrowsError(try FineJSONDecoder().decode(OrderedDictionary<TestKey3, String>.self, from: dictData))
     }
 }
 
@@ -807,4 +806,27 @@ fileprivate struct TestKey2: Hashable, Codable {
     let x: String
 
     init(_ x: String) { self.x = x }
+}
+
+fileprivate enum TestKey3: String, LosslessStringConvertible, Codable {
+    case one
+    case two
+
+    init?(_ description: String) {
+        switch description {
+        case "one":
+            self = .one
+        case "two":
+            self = .two
+        default:
+            return nil
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .one: return "one"
+        case .two: return "two"
+        }
+    }
 }
