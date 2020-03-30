@@ -7,13 +7,13 @@
 
 extension Either: CustomStringConvertible {
 	public var description: String {
-		let str: String
+		let string: String
 		switch self {
 		case .a(let a):
-			str = String(describing: a)
+			string = String(describing: a)
 		case .b(let b):
-			str = String(describing: b)
+			string = String(describing: b)
 		}
-		return "Either(\(str))"
+		return "Either(\(string))"
 	}
 }

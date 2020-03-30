@@ -10,9 +10,8 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Paths Object" path field pattern support.
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#paths-object
-    ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#patterned-fields
+    /// See [OpenAPI Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#paths-object)
+    /// and [OpenAPI Patterned Fields](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#patterned-fields).
     public struct Path: RawRepresentable, Equatable, Hashable {
         public let components: [String]
 
@@ -42,7 +41,7 @@ extension OpenAPI.Path: ExpressibleByStringLiteral {
 extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object
+    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
     public struct PathItem: Equatable {
         public var summary: String?
         public var description: String?
@@ -122,6 +121,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.PathItem {
+    /// Retrieve the operation for the given verb, if one is set for this path.
     public func `for`(_ verb: OpenAPI.HttpVerb) -> Operation? {
         switch verb {
         case .delete:
@@ -143,6 +143,7 @@ extension OpenAPI.PathItem {
         }
     }
 
+    /// Set the operation for the given verb, overwriting any already set operation for the same verb.
     public mutating func set(operation: Operation?, for verb: OpenAPI.HttpVerb) {
         switch verb {
         case .delete:

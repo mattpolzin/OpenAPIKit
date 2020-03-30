@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object
+    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object).
     public struct SecurityScheme: Equatable {
         public let type: SecurityType
         public let description: String?

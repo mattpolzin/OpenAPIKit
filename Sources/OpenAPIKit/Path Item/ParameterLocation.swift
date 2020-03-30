@@ -8,7 +8,7 @@
 extension OpenAPI.PathItem.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations
+    /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations).
     public enum Location: Equatable {
         case query(required: Bool, allowEmptyValue: Bool)
         case header(required: Bool)

@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
+    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
     public struct Parameter: Equatable {
         public var name: String
 
@@ -22,6 +22,9 @@ extension OpenAPI.PathItem {
         /// OpenAPI Spec "content" or "schema" properties.
         public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
+        public var required: Bool { parameterLocation.required }
+
+        /// An array of parameters that are `Either` `Parameters` or references to parameters.
         public typealias Array = [Either<JSONReference<Parameter>, Parameter>]
 
         public init(name: String,
@@ -83,18 +86,14 @@ extension OpenAPI.PathItem {
             self.description = description
             self.deprecated = deprecated
         }
-
-        public var required: Bool { parameterLocation.required }
     }
 }
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
 extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
-    public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self {
-        return .b(parameter)
-    }
 
+    /// Construct a parameter.
     public static func parameter(
         name: String,
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
@@ -113,6 +112,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         )
     }
 
+    /// Construct a parameter.
     public static func parameter(
         name: String,
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
@@ -130,28 +130,9 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
             )
         )
     }
-
-    public static func parameter(reference: JSONReference<OpenAPI.PathItem.Parameter>) -> Self {
-        return .a(reference)
-    }
-}
-
-// OpenAPI.PathItem.SchemaProperty =>
-extension Either where A == OpenAPI.PathItem.Parameter.Schema, B == OpenAPI.Content.Map {
-    public static func content(_ map: OpenAPI.Content.Map) -> Self {
-        return .b(map)
-    }
-
-    public static func schema(_ schema: OpenAPI.PathItem.Parameter.Schema) -> Self {
-        return .a(schema)
-    }
-
-    /// Retrieve the schema if that is what this property contains.
-    public var schema: A? { a }
 }
 
 // MARK: - Codable
-
 extension OpenAPI.PathItem.Parameter {
     private enum CodingKeys: String, CodingKey {
         case name

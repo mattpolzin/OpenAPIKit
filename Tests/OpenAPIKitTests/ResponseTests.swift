@@ -30,7 +30,8 @@ final class ResponseTests: XCTestCase {
     func test_responseMap() {
         let responseMap: OpenAPI.Response.Map = [
             200: .response(description: "hello world", content: [:]),
-            404: .response(reference: .external(URL(string: "hello.json#/world")!))
+            404: .reference(.external(URL(string: "hello.json#/world")!)),
+            500: .response(.init(description: "Server Error", content: [:]))
         ]
 
         XCTAssertNotNil(responseMap[200]?.responseValue)

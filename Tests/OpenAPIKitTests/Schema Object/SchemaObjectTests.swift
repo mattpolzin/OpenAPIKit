@@ -1614,6 +1614,7 @@ extension SchemaObjectTests {
             return
         }
         XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(true)))
+        XCTAssertEqual(contextB.additionalProperties?.booleanValue, true)
     }
 
     func test_encodeObjectWithAdditionalPropertiesObject() {

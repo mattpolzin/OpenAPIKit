@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#response-object
+    /// See [OpenAPI Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#response-object).
     public struct Response: Equatable {
         public let description: String
         public let headers: Header.Map?
@@ -33,6 +33,18 @@ extension OpenAPI.Response {
 
 // MARK: - Status Code
 extension OpenAPI.Response {
+    /// An HTTP Status code or status code range.
+    ///
+    /// OpenAPI supports one of the following as a key in the [Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responses-object):
+    /// - A `default` entry.
+    /// - A specific status code.
+    /// - A status code range.
+    ///
+    /// The `.default` case is used for a default entry.
+    ///
+    /// You can use integer literals to specify an exact status code.
+    ///
+    /// Status code ranges are named in the `StatusCode.Range` enum. For example, the "1XX" range (100-199) can be written as either `.range(.information)` or as `.range(.init(rawValue: "1XX"))`.
     public enum StatusCode: RawRepresentable, Equatable, Hashable {
         public typealias RawValue = String
 
@@ -111,10 +123,6 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
                 content: content
             )
         )
-    }
-
-    public static func response(reference: JSONReference<OpenAPI.Response>) -> Self {
-        return .a(reference)
     }
 }
 

@@ -8,9 +8,8 @@
 extension OpenAPI.PathItem.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
-    /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values
+    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object)
+    /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values).
     public struct Schema: Equatable {
         public let style: Style
         public let explode: Bool
@@ -124,35 +123,43 @@ extension OpenAPI.PathItem.Parameter {
             self.explode = style.defaultExplode
         }
 
-        public enum Style: String, CaseIterable, Codable {
-            case form
-            case simple
-            case matrix
-            case label
-            case spaceDelimited
-            case pipeDelimited
-            case deepObject
+    }
+}
 
-            public static func `default`(for location: OpenAPI.PathItem.Parameter.Location) -> Self {
-                switch location {
-                case .query:
-                    return .form
-                case .cookie:
-                    return .form
-                case .path:
-                    return .simple
-                case .header:
-                    return .simple
-                }
+extension OpenAPI.PathItem.Parameter.Schema {
+    public enum Style: String, CaseIterable, Codable {
+        case form
+        case simple
+        case matrix
+        case label
+        case spaceDelimited
+        case pipeDelimited
+        case deepObject
+
+        /// Get the default `Style` for the given location
+        /// per the OpenAPI Specification.
+        ///
+        /// See the `style` fixed field under
+        /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+        public static func `default`(for location: OpenAPI.PathItem.Parameter.Location) -> Self {
+            switch location {
+            case .query:
+                return .form
+            case .cookie:
+                return .form
+            case .path:
+                return .simple
+            case .header:
+                return .simple
             }
+        }
 
-            internal var defaultExplode: Bool {
-                switch self {
-                case .form:
-                    return true
-                default:
-                    return false
-                }
+        internal var defaultExplode: Bool {
+            switch self {
+            case .form:
+                return true
+            default:
+                return false
             }
         }
     }

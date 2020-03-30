@@ -48,7 +48,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         summary: "Get Test",
                         description: "Get Test description",
                         parameters: [
-                            .parameter(reference: .component( named: "filter")),
+                            .reference(.component( named: "filter")),
                             .parameter(
                                 name: "Content-Type",
                                 parameterLocation: .header(required: false),
@@ -165,7 +165,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             summary: "Get Test",
             description: "Get Test description",
             parameters: [
-                .parameter(reference: .component( named: "filter")),
+                .reference(.component( named: "filter")),
                 .parameter(
                     name: "Content-Type",
                     parameterLocation: .header(required: false),

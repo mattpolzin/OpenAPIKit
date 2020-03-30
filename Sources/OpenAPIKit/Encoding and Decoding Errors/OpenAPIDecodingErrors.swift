@@ -13,10 +13,15 @@ extension OpenAPI.Error {
 }
 
 public enum ErrorCategory {
+    /// The type with the given name was expected but not found.
     case typeMismatch(expectedTypeName: String)
+    /// One of two possible types were expected but neither was found.
     case typeMismatch2(possibleTypeName1: String, possibleTypeName2: String, details: String)
+    /// Either a key or value was missing.
     case missing(KeyValue)
+    /// There was a data corruption issue (a bit of a catchall for errors not categorized otherwise).
     case dataCorrupted(underlying: Swift.Error?)
+    /// Something inconsistent or disallowed according the OpenAPI Specification was found.
     case inconsistency(details: String)
 
     public enum KeyValue {
@@ -26,9 +31,34 @@ public enum ErrorCategory {
 }
 
 public protocol OpenAPIError: Swift.Error {
+    /// The subject of the error (i.e. the thing being worked with
+    ///     when the error occurred).
+    ///
+    /// In the error description "Expected to find `title`
+    ///     key in Document.info but it is missing." the **subject** is
+    ///     "title".
     var subjectName: String { get }
+    /// The context of the error (i.e. where in the document the error
+    ///     occurred).
+    ///
+    /// In the error description "Expected to find `title`
+    ///     key in Document.info but it is missing." the **context** is
+    ///     "Document.info".
     var contextString: String { get }
+    /// The category of error that occurred.
+    ///
+    /// The category can also carry a bit of contextual information that
+    /// is only relevant for the given category.
+    ///
+    /// In the error description "Expected to find `title`
+    ///     key in Document.info but it is missing." the **category** is
+    ///     `.missing(.key)`.
     var errorCategory: ErrorCategory { get }
+    /// The complete coding path for where the error occurred.
+    ///
+    /// This will often overlap with the `contextString` but there is not
+    /// a 1-1 relationship between the two. This is the same concept of
+    /// "codingPath" as is used elsewhere for the Swift `Codable` featureset.
     var codingPath: [CodingKey] { get }
 }
 
@@ -95,11 +125,11 @@ internal extension Swift.Array where Element == CodingKey {
             if let intValue = key.intValue {
                 return "[\(intValue)]"
             }
-            let strValue = key.stringValue
-            if strValue.contains("/") {
-                return "['\(strValue)']"
+            let stringValue = key.stringValue
+            if stringValue.contains("/") {
+                return "['\(stringValue)']"
             }
-            return ".\(strValue)"
+            return ".\(stringValue)"
         }.joined()
     }
 

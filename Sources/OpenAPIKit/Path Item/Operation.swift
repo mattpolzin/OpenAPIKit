@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Operation Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object
+    /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
     public struct Operation: Equatable {
         public var tags: [String]?
         public var summary: String?
@@ -20,7 +20,7 @@ extension OpenAPI.PathItem {
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
         public var responses: OpenAPI.Response.Map
-        //            public let callbacks:
+//      public let callbacks:
         public var deprecated: Bool // default is false
         public var security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
         public var servers: [OpenAPI.Server]?
@@ -90,7 +90,7 @@ extension OpenAPI.PathItem.Operation {
         case parameters
         case requestBody
         case responses
-        //        case callbacks
+//      case callbacks
         case deprecated
         case security
         case servers
@@ -154,9 +154,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
             deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
-            // TODO: would be ideal to validate against components from here, but not
-            //      sure off the top of my head the best way to go about that other than
-            // perhaps storing a copy of components in the userInfo for the decoder.
+            // TODO: would be ideal to validate against components from here
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)

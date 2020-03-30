@@ -33,12 +33,13 @@ final class ContentTests: XCTestCase {
 
         let withExamples = OpenAPI.Content(schema: .init(.string),
                                            examples: [
-                                            "hello": .b(.init(value: .init("world"))),
-                                            "bbbb": .b(.init(value: .b("pick me"))),
-                                            "aaaa": .b(.init(value: .a(URL(string: "http://google.com")!)))
+                                            "hello": .example(.init(value: .init("world"))),
+                                            "bbbb": .example(.init(value: .b("pick me"))),
+                                            "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
         ])
         XCTAssertNotNil(withExamples.examples)
         XCTAssertEqual(withExamples.example?.value as? String, "pick me")
+        XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
 
         let t4 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!),
                                 examples: nil)

@@ -9,7 +9,7 @@ import Foundation
 
 /// OpenAPI "Schema Object"
 /// 
-/// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object
+/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
 public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
     indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
@@ -320,7 +320,20 @@ extension JSONSchema {
         case .string(let context, let contextB):
             return .string(context.with(example: example), contextB)
         case .all, .one, .any, .not, .reference, .undefined:
-            throw OpenAPI.EncodableError.exampleNotSupported("examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
+            throw Self.Error.exampleNotSupported
+        }
+    }
+}
+
+extension JSONSchema {
+    internal enum Error: Swift.Error, Equatable {
+        case exampleNotSupported
+
+        public var localizedDescription: String {
+            switch self {
+            case .exampleNotSupported:
+                return "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref)."
+            }
         }
     }
 }
