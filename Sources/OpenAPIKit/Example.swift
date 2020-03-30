@@ -58,10 +58,6 @@ extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example
             )
         )
     }
-
-    public static func example(reference: JSONReference<OpenAPI.Example>) -> Self {
-        return .a(reference)
-    }
 }
 
 // MARK: - Codable

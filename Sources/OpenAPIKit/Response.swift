@@ -112,10 +112,6 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
             )
         )
     }
-
-    public static func response(reference: JSONReference<OpenAPI.Response>) -> Self {
-        return .a(reference)
-    }
 }
 
 // MARK: - Codable

@@ -68,6 +68,7 @@ extension ExampleTests {
 
         XCTAssertEqual(example, OpenAPI.Example(summary: "hello",
                                                 value: .init(URL(string: "https://google.com")!)))
+        XCTAssertEqual(example.value.urlValue, URL(string: "https://google.com")!)
     }
 
     func test_descriptionAndInternalExample_encode() {

@@ -91,9 +91,6 @@ extension OpenAPI.PathItem {
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
 extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
-    public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self {
-        return .b(parameter)
-    }
 
     public static func parameter(
         name: String,
@@ -130,24 +127,6 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
             )
         )
     }
-
-    public static func parameter(reference: JSONReference<OpenAPI.PathItem.Parameter>) -> Self {
-        return .a(reference)
-    }
-}
-
-// OpenAPI.PathItem.SchemaProperty =>
-extension Either where A == OpenAPI.PathItem.Parameter.Schema, B == OpenAPI.Content.Map {
-    public static func content(_ map: OpenAPI.Content.Map) -> Self {
-        return .b(map)
-    }
-
-    public static func schema(_ schema: OpenAPI.PathItem.Parameter.Schema) -> Self {
-        return .a(schema)
-    }
-
-    /// Retrieve the schema if that is what this property contains.
-    public var schema: A? { a }
 }
 
 // MARK: - Codable

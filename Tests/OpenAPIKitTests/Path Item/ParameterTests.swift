@@ -65,13 +65,13 @@ final class ParameterTests: XCTestCase {
         )
     }
 
-    func test_pathItemArray() {
+    func test_parameterArray() {
         let t1: OpenAPI.PathItem.Parameter.Array = [
             .parameter(OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, schema: .string)),
             .parameter(name: "hello", parameterLocation: .cookie, schema: .string),
             .parameter(OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)])),
             .parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)]),
-            .parameter(reference: .component( named: "hello"))
+            .reference(.component( named: "hello"))
         ]
 
         XCTAssertEqual(t1[0], t1[1])
@@ -80,6 +80,9 @@ final class ParameterTests: XCTestCase {
         XCTAssertNotEqual(t1[4], t1[1])
         XCTAssertNotEqual(t1[4], t1[2])
         XCTAssertNotEqual(t1[4], t1[3])
+
+        XCTAssertEqual(t1[0].parameterValue, OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, schema: .string))
+        XCTAssertEqual(t1[4].reference, .component( named: "hello"))
     }
 }
 
@@ -140,6 +143,7 @@ extension ParameterTests {
                 content: [ .json: .init(schema: .string(required: false))]
             )
         )
+        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string(required: false)) ])
     }
 
     func test_minimalSchema_encode() throws {
@@ -235,6 +239,10 @@ extension ParameterTests {
                 parameterLocation: .query,
                 schema: .string(required: false)
             )
+        )
+        XCTAssertEqual(
+            parameter.schemaOrContent.schemaValue,
+            OpenAPI.PathItem.Parameter.Schema(.string(required: false), style: .default(for: .query))
         )
     }
 

@@ -140,7 +140,7 @@ final class ParameterSchemaTests: XCTestCase {
             style: .deepObject,
             examples: [
                 "one": .example(value: .init("hello")),
-                "two": .example(reference: .external(URL(string: "world.yml")!))
+                "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
 
@@ -160,7 +160,7 @@ final class ParameterSchemaTests: XCTestCase {
             explode: true,
             examples: [
                 "one": .example(value: .init("hello")),
-                "two": .example(reference: .external(URL(string: "world.yml")!))
+                "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
 

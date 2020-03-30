@@ -87,10 +87,10 @@ extension OperationTests {
             externalDocs: .init(url: URL(string: "https://google.com")!),
             operationId: "123",
             parameters: [
-                .parameter(reference: .component(named: "hello"))
+                .reference(.component(named: "hello"))
             ],
             requestBody: .init(content: [.json: .init(schema: .init(.string))]),
-            responses: [200: .response(reference: .component(named: "test"))],
+            responses: [200: .reference(.component(named: "test"))],
             deprecated: true,
             security: [[.component(named: "security"): []]],
             servers: [.init(url: URL(string: "https://google.com")!)]
@@ -209,23 +209,27 @@ extension OperationTests {
                 externalDocs: .init(url: URL(string: "https://google.com")!),
                 operationId: "123",
                 parameters: [
-                    .parameter(reference: .component(named: "hello"))
+                    .reference(.component(named: "hello"))
                 ],
                 requestBody: .init(content: [.json: .init(schema: .init(.string(required:false)))]),
-                responses: [200: .response(reference: .component(named: "test"))],
+                responses: [200: .reference(.component(named: "test"))],
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
                 servers: [.init(url: URL(string: "https://google.com")!)]
             )
         )
+
+        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string(required:false)))]))
+        XCTAssertNil(operation.responses[200]?.responseValue)
+        XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
     }
 
     // Note that JSONEncoder for Linux Foundation does not respect order
     func test_responseOrder_encode() throws {
         let operation = OpenAPI.PathItem.Operation(
             responses: [
-                404: .response(reference: .component(named: "404")),
-                200: .response(reference: .component(named: "200"))
+                404: .reference(.component(named: "404")),
+                200: .reference(.component(named: "200"))
             ]
         )
 
@@ -252,8 +256,8 @@ extension OperationTests {
 
         let operation2 = OpenAPI.PathItem.Operation(
             responses: [
-                200: .response(reference: .component(named: "200")),
-                404: .response(reference: .component(named: "404"))
+                200: .reference(.component(named: "200")),
+                404: .reference(.component(named: "404"))
             ]
         )
 
@@ -296,8 +300,8 @@ responses:
             operation,
             OpenAPI.PathItem.Operation(
                 responses: [
-                    404: .response(reference: .component(named: "404")),
-                    200: .response(reference: .component(named: "200"))
+                    404: .reference(.component(named: "404")),
+                    200: .reference(.component(named: "200"))
                 ]
             )
         )
@@ -317,8 +321,8 @@ responses:
             operation2,
             OpenAPI.PathItem.Operation(
                 responses: [
-                    200: .response(reference: .component(named: "200")),
-                    404: .response(reference: .component(named: "404"))
+                    200: .reference(.component(named: "200")),
+                    404: .reference(.component(named: "404"))
                 ]
             )
         )

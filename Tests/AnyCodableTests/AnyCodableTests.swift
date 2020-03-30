@@ -31,6 +31,12 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(AnyCodable("hi"), AnyCodable("hi"))
         XCTAssertEqual(AnyCodable(["hi": AnyCodable(2)]), AnyCodable(["hi": AnyCodable(2)]))
         XCTAssertEqual(AnyCodable([AnyCodable("hi"), AnyCodable("there")]), AnyCodable([AnyCodable("hi"), AnyCodable("there")]))
+        XCTAssertEqual(AnyCodable(["hi":1]), AnyCodable(["hi":1]))
+        XCTAssertEqual(AnyCodable(["hi":1.2]), AnyCodable(["hi":1.2]))
+        XCTAssertEqual(AnyCodable(["hi"]), AnyCodable(["hi"]))
+        XCTAssertEqual(AnyCodable([1]), AnyCodable([1]))
+        XCTAssertEqual(AnyCodable([1.2]), AnyCodable([1.2]))
+        XCTAssertEqual(AnyCodable([true]), AnyCodable([true]))
 
         XCTAssertNotEqual(AnyCodable(()), AnyCodable(true))
     }
