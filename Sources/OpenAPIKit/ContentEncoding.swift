@@ -8,7 +8,7 @@
 extension OpenAPI.Content {
     /// OpenAPI Spec "Encoding Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#encoding-object
+    /// See [OpenAPI Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#encoding-object).
     public struct Encoding: Equatable {
         public typealias Style = OpenAPI.PathItem.Parameter.Schema.Style
 

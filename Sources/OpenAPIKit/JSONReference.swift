@@ -19,8 +19,8 @@ public protocol _OpenAPIReference {}
 /// is not required for external references.
 ///
 /// The intention, as prescribed by the OpenAPI specification, is
-/// for this type to conform to the logic in
-/// https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03
+/// for this type to conform to the logic in the
+/// [JSON Reference spec](https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03).
 public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
@@ -94,8 +94,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             self.init(rawValue: description)
         }
 
-        /// Create a Reference from a path fragment as defined in the URI spec found here:
-        /// https://tools.ietf.org/html/rfc3986
+        /// Create a Reference from a path fragment as defined in [RFC 3986](https://tools.ietf.org/html/rfc3986).
         ///
         /// - Important: The string must begin with the '#' that denotes
         ///     a URI "fragment" is to follow.
@@ -133,11 +132,9 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
 
     /// A JSON Reference path.
     ///
-    /// As described by the JSON pointer specification
-    /// at https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
-    ///
-    /// and following the URI specification for a "fragment" found here:
-    /// https://tools.ietf.org/html/rfc3986
+    /// As described by the [JSON pointer specification](https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04)
+    /// and following the URI specification for a "fragment" found in
+    /// [RFC 3986](https://tools.ietf.org/html/rfc3986).
     public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
 
         /// The Path's components. In the `rawValue`, these components are joined
@@ -176,8 +173,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         }
     }
 
-    /// A JSON Reference path component, as described by the JSON pointer specification
-    /// at https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04
+    /// A JSON Reference path component, as described by the [JSON pointer specification](https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04).
     ///
     /// - Important: The special characters `'~'` and `'/'` are handled as `"~0"` and `"~1"`,
     ///     respectively.

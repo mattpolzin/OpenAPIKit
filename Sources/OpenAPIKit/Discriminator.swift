@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Disciminator Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object
+    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
     public struct Discriminator: Equatable {
         public let propertyName: String
         public let mapping: [String: String]?

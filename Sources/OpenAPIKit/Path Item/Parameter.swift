@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
+    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
     public struct Parameter: Equatable {
         public var name: String
 
@@ -22,6 +22,9 @@ extension OpenAPI.PathItem {
         /// OpenAPI Spec "content" or "schema" properties.
         public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
+        public var required: Bool { parameterLocation.required }
+
+        /// An array of parameters that are `Either` `Parameters` or references to parameters.
         public typealias Array = [Either<JSONReference<Parameter>, Parameter>]
 
         public init(name: String,
@@ -83,8 +86,6 @@ extension OpenAPI.PathItem {
             self.description = description
             self.deprecated = deprecated
         }
-
-        public var required: Bool { parameterLocation.required }
     }
 }
 
@@ -92,6 +93,7 @@ extension OpenAPI.PathItem {
 // OpenAPI.PathItem.Array.Element =>
 extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
 
+    /// Construct a parameter.
     public static func parameter(
         name: String,
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
@@ -110,6 +112,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         )
     }
 
+    /// Construct a parameter.
     public static func parameter(
         name: String,
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
@@ -130,7 +133,6 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
 }
 
 // MARK: - Codable
-
 extension OpenAPI.PathItem.Parameter {
     private enum CodingKeys: String, CodingKey {
         case name

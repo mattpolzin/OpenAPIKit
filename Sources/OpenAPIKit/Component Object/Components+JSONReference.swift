@@ -1,0 +1,94 @@
+//
+//  Components+JSONReference.swift
+//  
+//
+//  Created by Mathew Polzin on 3/30/20.
+//
+
+import Foundation
+
+extension OpenAPI.Components {
+    /// Check if the `Components` contains the given reference or not.
+    ///
+    /// Look up a reference in this components dictionary. If you want a
+    /// non-throwing alternative, you can pull a `JSONReference.InternalReference`
+    /// out of your `JSONReference` and pass that to `contains`
+    /// instead.
+    ///
+    /// - throws: If the given reference cannot be checked against `Components`
+    ///     then this method will throw `ReferenceError`. This will occur when
+    ///     the given reference is a remote file reference.
+    public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> Bool {
+        guard case .internal(let localReference) = reference else {
+            throw ReferenceError.cannotLookupRemoteReference
+        }
+
+        return contains(localReference)
+    }
+
+    /// Check if the `Components` contains the given internal reference or not.
+    public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> Bool {
+        return reference.name
+            .flatMap(OpenAPI.ComponentKey.init(rawValue:))
+            .map { self[keyPath: ReferenceType.openAPIComponentsKeyPath].contains(key: $0) }
+            ?? false
+    }
+
+    /// Retrieve item referenced from the `Components`.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
+        guard case .internal(let localReference) = reference else {
+            return nil
+        }
+
+        return self[localReference]
+    }
+
+    /// Retrieve item referenced from the `Components`.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> ReferenceType? {
+        return reference.name
+            .flatMap(OpenAPI.ComponentKey.init(rawValue:))
+            .flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
+    }
+
+    /// Pass a value that can be either a reference to a component or the component itself.
+    /// `dereference()` will return the component value if it is found (in the Either wrapper
+    /// or in the Components Object).
+    ///
+    /// - Important: Dereferencing an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
+    public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
+        switch maybeReference {
+        case .a(let reference):
+            return self[reference]
+        case .b(let value):
+            return value
+        }
+    }
+
+    /// Create a `JSONReference`.
+    ///
+    /// - throws: If the given name does not refer to an existing component of the given type.
+    public func reference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType: ReferenceType.Type) throws -> JSONReference<ReferenceType> {
+        let internalReference = JSONReference<ReferenceType>.InternalReference.component(name: name)
+        let reference = JSONReference<ReferenceType>.internal(internalReference)
+
+        guard contains(internalReference) else {
+            throw ReferenceError.missingComponentOnReferenceCreation(name: name, key: ReferenceType.openAPIComponentsKey)
+        }
+        return reference
+    }
+
+    public enum ReferenceError: Swift.Error, Equatable, CustomStringConvertible {
+        case cannotLookupRemoteReference
+        case missingComponentOnReferenceCreation(name: String, key: String)
+
+        public var description: String {
+            switch self {
+            case .cannotLookupRemoteReference:
+                return "You cannot look up remote JSON references in the Components Object local to this file."
+            case .missingComponentOnReferenceCreation(name: let name, key: let key):
+                return "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. '\(name)' was not found in \(key)."
+            }
+        }
+    }
+}

@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
+    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
     public struct Document: Equatable {
         public var openAPIVersion: Version
         public var info: Info
@@ -48,7 +48,7 @@ extension OpenAPI {
     ///
     /// OpenAPI Spec "Security Requirement Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object
+    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 

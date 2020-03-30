@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object
+    /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
     public struct Server: Equatable {
         public let url: URL
         public let description: String?
@@ -29,7 +29,7 @@ extension OpenAPI {
 extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object
+    /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
     public struct Variable: Equatable {
         public let `enum`: [String]
         public let `default`: String

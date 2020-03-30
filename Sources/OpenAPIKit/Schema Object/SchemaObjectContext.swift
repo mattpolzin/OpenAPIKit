@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - Generic Context
+// MARK: - General Context
 
 /// A schema context stores information about a schema.
 /// All schemas can have the contextual information in

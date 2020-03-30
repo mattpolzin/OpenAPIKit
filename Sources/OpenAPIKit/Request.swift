@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#request-body-object
+    /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#request-body-object).
     public struct Request: Equatable {
         public let description: String?
         public let content: Content.Map

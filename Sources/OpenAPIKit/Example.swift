@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#example-object
+    /// See [OpenAPI Example Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#example-object).
     public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?

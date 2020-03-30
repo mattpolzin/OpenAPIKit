@@ -10,7 +10,7 @@ import Foundation
 extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
-    /// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object
+    /// See [OpenAPI Info Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object).
     public struct Info: Equatable {
         public let title: String
         public let description: String?
@@ -33,6 +33,9 @@ extension OpenAPI.Document {
             self.version = version
         }
 
+        /// OpenAPI Spec "Contact Object"
+        ///
+        /// See [OpenAPI Contact Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#contact-object).
         public struct Contact: Equatable {
             public let name: String?
             public let url: URL?
@@ -47,6 +50,9 @@ extension OpenAPI.Document {
             }
         }
 
+        /// OpenAPI Spec "License Object"
+        ///
+        /// See [OpenAPI License Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#license-object).
         public struct License: Equatable {
             public let name: String
             public let url: URL?
