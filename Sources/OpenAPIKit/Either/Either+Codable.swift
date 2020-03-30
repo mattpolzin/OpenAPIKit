@@ -24,8 +24,7 @@ public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomDebugStringCon
 
         let failureStrings = individualTypeFailures.map {
             let type = $0.type
-            let descriptiveError = $0.error as? CustomDebugStringConvertible
-            let error = descriptiveError?.debugDescription ?? String(describing: $0.error)
+            let error = ($0.error as CustomDebugStringConvertible).debugDescription
             return "\(String(describing: type)) could not be decoded because:\n\(error)"
         }.joined(separator: "\n\n")
 
