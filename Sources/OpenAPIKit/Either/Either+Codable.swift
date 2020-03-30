@@ -40,25 +40,25 @@ Either failed to decode any of its types at: "\(codingPathString)"
 private typealias EitherTypeNotFound = EitherDecodeNoTypesMatchedError.IndividualFailure
 
 private func decode<Thing: Decodable>(_ type: Thing.Type, from container: SingleValueDecodingContainer) throws -> Result<Thing, EitherTypeNotFound> {
-	let ret: Result<Thing, EitherTypeNotFound>
+	let result: Result<Thing, EitherTypeNotFound>
 	do {
-		ret = try .success(container.decode(Thing.self))
-	} catch (let err as DecodingError) {
-		ret = .failure(EitherTypeNotFound(type: type, error: err))
-	} catch (let err) {
-        ret = .failure(EitherTypeNotFound(
+		result = try .success(container.decode(Thing.self))
+	} catch (let error as DecodingError) {
+		result = .failure(EitherTypeNotFound(type: type, error: error))
+	} catch (let error) {
+        result = .failure(EitherTypeNotFound(
             type: type,
             error: DecodingError.typeMismatch(
                 Thing.self,
                 .init(
                     codingPath: container.codingPath,
-                    debugDescription: String(describing: err),
-                    underlyingError: err
+                    debugDescription: String(describing: error),
+                    underlyingError: error
                 )
             )
         ))
 	}
-	return ret
+	return result
 }
 
 extension Either: Encodable where A: Encodable, B: Encodable {
