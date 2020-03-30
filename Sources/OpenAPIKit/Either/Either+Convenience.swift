@@ -70,33 +70,41 @@ extension Either where B == OpenAPI.Header {
 
 // MARK: - Convenience constructors
 extension Either where A == Bool {
+    /// Construct a boolean value.
     public static func boolean(_ boolean: Bool) -> Self { .a(boolean) }
 }
 
 extension Either where A: _OpenAPIReference {
+    /// Construct a reference value.
     public static func reference(_ reference: A) -> Self { .a(reference) }
 }
 
 extension Either where A == OpenAPI.PathItem.Parameter.Schema {
+    /// Construct a schema value.
     public static func schema(_ schema: OpenAPI.PathItem.Parameter.Schema) -> Self { .a(schema) }
 }
 
 extension Either where B == JSONSchema {
+    /// Construct a schema value.
     public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
 }
 
 extension Either where B == OpenAPI.PathItem.Parameter {
+    /// Construct a parameter value.
     public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self { .b(parameter) }
 }
 
 extension Either where B == OpenAPI.Content.Map {
+    /// Construct a content map.
     public static func content(_ map: OpenAPI.Content.Map) -> Self { .b(map) }
 }
 
 extension Either where B == OpenAPI.Example {
+    /// Construct an example value.
     public static func example(_ example: OpenAPI.Example) -> Self { .b(example) }
 }
 
 extension Either where B == OpenAPI.Response {
+    /// Construct a response value.
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
 }
