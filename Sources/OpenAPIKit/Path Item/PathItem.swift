@@ -173,6 +173,18 @@ extension OpenAPI.PathItem {
             set(operation: newValue, for: verb)
         }
     }
+
+    public typealias Endpoint = (verb: OpenAPI.HttpVerb, operation: OpenAPI.PathItem.Operation)
+
+    /// Get all endpoints defined at this path.
+    ///
+    /// - Returns: An array of tuples with the verb (i.e. `.get`) and the operation for
+    ///     the verb.
+    public var endpoints: [Endpoint] {
+        return OpenAPI.HttpVerb.allCases.compactMap { verb in
+            self.for(verb).map { (verb, $0) }
+        }
+    }
 }
 
 // MARK: - Codable
@@ -240,6 +252,14 @@ extension OpenAPI.PathItem: Encodable {
 
 extension OpenAPI.PathItem: Decodable {
     public init(from decoder: Decoder) throws {
+        try self.init(from: decoder, in: nil)
+    }
+}
+
+extension OpenAPI.PathItem: ContextDecodable {
+    public typealias DecodingContext = OpenAPI.Components?
+
+    init(from decoder: Decoder, in context: DecodingContext) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {

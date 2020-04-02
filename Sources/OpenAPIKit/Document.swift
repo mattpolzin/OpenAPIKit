@@ -117,13 +117,12 @@ extension OpenAPI.Document: Decodable {
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
-            paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
-
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
 
-            // A real mess here because we've got an Array of non-string-keyed
-            // Dictionaries.
+            let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
+            self.paths = paths
+
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
 
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)

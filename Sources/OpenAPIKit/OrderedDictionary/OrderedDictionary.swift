@@ -399,6 +399,12 @@ extension OrderedDictionary: Decodable where Key: Decodable, Value: Decodable {
     }
 }
 
+extension OrderedDictionary: ContextDecodable where Value: ContextDecodable {
+    init(from decoder: Decoder, in context: Value.DecodingContext) throws {
+
+    }
+}
+
 private protocol LosslessStringKeyDecodable {
     static func decodeLosslessStringDict(
         from decoder: Decoder
