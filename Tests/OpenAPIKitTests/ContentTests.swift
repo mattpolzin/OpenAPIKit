@@ -86,8 +86,60 @@ final class ContentTests: XCTestCase {
             .txt: .init(schema: .init(.number)),
             .xml: .init(schema: .init(.external(URL(string: "hello.json#/world")!))),
             .yaml: .init(schema: .init(.string)),
-            .zip: .init(schema: .init(.string))
+            .zip: .init(schema: .init(.string)),
+
+            .other("application/custom"): .init(schema: .string),
+
+            .anyApplication: .init(schema: .string(format: .binary)),
+            .anyAudio: .init(schema: .string(format: .binary)),
+            .anyImage: .init(schema: .string(format: .binary)),
+            .anyText: .init(schema: .string(format: .binary)),
+            .anyVideo: .init(schema: .string(format: .binary)),
+
+            .any: .init(schema: .string(format: .binary))
         ]
+    }
+
+    func test_contentTypeStringReflexivity() {
+
+        XCTAssertNil(OpenAPI.ContentType(rawValue: "not a content type"))
+
+        let types: [OpenAPI.ContentType] = [
+            .bmp,
+            .css,
+            .csv,
+            .form,
+            .html,
+            .javascript,
+            .jpg,
+            .json,
+            .jsonapi,
+            .mov,
+            .mp3,
+            .mp4,
+            .mpg,
+            .multipartForm,
+            .pdf,
+            .rar,
+            .rtf,
+            .tar,
+            .tif,
+            .txt,
+            .xml,
+            .yaml,
+            .zip,
+            .anyApplication,
+            .anyAudio,
+            .anyImage,
+            .anyText,
+            .anyVideo,
+            .any,
+            .other("application/custom")
+        ]
+
+        for type in types {
+            XCTAssertEqual(type, OpenAPI.ContentType(rawValue: type.rawValue))
+        }
     }
 }
 
