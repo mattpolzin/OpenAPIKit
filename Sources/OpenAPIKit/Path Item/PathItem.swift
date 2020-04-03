@@ -84,39 +84,47 @@ extension OpenAPI {
             self.trace = trace
         }
 
+        public typealias Map = OrderedDictionary<Path, PathItem>
+
+        /// Set the `GET` endpoint operation.
         public mutating func get(_ op: Operation?) {
             get = op
         }
 
+        /// Set the `PUT` endpoint operation.
         public mutating func put(_ op: Operation?) {
             put = op
         }
 
+        /// Set the `POST` endpoint operation.
         public mutating func post(_ op: Operation?) {
             post = op
         }
 
+        /// Set the `DELETE` endpoint operation.
         public mutating func delete(_ op: Operation?) {
             delete = op
         }
 
+        /// Set the `OPTIONS` endpoint operation.
         public mutating func options(_ op: Operation?) {
             options = op
         }
 
+        /// Set the `HEAD` endpoint operation.
         public mutating func head(_ op: Operation?) {
             head = op
         }
 
+        /// Set the `PATCH` endpoint operation.
         public mutating func patch(_ op: Operation?) {
             patch = op
         }
 
+        /// Set the `TRACE` endpoint operation.
         public mutating func trace(_ op: Operation?) {
             trace = op
         }
-
-        public typealias Map = OrderedDictionary<Path, PathItem>
     }
 }
 
@@ -171,6 +179,18 @@ extension OpenAPI.PathItem {
         }
         set {
             set(operation: newValue, for: verb)
+        }
+    }
+
+    public typealias Endpoint = (verb: OpenAPI.HttpVerb, operation: OpenAPI.PathItem.Operation)
+
+    /// Get all endpoints defined at this path.
+    ///
+    /// - Returns: An array of tuples with the verb (i.e. `.get`) and the operation for
+    ///     the verb.
+    public var endpoints: [Endpoint] {
+        return OpenAPI.HttpVerb.allCases.compactMap { verb in
+            self.for(verb).map { (verb, $0) }
         }
     }
 }

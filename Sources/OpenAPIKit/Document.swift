@@ -117,13 +117,13 @@ extension OpenAPI.Document: Decodable {
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
-            paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
-
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
 
-            // A real mess here because we've got an Array of non-string-keyed
-            // Dictionaries.
+            let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
+            self.paths = paths
+            try validateSecurityRequirements(in: paths, against: components)
+
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
 
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
@@ -196,4 +196,43 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
     }
 
     return nil
+}
+
+internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
+    for (path, pathItem) in paths {
+        for (verb, operation) in pathItem.endpoints {
+            if let securityRequirements = operation.security {
+                try validate(
+                    securityRequirements: securityRequirements,
+                    at: path,
+                    for: verb,
+                    against: components
+                )
+            }
+        }
+    }
+}
+
+internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at path: OpenAPI.Path, for verb: OpenAPI.HttpVerb, against components: OpenAPI.Components) throws {
+    let securitySchemes = securityRequirements.flatMap { $0.keys }
+
+    for securityScheme in securitySchemes {
+        guard components[securityScheme] != nil else {
+            let schemeKey = securityScheme.name ?? securityScheme.absoluteString
+            let keys = [
+                "paths",
+                path.rawValue,
+                verb.rawValue.lowercased(),
+                "security",
+                schemeKey
+            ]
+            .map(AnyCodingKey.init(stringValue:))
+
+            throw InconsistencyError(
+                subjectName: schemeKey,
+                details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
+                codingPath: keys
+            )
+        }
+    }
 }

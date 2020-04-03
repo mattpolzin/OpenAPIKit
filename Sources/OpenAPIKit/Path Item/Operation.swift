@@ -154,7 +154,6 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
             deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
-            // TODO: would be ideal to validate against components from here
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
