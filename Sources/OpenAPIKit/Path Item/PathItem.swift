@@ -252,14 +252,6 @@ extension OpenAPI.PathItem: Encodable {
 
 extension OpenAPI.PathItem: Decodable {
     public init(from decoder: Decoder) throws {
-        try self.init(from: decoder, in: nil)
-    }
-}
-
-extension OpenAPI.PathItem: ContextDecodable {
-    public typealias DecodingContext = OpenAPI.Components?
-
-    init(from decoder: Decoder, in context: DecodingContext) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {
