@@ -17,7 +17,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case all(of: [JSONSchema])
+    indirect case all(of: [JSONSchemaFragment])
     indirect case one(of: [JSONSchema])
     indirect case any(of: [JSONSchema])
     indirect case not(JSONSchema)
@@ -722,7 +722,7 @@ extension JSONSchema {
         return .array(generalContext, arrayContext)
     }
 
-    public static func all(of schemas: JSONSchema...) -> JSONSchema {
+    public static func all(of schemas: JSONSchemaFragment...) -> JSONSchema {
         return .all(of: schemas)
     }
 
@@ -824,7 +824,7 @@ extension JSONSchema: Decodable {
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            self = .all(of: try container.decode([JSONSchema].self, forKey: .allOf))
+            self = .all(of: try container.decode([JSONSchemaFragment].self, forKey: .allOf))
             return
         }
 

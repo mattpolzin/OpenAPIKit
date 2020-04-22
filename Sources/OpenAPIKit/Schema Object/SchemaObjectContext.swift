@@ -314,8 +314,9 @@ extension JSONSchema {
 
 // MARK: - Codable
 
-extension JSONSchema.Context {
-    private enum CodingKeys: String, CodingKey {
+extension JSONSchema {
+    // not nested because Context is a generic type
+    internal enum ContextCodingKeys: String, CodingKey {
         case type
         case format
         case title
@@ -327,13 +328,13 @@ extension JSONSchema.Context {
         case readOnly
         case writeOnly
         case deprecated
-//        case constantValue = "const"
+//      case constantValue = "const"
     }
 }
 
 extension JSONSchema.Context: Encodable {
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
         try container.encode(format.jsonType, forKey: .type)
 
@@ -373,7 +374,7 @@ extension JSONSchema.Context: Encodable {
 
 extension JSONSchema.Context: Decodable {
     public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
@@ -415,7 +416,7 @@ extension JSONSchema.Context: Decodable {
 }
 
 extension JSONSchema.NumericContext {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case multipleOf
         case maximum
         case exclusiveMaximum
@@ -463,7 +464,7 @@ extension JSONSchema.NumericContext: Decodable {
 }
 
 extension JSONSchema.IntegerContext {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case multipleOf
         case maximum
         case exclusiveMaximum
@@ -511,7 +512,7 @@ extension JSONSchema.IntegerContext: Decodable {
 }
 
 extension JSONSchema.StringContext {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case maxLength
         case minLength
         case pattern
@@ -543,7 +544,7 @@ extension JSONSchema.StringContext: Decodable {
 }
 
 extension JSONSchema.ArrayContext {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case items
         case maxItems
         case minItems
@@ -583,7 +584,7 @@ extension JSONSchema.ArrayContext: Decodable {
 }
 
 extension JSONSchema.ObjectContext {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case maxProperties
         case minProperties
         case properties
