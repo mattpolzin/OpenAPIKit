@@ -26,7 +26,7 @@ final class SchemaObjectTests: XCTestCase {
         let dateString = JSONSchema.string(.init(format: .date, required: true), .init())
         let dateTimeString = JSONSchema.string(.init(format: .dateTime, required: true), .init())
         let passwordString = JSONSchema.string(.init(format: .password, required: true), .init())
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -98,7 +98,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -160,7 +160,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -188,7 +188,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -273,7 +273,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -319,7 +319,7 @@ final class SchemaObjectTests: XCTestCase {
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, title: "hello"), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, title: "hello"), .init())
 
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -349,7 +349,7 @@ final class SchemaObjectTests: XCTestCase {
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, description: "hello"), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, description: "hello"), .init())
 
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -381,7 +381,7 @@ final class SchemaObjectTests: XCTestCase {
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
 
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
@@ -416,7 +416,7 @@ final class SchemaObjectTests: XCTestCase {
             .optionalSchemaObject()
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
             .optionalSchemaObject()
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
             .optionalSchemaObject()
         let anyOf = JSONSchema.any(of: [boolean])
             .optionalSchemaObject()
@@ -453,7 +453,7 @@ final class SchemaObjectTests: XCTestCase {
             .requiredSchemaObject()
         let string = JSONSchema.string(.init(format: .unspecified, required: false), .init())
             .requiredSchemaObject()
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
             .requiredSchemaObject()
         let anyOf = JSONSchema.any(of: [boolean])
             .requiredSchemaObject()
@@ -490,7 +490,7 @@ final class SchemaObjectTests: XCTestCase {
             .nullableSchemaObject()
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
             .nullableSchemaObject()
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
             .nullableSchemaObject()
         let anyOf = JSONSchema.any(of: [boolean])
             .nullableSchemaObject()
@@ -545,7 +545,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(allowedValues: ["hello"])
 
         // nonesense:
-        let allOf = JSONSchema.all(of: [boolean])
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
             .with(allowedValues: ["hello"])
         let anyOf = JSONSchema.any(of: [boolean])
             .with(allowedValues: ["hello"])
@@ -607,7 +607,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(example: "hello world")
 
         // nonsense:
-        XCTAssertThrowsError(try JSONSchema.all(of: [object])
+        XCTAssertThrowsError(try JSONSchema.all(of: [.string(.init(), .init())])
             .with(example: ["hello"]))
         XCTAssertThrowsError(try JSONSchema.any(of: [object])
             .with(example: ["hello"]))
@@ -3469,8 +3469,8 @@ extension SchemaObjectTests {
 
     func test_encodeAll() {
         let allOf = JSONSchema.all(of: [
-            .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-            .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+            .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+            .object(.init(), .init())
         ])
 
         testEncodingPropertyLines(entity: allOf, propertyLines: [
@@ -3484,11 +3484,6 @@ extension SchemaObjectTests {
             "    \"type\" : \"object\"",
             "  },",
             "  {",
-            "    \"properties\" : {",
-            "      \"world\" : {",
-            "        \"type\" : \"boolean\"",
-            "      }",
-            "    },",
             "    \"type\" : \"object\"",
             "  }",
             "]"
@@ -3500,7 +3495,7 @@ extension SchemaObjectTests {
         {
             "allOf": [
                 { "type": "object" },
-                { "type": "object", "properties": { "hello": { "type": "boolean" } } }
+                { "properties": { "hello": { "type": "boolean" } } }
             ]
         }
         """.data(using: .utf8)!
@@ -3508,8 +3503,8 @@ extension SchemaObjectTests {
         let all = try! testDecoder.decode(JSONSchema.self, from: allData)
 
         XCTAssertEqual(all, JSONSchema.all(of: [
-            .object(.init(format: .generic, required: false), .init(properties: [:])),
-            .object(.init(format: .generic, required: false), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+            .object(.init(), .init()),
+            .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
         ]))
     }
 
@@ -3967,12 +3962,13 @@ extension SchemaObjectTests {
 
     func test_allOf() {
         let t1: JSONSchema = .all(of:
-            .object(properties: ["hello": .string]),
-            .object(properties: ["world": .boolean])
+            .object(.init(), .init(properties: ["hello": .string])),
+            .object(.init(), .init(properties: ["world": .boolean]))
         )
-        let t2: JSONSchema = .all(of: [
-            .object(properties: ["hello": .string]),
-            .object(properties: ["world": .boolean])
+        let t2: JSONSchema = .all(
+            of: [
+                .object(.init(), .init(properties: ["hello": .string])),
+                .object(.init(), .init(properties: ["world": .boolean]))
             ]
         )
 
