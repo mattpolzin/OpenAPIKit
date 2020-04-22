@@ -608,7 +608,9 @@ final class SchemaObjectTests: XCTestCase {
 
         // nonsense:
         XCTAssertThrowsError(try JSONSchema.all(of: [.string(.init(), .init())])
-            .with(example: ["hello"]))
+            .with(example: ["hello"])) { error in
+                XCTAssertEqual(String(describing: error), "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref).")
+        }
         XCTAssertThrowsError(try JSONSchema.any(of: [object])
             .with(example: ["hello"]))
         XCTAssertThrowsError(try JSONSchema.one(of: [object])
@@ -699,6 +701,30 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
 
         XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: readOnlyWriteOnlyData))
+    }
+
+    func test_decodingFailsForNoIdentifyingProperties() {
+        let badSchema = """
+        {
+            "example" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: badSchema))
+    }
+
+    func test_decodingFailsForTypeAndPropertyConflict() {
+        // has type "string" but "items" property that belongs with the "array" type.
+        let badSchema = """
+        {
+            "type": "object",
+            "items": {
+                "type" : "string"
+            }
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try testDecoder.decode(JSONSchema.self, from: badSchema))
     }
 
     func test_decodeUndefined() throws {
@@ -961,6 +987,26 @@ extension SchemaObjectTests {
             return
         }
         XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+    }
+
+    func test_decodeObjectWithTypeInferred() throws {
+        let objectData =
+"""
+{
+    "properties": {
+        "hello": {
+            "type": "boolean"
+        }
+    }
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: objectData)
+
+        XCTAssertEqual(
+            decoded,
+            JSONSchema.object(required: false, properties: ["hello": .boolean(required: false)])
+        )
     }
 
     func test_encodeObjectWithTitle() {
@@ -2093,6 +2139,24 @@ extension SchemaObjectTests {
         XCTAssertEqual(contextB, .init(items: .boolean(.init(format: .generic, required: false))))
     }
 
+    func test_decodeArrayWithTypeInferred() throws {
+        let objectData =
+"""
+{
+    "items": {
+        "type": "boolean"
+    }
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: objectData)
+
+        XCTAssertEqual(
+            decoded,
+            JSONSchema.array(required: false, items: .boolean(required: false))
+        )
+    }
+
     func test_encodeArrayWithItemsDefinition() {
         let requiredArray = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: false))))
         let optionalArray = JSONSchema.array(.init(format: .unspecified, required: false), .init(items: .boolean(.init(format: .unspecified, required: false))))
@@ -2387,6 +2451,22 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyNumber, JSONSchema.number(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedNumber, JSONSchema.number(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueNumber, JSONSchema.number(.init(format: .generic, required: false, allowedValues: [1, 2]), .init()))
+    }
+
+    func test_decodeNumberWithTypeInferred() throws {
+        let objectData =
+"""
+{
+    "maximum": 10
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: objectData)
+
+        XCTAssertEqual(
+            decoded,
+            JSONSchema.number(required: false, maximum: (10, exclusive: false))
+        )
     }
 
     func test_encodeFloatNumber() {
@@ -3135,6 +3215,22 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyString, JSONSchema.string(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedString, JSONSchema.string(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .generic, required: false, allowedValues: ["hello"]), .init()))
+    }
+
+    func test_decodeStringWithTypeInferred() throws {
+        let objectData =
+"""
+{
+    "pattern": ".*"
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(JSONSchema.self, from: objectData)
+
+        XCTAssertEqual(
+            decoded,
+            JSONSchema.string(required: false, pattern: ".*")
+        )
     }
 
     func test_encodeByteString() {

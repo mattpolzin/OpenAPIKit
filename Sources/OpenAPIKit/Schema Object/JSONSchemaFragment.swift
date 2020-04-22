@@ -540,21 +540,21 @@ extension JSONSchemaFragment: Decodable {
             }
         }
 
-        if !numericOrIntegerContainer.allKeys.isEmpty || typeHint == .integer || typeHint == .number {
+        if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
             if typeHint == .integer {
                 self = .integer(generalContext, try .init(from: decoder))
             } else {
                 self = .number(generalContext, try .init(from: decoder))
             }
-        } else if !stringContainer.allKeys.isEmpty || typeHint == .string {
+        } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .string)
             self = .string(generalContext, try .init(from: decoder))
 
-        } else if !arrayContainer.allKeys.isEmpty || typeHint == .array {
+        } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .array)
             self = .array(generalContext, try .init(from: decoder))
 
-        } else if !objectContainer.allKeys.isEmpty || typeHint == .object {
+        } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .object)
             self = .object(generalContext, try .init(from: decoder))
 
