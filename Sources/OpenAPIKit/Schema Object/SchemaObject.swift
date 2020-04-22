@@ -326,10 +326,10 @@ extension JSONSchema {
 }
 
 extension JSONSchema {
-    internal enum Error: Swift.Error, Equatable {
+    internal enum Error: Swift.Error, CustomStringConvertible, Equatable {
         case exampleNotSupported
 
-        public var localizedDescription: String {
+        public var description: String {
             switch self {
             case .exampleNotSupported:
                 return "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref)."
@@ -844,37 +844,61 @@ extension JSONSchema: Decodable {
         }
 
         let hintContainer = try decoder.container(keyedBy: HintCodingKeys.self)
+        let hintContainerCount = hintContainer.allKeys.count
+        let typeHint = try hintContainer.decodeIfPresent(JSONType.self, forKey: .type)
 
-        let containerCount = hintContainer.allKeys.count
-        // This means there is no type specified which is hopefully only found for truly
-        // undefined schemas (i.e. "{}"); there has been known to be a "description" even
-        // without a "type" specified.
-        if containerCount == 0 || (containerCount == 1 && hintContainer.contains(.description))  {
-            let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)
-            self = .undefined(description: description)
-            return
+        let numericOrIntegerContainer = try decoder.container(keyedBy: JSONSchema.NumericContext.CodingKeys.self)
+        let stringContainer = try decoder.container(keyedBy: JSONSchema.StringContext.CodingKeys.self)
+        let arrayContainer = try decoder.container(keyedBy: JSONSchema.ArrayContext.CodingKeys.self)
+        let objectContainer = try decoder.container(keyedBy: JSONSchema.ObjectContext.CodingKeys.self)
+
+        func assertNoTypeConflict(with type: JSONType) throws {
+            guard let typeHint = typeHint else { return }
+            guard typeHint == type else {
+                throw InconsistencyError(
+                    subjectName: "OpenAPI Schema",
+                    details: "Found schema attributes not consistent with the type specified: \(typeHint)",
+                    codingPath: decoder.codingPath
+                )
+            }
         }
 
-        let type = try hintContainer.decode(JSONType.self, forKey: .type)
+        if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
+            if typeHint == .integer {
+                self = .integer(try Context<JSONTypeFormat.IntegerFormat>(from: decoder),
+                                try IntegerContext(from: decoder))
+            } else {
+                self = .number(try Context<JSONTypeFormat.NumberFormat>(from: decoder),
+                               try NumericContext(from: decoder))
+            }
 
-        switch type {
-        case .boolean:
-            self = .boolean(try Context<JSONTypeFormat.BooleanFormat>(from: decoder))
-        case .object:
-            self = .object(try Context<JSONTypeFormat.ObjectFormat>(from: decoder),
-                           try ObjectContext(from: decoder))
-        case .array:
-            self = .array(try Context<JSONTypeFormat.ArrayFormat>(from: decoder),
-                           try ArrayContext(from: decoder))
-        case .number:
-            self = .number(try Context<JSONTypeFormat.NumberFormat>(from: decoder),
-                           try NumericContext(from: decoder))
-        case .integer:
-            self = .integer(try Context<JSONTypeFormat.IntegerFormat>(from: decoder),
-                           try IntegerContext(from: decoder))
-        case .string:
+        } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
+            try assertNoTypeConflict(with: .string)
             self = .string(try Context<JSONTypeFormat.StringFormat>(from: decoder),
                            try StringContext(from: decoder))
+
+        } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
+            try assertNoTypeConflict(with: .array)
+            self = .array(try Context<JSONTypeFormat.ArrayFormat>(from: decoder),
+                          try ArrayContext(from: decoder))
+
+        } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
+            try assertNoTypeConflict(with: .object)
+            self = .object(try Context<JSONTypeFormat.ObjectFormat>(from: decoder),
+                           try ObjectContext(from: decoder))
+
+        } else if typeHint == .boolean {
+            self = .boolean(try Context<JSONTypeFormat.BooleanFormat>(from: decoder))
+
+        } else if hintContainerCount == 0 || (hintContainerCount == 1 && hintContainer.contains(.description)) {
+            let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)
+            self = .undefined(description: description)
+        } else {
+            throw InconsistencyError(
+                subjectName: "OpenAPI Schema",
+                details: "No `type` or other identifying properties were found in the schema.",
+                codingPath: decoder.codingPath
+            )
         }
     }
 }
