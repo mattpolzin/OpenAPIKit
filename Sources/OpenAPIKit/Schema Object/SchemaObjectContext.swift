@@ -504,10 +504,33 @@ extension JSONSchema.IntegerContext: Decodable {
         let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
         let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
 
-        maximum = (try container.decodeIfPresent(Int.self, forKey: .maximum))
-            .map { Bound(value: $0, exclusive: exclusiveMaximum) }
-        minimum = (try container.decodeIfPresent(Int.self, forKey: .minimum))
-            .map { Bound(value: $0, exclusive: exclusiveMinimum) }
+        // the following acrobatics thanks to some libraries (namely Yams) not
+        // being willing to decode floating point representations of whole numbers
+        // as integer values.
+        let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
+        let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
+
+        maximum = try maximumAttempt.map { floatMax in
+            guard let integer = Int(exactly: floatMax) else {
+                throw InconsistencyError(
+                    subjectName: "maximum",
+                    details: "Expected an Integer literal but found a floating point value",
+                    codingPath: decoder.codingPath
+                )
+            }
+            return integer
+        }.map { Bound(value: $0, exclusive: exclusiveMaximum) }
+
+        minimum = try minimumAttempt.map { floatMin in
+            guard let integer = Int(exactly: floatMin) else {
+                throw InconsistencyError(
+                    subjectName: "minimum",
+                    details: "Expected an Integer literal but found a floating point value",
+                    codingPath: decoder.codingPath
+                )
+            }
+            return integer
+        }.map { Bound(value: $0, exclusive: exclusiveMinimum) }
     }
 }
 

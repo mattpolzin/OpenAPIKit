@@ -34,7 +34,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
     func test_successfullyParsedDocument() {
         switch tomtomAPI {
         case nil:
-            XCTFail("Did not attempt to pull Google Books API documentation like expected.")
+            XCTFail("Did not attempt to pull TomTom API documentation like expected.")
         case .failure(let error):
             let prettyError = OpenAPI.Error(from: error)
             XCTFail(prettyError.localizedDescription + "\n coding path: " + prettyError.codingPathString)
