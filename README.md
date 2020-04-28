@@ -208,7 +208,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] security
 - [x] tags
 - [x] externalDocs
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Info Object (`OpenAPI.Document.Info`)
 - [x] title
