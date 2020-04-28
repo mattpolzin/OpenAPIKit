@@ -11,7 +11,7 @@ extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
-    public struct Parameter: Equatable {
+    public struct Parameter: Equatable, CodableVendorExtendable {
         public var name: String
 
         /// OpenAPI Spec "in" property.
@@ -22,6 +22,13 @@ extension OpenAPI.PathItem {
         /// OpenAPI Spec "content" or "schema" properties.
         public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public var required: Bool { parameterLocation.required }
 
         /// An array of parameters that are `Either` `Parameters` or references to parameters.
@@ -31,60 +38,70 @@ extension OpenAPI.PathItem {
                     parameterLocation: Location,
                     schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.parameterLocation = parameterLocation
             self.schemaOrContent = schemaOrContent
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     parameterLocation: Location,
                     schema: Schema,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.parameterLocation = parameterLocation
             self.schemaOrContent = .init(schema)
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     parameterLocation: Location,
                     schema: JSONSchema,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.parameterLocation = parameterLocation
             self.schemaOrContent = .init(Schema(schema, style: .default(for: parameterLocation)))
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     parameterLocation: Location,
                     schemaReference: JSONReference<JSONSchema>,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.parameterLocation = parameterLocation
             self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: parameterLocation)))
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     parameterLocation: Location,
                     content: OpenAPI.Content.Map,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.parameterLocation = parameterLocation
             self.schemaOrContent = .init(content)
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -99,7 +116,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
         schema: JSONSchema,
         description: String? = nil,
-        deprecated: Bool = false
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
             .init(
@@ -107,7 +125,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
                 parameterLocation: parameterLocation,
                 schema: schema,
                 description: description,
-                deprecated: deprecated
+                deprecated: deprecated,
+                vendorExtensions: vendorExtensions
             )
         )
     }
@@ -118,7 +137,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         parameterLocation: OpenAPI.PathItem.Parameter.Location,
         content: OpenAPI.Content.Map,
         description: String? = nil,
-        deprecated: Bool = false
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
             .init(
@@ -126,7 +146,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
                 parameterLocation: parameterLocation,
                 content: content,
                 description: description,
-                deprecated: deprecated
+                deprecated: deprecated,
+                vendorExtensions: vendorExtensions
             )
         )
     }
