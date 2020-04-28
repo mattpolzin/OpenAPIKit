@@ -234,7 +234,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] url
 - [x] description
 - [x] variables
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Server Variable Object (`OpenAPI.Server.Variable`)
 - [x] enum

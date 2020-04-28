@@ -11,17 +11,26 @@ extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
     /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
-    public struct Server: Equatable {
+    public struct Server: Equatable, CodableVendorExtendable {
         public let url: URL
         public let description: String?
         public let variables: OrderedDictionary<String, Variable>
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(url: URL,
                     description: String? = nil,
-                    variables: OrderedDictionary<String, Variable> = [:]) {
+                    variables: OrderedDictionary<String, Variable> = [:],
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.url = url
             self.description = description
             self.variables = variables
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -53,6 +62,8 @@ extension OpenAPI.Server: Decodable {
         url = try container.decode(URL.self, forKey: .url)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
@@ -67,14 +78,64 @@ extension OpenAPI.Server: Encodable {
         if variables.count > 0 {
             try container.encode(variables, forKey: .variables)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
 extension OpenAPI.Server {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case url
         case description
         case variables
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .url,
+                .description,
+                .variables
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "url":
+                self = .url
+            case "description":
+                self = .description
+            case "variables":
+                self = .variables
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .url:
+                return "url"
+            case .description:
+                return "description"
+            case .variables:
+                return "variables"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }
 
