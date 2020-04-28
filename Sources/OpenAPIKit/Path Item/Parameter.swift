@@ -155,20 +155,6 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
 }
 
 // MARK: - Codable
-extension OpenAPI.PathItem.Parameter {
-    private enum CodingKeys: String, CodingKey {
-        case name
-        case parameterLocation = "in"
-        case description
-        case required
-        case deprecated
-        case allowEmptyValue
-
-        // the following are alternatives
-        case content
-        case schema
-    }
-}
 
 extension OpenAPI.PathItem.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -214,6 +200,8 @@ extension OpenAPI.PathItem.Parameter: Encodable {
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -271,5 +259,130 @@ extension OpenAPI.PathItem.Parameter: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+
+        vendorExtensions = try Self.extensions(from: decoder)
+    }
+}
+
+extension OpenAPI.PathItem.Parameter {
+    internal enum CodingKeys: ExtendableCodingKey {
+        case name
+        case parameterLocation
+        case description
+        case required
+        case deprecated
+        case allowEmptyValue
+
+        // the following are alternatives
+        case content
+        case schema
+
+        // the following are parsed as part of Schema
+        case style
+        case explode
+        case allowReserved
+        case example
+        case examples
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .name,
+                .parameterLocation,
+                .description,
+                .required,
+                .deprecated,
+                .allowEmptyValue,
+
+                .content,
+                .schema,
+
+                .style,
+                .explode,
+                .allowReserved,
+                .schema,
+                .example,
+                .examples
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "name":
+                self = .name
+            case "in":
+                self = .parameterLocation
+            case "description":
+                self = .description
+            case "required":
+                self = .required
+            case "deprecated":
+                self = .deprecated
+            case "allowEmptyValue":
+                self = .allowEmptyValue
+            case "content":
+                self = .content
+            case "schema":
+                self = .schema
+            case "style":
+                self = .style
+            case "explode":
+                self = .explode
+            case "allowReserved":
+                self = .allowReserved
+            case "example":
+                self = .example
+            case "examples":
+                self = .examples
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .name:
+                return "name"
+            case .parameterLocation:
+                return "in"
+            case .description:
+                return "description"
+            case .required:
+                return "required"
+            case .deprecated:
+                return "deprecated"
+            case .allowEmptyValue:
+                return "allowEmptyValue"
+            case .content:
+                return "content"
+            case .schema:
+                return "schema"
+            case .style:
+                return "style"
+            case .explode:
+                return "explode"
+            case .allowReserved:
+                return "allowReserved"
+            case .example:
+                return "example"
+            case .examples:
+                return "examples"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }

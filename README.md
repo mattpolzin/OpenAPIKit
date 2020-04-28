@@ -307,7 +307,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] allowReserved
     - [x] example
     - [x] examples
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Request Body Object (`OpenAPI.Request`)
 - [x] description

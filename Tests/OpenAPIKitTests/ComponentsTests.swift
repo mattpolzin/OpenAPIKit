@@ -317,7 +317,7 @@ extension ComponentsTests {
                     "two": .init(description: "hello", content: [:])
                 ],
                 parameters: [
-                    "three": .init(name: "hi", parameterLocation: .query, content: [:])
+                    "three": .init(name: "hi", context: .query, content: [:])
                 ],
                 examples: [
                     "four": .init(value: .init(URL(string: "http://address.com")!))
