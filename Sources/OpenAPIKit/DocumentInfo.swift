@@ -11,7 +11,7 @@ extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
     /// See [OpenAPI Info Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object).
-    public struct Info: Equatable {
+    public struct Info: Equatable, CodableVendorExtendable {
         public let title: String
         public let description: String?
         public let termsOfService: URL?
@@ -19,18 +19,27 @@ extension OpenAPI.Document {
         public let license: License?
         public let version: String
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(title: String,
                     description: String? = nil,
                     termsOfService: URL? = nil,
                     contact: Contact? = nil,
                     license: License? = nil,
-                    version: String) {
+                    version: String,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.title = title
             self.description = description
             self.termsOfService = termsOfService
             self.contact = contact
             self.license = license
             self.version = version
+            self.vendorExtensions = vendorExtensions
         }
 
         /// OpenAPI Spec "Contact Object"
@@ -161,6 +170,8 @@ extension OpenAPI.Document.Info: Encodable {
         try license.encodeIfNotNil(to: &container, forKey: .license)
 
         try container.encode(version, forKey: .version)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -179,16 +190,80 @@ extension OpenAPI.Document.Info: Decodable {
         license = try container.decodeIfPresent(License.self, forKey: .license)
 
         version = try container.decode(String.self, forKey: .version)
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
 extension OpenAPI.Document.Info {
-    internal enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case title
         case description
         case termsOfService
         case contact
         case license
         case version
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .title,
+                .description,
+                .termsOfService,
+                .contact,
+                .license,
+                .version
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "title":
+                self = .title
+            case "description":
+                self = .description
+            case "termsOfService":
+                self = .termsOfService
+            case "contact":
+                self = .contact
+            case "license":
+                self = .license
+            case "version":
+                self = .version
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .title:
+                return "title"
+            case .description:
+                return "description"
+            case .termsOfService:
+                return "termsOfService"
+            case .contact:
+                return "contact"
+            case .license:
+                return "license"
+            case .version:
+                return "version"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }

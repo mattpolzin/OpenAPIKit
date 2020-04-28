@@ -217,7 +217,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] contact
 - [x] license
 - [x] version
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Contact Object (`OpenAPI.Document.Info.Contact`)
 - [x] name

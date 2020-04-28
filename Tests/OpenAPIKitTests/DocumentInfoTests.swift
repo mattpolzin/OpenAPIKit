@@ -386,4 +386,59 @@ extension DocumentInfoTests {
             )
         )
     }
+
+    func test_info_withVendorExtension_encode() throws {
+        let info = OpenAPI.Document.Info(
+            title: "title",
+            license: .init(name: "license"),
+            version: "1.0",
+            vendorExtensions: ["x-speacialFeature": ["hello", "world"]]
+        )
+
+        let encodedInfo = try testStringFromEncoding(of: info)
+
+        assertJSONEquivalent(encodedInfo,
+"""
+{
+  "license" : {
+    "name" : "license"
+  },
+  "title" : "title",
+  "version" : "1.0",
+  "x-speacialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+"""
+        )
+    }
+
+    func test_info_withVendorExtension_decode() throws {
+        let infoData =
+"""
+{
+  "license" : {
+    "name" : "license"
+  },
+  "title" : "title",
+  "version" : "1.0",
+  "x-speacialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+
+        XCTAssertEqual(
+            info,
+            .init(
+                title: "title",
+                license: .init(name: "license"),
+                version: "1.0",
+                vendorExtensions: ["x-speacialFeature": ["hello", "world"]]
+            )
+        )
+    }
 }
