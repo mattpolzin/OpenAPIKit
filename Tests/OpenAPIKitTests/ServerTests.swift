@@ -87,29 +87,42 @@ extension ServerTests {
             "default": "hello",
             "description": "hello again"
         }
-    }
+    },
+    "x-specialFeature": [
+        "hello",
+        "world"
+    ]
 }
 """.data(using: .utf8)!
 
         let serverDecoded = try! testDecoder.decode(Server.self, from: serverData)
 
-        XCTAssertEqual(serverDecoded, Server(url: URL(string: "https://hello.com")!,
-                                             description: "hello world",
-                                             variables: [
-                                                "hello": .init(enum: ["hello"],
-                                                               default: "hello",
-                                                               description: "hello again")
-            ]))
+        XCTAssertEqual(
+            serverDecoded,
+            Server(
+                url: URL(string: "https://hello.com")!,
+                description: "hello world",
+                variables: [
+                    "hello": .init(enum: ["hello"],
+                                   default: "hello",
+                                   description: "hello again")
+                ],
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
+        )
     }
 
     func test_maximalServer_encode() {
-        let server = Server(url: URL(string: "https://hello.com")!,
-                            description: "hello world",
-                            variables: [
-                                "hello": .init(enum: ["hello"],
-                                               default: "hello",
-                                               description: "hello again")
-            ])
+        let server = Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(enum: ["hello"],
+                               default: "hello",
+                               description: "hello again")
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
         let encodedServer = try! testStringFromEncoding(of: server)
 
         assertJSONEquivalent(encodedServer,
@@ -125,7 +138,11 @@ extension ServerTests {
         "hello"
       ]
     }
-  }
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
 }
 """
         )

@@ -11,7 +11,7 @@ extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
     /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
-    public struct Document: Equatable {
+    public struct Document: Equatable, CodableVendorExtendable {
         public var openAPIVersion: Version
         public var info: Info
         public var servers: [Server]
@@ -21,6 +21,13 @@ extension OpenAPI {
         public var tags: [Tag]?
         public var externalDocs: ExternalDocumentation?
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(openAPIVersion: Version = .v3_0_0,
                     info: Info,
                     servers: [Server],
@@ -28,7 +35,8 @@ extension OpenAPI {
                     components: Components,
                     security: [SecurityRequirement] = [],
                     tags: [Tag]? = nil,
-                    externalDocs: ExternalDocumentation? = nil) {
+                    externalDocs: ExternalDocumentation? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.openAPIVersion = openAPIVersion
             self.info = info
             self.servers = servers
@@ -37,6 +45,7 @@ extension OpenAPI {
             self.security = security
             self.tags = tags
             self.externalDocs = externalDocs
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -62,19 +71,6 @@ extension OpenAPI.Document {
 }
 
 // MARK: - Codable
-
-extension OpenAPI.Document {
-    private enum CodingKeys: String, CodingKey {
-        case openAPIVersion = "openapi"
-        case info
-        case servers
-        case paths
-        case components
-        case security
-        case tags
-        case externalDocs
-    }
-}
 
 extension OpenAPI.Document: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -103,6 +99,8 @@ extension OpenAPI.Document: Encodable {
         try tags.encodeIfNotNil(to: &container, forKey: .tags)
 
         try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -129,6 +127,9 @@ extension OpenAPI.Document: Decodable {
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
 
             externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
+
+            vendorExtensions = try Self.extensions(from: decoder)
+
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
@@ -138,6 +139,91 @@ extension OpenAPI.Document: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Document(error)
+        }
+    }
+}
+
+extension OpenAPI.Document {
+    internal enum CodingKeys: ExtendableCodingKey {
+        case openAPIVersion
+        case info
+        case servers
+        case paths
+        case components
+        case security
+        case tags
+        case externalDocs
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .openAPIVersion,
+                .info,
+                .servers,
+                .paths,
+                .components,
+                .security,
+                .tags,
+                .externalDocs
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "openapi":
+                self = .openAPIVersion
+            case "info":
+                self = .info
+            case "servers":
+                self = .servers
+            case "paths":
+                self = .paths
+            case "components":
+                self = .components
+            case "security":
+                self = .security
+            case "tags":
+                self = .tags
+            case "externalDocs":
+                self = .externalDocs
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .openAPIVersion:
+                return "openapi"
+            case .info:
+                return "info"
+            case .servers:
+                return "servers"
+            case .paths:
+                return "paths"
+            case .components:
+                return "components"
+            case .security:
+                return "security"
+            case .tags:
+                return "tags"
+            case .externalDocs:
+                return "externalDocs"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
         }
     }
 }

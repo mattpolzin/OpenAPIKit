@@ -11,7 +11,7 @@ extension OpenAPI.PathItem {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
-    public struct Parameter: Equatable {
+    public struct Parameter: Equatable, CodableVendorExtendable {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.
@@ -21,6 +21,13 @@ extension OpenAPI.PathItem {
 
         /// OpenAPI Spec "content" or "schema" properties.
         public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
+
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
 
         public var required: Bool { context.required }
         public var location: Context.Location { return context.location }
@@ -32,60 +39,70 @@ extension OpenAPI.PathItem {
                     context: Context,
                     schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
             self.schemaOrContent = schemaOrContent
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     context: Context,
                     schema: Schema,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(schema)
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     context: Context,
                     schema: JSONSchema,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(Schema(schema, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     context: Context,
                     schemaReference: JSONReference<JSONSchema>,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
                     context: Context,
                     content: OpenAPI.Content.Map,
                     description: String? = nil,
-                    deprecated: Bool = false) {
+                    deprecated: Bool = false,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(content)
             self.description = description
             self.deprecated = deprecated
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -100,7 +117,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         context: OpenAPI.PathItem.Parameter.Context,
         schema: JSONSchema,
         description: String? = nil,
-        deprecated: Bool = false
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
             .init(
@@ -108,7 +126,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
                 context: context,
                 schema: schema,
                 description: description,
-                deprecated: deprecated
+                deprecated: deprecated,
+                vendorExtensions: vendorExtensions
             )
         )
     }
@@ -119,7 +138,8 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         context: OpenAPI.PathItem.Parameter.Context,
         content: OpenAPI.Content.Map,
         description: String? = nil,
-        deprecated: Bool = false
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
             .init(
@@ -127,27 +147,14 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
                 context: context,
                 content: content,
                 description: description,
-                deprecated: deprecated
+                deprecated: deprecated,
+                vendorExtensions: vendorExtensions
             )
         )
     }
 }
 
 // MARK: - Codable
-extension OpenAPI.PathItem.Parameter {
-    private enum CodingKeys: String, CodingKey {
-        case name
-        case parameterLocation = "in"
-        case description
-        case required
-        case deprecated
-        case allowEmptyValue
-
-        // the following are alternatives
-        case content
-        case schema
-    }
-}
 
 extension OpenAPI.PathItem.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -193,6 +200,8 @@ extension OpenAPI.PathItem.Parameter: Encodable {
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -250,5 +259,130 @@ extension OpenAPI.PathItem.Parameter: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
+
+        vendorExtensions = try Self.extensions(from: decoder)
+    }
+}
+
+extension OpenAPI.PathItem.Parameter {
+    internal enum CodingKeys: ExtendableCodingKey {
+        case name
+        case parameterLocation
+        case description
+        case required
+        case deprecated
+        case allowEmptyValue
+
+        // the following are alternatives
+        case content
+        case schema
+
+        // the following are parsed as part of Schema
+        case style
+        case explode
+        case allowReserved
+        case example
+        case examples
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .name,
+                .parameterLocation,
+                .description,
+                .required,
+                .deprecated,
+                .allowEmptyValue,
+
+                .content,
+                .schema,
+
+                .style,
+                .explode,
+                .allowReserved,
+                .schema,
+                .example,
+                .examples
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "name":
+                self = .name
+            case "in":
+                self = .parameterLocation
+            case "description":
+                self = .description
+            case "required":
+                self = .required
+            case "deprecated":
+                self = .deprecated
+            case "allowEmptyValue":
+                self = .allowEmptyValue
+            case "content":
+                self = .content
+            case "schema":
+                self = .schema
+            case "style":
+                self = .style
+            case "explode":
+                self = .explode
+            case "allowReserved":
+                self = .allowReserved
+            case "example":
+                self = .example
+            case "examples":
+                self = .examples
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .name:
+                return "name"
+            case .parameterLocation:
+                return "in"
+            case .description:
+                return "description"
+            case .required:
+                return "required"
+            case .deprecated:
+                return "deprecated"
+            case .allowEmptyValue:
+                return "allowEmptyValue"
+            case .content:
+                return "content"
+            case .schema:
+                return "schema"
+            case .style:
+                return "style"
+            case .explode:
+                return "explode"
+            case .allowReserved:
+                return "allowReserved"
+            case .example:
+                return "example"
+            case .examples:
+                return "examples"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }

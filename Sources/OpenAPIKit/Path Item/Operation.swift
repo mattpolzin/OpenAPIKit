@@ -11,7 +11,7 @@ extension OpenAPI.PathItem {
     /// OpenAPI Spec "Operation Object"
     /// 
     /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
-    public struct Operation: Equatable {
+    public struct Operation: Equatable, CodableVendorExtendable {
         public var tags: [String]?
         public var summary: String?
         public var description: String?
@@ -25,6 +25,13 @@ extension OpenAPI.PathItem {
         public var security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
         public var servers: [OpenAPI.Server]?
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(tags: [String]? = nil,
                     summary: String? = nil,
                     description: String? = nil,
@@ -35,7 +42,8 @@ extension OpenAPI.PathItem {
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
                     security: [OpenAPI.SecurityRequirement]? = nil,
-                    servers: [OpenAPI.Server]? = nil) {
+                    servers: [OpenAPI.Server]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.tags = tags
             self.summary = summary
             self.description = description
@@ -47,6 +55,7 @@ extension OpenAPI.PathItem {
             self.deprecated = deprecated
             self.security = security
             self.servers = servers
+            self.vendorExtensions = vendorExtensions
         }
 
         // variadic tags
@@ -60,7 +69,8 @@ extension OpenAPI.PathItem {
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
                     security: [OpenAPI.SecurityRequirement]? = nil,
-                    servers: [OpenAPI.Server]? = nil) {
+                    servers: [OpenAPI.Server]? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.init(
                 tags: tags,
                 summary: summary,
@@ -72,30 +82,14 @@ extension OpenAPI.PathItem {
                 responses: responses,
                 deprecated: deprecated,
                 security: security,
-                servers: servers
+                servers: servers,
+                vendorExtensions: vendorExtensions
             )
         }
     }
 }
 
 // MARK: - Codable
-
-extension OpenAPI.PathItem.Operation {
-    private enum CodingKeys: String, CodingKey {
-        case tags
-        case summary
-        case description
-        case externalDocs
-        case operationId
-        case parameters
-        case requestBody
-        case responses
-//      case callbacks
-        case deprecated
-        case security
-        case servers
-    }
-}
 
 extension OpenAPI.PathItem.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -128,6 +122,8 @@ extension OpenAPI.PathItem.Operation: Encodable {
         }
 
         try servers.encodeIfNotNil(to: &container, forKey: .servers)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -157,6 +153,8 @@ extension OpenAPI.PathItem.Operation: Decodable {
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: nil)
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
+
+            vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as OpenAPI.Error.Decoding.Request {
 
             throw OpenAPI.Error.Decoding.Operation(error)
@@ -172,6 +170,112 @@ extension OpenAPI.PathItem.Operation: Decodable {
         } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Operation(error)
+        }
+    }
+}
+
+extension OpenAPI.PathItem.Operation {
+    internal enum CodingKeys: ExtendableCodingKey {
+        case tags
+        case summary
+        case description
+        case externalDocs
+        case operationId
+        case parameters
+        case requestBody
+        case responses
+//      case callbacks
+        case deprecated
+        case security
+        case servers
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .tags,
+                .summary,
+                .description,
+                .externalDocs,
+                .operationId,
+                .parameters,
+                .requestBody,
+                .responses,
+//                .callbacks,
+                .deprecated,
+                .security,
+                .servers
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "tags":
+                self = .tags
+            case "summary":
+                self = .summary
+            case "description":
+                self = .description
+            case "externalDocs":
+                self = .externalDocs
+            case "operationId":
+                self = .operationId
+            case "parameters":
+                self = .parameters
+            case "requestBody":
+                self = .requestBody
+            case "responses":
+                self = .responses
+            case "deprecated":
+                self = .deprecated
+            case "security":
+                self = .security
+            case "servers":
+                self = .servers
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .tags:
+                return "tags"
+            case .summary:
+                return "summary"
+            case .description:
+                return "description"
+            case .externalDocs:
+                return "externalDocs"
+            case .operationId:
+                return "operationId"
+            case .parameters:
+                return "parameters"
+            case .requestBody:
+                return "requestBody"
+            case .responses:
+                return "responses"
+            case .deprecated:
+                return "deprecated"
+            case .security:
+                return "security"
+            case .servers:
+                return "servers"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
         }
     }
 }

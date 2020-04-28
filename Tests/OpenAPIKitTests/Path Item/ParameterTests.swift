@@ -646,6 +646,70 @@ extension ParameterTests {
         )
     }
 
+    func test_vendorExtension_encode() throws {
+        let parameter = OpenAPI.PathItem.Parameter(
+            name: "hello",
+            context: .path,
+            schema: .string,
+            description: "world",
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+
+        let encodedParameter = try testStringFromEncoding(of: parameter)
+
+        assertJSONEquivalent(
+            encodedParameter,
+            """
+{
+  "description" : "world",
+  "in" : "path",
+  "name" : "hello",
+  "required" : true,
+  "schema" : {
+    "type" : "string"
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+"""
+        )
+    }
+
+    func test_vendorExtension_decode() throws {
+        let parameterData =
+            """
+{
+  "description" : "world",
+  "in" : "path",
+  "name" : "hello",
+  "required" : true,
+  "schema" : {
+    "type" : "string"
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+
+        let parameter = try testDecoder.decode(OpenAPI.PathItem.Parameter.self, from: parameterData)
+
+        XCTAssertEqual(parameter.location, .path)
+        XCTAssertEqual(
+            parameter,
+            OpenAPI.PathItem.Parameter(
+                name: "hello",
+                context: .path,
+                schema: .string(required: false),
+                description: "world",
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
+        )
+    }
+
     func test_decodeBothSchemaAndContent_throws() {
         let parameterData =
 """

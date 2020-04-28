@@ -187,7 +187,8 @@ extension ComponentsTests {
             ],
             securitySchemes: [
                 "seven": .http(scheme: "cool")
-            ]
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
         let encoded = try testStringFromEncoding(of: t1)
@@ -239,14 +240,100 @@ extension ComponentsTests {
       "scheme" : "cool",
       "type" : "http"
     }
-  }
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
 }
 """
         )
     }
 
     func test_maximal_decode() throws {
-        // TODO: write tests
+        let t1 =
+"""
+{
+  "examples" : {
+    "four" : {
+      "externalValue" : "http:\\/\\/address.com"
+    }
+  },
+  "headers" : {
+    "six" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  },
+  "parameters" : {
+    "three" : {
+      "content" : {
+
+      },
+      "in" : "query",
+      "name" : "hi"
+    }
+  },
+  "requestBodies" : {
+    "five" : {
+      "content" : {
+
+      }
+    }
+  },
+  "responses" : {
+    "two" : {
+      "description" : "hello"
+    }
+  },
+  "schemas" : {
+    "one" : {
+      "type" : "string"
+    }
+  },
+  "securitySchemes" : {
+    "seven" : {
+      "scheme" : "cool",
+      "type" : "http"
+    }
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+
+        let decoded = try testDecoder.decode(OpenAPI.Components.self, from: t1)
+
+        XCTAssertEqual(
+            decoded,
+            OpenAPI.Components(
+                schemas: [
+                    "one": .string(required: false)
+                ],
+                responses: [
+                    "two": .init(description: "hello", content: [:])
+                ],
+                parameters: [
+                    "three": .init(name: "hi", context: .query, content: [:])
+                ],
+                examples: [
+                    "four": .init(value: .init(URL(string: "http://address.com")!))
+                ],
+                requestBodies: [
+                    "five": .init(content: [:])
+                ],
+                headers: [
+                    "six": .init(schema: .string(required: false))
+                ],
+                securitySchemes: [
+                    "seven": .http(scheme: "cool")
+                ],
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
+        )
     }
 }
 

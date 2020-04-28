@@ -170,7 +170,8 @@ extension PathItemTests {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", context: .query, schema: .string)]
+            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
         let encodedPathItem = try testStringFromEncoding(of: pathItem)
@@ -194,7 +195,11 @@ extension PathItemTests {
       "url" : "http:\\/\\/google.com"
     }
   ],
-  "summary" : "summary"
+  "summary" : "summary",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
 }
 """
         )
@@ -219,7 +224,11 @@ extension PathItemTests {
       "url" : "http:\\/\\/google.com"
     }
   ],
-  "summary" : "summary"
+  "summary" : "summary",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
 }
 """.data(using: .utf8)!
 
@@ -231,7 +240,8 @@ extension PathItemTests {
                 summary: "summary",
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-                parameters: [.parameter(name: "hello", context: .query, schema: .string(required: false))]
+                parameters: [.parameter(name: "hello", context: .query, schema: .string(required: false))],
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )
     }

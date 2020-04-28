@@ -525,4 +525,75 @@ extension DocumentTests {
             )
         )
     }
+
+    func test_vendorExtensions_encode() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            externalDocs: .init(url: URL(string: "http://google.com")!),
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let encodedDocument = try testStringFromEncoding(of: document)
+
+        assertJSONEquivalent(
+            encodedDocument,
+"""
+{
+  "externalDocs" : {
+    "url" : "http:\\/\\/google.com"
+  },
+  "info" : {
+    "title" : "API",
+    "version" : "1.0"
+  },
+  "openapi" : "3.0.0",
+  "paths" : {
+
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+"""
+        )
+    }
+
+    func test_vendorExtensions_decode() throws {
+        let documentData =
+"""
+{
+  "externalDocs" : {
+    "url" : "http:\\/\\/google.com"
+  },
+  "info" : {
+    "title" : "API",
+    "version" : "1.0"
+  },
+  "openapi" : "3.0.0",
+  "paths" : {
+
+  },
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents,
+                externalDocs: .init(url: URL(string: "http://google.com")!),
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
+        )
+    }
 }

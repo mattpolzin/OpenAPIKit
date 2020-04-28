@@ -208,7 +208,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] security
 - [x] tags
 - [x] externalDocs
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Info Object (`OpenAPI.Document.Info`)
 - [x] title
@@ -217,24 +217,24 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] contact
 - [x] license
 - [x] version
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Contact Object (`OpenAPI.Document.Info.Contact`)
 - [x] name
 - [x] url
 - [x] email
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### License Object (`OpenAPI.Document.Info.License`)
 - [x] name
 - [x] url
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Server Object (`OpenAPI.Server`)
 - [x] url
 - [x] description
 - [x] variables
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Server Variable Object (`OpenAPI.Server.Variable`)
 - [x] enum
@@ -252,7 +252,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] securitySchemes
 - [ ] links
 - [ ] callbacks
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Paths Object (`OpenAPI.PathItem.Map`)
 - [x] *dictionary*
@@ -271,7 +271,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] head
 - [x] patch
 - [x] trace
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
 - [x] tags
@@ -286,7 +286,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] deprecated
 - [x] security
 - [x] servers
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### External Document Object (`OpenAPI.ExternalDoc`)
 - [x] description
@@ -307,7 +307,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] allowReserved
     - [x] example
     - [x] examples
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Request Body Object (`OpenAPI.Request`)
 - [x] description

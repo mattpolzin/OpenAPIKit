@@ -42,7 +42,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
     /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
-    public struct PathItem: Equatable {
+    public struct PathItem: Equatable, CodableVendorExtendable {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?
@@ -57,6 +57,13 @@ extension OpenAPI {
         public var patch: Operation?
         public var trace: Operation?
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(summary: String? = nil,
                     description: String? = nil,
                     servers: [OpenAPI.Server]? = nil,
@@ -68,7 +75,8 @@ extension OpenAPI {
                     options: Operation? = nil,
                     head: Operation? = nil,
                     patch: Operation? = nil,
-                    trace: Operation? = nil) {
+                    trace: Operation? = nil,
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.summary = summary
             self.description = description
             self.servers = servers
@@ -82,6 +90,7 @@ extension OpenAPI {
             self.head = head
             self.patch = patch
             self.trace = trace
+            self.vendorExtensions = vendorExtensions
         }
 
         public typealias Map = OrderedDictionary<Path, PathItem>
@@ -215,24 +224,6 @@ extension OpenAPI.Path: Decodable {
     }
 }
 
-extension OpenAPI.PathItem {
-    private enum CodingKeys: String, CodingKey {
-        case summary
-        case description
-        case servers
-        case parameters
-
-        case get
-        case put
-        case post
-        case delete
-        case options
-        case head
-        case patch
-        case trace
-    }
-}
-
 extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -255,6 +246,8 @@ extension OpenAPI.PathItem: Encodable {
         try head.encodeIfNotNil(to: &container, forKey: .head)
         try patch.encodeIfNotNil(to: &container, forKey: .patch)
         try trace.encodeIfNotNil(to: &container, forKey: .trace)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -279,7 +272,9 @@ extension OpenAPI.PathItem: Decodable {
             head = try container.decodeIfPresent(Operation.self, forKey: .head)
             patch = try container.decodeIfPresent(Operation.self, forKey: .patch)
             trace = try container.decodeIfPresent(Operation.self, forKey: .trace)
-        }  catch let error as DecodingError {
+
+            vendorExtensions = try Self.extensions(from: decoder)
+        } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Path(error)
         } catch let error as OpenAPI.Error.Decoding.Operation {
@@ -288,6 +283,118 @@ extension OpenAPI.PathItem: Decodable {
         } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Path(error)
+        }
+    }
+}
+
+extension OpenAPI.PathItem {
+    internal enum CodingKeys: ExtendableCodingKey {
+        case summary
+        case description
+        case servers
+        case parameters
+
+        case get
+        case put
+        case post
+        case delete
+        case options
+        case head
+        case patch
+        case trace
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .summary,
+                .description,
+                .servers,
+                .parameters,
+                
+                .get,
+                .put,
+                .post,
+                .delete,
+                .options,
+                .head,
+                .patch,
+                .trace
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "summary":
+                self = .summary
+            case "description":
+                self = .description
+            case "servers":
+                self = .servers
+            case "parameters":
+                self = .parameters
+            case "get":
+                self = .get
+            case "put":
+                self = .put
+            case "post":
+                self = .post
+            case "delete":
+                self = .delete
+            case "options":
+                self = .options
+            case "head":
+                self = .head
+            case "patch":
+                self = .patch
+            case "trace":
+                self = .trace
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .summary:
+                return "summary"
+            case .description:
+                return "description"
+            case .servers:
+                return "servers"
+            case .parameters:
+                return "parameters"
+            case .get:
+                return "get"
+            case .put:
+                return "put"
+            case .post:
+                return "post"
+            case .delete:
+                return "delete"
+            case .options:
+                return "options"
+            case .head:
+                return "head"
+            case .patch:
+                return "patch"
+            case .trace:
+                return "trace"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
         }
     }
 }
