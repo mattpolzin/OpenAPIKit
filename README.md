@@ -300,8 +300,8 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] required (part of `context`)
 - [x] deprecated
 - [x] allowEmptyValue (part of `context`)
-- [x] content (`context`)
-- [x] schema (`context`)
+- [x] content (`schemaOrContent`)
+- [x] schema (`schemaOrContent`)
     - [x] style
     - [x] explode
     - [x] allowReserved
