@@ -39,7 +39,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     parameters: [
                         .parameter(
                             name: "param",
-                            parameterLocation: .path,
+                            context: .path,
                             schema: .string
                         )
                     ],
@@ -51,7 +51,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             .reference(.component( named: "filter")),
                             .parameter(
                                 name: "Content-Type",
-                                parameterLocation: .header(required: false),
+                                context: .header(required: false),
                                 schema: .string(
                                     allowedValues: [
                                         .init(OpenAPI.ContentType.json.rawValue),
@@ -116,7 +116,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 parameters: [
                     "filter": .init(
                         name: "filter",
-                        parameterLocation: .query(required: false),
+                        context: .query(required: false),
                         schema: .init(
                             .object(
                                 properties: [
@@ -168,7 +168,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 .reference(.component( named: "filter")),
                 .parameter(
                     name: "Content-Type",
-                    parameterLocation: .header(required: false),
+                    context: .header(required: false),
                     schema: .string(
                         allowedValues: [
                             .init(OpenAPI.ContentType.json.rawValue),
@@ -232,7 +232,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [
                 .parameter(
                     name: "param",
-                    parameterLocation: .path,
+                    context: .path,
                     schema: .string
                 )
             ],
@@ -247,7 +247,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [
                 "filter": .init(
                     name: "filter",
-                    parameterLocation: .query(required: false),
+                    context: .query(required: false),
                     schema: .init(
                         .object(
                             properties: [

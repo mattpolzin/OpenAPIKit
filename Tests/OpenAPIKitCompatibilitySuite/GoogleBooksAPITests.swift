@@ -91,7 +91,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["alt"])
-        XCTAssertTrue(apiDoc.components.parameters["alt"]?.parameterLocation.inQuery ?? false)
+        XCTAssertTrue(apiDoc.components.parameters["alt"]?.context.inQuery ?? false)
 
         // check for known schema
         XCTAssertNotNil(apiDoc.components.schemas["Annotation"])
@@ -110,6 +110,6 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         XCTAssertNotNil(addBooksParameters)
         XCTAssertEqual(addBooksParameters?.count, 7)
         XCTAssertEqual(addBooksParameters?.first?.description, "Data format for the response.")
-        XCTAssertEqual(addBooksParameters?.first?.parameterLocation, .query)
+        XCTAssertEqual(addBooksParameters?.first?.context, .query)
     }
 }

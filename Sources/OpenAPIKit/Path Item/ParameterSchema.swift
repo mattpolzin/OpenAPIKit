@@ -141,7 +141,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
         ///
         /// See the `style` fixed field under
         /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
-        public static func `default`(for location: OpenAPI.PathItem.Parameter.Location) -> Self {
+        public static func `default`(for location: OpenAPI.PathItem.Parameter.Context) -> Self {
             switch location {
             case .query:
                 return .form
@@ -180,7 +180,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
 }
 
 extension OpenAPI.PathItem.Parameter.Schema {
-    public func encode(to encoder: Encoder, for location: OpenAPI.PathItem.Parameter.Location) throws {
+    public func encode(to encoder: Encoder, for location: OpenAPI.PathItem.Parameter.Context) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         if style != Style.default(for: location) {
@@ -206,7 +206,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
 }
 
 extension OpenAPI.PathItem.Parameter.Schema {
-    public init(from decoder: Decoder, for location: OpenAPI.PathItem.Parameter.Location) throws {
+    public init(from decoder: Decoder, for location: OpenAPI.PathItem.Parameter.Context) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         schema = try container.decode(Either<JSONReference<JSONSchema>, JSONSchema>.self, forKey: .schema)

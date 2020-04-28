@@ -295,13 +295,13 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 
 ### Parameter Object (`OpenAPI.PathItem.Parameter`)
 - [x] name
-- [x] in (`parameterLocation`)
+- [x] in (`context`)
 - [x] description
-- [x] required (part of `parameterLocation`)
+- [x] required (part of `context`)
 - [x] deprecated
-- [x] allowEmptyValue (part of `parameterLocation`)
-- [x] content (`schemaOrContent`)
-- [x] schema (`schemaOrContent`)
+- [x] allowEmptyValue (part of `context`)
+- [x] content (`context`)
+- [x] schema (`context`)
     - [x] style
     - [x] explode
     - [x] allowReserved
