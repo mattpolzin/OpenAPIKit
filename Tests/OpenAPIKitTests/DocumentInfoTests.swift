@@ -97,6 +97,53 @@ extension DocumentInfoTests {
         )
     }
 
+    func test_license_withVendorExtension_encode() throws {
+        let license = OpenAPI.Document.Info.License(
+            name: "MIT",
+            url: URL(string: "http://website.com")!,
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+
+        let encodedLicense = try testStringFromEncoding(of: license)
+
+        assertJSONEquivalent(encodedLicense,
+"""
+{
+  "name" : "MIT",
+  "url" : "http:\\/\\/website.com",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+"""
+        )
+    }
+
+    func test_license_withVendorExtension_decode() throws {
+        let licenseData =
+"""
+{
+  "name" : "MIT",
+  "url" : "http://website.com",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+        let license = try testDecoder.decode(OpenAPI.Document.Info.License.self, from: licenseData)
+
+        XCTAssertEqual(
+            license,
+            OpenAPI.Document.Info.License(
+                name: "MIT",
+                url: URL(string: "http://website.com")!,
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
+        )
+    }
+
     func test_contact_name_encode() throws {
         let contact = OpenAPI.Document.Info.Contact(name: "contact")
 
@@ -181,6 +228,49 @@ extension DocumentInfoTests {
         XCTAssertEqual(
             contact,
             .init(email: "email")
+        )
+    }
+
+    func test_contact_vendorExtensions_encode() throws {
+        let contact = OpenAPI.Document.Info.Contact(
+            email: "email",
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+
+        let encodedContact = try testStringFromEncoding(of: contact)
+
+        assertJSONEquivalent(encodedContact,
+ """
+{
+  "email" : "email",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+"""
+        )
+    }
+
+    func test_contact_vendorExtensions_decode() throws {
+        let contactData =
+"""
+{
+  "email" : "email",
+  "x-specialFeature" : [
+    "hello",
+    "world"
+  ]
+}
+""".data(using: .utf8)!
+        let contact = try testDecoder.decode(OpenAPI.Document.Info.Contact.self, from: contactData)
+
+        XCTAssertEqual(
+            contact,
+            .init(
+                email: "email",
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            )
         )
     }
 

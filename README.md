@@ -223,12 +223,12 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] name
 - [x] url
 - [x] email
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### License Object (`OpenAPI.Document.Info.License`)
 - [x] name
 - [x] url
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Server Object (`OpenAPI.Server`)
 - [x] url

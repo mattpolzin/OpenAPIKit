@@ -45,31 +45,49 @@ extension OpenAPI.Document {
         /// OpenAPI Spec "Contact Object"
         ///
         /// See [OpenAPI Contact Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#contact-object).
-        public struct Contact: Equatable {
+        public struct Contact: Equatable, CodableVendorExtendable {
             public let name: String?
             public let url: URL?
             public let email: String?
 
+            /// Dictionary of vendor extensions.
+            ///
+            /// These should be of the form:
+            /// `[ "x-extensionKey": <anything>]`
+            /// where the values are anything codable.
+            public var vendorExtensions: [String: AnyCodable]
+
             public init(name: String? = nil,
                         url: URL? = nil,
-                        email: String? = nil) {
+                        email: String? = nil,
+                        vendorExtensions: [String: AnyCodable] = [:]) {
                 self.name = name
                 self.url = url
                 self.email = email
+                self.vendorExtensions = vendorExtensions
             }
         }
 
         /// OpenAPI Spec "License Object"
         ///
         /// See [OpenAPI License Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#license-object).
-        public struct License: Equatable {
+        public struct License: Equatable, CodableVendorExtendable {
             public let name: String
             public let url: URL?
 
+            /// Dictionary of vendor extensions.
+            ///
+            /// These should be of the form:
+            /// `[ "x-extensionKey": <anything>]`
+            /// where the values are anything codable.
+            public var vendorExtensions: [String: AnyCodable]
+
             public init(name: String,
-                        url: URL? = nil) {
+                        url: URL? = nil,
+                        vendorExtensions: [String: AnyCodable] = [:]) {
                 self.name = name
                 self.url = url
+                self.vendorExtensions = vendorExtensions
             }
         }
     }
@@ -103,6 +121,8 @@ extension OpenAPI.Document.Info.License: Encodable {
         try container.encode(name, forKey: .name)
 
         try url.encodeIfNotNil(to: &container, forKey: .url)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -113,13 +133,58 @@ extension OpenAPI.Document.Info.License: Decodable {
         name = try container.decode(String.self, forKey: .name)
 
         url = try container.decodeIfPresent(URL.self, forKey: .url)
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
 extension OpenAPI.Document.Info.License {
-    internal enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case name
         case url
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .name,
+                .url
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "name":
+                self = .name
+            case "url":
+                self = .url
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .name:
+                return "name"
+            case .url:
+                return "url"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }
 
@@ -132,6 +197,8 @@ extension OpenAPI.Document.Info.Contact: Encodable {
         try url.encodeIfNotNil(to: &container, forKey: .url)
 
         try email.encodeIfNotNil(to: &container, forKey: .email)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -144,14 +211,64 @@ extension OpenAPI.Document.Info.Contact: Decodable {
         url = try container.decodeIfPresent(URL.self, forKey: .url)
 
         email = try container.decodeIfPresent(String.self, forKey: .email)
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
 extension OpenAPI.Document.Info.Contact {
-    internal enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case name
         case url
         case email
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .name,
+                .url,
+                .email
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "name":
+                self = .name
+            case "url":
+                self = .url
+            case "email":
+                self = .email
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .name:
+                return "name"
+            case .url:
+                return "url"
+            case .email:
+                return "email"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }
 
