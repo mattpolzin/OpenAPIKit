@@ -24,7 +24,7 @@ final class OperationTests: XCTestCase {
             description: "description",
             externalDocs: .init(url: URL(string: "https://google.com")!),
             operationId: "123",
-            parameters: [.parameter(name: "hi", parameterLocation: .query, schema: .string)],
+            parameters: [.parameter(name: "hi", context: .query, schema: .string)],
             requestBody: .init(content: [:]),
             responses: [:],
             deprecated: false,

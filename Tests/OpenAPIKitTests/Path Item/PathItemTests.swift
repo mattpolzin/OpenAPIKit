@@ -39,7 +39,7 @@ final class PathItemTests: XCTestCase {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", parameterLocation: .query, schema: .string)],
+            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
             get: op,
             put: op,
             post: op,
@@ -170,7 +170,7 @@ extension PathItemTests {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", parameterLocation: .query, schema: .string)]
+            parameters: [.parameter(name: "hello", context: .query, schema: .string)]
         )
 
         let encodedPathItem = try testStringFromEncoding(of: pathItem)
@@ -231,7 +231,7 @@ extension PathItemTests {
                 summary: "summary",
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-                parameters: [.parameter(name: "hello", parameterLocation: .query, schema: .string(required: false))]
+                parameters: [.parameter(name: "hello", context: .query, schema: .string(required: false))]
             )
         )
     }
