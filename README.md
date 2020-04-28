@@ -286,7 +286,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] deprecated
 - [x] security
 - [x] servers
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### External Document Object (`OpenAPI.ExternalDoc`)
 - [x] description

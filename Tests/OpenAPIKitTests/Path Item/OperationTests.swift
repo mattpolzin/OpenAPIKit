@@ -93,7 +93,8 @@ extension OperationTests {
             responses: [200: .reference(.component(named: "test"))],
             deprecated: true,
             security: [[.component(named: "security"): []]],
-            servers: [.init(url: URL(string: "https://google.com")!)]
+            servers: [.init(url: URL(string: "https://google.com")!)],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
         let encodedOperation = try testStringFromEncoding(of: operation)
@@ -143,6 +144,10 @@ extension OperationTests {
   "tags" : [
     "hi",
     "hello"
+  ],
+  "x-specialFeature" : [
+    "hello",
+    "world"
   ]
 }
 """
@@ -194,6 +199,10 @@ extension OperationTests {
   "tags" : [
     "hi",
     "hello"
+  ],
+  "x-specialFeature" : [
+    "hello",
+    "world"
   ]
 }
 """.data(using: .utf8)!
@@ -215,7 +224,8 @@ extension OperationTests {
                 responses: [200: .reference(.component(named: "test"))],
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
-                servers: [.init(url: URL(string: "https://google.com")!)]
+                servers: [.init(url: URL(string: "https://google.com")!)],
+                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )
 
