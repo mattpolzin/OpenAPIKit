@@ -271,7 +271,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] head
 - [x] patch
 - [x] trace
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
 - [x] tags
