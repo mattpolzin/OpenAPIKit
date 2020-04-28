@@ -14,8 +14,8 @@ extension OpenAPI.PathItem {
     public struct Parameter: Equatable, CodableVendorExtendable {
         public var name: String
 
-        /// OpenAPI Spec "in" property.
-        public var parameterLocation: Location
+        /// OpenAPI Spec "in" property determines the `Context`.
+        public var context: Context
         public var description: String?
         public var deprecated: Bool // default is false
 
@@ -29,19 +29,20 @@ extension OpenAPI.PathItem {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public var required: Bool { parameterLocation.required }
+        public var required: Bool { context.required }
+        public var location: Context.Location { return context.location }
 
         /// An array of parameters that are `Either` `Parameters` or references to parameters.
         public typealias Array = [Either<JSONReference<Parameter>, Parameter>]
 
         public init(name: String,
-                    parameterLocation: Location,
+                    context: Context,
                     schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
-            self.parameterLocation = parameterLocation
+            self.context = context
             self.schemaOrContent = schemaOrContent
             self.description = description
             self.deprecated = deprecated
@@ -49,13 +50,13 @@ extension OpenAPI.PathItem {
         }
 
         public init(name: String,
-                    parameterLocation: Location,
+                    context: Context,
                     schema: Schema,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
-            self.parameterLocation = parameterLocation
+            self.context = context
             self.schemaOrContent = .init(schema)
             self.description = description
             self.deprecated = deprecated
@@ -63,41 +64,41 @@ extension OpenAPI.PathItem {
         }
 
         public init(name: String,
-                    parameterLocation: Location,
+                    context: Context,
                     schema: JSONSchema,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
-            self.parameterLocation = parameterLocation
-            self.schemaOrContent = .init(Schema(schema, style: .default(for: parameterLocation)))
+            self.context = context
+            self.schemaOrContent = .init(Schema(schema, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
-                    parameterLocation: Location,
+                    context: Context,
                     schemaReference: JSONReference<JSONSchema>,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
-            self.parameterLocation = parameterLocation
-            self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: parameterLocation)))
+            self.context = context
+            self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
         }
 
         public init(name: String,
-                    parameterLocation: Location,
+                    context: Context,
                     content: OpenAPI.Content.Map,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
-            self.parameterLocation = parameterLocation
+            self.context = context
             self.schemaOrContent = .init(content)
             self.description = description
             self.deprecated = deprecated
@@ -113,7 +114,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        parameterLocation: OpenAPI.PathItem.Parameter.Location,
+        context: OpenAPI.PathItem.Parameter.Context,
         schema: JSONSchema,
         description: String? = nil,
         deprecated: Bool = false,
@@ -122,7 +123,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         return .b(
             .init(
                 name: name,
-                parameterLocation: parameterLocation,
+                context: context,
                 schema: schema,
                 description: description,
                 deprecated: deprecated,
@@ -134,7 +135,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        parameterLocation: OpenAPI.PathItem.Parameter.Location,
+        context: OpenAPI.PathItem.Parameter.Context,
         content: OpenAPI.Content.Map,
         description: String? = nil,
         deprecated: Bool = false,
@@ -143,7 +144,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
         return .b(
             .init(
                 name: name,
-                parameterLocation: parameterLocation,
+                context: context,
                 content: content,
                 description: description,
                 deprecated: deprecated,
@@ -167,13 +168,6 @@ extension OpenAPI.PathItem.Parameter {
         case content
         case schema
     }
-
-    private enum LocationString: String, Codable {
-        case query
-        case header
-        case path
-        case cookie
-    }
 }
 
 extension OpenAPI.PathItem.Parameter: Encodable {
@@ -183,8 +177,8 @@ extension OpenAPI.PathItem.Parameter: Encodable {
         try container.encode(name, forKey: .name)
 
         let required: Bool
-        let location: LocationString
-        switch parameterLocation {
+        let location: Context.Location
+        switch context {
         case .query(required: let req, allowEmptyValue: let allowEmptyValue):
             required = req
             location = .query
@@ -210,7 +204,7 @@ extension OpenAPI.PathItem.Parameter: Encodable {
 
         switch schemaOrContent {
         case .a(let schema):
-            try schema.encode(to: encoder, for: parameterLocation)
+            try schema.encode(to: encoder, for: context)
         case .b(let contentMap):
             try container.encode(contentMap, forKey: .content)
         }
@@ -231,14 +225,14 @@ extension OpenAPI.PathItem.Parameter: Decodable {
         self.name = name
 
         let required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
-        let location = try container.decode(LocationString.self, forKey: .parameterLocation)
+        let location = try container.decode(Context.Location.self, forKey: .parameterLocation)
 
         switch location {
         case .query:
             let allowEmptyValue = try container.decodeIfPresent(Bool.self, forKey: .allowEmptyValue) ?? false
-            parameterLocation = .query(required: required, allowEmptyValue: allowEmptyValue)
+            context = .query(required: required, allowEmptyValue: allowEmptyValue)
         case .header:
-            parameterLocation = .header(required: required)
+            context = .header(required: required)
         case .path:
             if !required {
                 throw InconsistencyError(
@@ -247,16 +241,16 @@ extension OpenAPI.PathItem.Parameter: Decodable {
                     codingPath: decoder.codingPath
                 )
             }
-            parameterLocation = .path
+            context = .path
         case .cookie:
-            parameterLocation = .cookie(required: required)
+            context = .cookie(required: required)
         }
 
         let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
 
         let maybeSchema: Schema?
         if container.contains(.schema) {
-            maybeSchema = try Schema(from: decoder, for: parameterLocation)
+            maybeSchema = try Schema(from: decoder, for: context)
         } else {
             maybeSchema = nil
         }

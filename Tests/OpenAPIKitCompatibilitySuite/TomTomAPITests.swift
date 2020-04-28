@@ -88,7 +88,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["btmRight"])
-        XCTAssertTrue(apiDoc.components.parameters["btmRight"]?.parameterLocation.inQuery ?? false)
+        XCTAssertTrue(apiDoc.components.parameters["btmRight"]?.context.inQuery ?? false)
 
         // check for known response
         XCTAssertNotNil(apiDoc.components.responses["200"])

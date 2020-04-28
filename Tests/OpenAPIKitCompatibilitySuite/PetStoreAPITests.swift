@@ -89,7 +89,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         // check for parameters
         XCTAssertFalse(apiDoc.paths["/pet/{petId}"]?.get?.parameters.isEmpty ?? true)
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.name, "petId")
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.parameterLocation, .path)
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.context, .path)
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue?.schema.schemaValue, .integer(format: .int64, required: false))
     }
 

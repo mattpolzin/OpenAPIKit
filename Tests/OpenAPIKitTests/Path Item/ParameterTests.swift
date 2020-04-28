@@ -12,7 +12,7 @@ final class ParameterTests: XCTestCase {
     func test_initialize() {
         let t1 = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie(required: true),
+            context: .cookie(required: true),
             schemaOrContent: .init([.json: OpenAPI.Content(schema: .string)]),
             description: "hi",
             deprecated: true
@@ -21,7 +21,7 @@ final class ParameterTests: XCTestCase {
 
         let t2 = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie(required: true),
+            context: .cookie(required: true),
             schemaOrContent: .content([.json: OpenAPI.Content(schema: .string)]),
             description: "hi",
             deprecated: true
@@ -31,7 +31,7 @@ final class ParameterTests: XCTestCase {
 
         let t4 = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie(required: false),
+            context: .cookie(required: false),
             schema: .init(.string, style: .default(for: .cookie)),
             description: "hi",
             deprecated: false
@@ -40,37 +40,37 @@ final class ParameterTests: XCTestCase {
 
         let t5 = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie,
+            context: .cookie,
             schema: .string
         )
         XCTAssertFalse(t5.deprecated)
 
         let t6 = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie,
+            context: .cookie,
             schemaOrContent: .schema(.init(.string, style: .default(for: .cookie)))
         )
         XCTAssertEqual(t5, t6)
 
         let _ = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie,
+            context: .cookie,
             schemaReference: .component( named: "hello")
         )
 
         let _ = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie,
+            context: .cookie,
             content: [.json: OpenAPI.Content(schema: .string)]
         )
     }
 
     func test_parameterArray() {
         let t1: OpenAPI.PathItem.Parameter.Array = [
-            .parameter(OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, schema: .string)),
-            .parameter(name: "hello", parameterLocation: .cookie, schema: .string),
-            .parameter(OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)])),
-            .parameter(name: "hello", parameterLocation: .cookie, content: [.json: OpenAPI.Content(schema: .string)]),
+            .parameter(OpenAPI.PathItem.Parameter(name: "hello", context: .cookie, schema: .string)),
+            .parameter(name: "hello", context: .cookie, schema: .string),
+            .parameter(OpenAPI.PathItem.Parameter(name: "hello", context: .cookie, content: [.json: OpenAPI.Content(schema: .string)])),
+            .parameter(name: "hello", context: .cookie, content: [.json: OpenAPI.Content(schema: .string)]),
             .reference(.component( named: "hello"))
         ]
 
@@ -81,7 +81,7 @@ final class ParameterTests: XCTestCase {
         XCTAssertNotEqual(t1[4], t1[2])
         XCTAssertNotEqual(t1[4], t1[3])
 
-        XCTAssertEqual(t1[0].parameterValue, OpenAPI.PathItem.Parameter(name: "hello", parameterLocation: .cookie, schema: .string))
+        XCTAssertEqual(t1[0].parameterValue, OpenAPI.PathItem.Parameter(name: "hello", context: .cookie, schema: .string))
         XCTAssertEqual(t1[4].reference, .component( named: "hello"))
     }
 }
@@ -91,7 +91,7 @@ extension ParameterTests {
     func test_minimalContent_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .path,
+            context: .path,
             content: [ .json: .init(schema: .string)]
         )
 
@@ -139,7 +139,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .path,
+                context: .path,
                 content: [ .json: .init(schema: .string(required: false))]
             )
         )
@@ -149,7 +149,7 @@ extension ParameterTests {
     func test_minimalSchema_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .path,
+            context: .path,
             schema: .string
         )
 
@@ -189,7 +189,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .path,
+                context: .path,
                 schema: .string(required: false)
             )
         )
@@ -198,7 +198,7 @@ extension ParameterTests {
     func test_queryParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .query,
+            context: .query,
             schema: .string
         )
 
@@ -232,11 +232,12 @@ extension ParameterTests {
 
         let parameter = try testDecoder.decode(OpenAPI.PathItem.Parameter.self, from: parameterData)
 
+        XCTAssertEqual(parameter.location, .query)
         XCTAssertEqual(
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .query,
+                context: .query,
                 schema: .string(required: false)
             )
         )
@@ -249,7 +250,7 @@ extension ParameterTests {
     func test_queryParamAllowEmpty_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .query(allowEmptyValue: true),
+            context: .query(allowEmptyValue: true),
             schema: .string
         )
 
@@ -289,7 +290,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .query(allowEmptyValue: true),
+                context: .query(allowEmptyValue: true),
                 schema: .string(required: false)
             )
         )
@@ -298,7 +299,7 @@ extension ParameterTests {
     func test_requiredQueryParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .query(required: true),
+            context: .query(required: true),
             schema: .string
         )
 
@@ -338,7 +339,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .query(required: true),
+                context: .query(required: true),
                 schema: .string(required: false)
             )
         )
@@ -347,7 +348,7 @@ extension ParameterTests {
     func test_headerParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .header,
+            context: .header,
             schema: .string
         )
 
@@ -381,11 +382,12 @@ extension ParameterTests {
 
         let parameter = try testDecoder.decode(OpenAPI.PathItem.Parameter.self, from: parameterData)
 
+        XCTAssertEqual(parameter.location, .header)
         XCTAssertEqual(
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .header,
+                context: .header,
                 schema: .string(required: false)
             )
         )
@@ -394,7 +396,7 @@ extension ParameterTests {
     func test_requiredHeaderParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .header(required: true),
+            context: .header(required: true),
             schema: .string
         )
 
@@ -434,7 +436,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .header(required: true),
+                context: .header(required: true),
                 schema: .string(required: false)
             )
         )
@@ -443,7 +445,7 @@ extension ParameterTests {
     func test_cookieParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie,
+            context: .cookie,
             schema: .string
         )
 
@@ -477,11 +479,12 @@ extension ParameterTests {
 
         let parameter = try testDecoder.decode(OpenAPI.PathItem.Parameter.self, from: parameterData)
 
+        XCTAssertEqual(parameter.location, .cookie)
         XCTAssertEqual(
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .cookie,
+                context: .cookie,
                 schema: .string(required: false)
             )
         )
@@ -490,7 +493,7 @@ extension ParameterTests {
     func test_requiredCookieParam_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .cookie(required: true),
+            context: .cookie(required: true),
             schema: .string
         )
 
@@ -530,7 +533,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .cookie(required: true),
+                context: .cookie(required: true),
                 schema: .string(required: false)
             )
         )
@@ -539,7 +542,7 @@ extension ParameterTests {
     func test_deprecated_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .path,
+            context: .path,
             schema: .string,
             deprecated: true
         )
@@ -582,7 +585,7 @@ extension ParameterTests {
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .path,
+                context: .path,
                 schema: .string(required: false),
                 deprecated: true
             )
@@ -592,7 +595,7 @@ extension ParameterTests {
     func test_description_encode() throws {
         let parameter = OpenAPI.PathItem.Parameter(
             name: "hello",
-            parameterLocation: .path,
+            context: .path,
             schema: .string,
             description: "world"
         )
@@ -631,11 +634,12 @@ extension ParameterTests {
 
         let parameter = try testDecoder.decode(OpenAPI.PathItem.Parameter.self, from: parameterData)
 
+        XCTAssertEqual(parameter.location, .path)
         XCTAssertEqual(
             parameter,
             OpenAPI.PathItem.Parameter(
                 name: "hello",
-                parameterLocation: .path,
+                context: .path,
                 schema: .string(required: false),
                 description: "world"
             )
