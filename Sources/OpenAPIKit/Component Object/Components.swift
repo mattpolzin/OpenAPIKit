@@ -14,7 +14,7 @@ extension OpenAPI {
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
-    public struct Components: Equatable {
+    public struct Components: Equatable, CodableVendorExtendable {
 
         public var schemas: ComponentDictionary<JSONSchema>
         public var responses: ComponentDictionary<Response>
@@ -26,13 +26,21 @@ extension OpenAPI {
         //    public var links:
         //    public var callbacks:
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
         public init(schemas: ComponentDictionary<JSONSchema> = [:],
                     responses: ComponentDictionary<Response> = [:],
                     parameters: ComponentDictionary<PathItem.Parameter> = [:],
                     examples: ComponentDictionary<Example> = [:],
                     requestBodies: ComponentDictionary<Request> = [:],
                     headers: ComponentDictionary<Header> = [:],
-                    securitySchemes: ComponentDictionary<SecurityScheme> = [:]) {
+                    securitySchemes: ComponentDictionary<SecurityScheme> = [:],
+                    vendorExtensions: [String: AnyCodable] = [:]) {
             self.schemas = schemas
             self.responses = responses
             self.parameters = parameters
@@ -40,6 +48,7 @@ extension OpenAPI {
             self.requestBodies = requestBodies
             self.headers = headers
             self.securitySchemes = securitySchemes
+            self.vendorExtensions = vendorExtensions
         }
 
         public static let noComponents: Components = .init()
@@ -138,6 +147,8 @@ extension OpenAPI.Components: Encodable {
         if !securitySchemes.isEmpty {
             try container.encode(securitySchemes, forKey: .securitySchemes)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -165,6 +176,8 @@ extension OpenAPI.Components: Decodable {
                 ?? [:]
 
             securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+
+            vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
             if let underlyingError = error.underlyingError as? KeyDecodingError {
                 throw InconsistencyError(
@@ -179,7 +192,7 @@ extension OpenAPI.Components: Decodable {
 }
 
 extension OpenAPI.Components {
-    internal enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case schemas
         case responses
         case parameters
@@ -189,5 +202,73 @@ extension OpenAPI.Components {
          case securitySchemes
         // case links
         // case callbacks
+
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .schemas,
+                .responses,
+                .parameters,
+                .examples,
+                .requestBodies,
+                .headers,
+                .securitySchemes
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "schemas":
+                self = .schemas
+            case "responses":
+                self = .responses
+            case "parameters":
+                self = .parameters
+            case "examples":
+                self = .examples
+            case "requestBodies":
+                self = .requestBodies
+            case "headers":
+                self = .headers
+            case "securitySchemes":
+                self = .securitySchemes
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .schemas:
+                return "schemas"
+            case .responses:
+                return "responses"
+            case .parameters:
+                return "parameters"
+            case .examples:
+                return "examples"
+            case .requestBodies:
+                return "requestBodies"
+            case .headers:
+                return "headers"
+            case .securitySchemes:
+                return "securitySchemes"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }

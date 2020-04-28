@@ -208,7 +208,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] security
 - [x] tags
 - [x] externalDocs
-- [x] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Info Object (`OpenAPI.Document.Info`)
 - [x] title
@@ -217,7 +217,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] contact
 - [x] license
 - [x] version
-- [x] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Contact Object (`OpenAPI.Document.Info.Contact`)
 - [x] name
@@ -252,7 +252,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] securitySchemes
 - [ ] links
 - [ ] callbacks
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Paths Object (`OpenAPI.PathItem.Map`)
 - [x] *dictionary*
@@ -271,7 +271,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] head
 - [x] patch
 - [x] trace
-- [x] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Operation Object (`OpenAPI.PathItem.Operation`)
 - [x] tags
