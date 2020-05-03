@@ -34,7 +34,7 @@ extension DiggingError {
     /// more useful to dig into the less trivial branch and display a more granular error to the user
     /// from deeper in that brach. When this occurs, this function retruns the udnerlying error on
     /// that branch.
-    static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
+    internal static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
         // Just a guard against this being an error with more than 2 branches.
         guard eitherError.individualTypeFailures.count == 2 else { return nil }
 
