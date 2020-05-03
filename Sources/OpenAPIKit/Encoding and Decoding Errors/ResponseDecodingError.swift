@@ -88,6 +88,23 @@ extension OpenAPI.Error.Decoding.Response {
         relativeCodingPath = Array(codingPath)
     }
 
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
+            self = Self(unwrapping: eitherBranchToDigInto)
+            return
+        }
+
+        var codingPath = Self.relativePath(from: eitherError.codingPath)
+        let code = codingPath.removeFirst().stringValue.lowercased()
+
+        // this part of the coding path is structurally guaranteed to be a status code.
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
+        context = .neither(eitherError)
+        relativeCodingPath = Array(codingPath)
+    }
+}
+
+extension OpenAPI.Error.Decoding.Response: DiggingError {
     internal init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
@@ -98,31 +115,5 @@ extension OpenAPI.Error.Decoding.Response {
         } else {
             self = Self(error)
         }
-    }
-
-    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
-        if eitherError.individualTypeFailures.count == 2 {
-            let firstFailureIsReference = eitherError.individualTypeFailures[0].typeString == "$ref"
-            let secondFailureIsReference = eitherError.individualTypeFailures[1].typeString == "$ref"
-
-            let firstFailureIsDeeper = eitherError.individualTypeFailures[0].codingPath(relativeTo: eitherError.codingPath).count > 1
-            let secondFailureIsDeeper = eitherError.individualTypeFailures[1].codingPath(relativeTo: eitherError.codingPath).count > 1
-
-            if firstFailureIsReference && secondFailureIsDeeper {
-                self = Self(unwrapping: eitherError.individualTypeFailures[1].error)
-                return
-            } else if secondFailureIsReference && firstFailureIsDeeper {
-                self = Self(unwrapping: eitherError.individualTypeFailures[0].error)
-                return
-            }
-        }
-
-        var codingPath = Self.relativePath(from: eitherError.codingPath)
-        let code = codingPath.removeFirst().stringValue.lowercased()
-
-        // this part of the coding path is structurally guaranteed to be a status code.
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
-        context = .neither(eitherError)
-        relativeCodingPath = Array(codingPath)
     }
 }
