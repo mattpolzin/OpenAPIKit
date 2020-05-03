@@ -115,6 +115,23 @@ extension OpenAPI.Error.Decoding.Operation {
         relativeCodingPath = Array(codingPath)
     }
 
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
+            self = Self(unwrapping: eitherBranchToDigInto)
+            return
+        }
+
+        var codingPath = eitherError.codingPath.dropFirst(2)
+        // this part of the coding path is structurally guaranteed to be an HTTP verb.
+        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+
+        endpoint = verb
+        context = .neither(eitherError)
+        relativeCodingPath = Array(codingPath)
+    }
+}
+
+extension OpenAPI.Error.Decoding.Operation: DiggingError {
     internal init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
@@ -129,31 +146,5 @@ extension OpenAPI.Error.Decoding.Operation {
         } else {
             self = Self(error)
         }
-    }
-
-    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
-        if eitherError.individualTypeFailures.count == 2 {
-            let firstFailureIsReference = eitherError.individualTypeFailures[0].typeString == "$ref"
-            let secondFailureIsReference = eitherError.individualTypeFailures[1].typeString == "$ref"
-
-            let firstFailureIsDeeper = eitherError.individualTypeFailures[0].codingPath(relativeTo: eitherError.codingPath).count > 1
-            let secondFailureIsDeeper = eitherError.individualTypeFailures[1].codingPath(relativeTo: eitherError.codingPath).count > 1
-
-            if firstFailureIsReference && secondFailureIsDeeper {
-                self = Self(unwrapping: eitherError.individualTypeFailures[1].error)
-                return
-            } else if secondFailureIsReference && firstFailureIsDeeper {
-                self = Self(unwrapping: eitherError.individualTypeFailures[0].error)
-                return
-            }
-        }
-
-        var codingPath = eitherError.codingPath.dropFirst(2)
-        // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
-
-        endpoint = verb
-        context = .neither(eitherError)
-        relativeCodingPath = Array(codingPath)
     }
 }

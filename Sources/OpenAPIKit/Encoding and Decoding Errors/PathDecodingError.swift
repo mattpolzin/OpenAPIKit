@@ -15,6 +15,7 @@ extension OpenAPI.Error.Decoding {
 
         public enum Context {
             case endpoint(Operation)
+            case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)
         }
@@ -26,6 +27,8 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.subjectName
+        case .inconsistency(let inconsistencyError):
+            return inconsistencyError.subjectName
         case .other(let decodingError):
             return decodingError.subjectName
         case .neither(let eitherError):
@@ -52,7 +55,7 @@ extension OpenAPI.Error.Decoding.Path {
             case .other, .inconsistency, .neither:
                 return "\(relativeCodingPath)for the **\(endpointError.endpoint.rawValue)** endpoint under `\(path.rawValue)`"
             }
-        case .other, .neither:
+        case .other, .neither, .inconsistency:
             return "\(relativeCodingPath)under the `\(path.rawValue)` path"
         }
     }
@@ -61,6 +64,8 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.errorCategory
+        case .inconsistency(let inconsistencyError):
+            return inconsistencyError.errorCategory
         case .other(let decodingError):
             return decodingError.errorCategory
         case .neither(let eitherError):
@@ -72,6 +77,8 @@ extension OpenAPI.Error.Decoding.Path {
         switch context {
         case .endpoint(let endpointError):
             return endpointError.codingPath
+        case .inconsistency(let inconsistencyError):
+            return inconsistencyError.codingPath
         case .other(let decodingError):
             return decodingError.codingPath
         case .neither(let eitherError):
@@ -90,7 +97,7 @@ extension OpenAPI.Error.Decoding.Path {
             case .other, .inconsistency, .neither:
                 return endpointError.relativeCodingPathString
             }
-        case .other, .neither:
+        case .other, .inconsistency, .neither:
             return relativeCodingPath.stringValue
         }
     }
@@ -104,15 +111,6 @@ extension OpenAPI.Error.Decoding.Path {
         relativeCodingPath = Array(codingPath)
     }
 
-    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
-        var codingPath = eitherError.codingPath.dropFirst()
-        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
-
-        path = route
-        context = .neither(eitherError)
-        relativeCodingPath = Array(codingPath)
-    }
-
     internal init(_ error: OpenAPI.Error.Decoding.Operation) {
         var codingPath = error.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
@@ -120,5 +118,42 @@ extension OpenAPI.Error.Decoding.Path {
         path = route
         context = .endpoint(error)
         relativeCodingPath = Array(codingPath)
+    }
+
+    internal init(_ error: InconsistencyError) {
+        var codingPath = error.codingPath.dropFirst()
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+
+        path = route
+        context = .inconsistency(error)
+        relativeCodingPath = Array(codingPath)
+    }
+
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
+            self = Self(unwrapping: eitherBranchToDigInto)
+            return
+        }
+
+        var codingPath = eitherError.codingPath.dropFirst()
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+
+        path = route
+        context = .neither(eitherError)
+        relativeCodingPath = Array(codingPath)
+    }
+}
+
+extension OpenAPI.Error.Decoding.Path: DiggingError {
+    internal init(unwrapping error: Swift.DecodingError) {
+        if let decodingError = error.underlyingError as? Swift.DecodingError {
+            self = Self(unwrapping: decodingError)
+        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
+            self = Self(inconsistencyError)
+        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
+            self = Self(eitherError)
+        } else {
+            self = Self(error)
+        }
     }
 }

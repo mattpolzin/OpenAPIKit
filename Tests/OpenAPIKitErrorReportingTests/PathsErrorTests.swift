@@ -189,4 +189,51 @@ paths:
             )
         }
     }
+
+    func test_paramSchemaHasProblemDeeplyNestedInSchema() {
+        let documentYML =
+"""
+openapi: "3.0.0"
+info:
+    title: test
+    version: 1.0
+paths:
+    /hello/world:
+        summary: hello
+        parameters:
+            - name: world
+              in: query
+              schema:
+                type: object
+                properties:
+                    hi:
+                        type: object
+                        items:
+                            type: string
+"""
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(
+                openAPIError.localizedDescription,
+                """
+Inconsistency encountered when parsing `OpenAPI Schema` in .parameters[0].schema.properties.hi under the `/hello/world` path: Found schema attributes not consistent with the type specified: object.
+"""
+            )
+            XCTAssertEqual(
+                openAPIError.codingPath.map { $0.stringValue },
+                [
+                    "paths",
+                    "/hello/world",
+                    "parameters",
+                    "Index 0",
+                    "schema",
+                    "properties",
+                    "hi"
+                ]
+            )
+        }
+    }
 }

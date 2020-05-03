@@ -277,6 +277,9 @@ extension OpenAPI.PathItem: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Path(error)
+        } catch let error as InconsistencyError {
+
+            throw OpenAPI.Error.Decoding.Path(error)
         } catch let error as OpenAPI.Error.Decoding.Operation {
 
             throw OpenAPI.Error.Decoding.Path(error)
