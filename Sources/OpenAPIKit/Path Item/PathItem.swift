@@ -139,7 +139,7 @@ extension OpenAPI {
 
 extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
-    public func `for`(_ verb: OpenAPI.HttpVerb) -> Operation? {
+    public func `for`(_ verb: OpenAPI.HttpMethod) -> Operation? {
         switch verb {
         case .delete:
             return self.delete
@@ -161,7 +161,7 @@ extension OpenAPI.PathItem {
     }
 
     /// Set the operation for the given verb, overwriting any already set operation for the same verb.
-    public mutating func set(operation: Operation?, for verb: OpenAPI.HttpVerb) {
+    public mutating func set(operation: Operation?, for verb: OpenAPI.HttpMethod) {
         switch verb {
         case .delete:
             self.delete(operation)
@@ -182,7 +182,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public subscript(verb: OpenAPI.HttpVerb) -> Operation? {
+    public subscript(verb: OpenAPI.HttpMethod) -> Operation? {
         get {
             return `for`(verb)
         }
@@ -191,14 +191,14 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public typealias Endpoint = (verb: OpenAPI.HttpVerb, operation: OpenAPI.PathItem.Operation)
+    public typealias Endpoint = (verb: OpenAPI.HttpMethod, operation: OpenAPI.PathItem.Operation)
 
     /// Get all endpoints defined at this path.
     ///
     /// - Returns: An array of tuples with the verb (i.e. `.get`) and the operation for
     ///     the verb.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpVerb.allCases.compactMap { verb in
+        return OpenAPI.HttpMethod.allCases.compactMap { verb in
             self.for(verb).map { (verb, $0) }
         }
     }
