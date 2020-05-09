@@ -10,7 +10,7 @@ extension OpenAPI.PathItem.Parameter {
     ///
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object)
     /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values).
-    public struct Schema: Equatable {
+    public struct SchemaContext: Equatable {
         public let style: Style
         public let explode: Bool
         public let allowReserved: Bool //defaults to false
@@ -126,7 +126,7 @@ extension OpenAPI.PathItem.Parameter {
     }
 }
 
-extension OpenAPI.PathItem.Parameter.Schema {
+extension OpenAPI.PathItem.Parameter.SchemaContext {
     public enum Style: String, CaseIterable, Codable {
         case form
         case simple
@@ -166,7 +166,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
 }
 
 // MARK: - Codable
-extension OpenAPI.PathItem.Parameter.Schema {
+extension OpenAPI.PathItem.Parameter.SchemaContext {
     private enum CodingKeys: String, CodingKey {
         case style
         case explode
@@ -179,7 +179,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
     }
 }
 
-extension OpenAPI.PathItem.Parameter.Schema {
+extension OpenAPI.PathItem.Parameter.SchemaContext {
     public func encode(to encoder: Encoder, for location: OpenAPI.PathItem.Parameter.Context) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -205,7 +205,7 @@ extension OpenAPI.PathItem.Parameter.Schema {
     }
 }
 
-extension OpenAPI.PathItem.Parameter.Schema {
+extension OpenAPI.PathItem.Parameter.SchemaContext {
     public init(from decoder: Decoder, for location: OpenAPI.PathItem.Parameter.Context) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

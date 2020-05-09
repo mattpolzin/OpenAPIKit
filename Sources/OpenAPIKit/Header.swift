@@ -12,17 +12,17 @@ extension OpenAPI {
     ///
     /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
     public struct Header: Equatable {
-        public typealias Schema = PathItem.Parameter.Schema
+        public typealias SchemaContext = PathItem.Parameter.SchemaContext
 
         public let description: String?
         public let required: Bool
         public let deprecated: Bool // default is false
         /// OpenAPI Spec "schema" or "content", which are mutually exclusive.
-        public let schemaOrContent: Either<Schema, OpenAPI.Content.Map>
+        public let schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
 
         public typealias Map = OrderedDictionary<String, Either<JSONReference<Header>, Header>>
 
-        public init(schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
+        public init(schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
                     description: String? = nil,
                     required: Bool = false,
                     deprecated: Bool = false) {
@@ -32,7 +32,7 @@ extension OpenAPI {
             self.deprecated = deprecated
         }
 
-        public init(schema: Schema,
+        public init(schema: SchemaContext,
                     description: String? = nil,
                     required: Bool = false,
                     deprecated: Bool = false) {
@@ -46,7 +46,7 @@ extension OpenAPI {
                     description: String? = nil,
                     required: Bool = false,
                     deprecated: Bool = false) {
-            self.schemaOrContent = .init(Schema(schema, style: .default(for: .header)))
+            self.schemaOrContent = .init(SchemaContext(schema, style: .default(for: .header)))
             self.description = description
             self.required = required
             self.deprecated = deprecated
@@ -56,7 +56,7 @@ extension OpenAPI {
                     description: String? = nil,
                     required: Bool = false,
                     deprecated: Bool = false) {
-            self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: .header)))
+            self.schemaOrContent = .init(SchemaContext(schemaReference: schemaReference, style: .default(for: .header)))
             self.description = description
             self.required = required
             self.deprecated = deprecated
@@ -75,7 +75,7 @@ extension OpenAPI {
 }
 
 // MARK: - Header Convenience
-extension OpenAPI.PathItem.Parameter.Schema {
+extension OpenAPI.PathItem.Parameter.SchemaContext {
     public static func header(_ schema: JSONSchema,
                               allowReserved: Bool = false,
                               example: AnyCodable? = nil) -> Self {
@@ -166,9 +166,9 @@ extension OpenAPI.Header: Decodable {
 
         let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
 
-        let maybeSchema: Schema?
+        let maybeSchema: SchemaContext?
         if container.contains(.schema) {
-            maybeSchema = try Schema(from: decoder, for: .header)
+            maybeSchema = try SchemaContext(from: decoder, for: .header)
         } else {
             maybeSchema = nil
         }

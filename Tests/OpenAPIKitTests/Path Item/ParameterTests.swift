@@ -242,9 +242,10 @@ extension ParameterTests {
             )
         )
         XCTAssertEqual(
-            parameter.schemaOrContent.schemaValue,
-            OpenAPI.PathItem.Parameter.Schema(.string(required: false), style: .default(for: .query))
+            parameter.schemaOrContent.schemaContextValue,
+            OpenAPI.PathItem.Parameter.SchemaContext(.string(required: false), style: .default(for: .query))
         )
+        XCTAssertEqual(parameter.schemaOrContent.schemaValue, parameter.schemaOrContent.schemaContextValue?.schema.schemaValue)
     }
 
     func test_queryParamAllowEmpty_encode() throws {

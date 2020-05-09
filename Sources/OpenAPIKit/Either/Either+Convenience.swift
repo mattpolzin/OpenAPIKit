@@ -23,9 +23,33 @@ extension Either where A == URL {
     public var urlValue: A? { a }
 }
 
-extension Either where A == OpenAPI.Header.Schema {
-    /// Retrieve the schema if that is what this property contains.
-    public var schemaValue: A? { a }
+// This extension also covers `OpenAPI.Header.SchemaContext`
+// which is a typealias of `OpenAPI.PathItem.Parameter.SchemaContext`.
+extension Either where A == OpenAPI.PathItem.Parameter.SchemaContext {
+    /// Retrieve the schema context if that is what this property contains.
+    public var schemaContextValue: A? { a }
+
+    /// Retrieve the schema value if this property contains a schema context.
+    ///
+    /// If the schema is a `JSONReference` this property will be `nil`
+    /// but the `schemaReference` property will be `non-nil`.
+    public var schemaValue: JSONSchema? {
+        guard case .a(let schemaContext) = self else {
+            return nil
+        }
+        return schemaContext.schema.schemaValue
+    }
+
+    /// Retrieve the schema reference if this property contains a schema context.
+    ///
+    /// If the schema is a `JSONSchema` this property will be `nil` but the
+    /// `schemaValue` property will be `non-nil`.
+    public var schemaReference: JSONReference<JSONSchema>? {
+        guard case .a(let schemaContext) = self else {
+            return nil
+        }
+        return schemaContext.schema.reference
+    }
 }
 
 extension Either where B == OpenAPI.PathItem.Parameter {
@@ -79,9 +103,9 @@ extension Either where A: _OpenAPIReference {
     public static func reference(_ reference: A) -> Self { .a(reference) }
 }
 
-extension Either where A == OpenAPI.PathItem.Parameter.Schema {
-    /// Construct a schema value.
-    public static func schema(_ schema: OpenAPI.PathItem.Parameter.Schema) -> Self { .a(schema) }
+extension Either where A == OpenAPI.PathItem.Parameter.SchemaContext {
+    /// Construct a schema context value.
+    public static func schema(_ schema: OpenAPI.PathItem.Parameter.SchemaContext) -> Self { .a(schema) }
 }
 
 extension Either where B == JSONSchema {
