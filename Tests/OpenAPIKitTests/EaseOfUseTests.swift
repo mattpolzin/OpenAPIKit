@@ -430,10 +430,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let document = testDocument
 
         // get endpoints for each path
-        let endpoints = document.paths.mapValues(\.endpoints)
+        let endpoints = document.paths.mapValues { $0.endpoints }
 
         // count endpoints by HTTP method
-        let endpointMethods = endpoints.values.flatMap { $0 }.map(\.method)
+        let endpointMethods = endpoints.values.flatMap { $0 }.map { $0.method }
         let countByMethod = Dictionary(grouping: endpointMethods, by: { $0 }).mapValues { $0.count }
         XCTAssertEqual(countByMethod[.get], 2)
         XCTAssertEqual(countByMethod[.post], 1)
