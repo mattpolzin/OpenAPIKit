@@ -18,7 +18,7 @@ extension OpenAPI {
 
         public var schemas: ComponentDictionary<JSONSchema>
         public var responses: ComponentDictionary<Response>
-        public var parameters: ComponentDictionary<PathItem.Parameter>
+        public var parameters: ComponentDictionary<Parameter>
         public var examples: ComponentDictionary<Example>
         public var requestBodies: ComponentDictionary<Request>
         public var headers: ComponentDictionary<Header>
@@ -35,7 +35,7 @@ extension OpenAPI {
 
         public init(schemas: ComponentDictionary<JSONSchema> = [:],
                     responses: ComponentDictionary<Response> = [:],
-                    parameters: ComponentDictionary<PathItem.Parameter> = [:],
+                    parameters: ComponentDictionary<Parameter> = [:],
                     examples: ComponentDictionary<Example> = [:],
                     requestBodies: ComponentDictionary<Request> = [:],
                     headers: ComponentDictionary<Header> = [:],
@@ -163,7 +163,7 @@ extension OpenAPI.Components: Decodable {
             responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
                 ?? [:]
 
-            parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem.Parameter>.self, forKey: .parameters)
+            parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Parameter>.self, forKey: .parameters)
             ?? [:]
 
             examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)

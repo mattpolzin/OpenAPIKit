@@ -19,7 +19,7 @@ final class ComponentsTests: XCTestCase {
 
         let ref1 = JSONReference<JSONSchema>.component(named: "world")
         let ref2 = JSONReference<JSONSchema>.component(named: "missing")
-        let ref3 = JSONReference<OpenAPI.PathItem.Parameter>.component(named: "param")
+        let ref3 = JSONReference<OpenAPI.Parameter>.component(named: "param")
 
         XCTAssertEqual(components[ref1], .integer(required: false))
         XCTAssertNil(components[ref2])
@@ -27,7 +27,7 @@ final class ComponentsTests: XCTestCase {
 
         let ref4 = JSONReference<JSONSchema>.InternalReference.component(name: "world")
         let ref5 = JSONReference<JSONSchema>.InternalReference.component(name: "missing")
-        let ref6 = JSONReference<OpenAPI.PathItem.Parameter>.InternalReference.component(name: "param")
+        let ref6 = JSONReference<OpenAPI.Parameter>.InternalReference.component(name: "param")
 
         XCTAssertEqual(components[ref4], .integer(required: false))
         XCTAssertNil(components[ref5])
@@ -63,7 +63,7 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(ref2, .component(named: "world"))
 
         XCTAssertThrowsError(try components.reference(named: "missing", ofType: JSONSchema.self))
-        XCTAssertThrowsError(try components.reference(named: "hello", ofType: OpenAPI.PathItem.Parameter.self))
+        XCTAssertThrowsError(try components.reference(named: "hello", ofType: OpenAPI.Parameter.self))
     }
 
     func test_failedReferenceCreation() {
@@ -100,7 +100,7 @@ final class ComponentsTests: XCTestCase {
 
         let ref1 = try components.reference(named: "one", ofType: JSONSchema.self)
         let ref2 = try components.reference(named: "two", ofType: OpenAPI.Response.self)
-        let ref3 = try components.reference(named: "three", ofType: OpenAPI.PathItem.Parameter.self)
+        let ref3 = try components.reference(named: "three", ofType: OpenAPI.Parameter.self)
         let ref4 = try components.reference(named: "four", ofType: OpenAPI.Example.self)
         let ref5 = try components.reference(named: "five", ofType: OpenAPI.Request.self)
         let ref6 = try components.reference(named: "six", ofType: OpenAPI.Header.self)

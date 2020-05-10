@@ -9,7 +9,7 @@ import XCTest
 import OpenAPIKit
 
 final class ParameterContextTests: XCTestCase {
-    typealias Context = OpenAPI.PathItem.Parameter.Context
+    typealias Context = OpenAPI.Parameter.Context
 
     func test_query() {
         let t1: Context = .query

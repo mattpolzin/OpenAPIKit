@@ -160,7 +160,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             variables: [:]
         )
 
-        let testSHOW_endpoint = OpenAPI.PathItem.Operation(
+        let testSHOW_endpoint = OpenAPI.Operation(
             tags: "Test",
             summary: "Get Test",
             description: "Get Test description",
@@ -194,7 +194,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             ]
         )
 
-        let testCREATE_endpoint = OpenAPI.PathItem.Operation(
+        let testCREATE_endpoint = OpenAPI.Operation(
             tags: "Test",
             summary: "Post Test",
             description: "Post Test description",
@@ -412,7 +412,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     summary: "Say hello",
-                    get: OpenAPI.PathItem.Operation(
+                    get: OpenAPI.Operation(
                         tags: ["Greetings"],
                         summary: "Get a greeting",
                         description: "An endpoint that says hello to you.",
@@ -425,4 +425,82 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             components: components
         )
     }
+
+
 }
+
+fileprivate let testWidgetSchema = JSONSchema.object(
+    properties: [
+        "partNumber": .integer,
+        "description": .string
+    ]
+)
+
+fileprivate let testComponents = OpenAPI.Components(
+    schemas: [
+        "testWidgetSchema": testWidgetSchema
+    ],
+    securitySchemes: [
+        "oauth": .oauth2(
+            flows: .init(
+                clientCredentials: .init(
+                    tokenUrl: URL(string: "http://website.com/token")!,
+                    scopes: [ "widget:read": "", "widget:write": "" ]
+                )
+            )
+        )
+    ]
+)
+
+fileprivate let testInfo = OpenAPI.Document.Info(title: "Test API", version: "1.0")
+
+fileprivate let testServer = OpenAPI.Server(url: URL(string: "http://website.com")!)
+
+fileprivate let testDocument =  OpenAPI.Document(
+    openAPIVersion: .v3_0_3,
+    info: testInfo,
+    servers: [testServer],
+    paths: [
+        "/widgets/{id}": OpenAPI.PathItem(
+            parameters: [
+                .parameter(
+                    name: "id",
+                    context: .path,
+                    schema: .string
+                )
+            ],
+            get: OpenAPI.Operation(
+                tags: "Widgets",
+                summary: "Get a widget",
+                responses: [
+                    200: .init(
+                        OpenAPI.Response(
+                            description: "A single widget",
+                            content: [
+                                .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            ]
+                        )
+                    )
+                ]
+            ),
+            post: OpenAPI.Operation(
+                tags: "Widgets",
+                summary: "Create a new widget",
+                responses: [
+                    201: .init(
+                        OpenAPI.Response(
+                            description: "The newly created widget",
+                            content: [
+                                .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            ]
+                        )
+                    )
+                ]
+            )
+        )
+    ],
+    components: testComponents,
+    security: [
+        [.component(named: "oauth"): ["widget:read", "widget:write"]]
+    ]
+)

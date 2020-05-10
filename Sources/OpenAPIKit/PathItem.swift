@@ -139,7 +139,7 @@ extension OpenAPI {
 
 extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
-    public func `for`(_ verb: OpenAPI.HttpMethod) -> Operation? {
+    public func `for`(_ verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
         switch verb {
         case .delete:
             return self.delete
@@ -161,7 +161,7 @@ extension OpenAPI.PathItem {
     }
 
     /// Set the operation for the given verb, overwriting any already set operation for the same verb.
-    public mutating func set(operation: Operation?, for verb: OpenAPI.HttpMethod) {
+    public mutating func set(operation: OpenAPI.Operation?, for verb: OpenAPI.HttpMethod) {
         switch verb {
         case .delete:
             self.delete(operation)
@@ -182,7 +182,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public subscript(verb: OpenAPI.HttpMethod) -> Operation? {
+    public subscript(verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
         get {
             return `for`(verb)
         }
@@ -191,7 +191,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public typealias Endpoint = (verb: OpenAPI.HttpMethod, operation: OpenAPI.PathItem.Operation)
+    public typealias Endpoint = (verb: OpenAPI.HttpMethod, operation: OpenAPI.Operation)
 
     /// Get all endpoints defined at this path.
     ///
@@ -262,16 +262,16 @@ extension OpenAPI.PathItem: Decodable {
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
 
-            parameters = try container.decodeIfPresent(Parameter.Array.self, forKey: .parameters) ?? []
+            parameters = try container.decodeIfPresent(OpenAPI.Parameter.Array.self, forKey: .parameters) ?? []
 
-            get = try container.decodeIfPresent(Operation.self, forKey: .get)
-            put = try container.decodeIfPresent(Operation.self, forKey: .put)
-            post = try container.decodeIfPresent(Operation.self, forKey: .post)
-            delete = try container.decodeIfPresent(Operation.self, forKey: .delete)
-            options = try container.decodeIfPresent(Operation.self, forKey: .options)
-            head = try container.decodeIfPresent(Operation.self, forKey: .head)
-            patch = try container.decodeIfPresent(Operation.self, forKey: .patch)
-            trace = try container.decodeIfPresent(Operation.self, forKey: .trace)
+            get = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .get)
+            put = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .put)
+            post = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .post)
+            delete = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .delete)
+            options = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .options)
+            head = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .head)
+            patch = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .patch)
+            trace = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .trace)
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {

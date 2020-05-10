@@ -13,12 +13,12 @@ import FineJSON
 final class OperationTests: XCTestCase {
     func test_init() {
         // minimum
-        let _ = OpenAPI.PathItem.Operation(
+        let _ = OpenAPI.Operation(
             responses: [:]
         )
 
         // all things
-        let _ = OpenAPI.PathItem.Operation(
+        let _ = OpenAPI.Operation(
             tags: ["hello"],
             summary: "summary",
             description: "description",
@@ -33,7 +33,7 @@ final class OperationTests: XCTestCase {
         )
 
         // variadic tags
-        let _ = OpenAPI.PathItem.Operation(
+        let _ = OpenAPI.Operation(
             tags: "hi", "hello",
             parameters: [],
             responses: [:]
@@ -45,7 +45,7 @@ final class OperationTests: XCTestCase {
 extension OperationTests {
 
     func test_minimal_encode() throws {
-        let operation = OpenAPI.PathItem.Operation(
+        let operation = OpenAPI.Operation(
             responses: [:]
         )
 
@@ -71,16 +71,16 @@ extension OperationTests {
 }
 """.data(using: .utf8)!
 
-        let operation = try testDecoder.decode(OpenAPI.PathItem.Operation.self, from: operationData)
+        let operation = try testDecoder.decode(OpenAPI.Operation.self, from: operationData)
 
         XCTAssertEqual(
             operation,
-            OpenAPI.PathItem.Operation(responses: [:])
+            OpenAPI.Operation(responses: [:])
         )
     }
 
     func test_maximal_encode() throws {
-        let operation = OpenAPI.PathItem.Operation(
+        let operation = OpenAPI.Operation(
             tags: ["hi", "hello"],
             summary: "summary",
             description: "description",
@@ -207,11 +207,11 @@ extension OperationTests {
 }
 """.data(using: .utf8)!
 
-        let operation = try testDecoder.decode(OpenAPI.PathItem.Operation.self, from: operationData)
+        let operation = try testDecoder.decode(OpenAPI.Operation.self, from: operationData)
 
         XCTAssertEqual(
             operation,
-            OpenAPI.PathItem.Operation(
+            OpenAPI.Operation(
                 tags: ["hi", "hello"],
                 summary: "summary",
                 description: "description",
@@ -236,7 +236,7 @@ extension OperationTests {
 
     // Note that JSONEncoder for Linux Foundation does not respect order
     func test_responseOrder_encode() throws {
-        let operation = OpenAPI.PathItem.Operation(
+        let operation = OpenAPI.Operation(
             responses: [
                 404: .reference(.component(named: "404")),
                 200: .reference(.component(named: "200"))
@@ -264,7 +264,7 @@ extension OperationTests {
 """
         )
 
-        let operation2 = OpenAPI.PathItem.Operation(
+        let operation2 = OpenAPI.Operation(
             responses: [
                 200: .reference(.component(named: "200")),
                 404: .reference(.component(named: "404"))
@@ -304,11 +304,11 @@ responses:
     $ref: '#/components/responses/200'
 """
 
-        let operation = try YAMLDecoder().decode(OpenAPI.PathItem.Operation.self, from: operationString)
+        let operation = try YAMLDecoder().decode(OpenAPI.Operation.self, from: operationString)
 
         XCTAssertEqual(
             operation,
-            OpenAPI.PathItem.Operation(
+            OpenAPI.Operation(
                 responses: [
                     404: .reference(.component(named: "404")),
                     200: .reference(.component(named: "200"))
@@ -325,11 +325,11 @@ responses:
     $ref: '#/components/responses/404'
 """
 
-        let operation2 = try YAMLDecoder().decode(OpenAPI.PathItem.Operation.self, from: operationString2)
+        let operation2 = try YAMLDecoder().decode(OpenAPI.Operation.self, from: operationString2)
 
         XCTAssertEqual(
             operation2,
-            OpenAPI.PathItem.Operation(
+            OpenAPI.Operation(
                 responses: [
                     200: .reference(.component(named: "200")),
                     404: .reference(.component(named: "404"))

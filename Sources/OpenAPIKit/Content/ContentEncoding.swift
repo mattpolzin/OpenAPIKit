@@ -10,7 +10,7 @@ extension OpenAPI.Content {
     /// 
     /// See [OpenAPI Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#encoding-object).
     public struct Encoding: Equatable {
-        public typealias Style = OpenAPI.PathItem.Parameter.SchemaContext.Style
+        public typealias Style = OpenAPI.Parameter.SchemaContext.Style
 
         public let contentType: OpenAPI.ContentType?
         public let headers: OpenAPI.Header.Map?

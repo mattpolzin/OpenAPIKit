@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension OpenAPI.PathItem {
+extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
@@ -109,12 +109,12 @@ extension OpenAPI.PathItem {
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
-extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
+extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        context: OpenAPI.PathItem.Parameter.Context,
+        context: OpenAPI.Parameter.Context,
         schema: JSONSchema,
         description: String? = nil,
         deprecated: Bool = false,
@@ -135,7 +135,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        context: OpenAPI.PathItem.Parameter.Context,
+        context: OpenAPI.Parameter.Context,
         content: OpenAPI.Content.Map,
         description: String? = nil,
         deprecated: Bool = false,
@@ -156,7 +156,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
 
 // MARK: - Codable
 
-extension OpenAPI.PathItem.Parameter: Encodable {
+extension OpenAPI.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -205,7 +205,7 @@ extension OpenAPI.PathItem.Parameter: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Parameter: Decodable {
+extension OpenAPI.Parameter: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -264,7 +264,7 @@ extension OpenAPI.PathItem.Parameter: Decodable {
     }
 }
 
-extension OpenAPI.PathItem.Parameter {
+extension OpenAPI.Parameter {
     internal enum CodingKeys: ExtendableCodingKey {
         case name
         case parameterLocation

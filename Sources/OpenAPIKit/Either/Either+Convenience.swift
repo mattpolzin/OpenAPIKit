@@ -24,8 +24,8 @@ extension Either where A == URL {
 }
 
 // This extension also covers `OpenAPI.Header.SchemaContext`
-// which is a typealias of `OpenAPI.PathItem.Parameter.SchemaContext`.
-extension Either where A == OpenAPI.PathItem.Parameter.SchemaContext {
+// which is a typealias of `OpenAPI.Parameter.SchemaContext`.
+extension Either where A == OpenAPI.Parameter.SchemaContext {
     /// Retrieve the schema context if that is what this property contains.
     public var schemaContextValue: A? { a }
 
@@ -52,7 +52,7 @@ extension Either where A == OpenAPI.PathItem.Parameter.SchemaContext {
     }
 }
 
-extension Either where B == OpenAPI.PathItem.Parameter {
+extension Either where B == OpenAPI.Parameter {
     /// Retrieve the parameter if that is what this property contains.
     public var parameterValue: B? { b }
 }
@@ -103,9 +103,9 @@ extension Either where A: _OpenAPIReference {
     public static func reference(_ reference: A) -> Self { .a(reference) }
 }
 
-extension Either where A == OpenAPI.PathItem.Parameter.SchemaContext {
+extension Either where A == OpenAPI.Parameter.SchemaContext {
     /// Construct a schema context value.
-    public static func schema(_ schema: OpenAPI.PathItem.Parameter.SchemaContext) -> Self { .a(schema) }
+    public static func schema(_ schema: OpenAPI.Parameter.SchemaContext) -> Self { .a(schema) }
 }
 
 extension Either where B == JSONSchema {
@@ -113,9 +113,9 @@ extension Either where B == JSONSchema {
     public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
 }
 
-extension Either where B == OpenAPI.PathItem.Parameter {
+extension Either where B == OpenAPI.Parameter {
     /// Construct a parameter value.
-    public static func parameter(_ parameter: OpenAPI.PathItem.Parameter) -> Self { .b(parameter) }
+    public static func parameter(_ parameter: OpenAPI.Parameter) -> Self { .b(parameter) }
 }
 
 extension Either where B == OpenAPI.Content.Map {

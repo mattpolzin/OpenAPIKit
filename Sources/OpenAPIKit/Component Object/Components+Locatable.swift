@@ -28,7 +28,7 @@ extension OpenAPI.Response: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.responses }
 }
 
-extension OpenAPI.PathItem.Parameter: ComponentDictionaryLocatable {
+extension OpenAPI.Parameter: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "parameters" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.parameters }
 }

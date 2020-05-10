@@ -34,7 +34,7 @@ final class PathItemTests: XCTestCase {
         let _ = OpenAPI.PathItem()
 
         // maximal
-        let op = OpenAPI.PathItem.Operation(responses: [:])
+        let op = OpenAPI.Operation(responses: [:])
         let _ = OpenAPI.PathItem(
             summary: "summary",
             description: "description",
@@ -52,7 +52,7 @@ final class PathItemTests: XCTestCase {
     }
 
     func test_pathItemMutations() {
-        let op = OpenAPI.PathItem.Operation(responses: [:])
+        let op = OpenAPI.Operation(responses: [:])
 
         // adding/removing paths
         var pathItem = OpenAPI.PathItem()
@@ -247,7 +247,7 @@ extension PathItemTests {
     }
 
     func test_operations_encode() throws {
-        let op = OpenAPI.PathItem.Operation(responses: [:])
+        let op = OpenAPI.Operation(responses: [:])
 
         let pathItem = OpenAPI.PathItem(
             get: op,
@@ -360,7 +360,7 @@ extension PathItemTests {
 
         let pathItem = try testDecoder.decode(OpenAPI.PathItem.self, from: pathItemData)
 
-        let op = OpenAPI.PathItem.Operation(responses: [:])
+        let op = OpenAPI.Operation(responses: [:])
 
         XCTAssertEqual(
             pathItem,

@@ -12,7 +12,7 @@ extension OpenAPI {
     ///
     /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
     public struct Header: Equatable {
-        public typealias SchemaContext = PathItem.Parameter.SchemaContext
+        public typealias SchemaContext = Parameter.SchemaContext
 
         public let description: String?
         public let required: Bool
@@ -75,7 +75,7 @@ extension OpenAPI {
 }
 
 // MARK: - Header Convenience
-extension OpenAPI.PathItem.Parameter.SchemaContext {
+extension OpenAPI.Parameter.SchemaContext {
     public static func header(_ schema: JSONSchema,
                               allowReserved: Bool = false,
                               example: AnyCodable? = nil) -> Self {
