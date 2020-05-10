@@ -52,6 +52,28 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.SecurityScheme.SecurityType {
+    public enum Name: String, Codable {
+        case apiKey
+        case http
+        case oauth2
+        case openIdConnect
+    }
+
+    public var name: Name {
+        switch self {
+        case .apiKey:
+            return .apiKey
+        case .http:
+            return .http
+        case .oauth2:
+            return .oauth2
+        case .openIdConnect:
+            return .openIdConnect
+        }
+    }
+}
+
 // MARK: - Codable
 extension OpenAPI.SecurityScheme: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -61,18 +83,18 @@ extension OpenAPI.SecurityScheme: Encodable {
 
         switch type {
         case .apiKey(name: let name, location: let location):
-            try container.encode(SecurityTypeName.apiKey, forKey: .type)
+            try container.encode(SecurityType.Name.apiKey, forKey: .type)
             try container.encode(name, forKey: .name)
             try container.encode(location, forKey: .location)
         case .http(scheme: let scheme, bearerFormat: let bearerFormat):
-            try container.encode(SecurityTypeName.http, forKey: .type)
+            try container.encode(SecurityType.Name.http, forKey: .type)
             try container.encode(scheme, forKey: .scheme)
             try bearerFormat.encodeIfNotNil(to: &container, forKey: .bearerFormat)
         case .openIdConnect(openIdConnectUrl: let url):
-            try container.encode(SecurityTypeName.openIdConnect, forKey: .type)
+            try container.encode(SecurityType.Name.openIdConnect, forKey: .type)
             try container.encode(url, forKey: .openIdConnectUrl)
         case .oauth2(flows: let flows):
-            try container.encode(SecurityTypeName.oauth2, forKey: .type)
+            try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
         }
     }
@@ -84,7 +106,7 @@ extension OpenAPI.SecurityScheme: Decodable {
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
-        let typeName = try container.decode(SecurityTypeName.self, forKey: .type)
+        let typeName = try container.decode(SecurityType.Name.self, forKey: .type)
 
         switch typeName {
         case .apiKey:
@@ -135,12 +157,5 @@ extension OpenAPI.SecurityScheme {
         case bearerFormat
         case flows
         case openIdConnectUrl
-    }
-
-    internal enum SecurityTypeName: String, Codable {
-        case apiKey
-        case http
-        case oauth2
-        case openIdConnect
     }
 }

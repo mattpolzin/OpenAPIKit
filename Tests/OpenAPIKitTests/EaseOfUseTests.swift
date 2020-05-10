@@ -426,7 +426,29 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         )
     }
 
+    func test_getAllEndpoints() {
+        let document = testDocument
 
+        // get endpoints for each path
+        let endpoints = document.paths.mapValues(\.endpoints)
+
+        // count endpoints by HTTP method
+        let endpointMethods = endpoints.values.flatMap { $0 }.map(\.method)
+        let countByMethod = Dictionary(grouping: endpointMethods, by: { $0 }).mapValues { $0.count }
+        XCTAssertEqual(countByMethod[.get], 2)
+        XCTAssertEqual(countByMethod[.post], 1)
+    }
+
+    func test_resolveSecurity() {
+        let document = testDocument
+
+        let securityForAllEndpoints = document.security.first?.first
+        let authForAllEndpoints = securityForAllEndpoints.flatMap { document.components[$0.key] }
+        let scopesForAllEndpoints = securityForAllEndpoints?.value
+
+        XCTAssertEqual(authForAllEndpoints?.type.name, .oauth2)
+        XCTAssertEqual(scopesForAllEndpoints, ["widget:read", "widget:write"])
+    }
 }
 
 fileprivate let testWidgetSchema = JSONSchema.object(
@@ -473,13 +495,11 @@ fileprivate let testDocument =  OpenAPI.Document(
                 tags: "Widgets",
                 summary: "Get a widget",
                 responses: [
-                    200: .init(
-                        OpenAPI.Response(
-                            description: "A single widget",
-                            content: [
-                                .json: .init(schemaReference: .component(named: "testWidgetSchema"))
-                            ]
-                        )
+                    200: .response(
+                        description: "A single widget",
+                        content: [
+                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                        ]
                     )
                 ]
             ),
@@ -487,13 +507,24 @@ fileprivate let testDocument =  OpenAPI.Document(
                 tags: "Widgets",
                 summary: "Create a new widget",
                 responses: [
-                    201: .init(
-                        OpenAPI.Response(
-                            description: "The newly created widget",
-                            content: [
-                                .json: .init(schemaReference: .component(named: "testWidgetSchema"))
-                            ]
-                        )
+                    201: .response(
+                        description: "The newly created widget",
+                        content: [
+                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                        ]
+                    )
+                ]
+            )
+        ),
+        "/docs": OpenAPI.PathItem(
+            get: OpenAPI.Operation(
+                tags: "Documentation",
+                responses: [
+                    200: .response(
+                        description: "Get documentation on this API.",
+                        content: [
+                            .html: .init(schema: .string)
+                        ]
                     )
                 ]
             )

@@ -191,7 +191,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public typealias Endpoint = (verb: OpenAPI.HttpMethod, operation: OpenAPI.Operation)
+    public typealias Endpoint = (method: OpenAPI.HttpMethod, operation: OpenAPI.Operation)
 
     /// Get all endpoints defined at this path.
     ///
