@@ -65,6 +65,44 @@ final class ParameterTests: XCTestCase {
         )
     }
 
+    func test_schemaAccess() {
+        let t1 = OpenAPI.Parameter(
+            name: "hello",
+            context: .cookie,
+            schemaOrContent: .schema(.init(.string, style: .default(for: .cookie)))
+        )
+
+        XCTAssertNil(t1.schemaOrContent.contentValue)
+        XCTAssertNil(t1.schemaOrContent.schemaReference)
+        XCTAssertNil(t1.schemaOrContent.schemaContextValue?.schema.reference)
+        XCTAssertEqual(t1.schemaOrContent.schemaValue, .string)
+        XCTAssertEqual(t1.schemaOrContent.schemaContextValue, .init(.string, style: .default(for: .cookie)))
+        XCTAssertEqual(t1.schemaOrContent.schemaContextValue?.schema.schemaValue, t1.schemaOrContent.schemaValue)
+
+        let t2 = OpenAPI.Parameter(
+            name: "hello",
+            context: .cookie,
+            schemaReference: .component( named: "hello")
+        )
+
+        XCTAssertNil(t2.schemaOrContent.contentValue)
+        XCTAssertNil(t2.schemaOrContent.schemaValue)
+        XCTAssertNil(t2.schemaOrContent.schemaContextValue?.schema.schemaValue)
+        XCTAssertEqual(t2.schemaOrContent.schemaReference, .component( named: "hello"))
+        XCTAssertEqual(t2.schemaOrContent.schemaContextValue?.schema.reference, t2.schemaOrContent.schemaReference)
+
+        let t3 = OpenAPI.Parameter(
+            name: "hello",
+            context: .path,
+            content: [:]
+        )
+
+        XCTAssertNil(t3.schemaOrContent.schemaValue)
+        XCTAssertNil(t3.schemaOrContent.schemaReference)
+        XCTAssertNil(t3.schemaOrContent.schemaContextValue)
+        XCTAssertEqual(t3.schemaOrContent.contentValue, [:])
+    }
+
     func test_parameterArray() {
         let t1: OpenAPI.Parameter.Array = [
             .parameter(OpenAPI.Parameter(name: "hello", context: .cookie, schema: .string)),

@@ -22,6 +22,7 @@ final class ComponentsTests: XCTestCase {
         let ref3 = JSONReference<OpenAPI.Parameter>.component(named: "param")
 
         XCTAssertEqual(components[ref1], .integer(required: false))
+        XCTAssertEqual(components.dereference(ref1), components[ref1])
         XCTAssertNil(components[ref2])
         XCTAssertNil(components[ref3])
 
