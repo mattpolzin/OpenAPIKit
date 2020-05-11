@@ -449,6 +449,32 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         XCTAssertEqual(authForAllEndpoints?.type.name, .oauth2)
         XCTAssertEqual(scopesForAllEndpoints, ["widget:read", "widget:write"])
     }
+
+    func test_getResponseSchema() {
+        let document = testDocument
+
+        let endpoint = document.paths["/widgets/{id}"]?.get
+        let response = endpoint?.responses[.status(code: 200)]?.responseValue
+        let responseSchemaReference = response?.content[.json]?.schema
+        // this response schema is a reference found in the Components Object. We dereference
+        // it to get at the schema.
+        let responseSchema = responseSchemaReference.flatMap(document.components.dereference)
+
+        XCTAssertEqual(responseSchema, .object(properties: [ "partNumber": .integer, "description": .string ]))
+    }
+
+    func test_getRequestSchema() {
+        let document = testDocument
+
+        let endpoint = document.paths["/widgets/{id}"]?.post
+        let request = endpoint?.requestBody?.requestValue
+        let requestSchemaReference = request?.content[.json]?.schema
+        // this request schema is defined inline but dereferencing still produces the schema
+        // (dereferencing is just a no-op in this case).
+        let requestSchema = requestSchemaReference.flatMap(document.components.dereference)
+
+        XCTAssertEqual(requestSchema, .object(properties: [ "description": .string ]))
+    }
 }
 
 fileprivate let testWidgetSchema = JSONSchema.object(
@@ -506,6 +532,18 @@ fileprivate let testDocument =  OpenAPI.Document(
             post: OpenAPI.Operation(
                 tags: "Widgets",
                 summary: "Create a new widget",
+                description: "Create a new widget by adding a description. The created widget will be returned in the response body including a new part number.",
+                requestBody: OpenAPI.Request(
+                    content: [
+                        .json: .init(
+                            schema: JSONSchema.object(
+                                properties: [
+                                    "description": .string
+                                ]
+                            )
+                        )
+                    ]
+                ),
                 responses: [
                     201: .response(
                         description: "The newly created widget",
