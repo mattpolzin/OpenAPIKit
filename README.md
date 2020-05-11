@@ -101,7 +101,7 @@ The types used by this library largely mirror the object definitions found in th
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
 
 #### Routes
-Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of this dictionary are the paths for each route (i.e. `/widgets`). The values of this dictionary are `OpenAPI.PathItems` which define any combination of endpoints (i.e. `GET`, `POST`, `PATCH`, etc.) that the given route supports.
+Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of this dictionary are the paths for each route (i.e. `/widgets`). The values of this dictionary are `OpenAPI.PathItems` which define any combination of endpoints (i.e. `GET`, `POST`, `PATCH`, etc.) that the given route supports. In addition to accessing endpoints on a path item under the name of the method (`.get`, `.post`, etc.), you can get an array of pairs matching endpoint methods to operations with the `.endpoints` method on `PathItem`.
 
 #### Endpoints
 Each endpoint on a route is defined by an `OpenAPI.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
