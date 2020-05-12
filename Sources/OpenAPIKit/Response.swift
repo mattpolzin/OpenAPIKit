@@ -78,6 +78,15 @@ extension OpenAPI.Response {
             }
         }
 
+        public var isSuccess: Bool {
+            switch self {
+            case .range(.success), .status(code: 200..<300):
+                return true
+            case .range, .status, .default:
+                return false
+            }
+        }
+
         public init?(rawValue: String) {
             if let val = Int(rawValue) {
                 self = .status(code: val)
