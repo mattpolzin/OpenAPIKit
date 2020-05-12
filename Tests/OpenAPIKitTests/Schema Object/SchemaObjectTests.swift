@@ -631,45 +631,57 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_minObjectProperties() {
-        let obj1 = JSONSchema.ObjectContext(properties: [:],
-                                                 additionalProperties: .init(true),
-                                                 minProperties: 2)
+        let obj1 = JSONSchema.ObjectContext(
+            properties: [:],
+            additionalProperties: .init(true),
+            minProperties: 2
+        )
 
         XCTAssertEqual(obj1.minProperties, 2)
 
-        let obj2 = JSONSchema.ObjectContext(properties: [:],
-                                                  additionalProperties: .init(true))
+        let obj2 = JSONSchema.ObjectContext(
+            properties: [:],
+            additionalProperties: .init(true)
+        )
 
         XCTAssertEqual(obj2.minProperties, 0)
 
-        let obj3 = JSONSchema.ObjectContext(properties: [
-            "hello": .string
+        let obj3 = JSONSchema.ObjectContext(
+            properties: [
+                "hello": .string
             ],
-                                                  additionalProperties: .init(true))
+            additionalProperties: .init(true)
+        )
 
         XCTAssertEqual(obj3.minProperties, 1)
 
-        let obj4 = JSONSchema.ObjectContext(properties: [
-            "hello": .string(required: false)
+        let obj4 = JSONSchema.ObjectContext(
+            properties: [
+                "hello": .string(required: false)
             ],
-                                                  additionalProperties: .init(true))
+            additionalProperties: .init(true)
+        )
 
         XCTAssertEqual(obj4.minProperties, 0)
 
-        let obj5 = JSONSchema.ObjectContext(properties: [
-            "hello": .string
+        let obj5 = JSONSchema.ObjectContext(
+            properties: [
+                "hello": .string
             ],
-                                                  additionalProperties: .init(true),
-                                                  minProperties: 3)
+            additionalProperties: .init(true),
+            minProperties: 3
+        )
 
         XCTAssertEqual(obj5.minProperties, 3)
 
-        let obj6 = JSONSchema.ObjectContext(properties: [
-            "hello": .string,
-            "world": .boolean
+        let obj6 = JSONSchema.ObjectContext(
+            properties: [
+                "hello": .string,
+                "world": .boolean
             ],
-                                                  additionalProperties: .init(true),
-                                                  minProperties: 1)
+            additionalProperties: .init(true),
+            minProperties: 1
+        )
 
         XCTAssertEqual(obj6.minProperties, 2)
     }
@@ -1801,6 +1813,11 @@ extension SchemaObjectTests {
             ])
             .with(example: AnyCodable(["hello": true]))
 
+        if case let .object(_, objectContext) = requiredObject {
+            XCTAssertEqual(objectContext.requiredProperties, [])
+            XCTAssertEqual(objectContext.optionalProperties, ["hello"])
+        }
+
         testEncodingPropertyLines(entity: string,
                                   propertyLines: [
                                     "\"example\" : \"hello\",",
@@ -1984,6 +2001,11 @@ extension SchemaObjectTests {
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
+
+        if case let .object(_, objectContext) = requiredObject {
+            XCTAssertEqual(objectContext.requiredProperties, ["hello"])
+            XCTAssertEqual(objectContext.optionalProperties, [])
+        }
 
         testEncodingPropertyLines(entity: requiredObject,
                                   propertyLines: [
