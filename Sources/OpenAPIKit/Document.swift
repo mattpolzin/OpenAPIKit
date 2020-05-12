@@ -286,12 +286,12 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
 
 internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
     for (path, pathItem) in paths {
-        for (verb, operation) in pathItem.endpoints {
-            if let securityRequirements = operation.security {
+        for endpoint in pathItem.endpoints {
+            if let securityRequirements = endpoint.operation.security {
                 try validate(
                     securityRequirements: securityRequirements,
                     at: path,
-                    for: verb,
+                    for: endpoint.method,
                     against: components
                 )
             }

@@ -191,15 +191,20 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public typealias Endpoint = (method: OpenAPI.HttpMethod, operation: OpenAPI.Operation)
+    /// An `Endpoint` is the combination of an
+    /// HTTP method and an operation.
+    public struct Endpoint: Equatable {
+        public let method: OpenAPI.HttpMethod
+        public let operation: OpenAPI.Operation
+    }
 
     /// Get all endpoints defined at this path.
     ///
-    /// - Returns: An array of tuples with the verb (i.e. `.get`) and the operation for
-    ///     the verb.
+    /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
+    ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpMethod.allCases.compactMap { verb in
-            self.for(verb).map { (verb, $0) }
+        return OpenAPI.HttpMethod.allCases.compactMap { method in
+            self.for(method).map { .init(method: method, operation: $0) }
         }
     }
 }

@@ -39,6 +39,23 @@ final class OperationTests: XCTestCase {
             responses: [:]
         )
     }
+
+    func test_responseOutcomes() {
+        let t1 = OpenAPI.Operation(
+            responses: [
+                200: .response(description: "success", content: [:]),
+                404: .reference(.component(named: "notFound"))
+            ]
+        )
+
+        XCTAssertEqual(
+            t1.responseOutcomes,
+            [
+                .init(status: 200, response: .response(description: "success", content: [:])),
+                .init(status: 404, response: .reference(.component(named: "notFound")))
+            ]
+        )
+    }
 }
 
 // MARK: - Codable Tests

@@ -89,6 +89,31 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.Operation {
+    /// A `ResponseOutcome` is the combination of a
+    /// status code and a response.
+    public struct ResponseOutcome: Equatable {
+        public let status: OpenAPI.Response.StatusCode
+        public let response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+
+        public init(
+            status: OpenAPI.Response.StatusCode,
+            response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ) {
+            self.status = status
+            self.response = response
+        }
+    }
+
+    /// Get all response outcomes for this operation.
+    ///
+    /// - Returns: An array of `ResponseOutcomes` with the status
+    ///     and the response for the status.
+    public var responseOutcomes: [ResponseOutcome] {
+        return responses.map { (status, response) in .init(status: status, response: response) }
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Operation: Encodable {
