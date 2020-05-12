@@ -17,6 +17,7 @@ public protocol JSONSchemaContext {
     var nullable: Bool { get }
     var title: String? { get }
     var description: String? { get }
+    var discriminator: OpenAPI.Discriminator? { get }
     var externalDocs: OpenAPI.ExternalDocumentation? { get }
     var allowedValues: [AnyCodable]? { get }
     var example: AnyCodable? { get }
@@ -38,6 +39,21 @@ extension JSONSchema {
         public let title: String?
         public let description: String?
         public let externalDocs: OpenAPI.ExternalDocumentation?
+
+        /// An object used to discriminate upon the options for a child object's
+        /// schema in a polymorphic context.
+        ///
+        /// Discriminators are only applicable when used in conjunction with
+        /// `allOf`, `anyOf`, or `oneOf`.
+        ///
+        /// Still, they need to be supported on the
+        /// `JSONSchema.Context` (which is not used with those three special
+        /// schema types) because the specification states that a discriminator can
+        /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
+        /// or `oneOf`) as a way to reduce redundancy.
+        ///
+        /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
+        public let discriminator: OpenAPI.Discriminator?
 
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
@@ -68,6 +84,7 @@ extension JSONSchema {
                     deprecated: Bool = false,
                     title: String? = nil,
                     description: String? = nil,
+                    discriminator: OpenAPI.Discriminator? = nil,
                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: AnyCodable? = nil) {
@@ -78,6 +95,7 @@ extension JSONSchema {
             self.deprecated = deprecated
             self.title = title
             self.description = description
+            self.discriminator = discriminator
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.example = example
@@ -90,6 +108,7 @@ extension JSONSchema {
                     deprecated: Bool = false,
                     title: String? = nil,
                     description: String? = nil,
+                    discriminator: OpenAPI.Discriminator? = nil,
                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     allowedValues: [AnyCodable]? = nil,
                     example: String) {
@@ -100,6 +119,7 @@ extension JSONSchema {
             self.deprecated = deprecated
             self.title = title
             self.description = description
+            self.discriminator = discriminator
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.example = AnyCodable(example)
@@ -125,6 +145,7 @@ extension JSONSchema.Context {
                      deprecated: deprecated,
                      title: title,
                      description: description,
+                     discriminator: discriminator,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
                      example: example)
@@ -139,6 +160,7 @@ extension JSONSchema.Context {
                      deprecated: deprecated,
                      title: title,
                      description: description,
+                     discriminator: discriminator,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
                      example: example)
@@ -153,6 +175,7 @@ extension JSONSchema.Context {
                      deprecated: deprecated,
                      title: title,
                      description: description,
+                     discriminator: discriminator,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
                      example: example)
@@ -167,6 +190,7 @@ extension JSONSchema.Context {
                      deprecated: deprecated,
                      title: title,
                      description: description,
+                     discriminator: discriminator,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
                      example: example)
@@ -181,6 +205,7 @@ extension JSONSchema.Context {
                      deprecated: deprecated,
                      title: title,
                      description: description,
+                     discriminator: discriminator,
                      externalDocs: externalDocs,
                      allowedValues: allowedValues,
                      example: example)
@@ -321,6 +346,7 @@ extension JSONSchema {
         case format
         case title
         case description
+        case discriminator
         case externalDocs
         case allowedValues = "enum"
         case nullable
@@ -347,6 +373,8 @@ extension JSONSchema.Context: Encodable {
         try title.encodeIfNotNil(to: &container, forKey: .title)
 
         try description.encodeIfNotNil(to: &container, forKey: .description)
+
+        try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
 
         try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
 
@@ -385,6 +413,8 @@ extension JSONSchema.Context: Decodable {
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
 
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
