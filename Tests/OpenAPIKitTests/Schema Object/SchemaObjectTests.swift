@@ -373,6 +373,38 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(undefined.description)
     }
 
+    func test_discriminator() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())], discriminator: .init(propertyName: "name"))
+        let anyOf = JSONSchema.any(of: [boolean], discriminator: .init(propertyName: "name"))
+        let oneOf = JSONSchema.one(of: [boolean], discriminator: .init(propertyName: "name"))
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: nil)
+        let undefinedWithDescription = JSONSchema.undefined(description: "hello")
+
+        XCTAssertEqual(boolean.discriminator?.propertyName, "name")
+        XCTAssertEqual(object.discriminator?.propertyName, "name")
+        XCTAssertEqual(array.discriminator?.propertyName, "name")
+        XCTAssertEqual(number.discriminator?.propertyName, "name")
+        XCTAssertEqual(integer.discriminator?.propertyName, "name")
+        XCTAssertEqual(string.discriminator?.propertyName, "name")
+        XCTAssertEqual(allOf.discriminator?.propertyName, "name")
+        XCTAssertEqual(anyOf.discriminator?.propertyName, "name")
+        XCTAssertEqual(oneOf.discriminator?.propertyName, "name")
+
+        XCTAssertNil(undefinedWithDescription.discriminator)
+        XCTAssertNil(not.discriminator)
+        XCTAssertNil(reference.discriminator)
+        XCTAssertNil(undefined.discriminator)
+    }
+
     func test_externalDocs() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)))
         let object = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:]))
