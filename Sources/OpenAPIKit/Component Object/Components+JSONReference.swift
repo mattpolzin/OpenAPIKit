@@ -65,6 +65,16 @@ extension OpenAPI.Components {
         }
     }
 
+    /// Pass a reference to a component.
+    /// `dereference()` will return the component value if it is found
+    /// in the Components Object.
+    ///
+    /// - Important: Dereferencing an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
+    public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
+        return self[reference]
+    }
+
     /// Create a `JSONReference`.
     ///
     /// - throws: If the given name does not refer to an existing component of the given type.

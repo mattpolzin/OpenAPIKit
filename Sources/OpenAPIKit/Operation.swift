@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension OpenAPI.PathItem {
+extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
     /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
@@ -64,7 +64,7 @@ extension OpenAPI.PathItem {
                     description: String? = nil,
                     externalDocs: OpenAPI.ExternalDocumentation? = nil,
                     operationId: String? = nil,
-                    parameters: Parameter.Array,
+                    parameters: Parameter.Array = [],
                     requestBody: OpenAPI.Request? = nil,
                     responses: OpenAPI.Response.Map,
                     deprecated: Bool = false,
@@ -89,9 +89,34 @@ extension OpenAPI.PathItem {
     }
 }
 
+extension OpenAPI.Operation {
+    /// A `ResponseOutcome` is the combination of a
+    /// status code and a response.
+    public struct ResponseOutcome: Equatable {
+        public let status: OpenAPI.Response.StatusCode
+        public let response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+
+        public init(
+            status: OpenAPI.Response.StatusCode,
+            response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ) {
+            self.status = status
+            self.response = response
+        }
+    }
+
+    /// Get all response outcomes for this operation.
+    ///
+    /// - Returns: An array of `ResponseOutcomes` with the status
+    ///     and the response for the status.
+    public var responseOutcomes: [ResponseOutcome] {
+        return responses.map { (status, response) in .init(status: status, response: response) }
+    }
+}
+
 // MARK: - Codable
 
-extension OpenAPI.PathItem.Operation: Encodable {
+extension OpenAPI.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -127,7 +152,7 @@ extension OpenAPI.PathItem.Operation: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Operation: Decodable {
+extension OpenAPI.Operation: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -142,7 +167,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
 
             operationId = try container.decodeIfPresent(String.self, forKey: .operationId)
 
-            parameters = try container.decodeIfPresent(OpenAPI.PathItem.Parameter.Array.self, forKey: .parameters) ?? []
+            parameters = try container.decodeIfPresent(OpenAPI.Parameter.Array.self, forKey: .parameters) ?? []
 
             requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
@@ -174,7 +199,7 @@ extension OpenAPI.PathItem.Operation: Decodable {
     }
 }
 
-extension OpenAPI.PathItem.Operation {
+extension OpenAPI.Operation {
     internal enum CodingKeys: ExtendableCodingKey {
         case tags
         case summary

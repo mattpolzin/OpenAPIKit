@@ -39,6 +39,23 @@ final class ResponseTests: XCTestCase {
         XCTAssertNotNil(responseMap[404]?.reference)
         XCTAssertNil(responseMap[404]?.responseValue)
     }
+
+    func test_status() {
+        let t1: OpenAPI.Response.StatusCode = .range(.success)
+        XCTAssertTrue(t1.isSuccess)
+
+        let t2: OpenAPI.Response.StatusCode = 201
+        XCTAssertTrue(t2.isSuccess)
+
+        let t3: OpenAPI.Response.StatusCode = 200
+        XCTAssertTrue(t3.isSuccess)
+
+        let t4: OpenAPI.Response.StatusCode = 300
+        XCTAssertFalse(t4.isSuccess)
+
+        let t5: OpenAPI.Response.StatusCode = .range(.serverError)
+        XCTAssertFalse(t5.isSuccess)
+    }
 }
 
 // MARK: Response Status Code

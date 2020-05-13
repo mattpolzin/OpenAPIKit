@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-extension OpenAPI.PathItem.Parameter {
+extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
     /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations).
@@ -61,7 +61,7 @@ extension OpenAPI.PathItem.Parameter {
     }
 }
 
-extension OpenAPI.PathItem.Parameter.Context {
+extension OpenAPI.Parameter.Context {
     public enum Location: String, CaseIterable, Codable {
         case query
         case header

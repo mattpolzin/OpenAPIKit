@@ -321,6 +321,12 @@ extension JSONSchema {
             }.keys)
         }
 
+        public var optionalProperties: [String] {
+            return Array(properties.filter { (_, schemaObject) in
+                !schemaObject.required
+            }.keys)
+        }
+
         public var minProperties: Int {
             return max(_minProperties, requiredProperties.count)
         }

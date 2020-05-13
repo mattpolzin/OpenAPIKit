@@ -61,7 +61,8 @@ final class VendorExtendableTests: XCTestCase {
 """.data(using: .utf8)!
 
         XCTAssertThrowsError(try JSONDecoder().decode(TestStruct.self, from: data)) { error in
-            XCTAssert(error as? VendorExtensionDecodingError == VendorExtensionDecodingError.selfIsArrayNotDict)
+            XCTAssertEqual(error as? VendorExtensionDecodingError, VendorExtensionDecodingError.selfIsArrayNotDict)
+            XCTAssertEqual(String(describing: error), "Tried to get vendor extensions on a list. Vendor extensions are necessarily keyed and therefore can only be retrieved from hashes.")
         }
     }
 

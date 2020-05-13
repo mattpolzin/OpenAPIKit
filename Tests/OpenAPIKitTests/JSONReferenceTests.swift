@@ -114,7 +114,7 @@ final class JSONReferenceTests: XCTestCase {
     func test_componentPaths() {
         XCTAssertEqual(JSONReference<JSONSchema>.component(named: "hello").absoluteString, "#/components/schemas/hello")
         XCTAssertEqual(JSONReference<OpenAPI.Response>.component(named: "hello").absoluteString, "#/components/responses/hello")
-        XCTAssertEqual(JSONReference<OpenAPI.PathItem.Parameter>.component(named: "hello").absoluteString, "#/components/parameters/hello")
+        XCTAssertEqual(JSONReference<OpenAPI.Parameter>.component(named: "hello").absoluteString, "#/components/parameters/hello")
         XCTAssertEqual(JSONReference<OpenAPI.Example>.component(named: "hello").absoluteString, "#/components/examples/hello")
         XCTAssertEqual(JSONReference<OpenAPI.Request>.component(named: "hello").absoluteString, "#/components/requestBodies/hello")
         XCTAssertEqual(JSONReference<OpenAPI.Header>.component(named: "hello").absoluteString, "#/components/headers/hello")

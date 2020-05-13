@@ -9,7 +9,7 @@ import XCTest
 import OpenAPIKit
 
 final class ParameterSchemaTests: XCTestCase {
-    typealias Schema = OpenAPI.PathItem.Parameter.Schema
+    typealias Schema = OpenAPI.Parameter.SchemaContext
 
     func test_initialize() {
         // init specifying opposite of default explode and allowReserved.
@@ -529,9 +529,9 @@ extension ParameterSchemaTests {
 
 fileprivate struct SchemaWrapper: Codable {
     let location: TestLocation
-    let schema: OpenAPI.PathItem.Parameter.Schema
+    let schema: OpenAPI.Parameter.SchemaContext
 
-    init(location: OpenAPI.PathItem.Parameter.Context, schema: OpenAPI.PathItem.Parameter.Schema) {
+    init(location: OpenAPI.Parameter.Context, schema: OpenAPI.Parameter.SchemaContext) {
         self.location = .init(location)
         self.schema = schema
     }
@@ -547,7 +547,7 @@ fileprivate struct SchemaWrapper: Codable {
         case path
         case cookie
 
-        var paramLoc: OpenAPI.PathItem.Parameter.Context {
+        var paramLoc: OpenAPI.Parameter.Context {
             switch self {
             case .query: return .query
             case .header: return .header
@@ -556,7 +556,7 @@ fileprivate struct SchemaWrapper: Codable {
             }
         }
 
-        init(_ paramLoc: OpenAPI.PathItem.Parameter.Context) {
+        init(_ paramLoc: OpenAPI.Parameter.Context) {
             switch paramLoc {
             case .query: self = .query
             case .header: self = .header
@@ -580,6 +580,6 @@ fileprivate struct SchemaWrapper: Codable {
         let location = try container.decode(TestLocation.self, forKey: .location)
         self.location = location
 
-        schema = try OpenAPI.PathItem.Parameter.Schema(from: container.superDecoder(forKey: .schema), for: location.paramLoc)
+        schema = try OpenAPI.Parameter.SchemaContext(from: container.superDecoder(forKey: .schema), for: location.paramLoc)
     }
 }

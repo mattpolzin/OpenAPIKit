@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension OpenAPI.PathItem {
+extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
@@ -20,7 +20,7 @@ extension OpenAPI.PathItem {
         public var deprecated: Bool // default is false
 
         /// OpenAPI Spec "content" or "schema" properties.
-        public var schemaOrContent: Either<Schema, OpenAPI.Content.Map>
+        public var schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
 
         /// Dictionary of vendor extensions.
         ///
@@ -37,7 +37,7 @@ extension OpenAPI.PathItem {
 
         public init(name: String,
                     context: Context,
-                    schemaOrContent: Either<Schema, OpenAPI.Content.Map>,
+                    schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -51,7 +51,7 @@ extension OpenAPI.PathItem {
 
         public init(name: String,
                     context: Context,
-                    schema: Schema,
+                    schema: SchemaContext,
                     description: String? = nil,
                     deprecated: Bool = false,
                     vendorExtensions: [String: AnyCodable] = [:]) {
@@ -71,7 +71,7 @@ extension OpenAPI.PathItem {
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
-            self.schemaOrContent = .init(Schema(schema, style: .default(for: context)))
+            self.schemaOrContent = .init(SchemaContext(schema, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
@@ -85,7 +85,7 @@ extension OpenAPI.PathItem {
                     vendorExtensions: [String: AnyCodable] = [:]) {
             self.name = name
             self.context = context
-            self.schemaOrContent = .init(Schema(schemaReference: schemaReference, style: .default(for: context)))
+            self.schemaOrContent = .init(SchemaContext(schemaReference: schemaReference, style: .default(for: context)))
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
@@ -109,12 +109,12 @@ extension OpenAPI.PathItem {
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
-extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == OpenAPI.PathItem.Parameter {
+extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        context: OpenAPI.PathItem.Parameter.Context,
+        context: OpenAPI.Parameter.Context,
         schema: JSONSchema,
         description: String? = nil,
         deprecated: Bool = false,
@@ -135,7 +135,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
     /// Construct a parameter.
     public static func parameter(
         name: String,
-        context: OpenAPI.PathItem.Parameter.Context,
+        context: OpenAPI.Parameter.Context,
         content: OpenAPI.Content.Map,
         description: String? = nil,
         deprecated: Bool = false,
@@ -156,7 +156,7 @@ extension Either where A == JSONReference<OpenAPI.PathItem.Parameter>, B == Open
 
 // MARK: - Codable
 
-extension OpenAPI.PathItem.Parameter: Encodable {
+extension OpenAPI.Parameter: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -205,7 +205,7 @@ extension OpenAPI.PathItem.Parameter: Encodable {
     }
 }
 
-extension OpenAPI.PathItem.Parameter: Decodable {
+extension OpenAPI.Parameter: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -236,9 +236,9 @@ extension OpenAPI.PathItem.Parameter: Decodable {
 
         let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
 
-        let maybeSchema: Schema?
+        let maybeSchema: SchemaContext?
         if container.contains(.schema) {
-            maybeSchema = try Schema(from: decoder, for: context)
+            maybeSchema = try SchemaContext(from: decoder, for: context)
         } else {
             maybeSchema = nil
         }
@@ -264,7 +264,7 @@ extension OpenAPI.PathItem.Parameter: Decodable {
     }
 }
 
-extension OpenAPI.PathItem.Parameter {
+extension OpenAPI.Parameter {
     internal enum CodingKeys: ExtendableCodingKey {
         case name
         case parameterLocation
