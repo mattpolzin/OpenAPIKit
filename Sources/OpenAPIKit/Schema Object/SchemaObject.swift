@@ -17,9 +17,9 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case all(of: [JSONSchemaFragment])
-    indirect case one(of: [JSONSchema])
-    indirect case any(of: [JSONSchema])
+    indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
+    indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
+    indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case not(JSONSchema)
     case reference(JSONReference<JSONSchema>)
     /// This schema does not have a `type` specified. This is allowed
@@ -169,6 +169,25 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         case .undefined(description: let description):
             return description
         case .all, .one, .any, .not, .reference:
+            return nil
+        }
+    }
+
+    /// Get the discriminator, if specified. If unspecified, returns `nil`.
+    public var discriminator: OpenAPI.Discriminator? {
+        switch self {
+        case .boolean(let context as JSONSchemaContext),
+             .object(let context as JSONSchemaContext, _),
+             .array(let context as JSONSchemaContext, _),
+             .number(let context as JSONSchemaContext, _),
+             .integer(let context as JSONSchemaContext, _),
+             .string(let context as JSONSchemaContext, _):
+            return context.discriminator
+        case .all(_, let discriminator),
+             .one(_, let discriminator),
+             .any(_, let discriminator):
+            return discriminator
+        case .undefined, .not, .reference:
             return nil
         }
     }
@@ -372,6 +391,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
@@ -384,6 +404,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -400,6 +421,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
         example: AnyCodable? = nil
@@ -412,6 +434,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -431,6 +454,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
@@ -446,6 +470,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -467,6 +492,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minLength: Int = 0,
         maxLength: Int? = nil,
@@ -482,6 +508,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             minLength: minLength,
             maxLength: maxLength,
@@ -504,6 +531,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
@@ -519,6 +547,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -540,6 +569,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Double? = nil,
         maximum: (Double, exclusive: Bool)? = nil,
@@ -555,6 +585,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             multipleOf: multipleOf,
             maximum: maximum,
@@ -577,6 +608,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
@@ -592,6 +624,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -613,6 +646,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         multipleOf: Int? = nil,
         maximum: (Int, exclusive: Bool)? = nil,
@@ -628,6 +662,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             multipleOf: multipleOf,
             maximum: maximum,
@@ -650,6 +685,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minProperties: Int = 0,
         maxProperties: Int? = nil,
@@ -666,6 +702,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -692,6 +729,7 @@ extension JSONSchema {
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minItems: Int = 0,
         maxItems: Int? = nil,
@@ -708,6 +746,7 @@ extension JSONSchema {
             deprecated: deprecated,
             title: title,
             description: description,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
@@ -722,16 +761,43 @@ extension JSONSchema {
         return .array(generalContext, arrayContext)
     }
 
-    public static func all(of schemas: JSONSchemaFragment...) -> JSONSchema {
-        return .all(of: schemas)
+    public static func all(
+        of schemas: [JSONSchemaFragment]
+    ) -> JSONSchema {
+        return .all(of: schemas, discriminator: nil)
     }
 
-    public static func one(of schemas: JSONSchema...) -> JSONSchema {
-        return .one(of: schemas)
+    public static func all(
+        of schemas: JSONSchemaFragment...,
+        discriminator: OpenAPI.Discriminator? = nil
+    ) -> JSONSchema {
+        return .all(of: schemas, discriminator: discriminator)
     }
 
-    public static func any(of schemas: JSONSchema...) -> JSONSchema {
-        return .any(of: schemas)
+    public static func one(
+        of schemas: [JSONSchema]
+    ) -> JSONSchema {
+        return .one(of: schemas, discriminator: nil)
+    }
+
+    public static func one(
+        of schemas: JSONSchema...,
+        discriminator: OpenAPI.Discriminator? = nil
+    ) -> JSONSchema {
+        return .one(of: schemas, discriminator: discriminator)
+    }
+
+    public static func any(
+        of schemas: [JSONSchema]
+    ) -> JSONSchema {
+        return .any(of: schemas, discriminator: nil)
+    }
+
+    public static func any(
+        of schemas: JSONSchema...,
+        discriminator: OpenAPI.Discriminator? = nil
+    ) -> JSONSchema {
+        return .any(of: schemas, discriminator: discriminator)
     }
 }
 
@@ -739,6 +805,7 @@ extension JSONSchema {
 
 extension JSONSchema {
     private enum SubschemaCodingKeys: String, CodingKey {
+        case discriminator
         case allOf
         case oneOf
         case anyOf
@@ -761,20 +828,23 @@ extension JSONSchema: Encodable {
             try contextA.encode(to: encoder)
             try contextB.encode(to: encoder)
 
-        case .all(of: let nodes):
+        case .all(of: let nodes, let discriminator):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .allOf)
+            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
 
-        case .one(of: let nodes):
+        case .one(of: let nodes, let discriminator):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .oneOf)
+            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
 
-        case .any(of: let nodes):
+        case .any(of: let nodes, let discriminator):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .anyOf)
+            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
 
         case .not(let node):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
@@ -824,17 +894,20 @@ extension JSONSchema: Decodable {
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            self = .all(of: try container.decode([JSONSchemaFragment].self, forKey: .allOf))
+            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
+            self = .all(of: try container.decode([JSONSchemaFragment].self, forKey: .allOf), discriminator: discriminator)
             return
         }
 
         if container.contains(.anyOf) {
-            self = .any(of: try container.decode([JSONSchema].self, forKey: .anyOf))
+            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
+            self = .any(of: try container.decode([JSONSchema].self, forKey: .anyOf), discriminator: discriminator)
             return
         }
 
         if container.contains(.oneOf) {
-            self = .one(of: try container.decode([JSONSchema].self, forKey: .oneOf))
+            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
+            self = .one(of: try container.decode([JSONSchema].self, forKey: .oneOf), discriminator: discriminator)
             return
         }
 

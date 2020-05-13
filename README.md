@@ -396,7 +396,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 ### Schema Object (`JSONSchema`)
 - [x] Mostly complete support for JSON Schema inherited keywords
 - [x] nullable
-- [ ] discriminator
+- [x] discriminator
 - [x] readOnly (`permissions` `.readOnly` case)
 - [x] writeOnly (`permissions` `.writeOnly` case)
 - [ ] xml
