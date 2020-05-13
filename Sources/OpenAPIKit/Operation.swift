@@ -120,21 +120,17 @@ extension OpenAPI.Operation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try tags.encodeIfNotNil(to: &container, forKey: .tags)
-
-        try summary.encodeIfNotNil(to: &container, forKey: .summary)
-
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-
-        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
-
-        try operationId.encodeIfNotNil(to: &container, forKey: .operationId)
+        try container.encodeIfPresent(tags, forKey: .tags)
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encodeIfPresent(operationId, forKey: .operationId)
 
         if !parameters.isEmpty {
             try container.encode(parameters, forKey: .parameters)
         }
 
-        try requestBody.encodeIfNotNil(to: &container, forKey: .requestBody)
+        try container.encodeIfPresent(requestBody, forKey: .requestBody)
 
         try container.encode(responses, forKey: .responses)
 
@@ -146,8 +142,8 @@ extension OpenAPI.Operation: Encodable {
             try encodeSecurity(requirements: securityRequirements, to: &container, forKey: .security)
         }
 
-        try servers.encodeIfNotNil(to: &container, forKey: .servers)
-
+        try container.encodeIfPresent(servers, forKey: .servers)
+        
         try encodeExtensions(to: &container)
     }
 }

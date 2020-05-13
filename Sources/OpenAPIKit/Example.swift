@@ -65,9 +65,8 @@ extension OpenAPI.Example: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try summary.encodeIfNotNil(to: &container, forKey: .summary)
-
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
 
         switch value {
         case .a(let url):
@@ -95,7 +94,6 @@ extension OpenAPI.Example: Decodable {
         let externalValue = try container.decodeIfPresent(URL.self, forKey: .externalValue)
 
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
-
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         value = try externalValue.map(Either.init)

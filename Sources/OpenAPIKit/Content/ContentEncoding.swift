@@ -50,9 +50,8 @@ extension OpenAPI.Content.Encoding: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try contentType.encodeIfNotNil(to: &container, forKey: .contentType)
-
-        try headers.encodeIfNotNil(to: &container, forKey: .headers)
+        try container.encodeIfPresent(contentType, forKey: .contentType)
+        try container.encodeIfPresent(headers, forKey: .headers)
 
         if style != Self.defaultStyle {
             try container.encode(style, forKey: .style)

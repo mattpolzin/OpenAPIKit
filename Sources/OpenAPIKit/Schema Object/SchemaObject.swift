@@ -832,19 +832,19 @@ extension JSONSchema: Encodable {
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .allOf)
-            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
+            try container.encodeIfPresent(discriminator, forKey: .discriminator)
 
         case .one(of: let nodes, let discriminator):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .oneOf)
-            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
+            try container.encodeIfPresent(discriminator, forKey: .discriminator)
 
         case .any(of: let nodes, let discriminator):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .anyOf)
-            try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
+            try container.encodeIfPresent(discriminator, forKey: .discriminator)
 
         case .not(let node):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)

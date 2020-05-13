@@ -40,8 +40,7 @@ extension OpenAPI.Request: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-
+        try container.encodeIfPresent(description, forKey: .description)
         try container.encode(content, forKey: .content)
 
         if required {
@@ -56,9 +55,7 @@ extension OpenAPI.Request: Decodable {
 
         do {
             description = try container.decodeIfPresent(String.self, forKey: .description)
-
             content = try container.decode(OpenAPI.Content.Map.self, forKey: .content)
-
             required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
         } catch let error as InconsistencyError {
 

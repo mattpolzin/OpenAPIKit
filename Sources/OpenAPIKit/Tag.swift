@@ -40,9 +40,9 @@ extension OpenAPI.Tag: Encodable {
 
         try container.encode(name, forKey: .name)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(description, forKey: .description)
 
-        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
     }
 }
 

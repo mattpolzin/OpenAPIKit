@@ -149,10 +149,10 @@ extension OpenAPI.OAuthFlows: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try implicit.encodeIfNotNil(to: &container, forKey: .implicit)
-        try password.encodeIfNotNil(to: &container, forKey: .password)
-        try clientCredentials.encodeIfNotNil(to: &container, forKey: .clientCredentials)
-        try authorizationCode.encodeIfNotNil(to: &container, forKey: .authorizationCode)
+        try container.encodeIfPresent(implicit, forKey: .implicit)
+        try container.encodeIfPresent(password, forKey: .password)
+        try container.encodeIfPresent(clientCredentials, forKey: .clientCredentials)
+        try container.encodeIfPresent(authorizationCode, forKey: .authorizationCode)
     }
 }
 
@@ -171,7 +171,7 @@ extension OpenAPI.OAuthFlows.CommonFields: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try refreshUrl.encodeIfNotNil(to: &container, forKey: .refreshUrl)
+        try container.encodeIfPresent(refreshUrl, forKey: .refreshUrl)
         try container.encode(scopes, forKey: .scopes)
     }
 }

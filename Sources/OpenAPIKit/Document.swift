@@ -77,7 +77,6 @@ extension OpenAPI.Document: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
-
         try container.encode(info, forKey: .info)
 
         if !servers.isEmpty {
@@ -96,9 +95,8 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        try tags.encodeIfNotNil(to: &container, forKey: .tags)
-
-        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
+        try container.encodeIfPresent(tags, forKey: .tags)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
 
         try encodeExtensions(to: &container)
     }
@@ -110,9 +108,7 @@ extension OpenAPI.Document: Decodable {
 
         do {
             openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
-
             info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
-
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
@@ -123,11 +119,8 @@ extension OpenAPI.Document: Decodable {
             try validateSecurityRequirements(in: paths, against: components)
 
             security = try decodeSecurityRequirements(from: container, forKey: .security, given: components) ?? []
-
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
-
             externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
-
             vendorExtensions = try Self.extensions(from: decoder)
 
         } catch let error as OpenAPI.Error.Decoding.Path {

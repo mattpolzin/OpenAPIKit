@@ -151,8 +151,7 @@ extension OpenAPI.Response: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(description, forKey: .description)
-
-        try headers.encodeIfNotNil(to: &container, forKey: .headers)
+        try container.encodeIfPresent(headers, forKey: .headers)
 
         if content.count > 0 {
             try container.encode(content, forKey: .content)
@@ -166,9 +165,7 @@ extension OpenAPI.Response: Decodable {
 
         do {
             description = try container.decode(String.self, forKey: .description)
-
             headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
-
             content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
 
         } catch let error as InconsistencyError {

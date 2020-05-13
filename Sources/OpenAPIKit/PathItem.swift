@@ -233,24 +233,22 @@ extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try summary.encodeIfNotNil(to: &container, forKey: .summary)
-
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-
-        try servers.encodeIfNotNil(to: &container, forKey: .servers)
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(servers, forKey: .servers)
 
         if !parameters.isEmpty {
             try container.encode(parameters, forKey: .parameters)
         }
 
-        try get.encodeIfNotNil(to: &container, forKey: .get)
-        try put.encodeIfNotNil(to: &container, forKey: .put)
-        try post.encodeIfNotNil(to: &container, forKey: .post)
-        try delete.encodeIfNotNil(to: &container, forKey: .delete)
-        try options.encodeIfNotNil(to: &container, forKey: .options)
-        try head.encodeIfNotNil(to: &container, forKey: .head)
-        try patch.encodeIfNotNil(to: &container, forKey: .patch)
-        try trace.encodeIfNotNil(to: &container, forKey: .trace)
+        try container.encodeIfPresent(get, forKey: .get)
+        try container.encodeIfPresent(put, forKey: .put)
+        try container.encodeIfPresent(post, forKey: .post)
+        try container.encodeIfPresent(delete, forKey: .delete)
+        try container.encodeIfPresent(options, forKey: .options)
+        try container.encodeIfPresent(head, forKey: .head)
+        try container.encodeIfPresent(patch, forKey: .patch)
+        try container.encodeIfPresent(trace, forKey: .trace)
 
         try encodeExtensions(to: &container)
     }
@@ -262,11 +260,8 @@ extension OpenAPI.PathItem: Decodable {
 
         do {
             summary = try container.decodeIfPresent(String.self, forKey: .summary)
-
             description = try container.decodeIfPresent(String.self, forKey: .description)
-
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
-
             parameters = try container.decodeIfPresent(OpenAPI.Parameter.Array.self, forKey: .parameters) ?? []
 
             get = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .get)

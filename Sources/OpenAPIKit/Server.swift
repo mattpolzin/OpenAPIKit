@@ -73,7 +73,7 @@ extension OpenAPI.Server: Encodable {
 
         try container.encode(url, forKey: .url)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(description, forKey: .description)
 
         if variables.count > 0 {
             try container.encode(variables, forKey: .variables)
@@ -147,7 +147,7 @@ extension OpenAPI.Server.Variable: Encodable {
 
         try container.encode(`default`, forKey: .default)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(description, forKey: .description)
     }
 }
 

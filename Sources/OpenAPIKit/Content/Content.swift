@@ -121,7 +121,7 @@ extension OpenAPI.Content: Encodable {
             try container.encode(example, forKey: .example)
         }
 
-        try encoding.encodeIfNotNil(to: &container, forKey: .encoding)
+        try container.encodeIfPresent(encoding, forKey: .encoding)
 
         try encodeExtensions(to: &container)
     }

@@ -358,17 +358,17 @@ extension JSONSchemaFragment: Encodable {
     private func encodeGeneralProperties(for type: JSONType?, to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: GeneralCodingKeys.self)
 
-        try type.encodeIfNotNil(to: &container, forKey: .type)
-        try format.encodeIfNotNil(to: &container, forKey: .format)
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-        try title.encodeIfNotNil(to: &container, forKey: .title)
-        try nullable.encodeIfNotNil(to: &container, forKey: .nullable)
-        try deprecated.encodeIfNotNil(to: &container, forKey: .deprecated)
-        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
-        try allowedValues.encodeIfNotNil(to: &container, forKey: .allowedValues)
-        try example.encodeIfNotNil(to: &container, forKey: .example)
-        try readOnly.encodeIfNotNil(to: &container, forKey: .readOnly)
-        try writeOnly.encodeIfNotNil(to: &container, forKey: .writeOnly)
+        try container.encodeIfPresent(type, forKey: .type)
+        try container.encodeIfPresent(format, forKey: .format)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(title, forKey: .title)
+        try container.encodeIfPresent(nullable, forKey: .nullable)
+        try container.encodeIfPresent(deprecated, forKey: .deprecated)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        try container.encodeIfPresent(example, forKey: .example)
+        try container.encodeIfPresent(readOnly, forKey: .readOnly)
+        try container.encodeIfPresent(writeOnly, forKey: .writeOnly)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -382,47 +382,53 @@ extension JSONSchemaFragment: Encodable {
             try encodeGeneralProperties(for: .integer, to: encoder)
 
             var container = encoder.container(keyedBy: IntegerCodingKeys.self)
-            try integerContext.multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
-            try integerContext.maximum.encodeIfNotNil(to: &container, forKey: .maximum)
-            try integerContext.exclusiveMaximum.encodeIfNotNil(to: &container, forKey: .exclusiveMaximum)
-            try integerContext.minimum.encodeIfNotNil(to: &container, forKey: .minimum)
-            try integerContext.exclusiveMinimum.encodeIfNotNil(to: &container, forKey: .exclusiveMinimum)
+
+            try container.encodeIfPresent(integerContext.multipleOf, forKey: .multipleOf)
+            try container.encodeIfPresent(integerContext.maximum, forKey: .maximum)
+            try container.encodeIfPresent(integerContext.exclusiveMaximum, forKey: .exclusiveMaximum)
+            try container.encodeIfPresent(integerContext.minimum, forKey: .minimum)
+            try container.encodeIfPresent(integerContext.exclusiveMinimum, forKey: .exclusiveMinimum)
+
         case .number(_, let numericContext):
             try encodeGeneralProperties(for: .number, to: encoder)
 
             var container = encoder.container(keyedBy: NumericCodingKeys.self)
-            try numericContext.multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
-            try numericContext.maximum.encodeIfNotNil(to: &container, forKey: .maximum)
-            try numericContext.exclusiveMaximum.encodeIfNotNil(to: &container, forKey: .exclusiveMaximum)
-            try numericContext.minimum.encodeIfNotNil(to: &container, forKey: .minimum)
-            try numericContext.exclusiveMinimum.encodeIfNotNil(to: &container, forKey: .exclusiveMinimum)
+
+            try container.encodeIfPresent(numericContext.multipleOf, forKey: .multipleOf)
+            try container.encodeIfPresent(numericContext.maximum, forKey: .maximum)
+            try container.encodeIfPresent(numericContext.exclusiveMaximum, forKey: .exclusiveMaximum)
+            try container.encodeIfPresent(numericContext.minimum, forKey: .minimum)
+            try container.encodeIfPresent(numericContext.exclusiveMinimum, forKey: .exclusiveMinimum)
 
         case .string(_, let stringContext):
             try encodeGeneralProperties(for: .string, to: encoder)
 
             var container = encoder.container(keyedBy: StringCodingKeys.self)
-            try stringContext.maxLength.encodeIfNotNil(to: &container, forKey: .maxLength)
-            try stringContext.minLength.encodeIfNotNil(to: &container, forKey: .minLength)
-            try stringContext.pattern.encodeIfNotNil(to: &container, forKey: .pattern)
+
+            try container.encodeIfPresent(stringContext.maxLength, forKey: .maxLength)
+            try container.encodeIfPresent(stringContext.minLength, forKey: .minLength)
+            try container.encodeIfPresent(stringContext.pattern, forKey: .pattern)
 
         case .array(_, let arrayContext):
             try encodeGeneralProperties(for: .array, to: encoder)
 
             var container = encoder.container(keyedBy: ArrayCodingKeys.self)
-            try arrayContext.items.encodeIfNotNil(to: &container, forKey: .items)
-            try arrayContext.maxItems.encodeIfNotNil(to: &container, forKey: .maxItems)
-            try arrayContext.minItems.encodeIfNotNil(to: &container, forKey: .minItems)
-            try arrayContext.uniqueItems.encodeIfNotNil(to: &container, forKey: .uniqueItems)
+
+            try container.encodeIfPresent(arrayContext.items, forKey: .items)
+            try container.encodeIfPresent(arrayContext.maxItems, forKey: .maxItems)
+            try container.encodeIfPresent(arrayContext.minItems, forKey: .minItems)
+            try container.encodeIfPresent(arrayContext.uniqueItems, forKey: . uniqueItems)
 
         case .object(_, let objectContext):
             try encodeGeneralProperties(for: .object, to: encoder)
 
             var container = encoder.container(keyedBy: ObjectCodingKeys.self)
-            try objectContext.maxProperties.encodeIfNotNil(to: &container, forKey: .maxProperties)
-            try objectContext.minProperties.encodeIfNotNil(to: &container, forKey: .minProperties)
-            try objectContext.properties.encodeIfNotNil(to: &container, forKey: .properties)
-            try objectContext.additionalProperties.encodeIfNotNil(to: &container, forKey: .additionalProperties)
-            try objectContext.required.encodeIfNotNil(to: &container, forKey: .required)
+
+            try container.encodeIfPresent(objectContext.maxProperties, forKey: .maxProperties)
+            try container.encodeIfPresent(objectContext.minProperties, forKey: .minProperties)
+            try container.encodeIfPresent(objectContext.properties, forKey: .properties)
+            try container.encodeIfPresent(objectContext.additionalProperties, forKey: .additionalProperties)
+            try container.encodeIfPresent(objectContext.required, forKey: .required)
         }
     }
 }

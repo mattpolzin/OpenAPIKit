@@ -29,8 +29,7 @@ extension OpenAPI.ExternalDocumentation: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-
+        try container.encodeIfPresent(description, forKey: .description)
         try container.encode(url, forKey: .url)
     }
 }
@@ -40,7 +39,6 @@ extension OpenAPI.ExternalDocumentation: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
-
         url = try container.decode(URL.self, forKey: .url)
     }
 }

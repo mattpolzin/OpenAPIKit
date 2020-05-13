@@ -79,7 +79,7 @@ extension OpenAPI.SecurityScheme: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(description, forKey: .description)
 
         switch type {
         case .apiKey(name: let name, location: let location):
@@ -89,7 +89,7 @@ extension OpenAPI.SecurityScheme: Encodable {
         case .http(scheme: let scheme, bearerFormat: let bearerFormat):
             try container.encode(SecurityType.Name.http, forKey: .type)
             try container.encode(scheme, forKey: .scheme)
-            try bearerFormat.encodeIfNotNil(to: &container, forKey: .bearerFormat)
+            try container.encodeIfPresent(bearerFormat, forKey: .bearerFormat)
         case .openIdConnect(openIdConnectUrl: let url):
             try container.encode(SecurityType.Name.openIdConnect, forKey: .type)
             try container.encode(url, forKey: .openIdConnectUrl)

@@ -379,15 +379,11 @@ extension JSONSchema.Context: Encodable {
             try container.encode(format, forKey: .format)
         }
 
-        try allowedValues.encodeIfNotNil(to: &container, forKey: .allowedValues)
-
-        try title.encodeIfNotNil(to: &container, forKey: .title)
-
-        try description.encodeIfNotNil(to: &container, forKey: .description)
-
-        try discriminator.encodeIfNotNil(to: &container, forKey: .discriminator)
-
-        try externalDocs.encodeIfNotNil(to: &container, forKey: .externalDocs)
+        try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        try container.encodeIfPresent(title, forKey: .title)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(discriminator, forKey: .discriminator)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
 
         // nullable is false if omitted
         if nullable {
@@ -407,7 +403,7 @@ extension JSONSchema.Context: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try example.encodeIfNotNil(to: &container, forKey: .example)
+        try container.encodeIfPresent(example, forKey: .example)
     }
 }
 
@@ -424,17 +420,14 @@ extension JSONSchema.Context: Decodable {
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
-
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
-
         nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
 
         let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly) ?? false
         let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly) ?? false
+
         switch (readOnly, writeOnly) {
         case (false, false):
             permissions = .readWrite
@@ -451,7 +444,6 @@ extension JSONSchema.Context: Decodable {
         }
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
-
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
     }
 }
@@ -470,7 +462,7 @@ extension JSONSchema.NumericContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
+        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
 
         if let max = maximum {
             try container.encode(max.value, forKey: .maximum)
@@ -518,7 +510,7 @@ extension JSONSchema.IntegerContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try multipleOf.encodeIfNotNil(to: &container, forKey: .multipleOf)
+        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
 
         if let max = maximum {
             try container.encode(max.value, forKey: .maximum)
@@ -587,13 +579,13 @@ extension JSONSchema.StringContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try maxLength.encodeIfNotNil(to: &container, forKey: .maxLength)
+        try container.encodeIfPresent(maxLength, forKey: .maxLength)
 
         if minLength > 0 {
             try container.encode(minLength, forKey: .minLength)
         }
 
-        try pattern.encodeIfNotNil(to: &container, forKey: .pattern)
+        try container.encodeIfPresent(pattern, forKey: .pattern)
     }
 }
 
@@ -620,9 +612,8 @@ extension JSONSchema.ArrayContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try items.encodeIfNotNil(to: &container, forKey: .items)
-
-        try maxItems.encodeIfNotNil(to: &container, forKey: .maxItems)
+        try container.encodeIfPresent(items, forKey: .items)
+        try container.encodeIfPresent(maxItems, forKey: .maxItems)
 
         if minItems > 0 {
             // omission is the same as 0
@@ -661,13 +652,13 @@ extension JSONSchema.ObjectContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try maxProperties.encodeIfNotNil(to: &container, forKey: .maxProperties)
+        try container.encodeIfPresent(maxProperties, forKey: .maxProperties)
 
         if properties.count > 0 {
             try container.encode(properties, forKey: .properties)
         }
 
-        try additionalProperties.encodeIfNotNil(to: &container, forKey: .additionalProperties)
+        try container.encodeIfPresent(additionalProperties, forKey: .additionalProperties)
 
         if !requiredProperties.isEmpty {
             try container.encode(requiredProperties, forKey: .required)

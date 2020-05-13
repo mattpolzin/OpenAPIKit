@@ -30,8 +30,7 @@ extension OpenAPI.Discriminator: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(propertyName, forKey: .propertyName)
-
-        try mapping.encodeIfNotNil(to: &container, forKey: .mapping)
+        try container.encodeIfPresent(mapping, forKey: .mapping)
     }
 }
 
@@ -40,7 +39,6 @@ extension OpenAPI.Discriminator: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         propertyName = try container.decode(String.self, forKey: .propertyName)
-
         mapping = try container.decodeIfPresent([String: String].self, forKey: .mapping)
     }
 }
