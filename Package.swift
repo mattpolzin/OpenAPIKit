@@ -14,7 +14,7 @@ let package = Package(
             targets: ["OpenAPIKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"), // just for tests
+        .package(url: "https://github.com/jpsim/Yams.git", from: "3.0.0"), // just for tests
         .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
     ],
     targets: [
