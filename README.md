@@ -31,9 +31,9 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Components Object (`OpenAPI.Components`)](#components-object-openapicomponents)
 	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
 	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
-	- [Operation Object (`OpenAPI.PathItem.Operation`)](#operation-object-openapipathitemoperation)
+	- [Operation Object (`OpenAPI.Operation`)](#operation-object-openapipathitemoperation)
 	- [External Document Object (`OpenAPI.ExternalDoc`)](#external-document-object-openapiexternaldoc)
-	- [Parameter Object (`OpenAPI.PathItem.Parameter`)](#parameter-object-openapipathitemparameter)
+	- [Parameter Object (`OpenAPI.Parameter`)](#parameter-object-openapipathitemparameter)
 	- [Request Body Object (`OpenAPI.Request`)](#request-body-object-openapirequest)
 	- [Media Type Object (`OpenAPI.Content`)](#media-type-object-openapicontent)
 	- [Encoding Object (`OpenAPI.Content.Encoding`)](#encoding-object-openapicontentencoding)
@@ -101,10 +101,10 @@ The types used by this library largely mirror the object definitions found in th
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
 
 #### Routes
-Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of this dictionary are the paths for each route (i.e. `/widgets`). The values of this dictionary are `OpenAPI.PathItems` which define any combination of endpoints (i.e. `GET`, `POST`, `PATCH`, etc.) that the given route supports.
+Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of this dictionary are the paths for each route (i.e. `/widgets`). The values of this dictionary are `OpenAPI.PathItems` which define any combination of endpoints (i.e. `GET`, `POST`, `PATCH`, etc.) that the given route supports. In addition to accessing endpoints on a path item under the name of the method (`.get`, `.post`, etc.), you can get an array of pairs matching endpoint methods to operations with the `.endpoints` method on `PathItem`.
 
 #### Endpoints
-Each endpoint on a route is defined by an `OpenAPI.PathItem.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
+Each endpoint on a route is defined by an `OpenAPI.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
 
 #### Request/Response Bodies
 Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the `JSONSchema` type for such schema definitions.
@@ -183,7 +183,7 @@ For example,
 let apiDoc: OpenAPI.Document = ...
 let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
 
-let addBooksParameters: [OpenAPI.PathItem.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+let addBooksParameters: [OpenAPI.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
 ```
 
 ## Notes
@@ -275,7 +275,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] trace
 - [x] specification extensions (`vendorExtensions`)
 
-### Operation Object (`OpenAPI.PathItem.Operation`)
+### Operation Object (`OpenAPI.Operation`)
 - [x] tags
 - [x] summary
 - [x] description
@@ -295,7 +295,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] url
 - [ ] specification extensions
 
-### Parameter Object (`OpenAPI.PathItem.Parameter`)
+### Parameter Object (`OpenAPI.Parameter`)
 - [x] name
 - [x] in (`context`)
 - [x] description
@@ -387,7 +387,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] local (same file) reference (`internal` case)
         - [x] encode
         - [x] decode
-        - [ ] dereference
+        - [x] dereference
     - [x] remote (different file) reference (`external` case)
         - [x] encode
         - [x] decode
@@ -396,7 +396,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 ### Schema Object (`JSONSchema`)
 - [x] Mostly complete support for JSON Schema inherited keywords
 - [x] nullable
-- [ ] discriminator
+- [x] discriminator
 - [x] readOnly (`permissions` `.readOnly` case)
 - [x] writeOnly (`permissions` `.writeOnly` case)
 - [ ] xml

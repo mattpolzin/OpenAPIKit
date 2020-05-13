@@ -139,7 +139,7 @@ extension OpenAPI {
 
 extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
-    public func `for`(_ verb: OpenAPI.HttpVerb) -> Operation? {
+    public func `for`(_ verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
         switch verb {
         case .delete:
             return self.delete
@@ -161,7 +161,7 @@ extension OpenAPI.PathItem {
     }
 
     /// Set the operation for the given verb, overwriting any already set operation for the same verb.
-    public mutating func set(operation: Operation?, for verb: OpenAPI.HttpVerb) {
+    public mutating func set(operation: OpenAPI.Operation?, for verb: OpenAPI.HttpMethod) {
         switch verb {
         case .delete:
             self.delete(operation)
@@ -182,7 +182,7 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public subscript(verb: OpenAPI.HttpVerb) -> Operation? {
+    public subscript(verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
         get {
             return `for`(verb)
         }
@@ -191,15 +191,20 @@ extension OpenAPI.PathItem {
         }
     }
 
-    public typealias Endpoint = (verb: OpenAPI.HttpVerb, operation: OpenAPI.PathItem.Operation)
+    /// An `Endpoint` is the combination of an
+    /// HTTP method and an operation.
+    public struct Endpoint: Equatable {
+        public let method: OpenAPI.HttpMethod
+        public let operation: OpenAPI.Operation
+    }
 
     /// Get all endpoints defined at this path.
     ///
-    /// - Returns: An array of tuples with the verb (i.e. `.get`) and the operation for
-    ///     the verb.
+    /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
+    ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpVerb.allCases.compactMap { verb in
-            self.for(verb).map { (verb, $0) }
+        return OpenAPI.HttpMethod.allCases.compactMap { method in
+            self.for(method).map { .init(method: method, operation: $0) }
         }
     }
 }
@@ -262,16 +267,16 @@ extension OpenAPI.PathItem: Decodable {
 
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers)
 
-            parameters = try container.decodeIfPresent(Parameter.Array.self, forKey: .parameters) ?? []
+            parameters = try container.decodeIfPresent(OpenAPI.Parameter.Array.self, forKey: .parameters) ?? []
 
-            get = try container.decodeIfPresent(Operation.self, forKey: .get)
-            put = try container.decodeIfPresent(Operation.self, forKey: .put)
-            post = try container.decodeIfPresent(Operation.self, forKey: .post)
-            delete = try container.decodeIfPresent(Operation.self, forKey: .delete)
-            options = try container.decodeIfPresent(Operation.self, forKey: .options)
-            head = try container.decodeIfPresent(Operation.self, forKey: .head)
-            patch = try container.decodeIfPresent(Operation.self, forKey: .patch)
-            trace = try container.decodeIfPresent(Operation.self, forKey: .trace)
+            get = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .get)
+            put = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .put)
+            post = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .post)
+            delete = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .delete)
+            options = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .options)
+            head = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .head)
+            patch = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .patch)
+            trace = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .trace)
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {

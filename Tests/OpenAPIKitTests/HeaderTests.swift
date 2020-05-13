@@ -41,21 +41,21 @@ final class HeaderTests: XCTestCase {
         let t8 = OpenAPI.Header(content: contentMap, deprecated: true)
         XCTAssertTrue(t8.deprecated)
 
-        let t9 = OpenAPI.Header(schema: OpenAPI.Header.Schema.header(.string))
+        let t9 = OpenAPI.Header(schema: OpenAPI.Header.SchemaContext.header(.string))
         XCTAssertEqual(t9, t3)
     }
 
     func test_headerSchemaInits() {
-        let t1 = OpenAPI.Header.Schema.header(.string)
+        let t1 = OpenAPI.Header.SchemaContext.header(.string)
         XCTAssertEqual(t1.style, .default(for: .header))
 
-        let t2 = OpenAPI.Header.Schema.header(.string, examples: nil)
+        let t2 = OpenAPI.Header.SchemaContext.header(.string, examples: nil)
         XCTAssertEqual(t2.style, .default(for: .header))
 
-        let t3 = OpenAPI.Header.Schema.header(schemaReference: .external(URL(string: "hello.yml")!))
+        let t3 = OpenAPI.Header.SchemaContext.header(schemaReference: .external(URL(string: "hello.yml")!))
         XCTAssertEqual(t3.style, .default(for: .header))
 
-        let t4 = OpenAPI.Header.Schema.header(schemaReference: .external(URL(string: "hello.yml")!), examples: nil)
+        let t4 = OpenAPI.Header.SchemaContext.header(schemaReference: .external(URL(string: "hello.yml")!), examples: nil)
         XCTAssertEqual(t4.style, .default(for: .header))
     }
 }

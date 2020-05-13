@@ -9,7 +9,7 @@ import Foundation
 
 extension OpenAPI.Error.Decoding {
     public struct Operation: OpenAPIError {
-        public let endpoint: OpenAPI.HttpVerb
+        public let endpoint: OpenAPI.HttpMethod
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
@@ -78,7 +78,7 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(_ error: OpenAPI.Error.Decoding.Request) {
         var codingPath = error.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
         context = .request(error)
@@ -88,7 +88,7 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(_ error: OpenAPI.Error.Decoding.Response) {
         var codingPath = error.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
         context = .response(error)
@@ -98,7 +98,7 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(_ error: InconsistencyError) {
         var codingPath = error.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
         context = .inconsistency(error)
@@ -108,7 +108,7 @@ extension OpenAPI.Error.Decoding.Operation {
     internal init(_ error: Swift.DecodingError) {
         var codingPath = error.codingPathWithoutSubject.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
         context = .other(error)
@@ -123,7 +123,7 @@ extension OpenAPI.Error.Decoding.Operation {
 
         var codingPath = eitherError.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
-        let verb = OpenAPI.HttpVerb(rawValue: codingPath.removeFirst().stringValue.uppercased())!
+        let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
 
         endpoint = verb
         context = .neither(eitherError)

@@ -41,6 +41,10 @@ class AnyCodableTests: XCTestCase {
         XCTAssertNotEqual(AnyCodable(()), AnyCodable(true))
     }
 
+    func testVoidDescription() {
+        XCTAssertEqual(String(describing: AnyCodable(Void())), "nil")
+    }
+
     func testJSONDecoding() throws {
         let json = """
         {

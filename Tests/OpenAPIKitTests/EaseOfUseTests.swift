@@ -160,7 +160,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             variables: [:]
         )
 
-        let testSHOW_endpoint = OpenAPI.PathItem.Operation(
+        let testSHOW_endpoint = OpenAPI.Operation(
             tags: "Test",
             summary: "Get Test",
             description: "Get Test description",
@@ -194,7 +194,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             ]
         )
 
-        let testCREATE_endpoint = OpenAPI.PathItem.Operation(
+        let testCREATE_endpoint = OpenAPI.Operation(
             tags: "Test",
             summary: "Post Test",
             description: "Post Test description",
@@ -412,7 +412,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     summary: "Say hello",
-                    get: OpenAPI.PathItem.Operation(
+                    get: OpenAPI.Operation(
                         tags: ["Greetings"],
                         summary: "Get a greeting",
                         description: "An endpoint that says hello to you.",
@@ -425,4 +425,151 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             components: components
         )
     }
+
+    func test_getAllEndpoints() {
+        let document = testDocument
+
+        // get endpoints for each path
+        let endpoints = document.paths.mapValues { $0.endpoints }
+
+        // count endpoints by HTTP method
+        let endpointMethods = endpoints.values.flatMap { $0 }.map { $0.method }
+        let countByMethod = Dictionary(grouping: endpointMethods, by: { $0 }).mapValues { $0.count }
+        XCTAssertEqual(countByMethod[.get], 2)
+        XCTAssertEqual(countByMethod[.post], 1)
+    }
+
+    func test_resolveSecurity() {
+        let document = testDocument
+
+        let securityForAllEndpoints = document.security.first?.first
+        let authForAllEndpoints = securityForAllEndpoints.flatMap { document.components[$0.key] }
+        let scopesForAllEndpoints = securityForAllEndpoints?.value
+
+        XCTAssertEqual(authForAllEndpoints?.type.name, .oauth2)
+        XCTAssertEqual(scopesForAllEndpoints, ["widget:read", "widget:write"])
+    }
+
+    func test_getResponseSchema() {
+        let document = testDocument
+
+        let endpoint = document.paths["/widgets/{id}"]?.get
+        let response = endpoint?.responses[.status(code: 200)]?.responseValue
+        let responseSchemaReference = response?.content[.json]?.schema
+        // this response schema is a reference found in the Components Object. We dereference
+        // it to get at the schema.
+        let responseSchema = responseSchemaReference.flatMap(document.components.dereference)
+
+        XCTAssertEqual(responseSchema, .object(properties: [ "partNumber": .integer, "description": .string ]))
+    }
+
+    func test_getRequestSchema() {
+        let document = testDocument
+
+        let endpoint = document.paths["/widgets/{id}"]?.post
+        let request = endpoint?.requestBody?.requestValue
+        let requestSchemaReference = request?.content[.json]?.schema
+        // this request schema is defined inline but dereferencing still produces the schema
+        // (dereferencing is just a no-op in this case).
+        let requestSchema = requestSchemaReference.flatMap(document.components.dereference)
+
+        XCTAssertEqual(requestSchema, .object(properties: [ "description": .string ]))
+    }
 }
+
+fileprivate let testWidgetSchema = JSONSchema.object(
+    properties: [
+        "partNumber": .integer,
+        "description": .string
+    ]
+)
+
+fileprivate let testComponents = OpenAPI.Components(
+    schemas: [
+        "testWidgetSchema": testWidgetSchema
+    ],
+    securitySchemes: [
+        "oauth": .oauth2(
+            flows: .init(
+                clientCredentials: .init(
+                    tokenUrl: URL(string: "http://website.com/token")!,
+                    scopes: [ "widget:read": "", "widget:write": "" ]
+                )
+            )
+        )
+    ]
+)
+
+fileprivate let testInfo = OpenAPI.Document.Info(title: "Test API", version: "1.0")
+
+fileprivate let testServer = OpenAPI.Server(url: URL(string: "http://website.com")!)
+
+fileprivate let testDocument =  OpenAPI.Document(
+    openAPIVersion: .v3_0_3,
+    info: testInfo,
+    servers: [testServer],
+    paths: [
+        "/widgets/{id}": OpenAPI.PathItem(
+            parameters: [
+                .parameter(
+                    name: "id",
+                    context: .path,
+                    schema: .string
+                )
+            ],
+            get: OpenAPI.Operation(
+                tags: "Widgets",
+                summary: "Get a widget",
+                responses: [
+                    200: .response(
+                        description: "A single widget",
+                        content: [
+                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                        ]
+                    )
+                ]
+            ),
+            post: OpenAPI.Operation(
+                tags: "Widgets",
+                summary: "Create a new widget",
+                description: "Create a new widget by adding a description. The created widget will be returned in the response body including a new part number.",
+                requestBody: OpenAPI.Request(
+                    content: [
+                        .json: .init(
+                            schema: JSONSchema.object(
+                                properties: [
+                                    "description": .string
+                                ]
+                            )
+                        )
+                    ]
+                ),
+                responses: [
+                    201: .response(
+                        description: "The newly created widget",
+                        content: [
+                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                        ]
+                    )
+                ]
+            )
+        ),
+        "/docs": OpenAPI.PathItem(
+            get: OpenAPI.Operation(
+                tags: "Documentation",
+                responses: [
+                    200: .response(
+                        description: "Get documentation on this API.",
+                        content: [
+                            .html: .init(schema: .string)
+                        ]
+                    )
+                ]
+            )
+        )
+    ],
+    components: testComponents,
+    security: [
+        [.component(named: "oauth"): ["widget:read", "widget:write"]]
+    ]
+)

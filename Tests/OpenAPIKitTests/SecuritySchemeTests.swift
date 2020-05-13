@@ -33,6 +33,28 @@ final class SecuritySchemeTests: XCTestCase {
             OpenAPI.SecurityScheme.openIdConnect(url: URL(string: "https://google.com")!, description: "description")
         )
     }
+
+    func test_names() {
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .apiKey(name: "hi", location: .header), description: "description").type.name,
+            .apiKey
+        )
+
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .http(scheme: "hi", bearerFormat: "there"), description: "description").type.name,
+            .http
+        )
+
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .oauth2(flows: .init()), description: "description").type.name,
+            .oauth2
+        )
+
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .openIdConnect(openIdConnectUrl: URL(string: "https://google.com")!), description: "description").type.name,
+            .openIdConnect
+        )
+    }
 }
 
 // MARK: - Codable
