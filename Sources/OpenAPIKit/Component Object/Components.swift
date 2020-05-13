@@ -199,7 +199,7 @@ extension OpenAPI.Components {
         case examples
         case requestBodies
         case headers
-         case securitySchemes
+        case securitySchemes
         // case links
         // case callbacks
 
