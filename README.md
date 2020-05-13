@@ -387,7 +387,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] local (same file) reference (`internal` case)
         - [x] encode
         - [x] decode
-        - [ ] dereference
+        - [x] dereference
     - [x] remote (different file) reference (`external` case)
         - [x] encode
         - [x] decode
