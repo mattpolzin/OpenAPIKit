@@ -327,6 +327,11 @@ extension JSONSchema {
             }.keys)
         }
 
+        /// The minimum number of properties allowed.
+        ///
+        /// This might constradict a value explicitly specified on initialization
+        /// or when decoding if the number of required properties is greater
+        /// than the explicitly set minimum.
         public var minProperties: Int {
             return max(_minProperties, requiredProperties.count)
         }

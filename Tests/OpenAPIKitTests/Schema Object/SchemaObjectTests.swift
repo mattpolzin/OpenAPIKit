@@ -832,32 +832,43 @@ extension SchemaObjectTests {
         let deprecatedBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, deprecated: true))
         let allowedValueBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(allowedValues: [true])
+        let discriminatorBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")))
 
-        testAllSharedSimpleContextEncoding(typeName: "boolean",
-                                           requiredEntity: requiredBoolean,
-                                           optionalEntity: optionalBoolean,
-                                           nullableEntity: nullableBoolean,
-                                           readOnlyEntity: readOnlyBoolean,
-                                           writeOnlyEntity: writeOnlyBoolean,
-                                           deprecatedEntity: deprecatedBoolean,
-                                           allowedValues: (entity: allowedValueBoolean,
-                                                           value: "true"))
+        testAllSharedSimpleContextEncoding(
+            typeName: "boolean",
+            requiredEntity: requiredBoolean,
+            optionalEntity: optionalBoolean,
+            nullableEntity: nullableBoolean,
+            readOnlyEntity: readOnlyBoolean,
+            writeOnlyEntity: writeOnlyBoolean,
+            deprecatedEntity: deprecatedBoolean,
+            allowedValues: (
+                entity: allowedValueBoolean,
+                value: "true"
+            ),
+            discriminator: (
+                entity: discriminatorBoolean,
+                name: "hello"
+            )
+        )
     }
 
-    func test_decodeBoolean() {
+    func test_decodeBoolean() throws {
         let booleanData = #"{"type": "boolean"}"#.data(using: .utf8)!
         let nullableBooleanData = #"{"type": "boolean", "nullable": true}"#.data(using: .utf8)!
         let readOnlyBooleanData = #"{"type": "boolean", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyBooleanData = #"{"type": "boolean", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedBooleanData = #"{"type": "boolean", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueBooleanData = #"{"type": "boolean", "enum": [false]}"#.data(using: .utf8)!
+        let discriminatorBooleanData = #"{"type": "boolean", "discriminator": { "propertyName": "hello" }}"#.data(using: .utf8)!
 
-        let boolean = try! testDecoder.decode(JSONSchema.self, from: booleanData)
-        let nullableBoolean = try! testDecoder.decode(JSONSchema.self, from: nullableBooleanData)
-        let readOnlyBoolean = try! testDecoder.decode(JSONSchema.self, from: readOnlyBooleanData)
-        let writeOnlyBoolean = try! testDecoder.decode(JSONSchema.self, from: writeOnlyBooleanData)
-        let deprecatedBoolean = try! testDecoder.decode(JSONSchema.self, from: deprecatedBooleanData)
-        let allowedValueBoolean = try! testDecoder.decode(JSONSchema.self, from: allowedValueBooleanData)
+        let boolean = try testDecoder.decode(JSONSchema.self, from: booleanData)
+        let nullableBoolean = try testDecoder.decode(JSONSchema.self, from: nullableBooleanData)
+        let readOnlyBoolean = try testDecoder.decode(JSONSchema.self, from: readOnlyBooleanData)
+        let writeOnlyBoolean = try testDecoder.decode(JSONSchema.self, from: writeOnlyBooleanData)
+        let deprecatedBoolean = try testDecoder.decode(JSONSchema.self, from: deprecatedBooleanData)
+        let allowedValueBoolean = try testDecoder.decode(JSONSchema.self, from: allowedValueBooleanData)
+        let discriminatorBoolean = try testDecoder.decode(JSONSchema.self, from: discriminatorBooleanData)
 
         XCTAssertEqual(boolean, JSONSchema.boolean(.init(format: .generic, required: false)))
         XCTAssertEqual(nullableBoolean, JSONSchema.boolean(.init(format: .generic, required: false, nullable: true)))
@@ -865,6 +876,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyBoolean, JSONSchema.boolean(.init(format: .generic, required: false, permissions: .writeOnly)))
         XCTAssertEqual(deprecatedBoolean, JSONSchema.boolean(.init(format: .generic, required: false, deprecated: true)))
         XCTAssertEqual(allowedValueBoolean, JSONSchema.boolean(.init(format: .generic, required: false, allowedValues: [false])))
+        XCTAssertEqual(discriminatorBoolean, JSONSchema.boolean(.init(format: .generic, required: false, discriminator: .init(propertyName: "hello"))))
     }
 
     func test_encodeObject() {
@@ -892,88 +904,113 @@ extension SchemaObjectTests {
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
+        let discriminatorObject = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init(properties: [:]))
 
-        testEncodingPropertyLines(entity: requiredObject,
-                                  propertyLines: [
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: requiredObject,
+            propertyLines: [
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
 
-        testEncodingPropertyLines(entity: optionalObject,
-                                  propertyLines: [
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: optionalObject,
+            propertyLines: [
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
 
-        testEncodingPropertyLines(entity: nullableObject,
-                                  propertyLines: [
-                                    "\"nullable\" : true,",
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: nullableObject,
+            propertyLines: [
+                "\"nullable\" : true,",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
 
-        testEncodingPropertyLines(entity: readOnlyObject,
-                                  propertyLines: [
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"readOnly\" : true,",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: readOnlyObject,
+            propertyLines: [
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"readOnly\" : true,",
+                "\"type\" : \"object\""
+            ]
+        )
 
-        testEncodingPropertyLines(entity: writeOnlyObject,
-                                  propertyLines: [
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\",",
-                                    "\"writeOnly\" : true"
-        ])
+        testEncodingPropertyLines(
+            entity: writeOnlyObject,
+            propertyLines: [
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\",",
+                "\"writeOnly\" : true"
+            ]
+        )
 
-        testEncodingPropertyLines(entity: deprecatedObject,
-                                  propertyLines: [
-                                    "\"deprecated\" : true,",
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: deprecatedObject,
+            propertyLines: [
+                "\"deprecated\" : true,",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
 
-        testEncodingPropertyLines(entity: allowedValueObject,
-                                  propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
-                                    "\"properties\" : {",
-                                    "  \"hello\" : {",
-                                    "    \"type\" : \"boolean\"",
-                                    "  }",
-                                    "},",
-                                    "\"type\" : \"object\""
-        ])
+        testEncodingPropertyLines(
+            entity: allowedValueObject,
+            propertyLines: [
+                "\"enum\" : [",
+                "  {",
+                "    \"hello\" : false",
+                "  }",
+                "],",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: discriminatorObject,
+            propertyLines: [
+                "\"discriminator\" : {",
+                "  \"propertyName\" : \"hello\"",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
     }
 
-    func test_decodeObject() {
+    func test_decodeObject() throws {
         let objectData = """
         {
             "type": "object"
@@ -1010,13 +1047,20 @@ extension SchemaObjectTests {
             "enum": [{"hello": false}]
         }
         """.data(using: .utf8)!
+        let discriminatorObjectData = """
+        {
+            "type": "object",
+            "discriminator": {"propertyName": "hello"}
+        }
+        """.data(using: .utf8)!
 
-        let object = try! testDecoder.decode(JSONSchema.self, from: objectData)
-        let nullableObject = try! testDecoder.decode(JSONSchema.self, from: nullableObjectData)
-        let readOnlyObject = try! testDecoder.decode(JSONSchema.self, from: readOnlyObjectData)
-        let writeOnlyObject = try! testDecoder.decode(JSONSchema.self, from: writeOnlyObjectData)
-        let deprecatedObject = try! testDecoder.decode(JSONSchema.self, from: deprecatedObjectData)
-        let allowedValueObject = try! testDecoder.decode(JSONSchema.self, from: allowedValueObjectData)
+        let object = try testDecoder.decode(JSONSchema.self, from: objectData)
+        let nullableObject = try testDecoder.decode(JSONSchema.self, from: nullableObjectData)
+        let readOnlyObject = try testDecoder.decode(JSONSchema.self, from: readOnlyObjectData)
+        let writeOnlyObject = try testDecoder.decode(JSONSchema.self, from: writeOnlyObjectData)
+        let deprecatedObject = try testDecoder.decode(JSONSchema.self, from: deprecatedObjectData)
+        let allowedValueObject = try testDecoder.decode(JSONSchema.self, from: allowedValueObjectData)
+        let discriminatorObject = try testDecoder.decode(JSONSchema.self, from: discriminatorObjectData)
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, required: false), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, required: false, nullable: true), .init(properties: [:])))
@@ -1025,6 +1069,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, required: false, deprecated: true), .init(properties: [:])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
+        XCTAssertEqual(discriminatorObject, JSONSchema.object(required: false, discriminator: .init(propertyName: "hello")))
 
         guard case let .object(_, contextB) = allowedValueObject else {
             XCTFail("expected object to be parsed as object")
@@ -2152,32 +2197,43 @@ extension SchemaObjectTests {
         let deprecatedArray = JSONSchema.array(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueArray = JSONSchema.array(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [[10]])
+        let discriminatorArray = JSONSchema.array(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init())
 
-        testAllSharedSimpleContextEncoding(typeName: "array",
-                                           requiredEntity: requiredArray,
-                                           optionalEntity: optionalArray,
-                                           nullableEntity: nullableArray,
-                                           readOnlyEntity: readOnlyArray,
-                                           writeOnlyEntity: writeOnlyArray,
-                                           deprecatedEntity: deprecatedArray,
-                                           allowedValues: (entity: allowedValueArray,
-                                                           value: "[\n      10\n    ]"))
+        testAllSharedSimpleContextEncoding(
+            typeName: "array",
+            requiredEntity: requiredArray,
+            optionalEntity: optionalArray,
+            nullableEntity: nullableArray,
+            readOnlyEntity: readOnlyArray,
+            writeOnlyEntity: writeOnlyArray,
+            deprecatedEntity: deprecatedArray,
+            allowedValues: (
+                entity: allowedValueArray,
+                value: "[\n      10\n    ]"
+            ),
+            discriminator: (
+                entity: discriminatorArray,
+                name: "hello"
+            )
+        )
     }
 
-    func test_decodeArray() {
+    func test_decodeArray() throws {
         let arrayData = #"{"type": "array"}"#.data(using: .utf8)!
         let nullableArrayData = #"{"type": "array", "nullable": true}"#.data(using: .utf8)!
         let readOnlyArrayData = #"{"type": "array", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyArrayData = #"{"type": "array", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedArrayData = #"{"type": "array", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
+        let discriminatorArrayData = #"{"type": "array", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
 
-        let array = try! testDecoder.decode(JSONSchema.self, from: arrayData)
-        let nullableArray = try! testDecoder.decode(JSONSchema.self, from: nullableArrayData)
-        let readOnlyArray = try! testDecoder.decode(JSONSchema.self, from: readOnlyArrayData)
-        let writeOnlyArray = try! testDecoder.decode(JSONSchema.self, from: writeOnlyArrayData)
-        let deprecatedArray = try! testDecoder.decode(JSONSchema.self, from: deprecatedArrayData)
-        let allowedValueArray = try! testDecoder.decode(JSONSchema.self, from: allowedValueArrayData)
+        let array = try testDecoder.decode(JSONSchema.self, from: arrayData)
+        let nullableArray = try testDecoder.decode(JSONSchema.self, from: nullableArrayData)
+        let readOnlyArray = try testDecoder.decode(JSONSchema.self, from: readOnlyArrayData)
+        let writeOnlyArray = try testDecoder.decode(JSONSchema.self, from: writeOnlyArrayData)
+        let deprecatedArray = try testDecoder.decode(JSONSchema.self, from: deprecatedArrayData)
+        let allowedValueArray = try testDecoder.decode(JSONSchema.self, from: allowedValueArrayData)
+        let discriminatorArray = try testDecoder.decode(JSONSchema.self, from: discriminatorArrayData)
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, required: false, nullable: true), .init()))
@@ -2185,6 +2241,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyArray, JSONSchema.array(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedArray, JSONSchema.array(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(discriminatorArray, JSONSchema.array(required: false, discriminator: .init(propertyName: "hello")))
 
         guard case let .array(_, contextB) = allowedValueArray else {
             XCTFail("expected array")
@@ -2472,32 +2529,43 @@ extension SchemaObjectTests {
         let deprecatedNumber = JSONSchema.number(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueNumber = JSONSchema.number(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [10.5])
+        let discriminatorNumber = JSONSchema.number(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init())
 
-        testAllSharedSimpleContextEncoding(typeName: "number",
-                                           requiredEntity: requiredNumber,
-                                           optionalEntity: optionalNumber,
-                                           nullableEntity: nullableNumber,
-                                           readOnlyEntity: readOnlyNumber,
-                                           writeOnlyEntity: writeOnlyNumber,
-                                           deprecatedEntity: deprecatedNumber,
-                                           allowedValues: (entity: allowedValueNumber,
-                                                           value: "10.5"))
+        testAllSharedSimpleContextEncoding(
+            typeName: "number",
+            requiredEntity: requiredNumber,
+            optionalEntity: optionalNumber,
+            nullableEntity: nullableNumber,
+            readOnlyEntity: readOnlyNumber,
+            writeOnlyEntity: writeOnlyNumber,
+            deprecatedEntity: deprecatedNumber,
+            allowedValues: (
+                entity: allowedValueNumber,
+                value: "10.5"
+            ),
+            discriminator: (
+                entity: discriminatorNumber,
+                name: "hello"
+            )
+        )
     }
 
-    func test_decodeNumber() {
+    func test_decodeNumber() throws {
         let numberData = #"{"type": "number"}"#.data(using: .utf8)!
         let nullableNumberData = #"{"type": "number", "nullable": true}"#.data(using: .utf8)!
         let readOnlyNumberData = #"{"type": "number", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyNumberData = #"{"type": "number", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedNumberData = #"{"type": "number", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "enum": [1, 2]}"#.data(using: .utf8)!
+        let discriminatorNumberData = #"{"type": "number", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
 
-        let number = try! testDecoder.decode(JSONSchema.self, from: numberData)
-        let nullableNumber = try! testDecoder.decode(JSONSchema.self, from: nullableNumberData)
-        let readOnlyNumber = try! testDecoder.decode(JSONSchema.self, from: readOnlyNumberData)
-        let writeOnlyNumber = try! testDecoder.decode(JSONSchema.self, from: writeOnlyNumberData)
-        let deprecatedNumber = try! testDecoder.decode(JSONSchema.self, from: deprecatedNumberData)
-        let allowedValueNumber = try! testDecoder.decode(JSONSchema.self, from: allowedValueNumberData)
+        let number = try testDecoder.decode(JSONSchema.self, from: numberData)
+        let nullableNumber = try testDecoder.decode(JSONSchema.self, from: nullableNumberData)
+        let readOnlyNumber = try testDecoder.decode(JSONSchema.self, from: readOnlyNumberData)
+        let writeOnlyNumber = try testDecoder.decode(JSONSchema.self, from: writeOnlyNumberData)
+        let deprecatedNumber = try testDecoder.decode(JSONSchema.self, from: deprecatedNumberData)
+        let allowedValueNumber = try testDecoder.decode(JSONSchema.self, from: allowedValueNumberData)
+        let discriminatorNumber = try testDecoder.decode(JSONSchema.self, from: discriminatorNumberData)
 
         XCTAssertEqual(number, JSONSchema.number(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableNumber, JSONSchema.number(.init(format: .generic, required: false, nullable: true), .init()))
@@ -2505,6 +2573,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyNumber, JSONSchema.number(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedNumber, JSONSchema.number(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueNumber, JSONSchema.number(.init(format: .generic, required: false, allowedValues: [1, 2]), .init()))
+        XCTAssertEqual(discriminatorNumber, JSONSchema.number(required: false, discriminator: .init(propertyName: "hello")))
     }
 
     func test_decodeNumberWithTypeInferred() throws {
@@ -2862,32 +2931,43 @@ extension SchemaObjectTests {
         let deprecatedInteger = JSONSchema.integer(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueInteger = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: [10])
+        let discriminatorInteger = JSONSchema.integer(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init())
 
-        testAllSharedSimpleContextEncoding(typeName: "integer",
-                                           requiredEntity: requiredInteger,
-                                           optionalEntity: optionalInteger,
-                                           nullableEntity: nullableInteger,
-                                           readOnlyEntity: readOnlyInteger,
-                                           writeOnlyEntity: writeOnlyInteger,
-                                           deprecatedEntity: deprecatedInteger,
-                                           allowedValues: (entity: allowedValueInteger,
-                                                           value: "10"))
+        testAllSharedSimpleContextEncoding(
+            typeName: "integer",
+            requiredEntity: requiredInteger,
+            optionalEntity: optionalInteger,
+            nullableEntity: nullableInteger,
+            readOnlyEntity: readOnlyInteger,
+            writeOnlyEntity: writeOnlyInteger,
+            deprecatedEntity: deprecatedInteger,
+            allowedValues: (
+                entity: allowedValueInteger,
+                value: "10"
+            ),
+            discriminator: (
+                entity: discriminatorInteger,
+                name: "hello"
+            )
+        )
     }
 
-    func test_decodeInteger() {
+    func test_decodeInteger() throws {
         let integerData = #"{"type": "integer"}"#.data(using: .utf8)!
         let nullableIntegerData = #"{"type": "integer", "nullable": true}"#.data(using: .utf8)!
         let readOnlyIntegerData = #"{"type": "integer", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyIntegerData = #"{"type": "integer", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedIntegerData = #"{"type": "integer", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "enum": [1, 2]}"#.data(using: .utf8)!
+        let discriminatorIntegerData = #"{"type": "integer", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
 
-        let integer = try! testDecoder.decode(JSONSchema.self, from: integerData)
-        let nullableInteger = try! testDecoder.decode(JSONSchema.self, from: nullableIntegerData)
-        let readOnlyInteger = try! testDecoder.decode(JSONSchema.self, from: readOnlyIntegerData)
-        let writeOnlyInteger = try! testDecoder.decode(JSONSchema.self, from: writeOnlyIntegerData)
-        let deprecatedInteger = try! testDecoder.decode(JSONSchema.self, from: deprecatedIntegerData)
-        let allowedValueInteger = try! testDecoder.decode(JSONSchema.self, from: allowedValueIntegerData)
+        let integer = try testDecoder.decode(JSONSchema.self, from: integerData)
+        let nullableInteger = try testDecoder.decode(JSONSchema.self, from: nullableIntegerData)
+        let readOnlyInteger = try testDecoder.decode(JSONSchema.self, from: readOnlyIntegerData)
+        let writeOnlyInteger = try testDecoder.decode(JSONSchema.self, from: writeOnlyIntegerData)
+        let deprecatedInteger = try testDecoder.decode(JSONSchema.self, from: deprecatedIntegerData)
+        let allowedValueInteger = try testDecoder.decode(JSONSchema.self, from: allowedValueIntegerData)
+        let discriminatorInteger = try testDecoder.decode(JSONSchema.self, from: discriminatorIntegerData)
 
         XCTAssertEqual(integer, JSONSchema.integer(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableInteger, JSONSchema.integer(.init(format: .generic, required: false, nullable: true), .init()))
@@ -2895,6 +2975,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyInteger, JSONSchema.integer(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedInteger, JSONSchema.integer(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueInteger, JSONSchema.integer(.init(format: .generic, required: false, allowedValues: [1, 2]), .init()))
+        XCTAssertEqual(discriminatorInteger, JSONSchema.integer(required: false, discriminator: .init(propertyName: "hello")))
     }
 
     func test_encode32bitInteger() {
@@ -3242,32 +3323,43 @@ extension SchemaObjectTests {
         let deprecatedString = JSONSchema.string(.init(format: .unspecified, required: true, deprecated: true), .init())
         let allowedValueString = JSONSchema.string(.init(format: .unspecified, required: true), .init())
             .with(allowedValues: ["hello"])
+        let discriminatorString = JSONSchema.string(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init())
 
-        testAllSharedSimpleContextEncoding(typeName: "string",
-                                           requiredEntity: requiredString,
-                                           optionalEntity: optionalString,
-                                           nullableEntity: nullableString,
-                                           readOnlyEntity: readOnlyString,
-                                           writeOnlyEntity: writeOnlyString,
-                                           deprecatedEntity: deprecatedString,
-                                           allowedValues: (entity: allowedValueString,
-                                                           value: "\"hello\""))
+        testAllSharedSimpleContextEncoding(
+            typeName: "string",
+            requiredEntity: requiredString,
+            optionalEntity: optionalString,
+            nullableEntity: nullableString,
+            readOnlyEntity: readOnlyString,
+            writeOnlyEntity: writeOnlyString,
+            deprecatedEntity: deprecatedString,
+            allowedValues: (
+                entity: allowedValueString,
+                value: "\"hello\""
+            ),
+            discriminator: (
+                entity: discriminatorString,
+                name: "hello"
+            )
+        )
     }
 
-    func test_decodeString() {
+    func test_decodeString() throws {
         let stringData = #"{"type": "string"}"#.data(using: .utf8)!
         let nullableStringData = #"{"type": "string", "nullable": true}"#.data(using: .utf8)!
         let readOnlyStringData = #"{"type": "string", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyStringData = #"{"type": "string", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedStringData = #"{"type": "string", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "enum": ["hello"]}"#.data(using: .utf8)!
+        let discriminatorStringData = #"{"type": "string", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
 
-        let string = try! testDecoder.decode(JSONSchema.self, from: stringData)
-        let nullableString = try! testDecoder.decode(JSONSchema.self, from: nullableStringData)
-        let readOnlyString = try! testDecoder.decode(JSONSchema.self, from: readOnlyStringData)
-        let writeOnlyString = try! testDecoder.decode(JSONSchema.self, from: writeOnlyStringData)
-        let deprecatedString = try! testDecoder.decode(JSONSchema.self, from: deprecatedStringData)
-        let allowedValueString = try! testDecoder.decode(JSONSchema.self, from: allowedValueStringData)
+        let string = try testDecoder.decode(JSONSchema.self, from: stringData)
+        let nullableString = try testDecoder.decode(JSONSchema.self, from: nullableStringData)
+        let readOnlyString = try testDecoder.decode(JSONSchema.self, from: readOnlyStringData)
+        let writeOnlyString = try testDecoder.decode(JSONSchema.self, from: writeOnlyStringData)
+        let deprecatedString = try testDecoder.decode(JSONSchema.self, from: deprecatedStringData)
+        let allowedValueString = try testDecoder.decode(JSONSchema.self, from: allowedValueStringData)
+        let discriminatorString = try testDecoder.decode(JSONSchema.self, from: discriminatorStringData)
 
         XCTAssertEqual(string, JSONSchema.string(.init(format: .generic, required: false), .init()))
         XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .generic, required: false, nullable: true), .init()))
@@ -3275,6 +3367,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyString, JSONSchema.string(.init(format: .generic, required: false, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedString, JSONSchema.string(.init(format: .generic, required: false, deprecated: true), .init()))
         XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .generic, required: false, allowedValues: ["hello"]), .init()))
+        XCTAssertEqual(discriminatorString, JSONSchema.string(required: false, discriminator: .init(propertyName: "hello")))
     }
 
     func test_decodeStringWithTypeInferred() throws {
@@ -3628,6 +3721,13 @@ extension SchemaObjectTests {
             .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
             .object(.init(), .init())
         ])
+        let allOfWithDisciminator = JSONSchema.all(
+            of: [
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(), .init())
+            ],
+            discriminator: .init(propertyName: "hello")
+        )
 
         testEncodingPropertyLines(entity: allOf, propertyLines: [
             "\"allOf\" : [",
@@ -3644,9 +3744,28 @@ extension SchemaObjectTests {
             "  }",
             "]"
         ])
+
+        testEncodingPropertyLines(entity: allOfWithDisciminator, propertyLines: [
+            "\"allOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"type\" : \"object\"",
+            "  }",
+            "],",
+            "\"discriminator\" : {",
+            "  \"propertyName\" : \"hello\"",
+            "}"
+        ])
     }
 
-    func test_decodeAll() {
+    func test_decodeAll() throws {
         let allData = """
         {
             "allOf": [
@@ -3656,43 +3775,110 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        let all = try! testDecoder.decode(JSONSchema.self, from: allData)
+        let allWithDiscriminatorData = """
+        {
+            "allOf": [
+                { "type": "object" },
+                { "properties": { "hello": { "type": "boolean" } } }
+            ],
+            "discriminator": { "propertyName": "hello" }
+        }
+        """.data(using: .utf8)!
 
-        XCTAssertEqual(all, JSONSchema.all(of: [
-            .object(.init(), .init()),
-            .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
-        ]))
+        let all = try testDecoder.decode(JSONSchema.self, from: allData)
+        let allWithDiscriminator = try testDecoder.decode(JSONSchema.self, from: allWithDiscriminatorData)
+
+        XCTAssertEqual(
+            all,
+            JSONSchema.all(
+                of: [
+                    .object(.init(), .init()),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            allWithDiscriminator,
+            JSONSchema.all(
+                of: [
+                    .object(.init(), .init()),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ],
+                discriminator: .init(propertyName: "hello")
+            )
+        )
     }
 
     func test_encodeOne() {
-        let oneOf = JSONSchema.one(of: [
-            .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-            .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
-        ])
+        let oneOf = JSONSchema.one(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+            ]
+        )
 
-        testEncodingPropertyLines(entity: oneOf, propertyLines: [
-            "\"oneOf\" : [",
-            "  {",
-            "    \"properties\" : {",
-            "      \"hello\" : {",
-            "        \"type\" : \"string\"",
-            "      }",
-            "    },",
-            "    \"type\" : \"object\"",
-            "  },",
-            "  {",
-            "    \"properties\" : {",
-            "      \"world\" : {",
-            "        \"type\" : \"boolean\"",
-            "      }",
-            "    },",
-            "    \"type\" : \"object\"",
-            "  }",
-            "]"
-        ])
+        let oneOfWithDiscriminator = JSONSchema.one(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+            ],
+            discriminator: .init(propertyName: "hello")
+        )
+
+        testEncodingPropertyLines(
+            entity: oneOf,
+            propertyLines: [
+                "\"oneOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"properties\" : {",
+                "      \"world\" : {",
+                "        \"type\" : \"boolean\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  }",
+                "]"
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: oneOfWithDiscriminator,
+            propertyLines: [
+                "\"discriminator\" : {",
+                "  \"propertyName\" : \"hello\"",
+                "},",
+                "\"oneOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"properties\" : {",
+                "      \"world\" : {",
+                "        \"type\" : \"boolean\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  }",
+                "]"
+            ]
+        )
     }
 
-    func test_decodeOne() {
+    func test_decodeOne() throws {
         let oneData = """
         {
             "oneOf": [
@@ -3702,43 +3888,110 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        let one = try! testDecoder.decode(JSONSchema.self, from: oneData)
+        let oneWithDiscriminatorData = """
+        {
+            "oneOf": [
+                { "type": "object" },
+                { "type": "object", "properties": { "hello": { "type": "boolean" } } }
+            ],
+            "discriminator": { "propertyName": "hello" }
+        }
+        """.data(using: .utf8)!
 
-        XCTAssertEqual(one, JSONSchema.one(of: [
-            .object(.init(format: .generic, required: false), .init(properties: [:])),
-            .object(.init(format: .generic, required: false), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
-        ]))
+        let one = try testDecoder.decode(JSONSchema.self, from: oneData)
+        let oneWithDiscriminator = try testDecoder.decode(JSONSchema.self, from: oneWithDiscriminatorData)
+
+        XCTAssertEqual(
+            one,
+            JSONSchema.one(
+                of: [
+                    .object(.init(format: .generic, required: false), .init(properties: [:])),
+                    .object(.init(format: .generic, required: false), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            oneWithDiscriminator,
+            JSONSchema.one(
+                of: [
+                    .object(.init(format: .generic, required: false), .init(properties: [:])),
+                    .object(.init(format: .generic, required: false), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ],
+                discriminator: .init(propertyName: "hello")
+            )
+        )
     }
 
     func test_encodeAny() {
-        let anyOf = JSONSchema.any(of: [
-            .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-            .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
-        ])
+        let anyOf = JSONSchema.any(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+            ]
+        )
 
-        testEncodingPropertyLines(entity: anyOf, propertyLines: [
-            "\"anyOf\" : [",
-            "  {",
-            "    \"properties\" : {",
-            "      \"hello\" : {",
-            "        \"type\" : \"string\"",
-            "      }",
-            "    },",
-            "    \"type\" : \"object\"",
-            "  },",
-            "  {",
-            "    \"properties\" : {",
-            "      \"world\" : {",
-            "        \"type\" : \"boolean\"",
-            "      }",
-            "    },",
-            "    \"type\" : \"object\"",
-            "  }",
-            "]"
-        ])
+        let anyOfWithDiscriminator = JSONSchema.any(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+            ],
+            discriminator: .init(propertyName: "hello")
+        )
+
+        testEncodingPropertyLines(
+            entity: anyOf,
+            propertyLines: [
+                "\"anyOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"properties\" : {",
+                "      \"world\" : {",
+                "        \"type\" : \"boolean\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  }",
+                "]"
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: anyOfWithDiscriminator,
+            propertyLines: [
+                "\"anyOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"properties\" : {",
+                "      \"world\" : {",
+                "        \"type\" : \"boolean\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  }",
+                "],",
+                "\"discriminator\" : {",
+                "  \"propertyName\" : \"hello\"",
+                "}"
+            ]
+        )
     }
 
-    func test_decodeAny() {
+    func test_decodeAny() throws {
         let anyData = """
         {
             "anyOf": [
@@ -3748,12 +4001,39 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        let any = try! testDecoder.decode(JSONSchema.self, from: anyData)
+        let anyWithDiscriminatorData = """
+        {
+            "anyOf": [
+                { "type": "boolean" },
+                { "type": "object" }
+            ],
+            "discriminator": { "propertyName": "hello" }
+        }
+        """.data(using: .utf8)!
 
-        XCTAssertEqual(any, JSONSchema.any(of: [
-            .boolean(.init(format: .generic, required: false)),
-            .object(.init(format: .generic, required: false), .init(properties: [:]))
-        ]))
+        let any = try testDecoder.decode(JSONSchema.self, from: anyData)
+        let anyWithDiscriminator = try testDecoder.decode(JSONSchema.self, from: anyWithDiscriminatorData)
+
+        XCTAssertEqual(
+            any,
+            JSONSchema.any(
+                of: [
+                    .boolean(.init(format: .generic, required: false)),
+                    .object(.init(format: .generic, required: false), .init(properties: [:]))
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            anyWithDiscriminator,
+            JSONSchema.any(
+                of: [
+                    .boolean(.init(format: .generic, required: false)),
+                    .object(.init(format: .generic, required: false), .init(properties: [:]))
+                ],
+                discriminator: .init(propertyName: "hello")
+            )
+        )
     }
 
     func test_encodeNot() {
@@ -3832,46 +4112,70 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
     readOnlyEntity: T,
     writeOnlyEntity: T,
     deprecatedEntity: T,
-    allowedValues: (entity: T, value: String)
+    allowedValues: (entity: T, value: String),
+    discriminator: (entity: T, name: String)
     ) {
-    testEncodingPropertyLines(entity: requiredEntity,
-                              propertyLines: ["\"type\" : \"\(typeName)\""])
+    testEncodingPropertyLines(
+        entity: requiredEntity,
+        propertyLines: ["\"type\" : \"\(typeName)\""]
+    )
 
-    testEncodingPropertyLines(entity: optionalEntity,
-                              propertyLines: ["\"type\" : \"\(typeName)\""])
+    testEncodingPropertyLines(
+        entity: optionalEntity,
+        propertyLines: ["\"type\" : \"\(typeName)\""]
+    )
 
-    testEncodingPropertyLines(entity: nullableEntity,
-                              propertyLines: [
-                                "\"nullable\" : true,",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: nullableEntity,
+        propertyLines: [
+            "\"nullable\" : true,",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: readOnlyEntity,
-                              propertyLines: [
-                                "\"readOnly\" : true,",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: readOnlyEntity,
+        propertyLines: [
+            "\"readOnly\" : true,",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: writeOnlyEntity,
-                              propertyLines: [
-                                "\"type\" : \"\(typeName)\",",
-                                "\"writeOnly\" : true"
-    ])
+    testEncodingPropertyLines(
+        entity: writeOnlyEntity,
+        propertyLines: [
+            "\"type\" : \"\(typeName)\",",
+            "\"writeOnly\" : true"
+        ]
+    )
 
-    testEncodingPropertyLines(entity: deprecatedEntity,
-                              propertyLines: [
-                                "\"deprecated\" : true,",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: deprecatedEntity,
+        propertyLines: [
+            "\"deprecated\" : true,",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: allowedValues.entity,
-                              propertyLines: [
-                                "\"enum\" : [",
-                                "  \(allowedValues.value)",
-                                "],",
-                                "\"type\" : \"\(typeName)\""
+    testEncodingPropertyLines(
+        entity: allowedValues.entity,
+        propertyLines: [
+            "\"enum\" : [",
+            "  \(allowedValues.value)",
+            "],",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    ])
+    testEncodingPropertyLines(
+        entity: discriminator.entity,
+        propertyLines: [
+            "\"discriminator\" : {",
+            "  \"propertyName\" : \"\(discriminator.name)\"",
+            "},",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 }
 
 private func testAllSharedFormattedContextEncoding<T: Encodable>(
