@@ -195,7 +195,7 @@ extension OpenAPI.Parameter: Encodable {
             try container.encode(contentMap, forKey: .content)
         }
 
-        try description.encodeIfNotNil(to: &container, forKey: .description)
+        try container.encodeIfPresent(description, forKey: .description)
 
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)

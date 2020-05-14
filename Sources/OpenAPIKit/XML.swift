@@ -49,14 +49,14 @@ extension OpenAPI.XML: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try name.encodeIfNotNil(to: &container, forKey: .name)
-        try namespace.encodeIfNotNil(to: &container, forKey: .namespace)
-        try prefix.encodeIfNotNil(to: &container, forKey: .prefix)
+        try container.encodeIfPresent(name, forKey: .name)
+        try container.encodeIfPresent(namespace, forKey: .namespace)
+        try container.encodeIfPresent(prefix, forKey: .prefix)
         if attribute {
-            try container.encode(attribute, forKey: .attribute)
+            try container.encode(true, forKey: .attribute)
         }
         if wrapped {
-            try container.encode(wrapped, forKey: .wrapped)
+            try container.encode(true, forKey: .wrapped)
         }
     }
 }
