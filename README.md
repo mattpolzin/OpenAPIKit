@@ -20,6 +20,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Schemas](#schemas)
 			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 		- [JSON References](#json-references)
+		- [Specification Extensions](#specification-extensions)
+- [Curated Integrations](#curated-integrations)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
@@ -32,7 +34,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
 	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
 	- [Operation Object (`OpenAPI.Operation`)](#operation-object-openapipathitemoperation)
-	- [External Document Object (`OpenAPI.ExternalDoc`)](#external-document-object-openapiexternaldoc)
+	- [External Document Object (`OpenAPI.ExternalDocumentation`)](#external-document-object-openapiexternaldoc)
 	- [Parameter Object (`OpenAPI.Parameter`)](#parameter-object-openapipathitemparameter)
 	- [Request Body Object (`OpenAPI.Request`)](#request-body-object-openapirequest)
 	- [Media Type Object (`OpenAPI.Content`)](#media-type-object-openapicontent)
@@ -87,12 +89,6 @@ let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a totally different order.
 
 If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
-
-### Generating OpenAPI Documents
-
-See [**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) / [VaporOpenAPIExample](https://github.com/mattpolzin/VaporOpenAPIExample) for an example of generating OpenAPI from a Vapor application's routes.
-
-See [**JSONAPI+OpenAPI**](https://github.com/mattpolzin/jsonapi-openapi) for an example of generating OpenAPI response schemas from JSON:API response documents.
 
 ### OpenAPI Document structure
 The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)  version 3.0.2. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
@@ -167,6 +163,8 @@ Int32?.openAPISchema == .integer(format: .int32, required: false)
 
 Additional schema generation support can be found in the [`mattpolzin/OpenAPIReflection`](https://github.com/mattpolzin/OpenAPIReflection) library.
 
+You can conform your own types to `OpenAPISchemaType` to make it convenient to generate `JSONSchemas` from them.
+
 #### JSON References
 The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. You cannot dereference documents (yet), but you can encode and decode references.
 
@@ -185,6 +183,38 @@ let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
 
 let addBooksParameters: [OpenAPI.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
 ```
+
+#### Specification Extensions
+Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
+
+You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
+
+`AnyCodable` can be constructed from literals or explicitly. The following are all valid.
+
+```swift
+var document = OpenAPI.Document(...)
+
+document.vendorExtensions["x-specialProperty1"] = true
+document.vendorExtensions["x-specialProperty2"] = "hello world"
+document.vendorExtensions["x-specialProperty3"] = ["hello", "world"]
+document.vendorExtensions["x-specialProperty4"] = ["hello": "world"]
+document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
+```
+
+## Curated Integrations
+Following is a short list of integrations that might be immediately useful or just serve as examples of ways that OpenAPIKit can be used to harness the power of the OpenAPI specification.
+
+If you have a library you would like to propose for this section, please create a pull request and explain a bit about your project.
+
+### Generating OpenAPI Documents
+
+[**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) / [VaporOpenAPIExample](https://github.com/mattpolzin/VaporOpenAPIExample) provide an example of generating OpenAPI from a Vapor application's routes.
+
+[**JSONAPI+OpenAPI**](https://github.com/mattpolzin/jsonapi-openapi) is a library that generates OpenAPI schemas from JSON:API types. The library has some rudimentary and experimental support for going the other direction and generating Swift types that represent JSON:API resources described by OpenAPI documentation.
+
+### Semantic Diffing of OpenAPI Documents
+
+[**OpenAPIDiff**](https://github.com/mattpolzin/OpenAPIDiff) is a library and a CLI that implements semantic diffing; that is, rather than just comparing two OpenAPI documents line-by-line for textual differences, it parses the documents and describes the differences in the two OpenAPI ASTs.
 
 ## Notes
 This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
@@ -290,7 +320,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] servers
 - [x] specification extensions (`vendorExtensions`)
 
-### External Document Object (`OpenAPI.ExternalDoc`)
+### External Document Object (`OpenAPI.ExternalDocumentation`)
 - [x] description
 - [x] url
 - [ ] specification extensions

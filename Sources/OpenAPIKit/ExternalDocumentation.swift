@@ -1,5 +1,5 @@
 //
-//  ExternalDoc.swift
+//  ExternalDocumentation.swift
 //  
 //
 //  Created by Mathew Polzin on 11/2/19.
