@@ -20,7 +20,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Schemas](#schemas)
 			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 		- [JSON References](#json-references)
-                - [Specification Extensions](#specification-extensions)
+		- [Specification Extensions](#specification-extensions)
 - [Curated Integrations](#curated-integrations)
 - [Notes](#notes)
 - [Project Status](#project-status)
