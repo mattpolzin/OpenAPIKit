@@ -70,7 +70,7 @@ You can wrap any error you get back from a decoder in `OpenAPI.Error` to get a f
 
 ```swift
 do {
-  try decoder.docode(OpenAPI.Document, from: ...)
+  try decoder.decode(OpenAPI.Document, from: ...)
 } catch let error {
   print(OpenAPI.Error(from: error).localizedDescription)  
 }
