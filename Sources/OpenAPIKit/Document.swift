@@ -28,15 +28,17 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(openAPIVersion: Version = .v3_0_0,
-                    info: Info,
-                    servers: [Server],
-                    paths: PathItem.Map,
-                    components: Components,
-                    security: [SecurityRequirement] = [],
-                    tags: [Tag]? = nil,
-                    externalDocs: ExternalDocumentation? = nil,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            openAPIVersion: Version = .v3_0_0,
+            info: Info,
+            servers: [Server],
+            paths: PathItem.Map,
+            components: Components,
+            security: [SecurityRequirement] = [],
+            tags: [Tag]? = nil,
+            externalDocs: ExternalDocumentation? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.openAPIVersion = openAPIVersion
             self.info = info
             self.servers = servers
@@ -188,10 +190,6 @@ extension OpenAPI.Document {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .openAPIVersion:
@@ -213,10 +211,6 @@ extension OpenAPI.Document {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

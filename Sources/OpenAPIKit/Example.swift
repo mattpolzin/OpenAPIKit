@@ -134,10 +134,6 @@ extension OpenAPI.Example {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .summary:
@@ -151,10 +147,6 @@ extension OpenAPI.Example {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

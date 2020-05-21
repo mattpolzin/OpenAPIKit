@@ -242,10 +242,6 @@ extension OpenAPI.Components {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .schemas:
@@ -265,10 +261,6 @@ extension OpenAPI.Components {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

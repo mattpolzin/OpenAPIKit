@@ -11,14 +11,25 @@ extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
     /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object).
-    public struct SecurityScheme: Equatable {
-        public let type: SecurityType
-        public let description: String?
+    public struct SecurityScheme: Equatable, CodableVendorExtendable {
+        public var type: SecurityType
+        public var description: String?
 
-        public init(type: SecurityType,
-                    description: String? = nil) {
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
+        public init(
+            type: SecurityType,
+            description: String? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.type = type
             self.description = description
+            self.vendorExtensions = vendorExtensions
         }
 
         public static func apiKey(name: String, location: Location, description: String? = nil) -> SecurityScheme {
@@ -97,6 +108,8 @@ extension OpenAPI.SecurityScheme: Encodable {
             try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -130,6 +143,8 @@ extension OpenAPI.SecurityScheme: Decodable {
                 openIdConnectUrl: try container.decode(URL.self, forKey: .openIdConnectUrl)
             )
         }
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 
     internal static func decodeAPIKey(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (name: String, location: Location) {
@@ -148,14 +163,78 @@ extension OpenAPI.SecurityScheme: Decodable {
 }
 
 extension OpenAPI.SecurityScheme {
-    internal enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case type
         case description
         case name
-        case location = "in"
+        case location
         case scheme
         case bearerFormat
         case flows
         case openIdConnectUrl
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .type,
+                .description,
+                .name,
+                .location,
+                .scheme,
+                .bearerFormat,
+                .flows,
+                .openIdConnectUrl
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "type":
+                self = .type
+            case "description":
+                self = .description
+            case "name":
+                self = .name
+            case "in":
+                self = .location
+            case "scheme":
+                self = .scheme
+            case "bearerFormat":
+                self = .bearerFormat
+            case "flows":
+                self = .flows
+            case "openIdConnectUrl":
+                self = .openIdConnectUrl
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        var stringValue: String {
+            switch self {
+            case .type:
+                return "type"
+            case .description:
+                return "description"
+            case .name:
+                return "name"
+            case .location:
+                return "in"
+            case .scheme:
+                return "scheme"
+            case .bearerFormat:
+                return "bearerFormat"
+            case .flows:
+                return "flows"
+            case .openIdConnectUrl:
+                return "openIdConnectUrl"
+            case .extended(let key):
+                return key
+            }
+        }
     }
 }

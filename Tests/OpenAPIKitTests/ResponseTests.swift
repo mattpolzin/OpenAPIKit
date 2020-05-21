@@ -205,6 +205,70 @@ extension ResponseTests {
                                                   headers: ["hello": .init(header)],
                                                   content: [.json: content]))
     }
+
+    func test_populatedDescriptionPopulatedContent_withExtension_encode() {
+        let content = OpenAPI.Content(schema: .init(.string))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
+        let response = OpenAPI.Response(
+            description: "hello world",
+            headers: ["hello": .init(header)],
+            content: [.json: content],
+            vendorExtensions: [ "x-specialFeature": true ]
+        )
+
+        let encodedResponse = try! testStringFromEncoding(of: response)
+
+        assertJSONEquivalent(encodedResponse,
+"""
+{
+  "content" : {
+    "application\\/json" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "hello world",
+  "headers" : {
+    "hello" : {
+      "schema" : {
+        "type" : "string"
+      }
+    }
+  },
+  "x-specialFeature" : true
+}
+"""
+        )
+    }
+
+    func test_populatedDescriptionPopulatedContent_withExtension_decode() throws {
+        let responseData =
+"""
+{
+    "description": "hello world",
+    "content": { "application/json": { "schema": { "type": "string" } } },
+    "headers": {
+        "hello": { "schema" : { "type" : "string" } }
+    },
+    "x-specialFeature": true
+}
+""".data(using: .utf8)!
+
+        let response = try testDecoder.decode(OpenAPI.Response.self, from: responseData)
+
+        let content = OpenAPI.Content(schema: .init(.string(required: false)))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                headers: ["hello": .init(header)],
+                content: [.json: content],
+                vendorExtensions: [ "x-specialFeature": true ]
+            )
+        )
+    }
 }
 
 // MARK: Response Status Code

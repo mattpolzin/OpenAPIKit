@@ -39,17 +39,28 @@ extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
     /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
-    public struct Variable: Equatable {
-        public let `enum`: [String]
-        public let `default`: String
-        public let description: String?
+    public struct Variable: Equatable, CodableVendorExtendable {
+        public var `enum`: [String]
+        public var `default`: String
+        public var description: String?
 
-        public init(enum: [String] = [],
-                    default: String,
-                    description: String? = nil) {
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
+        public init(
+            enum: [String] = [],
+            default: String,
+            description: String? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.enum = `enum`
             self.default = `default`
             self.description = description
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -116,10 +127,6 @@ extension OpenAPI.Server {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .url:
@@ -131,10 +138,6 @@ extension OpenAPI.Server {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }
@@ -148,6 +151,8 @@ extension OpenAPI.Server.Variable: Encodable {
         try container.encode(`default`, forKey: .default)
 
         try container.encodeIfPresent(description, forKey: .description)
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -160,13 +165,54 @@ extension OpenAPI.Server.Variable: Decodable {
         `default` = try container.decode(String.self, forKey: .default)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
 extension OpenAPI.Server.Variable {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case `enum`
         case `default`
         case description
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .enum,
+                .default,
+                .description
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "enum":
+                self = .enum
+            case "default":
+                self = .default
+            case "description":
+                self = .description
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        var stringValue: String {
+            switch self {
+            case .enum:
+                return "enum"
+            case .default:
+                return "default"
+            case .description:
+                return "description"
+            case .extended(let key):
+                return key
+            }
+        }
     }
 }

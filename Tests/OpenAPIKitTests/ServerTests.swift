@@ -85,7 +85,8 @@ extension ServerTests {
         "hello": {
             "enum": ["hello"],
             "default": "hello",
-            "description": "hello again"
+            "description": "hello again",
+            "x-otherThing": 1234
         }
     },
     "x-specialFeature": [
@@ -103,9 +104,12 @@ extension ServerTests {
                 url: URL(string: "https://hello.com")!,
                 description: "hello world",
                 variables: [
-                    "hello": .init(enum: ["hello"],
-                                   default: "hello",
-                                   description: "hello again")
+                    "hello": .init(
+                        enum: ["hello"],
+                        default: "hello",
+                        description: "hello again",
+                        vendorExtensions: [ "x-otherThing": 1234 ]
+                    )
                 ],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
@@ -117,9 +121,12 @@ extension ServerTests {
             url: URL(string: "https://hello.com")!,
             description: "hello world",
             variables: [
-                "hello": .init(enum: ["hello"],
-                               default: "hello",
-                               description: "hello again")
+                "hello": .init(
+                    enum: ["hello"],
+                    default: "hello",
+                    description: "hello again",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
             ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
@@ -136,7 +143,8 @@ extension ServerTests {
       "description" : "hello again",
       "enum" : [
         "hello"
-      ]
+      ],
+      "x-otherThing" : 1234
     }
   },
   "x-specialFeature" : [

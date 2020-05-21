@@ -166,10 +166,6 @@ extension OpenAPI.Document.Info.License {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .name:
@@ -179,10 +175,6 @@ extension OpenAPI.Document.Info.License {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }
@@ -244,10 +236,6 @@ extension OpenAPI.Document.Info.Contact {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .name:
@@ -259,10 +247,6 @@ extension OpenAPI.Document.Info.Contact {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }
@@ -341,10 +325,6 @@ extension OpenAPI.Document.Info {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .title:
@@ -362,10 +342,6 @@ extension OpenAPI.Document.Info {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

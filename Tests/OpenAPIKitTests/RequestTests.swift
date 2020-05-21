@@ -181,6 +181,49 @@ extension RequestTests {
                                                 content: [:]))
     }
 
+    func test_withDescription_withExtension_encode() {
+        let request = OpenAPI.Request(
+            description: "A request",
+            content: [:],
+            vendorExtensions: [ "x-specialFeature": "ok" ]
+        )
+        let encodedString = try! testStringFromEncoding(of: request)
+
+        assertJSONEquivalent(encodedString,
+"""
+{
+  "content" : {
+
+  },
+  "description" : "A request",
+  "x-specialFeature" : "ok"
+}
+"""
+        )
+    }
+
+    func test_withDescription_withExtension_decode() {
+        let requestData =
+"""
+{
+  "content" : {},
+  "description" : "A request",
+  "x-specialFeature" : "ok"
+}
+""".data(using: .utf8)!
+
+        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                description: "A request",
+                content: [:],
+                vendorExtensions: [ "x-specialFeature": "ok" ]
+            )
+        )
+    }
+
     func test_withRequired_encode() {
         let request = OpenAPI.Request(content: [:],
                                       required: true)

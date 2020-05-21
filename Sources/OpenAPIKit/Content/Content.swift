@@ -187,10 +187,6 @@ extension OpenAPI.Content {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .schema:
@@ -204,10 +200,6 @@ extension OpenAPI.Content {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

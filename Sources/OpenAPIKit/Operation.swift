@@ -262,10 +262,6 @@ extension OpenAPI.Operation {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .tags:
@@ -293,10 +289,6 @@ extension OpenAPI.Operation {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }
