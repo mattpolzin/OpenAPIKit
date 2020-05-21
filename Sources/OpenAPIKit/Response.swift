@@ -182,10 +182,6 @@ extension OpenAPI.Response {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .description:
@@ -197,10 +193,6 @@ extension OpenAPI.Response {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

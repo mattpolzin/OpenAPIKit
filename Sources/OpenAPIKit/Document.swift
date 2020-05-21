@@ -190,10 +190,6 @@ extension OpenAPI.Document {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .openAPIVersion:
@@ -215,10 +211,6 @@ extension OpenAPI.Document {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

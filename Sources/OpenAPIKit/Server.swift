@@ -116,10 +116,6 @@ extension OpenAPI.Server {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .url:
@@ -131,10 +127,6 @@ extension OpenAPI.Server {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

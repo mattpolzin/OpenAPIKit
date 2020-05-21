@@ -40,6 +40,14 @@ extension ExtendableCodingKey {
     internal static func key(for value: String) -> Self {
         return Self(stringValue: value) ?? .extendedKey(for: value)
     }
+
+    internal init?(intValue: Int) {
+        return nil
+    }
+
+    internal var intValue: Int? {
+        return nil
+    }
 }
 
 internal protocol CodableVendorExtendable: VendorExtendable {

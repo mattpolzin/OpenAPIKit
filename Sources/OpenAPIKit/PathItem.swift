@@ -361,10 +361,6 @@ extension OpenAPI.PathItem {
             }
         }
 
-        init?(intValue: Int) {
-            return nil
-        }
-
         var stringValue: String {
             switch self {
             case .summary:
@@ -394,10 +390,6 @@ extension OpenAPI.PathItem {
             case .extended(let key):
                 return key
             }
-        }
-
-        var intValue: Int? {
-            return nil
         }
     }
 }

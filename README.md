@@ -339,13 +339,13 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] allowReserved
     - [x] example
     - [x] examples
-- [x] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Request Body Object (`OpenAPI.Request`)
 - [x] description
 - [x] content
 - [x] required
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Media Type Object (`OpenAPI.Content`)
 - [x] schema
@@ -371,7 +371,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] headers
 - [x] content
 - [ ] links
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Callback Object
 - [ ] *{expression}*
@@ -456,7 +456,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] bearerFormat (`SecurityType` `.http` case)
 - [x] flows (`SecurityType` `.oauth2` case)
 - [x] openIdConnectUrl (`SecurityType` `.openIdConnect` case)
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### OAuth Flows Object (`OpenAPI.OauthFlows`)
 - [x] implicit

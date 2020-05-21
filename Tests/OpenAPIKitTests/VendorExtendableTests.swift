@@ -142,12 +142,6 @@ private struct TestStruct: Codable, CodableVendorExtendable {
             default: return nil
             }
         }
-
-        var intValue: Int? { return nil }
-
-        init?(intValue: Int) {
-            return nil
-        }
     }
 
     public let vendorExtensions: Self.VendorExtensions
