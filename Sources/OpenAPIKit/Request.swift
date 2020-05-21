@@ -11,17 +11,28 @@ extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
     /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#request-body-object).
-    public struct Request: Equatable {
-        public let description: String?
-        public let content: Content.Map
-        public let required: Bool
+    public struct Request: Equatable, CodableVendorExtendable {
+        public var description: String?
+        public var content: Content.Map
+        public var required: Bool
 
-        public init(description: String? = nil,
-                    content: Content.Map,
-                    required: Bool = false) {
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
+        public init(
+            description: String? = nil,
+            content: Content.Map,
+            required: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.description = description
             self.content = content
             self.required = required
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -29,10 +40,57 @@ extension OpenAPI {
 // MARK: - Codable
 
 extension OpenAPI.Request {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case description
         case content
         case required
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .description,
+                .content,
+                .required
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "description":
+                self = .description
+            case "content":
+                self = .content
+            case "required":
+                self = .required
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .description:
+                return "description"
+            case .content:
+                return "content"
+            case .required:
+                return "required"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }
 
@@ -46,6 +104,8 @@ extension OpenAPI.Request: Encodable {
         if required {
             try container.encode(required, forKey: .required)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -57,6 +117,8 @@ extension OpenAPI.Request: Decodable {
             description = try container.decodeIfPresent(String.self, forKey: .description)
             content = try container.decode(OpenAPI.Content.Map.self, forKey: .content)
             required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
+
+            vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as InconsistencyError {
 
             throw OpenAPI.Error.Decoding.Request(error)

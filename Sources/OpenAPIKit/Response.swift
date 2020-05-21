@@ -229,6 +229,8 @@ extension OpenAPI.Response: Decodable {
             headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
             content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
 
+            vendorExtensions = try Self.extensions(from: decoder)
+
         } catch let error as InconsistencyError {
 
             throw OpenAPI.Error.Decoding.Response(error)
@@ -239,8 +241,6 @@ extension OpenAPI.Response: Decodable {
 
             throw OpenAPI.Error.Decoding.Response(error)
         }
-
-        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
