@@ -272,7 +272,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 - [x] enum
 - [x] default
 - [x] description
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Components Object (`OpenAPI.Components`)
 - [x] schemas
