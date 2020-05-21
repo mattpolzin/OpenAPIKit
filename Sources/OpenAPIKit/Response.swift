@@ -11,18 +11,29 @@ extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
     /// See [OpenAPI Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#response-object).
-    public struct Response: Equatable {
-        public let description: String
-        public let headers: Header.Map?
-        public let content: Content.Map
-        //    public let links:
+    public struct Response: Equatable, CodableVendorExtendable {
+        public var description: String
+        public var headers: Header.Map?
+        public var content: Content.Map
+        //    public var links:
 
-        public init(description: String,
-                    headers: Header.Map? = nil,
-                    content: Content.Map) {
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
+        public var vendorExtensions: [String: AnyCodable]
+
+        public init(
+            description: String,
+            headers: Header.Map? = nil,
+            content: Content.Map,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.description = description
             self.headers = headers
             self.content = content
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -138,11 +149,59 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
 // MARK: - Codable
 
 extension OpenAPI.Response {
-    private enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: ExtendableCodingKey {
         case description
         case headers
         case content
         //        case links
+        case extended(String)
+
+        static var allBuiltinKeys: [CodingKeys] {
+            return [
+                .description,
+                .headers,
+                .content
+//                .links
+            ]
+        }
+
+        static func extendedKey(for value: String) -> CodingKeys {
+            return .extended(value)
+        }
+
+        init?(stringValue: String) {
+            switch stringValue {
+            case "description":
+                self = .description
+            case "headers":
+                self = .headers
+            case "content":
+                self = .content
+            default:
+                self = .extendedKey(for: stringValue)
+            }
+        }
+
+        init?(intValue: Int) {
+            return nil
+        }
+
+        var stringValue: String {
+            switch self {
+            case .description:
+                return "description"
+            case .headers:
+                return "headers"
+            case .content:
+                return "content"
+            case .extended(let key):
+                return key
+            }
+        }
+
+        var intValue: Int? {
+            return nil
+        }
     }
 }
 
@@ -156,6 +215,8 @@ extension OpenAPI.Response: Encodable {
         if content.count > 0 {
             try container.encode(content, forKey: .content)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
@@ -178,6 +239,8 @@ extension OpenAPI.Response: Decodable {
 
             throw OpenAPI.Error.Decoding.Response(error)
         }
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 
