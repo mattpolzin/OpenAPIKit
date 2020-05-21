@@ -292,4 +292,49 @@ extension SecuritySchemeTests {
             OpenAPI.SecurityScheme.openIdConnect(url: URL(string: "http://google.com")!)
         )
     }
+
+    func test_openIdConnect_withExtension_encode() throws {
+        let openIdConnect = OpenAPI.SecurityScheme(
+            type: .openIdConnect(
+                openIdConnectUrl: URL(string: "http://google.com")!
+            ),
+            vendorExtensions: [ "x-specialFeature": "hello" ]
+        )
+
+        let encodedOpenIdConnect = try testStringFromEncoding(of: openIdConnect)
+
+        assertJSONEquivalent(
+            encodedOpenIdConnect,
+"""
+{
+  "openIdConnectUrl" : "http:\\/\\/google.com",
+  "type" : "openIdConnect",
+  "x-specialFeature" : "hello"
+}
+"""
+        )
+    }
+
+    func test_openIdConnect_withExtension_decode() throws {
+        let openIdConnectData =
+"""
+{
+  "openIdConnectUrl" : "http:\\/\\/google.com",
+  "type" : "openIdConnect",
+  "x-specialFeature" : "hello"
+}
+""".data(using: .utf8)!
+
+        let openIdConnect = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
+
+        XCTAssertEqual(
+            openIdConnect,
+            OpenAPI.SecurityScheme(
+                type: .openIdConnect(
+                    openIdConnectUrl: URL(string: "http://google.com")!
+                ),
+                vendorExtensions: [ "x-specialFeature": "hello" ]
+            )
+        )
+    }
 }
