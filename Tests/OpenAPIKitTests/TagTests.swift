@@ -82,9 +82,14 @@ extension TagTests {
     }
 
     func test_allFields_encode() {
-        let tag = OpenAPI.Tag(name: "hello",
-                              description: "world",
-                              externalDocs: .init(url: URL(string: "http://google.com")!))
+        let tag = OpenAPI.Tag(
+            name: "hello",
+            description: "world",
+            externalDocs: .init(
+                url: URL(string: "http://google.com")!
+            ),
+            vendorExtensions: ["x-specialFeature": false]
+        )
         let encodedTag = try! testStringFromEncoding(of: tag)
 
         assertJSONEquivalent(encodedTag,
@@ -94,7 +99,8 @@ extension TagTests {
   "externalDocs" : {
     "url" : "http:\\/\\/google.com"
   },
-  "name" : "hello"
+  "name" : "hello",
+  "x-specialFeature" : false
 }
 """
         )
@@ -108,13 +114,20 @@ extension TagTests {
     "description": "world",
     "externalDocs": {
         "url": "http://google.com"
-    }
+    },
+    "x-specialFeature" : false
 }
 """.data(using: .utf8)!
         let tag = try! testDecoder.decode(OpenAPI.Tag.self, from: tagData)
 
-        XCTAssertEqual(tag, OpenAPI.Tag(name: "hello",
-                                        description: "world",
-                                        externalDocs: .init(url: URL(string: "http://google.com")!)))
+        XCTAssertEqual(
+            tag,
+            OpenAPI.Tag(
+                name: "hello",
+                description: "world",
+                externalDocs: .init(url: URL(string: "http://google.com")!),
+                vendorExtensions: ["x-specialFeature": false]
+            )
+        )
     }
 }

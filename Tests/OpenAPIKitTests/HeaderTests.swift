@@ -140,6 +140,41 @@ extension HeaderTests {
         )
     }
 
+    func test_header_schema_withExntesion_encode() throws {
+        let header = OpenAPI.Header(schema: .string, vendorExtensions: ["x-hello": "hi"])
+
+        let headerEncoding = try testStringFromEncoding(of: header)
+
+        assertJSONEquivalent(headerEncoding,
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : "hi"
+}
+"""
+        )
+    }
+
+    func test_header_schema_withExtension_decode() throws {
+        let headerData =
+"""
+{
+  "schema" : {
+    "type" : "string"
+  },
+  "x-hello" : "hi"
+}
+""".data(using: .utf8)!
+        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+
+        XCTAssertEqual(
+            header,
+            OpenAPI.Header(schema: .string(required: false), vendorExtensions: ["x-hello": "hi"])
+        )
+    }
+
     func test_header_required_encode() throws {
         let header = OpenAPI.Header(
             content: [

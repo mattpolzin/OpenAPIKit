@@ -323,7 +323,7 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
 ### External Document Object (`OpenAPI.ExternalDocumentation`)
 - [x] description
 - [x] url
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Parameter Object (`OpenAPI.Parameter`)
 - [x] name
@@ -404,13 +404,13 @@ See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before d
     - [x] allowReserved
     - [x] example
     - [x] examples
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Tag Object (`OpenAPI.Tag`)
 - [x] name
 - [x] description
 - [x] externalDocs
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Reference Object (`JSONReference`)
 - [x] $ref
