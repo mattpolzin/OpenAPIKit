@@ -52,6 +52,31 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.Document {
+    /// A `Route` is the combination of a path (where the route lives)
+    /// and a path item (the definition of the route).
+    public struct Route: Equatable {
+        public let path: OpenAPI.Path
+        public let pathItem: OpenAPI.PathItem
+
+        public init(
+            path: OpenAPI.Path,
+            pathItem: OpenAPI.PathItem
+        ) {
+            self.path = path
+            self.pathItem = pathItem
+        }
+    }
+
+    /// Get all routes for this document.
+    ///
+    /// - Returns: An Array of `Routes` with the path
+    ///     and the definition of the route.
+    public var routes: [Route] {
+        return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
+    }
+}
+
 extension OpenAPI {
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.

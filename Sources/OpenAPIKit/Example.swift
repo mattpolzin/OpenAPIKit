@@ -25,10 +25,12 @@ extension OpenAPI {
         /// where the values are anything codable.
         public let vendorExtensions: [String: AnyCodable]
 
-        public init(summary: String? = nil,
-                    description: String? = nil,
-                    value: Either<URL, AnyCodable>,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            summary: String? = nil,
+            description: String? = nil,
+            value: Either<URL, AnyCodable>,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.summary = summary
             self.description = description
             self.value = value

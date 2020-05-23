@@ -41,6 +41,43 @@ final class DocumentTests: XCTestCase {
         )
     }
 
+    func test_getRoutes() {
+        let pi1 = OpenAPI.PathItem(
+            parameters: [],
+            get: .init(
+                tags: "hi",
+                parameters: [],
+                responses: [:]
+            )
+        )
+
+        let pi2 = OpenAPI.PathItem(
+            get: .init(
+                responses: [:]
+            )
+        )
+
+        let test = OpenAPI.Document(
+            info: .init(title: "hi", version: "1.0"),
+            servers: [
+                .init(url: URL(string: "https://google.com")!)
+            ],
+            paths: [
+                "/hi/there": pi1,
+                "/hi": pi2
+            ],
+            components: .init(schemas: ["hello": .string])
+        )
+
+        XCTAssertEqual(
+            test.routes,
+            [
+                .init(path: "/hi/there", pathItem: pi1),
+                .init(path: "/hi", pathItem: pi2)
+            ]
+        )
+    }
+
     func test_existingSecuritySchemeSuccess() {
         let docData =
 """
