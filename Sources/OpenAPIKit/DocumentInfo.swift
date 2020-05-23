@@ -26,13 +26,15 @@ extension OpenAPI.Document {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(title: String,
-                    description: String? = nil,
-                    termsOfService: URL? = nil,
-                    contact: Contact? = nil,
-                    license: License? = nil,
-                    version: String,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            title: String,
+            description: String? = nil,
+            termsOfService: URL? = nil,
+            contact: Contact? = nil,
+            license: License? = nil,
+            version: String,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.title = title
             self.description = description
             self.termsOfService = termsOfService
@@ -57,10 +59,12 @@ extension OpenAPI.Document {
             /// where the values are anything codable.
             public var vendorExtensions: [String: AnyCodable]
 
-            public init(name: String? = nil,
-                        url: URL? = nil,
-                        email: String? = nil,
-                        vendorExtensions: [String: AnyCodable] = [:]) {
+            public init(
+                name: String? = nil,
+                url: URL? = nil,
+                email: String? = nil,
+                vendorExtensions: [String: AnyCodable] = [:]
+            ) {
                 self.name = name
                 self.url = url
                 self.email = email
@@ -82,9 +86,11 @@ extension OpenAPI.Document {
             /// where the values are anything codable.
             public var vendorExtensions: [String: AnyCodable]
 
-            public init(name: String,
-                        url: URL? = nil,
-                        vendorExtensions: [String: AnyCodable] = [:]) {
+            public init(
+                name: String,
+                url: URL? = nil,
+                vendorExtensions: [String: AnyCodable] = [:]
+            ) {
                 self.name = name
                 self.url = url
                 self.vendorExtensions = vendorExtensions

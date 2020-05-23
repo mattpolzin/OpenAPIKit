@@ -23,10 +23,12 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(url: URL,
-                    description: String? = nil,
-                    variables: OrderedDictionary<String, Variable> = [:],
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            url: URL,
+            description: String? = nil,
+            variables: OrderedDictionary<String, Variable> = [:],
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.url = url
             self.description = description
             self.variables = variables

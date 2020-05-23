@@ -32,18 +32,20 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(tags: [String]? = nil,
-                    summary: String? = nil,
-                    description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                    operationId: String? = nil,
-                    parameters: Parameter.Array = [],
-                    requestBody: OpenAPI.Request? = nil,
-                    responses: OpenAPI.Response.Map,
-                    deprecated: Bool = false,
-                    security: [OpenAPI.SecurityRequirement]? = nil,
-                    servers: [OpenAPI.Server]? = nil,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            tags: [String]? = nil,
+            summary: String? = nil,
+            description: String? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            operationId: String? = nil,
+            parameters: Parameter.Array = [],
+            requestBody: OpenAPI.Request? = nil,
+            responses: OpenAPI.Response.Map,
+            deprecated: Bool = false,
+            security: [OpenAPI.SecurityRequirement]? = nil,
+            servers: [OpenAPI.Server]? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.tags = tags
             self.summary = summary
             self.description = description
@@ -59,18 +61,20 @@ extension OpenAPI {
         }
 
         // variadic tags
-        public init(tags: String...,
-                    summary: String? = nil,
-                    description: String? = nil,
-                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                    operationId: String? = nil,
-                    parameters: Parameter.Array = [],
-                    requestBody: OpenAPI.Request? = nil,
-                    responses: OpenAPI.Response.Map,
-                    deprecated: Bool = false,
-                    security: [OpenAPI.SecurityRequirement]? = nil,
-                    servers: [OpenAPI.Server]? = nil,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            tags: String...,
+            summary: String? = nil,
+            description: String? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            operationId: String? = nil,
+            parameters: Parameter.Array = [],
+            requestBody: OpenAPI.Request? = nil,
+            responses: OpenAPI.Response.Map,
+            deprecated: Bool = false,
+            security: [OpenAPI.SecurityRequirement]? = nil,
+            servers: [OpenAPI.Server]? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.init(
                 tags: tags,
                 summary: summary,

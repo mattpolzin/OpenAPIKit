@@ -64,19 +64,21 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(summary: String? = nil,
-                    description: String? = nil,
-                    servers: [OpenAPI.Server]? = nil,
-                    parameters: Parameter.Array = [],
-                    get: Operation? = nil,
-                    put: Operation? = nil,
-                    post: Operation? = nil,
-                    delete: Operation? = nil,
-                    options: Operation? = nil,
-                    head: Operation? = nil,
-                    patch: Operation? = nil,
-                    trace: Operation? = nil,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            summary: String? = nil,
+            description: String? = nil,
+            servers: [OpenAPI.Server]? = nil,
+            parameters: Parameter.Array = [],
+            get: Operation? = nil,
+            put: Operation? = nil,
+            post: Operation? = nil,
+            delete: Operation? = nil,
+            options: Operation? = nil,
+            head: Operation? = nil,
+            patch: Operation? = nil,
+            trace: Operation? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.summary = summary
             self.description = description
             self.servers = servers
