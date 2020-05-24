@@ -8,6 +8,10 @@
 import Foundation
 
 // MARK: Types
+/// A type with an associated value representing its Swift type.
+///
+/// For example, a type might represent a `String` in some context
+/// like `JSONSchema` so its Swift type would be `String.self`.
 public protocol SwiftTyped {
     associatedtype SwiftType: Codable, Equatable
 }
