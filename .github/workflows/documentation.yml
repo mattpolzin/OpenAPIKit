@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Generate Documentation
-        uses: SwiftDocOrg/swift-doc@master
+        uses: mattpolzin/swift-doc@bugfix/relative-links
         with:
           inputs: Sources
           module-name: OpenAPIKit
