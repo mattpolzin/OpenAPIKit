@@ -23,7 +23,7 @@ jobs:
     container: ${{ matrix.image }}
     steps:
     - name: Install dependencies if needed
-        run: ${{ matrix.depscmd }}
+      run: ${{ matrix.depscmd }}
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Run tests
