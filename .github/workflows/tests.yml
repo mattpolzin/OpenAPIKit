@@ -1,33 +1,40 @@
 name: Tests
 
-on: [pull_request]
+on: 
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
-  xenial_5_1:
-    container: 
-      image: swift:5.1-xenial
+  linux:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - swift:5.1-xenial
+          - swift:5.1-bionic
+          - swift:5.2-xenial
+          - swift:5.2-bionic
+          - swiftlang/swift:nightly-master-focal
+          - swiftlang/swift:nightly-master-centos8
+          - swiftlang/swift:nightly-master-amazonlinux2
+    container: ${{ matrix.image }}
     steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
-  bionic_5_1:
-    container: 
-      image: swift:5.1-bionic
-    runs-on: ubuntu-latest
+    - name: Install dependencies if needed
+        run: ${{ matrix.depscmd }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Run tests
+      run: swift test --enable-test-discovery
+  osx:
+    runs-on: macOS-latest
     steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
-  xenial_5_2:
-    container: 
-      image: swift:5.2-xenial
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
-  bionic_5_2:
-    container: 
-      image: swift:5.2-bionic
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: swift test --enable-test-discovery
+      - name: Select latest available Xcode
+        uses: maxim-lobanov/setup-xcode@1.0
+        with: { 'xcode-version': 'latest' }
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: swift test --enable-test-discovery
