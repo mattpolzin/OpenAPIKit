@@ -10,6 +10,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: swift test --enable-test-discovery --enable-code-coverage
-    - uses: mattpolzin/swift-codecov-action@0.3.0
+    - id: analysis
+      uses: mattpolzin/swift-codecov-action@0.3.0
       with:
         MINIMUM_COVERAGE: 98
+    - if: ${{ success() }}
+      uses: ouzi-dev/commit-status-updater@v1.0.4
+      with:
+        status: "success"
+        description: "${{ steps.analysis.outputs.codecov }}"
+        name: "codecov"
