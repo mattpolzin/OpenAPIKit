@@ -15,8 +15,8 @@ jobs:
       with:
         MINIMUM_COVERAGE: 98
     - if: ${{ success() }}
-      uses: ouzi-dev/commit-status-updater@v1.0.4
+      uses: ouzi-dev/commit-status-updater@v1.0.6
       with:
         status: "success"
         description: "${{ steps.analysis.outputs.codecov }}"
-        name: "codecov"
+        name: "Test Coverage"
