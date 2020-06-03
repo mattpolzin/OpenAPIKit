@@ -592,6 +592,22 @@ final class ValidityEncoderTests: XCTestCase {
                 if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
         )
 
-        try validator.assertValidity()
+        XCTAssertThrowsError(try validator.assertValidity())
+
+        let document2 = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator2 = document2
+            .validator
+            .validating(
+                \.document.servers.count > 1,
+                if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+        )
+
+        XCTAssertNoThrow(try validator2.assertValidity())
     }
 }
