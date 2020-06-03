@@ -329,7 +329,7 @@ final class ValidityEncoderTests: XCTestCase {
         }
     }
 
-    func test_failsNestedInt() {
+    func test_failsNestedString() {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,
             description: "hello world",
@@ -353,16 +353,16 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (context: ValidationContext<Int64>, path) in
+            { (context: ValidationContext<String>, path) in
                 .invalid(because: [ ValidationError(reason: String(context.subject), at: path) ])
             },
-            if: { (context, path) in context.subject == 2244 }
+            if: { (context, path) in context.subject == "world" }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
             let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "2244")
+            XCTAssertEqual(error?.values.count, 2)
+            XCTAssertEqual(error?.values.first?.reason, "world")
         }
     }
 
@@ -562,5 +562,36 @@ final class ValidityEncoderTests: XCTestCase {
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Path Items must have at least one Operation'.")
             XCTAssertEqual(error?.values.first?.codingPath.map(\.stringValue), ["paths"])
         }
+    }
+
+    func test_ifTestServerThenTwoServers() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://test.server.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hello",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = document
+            .validator
+            .validating(
+                \.document.servers.count > 1,
+                if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+        )
+
+        try validator.assertValidity()
     }
 }
