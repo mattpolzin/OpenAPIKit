@@ -33,7 +33,7 @@ final class ValidityEncoderTests: XCTestCase {
 
         let validator = document
             .validator
-            .validating { (_: ValidationContext<OpenAPI.Server>, path) in .valid }
+            .validating { (_: ValidationContext<OpenAPI.Server>) in .valid }
 
         try validator.assertValidity()
     }
@@ -62,10 +62,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
             },
-            if: { _, _ in false }
+            if: { _ in false }
         )
 
         try validator.assertValidity()
@@ -95,10 +95,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
             },
-            if: { _, _ in true }
+            if: { _ in true }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -132,10 +132,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
             },
-            if: { (context, path) in context.subject.description != "hello world" }
+            if: { context in context.subject.description != "hello world" }
         )
 
         try validator.assertValidity()
@@ -165,10 +165,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>, path) in
+            { (_: ValidationContext<OpenAPI.Server>) in
                 .valid
             },
-            if: { (context, path) in context.subject.description == "hello world" }
+            if: { context in context.subject.description == "hello world" }
         )
 
         try validator.assertValidity()
@@ -198,10 +198,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
             },
-            if: { (context, path) in context.subject.description == "hello world" }
+            if: { context in context.subject.description == "hello world" }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -234,8 +234,8 @@ final class ValidityEncoderTests: XCTestCase {
 
         let validator = document
             .validator
-            .validating { (_: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            .validating { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
         }
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -282,10 +282,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (context: ValidationContext<OpenAPI.Server>, path) in
-                .invalid(because: [ ValidationError(reason: context.subject.description ?? "", at: path) ])
+            { (context: ValidationContext<OpenAPI.Server>) in
+                .invalid(because: [ ValidationError(reason: context.subject.description ?? "", at: context.codingPath) ])
             },
-            if: { (context, path) in context.subject.description == "hello world" }
+            if: { context in context.subject.description == "hello world" }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -318,8 +318,8 @@ final class ValidityEncoderTests: XCTestCase {
 
         let validator = document
             .validator
-            .validating { (_: ValidationContext<URL>, path) in
-                .invalid(because: [ ValidationError(reason: "just because", at: path) ])
+            .validating { (context: ValidationContext<URL>) in
+                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
         }
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -353,10 +353,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (context: ValidationContext<String>, path) in
-                .invalid(because: [ ValidationError(reason: String(context.subject), at: path) ])
+            { (context: ValidationContext<String>) in
+                .invalid(because: [ ValidationError(reason: String(context.subject), at: context.codingPath) ])
             },
-            if: { (context, path) in context.subject == "world" }
+            if: { context in context.subject == "world" }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -390,10 +390,10 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (context: ValidationContext<String>, path) in
-                .invalid(because: [ ValidationError(reason: context.subject, at: path) ])
+            { (context: ValidationContext<String>) in
+                .invalid(because: [ ValidationError(reason: context.subject, at: context.codingPath) ])
             },
-            if: { (context, _) in ["hello", "world"].contains(context.subject) }
+            if: { context in ["hello", "world"].contains(context.subject) }
         )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
@@ -428,8 +428,8 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-            { (context: ValidationContext<String>, path) in
-                    .invalid(because: [ ValidationError(reason: context.subject, at: path) ])
+            { (context: ValidationContext<String>) in
+                .invalid(because: [ ValidationError(reason: context.subject, at: context.codingPath) ])
             },
             if: \.subject == "hello"
         )
@@ -503,7 +503,8 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-                \OpenAPI.Document.Info.version != "2.0",
+                "API version is 2.0",
+                asserting: \OpenAPI.Document.Info.version != "2.0",
                 if: \.title == "hello"
         )
 
@@ -534,7 +535,10 @@ final class ValidityEncoderTests: XCTestCase {
         )
 
         try document.validator
-            .validating(\OpenAPI.PathItem.endpoints.count > 0)
+            .validating(
+                "Path Items must have at least one Operation",
+                asserting: \OpenAPI.PathItem.endpoints.count > 0
+        )
             .assertValidity()
     }
 
@@ -552,9 +556,10 @@ final class ValidityEncoderTests: XCTestCase {
 
         let validator = document
             .validator
-            .validating("Path Items must have at least one Operation") { (context: ValidationContext<OpenAPI.PathItem>) in
-                context.subject.endpoints.count > 0
-        }
+            .validating(
+                "Path Items must have at least one Operation",
+                asserting: \OpenAPI.PathItem.endpoints.count > 0
+        )
 
         XCTAssertThrowsError(try validator.assertValidity()) { error in
             let error = error as? ValidationErrors
@@ -588,7 +593,8 @@ final class ValidityEncoderTests: XCTestCase {
         let validator = document
             .validator
             .validating(
-                \.document.servers.count > 1,
+                "At least two servers are specified if one of them is the test server.",
+                asserting: \.document.servers.count >= 2,
                 if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
         )
 
@@ -604,7 +610,8 @@ final class ValidityEncoderTests: XCTestCase {
         let validator2 = document2
             .validator
             .validating(
-                \.document.servers.count > 1,
+                "At least two servers are specified if one of them is the test server.",
+                asserting: \.document.servers.count >= 2,
                 if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
         )
 

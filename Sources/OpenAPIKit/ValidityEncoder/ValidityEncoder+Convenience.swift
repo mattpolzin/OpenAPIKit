@@ -7,107 +7,75 @@
 
 import Foundation
 
-public func ==<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func ==<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context[keyPath: lhs] == rhs
     }
 }
 
-public func !=<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func !=<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context[keyPath: lhs] != rhs
     }
 }
 
-public func ><T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func ><T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context[keyPath: lhs] > rhs
     }
 }
 
-public func <<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func >=<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
+        return context[keyPath: lhs] >= rhs
+    }
+}
+
+public func <<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context[keyPath: lhs] < rhs
     }
 }
 
-public func ==<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func <=<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
+        return context[keyPath: lhs] <= rhs
+    }
+}
+
+public func ==<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context.subject[keyPath: lhs] == rhs
     }
 }
 
-public func !=<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func !=<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context.subject[keyPath: lhs] != rhs
     }
 }
 
-public func ><T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func ><T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context.subject[keyPath: lhs] > rhs
     }
 }
 
-public func <<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Bool {
-    return { context, _ in
+public func >=<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
+        return context.subject[keyPath: lhs] >= rhs
+    }
+}
+
+public func <<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
         return context.subject[keyPath: lhs] < rhs
     }
 }
 
-public func ==<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context[keyPath: lhs]
-        return lhsValue == rhs ? .valid : .invalid(because: "\(String(describing:U.self)) value was \(lhs) but it needs to be equal to \(rhs).", at: codingPath)
-    }
-}
-
-public func !=<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context[keyPath: lhs]
-        return lhsValue != rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value must not be \(lhsValue).", at: codingPath)
-    }
-}
-
-public func ><T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context[keyPath: lhs]
-        return lhsValue > rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value was \(lhsValue) but it needs to be greater than \(rhs).", at: codingPath)
-    }
-}
-
-public func <<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context[keyPath: lhs]
-        return lhsValue < rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value was \(lhsValue) but it needs to be less than \(rhs).", at: codingPath)
-    }
-}
-
-public func ==<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context.subject[keyPath: lhs]
-        return lhsValue == rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value was \(lhsValue) but it needs to be equal to \(rhs).", at: codingPath)
-    }
-}
-
-public func !=<T: Encodable, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context.subject[keyPath: lhs]
-        return lhsValue != rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value must not be \(lhsValue).", at: codingPath)
-    }
-}
-
-public func ><T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context.subject[keyPath: lhs]
-        return lhsValue > rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value was \(lhsValue) but it needs be greater than \(rhs).", at: codingPath)
-    }
-}
-
-public func <<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>, [CodingKey]) -> Validity {
-    return { context, codingPath in
-        let lhsValue = context.subject[keyPath: lhs]
-        return lhsValue < rhs ? .valid : .invalid(because: "\(String(describing: U.self)) value was \(lhsValue) but it needs to be less than \(rhs).", at: codingPath)
+public func <=<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+    return { context in
+        return context.subject[keyPath: lhs] <= rhs
     }
 }
 
@@ -125,25 +93,9 @@ extension ValidityEncoder {
     ///
     public func validating<T: Encodable>(
         _ validate: @escaping (T, [CodingKey]) -> Validity,
-        if predicate: @escaping (ValidationContext<T>, [CodingKey]) -> Bool = { _, _ in true }
+        if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
     ) -> Self {
-        return validating(Validator(if: predicate, validate: { context, codingPath in validate(context.subject, codingPath) }))
-    }
-
-    /// Add a validation to be performed.
-    ///
-    /// - Parameters:
-    ///     - validate: A function taking values of type `T` and validating
-    ///         them. This function should return an array of all validation failures.
-    ///         `ValidationError` is a good general purpose error for this use-case.
-    ///     - predicate: A function returning `true` if this validator
-    ///         should run against the given value.
-    ///
-    public func validating<T: Encodable>(
-        _ validate: @escaping (ValidationContext<T>, [CodingKey]) -> Validity,
-        if predicate: @escaping (ValidationContext<T>) -> Bool
-    ) -> Self {
-        return validating(Validator(if: { context, _ in predicate(context) } , validate: validate))
+        return validating(Validator(if: predicate, validate: { context in validate(context.subject, context.codingPath) }))
     }
 
     /// Given the description of the correct & valid state being asserted,
@@ -153,9 +105,12 @@ extension ValidityEncoder {
     ///     - description: The description of the correct state described by the assertion.
     ///     - validate: The function called to assert a condition. The function should return `false`
     ///         if the validity check has failed or `true` if everything is valid.
-    public func validating<T: Encodable>(_ description: String, asserting validate: @escaping (ValidationContext<T>) -> Bool) -> Self {
-        return validating({ context, codingPath in
-            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: codingPath)
+    public func validating<T: Encodable>(
+        _ description: String,
+        asserting validate: @escaping (ValidationContext<T>) -> Bool
+    ) -> Self {
+        return validating({ context in
+            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: context.codingPath)
         })
     }
 
@@ -170,12 +125,11 @@ extension ValidityEncoder {
     public func validating<T: Encodable>(
         _ description: String,
         asserting validate: @escaping (ValidationContext<T>) -> Bool,
-        if predicate: @escaping (ValidationContext<T>, [CodingKey]) -> Bool) -> Self {
-        return validating(
-            { context, codingPath in
-            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: codingPath)
-            },
-            if: predicate
-        )
+        if predicate: @escaping (ValidationContext<T>) -> Bool) -> Self {
+        let validity: (ValidationContext<T>) -> Validity = { context in
+            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: context.codingPath)
+        }
+
+        return validating(validity, if: predicate)
     }
 }

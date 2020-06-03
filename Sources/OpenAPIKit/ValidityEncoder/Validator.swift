@@ -5,13 +5,26 @@
 //  Created by Mathew Polzin on 1/26/20.
 //
 
+/// A type that holds a function to determine if a validation
+/// applies (`predicate`) and a function that applies
+/// a validation (`validate`).
 public struct Validator<T: Encodable> {
     /// Applies validation on type `T`. Throws if validation fails.
-    public let validate: (ValidationContext<T>, [CodingKey]) -> Validity
+    ///
+    /// The context includes
+    /// - The entire `OpenAPI.Document`
+    /// - A value of the type in which this validator specializes.
+    /// - The coding path where the validation is occurring.
+    public let validate: (ValidationContext<T>) -> Validity
 
     /// Returns `true` if this validator should apply to
     /// the given value of type `T`.
-    public let predicate: (ValidationContext<T>, [CodingKey]) -> Bool
+    ///
+    /// The context includes
+    /// - The entire `OpenAPI.Document`
+    /// - A value of the type in which this validator specializes.
+    /// - The coding path where the validation is occurring.
+    public let predicate: (ValidationContext<T>) -> Bool
 
     /// Create a Validator that by default appllies to all
     /// values of type `T`.
@@ -23,18 +36,24 @@ public struct Validator<T: Encodable> {
     ///         should run against the given value.
     ///
     public init(
-        if predicate: @escaping (ValidationContext<T>, [CodingKey]) -> Bool = { _, _ in true },
-        validate: @escaping (ValidationContext<T>, [CodingKey]) -> Validity
+        if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true },
+        validate: @escaping (ValidationContext<T>) -> Validity
     ) {
         self.validate = validate
         self.predicate = predicate
     }
 }
 
+/// Validation errors are just a textual reason for validation failure and
+/// a coding path where the validation error occurred.
 public struct ValidationError: Swift.Error, CustomStringConvertible {
+    /// The reason for the validation failure.
     public let reason: String
+    /// The location where the failure occurred.
     public let codingPath: [CodingKey]
 
+    /// Create a new `ValidationError` with the given
+    /// reason and location (coding path).
     public init(reason: String, at path: [CodingKey]) {
         self.reason = reason
         self.codingPath = path
@@ -45,7 +64,8 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     }
 }
 
-public struct ValidationErrors: Error {
+/// A type that collects `ValidationErrors`.
+public struct ValidationErrors: Swift.Error {
     public let values: [ValidationError]
 
     internal var validity: Validity {
@@ -109,12 +129,12 @@ internal struct ValidationAttempt {
                 // coerced to T above.
                 return .valid
             }
-            let context = ValidationContext(document: document, subject: subject)
-            guard validator.predicate(context, codingPath) else {
+            let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
+            guard validator.predicate(context) else {
                 return .valid
             }
 
-            return validator.validate(context, codingPath)
+            return validator.validate(context)
         }
     }
 }

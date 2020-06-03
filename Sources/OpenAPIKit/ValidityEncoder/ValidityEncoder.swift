@@ -2,6 +2,7 @@
 public struct ValidationContext<T: Encodable> {
     public let document: OpenAPI.Document
     public let subject: T
+    public let codingPath: [CodingKey]
 }
 
 extension OpenAPI.Document {
@@ -36,9 +37,9 @@ public class ValidityEncoder {
     ///         `ValidationError` is a good general purpose error for this use-case.
     ///
     public func validating<T: Encodable>(
-        _ validate: @escaping (ValidationContext<T>, [CodingKey]) -> Validity
+        _ validate: @escaping (ValidationContext<T>) -> Validity
     ) -> Self {
-        return validating(Validator(if: { _, _ in true }, validate: validate))
+        return validating(Validator(if: { _ in true }, validate: validate))
     }
 
     /// Add a validation to be performed.
@@ -51,8 +52,8 @@ public class ValidityEncoder {
     ///         should run against the given value.
     ///
     public func validating<T: Encodable>(
-        _ validate: @escaping (ValidationContext<T>, [CodingKey]) -> Validity,
-        if predicate: @escaping (ValidationContext<T>, [CodingKey]) -> Bool
+        _ validate: @escaping (ValidationContext<T>) -> Validity,
+        if predicate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
         return validating(Validator(if: predicate, validate: validate))
     }
