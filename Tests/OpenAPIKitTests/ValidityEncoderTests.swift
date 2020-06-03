@@ -399,8 +399,8 @@ final class ValidityEncoderTests: XCTestCase {
         XCTAssertThrowsError(try validator.assertValidity()) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 5)
-            XCTAssertEqual(error?.values.map(\.reason).filter { $0 == "hello" }.count, 3)
-            XCTAssertEqual(error?.values.map(\.reason).filter { $0 == "world" }.count, 2)
+            XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
+            XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "world" }.count, 2)
         }
     }
 
@@ -437,8 +437,8 @@ final class ValidityEncoderTests: XCTestCase {
         XCTAssertThrowsError(try validator.assertValidity()) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 3)
-            XCTAssertEqual(error?.values.map(\.reason).filter { $0 == "hello" }.count, 3)
-            XCTAssertEqual(error?.values.map(\.reason).filter { $0 == "world" }.count, 0)
+            XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
+            XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "world" }.count, 0)
         }
     }
 
@@ -475,7 +475,7 @@ final class ValidityEncoderTests: XCTestCase {
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'there should be two servers'.")
-            XCTAssertEqual(error?.values.first?.codingPath.map(\.stringValue), ["info", "title"])
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["info", "title"])
         }
     }
 
@@ -560,7 +560,7 @@ final class ValidityEncoderTests: XCTestCase {
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Path Items must have at least one Operation'.")
-            XCTAssertEqual(error?.values.first?.codingPath.map(\.stringValue), ["paths"])
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
         }
     }
 
