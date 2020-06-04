@@ -10,6 +10,38 @@ import XCTest
 import OpenAPIKit
 
 final class ValidatorTests: XCTestCase {
+    func test_randomSyntaxConstructions() {
+        // just here to test out syntax constructions and make sure they compile
+        let validator = Validator()
+
+        _ = validator.validating(
+            "",
+            check: \OpenAPI.Document.openAPIVersion == .v3_0_0
+        )
+        _ = validator.validating(
+            "",
+            check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_0_0 }
+        )
+
+        _ = validator.validating(
+            "",
+            check: \[OpenAPI.Server].count > 1
+        )
+
+        _ = validator.validating(
+            "",
+            check: given(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+        )
+
+        _ = validator.validating(
+            "",
+            check: \[OpenAPI.Server].count >= 2,
+            where: { context in
+                context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
+            }
+        )
+    }
+
     func test_validationSucceedsUnconditionally() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,
@@ -452,7 +484,7 @@ final class ValidatorTests: XCTestCase {
         let validator = Validator()
             .validating(
                 "there should be two servers",
-                check: { context in context.document.servers.count == 2 },
+                check: { context in context.document.servers.count == 2 }, // just something false to check for every "hello" String value
                 where: \.subject == "hello"
         )
 
@@ -792,15 +824,15 @@ final class ValidatorTests: XCTestCase {
 
         let validator = Validator()
             .validating(
-                "Operations must contain a status code 500 or there must be two possible response",
-                check: given(\OpenAPI.Response.Map.keys, { $0.contains(500) })
+                "Operations must contain a status code 500 or there must be two possible responses",
+                check: given(\OpenAPI.Response.Map.keys) { $0.contains(500) }
                     || \.count == 2
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must contain a status code 500 or there must be two possible response")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must contain a status code 500 or there must be two possible responses")
         }
     }
 
@@ -876,6 +908,44 @@ final class ValidatorTests: XCTestCase {
         }
     }
 
+    func test_conditionForExtensionWithFailingCheckAlternativeWhereConstruction() {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hiya",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "world"
+            ]
+        )
+
+        let validator = Validator()
+            .validating(
+                "x-string is 'hello'",
+                check: \.subject == "hello",
+                where: \.codingPath.last?.stringValue == "x-string"
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 2)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: x-string is 'hello'")
+        }
+    }
+
     func test_conditionForExtensionWithFailingCheckAlternativeConstruction() {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,
@@ -918,5 +988,81 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "x-string needs to be 'hello'")
         }
+    }
+
+    func test_unconditionalServerCountCheckFails() {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hiya",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [
+                "/hello/world": .init(servers: [server])
+            ],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "world"
+            ]
+        )
+
+        let validator = Validator()
+            .validating(
+                "All server arrays have more than 1 server",
+                check: \[OpenAPI.Server].count > 1
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 1)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All server arrays have more than 1 server")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "servers"])
+        }
+    }
+
+    func test_conditionalServerCountCheckSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hiya",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [
+                "/hello/world": .init(servers: [server])
+            ],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "world"
+            ]
+        )
+
+        let validator = Validator()
+            .validating(
+                "All server arrays have more than 1 server",
+                check: \[OpenAPI.Server].count > 1,
+                where: \.codingPath.count < 2
+        )
+
+        try document.validate(using: validator)
     }
 }

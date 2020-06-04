@@ -130,7 +130,7 @@ extension Validator {
     }
 
     /// Given the description of the correct & valid state being asserted,
-    /// create a validation function that can be passed to a `ValidityEncoder`.
+    /// create a validation function and add it to the `Validator`.
     ///
     /// - Parameters:
     ///     - description: The description of the correct state described by the assertion.
@@ -148,7 +148,7 @@ extension Validator {
     }
 
     /// Given the description of the correct & valid state being asserted,
-    /// create a validation function that can be passed to a `ValidityEncoder`.
+    /// create a validation function and add it to the `Validator`.
     ///
     /// - Parameters:
     ///     - description: The description of the correct state described by the assertion.
