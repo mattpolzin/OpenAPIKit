@@ -1,5 +1,5 @@
 //
-//  ValidityEncoder+Convenience.swift
+//  Validator+Convenience.swift
 //  
 //
 //  Created by Mathew Polzin on 6/2/20.

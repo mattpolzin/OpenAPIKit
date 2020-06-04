@@ -1,123 +1,480 @@
 //
 //  Validator.swift
-//  
 //
-//  Created by Mathew Polzin on 1/26/20.
+//
+//  Created by Mathew Polzin on 6/2/20.
 //
 
-/// The context in which a validation can be applied.
-///
-/// It may or may not be important for a particular validation
-/// to know what the whole `OpenAPI.Document` looks like
-/// or the coding path where the validation is being applied,
-/// but it always has access to these two pieces of information
-/// in addition to the subject (a value of the type on which the
-/// validation is specialized).
-public struct ValidationContext<T: Encodable> {
-    public let document: OpenAPI.Document
-    public let subject: T
-    public let codingPath: [CodingKey]
+extension OpenAPI.Document {
+    /// Validate this `OpenAPI.Document`.
+    ///
+    /// - parameter validator: Validator to use. By default,
+    ///     a validator that just asserts requirements of the OpenAPI
+    ///     Specification will be used.
+    ///
+    /// - throws: `ValidationErrors` if any validations failed.
+    ///     `EncodingError` if encoding failed for a structural reason.
+    public func validate(using validator: Validator = .default) throws {
+        let validator = _Validator(document: self, validations: validator.validations)
+        var container = validator.singleValueContainer()
+
+        // we kick things off by applying validations to the root (OpenAPI.Document)
+        // and then encoding with the single value container.
+        // After this, validations are only applied by keyed/unkeyed containers and
+        // by the leaf node methods of the single value container.
+        validator.applyValidations(to: self)
+        try container.encode(self)
+
+        if !validator.errors.isEmpty {
+            throw ValidationErrors(values: validator.errors)
+        }
+    }
 }
 
-/// Holds a function to determine if a validation
-/// applies (`predicate`) and a function that applies
-/// a validation (`validate`).
-public struct Validation<T: Encodable> {
-    /// Applies validation on type `T`. Throws if validation fails.
-    ///
-    /// The context includes
-    /// - The entire `OpenAPI.Document`
-    /// - A value of the type in which this validator specializes.
-    /// - The coding path where the validation is occurring.
-    public let validate: (ValidationContext<T>) -> [ValidationError]
+/// `Codable`-style `Encoder` that can be used to encode an `Encodable` type to a `Validity` by applying
+/// the specified validation checks.
+public final class Validator {
 
-    /// Returns `true` if this validator should apply to
-    /// the given value of type `T`.
-    ///
-    /// The context includes
-    /// - The entire `OpenAPI.Document`
-    /// - A value of the type in which this validator specializes.
-    /// - The coding path where the validation is occurring.
-    public let predicate: (ValidationContext<T>) -> Bool
+    internal var validations: [AnyValidation]
 
-    /// Create a Validation that by default appllies to all
-    /// values of type `T`.
+    /// Creates a `Validator`.
+    internal init(validations: [AnyValidation]) {
+        self.validations = validations
+    }
+
+    /// Creates an empty `Validator`. Note that
+    /// this Validator will not perform any validations
+    /// that are not added to it. If you want to start with
+    /// the validations required by the OpenAPI specifcation,
+    /// use `Validator.default`.
+    public convenience init() {
+        self.init(validations: [])
+    }
+
+    /// The default Validator contians only
+    /// validations required by the OpenAPI
+    /// specification.
+    public static var `default`: Self {
+        Self.init(validations: []) // TODO: add default validations
+    }
+
+    /// Add a validation to be performed.
     ///
     /// - Parameters:
     ///     - validate: A function taking values of type `T` and validating
-    ///         them. This function should throw if a validation error occurs.
+    ///         them. This function should return an array of all validation failures.
+    ///         `ValidationError` is a good general purpose error for this use-case.
+    ///
+    public func validating<T: Encodable>(
+        _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
+    ) -> Self {
+        return validating(Validation(if: { _ in true }, validate: validate))
+    }
+
+    /// Add a validation to be performed.
+    ///
+    /// - Parameters:
+    ///     - validate: A function taking values of type `T` and validating
+    ///         them. This function should return an array of all validation failures.
+    ///         `ValidationError` is a good general purpose error for this use-case.
     ///     - predicate: A function returning `true` if this validator
     ///         should run against the given value.
     ///
-    public init(
-        if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true },
-        validate: @escaping (ValidationContext<T>) -> [ValidationError]
+    public func validating<T: Encodable>(
+        _ validate: @escaping (ValidationContext<T>) -> [ValidationError],
+        where predicate: @escaping (ValidationContext<T>) -> Bool
+    ) -> Self {
+        return validating(Validation(if: predicate, validate: validate))
+    }
+
+    /// Add a validation to be performed.
+    public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
+        validations.append(AnyValidation(validation))
+        return self
+    }
+}
+
+/// Must be used with Encodable dict values and array elements only.
+enum ValidityEncoderNode {
+    case unused
+    case single
+    case unkeyed(count: Int)
+    case keyed
+}
+
+class _Validator: Encoder {
+
+    init(
+        document: OpenAPI.Document,
+        validations: [AnyValidation],
+        userInfo: [CodingUserInfoKey: Any] = [:],
+        codingPath: [CodingKey] = []
     ) {
-        self.validate = validate
-        self.predicate = predicate
-    }
-}
-
-/// Validation errors are just a textual reason for validation failure and
-/// a coding path where the validation error occurred.
-public struct ValidationError: Swift.Error, CustomStringConvertible {
-    /// The reason for the validation failure.
-    public let reason: String
-    /// The location where the failure occurred.
-    public let codingPath: [CodingKey]
-
-    /// Create a new `ValidationError` with the given
-    /// reason and location (coding path).
-    public init(reason: String, at path: [CodingKey]) {
-        self.reason = reason
-        self.codingPath = path
+        self.document = document
+        self.validations = validations
+        self.userInfo = userInfo
+        self.codingPath = codingPath
     }
 
-    public var description: String {
-        "\(reason) at path: \(codingPath.map { $0.intValue.map { "[\($0)]" } ?? "/\($0.stringValue)" }.joined())"
-    }
-}
+    let codingPath: [CodingKey]
+    let userInfo: [CodingUserInfoKey: Any]
+    let document: OpenAPI.Document
+    private(set) var validations: [AnyValidation]
 
-/// Collects `ValidationErrors`.
-public struct ValidationErrors: Swift.Error {
-    public let values: [ValidationError]
-}
+    var errors: [ValidationError] = []
+    var node: ValidityEncoderNode = .unused
 
-/// Erases the type on which a `Validator` is specialized and combines
-/// the predicate and validation logic into one `apply` function.
-internal struct AnyValidation {
-    // The only reason apply is private is because `attempt()` and `callAsFunction()`
-    // get us back our argument labels but are otherwise just straight-forward calls
-    // to `apply()`
-    private let apply: (OpenAPI.Document, Encodable, [CodingKey]) -> [ValidationError]
-
-    #if swift(>=5.2)
-    func callAsFunction(_ value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
-        return attempt(on: value, in: document, at: codingPath)
-    }
-    #endif
-
-    func attempt(on value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
-        return apply(document, value, codingPath)
+    func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key : CodingKey {
+        return .init(_KeyedEncodingContainer(referencing: self))
     }
 
-    init<T: Encodable>(_ validator: Validation<T>) {
-        self.apply = { document, input, codingPath in
-            
-            guard let subject = input as? T else {
-                return []
+    func unkeyedContainer() -> UnkeyedEncodingContainer {
+        return _UnkeyedEncodingContainer(referencing: self)
+    }
+
+    func singleValueContainer() -> SingleValueEncodingContainer {
+        return self
+    }
+
+    var unkeyedCount: Int {
+        get {
+            guard case .unkeyed(let count) = node else {
+                return 0
             }
-            guard type(of: subject) == type(of: input) else {
-                // apparently we need to guard against T? being
-                // coerced to T above.
-                return []
+            return count
+        }
+        set {
+            guard case .unkeyed = node else {
+                fatalError()
             }
-            let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
-            guard validator.predicate(context) else {
-                return []
-            }
-
-            return validator.validate(context)
+            node = .unkeyed(count: newValue)
         }
     }
+
+    /// create a new `_ReferencingEncoder` instance as `key` inheriting `userInfo`
+    func encoder(for key: CodingKey) -> _ReferencingValidator {
+        return .init(referencing: self, key: key)
+    }
+
+    /// create a new `_ReferencingEncoder` instance at `index` inheriting `userInfo`
+    func encoder(at index: Int) -> _ReferencingValidator {
+        return .init(referencing: self, at: index)
+    }
+
+    private var canEncodeNewValue: Bool {
+        guard case .unused = node else {
+            return false
+        }
+        return true
+    }
+}
+
+class _ReferencingValidator: _Validator {
+    private enum Reference {
+        case dictionary(String)
+        case array(Int)
+    }
+
+    private let encoder: _Validator
+    private let reference: Reference
+
+    init(referencing encoder: _Validator, key: CodingKey) {
+        self.encoder = encoder
+        reference = .dictionary(key.stringValue)
+        super.init(
+            document: encoder.document,
+            validations: encoder.validations,
+            userInfo: encoder.userInfo,
+            codingPath: encoder.codingPath + [key]
+        )
+    }
+
+    init(referencing encoder: _Validator, at index: Int) {
+        self.encoder = encoder
+        reference = .array(index)
+        super.init(
+            document: encoder.document,
+            validations: encoder.validations,
+            userInfo: encoder.userInfo,
+            codingPath: encoder.codingPath + [_CodingKey(index: index)]
+        )
+    }
+
+    deinit {
+        encoder.errors += errors
+        switch reference {
+        case .dictionary:
+            switch encoder.node {
+            case .keyed, .unused:
+                break
+
+            case .single, .unkeyed:
+                fatalError()
+            }
+        case .array(let index):
+            switch encoder.node {
+            case .unkeyed(var count):
+                if index == count {
+                    count += 1
+                }
+                encoder.node = .unkeyed(count: count)
+            case .unused:
+                encoder.node = .unkeyed(count: 1)
+
+            case .keyed, .single:
+                fatalError()
+            }
+        }
+    }
+}
+
+extension _Validator: SingleValueEncodingContainer {
+    func encodeNil() {
+        assertCanEncodeNewValue()
+        node = .single
+    }
+
+    func encode(_ value: Bool) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: String) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Double) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Float) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Int) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Int8) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Int16) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Int32) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: Int64) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: UInt) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: UInt8) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: UInt16) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: UInt32) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode(_ value: UInt64) {
+        applyValidations(to: value)
+        node = .single
+    }
+
+    func encode<T>(_ value: T) throws where T : Encodable {
+        assertCanEncodeNewValue()
+        try value.encode(to: self)
+    }
+
+    /// Asserts that a single value can be encoded at the current coding path
+    /// (i.e. that one has not already been encoded through this container).
+    /// `preconditionFailure()`s if one cannot be encoded.
+    private func assertCanEncodeNewValue() {
+        precondition(
+            canEncodeNewValue,
+            "Attempt to encode value through single value container when previously value already encoded."
+        )
+    }
+
+    fileprivate func applyValidations(to value: Encodable) {
+        for idx in validations.indices {
+            #if swift(>=5.2)
+            errors += validations[idx](value, in: document, at: codingPath)
+            #else
+            errors += validations[idx].attempt(on: value, in: document, at: codingPath)
+            #endif
+        }
+    }
+}
+
+struct _UnkeyedEncodingContainer: UnkeyedEncodingContainer {
+    let encoder: _Validator
+
+    init(referencing encoder: _Validator) {
+        self.encoder = encoder
+    }
+
+    var codingPath: [CodingKey] { encoder.codingPath }
+
+    var count: Int { encoder.unkeyedCount }
+
+    func encodeNil() {
+        encoder.unkeyedCount += 1
+    }
+
+    func encode<T>(_ value: T) throws where T: Encodable {
+        encoder.applyValidations(to: value)
+        try currentEncoder.encode(value)
+    }
+
+    func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey {
+        currentEncoder.container(keyedBy: keyType)
+    }
+
+    func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
+        currentEncoder.unkeyedContainer()
+    }
+
+    func superEncoder() -> Encoder { currentEncoder }
+
+    private var currentEncoder: _ReferencingValidator {
+        return encoder.encoder(at: count)
+    }
+}
+
+struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
+
+    let encoder: _Validator
+
+    init(referencing encoder: _Validator) {
+        self.encoder = encoder
+    }
+
+    var codingPath: [CodingKey] { encoder.codingPath }
+
+    func encodeNil(forKey key: Key) {}
+
+    func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
+        encoder.applyValidations(to: value)
+        try encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Bool, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: String, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Double, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Float, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Int, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Int8, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Int16, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Int32, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: Int64, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: UInt, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: UInt8, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: UInt16, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: UInt32, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func encode(_ value: UInt64, forKey key: Key) {
+        encoder(for: key).encode(value)
+    }
+
+    func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey {
+        encoder(for: key).container(keyedBy: keyType)
+    }
+
+    func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer {
+        encoder(for: key).unkeyedContainer()
+    }
+
+    func superEncoder() -> Encoder {
+        encoder(for: _CodingKey.super)
+    }
+
+    func superEncoder(forKey key: Key) -> Encoder {
+        encoder(for: key)
+    }
+
+    private func encoder(for key: CodingKey) -> _ReferencingValidator { return encoder.encoder(for: key) }
+}
+
+struct _CodingKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+
+    init(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    init(intValue: Int) {
+        self.stringValue = "\(intValue)"
+        self.intValue = intValue
+    }
+
+    init(index: Int) {
+        self.stringValue = "Index \(index)"
+        self.intValue = index
+    }
+
+    static let `super` = _CodingKey(stringValue: "super")
 }
