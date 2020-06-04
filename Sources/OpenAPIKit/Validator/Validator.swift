@@ -54,7 +54,7 @@ public final class Validator {
     /// The default Validator contians only
     /// validations required by the OpenAPI
     /// specification.
-    public static var `default`: Self {
+    public static var `default`: Validator {
         Self.init(validations: []) // TODO: add default validations
     }
 

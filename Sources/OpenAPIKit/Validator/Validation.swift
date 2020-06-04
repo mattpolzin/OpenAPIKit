@@ -93,13 +93,13 @@ internal struct AnyValidation {
 
     #if swift(>=5.2)
     func callAsFunction(_ value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
-        return attempt(on: value, in: document, at: codingPath)
+        return apply(document, value, codingPath)
     }
-    #endif
-
+    #else
     func attempt(on value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
         return apply(document, value, codingPath)
     }
+    #endif
 
     init<T: Encodable>(_ validator: Validation<T>) {
         self.apply = { document, input, codingPath in

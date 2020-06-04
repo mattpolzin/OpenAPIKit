@@ -1,5 +1,5 @@
 //
-//  ValidityEncoderTests.swift
+//  ValidatorTests.swift
 //  
 //
 //  Created by Mathew Polzin on 6/2/20.
@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 import OpenAPIKit
 
-final class ValidityEncoderTests: XCTestCase {
+final class ValidatorTests: XCTestCase {
     func test_validationSucceedsUnconditionally() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,

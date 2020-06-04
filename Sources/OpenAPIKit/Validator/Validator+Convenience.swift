@@ -87,6 +87,8 @@ public func <=<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (Vali
     }
 }
 
+/// Create a validation or predicate function from a KeyPath
+/// and a function operating on that value.
 public func given<T: Encodable, U>(_ path: KeyPath<T, U>, _ check: @escaping (U) -> Bool) -> (ValidationContext<T>) -> Bool {
     return { context in check(context.subject[keyPath: path]) }
 }
