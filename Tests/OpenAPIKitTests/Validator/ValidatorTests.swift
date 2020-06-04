@@ -487,7 +487,7 @@ final class ValidatorTests: XCTestCase {
 
         let validator = Validator()
             .validating(
-                "API version is 2.0",
+                "API version is not 2.0",
                 check: \OpenAPI.Document.Info.version != "2.0",
                 where: \.title == "hello"
         )
@@ -548,7 +548,7 @@ final class ValidatorTests: XCTestCase {
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Path Items must have at least one Operation'.")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }
     }
 
@@ -627,7 +627,9 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                where: { (context: ValidationContext<OpenAPI.Document>) in context.subject.servers.map { $0.url.absoluteString }.contains("https://test.server.com") }
+                where: given(\OpenAPI.Document.servers) { servers in
+                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator))
@@ -643,7 +645,9 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                where: { (context: ValidationContext<OpenAPI.Document>) in context.subject.servers.map { $0.url.absoluteString }.contains("https://test.server.com") }
+                where: given(\OpenAPI.Document.servers) { servers in
+                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                }
         )
 
         XCTAssertNoThrow(try document2.validate(using: validator2))

@@ -11,7 +11,7 @@ import XCTest
 
 final class ValidationTests: XCTestCase {
     func test_optionalValidation() {
-        let validation = Validation<String>(validate: { _ in [ ValidationError(reason: "because", at: []) ] })
+        let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] })
         let check = AnyValidation(validation)
 
         #if swift(>=5.2)
@@ -30,7 +30,7 @@ final class ValidationTests: XCTestCase {
     }
 
     func test_wrongTypeValidation() {
-        let validation = Validation<String>(validate: { _ in [ ValidationError(reason: "because", at: []) ] })
+        let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] })
         let check = AnyValidation(validation)
 
         #if swift(>=5.2)
@@ -42,7 +42,7 @@ final class ValidationTests: XCTestCase {
     }
 
     func test_failsPredicateValidation() {
-        let validation = Validation<String>(if: { _ in false }, validate: { _ in [ ValidationError(reason: "because", at: []) ] })
+        let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] }, where: { _ in false })
         let check = AnyValidation(validation)
 
         #if swift(>=5.2)

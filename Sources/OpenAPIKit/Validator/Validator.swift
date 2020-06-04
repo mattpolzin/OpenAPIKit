@@ -14,7 +14,7 @@ extension OpenAPI.Document {
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
-    public func validate(using validator: Validator = .default) throws {
+    public func validate(using validator: Validator = .init()) throws {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
@@ -31,8 +31,96 @@ extension OpenAPI.Document {
     }
 }
 
-/// `Codable`-style `Encoder` that can be used to encode an `Encodable` type to a `Validity` by applying
-/// the specified validation checks.
+/// A validator that works by traversing an `Encodable` object and validating
+/// any values that match an included validation's type and pass that validation's
+/// predicate.
+///
+/// The default Validator will perform a set of default validations
+/// that catch OpenAPI Specification violations not possible (or inconvenient) to
+/// prevent using the Swift type-system.
+///
+/// **Example**
+///
+///     let document = OpenAPI.Document(...)
+///     let validator = Validator()
+///     try document.validate(using: validator)
+///
+///     // or, equivalently for the default validator:
+///     try document.validate()
+///
+/// The default validations are
+/// - Operations must contain at least one response.
+/// - Document-level tag names are unique.
+///
+/// If you want a Validator that won't perform any
+/// validations except the ones you add, use
+/// `Validator.blank`.
+///
+/// You can add validations to the validator using the
+/// `validating()` instance methods.
+///
+/// There are a few default validations that ship with OpenAPIKit but
+/// are not used unless explicitly added to a Validator. You can find these
+/// validations as static members of the `Validation` type.
+///
+/// **Example**
+///
+///     let document = OpenAPI.Document(...)
+///     let validator = Validator()
+///         .validating(.documentContainsPaths)
+///         .validating(.pathsContainOperations)
+///     try document.validate(using: validator)
+///
+/// At their core, all validations are values of the `Validation`
+/// type. You can create validations by initializing the `Validation`
+/// type directly but it is generally more convenient to add validations
+/// to a Validator using one of the convenience `validating()`
+/// methods that know how to construct `Validation` on your behalf.
+///
+/// For example, you can construct validation methods for simple equalities
+/// and inequalities by specifying the KeyPath from any OpenAPI type to
+/// the value you want to validate and then writing the equality/inequality
+/// that must succeed for the validation to pass.
+///
+/// **Example**
+///
+///     let validator = Validator()
+///         .validating(
+///             "API version is 2.0",
+///             check: \OpenAPI.Document.Info.version == "2.0"
+///     )
+///
+/// You can add a `where` clause to any validation as long as the `check` and
+/// `where` clause both examine the same type (i.e. `OpenAPI.Document.Info`
+/// from the previous example and `OpenAPI.Document` from the next example).
+///
+/// The next example also uses `given()`  in its `where` caluse. This allows you to
+/// dig into a value based on its KeyPath just like the previous example but you can
+/// use it for more complicated criteria than equality/inequality.
+///
+/// Finally, the next example also introduces the context access KayPath syntax in its
+/// `check` clause. This syntax allows you to access the entire OpenAPI Document
+/// that is being validated as `\.document`. It also gives you access to the current value
+/// being validated as `\.subject` and the current key path as `\.codingPath`.
+///
+/// **Example**
+///
+///     let validator = Validator()
+///         .validating(
+///             "At least two servers are specified if one of them is the test server.",
+///             check: \.document.servers.count >= 2,
+///             where: given(\OpenAPI.Document.servers) { servers in
+///                 servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+///             }
+///     )
+///
+/// Context access, the `given()` method, and the inequality KeyPath syntax are all
+/// allowed in both the `check` and `where` clauses. Just keep in mind that if you
+/// omit information about the type of thing being validated in one clause (as you do
+/// when you access `\.document`) then you need to indicate the type (perhaps with
+/// a KeyPath that includes the full type as in `\OpenAPI.Document.servers` above) in the other clause
+/// so the type system knows what you are validating.
+///
 public final class Validator {
 
     internal var validations: [AnyValidation]
@@ -42,20 +130,26 @@ public final class Validator {
         self.validations = validations
     }
 
-    /// Creates an empty `Validator`. Note that
-    /// this Validator will not perform any validations
-    /// that are not added to it. If you want to start with
-    /// the validations required by the OpenAPI specifcation,
-    /// use `Validator.default`.
+    /// Creates the default `Validator`. Note that
+    /// this Validator will perform the default validations.
+    /// If you want a Validator that won't perform any
+    /// validations except the ones you add, use
+    /// `Validator.blank`.
+    ///
+    /// The default validations are
+    /// - Operations must contain at least one response.
+    /// - Document-level tag names are unique.
     public convenience init() {
-        self.init(validations: [])
+        self.init(validations: [
+            .init(.operationsContainResponses),
+            .init(.documentTagNamesAreUnique)
+        ])
     }
 
-    /// The default Validator contians only
-    /// validations required by the OpenAPI
-    /// specification.
-    public static var `default`: Validator {
-        Self.init(validations: []) // TODO: add default validations
+    /// A validator with no validation rules at all (not
+    /// even the defaults).
+    public static var blank: Validator {
+        return Self.init(validations: [])
     }
 
     /// Add a validation to be performed.
@@ -68,7 +162,7 @@ public final class Validator {
     public func validating<T: Encodable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) -> Self {
-        return validating(Validation(if: { _ in true }, validate: validate))
+        return validating(Validation(check: validate, where: { _ in true }))
     }
 
     /// Add a validation to be performed.
@@ -84,7 +178,7 @@ public final class Validator {
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError],
         where predicate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
-        return validating(Validation(if: predicate, validate: validate))
+        return validating(Validation(check: validate, where: predicate))
     }
 
     /// Add a validation to be performed.
@@ -319,12 +413,13 @@ extension _Validator: SingleValueEncodingContainer {
         )
     }
 
-    fileprivate func applyValidations(to value: Encodable) {
+    fileprivate func applyValidations(to value: Encodable, atKey key: CodingKey? = nil) {
+        let pathTail = key.map { [$0] } ?? []
         for idx in validations.indices {
             #if swift(>=5.2)
-            errors += validations[idx](value, in: document, at: codingPath)
+            errors += validations[idx](value, in: document, at: codingPath + pathTail)
             #else
-            errors += validations[idx].attempt(on: value, in: document, at: codingPath)
+            errors += validations[idx].attempt(on: value, in: document, at: codingPath + pathTail)
             #endif
         }
     }
@@ -346,7 +441,7 @@ struct _UnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     func encode<T>(_ value: T) throws where T: Encodable {
-        encoder.applyValidations(to: value)
+        encoder.applyValidations(to: value, atKey: _CodingKey(index: count))
         try currentEncoder.encode(value)
     }
 
@@ -378,7 +473,7 @@ struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
     func encodeNil(forKey key: Key) {}
 
     func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
-        encoder.applyValidations(to: value)
+        encoder.applyValidations(to: value, atKey: key)
         try encoder(for: key).encode(value)
     }
 

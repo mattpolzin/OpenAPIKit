@@ -7,11 +7,17 @@
 
 import Foundation
 
-public func &&<T: Encodable>(lhs: @escaping (ValidationContext<T>) -> Bool, rhs: @escaping (ValidationContext<T>) -> Bool) -> (ValidationContext<T>) -> Bool {
+public func &&<T: Encodable>(
+    lhs: @escaping (ValidationContext<T>) -> Bool,
+    rhs: @escaping (ValidationContext<T>) -> Bool
+) -> (ValidationContext<T>) -> Bool {
     return { context in lhs(context) && rhs(context) }
 }
 
-public func ||<T: Encodable>(lhs: @escaping (ValidationContext<T>) -> Bool, rhs: @escaping (ValidationContext<T>) -> Bool) -> (ValidationContext<T>) -> Bool {
+public func ||<T: Encodable>(
+    lhs: @escaping (ValidationContext<T>) -> Bool,
+    rhs: @escaping (ValidationContext<T>) -> Bool
+) -> (ValidationContext<T>) -> Bool {
     return { context in lhs(context) || rhs(context) }
 }
 
@@ -109,7 +115,12 @@ extension Validator {
         _ validate: @escaping (T, [CodingKey]) -> [ValidationError],
         where predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
     ) -> Self {
-        return validating(Validation(if: predicate, validate: { context in validate(context.subject, context.codingPath) }))
+        return validating(
+            Validation(
+                check: { context in validate(context.subject, context.codingPath) },
+                where: predicate
+            )
+        )
     }
 
     /// Given the description of the correct & valid state being asserted,
@@ -124,7 +135,9 @@ extension Validator {
         check validate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
         return validating({ context in
-            return validate(context) ? [] : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
+            return validate(context)
+                ? []
+                : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
         })
     }
 
@@ -141,7 +154,9 @@ extension Validator {
         check validate: @escaping (ValidationContext<T>) -> Bool,
         where predicate: @escaping (ValidationContext<T>) -> Bool) -> Self {
         let validity: (ValidationContext<T>) -> [ValidationError] = { context in
-            return validate(context) ? [] : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
+            return validate(context)
+                ? []
+                : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
         }
 
         return validating(validity, where: predicate)

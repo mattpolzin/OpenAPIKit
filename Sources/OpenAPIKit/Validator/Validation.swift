@@ -50,8 +50,8 @@ public struct Validation<T: Encodable> {
     ///         should run against the given value.
     ///
     public init(
-        if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true },
-        validate: @escaping (ValidationContext<T>) -> [ValidationError]
+        check validate: @escaping (ValidationContext<T>) -> [ValidationError],
+        where predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
     ) {
         self.validate = validate
         self.predicate = predicate
