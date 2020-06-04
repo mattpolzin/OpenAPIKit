@@ -459,7 +459,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 3)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'there should be two servers'.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: there should be two servers")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["info", "title"])
         }
     }
@@ -547,7 +547,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Path Items must have at least one Operation'.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Items must have at least one Operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }
     }
@@ -724,7 +724,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Operations must have at least one Response and they all must be status code 200'.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must have at least one Response and they all must be status code 200")
         }
     }
 
@@ -800,7 +800,123 @@ final class ValidatorTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Operations must contain a status code 500 or there must be two possible response'.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must contain a status code 500 or there must be two possible response")
+        }
+    }
+
+    func test_conditionForExtensionWithPassingCheck() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hello",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "hello"
+            ]
+        )
+
+        let validator = Validator()
+            .validating(
+                "x-string is 'hello'",
+                check: \.subject == "hello",
+                where: given(\.codingPath) { $0.last?.stringValue == "x-string" }
+        )
+
+        try document.validate(using: validator)
+    }
+
+    func test_conditionForExtensionWithFailingCheck() {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hiya",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "world"
+            ]
+        )
+
+        let validator = Validator()
+            .validating(
+                "x-string is 'hello'",
+                check: \.subject == "hello",
+                where: given(\.codingPath) { $0.last?.stringValue == "x-string" }
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 2)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: x-string is 'hello'")
+        }
+    }
+
+    func test_conditionForExtensionWithFailingCheckAlternativeConstruction() {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://google.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hiya",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: [
+                "x-string": "world"
+            ]
+        )
+
+        let validation = Validation<String>(
+            check: { context in
+                guard context.subject == "hello" else {
+                    return [ ValidationError(reason: "x-string needs to be 'hello'", at: context.codingPath) ]
+                }
+                return []
+            },
+            where: { context in context.codingPath.last?.stringValue == "x-string" }
+        )
+
+        let validator = Validator()
+            .validating(validation)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 2)
+            XCTAssertEqual(error?.values.first?.reason, "x-string needs to be 'hello'")
         }
     }
 }

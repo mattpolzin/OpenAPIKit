@@ -2,7 +2,7 @@
 
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT)
 
-# OpenAPIKit
+# OpenAPIKit <!-- omit in toc -->
 
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
 
@@ -10,8 +10,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
 		- [Decoding Errors](#decoding-errors)
 	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
+	- [Validating OpenAPI Documents](#validating-openapi-documents)
 	- [A note on dictionary ordering](#a-note-on-dictionary-ordering)
-	- [Generating OpenAPI Documents](#generating-openapi-documents)
 	- [OpenAPI Document structure](#openapi-document-structure)
 		- [Document Root](#document-root)
 		- [Routes](#routes)
@@ -22,6 +22,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [JSON References](#json-references)
 		- [Specification Extensions](#specification-extensions)
 - [Curated Integrations](#curated-integrations)
+	- [Generating OpenAPI Documents](#generating-openapi-documents)
+	- [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
 - [Project Status](#project-status)
 	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
@@ -33,9 +35,9 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 	- [Components Object (`OpenAPI.Components`)](#components-object-openapicomponents)
 	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
 	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
-	- [Operation Object (`OpenAPI.Operation`)](#operation-object-openapipathitemoperation)
-	- [External Document Object (`OpenAPI.ExternalDocumentation`)](#external-document-object-openapiexternaldoc)
-	- [Parameter Object (`OpenAPI.Parameter`)](#parameter-object-openapipathitemparameter)
+	- [Operation Object (`OpenAPI.Operation`)](#operation-object-openapioperation)
+	- [External Document Object (`OpenAPI.ExternalDocumentation`)](#external-document-object-openapiexternaldocumentation)
+	- [Parameter Object (`OpenAPI.Parameter`)](#parameter-object-openapiparameter)
 	- [Request Body Object (`OpenAPI.Request`)](#request-body-object-openapirequest)
 	- [Media Type Object (`OpenAPI.Content`)](#media-type-object-openapicontent)
 	- [Encoding Object (`OpenAPI.Content.Encoding`)](#encoding-object-openapicontentencoding)
@@ -84,6 +86,19 @@ let openAPIDoc = ...
 let encoder = ... // JSONEncoder() or YAMLEncoder()
 let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 ```
+
+### Validating OpenAPI Documents
+Thanks to Swift's type system, the vast majority of the OpenAPI Specification is represented by the types of OpenAPIKit -- you cannot create bad OpenAPI docuements in the first place and decoding a document will fail with generally useful errors.
+
+That being said, there are a small number of additional checks that you can perform to really put any concerns to bed.
+
+```swift
+let openAPIDoc = ...
+// perform additional validations on the document:
+try openAPIDoc.validate()
+```
+
+You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [Validation Documentation](./documentation/validation.md).
 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a totally different order.

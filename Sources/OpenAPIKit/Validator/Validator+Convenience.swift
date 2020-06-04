@@ -99,6 +99,12 @@ public func given<T: Encodable, U>(_ path: KeyPath<T, U>, _ check: @escaping (U)
     return { context in check(context.subject[keyPath: path]) }
 }
 
+/// Create a validation or predicate function from a KeyPath
+/// and a function operating on that value.
+public func given<T: Encodable, U>(_ path: KeyPath<ValidationContext<T>, U>, _ check: @escaping (U) -> Bool) -> (ValidationContext<T>) -> Bool {
+    return { context in check(context[keyPath: path]) }
+}
+
 extension Validator {
     public typealias KeyPathPredicate<T: Encodable, U: Equatable> = KeyPath<ValidationContext<T>, U>
 
@@ -137,7 +143,7 @@ extension Validator {
         return validating({ context in
             return validate(context)
                 ? []
-                : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
+                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
         })
     }
 
@@ -156,7 +162,7 @@ extension Validator {
         let validity: (ValidationContext<T>) -> [ValidationError] = { context in
             return validate(context)
                 ? []
-                : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
+                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
         }
 
         return validating(validity, where: predicate)
