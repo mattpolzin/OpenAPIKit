@@ -1,32 +1,55 @@
 
-public struct ValidationContext<T: Encodable> {
-    public let document: OpenAPI.Document
-    public let subject: T
-    public let codingPath: [CodingKey]
-}
-
 extension OpenAPI.Document {
-    /// Create a validator for this Document.
-    public var validator: ValidityEncoder { ValidityEncoder(document: self) }
+    /// Validate this `OpenAPI.Document`.
+    ///
+    /// - parameter validator: Validator to use. By default,
+    ///     a validator that just asserts requirements of the OpenAPI
+    ///     Specification will be used.
+    ///
+    /// - throws: `ValidationErrors` if any validations failed.
+    ///     `EncodingError` if encoding failed for a structural reason.
+    public func validate(using validator: Validator = .default) throws {
+        let validator = _Validator(document: self, validations: validator.validations)
+        var container = validator.singleValueContainer()
+
+        // we kick things off by applying validations to the root (OpenAPI.Document)
+        // and then encoding with the single value container.
+        // After this, validations are only applied by keyed/unkeyed containers and
+        // by the leaf node methods of the single value container.
+        validator.applyValidations(to: self)
+        try container.encode(self)
+
+        if !validator.errors.isEmpty {
+            throw ValidationErrors(values: validator.errors)
+        }
+    }
 }
 
 /// `Codable`-style `Encoder` that can be used to encode an `Encodable` type to a `Validity` by applying
 /// the specified validation checks.
-public class ValidityEncoder {
+public final class Validator {
 
-    internal var validations: [ValidationAttempt]
-    internal let document: OpenAPI.Document
+    internal var validations: [AnyValidation]
 
-    /// Creates a `TransformEncoder`.
-    internal init(document: OpenAPI.Document) {
-        self.document = document
-        self.validations = []
+    /// Creates a `Validator`.
+    internal init(validations: [AnyValidation]) {
+        self.validations = validations
     }
 
-    /// Creates a `TransformEncoder`.
-    internal init(document: OpenAPI.Document, validations: [ValidationAttempt]) {
-        self.document = document
-        self.validations = validations
+    /// Creates an empty `Validator`. Note that
+    /// this Validator will not perform any validations
+    /// that are not added to it. If you want to start with
+    /// the validations required by the OpenAPI specifcation,
+    /// use `Validator.default`.
+    public convenience init() {
+        self.init(validations: [])
+    }
+
+    /// The default Validator contians only
+    /// validations required by the OpenAPI
+    /// specification.
+    public static var `default`: Self {
+        Self.init(validations: []) // TODO: add default validations
     }
 
     /// Add a validation to be performed.
@@ -37,9 +60,9 @@ public class ValidityEncoder {
     ///         `ValidationError` is a good general purpose error for this use-case.
     ///
     public func validating<T: Encodable>(
-        _ validate: @escaping (ValidationContext<T>) -> Validity
+        _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) -> Self {
-        return validating(Validator(if: { _ in true }, validate: validate))
+        return validating(Validation(if: { _ in true }, validate: validate))
     }
 
     /// Add a validation to be performed.
@@ -52,33 +75,16 @@ public class ValidityEncoder {
     ///         should run against the given value.
     ///
     public func validating<T: Encodable>(
-        _ validate: @escaping (ValidationContext<T>) -> Validity,
-        if predicate: @escaping (ValidationContext<T>) -> Bool
+        _ validate: @escaping (ValidationContext<T>) -> [ValidationError],
+        where predicate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
-        return validating(Validator(if: predicate, validate: validate))
+        return validating(Validation(if: predicate, validate: validate))
     }
 
     /// Add a validation to be performed.
-    public func validating<T: Encodable>(_ validator: Validator<T>) -> Self {
-        validations.append(ValidationAttempt(validator))
+    public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
+        validations.append(AnyValidation(validation))
         return self
-    }
-
-    /// Validate an `OpenAPI.Document`.
-    ///
-    /// - parameter document: Document to validate.
-    ///
-    /// - throws: `ValidationErrors` if any validations failed.
-    ///     `EncodingError` if encoding failed for a structural reason.
-    public func assertValidity() throws {
-        let validator = _Validator(document: document, validations: validations)
-        var container = validator.singleValueContainer()
-
-        try container.encode(document)
-
-        if !validator.validity.isValid {
-            throw ValidationErrors(values: validator.validity.errors)
-        }
     }
 }
 
@@ -94,7 +100,7 @@ class _Validator: Encoder {
 
     init(
         document: OpenAPI.Document,
-        validations: [ValidationAttempt],
+        validations: [AnyValidation],
         userInfo: [CodingUserInfoKey: Any] = [:],
         codingPath: [CodingKey] = []
     ) {
@@ -107,9 +113,9 @@ class _Validator: Encoder {
     let codingPath: [CodingKey]
     let userInfo: [CodingUserInfoKey: Any]
     let document: OpenAPI.Document
-    private(set) var validations: [ValidationAttempt]
+    private(set) var validations: [AnyValidation]
 
-    var validity: Validity = .valid
+    var errors: [ValidationError] = []
     var node: ValidityEncoderNode = .unused
 
     func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key : CodingKey {
@@ -189,7 +195,7 @@ class _ReferencingValidator: _Validator {
     }
 
     deinit {
-        encoder.validity.merge(with: validity)
+        encoder.errors += errors
         switch reference {
         case .dictionary:
             switch encoder.node {
@@ -309,9 +315,11 @@ extension _Validator: SingleValueEncodingContainer {
 
     fileprivate func applyValidations(to value: Encodable) {
         for idx in validations.indices {
-            validity.merge(
-                with: validations[idx].attempt(on: value, in: document, at: codingPath)
-            )
+            #if swift(>=5.2)
+            errors += validations[idx](value, in: document, at: codingPath)
+            #else
+            errors += validations[idx].attempt(on: value, in: document, at: codingPath)
+            #endif
         }
     }
 }

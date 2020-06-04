@@ -31,11 +31,10 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
-            .validating { (_: ValidationContext<OpenAPI.Server>) in .valid }
+        let validator = Validator()
+            .validating { (_: ValidationContext<OpenAPI.Server>) in [] }
 
-        try validator.assertValidity()
+        try document.validate(using: validator)
     }
 
     func test_validationNeverRunsAndSucceeds() throws {
@@ -59,16 +58,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            if: { _ in false }
+            where: { _ in false }
         )
 
-        try validator.assertValidity()
+        try document.validate(using: validator)
     }
 
     func test_validationFailsUnconditionally() {
@@ -92,16 +90,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            if: { _ in true }
+            where: { _ in true }
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "just because")
@@ -129,16 +126,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            if: { context in context.subject.description != "hello world" }
+            where: { context in context.subject.description != "hello world" }
         )
 
-        try validator.assertValidity()
+        try document.validate(using: validator)
     }
 
     func test_singleConditionallyRunsAndSucceeds() throws {
@@ -162,16 +158,13 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
-            { (_: ValidationContext<OpenAPI.Server>) in
-                .valid
-            },
-            if: { context in context.subject.description == "hello world" }
+            { (_: ValidationContext<OpenAPI.Server>) in [] },
+            where: { context in context.subject.description == "hello world" }
         )
 
-        try validator.assertValidity()
+        try document.validate(using: validator)
     }
 
     func test_singleConditionallyRunsAndFails() {
@@ -195,16 +188,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            if: { context in context.subject.description == "hello world" }
+            where: { context in context.subject.description == "hello world" }
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "just because")
@@ -232,13 +224,12 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
         }
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "just because")
@@ -279,16 +270,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<OpenAPI.Server>) in
-                .invalid(because: [ ValidationError(reason: context.subject.description ?? "", at: context.codingPath) ])
+                [ ValidationError(reason: context.subject.description ?? "", at: context.codingPath) ]
             },
-            if: { context in context.subject.description == "hello world" }
+            where: { context in context.subject.description == "hello world" }
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "hello world")
@@ -316,13 +306,12 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating { (context: ValidationContext<URL>) in
-                .invalid(because: [ ValidationError(reason: "just because", at: context.codingPath) ])
+                [ ValidationError(reason: "just because", at: context.codingPath) ]
         }
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "just because")
@@ -350,16 +339,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<String>) in
-                .invalid(because: [ ValidationError(reason: String(context.subject), at: context.codingPath) ])
+                [ ValidationError(reason: String(context.subject), at: context.codingPath) ]
             },
-            if: { context in context.subject == "world" }
+            where: { context in context.subject == "world" }
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "world")
@@ -387,16 +375,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<String>) in
-                .invalid(because: [ ValidationError(reason: context.subject, at: context.codingPath) ])
+                [ ValidationError(reason: context.subject, at: context.codingPath) ]
             },
-            if: { context in ["hello", "world"].contains(context.subject) }
+            where: { context in ["hello", "world"].contains(context.subject) }
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 5)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
@@ -425,16 +412,15 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
             { (context: ValidationContext<String>) in
-                .invalid(because: [ ValidationError(reason: context.subject, at: context.codingPath) ])
+                [ ValidationError(reason: context.subject, at: context.codingPath) ]
             },
-            if: \.subject == "hello"
+            where: \.subject == "hello"
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
@@ -463,15 +449,14 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
                 "there should be two servers",
-                asserting: { context in context.document.servers.count == 2 },
-                if: \.subject == "hello"
+                check: { context in context.document.servers.count == 2 },
+                where: \.subject == "hello"
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'there should be two servers'.")
@@ -500,15 +485,14 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
                 "API version is 2.0",
-                asserting: \OpenAPI.Document.Info.version != "2.0",
-                if: \.title == "hello"
+                check: \OpenAPI.Document.Info.version != "2.0",
+                where: \.title == "hello"
         )
 
-        try validator.assertValidity()
+        try document.validate(using: validator)
     }
 
     func test_pathItemHasAtLeastOneOperationSucceeds() throws {
@@ -534,12 +518,12 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        try document.validator
+        try document.validate(using: Validator()
             .validating(
                 "Path Items must have at least one Operation",
-                asserting: \OpenAPI.PathItem.endpoints.count > 0
+                check: \OpenAPI.PathItem.endpoints.count > 0
+            )
         )
-            .assertValidity()
     }
 
     func test_pathItemHasAtLeastOneOperationFails() throws {
@@ -554,14 +538,13 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
                 "Path Items must have at least one Operation",
-                asserting: \OpenAPI.PathItem.endpoints.count > 0
+                check: \OpenAPI.PathItem.endpoints.count > 0
         )
 
-        XCTAssertThrowsError(try validator.assertValidity()) { error in
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Path Items must have at least one Operation'.")
@@ -590,15 +573,14 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = document
-            .validator
+        let validator = Validator()
             .validating(
                 "At least two servers are specified if one of them is the test server.",
-                asserting: \.document.servers.count >= 2,
-                if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+                check: \.document.servers.count >= 2,
+                where: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
         )
 
-        XCTAssertThrowsError(try validator.assertValidity())
+        XCTAssertThrowsError(try document.validate(using: validator))
 
         let document2 = OpenAPI.Document(
             info: .init(title: "hello", version: "1.0"),
@@ -607,14 +589,214 @@ final class ValidityEncoderTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator2 = document2
-            .validator
+        let validator2 = Validator()
             .validating(
                 "At least two servers are specified if one of them is the test server.",
-                asserting: \.document.servers.count >= 2,
-                if: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+                check: \.document.servers.count >= 2,
+                where: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
         )
 
-        XCTAssertNoThrow(try validator2.assertValidity())
+        XCTAssertNoThrow(try document2.validate(using: validator2))
+    }
+
+    func test_ifTestServerThenTwoServersAlternative() throws {
+        // in this alternative, the condition is checked against
+        // the OpenAPI.Document.servers property instead of checking
+        // against OpenAPI.Server.url.
+        let server = OpenAPI.Server(
+            url: URL(string: "https://test.server.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hello",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "At least two servers are specified if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                where: { (context: ValidationContext<OpenAPI.Document>) in context.subject.servers.map { $0.url.absoluteString }.contains("https://test.server.com") }
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator))
+
+        let document2 = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator2 = Validator()
+            .validating(
+                "At least two servers are specified if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                where: { (context: ValidationContext<OpenAPI.Document>) in context.subject.servers.map { $0.url.absoluteString }.contains("https://test.server.com") }
+        )
+
+        XCTAssertNoThrow(try document2.validate(using: validator2))
+    }
+
+    func test_andCheckSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world",
+                    get: .init(
+                        tags: "World",
+                        responses: [
+                            200: .response(
+                                description: "Get the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        try document.validate(using: Validator()
+            .validating(
+                "Operations must have at least one Response and they all must be status code 200",
+                check: \OpenAPI.Operation.responseOutcomes.count >= 1
+                    && { $0.subject.responseOutcomes.allSatisfy { $0.status == 200 } }
+            )
+        )
+    }
+
+    func test_andCheckFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world",
+                    get: .init(
+                        tags: "World",
+                        responses: [
+                            200: .response(
+                                description: "Get the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            ),
+                            404: .response(
+                                description: "Leave the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "Operations must have at least one Response and they all must be status code 200",
+                check: \OpenAPI.Operation.responseOutcomes.count >= 1
+                    && { $0.subject.responseOutcomes.allSatisfy { $0.status == 200 } }
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 1)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Operations must have at least one Response and they all must be status code 200'.")
+        }
+    }
+
+    func test_orCheckSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world",
+                    get: .init(
+                        tags: "World",
+                        responses: [
+                            200: .response(
+                                description: "Get the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            ),
+                            404: .response(
+                                description: "Leave the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        try document.validate(using: Validator()
+            .validating(
+                "Operations must contain a status code 500 or there must be two possible response",
+                check: given(\OpenAPI.Response.Map.keys, { $0.contains(500) })
+                    || \.count == 2
+
+            )
+        )
+    }
+
+    func test_orCheckFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world",
+                    get: .init(
+                        tags: "World",
+                        responses: [
+                            200: .response(
+                                description: "Get the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "Operations must contain a status code 500 or there must be two possible response",
+                check: given(\OpenAPI.Response.Map.keys, { $0.contains(500) })
+                    || \.count == 2
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 1)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: 'Operations must contain a status code 500 or there must be two possible response'.")
+        }
     }
 }

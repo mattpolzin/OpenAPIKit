@@ -5,17 +5,31 @@
 //  Created by Mathew Polzin on 1/26/20.
 //
 
-/// A type that holds a function to determine if a validation
+/// The context in which a validation can be applied.
+///
+/// It may or may not be important for a particular validation
+/// to know what the whole `OpenAPI.Document` looks like
+/// or the coding path where the validation is being applied,
+/// but it always has access to these two pieces of information
+/// in addition to the subject (a value of the type on which the
+/// validation is specialized).
+public struct ValidationContext<T: Encodable> {
+    public let document: OpenAPI.Document
+    public let subject: T
+    public let codingPath: [CodingKey]
+}
+
+/// Holds a function to determine if a validation
 /// applies (`predicate`) and a function that applies
 /// a validation (`validate`).
-public struct Validator<T: Encodable> {
+public struct Validation<T: Encodable> {
     /// Applies validation on type `T`. Throws if validation fails.
     ///
     /// The context includes
     /// - The entire `OpenAPI.Document`
     /// - A value of the type in which this validator specializes.
     /// - The coding path where the validation is occurring.
-    public let validate: (ValidationContext<T>) -> Validity
+    public let validate: (ValidationContext<T>) -> [ValidationError]
 
     /// Returns `true` if this validator should apply to
     /// the given value of type `T`.
@@ -26,7 +40,7 @@ public struct Validator<T: Encodable> {
     /// - The coding path where the validation is occurring.
     public let predicate: (ValidationContext<T>) -> Bool
 
-    /// Create a Validator that by default appllies to all
+    /// Create a Validation that by default appllies to all
     /// values of type `T`.
     ///
     /// - Parameters:
@@ -37,7 +51,7 @@ public struct Validator<T: Encodable> {
     ///
     public init(
         if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true },
-        validate: @escaping (ValidationContext<T>) -> Validity
+        validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) {
         self.validate = validate
         self.predicate = predicate
@@ -64,74 +78,43 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     }
 }
 
-/// A type that collects `ValidationErrors`.
+/// Collects `ValidationErrors`.
 public struct ValidationErrors: Swift.Error {
     public let values: [ValidationError]
-
-    internal var validity: Validity {
-        return .invalid(because: values)
-    }
 }
 
-public enum Validity {
-    case valid
-    case invalid(because: [ValidationError])
-
-    public static func invalid(because reason: String, at path: [CodingKey]) -> Self {
-        .invalid(because: [ValidationError(reason: reason, at: path)])
-    }
-
-    internal var isValid: Bool {
-        guard case .valid = self else { return false }
-        return true
-    }
-
-    internal var errors: [ValidationError] {
-        guard case .invalid(because: let reasons) = self else { return [] }
-        return reasons
-    }
-
-    internal mutating func merge(with other: Validity) {
-        switch (self, other) {
-        case (.valid, .valid):
-            self = .valid
-        case (.valid, _):
-            self = other
-        case (_, .valid):
-            break
-        case (.invalid(because: let reasons1), .invalid(because: let reasons2)):
-            self = .invalid(because: reasons1 + reasons2)
-        }
-    }
-}
-
-internal struct ValidationAttempt {
-    let validate: (OpenAPI.Document, Encodable, [CodingKey]) -> Validity
+/// Erases the type on which a `Validator` is specialized and combines
+/// the predicate and validation logic into one `apply` function.
+internal struct AnyValidation {
+    // The only reason apply is private is because `attempt()` and `callAsFunction()`
+    // get us back our argument labels but are otherwise just straight-forward calls
+    // to `apply()`
+    private let apply: (OpenAPI.Document, Encodable, [CodingKey]) -> [ValidationError]
 
     #if swift(>=5.2)
-    func callAsFunction(_ value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> Validity {
+    func callAsFunction(_ value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
         return attempt(on: value, in: document, at: codingPath)
     }
     #endif
 
-    func attempt(on value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> Validity {
-        return validate(document, value, codingPath)
+    func attempt(on value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
+        return apply(document, value, codingPath)
     }
 
-    init<T: Encodable>(_ validator: Validator<T>) {
-        self.validate = { document, input, codingPath in
+    init<T: Encodable>(_ validator: Validation<T>) {
+        self.apply = { document, input, codingPath in
             
             guard let subject = input as? T else {
-                return .valid
+                return []
             }
             guard type(of: subject) == type(of: input) else {
                 // apparently we need to guard against T? being
                 // coerced to T above.
-                return .valid
+                return []
             }
             let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
             guard validator.predicate(context) else {
-                return .valid
+                return []
             }
 
             return validator.validate(context)

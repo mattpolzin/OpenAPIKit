@@ -7,37 +7,45 @@
 
 import Foundation
 
-public func ==<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func &&<T: Encodable>(lhs: @escaping (ValidationContext<T>) -> Bool, rhs: @escaping (ValidationContext<T>) -> Bool) -> (ValidationContext<T>) -> Bool {
+    return { context in lhs(context) && rhs(context) }
+}
+
+public func ||<T: Encodable>(lhs: @escaping (ValidationContext<T>) -> Bool, rhs: @escaping (ValidationContext<T>) -> Bool) -> (ValidationContext<T>) -> Bool {
+    return { context in lhs(context) || rhs(context) }
+}
+
+public func ==<T: Encodable, U: Equatable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] == rhs
     }
 }
 
-public func !=<T: Encodable, U: Equatable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func !=<T: Encodable, U: Equatable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] != rhs
     }
 }
 
-public func ><T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func ><T: Encodable, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] > rhs
     }
 }
 
-public func >=<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func >=<T: Encodable, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] >= rhs
     }
 }
 
-public func <<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func <<T: Encodable, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] < rhs
     }
 }
 
-public func <=<T: Encodable, U: Comparable>(lhs: ValidityEncoder.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func <=<T: Encodable, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] <= rhs
     }
@@ -79,7 +87,11 @@ public func <=<T: Encodable, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (Vali
     }
 }
 
-extension ValidityEncoder {
+public func given<T: Encodable, U>(_ path: KeyPath<T, U>, _ check: @escaping (U) -> Bool) -> (ValidationContext<T>) -> Bool {
+    return { context in check(context.subject[keyPath: path]) }
+}
+
+extension Validator {
     public typealias KeyPathPredicate<T: Encodable, U: Equatable> = KeyPath<ValidationContext<T>, U>
 
     /// Add a validation to be performed.
@@ -92,10 +104,10 @@ extension ValidityEncoder {
     ///         should run against the given value.
     ///
     public func validating<T: Encodable>(
-        _ validate: @escaping (T, [CodingKey]) -> Validity,
-        if predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
+        _ validate: @escaping (T, [CodingKey]) -> [ValidationError],
+        where predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
     ) -> Self {
-        return validating(Validator(if: predicate, validate: { context in validate(context.subject, context.codingPath) }))
+        return validating(Validation(if: predicate, validate: { context in validate(context.subject, context.codingPath) }))
     }
 
     /// Given the description of the correct & valid state being asserted,
@@ -107,10 +119,10 @@ extension ValidityEncoder {
     ///         if the validity check has failed or `true` if everything is valid.
     public func validating<T: Encodable>(
         _ description: String,
-        asserting validate: @escaping (ValidationContext<T>) -> Bool
+        check validate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
         return validating({ context in
-            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: context.codingPath)
+            return validate(context) ? [] : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
         })
     }
 
@@ -124,12 +136,12 @@ extension ValidityEncoder {
     ///     - predicate: A condition that must be met for this validation to be applied.
     public func validating<T: Encodable>(
         _ description: String,
-        asserting validate: @escaping (ValidationContext<T>) -> Bool,
-        if predicate: @escaping (ValidationContext<T>) -> Bool) -> Self {
-        let validity: (ValidationContext<T>) -> Validity = { context in
-            return validate(context) ? .valid : .invalid(because: "Failed to satisfy: '\(description)'.", at: context.codingPath)
+        check validate: @escaping (ValidationContext<T>) -> Bool,
+        where predicate: @escaping (ValidationContext<T>) -> Bool) -> Self {
+        let validity: (ValidationContext<T>) -> [ValidationError] = { context in
+            return validate(context) ? [] : [ ValidationError(reason: "Failed to satisfy: '\(description)'.", at: context.codingPath) ]
         }
 
-        return validating(validity, if: predicate)
+        return validating(validity, where: predicate)
     }
 }
