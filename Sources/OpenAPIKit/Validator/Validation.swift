@@ -13,7 +13,7 @@
 /// but it always has access to these two pieces of information
 /// in addition to the subject (a value of the type on which the
 /// validation is specialized).
-public struct ValidationContext<T: Encodable> {
+public struct ValidationContext<T> {
     public let document: OpenAPI.Document
     public let subject: T
     public let codingPath: [CodingKey]
@@ -22,7 +22,7 @@ public struct ValidationContext<T: Encodable> {
 /// Holds a function to determine if a validation
 /// applies (`predicate`) and a function that applies
 /// a validation (`validate`).
-public struct Validation<T: Encodable> {
+public struct Validation<T> {
     /// Applies validation on type `T`. Throws if validation fails.
     ///
     /// The context includes
@@ -40,21 +40,68 @@ public struct Validation<T: Encodable> {
     /// - The coding path where the validation is occurring.
     public let predicate: (ValidationContext<T>) -> Bool
 
-    /// Create a Validation that by default appllies to all
-    /// values of type `T`.
+    /// Apply the validation to the given value if the predicate
+    /// returns `true`.
+    public func apply(to subject: T, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
+
+        let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
+        guard predicate(context) else {
+            return []
+        }
+
+        return validate(context)
+    }
+
+    /// Create a Validation that appllies to values of type `T`.
+    ///
+    /// You can return any number of errors from your `validate`
+    /// function, each with its own description of a problem. Add an
+    /// optional `predicate` to apply your validation to a subset of
+    /// all values of the type your `validate` method operates on.
     ///
     /// - Parameters:
-    ///     - validate: A function taking values of type `T` and validating
-    ///         them. This function should throw if a validation error occurs.
+    ///     - validate: A function taking validation contexts containing
+    ///         subjects of type `T` and validating them. This function must
+    ///         return an array of errors. If validation succeeds, return an empty
+    ///         array.
     ///     - predicate: A function returning `true` if this validator
     ///         should run against the given value.
     ///
     public init(
         check validate: @escaping (ValidationContext<T>) -> [ValidationError],
-        where predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
+        when predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
     ) {
         self.validate = validate
         self.predicate = predicate
+    }
+
+    /// Create a Validation with a single error that applies to values of type `T`.
+    ///
+    /// This version of the initializer assumes only one error can occur for this
+    /// validation and in exchange you can frontload the description of the validation
+    /// and simplify the body of the `validate` method to just return `false`
+    /// if the value is invalid.
+    ///
+    /// - Parameters:
+    ///     - description: A description of the correct state described by the
+    ///         `validate` function. Upon failure, the error will read "Failed to satisfy: <description>".
+    ///     - validate: A function taking validation contexts containing
+    ///         subjects of type `T` and validating them. This function returns
+    ///         `true` if validation succeeds and `false` if it fails.
+    ///     - predicate: A function returning `true` if this validator
+    ///         should run against the given value.
+    ///
+    public init(
+        description: String,
+        check validate: @escaping (ValidationContext<T>) -> Bool,
+        when predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
+    ) {
+        let validity: (ValidationContext<T>) -> [ValidationError] = { context in
+            return validate(context)
+                ? []
+                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
+        }
+        self.init(check: validity, when: predicate)
     }
 }
 
@@ -74,7 +121,7 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     }
 
     public var description: String {
-        "\(reason) at path: \(codingPath.map { $0.intValue.map { "[\($0)]" } ?? "/\($0.stringValue)" }.joined())"
+        "\(reason) at path: \(codingPath.stringValue)"
     }
 }
 
@@ -89,35 +136,35 @@ internal struct AnyValidation {
     // The only reason apply is private is because `attempt()` and `callAsFunction()`
     // get us back our argument labels but are otherwise just straight-forward calls
     // to `apply()`
-    private let apply: (OpenAPI.Document, Encodable, [CodingKey]) -> [ValidationError]
+    private let apply: (Any, [CodingKey], OpenAPI.Document) -> [ValidationError]
 
     #if swift(>=5.2)
-    func callAsFunction(_ value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
-        return apply(document, value, codingPath)
+    func callAsFunction(_ value: Any, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
+        return apply(value, codingPath, document)
     }
     #else
-    func attempt(on value: Encodable, in document: OpenAPI.Document, at codingPath: [CodingKey]) -> [ValidationError] {
-        return apply(document, value, codingPath)
+    func attempt(on value: Any, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
+        return apply(value, codingPath, document)
     }
     #endif
 
-    init<T: Encodable>(_ validator: Validation<T>) {
-        self.apply = { document, input, codingPath in
-            
+    init<T>(_ validation: Validation<T>) {
+        self.apply = { input, codingPath, document in
+
+            print("--")
+            print(type(of: input))
+            print(T.self)
+            print("--")
             guard let subject = input as? T else {
                 return []
             }
             guard type(of: subject) == type(of: input) else {
-                // apparently we need to guard against T? being
-                // coerced to T above.
-                return []
-            }
-            let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
-            guard validator.predicate(context) else {
+                // we need to guard against `T?` being
+                // coerced to `T` above.
                 return []
             }
 
-            return validator.validate(context)
+            return validation.apply(to: subject, at: codingPath, in: document)
         }
     }
 }

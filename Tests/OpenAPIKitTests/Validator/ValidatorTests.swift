@@ -30,15 +30,21 @@ final class ValidatorTests: XCTestCase {
 
         _ = validator.validating(
             "",
-            check: given(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+            check: take(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
         )
 
         _ = validator.validating(
             "",
             check: \[OpenAPI.Server].count >= 2,
-            where: { context in
+            when: { context in
                 context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
             }
+        )
+
+        _ = Validation(
+            description: "x-string is 'hello'",
+            check: \.subject == "hello",
+            when: \.codingPath.last?.stringValue == "x-string"
         )
     }
 
@@ -95,7 +101,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<OpenAPI.Server>) in
                 [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            where: { _ in false }
+            when: { _ in false }
         )
 
         try document.validate(using: validator)
@@ -127,7 +133,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<OpenAPI.Server>) in
                 [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            where: { _ in true }
+            when: { _ in true }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -163,7 +169,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<OpenAPI.Server>) in
                 [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            where: { context in context.subject.description != "hello world" }
+            when: { context in context.subject.description != "hello world" }
         )
 
         try document.validate(using: validator)
@@ -193,7 +199,7 @@ final class ValidatorTests: XCTestCase {
         let validator = Validator()
             .validating(
             { (_: ValidationContext<OpenAPI.Server>) in [] },
-            where: { context in context.subject.description == "hello world" }
+            when: { context in context.subject.description == "hello world" }
         )
 
         try document.validate(using: validator)
@@ -225,7 +231,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<OpenAPI.Server>) in
                 [ ValidationError(reason: "just because", at: context.codingPath) ]
             },
-            where: { context in context.subject.description == "hello world" }
+            when: { context in context.subject.description == "hello world" }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -307,7 +313,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<OpenAPI.Server>) in
                 [ ValidationError(reason: context.subject.description ?? "", at: context.codingPath) ]
             },
-            where: { context in context.subject.description == "hello world" }
+            when: { context in context.subject.description == "hello world" }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -376,7 +382,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<String>) in
                 [ ValidationError(reason: String(context.subject), at: context.codingPath) ]
             },
-            where: { context in context.subject == "world" }
+            when: { context in context.subject == "world" }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -412,7 +418,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<String>) in
                 [ ValidationError(reason: context.subject, at: context.codingPath) ]
             },
-            where: { context in ["hello", "world"].contains(context.subject) }
+            when: { context in ["hello", "world"].contains(context.subject) }
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -449,7 +455,7 @@ final class ValidatorTests: XCTestCase {
             { (context: ValidationContext<String>) in
                 [ ValidationError(reason: context.subject, at: context.codingPath) ]
             },
-            where: \.subject == "hello"
+            when: \.subject == "hello"
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -485,7 +491,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "there should be two servers",
                 check: { context in context.document.servers.count == 2 }, // just something false to check for every "hello" String value
-                where: \.subject == "hello"
+                when: \.subject == "hello"
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -521,168 +527,10 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "API version is not 2.0",
                 check: \OpenAPI.Document.Info.version != "2.0",
-                where: \.title == "hello"
+                when: \.title == "hello"
         )
 
         try document.validate(using: validator)
-    }
-
-    func test_pathItemHasAtLeastOneOperationSucceeds() throws {
-        let document = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    summary: "get the world",
-                    get: .init(
-                        tags: "World",
-                        responses: [
-                            200: .response(
-                                description: "Get the world",
-                                content: [
-                                    .json: .init(schema: .string)
-                                ]
-                            )
-                        ]
-                    )
-                )
-            ],
-            components: .noComponents
-        )
-
-        try document.validate(using: Validator()
-            .validating(
-                "Path Items must have at least one Operation",
-                check: \OpenAPI.PathItem.endpoints.count > 0
-            )
-        )
-    }
-
-    func test_pathItemHasAtLeastOneOperationFails() throws {
-        let document = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    summary: "get the world"
-                )
-            ],
-            components: .noComponents
-        )
-
-        let validator = Validator()
-            .validating(
-                "Path Items must have at least one Operation",
-                check: \OpenAPI.PathItem.endpoints.count > 0
-        )
-
-        XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Items must have at least one Operation")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
-        }
-    }
-
-    func test_ifTestServerThenTwoServers() throws {
-        let server = OpenAPI.Server(
-            url: URL(string: "https://test.server.com")!,
-            description: "hello world",
-            variables: [:],
-            vendorExtensions: [
-                "x-string": "hello",
-                "x-int": 2244,
-                "x-double": 10.5,
-                "x-dict": [ "string": "world"],
-                "x-array": AnyCodable(["hello", nil, "world"])
-            ]
-        )
-
-        let document = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [server],
-            paths: [:],
-            components: .noComponents
-        )
-
-        let validator = Validator()
-            .validating(
-                "At least two servers are specified if one of them is the test server.",
-                check: \.document.servers.count >= 2,
-                where: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
-        )
-
-        XCTAssertThrowsError(try document.validate(using: validator))
-
-        let document2 = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [server, server],
-            paths: [:],
-            components: .noComponents
-        )
-
-        let validator2 = Validator()
-            .validating(
-                "At least two servers are specified if one of them is the test server.",
-                check: \.document.servers.count >= 2,
-                where: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
-        )
-
-        XCTAssertNoThrow(try document2.validate(using: validator2))
-    }
-
-    func test_ifTestServerThenTwoServersAlternative() throws {
-        // in this alternative, the condition is checked against
-        // the OpenAPI.Document.servers property instead of checking
-        // against OpenAPI.Server.url.
-        let server = OpenAPI.Server(
-            url: URL(string: "https://test.server.com")!,
-            description: "hello world",
-            variables: [:],
-            vendorExtensions: [
-                "x-string": "hello",
-                "x-int": 2244,
-                "x-double": 10.5,
-                "x-dict": [ "string": "world"],
-                "x-array": AnyCodable(["hello", nil, "world"])
-            ]
-        )
-
-        let document = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [server],
-            paths: [:],
-            components: .noComponents
-        )
-
-        let validator = Validator()
-            .validating(
-                "At least two servers are specified if one of them is the test server.",
-                check: \.document.servers.count >= 2,
-                where: given(\OpenAPI.Document.servers) { servers in
-                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
-                }
-        )
-
-        XCTAssertThrowsError(try document.validate(using: validator))
-
-        let document2 = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [server, server],
-            paths: [:],
-            components: .noComponents
-        )
-
-        let validator2 = Validator()
-            .validating(
-                "At least two servers are specified if one of them is the test server.",
-                check: \.document.servers.count >= 2,
-                where: given(\OpenAPI.Document.servers) { servers in
-                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
-                }
-        )
-
-        XCTAssertNoThrow(try document2.validate(using: validator2))
     }
 
     func test_andCheckSucceeds() throws {
@@ -792,7 +640,7 @@ final class ValidatorTests: XCTestCase {
         try document.validate(using: Validator()
             .validating(
                 "Operations must contain a status code 500 or there must be two possible response",
-                check: given(\OpenAPI.Response.Map.keys, { $0.contains(500) })
+                check: take(\OpenAPI.Response.Map.keys) { $0.contains(500) }
                     || \.count == 2
 
             )
@@ -825,7 +673,7 @@ final class ValidatorTests: XCTestCase {
         let validator = Validator()
             .validating(
                 "Operations must contain a status code 500 or there must be two possible responses",
-                check: given(\OpenAPI.Response.Map.keys) { $0.contains(500) }
+                check: take(\OpenAPI.Response.Map.keys) { $0.contains(500) }
                     || \.count == 2
         )
 
@@ -864,7 +712,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "x-string is 'hello'",
                 check: \.subject == "hello",
-                where: given(\.codingPath) { $0.last?.stringValue == "x-string" }
+                when: take(\.codingPath) { $0.last?.stringValue == "x-string" } // see alternative construction test cases for more concise version of this
         )
 
         try document.validate(using: validator)
@@ -898,7 +746,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "x-string is 'hello'",
                 check: \.subject == "hello",
-                where: given(\.codingPath) { $0.last?.stringValue == "x-string" }
+                when: take(\.codingPath) { $0.last?.stringValue == "x-string" } // see alternative construction test cases for more concise version of this
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -906,6 +754,166 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: x-string is 'hello'")
         }
+    }
+
+    // MARK: - Misc Test Cases
+    func test_pathItemHasAtLeastOneOperationSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world",
+                    get: .init(
+                        tags: "World",
+                        responses: [
+                            200: .response(
+                                description: "Get the world",
+                                content: [
+                                    .json: .init(schema: .string)
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        try document.validate(using: Validator()
+            .validating(
+                "Path Items must have at least one Operation",
+                check: \OpenAPI.PathItem.endpoints.count > 0
+            )
+        )
+    }
+
+    func test_pathItemHasAtLeastOneOperationFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    summary: "get the world"
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "Path Items must have at least one Operation",
+                check: \OpenAPI.PathItem.endpoints.count > 0
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 1)
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Items must have at least one Operation")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
+        }
+    }
+
+    func test_ifTestServerThenTwoServers() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://test.server.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hello",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "At least two servers are specified on root Document if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                when: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+                    && \.codingPath.first?.stringValue == "servers"
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator))
+
+        let document2 = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator2 = Validator()
+            .validating(
+                "At least two servers are specified if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                when: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+        )
+
+        XCTAssertNoThrow(try document2.validate(using: validator2))
+    }
+
+    func test_ifTestServerThenTwoServersAlternative() throws {
+        // in this alternative, the condition is checked against
+        // the OpenAPI.Document.servers property instead of checking
+        // against OpenAPI.Server.url.
+        let server = OpenAPI.Server(
+            url: URL(string: "https://test.server.com")!,
+            description: "hello world",
+            variables: [:],
+            vendorExtensions: [
+                "x-string": "hello",
+                "x-int": 2244,
+                "x-double": 10.5,
+                "x-dict": [ "string": "world"],
+                "x-array": AnyCodable(["hello", nil, "world"])
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator()
+            .validating(
+                "At least two servers are specified if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                when: take(\OpenAPI.Document.servers) { servers in
+                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                }
+        )
+
+        XCTAssertThrowsError(try document.validate(using: validator))
+
+        let document2 = OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0"),
+            servers: [server, server],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator2 = Validator()
+            .validating(
+                "At least two servers are specified if one of them is the test server.",
+                check: \.document.servers.count >= 2,
+                when: take(\OpenAPI.Document.servers) { servers in
+                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                }
+        )
+
+        XCTAssertNoThrow(try document2.validate(using: validator2))
     }
 
     func test_conditionForExtensionWithFailingCheckAlternativeWhereConstruction() {
@@ -936,7 +944,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "x-string is 'hello'",
                 check: \.subject == "hello",
-                where: \.codingPath.last?.stringValue == "x-string"
+                when: \.codingPath.last?.stringValue == "x-string"
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
@@ -977,7 +985,7 @@ final class ValidatorTests: XCTestCase {
                 }
                 return []
             },
-            where: { context in context.codingPath.last?.stringValue == "x-string" }
+            when: { context in context.codingPath.last?.stringValue == "x-string" }
         )
 
         let validator = Validator()
@@ -1008,7 +1016,10 @@ final class ValidatorTests: XCTestCase {
             info: .init(title: "hello", version: "1.0"),
             servers: [server, server],
             paths: [
-                "/hello/world": .init(servers: [server])
+                "/hello/world": .init(
+                    servers: [server, server],
+                    get: .init(responses: [:], servers: [server])
+                )
             ],
             components: .noComponents,
             vendorExtensions: [
@@ -1016,7 +1027,7 @@ final class ValidatorTests: XCTestCase {
             ]
         )
 
-        let validator = Validator()
+        let validator = Validator.blank
             .validating(
                 "All server arrays have more than 1 server",
                 check: \[OpenAPI.Server].count > 1
@@ -1026,7 +1037,7 @@ final class ValidatorTests: XCTestCase {
             let error = error as? ValidationErrors
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All server arrays have more than 1 server")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "servers"])
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "servers"])
         }
     }
 
@@ -1048,7 +1059,10 @@ final class ValidatorTests: XCTestCase {
             info: .init(title: "hello", version: "1.0"),
             servers: [server, server],
             paths: [
-                "/hello/world": .init(servers: [server])
+                "/hello/world": .init(
+                    servers: [server, server],
+                    get: .init(responses: [:], servers: [server])
+                )
             ],
             components: .noComponents,
             vendorExtensions: [
@@ -1056,12 +1070,221 @@ final class ValidatorTests: XCTestCase {
             ]
         )
 
-        let validator = Validator()
+        let validator = Validator.blank
             .validating(
-                "All server arrays have more than 1 server",
+                "All server arrays have not in operations have more than 1 server",
                 check: \[OpenAPI.Server].count > 1,
-                where: \.codingPath.count < 2
+                when: \.codingPath.count == 1 // server array is under root document (coding path count 1)
+                    || take(\.codingPath) { codingPath in
+                        // server array is not under an HTTP verb (i.e. in an operation)
+                        guard codingPath.count > 1 else { return false }
+
+                        let secondToLastPathComponent = codingPath.suffix(2).first!.stringValue
+                        let httpMethods = OpenAPI.HttpMethod.allCases.map { $0.rawValue.lowercased() }
+
+                        return !httpMethods.contains(secondToLastPathComponent)
+                }
         )
+
+        try document.validate(using: validator)
+    }
+
+    func test_requestBodySchemaValidationFails() {
+        // should fail in three ways:
+        // 1. No `name` in request schema
+        // 2. No `name` in response schema
+        // 3. No `id` in response schema
+
+        let createRequest = OpenAPI.Request(
+            content: [
+                .json: .init(
+                    schema: .object(
+                        properties: [
+                            "classification": .string(allowedValues: "big", "small")
+                        ]
+                    )
+                )
+            ]
+        )
+
+        let successCreateResponse = OpenAPI.Response(
+            description: "Created Widget",
+            content: [
+                .json: .init(
+                    schema: .object(
+                        properties: [
+                            "classification": .string(allowedValues: "big", "small")
+                        ]
+                    )
+                )
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/widget/create": .init(
+                    post: .init(
+                        requestBody: createRequest,
+                        responses: [
+                            201: .response(successCreateResponse)
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let resourceContainsName = Validation<JSONSchema>(
+            description: "All JSON resources must have a String name",
+            check: take(\.subject) { schema in
+                guard case let .object(_, context) = schema,
+                    let nameProperty = context.properties["name"] else {
+                        return false
+                }
+                return nameProperty.jsonTypeFormat?.jsonType == .string
+            }
+        )
+
+        let responseResourceContainsId = Validation<JSONSchema>(
+            description: "All JSON response resources must have an Id",
+            check: take(\.subject) { schema in
+                guard case let .object(_, context) = schema,
+                    let idProperty = context.properties["id"] else {
+                        return false
+                }
+                return idProperty.jsonTypeFormat?.jsonType == .integer
+            }
+        )
+
+        let requestBodyContainsName = Validation(
+            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+
+            when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+        )
+
+        let responseBodyContainsNameAndId = Validation(
+            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+
+            when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+        )
+
+        let successResponseBodyContainsNameAndId = Validation(
+            check: unwrap(\.[.status(code: 201)]?.responseValue, into: responseBodyContainsNameAndId),
+
+            when: \OpenAPI.Response.Map[.status(code: 201)]?.responseValue != nil
+        )
+
+        let validator = Validator()
+            .validating(requestBodyContainsName)
+            .validating(successResponseBodyContainsNameAndId)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 3)
+            XCTAssertEqual(error?.values.map { $0.reason }, [
+                "Failed to satisfy: All JSON resources must have a String name",
+                "Failed to satisfy: All JSON resources must have a String name",
+                "Failed to satisfy: All JSON response resources must have an Id"
+            ])
+            XCTAssertEqual(
+                error?.values.map { $0.codingPath.map { $0.stringValue } },
+                [
+                    ["paths", "/widget/create", "post", "requestBody"], // request name property
+                    ["paths", "/widget/create", "post", "responses"],   // response name property
+                    ["paths", "/widget/create", "post", "responses"]    // response id property
+                ]
+            )
+        }
+    }
+
+    func test_requestBodySchemaValidationSucceeds() throws {
+        let createRequest = OpenAPI.Request(
+            content: [
+                .json: .init(
+                    schema: .object(
+                        properties: [
+                            "name": .string,
+                            "classification": .string(allowedValues: "big", "small")
+                        ]
+                    )
+                )
+            ]
+        )
+
+        let successCreateResponse = OpenAPI.Response(
+            description: "Created Widget",
+            content: [
+                .json: .init(
+                    schema: .object(
+                        properties: [
+                            "id": .integer,
+                            "name": .string,
+                            "classification": .string(allowedValues: "big", "small")
+                        ]
+                    )
+                )
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/widget/create": .init(
+                    post: .init(
+                        requestBody: createRequest,
+                        responses: [
+                            201: .response(successCreateResponse)
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let resourceContainsName = Validation<JSONSchema>(
+            description: "All JSON resources must have a String name",
+            check: take(\.subject) { schema in
+                guard case let .object(_, context) = schema,
+                    let nameProperty = context.properties["name"] else {
+                        return false
+                }
+                return nameProperty.jsonTypeFormat?.jsonType == .string
+            }
+        )
+
+        let responseResourceContainsId = Validation<JSONSchema>(
+            description: "All JSON response resources must have an Id",
+            check: take(\.subject) { schema in
+                guard case let .object(_, context) = schema,
+                    let idProperty = context.properties["id"] else {
+                        return false
+                }
+                return idProperty.jsonTypeFormat?.jsonType == .integer
+            }
+        )
+
+        let requestBodyContainsName = Validation(
+            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+
+            when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+        )
+
+        let responseBodyContainsNameAndId = Validation(
+            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+            when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+        )
+
+        let successResponseBodyContainsNameAndId = Validation(
+            check: unwrap(\.[.status(code: 200)]?.responseValue, into: responseBodyContainsNameAndId),
+            when: \OpenAPI.Response.Map[.status(code: 200)]?.responseValue != nil
+        )
+
+        let validator = Validator()
+            .validating(requestBodyContainsName)
+            .validating(successResponseBodyContainsNameAndId)
 
         try document.validate(using: validator)
     }

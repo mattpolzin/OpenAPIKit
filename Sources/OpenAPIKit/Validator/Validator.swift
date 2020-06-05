@@ -109,7 +109,7 @@ extension OpenAPI.Document {
 ///         .validating(
 ///             "At least two servers are specified if one of them is the test server.",
 ///             check: \.document.servers.count >= 2,
-///             where: given(\OpenAPI.Document.servers) { servers in
+///             when: given(\OpenAPI.Document.servers) { servers in
 ///                 servers.map { $0.url.absoluteString }.contains("https://test.server.com")
 ///             }
 ///     )
@@ -162,7 +162,7 @@ public final class Validator {
     public func validating<T: Encodable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) -> Self {
-        return validating(Validation(check: validate, where: { _ in true }))
+        return validating(Validation(check: validate, when: { _ in true }))
     }
 
     /// Add a validation to be performed.
@@ -176,9 +176,9 @@ public final class Validator {
     ///
     public func validating<T: Encodable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError],
-        where predicate: @escaping (ValidationContext<T>) -> Bool
+        when predicate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
-        return validating(Validation(check: validate, where: predicate))
+        return validating(Validation(check: validate, when: predicate))
     }
 
     /// Add a validation to be performed.
@@ -400,6 +400,7 @@ extension _Validator: SingleValueEncodingContainer {
 
     func encode<T>(_ value: T) throws where T : Encodable {
         assertCanEncodeNewValue()
+        applyValidations(to: value)
         try value.encode(to: self)
     }
 
@@ -417,7 +418,7 @@ extension _Validator: SingleValueEncodingContainer {
         let pathTail = key.map { [$0] } ?? []
         for idx in validations.indices {
             #if swift(>=5.2)
-            errors += validations[idx](value, in: document, at: codingPath + pathTail)
+            errors += validations[idx](value, at: codingPath + pathTail, in: document)
             #else
             errors += validations[idx].attempt(on: value, in: document, at: codingPath + pathTail)
             #endif
@@ -441,7 +442,6 @@ struct _UnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     func encode<T>(_ value: T) throws where T: Encodable {
-        encoder.applyValidations(to: value, atKey: _CodingKey(index: count))
         try currentEncoder.encode(value)
     }
 
@@ -473,7 +473,6 @@ struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
     func encodeNil(forKey key: Key) {}
 
     func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
-        encoder.applyValidations(to: value, atKey: key)
         try encoder(for: key).encode(value)
     }
 

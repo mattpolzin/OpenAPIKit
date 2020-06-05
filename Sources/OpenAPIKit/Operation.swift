@@ -32,6 +32,36 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        // allowing Request Body reference
+        public init(
+            tags: [String]? = nil,
+            summary: String? = nil,
+            description: String? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            operationId: String? = nil,
+            parameters: Parameter.Array = [],
+            requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>,
+            responses: OpenAPI.Response.Map,
+            deprecated: Bool = false,
+            security: [OpenAPI.SecurityRequirement]? = nil,
+            servers: [OpenAPI.Server]? = nil,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
+            self.tags = tags
+            self.summary = summary
+            self.description = description
+            self.externalDocs = externalDocs
+            self.operationId = operationId
+            self.parameters = parameters
+            self.requestBody = requestBody
+            self.responses = responses
+            self.deprecated = deprecated
+            self.security = security
+            self.servers = servers
+            self.vendorExtensions = vendorExtensions
+        }
+
+        // assuming inline request body
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
