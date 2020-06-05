@@ -46,6 +46,28 @@ final class ValidatorTests: XCTestCase {
             check: \.subject == "hello",
             when: \.codingPath.last?.stringValue == "x-string"
         )
+
+        let allRoutesOfferJSON = Validation(
+            description: "All content maps have JSON members.",
+            check: \OpenAPI.Content.Map[.json] != nil
+        )
+
+        _ = Validation(
+            check: lift(\OpenAPI.Request.content, into: allRoutesOfferJSON)
+        )
+
+        _ = Validation(
+            check: lift(\OpenAPI.Response.content, into: allRoutesOfferJSON)
+        )
+
+        let contentValidation = Validation<OpenAPI.Content>(
+            check: { _ in [] }
+        )
+
+        let _ = Validation(
+            check: unwrap(\OpenAPI.Content.Map[.json], into: contentValidation),
+            when: \OpenAPI.Content.Map[.json] != nil
+        )
     }
 
     func test_validationSucceedsUnconditionally() throws {

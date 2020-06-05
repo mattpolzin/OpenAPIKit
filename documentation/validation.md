@@ -9,6 +9,11 @@
     - [Context KeyPaths](#context-keypaths)
     - [Logical Combinations](#logical-combinations)
   - [The `Validation` Type](#the-validation-type)
+    - [Validation Composition](#validation-composition)
+  - [A More Substantial Example](#a-more-substantial-example)
+    - [A Passing Example](#a-passing-example)
+    - [A Failing Example](#a-failing-example)
+    - [The Validation Code](#the-validation-code)
 
 ### Executing Validations
 
@@ -46,9 +51,9 @@ You can find all such built-in validations in `Validation+Defaults.swift` -- jus
 
 There are two ways to define validations:
 1. Using the various `validating()` helper methods on the `Validatior`.
-2. Directly creating values of the `Validation` type.
+2. Creating values of the `Validation` type.
 
-The first approach can be much more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated, and (c) the coding path of the value being validated.
+The first approach can be more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated, and (c) the coding path of the value being validated.
 
 #### `Validator.validating()`
 
@@ -215,4 +220,253 @@ let validate: (ValidationContext<String>) -> [ValidationError] = ...
 let predicate: (ValidationContext<String>) -> Bool = ...
 
 let validation = Validation(check: validate, when: predicate)
+```
+
+##### Validation Composition
+
+Validations can be applied as part of other validations. You can use a parent validation context to gate child validations based on a shared `when` clause, drill into a parent context within the `check` clause, and reuse child validations in multiple parent validations.
+
+Let's say you want to assert that all requests and responses are offered as JSON. You might be tempted to write the following validator
+```swift
+let allRoutesOfferJSON = Validation(
+    description: "All content maps have JSON members.",
+    check: \OpenAPI.Content.Map[.json] != nil
+)
+```
+
+Unfortunately, now you are also validating that the content map that can be associated with parameters offers a JSON option; that might be ok, but it is definitely not the stated goal.
+
+We could add a `when` clause that looks at the context's `codingPath` to determine whether the current context is a parameter, a request, or a response, but that's going to get cumbersome fast.
+
+Instead, let's compose the content map validator with a validator that only runs against `OpenAPI.Response`. Then we will do the same thing with a validator that only runs against `OpenAPI.Request`. We need a new tool for this. The `lift()` function will let us use a KeyPath to map the current context to a new context and then run a validator in that new context.
+```swift
+let requestRoutesOfferJSON = Validation(
+    check: lift(\OpenAPI.Request.content, into: allRoutesOfferJSON)
+)
+
+let responseRoutesOfferJSON = Validation(
+    check: lift(\OpenAPI.Response.content, into: allRoutesOfferJSON)
+)
+
+try document.validate(using: Validator()
+    .validating(requestRoutesOfferJSON)
+    .validating(responseRoutesOfferJSON)
+)
+```
+
+Notice we are using the `Validation` initializer that does not take a description for the parent validations. These validations can potentially produce any of the errors of their children validations but because they don't themselves represent one distinct potential error there is no description associated with them.
+
+`lift()` can take a variadic list of any number of validators, so if we had an `allRoutesOfferXML` validator as well then we could write 
+```swift
+lift(\OpenAPI.Response.content, into: allRoutesOfferJSON, allRoutesOfferXML)
+```
+
+`lift()` does have its limits, though. One you'll hit pretty quickly is that you can't use any optional chaining in your KeyPath if you are lifting into a validator that expects a non-optional value in its context. This is actually a good thing -- we must be explicit about whether or not to error out if the optional unwrapping results in `nil`.
+
+Let's pass a response's JSON content to a validation that operates on content:
+```swift
+let contentValidation = Validation<OpenAPI.Content>(...)
+
+let contentMapValidator = Validation(
+    check: lift(\OpenAPI.Content.Map[.json], into: contentValidation)
+    // ^ error about the KeyPath pointing at `OpenAPI.Content?` instead of `OpenAPI.Content`.
+)
+```
+
+Instead, we must use the `unwrap()` function. It operates similarly to `lift()` except if it encounters `nil` it will produce a `ValidationError`.
+```swift
+let contentValidation = Validation<OpenAPI.Content>(...)
+
+let contentMapValidator = Validation(
+    check: unwrap(\OpenAPI.Content.Map[.json], into: contentValidation)
+)
+```
+
+That leaves the question of how to specify that the unwrap should _not_ fail if it hits an optional. It turns out, we already have a good way to be explicit about this with a `when` clause.
+```swift
+let contentValidation = Validation<OpenAPI.Content>(...)
+
+let contentMapValidator = Validation(
+    check: unwrap(\OpenAPI.Content.Map[.json], into: contentValidation),
+    when: \OpenAPI.Content.Map[.json] != nil
+)
+```
+
+#### A More Substantial Example
+
+Let's put this all together to form a slightly more realistic example of fully operational code (could be copy/pasted into a Swift project or playground with access to OpenAPIKit).
+
+The setup is that we need to verify that no matter how many endpoints we add to the API we are documenting all `POST` resource requests contain a `'name'` property and all `POST` resource responses contain both a `'name'` and and `'id'`.
+
+We are going to fib a bit by pretending that all requests and responses are relevant and ignore checking that the requests and responses are via the `POST` HTTP method. Limiting the following validations to `POST` method endpoints would be a relatively simple expansion (perhaps a good exercise for the reader).
+
+First, let's establish some test material so we can visualize what we are checking.
+
+##### A Passing Example
+```swift
+let createRequest = OpenAPI.Request(
+   content: [
+       .json: .init(
+           schema: .object(
+               properties: [
+                   "name": .string,
+                   "classification": .string(allowedValues: "big", "small")
+               ]
+           )
+       )
+   ]
+)
+
+let successCreateResponse = OpenAPI.Response(
+   description: "Created Widget",
+   content: [
+       .json: .init(
+           schema: .object(
+               properties: [
+                   "id": .integer,
+                   "name": .string,
+                   "classification": .string(allowedValues: "big", "small")
+               ]
+           )
+       )
+   ]
+)
+
+let document = OpenAPI.Document(
+   info: .init(title: "test", version: "1.0"),
+   servers: [],
+   paths: [
+       "/widget/create": .init(
+           post: .init(
+               requestBody: createRequest,
+               responses: [
+                   201: .response(successCreateResponse)
+               ]
+           )
+       )
+   ],
+   components: .noComponents
+)
+```
+
+##### A Failing Example
+```swift
+// should fail in three ways:
+// 1. No `name` in request schema
+// 2. No `name` in response schema
+// 3. No `id` in response schema
+
+let createRequest = OpenAPI.Request(
+   content: [
+       .json: .init(
+           schema: .object(
+               properties: [
+                   "classification": .string(allowedValues: "big", "small")
+               ]
+           )
+       )
+   ]
+)
+
+let successCreateResponse = OpenAPI.Response(
+   description: "Created Widget",
+   content: [
+       .json: .init(
+           schema: .object(
+               properties: [
+                   "classification": .string(allowedValues: "big", "small")
+               ]
+           )
+       )
+   ]
+)
+
+let document = OpenAPI.Document(
+   info: .init(title: "test", version: "1.0"),
+   servers: [],
+   paths: [
+       "/widget/create": .init(
+           post: .init(
+               requestBody: createRequest,
+               responses: [
+                   201: .response(successCreateResponse)
+               ]
+           )
+       )
+   ],
+   components: .noComponents
+)
+```
+
+##### The Validation Code
+```swift
+// First, we define two validators that dig into
+// JSON schemas looking for the 'name' or 'id'
+// properties and verifying those properties are of
+// the correct type.
+//
+// Notice that these validators don't actually care
+// about their context because we will isolate parts of
+// the OpenAPI document to validate with their parent
+// validations.
+let resourceContainsName = Validation<JSONSchema>(
+   description: "All JSON resources must have a String name",
+   check: take(\.subject) { schema in
+       guard case let .object(_, context) = schema,
+           let nameProperty = context.properties["name"] else {
+               return false
+       }
+       return nameProperty.jsonTypeFormat?.jsonType == .string
+   }
+)
+
+let responseResourceContainsId = Validation<JSONSchema>(
+   description: "All JSON response resources must have an Id",
+   check: take(\.subject) { schema in
+       guard case let .object(_, context) = schema,
+           let idProperty = context.properties["id"] else {
+               return false
+       }
+       return idProperty.jsonTypeFormat?.jsonType == .integer
+   }
+)
+
+// Now we create a validation that runs for all requests that
+// have non-nil JSON schemas inlined within them. We use a `when`
+// check to skip over any requests that do not have such schemas
+// without error.
+let requestBodyContainsName = Validation(
+   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+
+   when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+)
+
+// Similarly, we check JSON response schemas.
+let responseBodyContainsNameAndId = Validation(
+   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+
+   when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+)
+
+// We are specifically look only at 201 ("created") status code
+// responses in this example so we create another parent context
+// validation for responses (requests are not broken down by response
+// status code (obviously) so this step is only needed for responses).
+let successResponseBodyContainsNameAndId = Validation(
+   check: unwrap(\.[.status(code: 201)]?.responseValue, into: responseBodyContainsNameAndId),
+
+   when: \OpenAPI.Response.Map[.status(code: 201)]?.responseValue != nil
+)
+
+// Finally, we can create our Validator and add the two validations we
+// really want to expose. The various child validations not directly added
+// below are not strictly necessary and could have been written into the logic
+// of their parent validtions. Doing so would have meant replacing small composable
+// validtions with large validations containing a lot of logic in their
+// `check` or `when` clauses.
+let validator = Validator()
+   .validating(requestBodyContainsName)
+   .validating(successResponseBodyContainsNameAndId)
+
+// try document.validate(using: validator)
 ```
