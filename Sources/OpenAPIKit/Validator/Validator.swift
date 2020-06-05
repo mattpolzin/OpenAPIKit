@@ -417,11 +417,7 @@ extension _Validator: SingleValueEncodingContainer {
     fileprivate func applyValidations(to value: Encodable, atKey key: CodingKey? = nil) {
         let pathTail = key.map { [$0] } ?? []
         for idx in validations.indices {
-            #if swift(>=5.2)
-            errors += validations[idx](value, at: codingPath + pathTail, in: document)
-            #else
-            errors += validations[idx].attempt(on: value, in: document, at: codingPath + pathTail)
-            #endif
+            errors += validations[idx].apply(to: value, at: codingPath + pathTail, in: document)
         }
     }
 }

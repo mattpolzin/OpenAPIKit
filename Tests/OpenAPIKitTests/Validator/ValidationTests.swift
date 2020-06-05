@@ -14,18 +14,10 @@ final class ValidationTests: XCTestCase {
         let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] })
         let check = AnyValidation(validation)
 
-        #if swift(>=5.2)
-        let errors = check("hello", at: [], in: testDocument)
-        #else
-        let errors = check.attempt(on: "hello", at: [], in: testDocument)
-        #endif
+        let errors = check.apply(to: "hello", at: [], in: testDocument)
         XCTAssertEqual(errors.map { $0.description }, [ "because at path: " ])
 
-        #if swift(>=5.2)
-        let errors2 = check("hello" as String?, at: [], in: testDocument)
-        #else
-        let errors2 = check.attempt(on: "hello" as String?, at: [], in: testDocument)
-        #endif
+        let errors2 = check.apply(to: "hello" as String?, at: [], in: testDocument)
         XCTAssertTrue(errors2.isEmpty)
     }
 
@@ -33,11 +25,7 @@ final class ValidationTests: XCTestCase {
         let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] })
         let check = AnyValidation(validation)
 
-        #if swift(>=5.2)
-        let errors2 = check(10, at: [], in: testDocument)
-        #else
-        let errors2 = check.attempt(on: 10, at: [], in: testDocument)
-        #endif
+        let errors2 = check.apply(to: 10, at: [], in: testDocument)
         XCTAssertTrue(errors2.isEmpty)
     }
 
@@ -45,11 +33,7 @@ final class ValidationTests: XCTestCase {
         let validation = Validation<String>(check: { _ in [ ValidationError(reason: "because", at: []) ] }, when: { _ in false })
         let check = AnyValidation(validation)
 
-        #if swift(>=5.2)
-        let errors2 = check("hi", at: [], in: testDocument)
-        #else
-        let errors2 = check.attempt(on: "hi", at: [], in: testDocument)
-        #endif
+        let errors2 = check.apply(to: "hi", at: [], in: testDocument)
         XCTAssertTrue(errors2.isEmpty)
     }
 }

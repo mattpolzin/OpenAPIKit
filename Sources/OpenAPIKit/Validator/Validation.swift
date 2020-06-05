@@ -133,23 +133,17 @@ public struct ValidationErrors: Swift.Error {
 /// Erases the type on which a `Validator` is specialized and combines
 /// the predicate and validation logic into one `apply` function.
 internal struct AnyValidation {
-    // The only reason apply is private is because `attempt()` and `callAsFunction()`
-    // get us back our argument labels but are otherwise just straight-forward calls
-    // to `apply()`
-    private let apply: (Any, [CodingKey], OpenAPI.Document) -> [ValidationError]
+    // The only reason apply is private is because `apply()` gets us back
+    // our argument labels but are otherwise just straight-forward calls
+    // to `_apply()`
+    private let _apply: (Any, [CodingKey], OpenAPI.Document) -> [ValidationError]
 
-    #if swift(>=5.2)
-    func callAsFunction(_ value: Any, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
-        return apply(value, codingPath, document)
+    func apply(to value: Any, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
+        return _apply(value, codingPath, document)
     }
-    #else
-    func attempt(on value: Any, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
-        return apply(value, codingPath, document)
-    }
-    #endif
 
     init<T>(_ validation: Validation<T>) {
-        self.apply = { input, codingPath, document in
+        self._apply = { input, codingPath, document in
 
             print("--")
             print(type(of: input))
