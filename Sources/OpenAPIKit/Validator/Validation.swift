@@ -13,36 +13,36 @@
 /// but it always has access to these two pieces of information
 /// in addition to the subject (a value of the type on which the
 /// validation is specialized).
-public struct ValidationContext<T> {
+public struct ValidationContext<Subject> {
     public let document: OpenAPI.Document
-    public let subject: T
+    public let subject: Subject
     public let codingPath: [CodingKey]
 }
 
 /// Holds a function to determine if a validation
 /// applies (`predicate`) and a function that applies
 /// a validation (`validate`).
-public struct Validation<T> {
-    /// Applies validation on type `T`. Throws if validation fails.
+public struct Validation<Subject> {
+    /// Applies validation on type `Subject`. Throws if validation fails.
     ///
     /// The context includes
     /// - The entire `OpenAPI.Document`
     /// - A value of the type in which this validator specializes.
     /// - The coding path where the validation is occurring.
-    public let validate: (ValidationContext<T>) -> [ValidationError]
+    public let validate: (ValidationContext<Subject>) -> [ValidationError]
 
     /// Returns `true` if this validator should apply to
-    /// the given value of type `T`.
+    /// the given value of type `Subject`.
     ///
     /// The context includes
     /// - The entire `OpenAPI.Document`
     /// - A value of the type in which this validator specializes.
     /// - The coding path where the validation is occurring.
-    public let predicate: (ValidationContext<T>) -> Bool
+    public let predicate: (ValidationContext<Subject>) -> Bool
 
     /// Apply the validation to the given value if the predicate
     /// returns `true`.
-    public func apply(to subject: T, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
+    public func apply(to subject: Subject, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
 
         let context = ValidationContext(document: document, subject: subject, codingPath: codingPath)
         guard predicate(context) else {
@@ -52,7 +52,7 @@ public struct Validation<T> {
         return validate(context)
     }
 
-    /// Create a Validation that appllies to values of type `T`.
+    /// Create a Validation that appllies to values of type `Subject`.
     ///
     /// You can return any number of errors from your `validate`
     /// function, each with its own description of a problem. Add an
@@ -61,21 +61,21 @@ public struct Validation<T> {
     ///
     /// - Parameters:
     ///     - validate: A function taking validation contexts containing
-    ///         subjects of type `T` and validating them. This function must
+    ///         subjects of type `Subject` and validating them. This function must
     ///         return an array of errors. If validation succeeds, return an empty
     ///         array.
     ///     - predicate: A function returning `true` if this validator
     ///         should run against the given value.
     ///
     public init(
-        check validate: @escaping (ValidationContext<T>) -> [ValidationError],
-        when predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
+        check validate: @escaping (ValidationContext<Subject>) -> [ValidationError],
+        when predicate: @escaping (ValidationContext<Subject>) -> Bool = { _ in true }
     ) {
         self.validate = validate
         self.predicate = predicate
     }
 
-    /// Create a Validation with a single error that applies to values of type `T`.
+    /// Create a Validation with a single error that applies to values of type `Subject`.
     ///
     /// This version of the initializer assumes only one error can occur for this
     /// validation and in exchange you can frontload the description of the validation
@@ -86,17 +86,17 @@ public struct Validation<T> {
     ///     - description: A description of the correct state described by the
     ///         `validate` function. Upon failure, the error will read "Failed to satisfy: <description>".
     ///     - validate: A function taking validation contexts containing
-    ///         subjects of type `T` and validating them. This function returns
+    ///         subjects of type `Subject` and validating them. This function returns
     ///         `true` if validation succeeds and `false` if it fails.
     ///     - predicate: A function returning `true` if this validator
     ///         should run against the given value.
     ///
     public init(
         description: String,
-        check validate: @escaping (ValidationContext<T>) -> Bool,
-        when predicate: @escaping (ValidationContext<T>) -> Bool = { _ in true }
+        check validate: @escaping (ValidationContext<Subject>) -> Bool,
+        when predicate: @escaping (ValidationContext<Subject>) -> Bool = { _ in true }
     ) {
-        let validity: (ValidationContext<T>) -> [ValidationError] = { context in
+        let validity: (ValidationContext<Subject>) -> [ValidationError] = { context in
             return validate(context)
                 ? []
                 : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]

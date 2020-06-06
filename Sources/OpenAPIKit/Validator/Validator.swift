@@ -151,8 +151,8 @@ public final class Validator {
             .init(.operationsContainResponses),
             .init(.documentTagNamesAreUnique),
             .init(.pathItemParametersAreUnique),
-            .init(.operationIdsAreUnique),
-            .init(.operationParametersAreUnique)
+            .init(.operationParametersAreUnique),
+            .init(.operationIdsAreUnique)
         ])
     }
 
