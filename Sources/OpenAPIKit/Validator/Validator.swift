@@ -51,6 +51,9 @@ extension OpenAPI.Document {
 /// The default validations are
 /// - Operations must contain at least one response.
 /// - Document-level tag names are unique.
+/// - Parameters are unique within each Path Item.
+/// - Parameters are unique within each Operation.
+/// - Operation Ids are unique across the whole Document.
 ///
 /// If you want a Validator that won't perform any
 /// validations except the ones you add, use
@@ -139,10 +142,17 @@ public final class Validator {
     /// The default validations are
     /// - Operations must contain at least one response.
     /// - Document-level tag names are unique.
+    /// - Parameters are unique within each Path Item.
+    /// - Parameters are unique within each Operation.
+    /// - Operation Ids are unique across the whole Document.
+    ///
     public convenience init() {
         self.init(validations: [
             .init(.operationsContainResponses),
-            .init(.documentTagNamesAreUnique)
+            .init(.documentTagNamesAreUnique),
+            .init(.pathItemParametersAreUnique),
+            .init(.operationIdsAreUnique),
+            .init(.operationParametersAreUnique)
         ])
     }
 

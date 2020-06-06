@@ -161,7 +161,7 @@ Validator().validating(
 
 #### The `Validation` Type
 
-The `Validation` type defines a validation. Each validation is specialized on one particular type that it applies to. For example, the `.pathsContainsOperations` validation applies to `OpenAPI.PathItem`. When the Validator is validating an OpenAPI Document it will run the validation any time that type is encountered anywhere in the Document.
+The `Validation` type defines a validation. Each validation is specialized on one particular type that it applies to. For example, the `.pathsContainOperations` validation applies to `OpenAPI.PathItem`. When the Validator is validating an OpenAPI Document it will run the validation any time that type is encountered anywhere in the Document.
 
 You create a new validation by specifying a check to perform on values and optionally a predicate that needs to return `true` for any value the check should be performed on. If you don't specify a predicate, the check is run for all values of the type the `Validation` is specialized for.
 

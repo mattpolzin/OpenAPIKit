@@ -56,7 +56,7 @@ extension Validation {
         )
     }
 
-    /// Validate the OpenAPI Document's `Tags` all have unique names.
+    /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
     /// The OpenAPI Specifcation requires that tag names on the Document
     /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object).
@@ -72,4 +72,70 @@ extension Validation {
             }
         )
     }
+
+    /// Validate that all OpenAPI Path Items have no duplicate parameters defined
+    /// within them.
+    ///
+    /// A Path Item Parameter's identity is defined as the pairing of its `name` and
+    /// `location`.
+    ///
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var pathItemParametersAreUnique: Validation<OpenAPI.PathItem> {
+        .init(
+            description: "Path Item parameters are unqiue (identity is defined by the 'name' and 'location')",
+            check: take(\.parameters, check: parametersAreUnique),
+            when: \.parameters.count > 0
+        )
+    }
+
+    /// Validate that all OpenAPI Operations have no duplicate parameters defined
+    /// within them.
+    ///
+    /// An Operation's Parameter's identity is defined as the pairing of its `name` and
+    /// `location`.
+    ///
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var operationParametersAreUnique: Validation<OpenAPI.Operation> {
+        .init(
+            description: "Operation parameters are unqiue (identity is defined by the 'name' and 'location')",
+            check: take(\.parameters, check: parametersAreUnique),
+            when: \.parameters.count > 0
+        )
+    }
+
+    /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
+    ///
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var operationIdsAreUnique: Validation<OpenAPI.Document> {
+        .init(
+            description: "All Operation Ids in Document are unique",
+            check: take(\.allOperationIds) { operationIds in
+                return Set(operationIds).count == operationIds.count
+            }
+        )
+    }
+}
+
+/// Used by both the Path Item parameter check and the
+/// Operation parameter check in the default validations.
+fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array) -> Bool {
+    let inlinedParameters = parameters.compactMap { $0.parameterValue }
+
+    let identities = inlinedParameters.map { PathItemParameterIdentity(name: $0.name, location: $0.location) }
+
+    return Set(identities).count == inlinedParameters.count
+}
+
+fileprivate struct PathItemParameterIdentity: Hashable {
+    let name: String
+    let location: OpenAPI.Parameter.Context.Location
 }

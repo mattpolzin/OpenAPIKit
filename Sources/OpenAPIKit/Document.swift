@@ -21,6 +21,18 @@ extension OpenAPI {
         public var tags: [Tag]?
         public var externalDocs: ExternalDocumentation?
 
+        /// Retrieve an array of all Operation Ids defined by
+        /// this API. These Ids are guaranteed to be unique by
+        /// the OpenAPI Specification.
+        ///
+        /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
+        ///
+        public var allOperationIds: [String] {
+            return paths.values
+                .flatMap { $0.endpoints }
+                .compactMap { $0.operation.operationId }
+        }
+
         /// Dictionary of vendor extensions.
         ///
         /// These should be of the form:
