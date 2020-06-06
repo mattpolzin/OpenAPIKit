@@ -15,7 +15,7 @@ extension OpenAPI.Components {
     /// out of your `JSONReference` and pass that to `contains`
     /// instead.
     ///
-    /// - throws: If the given reference cannot be checked against `Components`
+    /// - Throws: If the given reference cannot be checked against `Components`
     ///     then this method will throw `ReferenceError`. This will occur when
     ///     the given reference is a remote file reference.
     public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> Bool {
@@ -57,9 +57,25 @@ extension OpenAPI.Components {
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
     public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
+        return try? forceDereference(maybeReference)
+    }
+
+    /// Pass a value that can be either a reference to a component or the component itself.
+    /// `forceDereference()` will return the component value if it is found (in the Either wrapper
+    /// or in the Components Object).
+    ///
+    /// - Important: Dereferencing an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType? {
         switch maybeReference {
         case .a(let reference):
-            return self[reference]
+            guard case .internal = reference else {
+                throw ReferenceError.cannotLookupRemoteReference
+            }
+            guard let value = self[reference] else {
+                throw MissingReferenceError.referenceMissingOnLookup(name: reference.absoluteString, key: ReferenceType.openAPIComponentsKey)
+            }
+            return value
         case .b(let value):
             return value
         }
@@ -72,7 +88,23 @@ extension OpenAPI.Components {
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
     public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
-        return self[reference]
+        return try? forceDereference(reference)
+    }
+
+    /// Pass a reference to a component.
+    /// `forceDereference()` will return the component value if it is found
+    /// in the Components Object.
+    ///
+    /// - Important: Dereferencing an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
+        guard case .internal = reference else {
+            throw ReferenceError.cannotLookupRemoteReference
+        }
+        guard let value = self[reference] else {
+            throw MissingReferenceError.referenceMissingOnLookup(name: reference.absoluteString, key: ReferenceType.openAPIComponentsKey)
+        }
+        return value
     }
 
     /// Create a `JSONReference`.
@@ -98,6 +130,20 @@ extension OpenAPI.Components {
                 return "You cannot look up remote JSON references in the Components Object local to this file."
             case .missingComponentOnReferenceCreation(name: let name, key: let key):
                 return "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. '\(name)' was not found in \(key)."
+            }
+        }
+    }
+
+    // TODO: combine with `ReferenceError` upon next Major release.
+    // This is only its own type to avoid any chance of a breaking change
+    // in a minor version release.
+    public enum MissingReferenceError: Swift.Error, Equatable, CustomStringConvertible {
+        case referenceMissingOnLookup(name: String, key: String)
+
+        public var description: String {
+            switch self {
+            case .referenceMissingOnLookup(name: let name, key: let key):
+                return "Failed to look up a JSON Reference. '\(name)' was not found in \(key)."
             }
         }
     }
