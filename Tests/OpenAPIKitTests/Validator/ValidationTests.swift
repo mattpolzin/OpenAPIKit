@@ -17,7 +17,8 @@ final class ValidationTests: XCTestCase {
         let errors = check.apply(to: "hello", at: [], in: testDocument)
         XCTAssertEqual(errors.map { $0.description }, [ "because at path: " ])
 
-        let errors2 = check.apply(to: "hello" as String?, at: [], in: testDocument)
+        let string: String? = "hello"
+        let errors2 = check.apply(to: string as Any, at: [], in: testDocument)
         XCTAssertTrue(errors2.isEmpty)
     }
 

@@ -78,6 +78,72 @@ final class DocumentTests: XCTestCase {
         )
     }
 
+    func test_getAllOperationIds() {
+        let t1 = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: nil, responses: [:])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: nil, responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t1.allOperationIds, [])
+
+        let t2 = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [:])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: nil, responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t2.allOperationIds, ["test"])
+
+        let t3 = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [:])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "two", responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t3.allOperationIds, ["test", "two"])
+
+        let t4 = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: nil, responses: [:])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "two", responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t4.allOperationIds, ["two"])
+    }
+
     func test_existingSecuritySchemeSuccess() {
         let docData =
 """

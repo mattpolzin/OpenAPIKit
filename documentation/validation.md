@@ -23,6 +23,26 @@ let document = OpenAPI.Document(...)
 try document.validate()
 ```
 
+If validation fails, `document.validate()` will throw a `ValidationErrors` value. `ValidationErrors` is a `Swift.Error` that holds all of the validation errors that occurred. You can access all of the validation errors with the `values` property. 
+
+Each element of the `ValdiationErrors` `values` property is a `ValidationError` (singular). Each `ValidationError` in turn offers you a `reason` (`String`) for the failure and the `codingPath` (`[CodingKey]`) where the failure occurred. 
+
+You can also get a `codingPathString` if you want a convenient string representation of the coding path.
+
+```swift
+let document = OpenAPI.Document(...)
+do {
+    try document.validate()
+} catch let errors as ValidationErrors {
+    for error in errors {
+        print(error.reason)
+        print("occurred at \(error.codingPathString)")
+    }
+} catch let error {
+    // probably an `EncodingError` if we get here. If the document cannot be successfully encoded, it is not valid.
+}
+```
+
 ### Adding Validations
 
 There are additionally a few built-in validations you can add that are not actually part of the OpenAPI Specifcation. For example, you might want to assert that your document should contain at least one `OpenAPI.PathItem`. This is not a default validation because the OpenAPI Specification allows omitting `PathItems` for security reasons depending upon the authorization of a person looking at the documentation.

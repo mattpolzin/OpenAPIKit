@@ -86,7 +86,7 @@ extension Validation {
     public static var pathItemParametersAreUnique: Validation<OpenAPI.PathItem> {
         .init(
             description: "Path Item parameters are unqiue (identity is defined by the 'name' and 'location')",
-            check: take(\.parameters, check: parametersAreUnique),
+            check: { parametersAreUnique($0.subject.parameters, components: $0.document.components) },
             when: \.parameters.count > 0
         )
     }
@@ -104,7 +104,7 @@ extension Validation {
     public static var operationParametersAreUnique: Validation<OpenAPI.Operation> {
         .init(
             description: "Operation parameters are unqiue (identity is defined by the 'name' and 'location')",
-            check: take(\.parameters, check: parametersAreUnique),
+            check: { parametersAreUnique($0.subject.parameters, components: $0.document.components) },
             when: \.parameters.count > 0
         )
     }
@@ -127,12 +127,12 @@ extension Validation {
 
 /// Used by both the Path Item parameter check and the
 /// Operation parameter check in the default validations.
-fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array) -> Bool {
-    let inlinedParameters = parameters.compactMap { $0.parameterValue }
+fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> Bool {
+    let parameters = parameters.compactMap(components.dereference)
 
-    let identities = inlinedParameters.map { PathItemParameterIdentity(name: $0.name, location: $0.location) }
+    let identities = parameters.map { PathItemParameterIdentity(name: $0.name, location: $0.location) }
 
-    return Set(identities).count == inlinedParameters.count
+    return Set(identities).count == parameters.count
 }
 
 fileprivate struct PathItemParameterIdentity: Hashable {

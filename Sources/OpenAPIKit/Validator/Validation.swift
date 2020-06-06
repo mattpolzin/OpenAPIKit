@@ -112,6 +112,9 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     public let reason: String
     /// The location where the failure occurred.
     public let codingPath: [CodingKey]
+    /// A string representation of the whole coding
+    /// path.
+    public var codingPathString: String { codingPath.stringValue }
 
     /// Create a new `ValidationError` with the given
     /// reason and location (coding path).
@@ -145,10 +148,6 @@ internal struct AnyValidation {
     init<T>(_ validation: Validation<T>) {
         self._apply = { input, codingPath, document in
 
-            print("--")
-            print(type(of: input))
-            print(T.self)
-            print("--")
             guard let subject = input as? T else {
                 return []
             }
