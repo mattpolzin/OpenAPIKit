@@ -19,11 +19,8 @@ extension Validation {
     /// - Important: This is not an included validation by default.
     public static var documentContainsPaths: Validation<OpenAPI.PathItem.Map> {
         .init(
-            check: { context in
-                context.subject.count > 0
-                    ? []
-                    : [ ValidationError(reason: "Document does not contain any paths.", at: context.codingPath) ]
-            }
+            description: "Document contains at least one path",
+            check: \.count > 0
         )
     }
 
@@ -38,11 +35,8 @@ extension Validation {
     /// - Important: This is not an included validation by default.
     public static var pathsContainOperations: Validation<OpenAPI.PathItem> {
         .init(
-            check: { context in
-                context.subject.endpoints.count > 0
-                    ? []
-                    : [ ValidationError(reason: "Path does not contain operations.", at: context.codingPath) ]
-            }
+            description: "Paths contain at least one operation",
+            check: \.endpoints.count > 0
         )
     }
 
@@ -57,11 +51,8 @@ extension Validation {
     /// - Important: This is included in validation by default.
     public static var operationsContainResponses: Validation<OpenAPI.Response.Map> {
         .init(
-            check: { context in
-                context.subject.count > 0
-                    ? []
-                    : [ ValidationError(reason: "All operations must contain at least one response.", at: context.codingPath) ]
-            }
+            description: "Operations contain at least one response",
+            check: \.count > 0
         )
     }
 
@@ -73,12 +64,11 @@ extension Validation {
     /// - Important: This is included in validation by default.
     public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
         .init(
-            check: { context in
-                guard let tags = context.subject.tags else { return [] }
-                let tagNames = tags.map { $0.name }
-                return Set(tagNames).count == tags.count
-                    ? []
-                    : [ ValidationError(reason: "The names of Tags in the Document must be unique.", at: context.codingPath) ]
+            description: "The names of Tags in the Document are unique",
+            check: take(\.tags) { maybeTags in
+                guard let tags = maybeTags else { return true }
+
+                return Set(tags.map { $0.name }).count == tags.count
             }
         )
     }

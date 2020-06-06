@@ -7,6 +7,36 @@
 
 import Foundation
 
+// MARK: - Operators
+
+// MARK: Context -> Error Array
+public func &&<T>(
+    lhs: @escaping (ValidationContext<T>) -> [ValidationError],
+    rhs: @escaping (ValidationContext<T>) -> [ValidationError]
+) -> (ValidationContext<T>) -> [ValidationError] {
+    return { context in
+        lhs(context) + rhs(context)
+    }
+}
+
+public func ||<T>(
+    lhs: @escaping (ValidationContext<T>) -> [ValidationError],
+    rhs: @escaping (ValidationContext<T>) -> [ValidationError]
+) -> (ValidationContext<T>) -> [ValidationError] {
+    return { context in
+        let leftHandCheck = lhs(context)
+        if leftHandCheck.isEmpty {
+            return []
+        }
+        let rightHandCheck = rhs(context)
+        if rightHandCheck.isEmpty {
+            return []
+        }
+        return leftHandCheck + rightHandCheck
+    }
+}
+
+// MARK: Context -> Bool
 public func &&<T>(
     lhs: @escaping (ValidationContext<T>) -> Bool,
     rhs: @escaping (ValidationContext<T>) -> Bool
@@ -21,42 +51,44 @@ public func ||<T>(
     return { context in lhs(context) || rhs(context) }
 }
 
-public func ==<T, U: Equatable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+// MARK: Context KeyPath -> Bool
+public func ==<T, U: Equatable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] == rhs
     }
 }
 
-public func !=<T, U: Equatable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func !=<T, U: Equatable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] != rhs
     }
 }
 
-public func ><T, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func ><T, U: Comparable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] > rhs
     }
 }
 
-public func >=<T, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func >=<T, U: Comparable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] >= rhs
     }
 }
 
-public func <<T, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func <<T, U: Comparable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] < rhs
     }
 }
 
-public func <=<T, U: Comparable>(lhs: Validator.KeyPathPredicate<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
+public func <=<T, U: Comparable>(lhs: KeyPath<ValidationContext<T>, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context[keyPath: lhs] <= rhs
     }
 }
 
+// MARK: Subject KeyPath -> Bool
 public func ==<T, U: Equatable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationContext<T>) -> Bool {
     return { context in
         return context.subject[keyPath: lhs] == rhs
@@ -92,6 +124,8 @@ public func <=<T, U: Comparable>(lhs: KeyPath<T, U>, rhs: U) -> (ValidationConte
         return context.subject[keyPath: lhs] <= rhs
     }
 }
+
+// MARK: - Methods
 
 /// Create a validation or predicate function from a KeyPath
 /// and a function operating on that value.
@@ -133,6 +167,11 @@ public func lift<T, U>(_ path: KeyPath<ValidationContext<T>, U>, into validation
 /// on that value producing a new validation function that operates on the type of
 /// the root of the KeyPath and results in all the given validations being run.
 ///
+/// - Parameters:
+///         - path: The path to lift into the given validations.
+///         - validations: One or more validations to perform on the value
+///             the KeyPath points to.
+///
 /// This can be used to perform logic such as:
 /// *"When type A has property b of type String with value 'hello',*
 /// *run validations alpha and beta (both of which are Validations on type String"*
@@ -157,14 +196,23 @@ public func lift<T, U>(_ path: KeyPath<T, U>, into validations: Validation<U>...
 /// with a `ValidationError` if the value is `nil` or
 /// pass onto each validation provided otherwise.
 ///
+/// - Parameters:
+///         - path: The path to unwrap.
+///         - validations: One or more validations to perform on the value
+///             the KeyPath points to.
+///         - description: (Optionally) describe the unwrap operation so that
+///             the failure error is more useful to you.
+///
 /// See `lift<T, U>(_:,into:)` for more information
 /// on what this function does when the value pointed to
 /// is non-nil.
 ///
-public func unwrap<T, U>(_ path: KeyPath<ValidationContext<T>, U?>, into validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func unwrap<T, U>(_ path: KeyPath<ValidationContext<T>, U?>, into validations: Validation<U>..., description: String? = nil) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         guard let subject = context[keyPath: path] else {
-            return [ ValidationError(reason: "Tried to unwrap an optional for path \(String(describing: path)) and found `nil`", at: context.codingPath) ]
+            let error = description.map { "Tried to unwrap but found nil: \($0)" }
+                ?? "Tried to unwrap an optional for path \(String(describing: path)) and found `nil`"
+            return [ ValidationError(reason: error, at: context.codingPath) ]
         }
         return validations.flatMap { $0.apply(to: subject, at: context.codingPath, in: context.document) }
     }
@@ -174,59 +222,24 @@ public func unwrap<T, U>(_ path: KeyPath<ValidationContext<T>, U?>, into validat
 /// with a `ValidationError` if the value is `nil` or
 /// pass onto each validation provided otherwise.
 ///
+/// - Parameters:
+///         - path: The path to unwrap.
+///         - validations: One or more validations to perform on the value
+///             the KeyPath points to.
+///         - description: (Optionally) describe the unwrap operation so that
+///             the failure error is more useful to you.
+///
 /// See `lift<T, U>(_:,into:)` for more information
 /// on what this function does when the value pointed to
 /// is non-nil.
 ///
-public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>..., description: String? = nil) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         guard let subject = context.subject[keyPath: path] else {
-            return [ ValidationError(reason: "Tried to unwrap an optional for path \(String(describing: path)) and found `nil`", at: context.codingPath) ]
+            let error = description.map { "Tried to unwrap but found nil: \($0)" }
+                ?? "Tried to unwrap an optional for path \(String(describing: path)) and found `nil`"
+            return [ ValidationError(reason: error, at: context.codingPath) ]
         }
         return validations.flatMap { $0.apply(to: subject, at: context.codingPath, in: context.document) }
-    }
-}
-
-extension Validator {
-    public typealias KeyPathPredicate<T: Encodable, U: Equatable> = KeyPath<ValidationContext<T>, U>
-
-    /// Given the description of the correct & valid state being asserted,
-    /// create a validation function and add it to the `Validator`.
-    ///
-    /// - Parameters:
-    ///     - description: The description of the correct state described by the assertion.
-    ///     - validate: The function called to assert a condition. The function should return `false`
-    ///         if the validity check has failed or `true` if everything is valid.
-    public func validating<T: Encodable>(
-        _ description: String,
-        check validate: @escaping (ValidationContext<T>) -> Bool
-    ) -> Self {
-        return validating({ context in
-            return validate(context)
-                ? []
-                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
-        })
-    }
-
-    /// Given the description of the correct & valid state being asserted,
-    /// create a validation function and add it to the `Validator`.
-    ///
-    /// - Parameters:
-    ///     - description: The description of the correct state described by the assertion.
-    ///     - validate: The function called to assert a condition. The function should return `false`
-    ///         if the validity check has failed or `true` if everything is valid.
-    ///     - predicate: A condition that must be met for this validation to be applied.
-    public func validating<T: Encodable>(
-        _ description: String,
-        check validate: @escaping (ValidationContext<T>) -> Bool,
-        when predicate: @escaping (ValidationContext<T>) -> Bool
-    ) -> Self {
-        let validity: (ValidationContext<T>) -> [ValidationError] = { context in
-            return validate(context)
-                ? []
-                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
-        }
-
-        return validating(validity, when: predicate)
     }
 }

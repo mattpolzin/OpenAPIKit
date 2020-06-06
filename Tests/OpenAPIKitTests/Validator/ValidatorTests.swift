@@ -41,6 +41,12 @@ final class ValidatorTests: XCTestCase {
             }
         )
 
+        _ = validator.validating(
+            "At least two servers are specified if one of them is the test server.",
+            check: \[OpenAPI.Server].count >= 2,
+            when: take(\.subject) { $0.map { $0.url.absoluteString }.contains("https://test.server.com") }
+        )
+
         _ = Validation(
             description: "x-string is 'hello'",
             check: \.subject == "hello",
@@ -1181,26 +1187,46 @@ final class ValidatorTests: XCTestCase {
         )
 
         let requestBodyContainsName = Validation(
-            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+            check: unwrap(
+                \.content[.json]?.schema.schemaValue,
+                into: resourceContainsName
+            ),
 
             when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
-            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+            check: unwrap(
+                \.content[.json]?.schema.schemaValue,
+                into: resourceContainsName, responseResourceContainsId
+            ),
 
             when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
-            check: unwrap(\.[.status(code: 201)]?.responseValue, into: responseBodyContainsNameAndId),
+            check: unwrap(
+                \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+                into: responseBodyContainsNameAndId,
+                description: "201 status response value"
+            )
+        )
 
-            when: \OpenAPI.Response.Map[.status(code: 201)]?.responseValue != nil
+        let postRequestAndResponsesAreValid = Validation(
+            check: unwrap(
+                \OpenAPI.PathItem[.post]?.requestBody?.requestValue,
+                into: requestBodyContainsName
+            )
+            && unwrap(
+                \OpenAPI.PathItem[.post]?.responses,
+                into: successResponseBodyContainsNameAndId
+            ),
+
+            when: \OpenAPI.PathItem[.post] != nil
         )
 
         let validator = Validator()
-            .validating(requestBodyContainsName)
-            .validating(successResponseBodyContainsNameAndId)
+            .validating(postRequestAndResponsesAreValid)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
@@ -1213,9 +1239,9 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(
                 error?.values.map { $0.codingPath.map { $0.stringValue } },
                 [
-                    ["paths", "/widget/create", "post", "requestBody"], // request name property
-                    ["paths", "/widget/create", "post", "responses"],   // response name property
-                    ["paths", "/widget/create", "post", "responses"]    // response id property
+                    ["paths", "/widget/create"], // request name property
+                    ["paths", "/widget/create"],   // response name property
+                    ["paths", "/widget/create"]    // response id property
                 ]
             )
         }
@@ -1289,24 +1315,46 @@ final class ValidatorTests: XCTestCase {
         )
 
         let requestBodyContainsName = Validation(
-            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+            check: unwrap(
+                \.content[.json]?.schema.schemaValue,
+                into: resourceContainsName
+            ),
 
             when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
-            check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+            check: unwrap(
+                \.content[.json]?.schema.schemaValue,
+                into: resourceContainsName, responseResourceContainsId
+            ),
+
             when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
-            check: unwrap(\.[.status(code: 200)]?.responseValue, into: responseBodyContainsNameAndId),
-            when: \OpenAPI.Response.Map[.status(code: 200)]?.responseValue != nil
+            check: unwrap(
+                \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+                into: responseBodyContainsNameAndId,
+                description: "201 status response value"
+            )
+        )
+
+        let postRequestAndResponsesAreValid = Validation(
+            check: unwrap(
+                \OpenAPI.PathItem[.post]?.requestBody?.requestValue,
+                into: requestBodyContainsName
+            )
+            && unwrap(
+                \OpenAPI.PathItem[.post]?.responses,
+                into: successResponseBodyContainsNameAndId
+            ),
+
+            when: \OpenAPI.PathItem[.post] != nil
         )
 
         let validator = Validator()
-            .validating(requestBodyContainsName)
-            .validating(successResponseBodyContainsNameAndId)
+            .validating(postRequestAndResponsesAreValid)
 
         try document.validate(using: validator)
     }

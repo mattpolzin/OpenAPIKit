@@ -153,6 +153,12 @@ public final class Validator {
     }
 
     /// Add a validation to be performed.
+    public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
+        validations.append(AnyValidation(validation))
+        return self
+    }
+
+    /// Add a validation to be performed.
     ///
     /// - Parameters:
     ///     - validate: A function taking values of type `T` and validating
@@ -181,10 +187,44 @@ public final class Validator {
         return validating(Validation(check: validate, when: predicate))
     }
 
-    /// Add a validation to be performed.
-    public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
-        validations.append(AnyValidation(validation))
-        return self
+    /// Given the description of the correct & valid state being asserted,
+    /// create a validation function and add it to the `Validator`.
+    ///
+    /// - Parameters:
+    ///     - description: The description of the correct state described by the assertion.
+    ///     - validate: The function called to assert a condition. The function should return `false`
+    ///         if the validity check has failed or `true` if everything is valid.
+    public func validating<T: Encodable>(
+        _ description: String,
+        check validate: @escaping (ValidationContext<T>) -> Bool
+    ) -> Self {
+        return validating({ context in
+            return validate(context)
+                ? []
+                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
+        })
+    }
+
+    /// Given the description of the correct & valid state being asserted,
+    /// create a validation function and add it to the `Validator`.
+    ///
+    /// - Parameters:
+    ///     - description: The description of the correct state described by the assertion.
+    ///     - validate: The function called to assert a condition. The function should return `false`
+    ///         if the validity check has failed or `true` if everything is valid.
+    ///     - predicate: A condition that must be met for this validation to be applied.
+    public func validating<T: Encodable>(
+        _ description: String,
+        check validate: @escaping (ValidationContext<T>) -> Bool,
+        when predicate: @escaping (ValidationContext<T>) -> Bool
+    ) -> Self {
+        let validity: (ValidationContext<T>) -> [ValidationError] = { context in
+            return validate(context)
+                ? []
+                : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
+        }
+
+        return validating(validity, when: predicate)
     }
 }
 

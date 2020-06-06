@@ -10,10 +10,10 @@
     - [Logical Combinations](#logical-combinations)
   - [The `Validation` Type](#the-validation-type)
     - [Validation Composition](#validation-composition)
-  - [A More Substantial Example](#a-more-substantial-example)
-    - [A Passing Example](#a-passing-example)
-    - [A Failing Example](#a-failing-example)
-    - [The Validation Code](#the-validation-code)
+  - [A "Real" Example](#a-real-example)
+    - [Passing OpenAPI Document](#passing-openapi-document)
+    - [Failing OpenAPI Document](#failing-openapi-document)
+    - [Validation Code](#validation-code)
 
 ### Executing Validations
 
@@ -53,11 +53,13 @@ There are two ways to define validations:
 1. Using the various `validating()` helper methods on the `Validatior`.
 2. Creating values of the `Validation` type.
 
-The first approach can be more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated, and (c) the coding path of the value being validated.
+The first approach can be more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "subject"), and (c) the coding path of the value being validated.
 
 #### `Validator.validating()`
 
-The simplest possible validations are equalities and inequalities. Such validations can usually be expressed using a KeyPath syntax starting with any OpenAPIKit type and ending with the value being checked followed by the appropriate equality or inequality.
+The simplest possible validations are equalities and inequalities. Such validations can usually be expressed using a KeyPath syntax starting with any OpenAPIKit type and ending with the value being checked followed by the appropriate equality or inequality. 
+
+I'll call this the "Subject KeyPath syntax" because the type of the root of the KeyPath is the "subject" of the validation context.
 
 To assert that the version of the OpenAPI Document is 3.0.0 we could write
 ```swift
@@ -75,7 +77,7 @@ Validator().validating(
 )
 ```
 
-Notice that when using the closure we are operating on the whole context and we drill into the `subject` which is the part of the context implicitly used by the previous KeyPath syntax.
+Notice that when using the closure we are operating on the whole context and we drill into the `subject` which is the part of the context implicitly used by the Subject KeyPath syntax.
 
 We could assert that all server arrays in the document have more than 1 element
 ```swift
@@ -93,7 +95,7 @@ Validator().validating(
 )
 ```
 
-If we want to stay lighter weight than the full `(ValidationContext<T>) -> Bool` closure but we need to do something more involved (like call functions on the value), the `take()` function will pull a value by KeyPath and pass it to a closure for us.
+If we want to stay more light-weight than the full `(ValidationContext<T>) -> Bool` closure but we need to do something more involved (like call functions on the **subject**), the `take()` function will pull a value by KeyPath and pass it to a closure for us.
 ```swift
 Validator().validating(
     "All servers have URLs containing the word 'prod'",
@@ -105,7 +107,7 @@ Validator().validating(
 
 We can assign predicates to validations to make the validation logic only apply to some values of the given type. 
 
-For example, we could check that any time a list contains a server with a URL containing the word "test" we expect there to be at least two servers listed.
+For example, we could assert that any time a server list contains a server with the "test server" URL, we expect there to be at least two servers listed.
 ```swift
 Validator().validating(
     "At least two servers are specified if one of them is the test server.",
@@ -116,18 +118,18 @@ Validator().validating(
 )
 ```
 
-Predicates passed to the `Validator.validating()` method have the same signature as the validation check functions and indeed can take all the same KeyPath forms.
+Predicates passed to the `Validator.validating()` method have the same signature as the validation check functions and indeed can take advantage of all the same KeyPath syntax.
 
 ##### Context KeyPaths
 
-A context KeyPath is a KeyPath originating at the `ValidationContext` which means it has access to the `document` (the entire OpenAPI Document), `codingPath` (the location of the current value), and `subject` (the value being validated).
+A Context KeyPath is a KeyPath originating at the `ValidationContext` which means it has access to the `document` (the entire OpenAPI Document), `codingPath` (the location of the current value), and `subject` (the value being validated).
 
-As long as something in the `validating()` method call (either the `check` or the `when` clause) provides a hint to the compiler as to the type of value being validated, either clause is free to use context KeyPaths to build predicates or validation logic based on parts of the context other than the value being validated.
+As long as something in the `validating()` method call (either the `check` or the `when` clause) provides a hint to the compiler as to the type of value being validated, either clause is free to use context KeyPaths to build predicates or validation logic based on parts of the context other than the **subject**.
 
 For example, the following validation is on a `\.subject` of type `String` so the predicate is free to only reference the `\.codingPath`. It's a silly example, but it shows one way you can apply validations to Specification Extensions.
 ```swift
 Validator().validating(
-    "x-string is 'hello'",
+    "x-string is always 'hello'",
     check: \.subject == "hello",
     when: \.codingPath.last?.stringValue == "x-string"
 )
@@ -136,13 +138,13 @@ Validator().validating(
 If the syntax is making your head hurt a bit, take a look at the same validation with fully qualified KeyPaths:
 ```swift
 Validator().validating(
-    "x-string is 'hello'",
+    "x-string is always 'hello'",
     check: \ValidationContext<String>.subject == "hello",
     when: \ValidationContext<String>.codingPath.last?.stringValue == "x-string"
 )
 ```
 
-In the second example the verbosity hurts the legibility but it is a bit more obvious that the check is going to run any time the Validator finds a `String` but before it tests whether the `subject` (the `String` in question) is equal to "hello" it is going to check that the last component of the coding path is "x-string" and skip the validation if not.
+In the second example the verbosity hurts the visual flow a bit but it is more obvious that the check is going to run any time the Validator finds a `String` but before it tests whether the `subject` (the `String` in question) is equal to "hello" it is going to check that the last component of the coding path is "x-string" and skip the validation if not.
 
 ##### Logical Combinations
 
@@ -153,7 +155,7 @@ For example
 Validator().validating(
     "Operations must contain a status code 500 or there must be two possible responses",
     check: take(\OpenAPI.Response.Map.keys) { $0.contains(500) }
-        || \.count == 2  // Response.Map.count
+        || \.count == 2  // \.Response.Map.count == 2
 )
 ```
 
@@ -292,17 +294,15 @@ let contentMapValidator = Validation(
 )
 ```
 
-#### A More Substantial Example
+#### A "Real" Example
 
 Let's put this all together to form a slightly more realistic example of fully operational code (could be copy/pasted into a Swift project or playground with access to OpenAPIKit).
 
 The setup is that we need to verify that no matter how many endpoints we add to the API we are documenting all `POST` resource requests contain a `'name'` property and all `POST` resource responses contain both a `'name'` and and `'id'`.
 
-We are going to fib a bit by pretending that all requests and responses are relevant and ignore checking that the requests and responses are via the `POST` HTTP method. Limiting the following validations to `POST` method endpoints would be a relatively simple expansion (perhaps a good exercise for the reader).
-
 First, let's establish some test material so we can visualize what we are checking.
 
-##### A Passing Example
+##### Passing OpenAPI Document
 ```swift
 let createRequest = OpenAPI.Request(
    content: [
@@ -349,7 +349,7 @@ let document = OpenAPI.Document(
 )
 ```
 
-##### A Failing Example
+##### Failing OpenAPI Document
 ```swift
 // should fail in three ways:
 // 1. No `name` in request schema
@@ -398,7 +398,7 @@ let document = OpenAPI.Document(
 )
 ```
 
-##### The Validation Code
+##### Validation Code
 ```swift
 // First, we define two validators that dig into
 // JSON schemas looking for the 'name' or 'id'
@@ -433,7 +433,7 @@ let responseResourceContainsId = Validation<JSONSchema>(
 
 // Now we create a validation that runs for all requests that
 // have non-nil JSON schemas inlined within them. We use a `when`
-// check to skip over any requests that do not have such schemas
+// clause to skip over any requests that do not have such schemas
 // without error.
 let requestBodyContainsName = Validation(
    check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
@@ -448,25 +448,50 @@ let responseBodyContainsNameAndId = Validation(
    when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
 )
 
-// We are specifically look only at 201 ("created") status code
+// We are specifically looking only at 201 ("created") status code
 // responses in this example so we create another parent context
-// validation for responses (requests are not broken down by response
-// status code (obviously) so this step is only needed for responses).
+// validation for responses (_requests_ are not broken down by _response_
+// status code (obviously) so this step is not needed for requests).
+//
+// Notice we do not use a `when` clause here because we want the check
+// to run even when the subject is `nil` so it will produce an error
+// if we find a POST operation that does not define a `201` status
+// response. We also give this unwrap call a description that we want
+// used in the creation of an error message if the validation does find
+// a missing `201` response definition.
 let successResponseBodyContainsNameAndId = Validation(
-   check: unwrap(\.[.status(code: 201)]?.responseValue, into: responseBodyContainsNameAndId),
-
-   when: \OpenAPI.Response.Map[.status(code: 201)]?.responseValue != nil
+   check: unwrap(
+       \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+       into: responseBodyContainsNameAndId,
+       description: "201 status response value"
+    )
 )
 
-// Finally, we can create our Validator and add the two validations we
-// really want to expose. The various child validations not directly added
-// below are not strictly necessary and could have been written into the logic
-// of their parent validtions. Doing so would have meant replacing small composable
-// validtions with large validations containing a lot of logic in their
-// `check` or `when` clauses.
-let validator = Validator()
-   .validating(requestBodyContainsName)
-   .validating(successResponseBodyContainsNameAndId)
+// The last validation we create operates on POST operations of
+// path items. We use two separate `unwrap()` calls because we
+// want to run child validations against both the request body
+// and the responses.
+let postRequestAndResponsesAreValid = Validation(
+    check: unwrap(
+        \OpenAPI.PathItem[.post]?.requestBody?.requestValue,
+        into: requestBodyContainsName
+    )
+    && unwrap(
+        \OpenAPI.PathItem[.post]?.responses,
+        into: successResponseBodyContainsNameAndId
+    ),
 
-// try document.validate(using: validator)
+    when: \OpenAPI.PathItem[.post] != nil
+)
+
+// Finally, we can create our Validator and add the POST request validation. 
+// The various child validations not directly added below are not strictly 
+// necessary and could have been written into the logic of their parent
+// validtions. Doing so would have meant replacing small composable validtions
+// with large validations containing a lot of logic in their `check` or `when`
+// clauses.
+let validator = Validator()
+    .validating(postRequestAndResponsesAreValid)
+
+try document.validate(using: validator)
 ```

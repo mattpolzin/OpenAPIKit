@@ -22,7 +22,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.first?.reason, "Document does not contain any paths.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
         }
     }
@@ -55,7 +55,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.first?.reason, "Path does not contain operations.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Paths contain at least one operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }
     }
@@ -88,7 +88,7 @@ final class DefaultValidatorTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.first?.reason, "The names of Tags in the Document must be unique.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Tags in the Document are unique")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
         }
     }
@@ -121,7 +121,7 @@ final class DefaultValidatorTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.first?.reason, "All operations must contain at least one response.")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
         }
     }
