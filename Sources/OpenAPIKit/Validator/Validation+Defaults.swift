@@ -8,6 +8,8 @@
 import Foundation
 
 extension Validation {
+    // MARK: - Optionally added with `Validator.validating()`
+
     /// Validate the OpenAPI Document has at least one path in its
     /// `PathItem.Map`.
     ///
@@ -55,6 +57,11 @@ extension Validation {
             check: \.count > 0
         )
     }
+
+    // MARK: - Included with `Validator()` by default
+
+    // You can start with no validations (not even the defaults below)
+    // by calling `Validator.blank`.
 
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
