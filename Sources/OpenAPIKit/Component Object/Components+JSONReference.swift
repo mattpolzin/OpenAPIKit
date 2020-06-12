@@ -73,7 +73,7 @@ extension OpenAPI.Components {
                 throw ReferenceError.cannotLookupRemoteReference
             }
             guard let value = self[reference] else {
-                throw MissingReferenceError.referenceMissingOnLookup(name: reference.absoluteString, key: ReferenceType.openAPIComponentsKey)
+                throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
             }
             return value
         case .b(let value):
@@ -102,7 +102,7 @@ extension OpenAPI.Components {
             throw ReferenceError.cannotLookupRemoteReference
         }
         guard let value = self[reference] else {
-            throw MissingReferenceError.referenceMissingOnLookup(name: reference.absoluteString, key: ReferenceType.openAPIComponentsKey)
+            throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
         }
         return value
     }

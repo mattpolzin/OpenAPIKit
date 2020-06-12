@@ -92,12 +92,17 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         /// The reference refers to some path outside the Components Object.
         case path(Path)
 
-        /// Get the name of the referenced object. Note that if the
-        /// last path component is an integer, its string representation
-        /// will be returned. JSON References do not have a way to
-        /// determine whether that is the name of a property or an index
-        /// within an array without crawling the JSON path to determine if
-        /// its parent is an array or an object.
+        /// Get the name of the referenced object.
+        ///
+        /// - Note: If the last path component is an integer, its
+        /// string representation will be returned. JSONReferences do
+        /// not have a way to determine whether that is the name of
+        /// a property or an index within an array without crawling the
+        /// JSON path to determine if its parent is an array or an object.
+        ///
+        /// This value will be `nil` if there are no path components
+        /// (which can happen if the reference just points to the whole
+        /// document).
         public var name: String? {
             switch self {
             case .component(name: let name):
