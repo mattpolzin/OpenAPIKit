@@ -48,6 +48,20 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         return .internal(.path(path))
     }
 
+    /// `true` for internal references, `false` for
+    /// external references (i.e. to another file).
+    public var isInternal: Bool {
+        guard case .internal = self else { return false }
+        return true
+    }
+
+    /// `true` for external references, `false` for
+    /// internal references.
+    public var isExternal: Bool {
+        guard case .external = self else { return false }
+        return true
+    }
+
     /// Get the name of the referenced object. This method returns optional
     /// because a reference to an external file might not have any path if the
     /// file itself is the referenced component.
@@ -60,6 +74,9 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         }
     }
 
+    /// The absolute value of an external reference's
+    /// URL or the path fragment string for a local
+    /// reference as defined in [RFC 3986](https://tools.ietf.org/html/rfc3986).
     public var absoluteString: String {
         switch self {
         case .internal(let reference):
@@ -75,12 +92,17 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         /// The reference refers to some path outside the Components Object.
         case path(Path)
 
-        /// Get the name of the referenced object. Note that if the
-        /// last path component is an integer, its string representation
-        /// will be returned. JSON References do not have a way to
-        /// determine whether that is the name of a property or an index
-        /// within an array without crawling the JSON path to determine if
-        /// its parent is an array or an object.
+        /// Get the name of the referenced object.
+        ///
+        /// - Note: If the last path component is an integer, its
+        /// string representation will be returned. JSONReferences do
+        /// not have a way to determine whether that is the name of
+        /// a property or an index within an array without crawling the
+        /// JSON path to determine if its parent is an array or an object.
+        ///
+        /// This value will be `nil` if there are no path components
+        /// (which can happen if the reference just points to the whole
+        /// document).
         public var name: String? {
             switch self {
             case .component(name: let name):
@@ -118,8 +140,12 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             self = .component(name: componentName)
         }
 
+        /// Synonymous with `rawValue`.
         public var description: String { rawValue }
 
+        /// A String formatted per the
+        /// path fragment specification found in
+        /// [RFC 3986](https://tools.ietf.org/html/rfc3986).
         public var rawValue: String {
             switch self {
             case .component(name: let name):
