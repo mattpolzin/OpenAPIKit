@@ -130,6 +130,138 @@ extension Validation {
             }
         )
     }
+
+    /// Validate that all JSONSchema references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var schemaReferencesAreValid: Validation<JSONReference<JSONSchema>> {
+        .init(
+            description: "JSONSchema reference can be found in components/schemas",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                    // don't make assertions about external references
+                    // TODO: could make a stronger assertion including
+                    // internal references outside of components given
+                    // some way to resolve those references.
+                    return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all Response references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var responseReferencesAreValid: Validation<JSONReference<OpenAPI.Response>> {
+        .init(
+            description: "Response reference can be found in components/responses",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all Parameter references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var parameterReferencesAreValid: Validation<JSONReference<OpenAPI.Parameter>> {
+        .init(
+            description: "Parameter reference can be found in components/parameters",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all Example references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var exampleReferencesAreValid: Validation<JSONReference<OpenAPI.Example>> {
+        .init(
+            description: "Example reference can be found in components/examples",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all Request references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var requestReferencesAreValid: Validation<JSONReference<OpenAPI.Request>> {
+        .init(
+            description: "Request reference can be found in components/requestBodies",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all Header references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var headerReferencesAreValid: Validation<JSONReference<OpenAPI.Header>> {
+        .init(
+            description: "Header reference can be found in components/headers",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
 }
 
 /// Used by both the Path Item parameter check and the

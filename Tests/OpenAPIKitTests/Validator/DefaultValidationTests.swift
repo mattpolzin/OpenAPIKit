@@ -372,4 +372,130 @@ final class DefaultValidatorTests: XCTestCase {
         // NOTE this is part of default validation
         try document.validate()
     }
+
+    func test_oneOfEachReferenceTypeFails() throws {
+
+        let path = OpenAPI.PathItem(
+            get: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    404: .response(
+                        description: "response2",
+                        headers: ["header1": .reference(.component(named: "header1"))],
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1"))
+                                ]
+                            ),
+                            .xml: .init(schemaReference: .component(named: "schema1"))
+                        ]
+                    )
+                ]
+            )
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .noComponents
+        )
+
+        // NOTE this is part of default validation
+        XCTAssertThrowsError(try document.validate()) { error in
+            let error = error as? ValidationErrors
+            XCTAssertEqual(error?.values.count, 6)
+            XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
+            XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")
+            XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
+            XCTAssertEqual(error?.values[1].codingPathString, ".paths['/hello'].get.requestBody")
+            XCTAssertEqual(error?.values[2].reason, "Failed to satisfy: Response reference can be found in components/responses")
+            XCTAssertEqual(error?.values[2].codingPathString, ".paths['/hello'].get.responses.200")
+            XCTAssertEqual(error?.values[3].reason, "Failed to satisfy: Header reference can be found in components/headers")
+            XCTAssertEqual(error?.values[3].codingPathString, ".paths['/hello'].get.responses.404.headers.header1")
+            XCTAssertEqual(error?.values[4].reason, "Failed to satisfy: Example reference can be found in components/examples")
+            XCTAssertEqual(error?.values[4].codingPathString, ".paths['/hello'].get.responses.404.content['application/json'].examples.example1")
+            XCTAssertEqual(error?.values[5].reason, "Failed to satisfy: JSONSchema reference can be found in components/schemas")
+            XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].get.responses.404.content['application/xml'].schema")
+        }
+    }
+
+    func test_oneOfEachReferenceTypeSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            put: .init(
+                requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                responses: [
+                    200: .response(description: "empty")
+                ]
+            ),
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1")),
+                    .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    301: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                    404: .response(
+                        description: "response2",
+                        headers: [
+                            "header1": .reference(.component(named: "header1")),
+                            "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
+                        ],
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1")),
+                                    "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
+                                ]
+                            ),
+                            .xml: .init(schemaReference: .component(named: "schema1")),
+                            .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
+                        ]
+                    )
+                ]
+            )
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                schemas: [
+                    "schema1": .object
+                ],
+                responses: [
+                    "response1": .init(description: "test")
+                ],
+                parameters: [
+                    "parameter1": .init(name: "test", context: .header, schema: .string)
+                ],
+                examples: [
+                    "example1": .init(value: .b("hello"))
+                ],
+                requestBodies: [
+                    "request1": .init(content: [.json: .init(schema: .object)])
+                ],
+                headers: [
+                    "header1": .init(schema: .string)
+                ]
+            )
+        )
+
+        // NOTE this is part of default validation
+        try document.validate()
+    }
 }

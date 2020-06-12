@@ -54,6 +54,8 @@ extension OpenAPI.Document {
 /// - Parameters are unique within each Path Item.
 /// - Parameters are unique within each Operation.
 /// - Operation Ids are unique across the whole Document.
+/// - All JSONReferences that refer to components in this
+///     document can be found in the components dictionary.
 ///
 /// If you want a Validator that won't perform any
 /// validations except the ones you add, use
@@ -145,6 +147,8 @@ public final class Validator {
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
     /// - Operation Ids are unique across the whole Document.
+    /// - All JSONReferences that refer to components in this
+    ///     document can be found in the components dictionary.
     ///
     public convenience init() {
         self.init(validations: [
@@ -152,7 +156,13 @@ public final class Validator {
             .init(.documentTagNamesAreUnique),
             .init(.pathItemParametersAreUnique),
             .init(.operationParametersAreUnique),
-            .init(.operationIdsAreUnique)
+            .init(.operationIdsAreUnique),
+            .init(.schemaReferencesAreValid),
+            .init(.responseReferencesAreValid),
+            .init(.parameterReferencesAreValid),
+            .init(.exampleReferencesAreValid),
+            .init(.requestReferencesAreValid),
+            .init(.headerReferencesAreValid)
         ])
     }
 
