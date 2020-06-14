@@ -5,6 +5,40 @@
 //  Created by Mathew Polzin on 6/2/20.
 //
 
+extension OpenAPI.Document {
+    /// Validate this `OpenAPI.Document`.
+    ///
+    /// - parameters:
+    ///     - validator: Validator to use. By default,
+    ///         a validator that just asserts requirements of the OpenAPI
+    ///         Specification will be used.
+    ///
+    /// - throws: `ValidationErrors` if any validations failed.
+    ///     `EncodingError` if encoding failed for a structural reason.
+    ///
+    /// Call without any arguments to validate some aspects of the OpenAPI
+    /// Specification not guaranteed by the Swift types in OpenAPIKit.
+    /// You can create a `Validator` of your own, adding additional steps
+    /// to the validation (or starting from scratch), and then pass that
+    /// `Validator` to the `validate(using:)` method to use custom validation
+    /// criteria.
+    public func validate(using validator: Validator = .init()) throws {
+        let validator = _Validator(document: self, validations: validator.validations)
+        var container = validator.singleValueContainer()
+
+        // we kick things off by applying validations to the root (OpenAPI.Document)
+        // and then encoding with the single value container.
+        // After this, validations are only applied by keyed/unkeyed containers and
+        // by the leaf node methods of the single value container.
+        validator.applyValidations(to: self)
+        try container.encode(self)
+
+        if !validator.errors.isEmpty {
+            throw ValidationErrors(values: validator.errors)
+        }
+    }
+}
+
 /// A validator that works by traversing an `Encodable` object and validating
 /// any values that match an included validation's type and pass that validation's
 /// predicate.
