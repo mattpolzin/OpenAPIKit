@@ -15,12 +15,18 @@ final class JSONReferenceTests: XCTestCase {
         let t1 = JSONReference<JSONSchema>.internal(path: "/hello")
         let t2 = JSONReference<JSONSchema>.internal(.path("/hello"))
         XCTAssertEqual(t1, t2)
+        XCTAssertTrue(t1.isInternal)
+        XCTAssertFalse(t1.isExternal)
 
         let t3 = JSONReference<JSONSchema>.component(named: "hello")
         let t4 = JSONReference<JSONSchema>.internal(.component(name: "hello"))
         XCTAssertEqual(t3, t4)
+        XCTAssertTrue(t3.isInternal)
+        XCTAssertFalse(t3.isExternal)
 
-        let _ = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
+        let externalTest = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
+        XCTAssertFalse(externalTest.isInternal)
+        XCTAssertTrue(externalTest.isExternal)
 
         let t5 = JSONReference<JSONSchema>.InternalReference("#/hello/world")
         let t6 = JSONReference<JSONSchema>.InternalReference(rawValue: "#/hello/world")
