@@ -11,7 +11,9 @@ import Foundation
 /// a reference (which only `JSONReference` should be).
 public protocol _OpenAPIReference {}
 
-/// A JSON Reference which represents something like
+/// A reference following the JSON Reference specification.
+///
+/// These references are formatted like
 ///
 ///     $ref: filename.yml#/path/to/something
 ///
@@ -21,6 +23,25 @@ public protocol _OpenAPIReference {}
 /// The intention, as prescribed by the OpenAPI specification, is
 /// for this type to conform to the logic in the
 /// [JSON Reference spec](https://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03).
+///
+/// A common reason to use `JSONReferences` is to refer to
+/// something in the OpenAPI Components Object. There are two
+/// easy ways to create this kind of reference.
+/// - The `JSONReference.component(named:)` static constructor.
+/// - The `OpenAPI.Components` `reference(named:ofType:)` method.
+///
+/// Which you use depends on your specifc needs. The `reference(named:ofType:)`
+/// method will guarantee that the thing you are referencing exists in the Components
+/// Object (or else the method will `throw` an error). The `component(named:)`
+/// constructor by contrast will not guarantee that the component you are referencing
+/// currently exists in the Components Object. The lack of safety might be beneficial
+/// or necessary depending on whether you have the Components Object built out and
+/// available at the time and location where you need to create a reference.
+///
+/// Regardless of how you create your reference, internal references to things in the
+/// Components Object will be validated when you call `validate()` on an
+/// `OpenAPI.Document`.
+///
 public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
@@ -86,6 +107,12 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         }
     }
 
+    /// The context for a JSONReference that points to something within
+    /// the same document as the reference itself.
+    ///
+    /// By contrast, an "external" reference is represented by a `URL` that
+    /// is expected to be resolved to a different file than one containing the
+    /// `JSONReference`.
     public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
