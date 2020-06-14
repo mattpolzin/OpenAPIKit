@@ -8,14 +8,25 @@
 import Foundation
 
 // MARK: Types
-/// A type with an associated value representing its Swift type.
+/// An OpenAPI type with an associated value representing its Swift type.
 ///
-/// For example, a type might represent a `String` in some context
-/// like `JSONSchema` so its Swift type would be `String.self`.
+/// For example, `JSONTypeFormat.BooleanFormat` is associated with
+/// the `Bool` Swift type.
 public protocol SwiftTyped {
     associatedtype SwiftType: Codable, Equatable
 }
 
+/// The raw types supported by JSON Schema.
+///
+/// These are the OpenAPI [data types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types)
+/// and additionally the `object` and `array`
+/// "compound" data types.
+/// - boolean
+/// - object
+/// - array
+/// - number
+/// - integer
+/// - string
 public enum JSONType: String, Codable {
     case boolean = "boolean"
     case object = "object"
@@ -25,6 +36,14 @@ public enum JSONType: String, Codable {
     case string = "string"
 }
 
+/// The combination of a JSON Schema type and format.
+///
+/// See the `JSONType` and `OpenAPIFormat`
+/// types for more information on each.
+///
+/// You can also find information on types and
+/// formats in the OpenAPI Specification's
+/// section on [data types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types).
 public enum JSONTypeFormat: Equatable {
     case boolean(BooleanFormat)
     case object(ObjectFormat)
@@ -69,6 +88,17 @@ public enum JSONTypeFormat: Equatable {
 }
 
 // MARK: Formats
+/// OpenAPI formats represent the valid formats a
+/// raw type can take on to better specify its allowed
+/// values and intended semantics.
+///
+/// For example, a `string` might have the `date-time` format, indicating
+/// it is representative of a date/time and also indicating its format
+/// adheres to the [RFC3339](https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
+/// specification for a "date-time."
+///
+/// See "formats" under the OpenAPI [data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types)
+/// documentation.
 public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
     static var unspecified: Self { get }
 
