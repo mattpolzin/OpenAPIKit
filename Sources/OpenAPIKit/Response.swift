@@ -27,7 +27,7 @@ extension OpenAPI {
         public init(
             description: String,
             headers: Header.Map? = nil,
-            content: Content.Map,
+            content: Content.Map = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.description = description
@@ -134,7 +134,7 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
     public static func response(
         description: String,
         headers: OpenAPI.Header.Map? = nil,
-        content: OpenAPI.Content.Map
+        content: OpenAPI.Content.Map = [:]
     ) -> Self {
         return .b(
             .init(

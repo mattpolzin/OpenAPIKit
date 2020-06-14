@@ -128,6 +128,11 @@ extension Either where B == OpenAPI.Example {
     public static func example(_ example: OpenAPI.Example) -> Self { .b(example) }
 }
 
+extension Either where B == OpenAPI.Request {
+    /// Construct a request value.
+    public static func request(_ request: OpenAPI.Request) -> Self { .b(request) }
+}
+
 extension Either where B == OpenAPI.Response {
     /// Construct a response value.
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
