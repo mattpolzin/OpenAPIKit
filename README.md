@@ -4,7 +4,7 @@
 
 # OpenAPIKit <!-- omit in toc -->
 
-A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) Documents and their components.
+A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) Documents and their components.
 
 - [Usage](#usage)
 	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
