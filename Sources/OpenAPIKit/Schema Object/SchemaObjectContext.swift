@@ -77,17 +77,19 @@ extension JSONSchema {
         public var readOnly: Bool { permissions == .readOnly }
         public var writeOnly: Bool { permissions == .writeOnly }
 
-        public init(format: Format = .unspecified,
-                    required: Bool = true,
-                    nullable: Bool = false,
-                    permissions: Permissions = .readWrite,
-                    deprecated: Bool = false,
-                    title: String? = nil,
-                    description: String? = nil,
-                    discriminator: OpenAPI.Discriminator? = nil,
-                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                    allowedValues: [AnyCodable]? = nil,
-                    example: AnyCodable? = nil) {
+        public init(
+            format: Format = .unspecified,
+            required: Bool = true,
+            nullable: Bool = false,
+            permissions: Permissions = .readWrite,
+            deprecated: Bool = false,
+            title: String? = nil,
+            description: String? = nil,
+            discriminator: OpenAPI.Discriminator? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            allowedValues: [AnyCodable]? = nil,
+            example: AnyCodable? = nil
+        ) {
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -101,17 +103,19 @@ extension JSONSchema {
             self.example = example
         }
 
-        public init(format: Format = .unspecified,
-                    required: Bool = true,
-                    nullable: Bool = false,
-                    permissions: Permissions = .readWrite,
-                    deprecated: Bool = false,
-                    title: String? = nil,
-                    description: String? = nil,
-                    discriminator: OpenAPI.Discriminator? = nil,
-                    externalDocs: OpenAPI.ExternalDocumentation? = nil,
-                    allowedValues: [AnyCodable]? = nil,
-                    example: String) {
+        public init(
+            format: Format = .unspecified,
+            required: Bool = true,
+            nullable: Bool = false,
+            permissions: Permissions = .readWrite,
+            deprecated: Bool = false,
+            title: String? = nil,
+            description: String? = nil,
+            discriminator: OpenAPI.Discriminator? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            allowedValues: [AnyCodable]? = nil,
+            example: String
+        ) {
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -138,77 +142,87 @@ extension JSONSchema {
 extension JSONSchema.Context {
     /// Return the optional version of this Context
     public func optionalContext() -> JSONSchema.Context<Format> {
-        return .init(format: format,
-                     required: false,
-                     nullable: nullable,
-                     permissions: permissions,
-                     deprecated: deprecated,
-                     title: title,
-                     description: description,
-                     discriminator: discriminator,
-                     externalDocs: externalDocs,
-                     allowedValues: allowedValues,
-                     example: example)
+        return .init(
+            format: format,
+            required: false,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 
     /// Return the required version of this context
     public func requiredContext() -> JSONSchema.Context<Format> {
-        return .init(format: format,
-                     required: true,
-                     nullable: nullable,
-                     permissions: permissions,
-                     deprecated: deprecated,
-                     title: title,
-                     description: description,
-                     discriminator: discriminator,
-                     externalDocs: externalDocs,
-                     allowedValues: allowedValues,
-                     example: example)
+        return .init(
+            format: format,
+            required: true,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 
     /// Return the nullable version of this context
     public func nullableContext() -> JSONSchema.Context<Format> {
-        return .init(format: format,
-                     required: required,
-                     nullable: true,
-                     permissions: permissions,
-                     deprecated: deprecated,
-                     title: title,
-                     description: description,
-                     discriminator: discriminator,
-                     externalDocs: externalDocs,
-                     allowedValues: allowedValues,
-                     example: example)
+        return .init(
+            format: format,
+            required: required,
+            nullable: true,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 
     /// Return this context with the given list of possible values
     public func with(allowedValues: [AnyCodable]) -> JSONSchema.Context<Format> {
-        return .init(format: format,
-                     required: required,
-                     nullable: nullable,
-                     permissions: permissions,
-                     deprecated: deprecated,
-                     title: title,
-                     description: description,
-                     discriminator: discriminator,
-                     externalDocs: externalDocs,
-                     allowedValues: allowedValues,
-                     example: example)
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 
     /// Return this context with the given example
     public func with(example: AnyCodable) -> JSONSchema.Context<Format> {
-        return .init(format: format,
-                     required: required,
-                     nullable: nullable,
-                     permissions: permissions,
-                     deprecated: deprecated,
-                     title: title,
-                     description: description,
-                     discriminator: discriminator,
-                     externalDocs: externalDocs,
-                     allowedValues: allowedValues,
-                     example: example)
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 }
 
@@ -216,6 +230,12 @@ extension JSONSchema.Context {
 
 extension JSONSchema {
     /// The context that only applies to `.number` schemas.
+    ///
+    /// - Note: Although integers are numbers, `integer`
+    /// schemas have their own context type. An
+    /// `IntegerContext` _can_ be asked for the
+    /// `NumericContext` that would describe it via its
+    /// `numericContext` property.
     public struct NumericContext: Equatable {
         public struct Bound: Equatable {
             public let value: Double
@@ -228,9 +248,11 @@ extension JSONSchema {
         public let maximum: Bound?
         public let minimum: Bound?
 
-        public init(multipleOf: Double? = nil,
-                    maximum: (Double, exclusive: Bool)? = nil,
-                    minimum: (Double, exclusive: Bool)? = nil) {
+        public init(
+            multipleOf: Double? = nil,
+            maximum: (Double, exclusive: Bool)? = nil,
+            minimum: (Double, exclusive: Bool)? = nil
+        ) {
             self.multipleOf = multipleOf
             self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
             self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
@@ -250,12 +272,24 @@ extension JSONSchema {
         public let maximum: Bound?
         public let minimum: Bound?
 
-        public init(multipleOf: Int? = nil,
-                    maximum: (Int, exclusive: Bool)? = nil,
-                    minimum: (Int, exclusive: Bool)? = nil) {
+        public init(
+            multipleOf: Int? = nil,
+            maximum: (Int, exclusive: Bool)? = nil,
+            minimum: (Int, exclusive: Bool)? = nil
+        ) {
             self.multipleOf = multipleOf
             self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
             self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+        }
+
+        /// Get the `NumericContext` that describes this
+        /// `IntegerContext`.
+        public var numericContext: NumericContext {
+            return .init(
+                multipleOf: multipleOf.map(Double.init),
+                maximum: maximum.map { (Double($0.value), exclusive: $0.exclusive) },
+                minimum: minimum.map { (Double($0.value), exclusive: $0.exclusive) }
+            )
         }
     }
 
@@ -267,9 +301,11 @@ extension JSONSchema {
         /// Regular expression
         public let pattern: String?
 
-        public init(maxLength: Int? = nil,
-                    minLength: Int = 0,
-                    pattern: String? = nil) {
+        public init(
+            maxLength: Int? = nil,
+            minLength: Int = 0,
+            pattern: String? = nil
+        ) {
             self.maxLength = maxLength
             self.minLength = minLength
             self.pattern = pattern
@@ -294,10 +330,12 @@ extension JSONSchema {
         /// to be unique. Defaults to false.
         public let uniqueItems: Bool
 
-        public init(items: JSONSchema? = nil,
-                    maxItems: Int? = nil,
-                    minItems: Int = 0,
-                    uniqueItems: Bool = false) {
+        public init(
+            items: JSONSchema? = nil,
+            maxItems: Int? = nil,
+            minItems: Int = 0,
+            uniqueItems: Bool = false
+        ) {
             self.items = items
             self.maxItems = maxItems
             self.minItems = minItems
@@ -336,10 +374,12 @@ extension JSONSchema {
             return max(_minProperties, requiredProperties.count)
         }
 
-        public init(properties: [String: JSONSchema],
-                    additionalProperties: Either<Bool, JSONSchema>? = nil,
-                    maxProperties: Int? = nil,
-                    minProperties: Int = 0) {
+        public init(
+            properties: [String: JSONSchema],
+            additionalProperties: Either<Bool, JSONSchema>? = nil,
+            maxProperties: Int? = nil,
+            minProperties: Int = 0
+        ) {
             self.properties = properties
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties

@@ -435,6 +435,215 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(undefined.externalDocs)
     }
 
+    func test_generalContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: nil)
+
+        XCTAssertNotNil(boolean.generalContext as? JSONSchema.Context<JSONTypeFormat.BooleanFormat>)
+        XCTAssertNotNil(object.generalContext as? JSONSchema.Context<JSONTypeFormat.ObjectFormat>)
+        XCTAssertNotNil(array.generalContext as? JSONSchema.Context<JSONTypeFormat.ArrayFormat>)
+        XCTAssertNotNil(number.generalContext as? JSONSchema.Context<JSONTypeFormat.NumberFormat>)
+        XCTAssertNotNil(integer.generalContext as? JSONSchema.Context<JSONTypeFormat.IntegerFormat>)
+        XCTAssertNotNil(string.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>)
+
+        XCTAssertNil(allOf.generalContext)
+        XCTAssertNil(anyOf.generalContext)
+        XCTAssertNil(oneOf.generalContext)
+        XCTAssertNil(not.generalContext)
+        XCTAssertNil(reference.generalContext)
+        XCTAssertNil(undefined.generalContext)
+    }
+
+    func test_objectContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [ "hello": .string]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: "hello world")
+
+        XCTAssertNil(boolean.objectContext)
+        XCTAssertEqual(object.objectContext, .init(properties: ["hello": .string]))
+        XCTAssertNil(array.objectContext)
+        XCTAssertNil(number.objectContext)
+        XCTAssertNil(integer.objectContext)
+        XCTAssertNil(string.objectContext)
+
+        XCTAssertNil(allOf.objectContext)
+        XCTAssertNil(anyOf.objectContext)
+        XCTAssertNil(oneOf.objectContext)
+        XCTAssertNil(not.objectContext)
+        XCTAssertNil(reference.objectContext)
+        XCTAssertNil(undefined.objectContext)
+    }
+
+    func test_arrayContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: "hello world")
+
+        XCTAssertNil(boolean.arrayContext)
+        XCTAssertNil(object.arrayContext)
+        XCTAssertEqual(array.arrayContext, .init(items: .boolean))
+        XCTAssertNil(number.arrayContext)
+        XCTAssertNil(integer.arrayContext)
+        XCTAssertNil(string.arrayContext)
+
+        XCTAssertNil(allOf.arrayContext)
+        XCTAssertNil(anyOf.arrayContext)
+        XCTAssertNil(oneOf.arrayContext)
+        XCTAssertNil(not.arrayContext)
+        XCTAssertNil(reference.arrayContext)
+        XCTAssertNil(undefined.arrayContext)
+    }
+
+    func test_numberContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init(multipleOf: 22.3))
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: "hello world")
+
+        XCTAssertNil(boolean.numberContext)
+        XCTAssertNil(object.numberContext)
+        XCTAssertNil(array.numberContext)
+        XCTAssertEqual(number.numberContext, .init(multipleOf: 22.3))
+        XCTAssertNil(integer.numberContext)
+        XCTAssertNil(string.numberContext)
+
+        XCTAssertNil(allOf.numberContext)
+        XCTAssertNil(anyOf.numberContext)
+        XCTAssertNil(oneOf.numberContext)
+        XCTAssertNil(not.numberContext)
+        XCTAssertNil(reference.numberContext)
+        XCTAssertNil(undefined.numberContext)
+    }
+
+    func test_integerContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init(multipleOf: 3))
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: "hello world")
+
+        XCTAssertNil(boolean.integerContext)
+        XCTAssertNil(object.integerContext)
+        XCTAssertNil(array.integerContext)
+        XCTAssertNil(number.integerContext)
+        XCTAssertEqual(integer.integerContext, .init(multipleOf: 3))
+        XCTAssertNil(string.integerContext)
+
+        XCTAssertNil(allOf.integerContext)
+        XCTAssertNil(anyOf.integerContext)
+        XCTAssertNil(oneOf.integerContext)
+        XCTAssertNil(not.integerContext)
+        XCTAssertNil(reference.integerContext)
+        XCTAssertNil(undefined.integerContext)
+    }
+
+    func test_stringContextAccessor() {
+        let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
+        let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
+        let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
+        let string = JSONSchema.string(.init(format: .unspecified, required: true), .init(maxLength: 5))
+
+        let allOf = JSONSchema.all(of: [.string(.init(), .init())])
+        let anyOf = JSONSchema.any(of: [boolean])
+        let oneOf = JSONSchema.one(of: [boolean])
+        let not = JSONSchema.not(boolean)
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let undefined = JSONSchema.undefined(description: "hello world")
+
+        XCTAssertNil(boolean.stringContext)
+        XCTAssertNil(object.stringContext)
+        XCTAssertNil(array.stringContext)
+        XCTAssertNil(number.stringContext)
+        XCTAssertNil(integer.stringContext)
+        XCTAssertEqual(string.stringContext, .init(maxLength: 5))
+
+        XCTAssertNil(allOf.stringContext)
+        XCTAssertNil(anyOf.stringContext)
+        XCTAssertNil(oneOf.stringContext)
+        XCTAssertNil(not.stringContext)
+        XCTAssertNil(reference.stringContext)
+        XCTAssertNil(undefined.stringContext)
+    }
+
+    func test_numericContextFromIntegerContext() {
+        let i1 = JSONSchema.IntegerContext(multipleOf: 2)
+        let i2 = JSONSchema.IntegerContext(maximum: (10, exclusive: false))
+        let i3 = JSONSchema.IntegerContext(maximum: (10, exclusive: true))
+        let i4 = JSONSchema.IntegerContext(minimum: (3, exclusive: false))
+        let i5 = JSONSchema.IntegerContext(minimum: (3, exclusive: true))
+
+        XCTAssertEqual(
+            i1.numericContext,
+            JSONSchema.NumericContext(multipleOf: 2)
+        )
+        XCTAssertEqual(
+            i2.numericContext,
+            JSONSchema.NumericContext(maximum: (10, exclusive: false))
+        )
+        XCTAssertEqual(
+            i3.numericContext,
+            JSONSchema.NumericContext(maximum: (10, exclusive: true))
+        )
+        XCTAssertEqual(
+            i4.numericContext,
+            JSONSchema.NumericContext(minimum: (3, exclusive: false))
+        )
+        XCTAssertEqual(
+            i5.numericContext,
+            JSONSchema.NumericContext(minimum: (3, exclusive: true))
+        )
+    }
+
     func test_requiredToOptional() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .optionalSchemaObject()

@@ -72,90 +72,6 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// `true` if values for this schema can be `null`.
-    ///
-    /// - Important: This is distinct from the concept of optionality.
-    ///
-    ///     **Nullability:** Whether or not a value can be  `null`.
-    ///
-    ///     **Optionality:** Whether or not a key/value can be entirely
-    ///         omitted from request/response data.
-    public var nullable: Bool {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.nullable
-        case .all, .one, .any, .not, .reference, .undefined:
-            return false
-        }
-    }
-
-    /// `true` if this schema can only be read from and is therefore
-    /// unsupported for request data.
-    public var readOnly: Bool {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.readOnly
-        case .all, .one, .any, .not, .reference, .undefined:
-            return false
-        }
-    }
-
-    /// `true` if this schema can only be written to and is therefore
-    /// unavailable in response data.
-    public var writeOnly: Bool {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.writeOnly
-        case .all, .one, .any, .not, .reference, .undefined:
-            return false
-        }
-    }
-
-    /// `true` if this schema is deprecated, `false` otherwise.
-    public var deprecated: Bool {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.deprecated
-        case .all, .one, .any, .not, .reference, .undefined:
-            return false
-        }
-    }
-
-    /// Get the title, if specified. If unspecified, returns `nil`.
-    public var title: String? {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.title
-        case .all, .one, .any, .not, .reference, .undefined:
-            return nil
-        }
-    }
-
     /// Get the description, if specified. If unspecified, returns `nil`.
     public var description: String? {
         switch self {
@@ -192,23 +108,71 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    /// `true` if values for this schema can be `null`.
+    ///
+    /// - Important: This is distinct from the concept of optionality.
+    ///
+    ///     **Nullability:** Whether or not a value can be  `null`.
+    ///
+    ///     **Optionality:** Whether or not a key/value can be entirely
+    ///         omitted from request/response data.
+    public var nullable: Bool {
+        return generalContext?.nullable ?? false
+    }
+
+    /// `true` if this schema can only be read from and is therefore
+    /// unsupported for request data.
+    public var readOnly: Bool {
+        return generalContext?.readOnly ?? false
+    }
+
+    /// `true` if this schema can only be written to and is therefore
+    /// unavailable in response data.
+    public var writeOnly: Bool {
+        return generalContext?.writeOnly ?? false
+    }
+
+    /// `true` if this schema is deprecated, `false` otherwise.
+    public var deprecated: Bool {
+        return generalContext?.deprecated ?? false
+    }
+
+    /// Get the title, if specified. If unspecified, returns `nil`.
+    public var title: String? {
+        return generalContext?.title
+    }
+
     /// Get the external docs, if specified. If unspecified, returns `nil`.
     public var externalDocs: OpenAPI.ExternalDocumentation? {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.externalDocs
-        case .all, .one, .any, .not, .reference, .undefined:
-            return nil
-        }
+        return generalContext?.externalDocs
     }
 
     /// Get the allowed values, if specified. If unspecified, returns `nil`.
     public var allowedValues: [AnyCodable]? {
+        return generalContext?.allowedValues
+    }
+
+    /// Get an example, if specified. If unspecified, returns `nil`.
+    public var example: AnyCodable? {
+        return generalContext?.example
+    }
+}
+
+// MARK: - Context Accessors
+extension JSONSchema {
+    /// Get the general context most JSONSchemas have.
+    ///
+    /// This is the information shared by most schemas.
+    ///
+    /// Notably missing this general context are:
+    /// - `all`
+    /// - `one`
+    /// - `any`
+    /// - `not`
+    /// - `reference`
+    /// - `undefined`
+    ///
+    public var generalContext: JSONSchemaContext? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
@@ -216,25 +180,64 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
              .string(let context as JSONSchemaContext, _):
-            return context.allowedValues
+            return context
         case .all, .one, .any, .not, .reference, .undefined:
             return nil
         }
     }
 
-    /// Get an example, if specified. If unspecified, returns `nil`.
-    public var example: AnyCodable? {
-        switch self {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.example
-        case .all, .one, .any, .not, .reference, .undefined:
+    /// Get the context specific to an `object` schema. If not an
+    /// object schema, returns `nil`.
+    public var objectContext: ObjectContext? {
+        guard case .object(_, let context) = self else {
             return nil
         }
+        return context
+    }
+
+    /// Get the context specific to an `array` schema. If not an
+    /// array schema, returns `nil`.
+    public var arrayContext: ArrayContext? {
+        guard case .array(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to a `number` schema. If not a
+    /// number schema, returns `nil`.
+    ///
+    /// Although integers are numbers, an `integer` schema will
+    /// still return `nil` when asked for a `numberContext`.
+    ///
+    /// If you wish to get a `NumericContext` from an `integer`
+    /// schema, take an `IntegerContext` and explicitly request
+    /// a `NumericContext` from it via its `numericContext`
+    /// accessor.
+    ///
+    public var numberContext: NumericContext? {
+        guard case .number(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to an `integer` schema. If not an
+    /// integer schema, returns `nil`.
+    public var integerContext: IntegerContext? {
+        guard case .integer(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to a `string` schema. If not a
+    /// string schema, returns `nil`.
+    public var stringContext: StringContext? {
+        guard case .string(_, let context) = self else {
+            return nil
+        }
+        return context
     }
 }
 
