@@ -11,14 +11,85 @@ extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
     /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
+    ///
+    /// An OpenAPI Document can say a _lot_ about the API it describes.
+    /// A read-through of the specification is highly recommended because
+    /// OpenAPIKit stays intentionally close to the naming and structure
+    /// layed out by the Specification -- it goes without saying that the encoded
+    /// JSON or YAML produced by OpenAPIKit conforms to the specification
+    /// exactly.
     public struct Document: Equatable, CodableVendorExtendable {
+        /// OpenAPI Spec "openapi" field.
+        ///
+        /// OpenAPIKit only explicitly supports versions that can be found in
+        /// the `Version` enum. Other versions may or may not be decodable
+        /// by OpenAPIKit to a certain extent.
         public var openAPIVersion: Version
+
+        /// Information about the API described by this OpenAPI Document.
+        ///
+        /// Licensing, Terms of Service, contact information, API version (the
+        /// version of the API this document describes, not the OpenAPI
+        /// Specification version), etc.
         public var info: Info
+
+        /// An array of Server Objects, which provide connectivity information
+        /// to a target server.
+        ///
+        /// If the servers property is not provided, or is an
+        /// empty array, the default value is a Server Object with a url value of
+        /// "/".
         public var servers: [Server]
+
+        /// All routes supported by this API. This property maps the path of each
+        /// route (`OpenAPI.Path`) to the documentation for that route
+        /// (`OpenAPI.PathItem`).
         public var paths: PathItem.Map
+
+        /// Storage for components that need to be referenced elsewhere in the
+        /// OpenAPI Document using `JSONReferences`.
+        ///
+        /// Storing components here can be in the interest of being explicit about
+        /// the fact that the components are always the same (such as an
+        /// "Unauthorized" `Response` definition used on all endpoints) or it might
+        /// just be practical to put things here and reference them elsewhere to
+        /// cut down on the overall size of the document.
+        ///
+        /// If your document is defined in Swift then this is a less beneficial way to
+        /// share definitions than to just use the same Swift value multiple times, but
+        /// you still might want to consider using the Components Object for its impact
+        /// on the JSON/YAML structure of your document once encoded.
         public var components: Components
+
+        /// A declaration of which security mechanisms can be used across the API.
+        ///
+        /// The list of values includes alternative security requirement objects that can
+        /// be used. Only one of the security requirement objects need to be satisfied
+        /// to authorize a request. Individual operations can override this definition.
+        ///
+        /// To make security optional, an empty security requirement can be included
+        /// in the array.
+        ///
+        /// - Important: The OpenAPI Specification defines Security Requirement
+        ///     Object keys as being `String` values corresponding to entries in
+        ///     the Components Object.
+        ///
+        ///     OpenAPIKit has a type capable of representing that: The `JSONReference`.
+        ///     For that reason, OpenAPIKit defines keys in security requirement objects as
+        ///     explicit references to entries in the Components Object instead of `String`
+        ///     values.
         public var security: [SecurityRequirement]
+
+        /// A list of tags used by the specification with additional metadata.
+        ///
+        /// The order of the tags can be used to reflect on their order by the parsing tools.
+        /// Not all tags that are used by Operation Objects must be declared at the document
+        /// level.
+        ///
+        /// - Important: Each tag name in the list MUST be unique.
         public var tags: [Tag]?
+
+        /// Additional external documentation.
         public var externalDocs: ExternalDocumentation?
 
         /// Retrieve an array of all Operation Ids defined by
@@ -101,6 +172,11 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Document {
+    /// The OpenAPI Specification version.
+    ///
+    /// OpenAPIKit only explicitly supports versions that can be found in
+    /// this enum. Other versions may or may not be decodable by
+    /// OpenAPIKit to a certain extent.
     public enum Version: String, Codable {
         case v3_0_0 = "3.0.0"
         case v3_0_1 = "3.0.1"
