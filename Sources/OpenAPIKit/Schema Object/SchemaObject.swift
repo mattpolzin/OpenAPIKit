@@ -185,6 +185,60 @@ extension JSONSchema {
             return nil
         }
     }
+
+    /// Get the context specific to an `object` schema. If not an
+    /// object schema, returns `nil`.
+    public var objectContext: ObjectContext? {
+        guard case .object(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to an `array` schema. If not an
+    /// array schema, returns `nil`.
+    public var arrayContext: ArrayContext? {
+        guard case .array(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to a `number` schema. If not a
+    /// number schema, returns `nil`.
+    ///
+    /// Although integers are numbers, an `integer` schema will
+    /// still return `nil` when asked for a `numberContext`.
+    ///
+    /// If you wish to get a `NumericContext` from an `integer`
+    /// schema, take an `IntegerContext` and explicitly request
+    /// a `NumericContext` from it via its `numericContext`
+    /// accessor.
+    ///
+    public var numberContext: NumericContext? {
+        guard case .number(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to an `integer` schema. If not an
+    /// integer schema, returns `nil`.
+    public var integerContext: IntegerContext? {
+        guard case .integer(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to a `string` schema. If not a
+    /// string schema, returns `nil`.
+    public var stringContext: StringContext? {
+        guard case .string(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
 }
 
 // MARK: - Transformations
