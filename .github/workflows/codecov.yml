@@ -14,9 +14,3 @@ jobs:
       uses: mattpolzin/swift-codecov-action@0.4.0
       with:
         MINIMUM_COVERAGE: 98
-    - if: ${{ success() }}
-      uses: ouzi-dev/commit-status-updater@v1.0.6
-      with:
-        status: "success"
-        description: "${{ steps.analysis.outputs.codecov }}"
-        name: "Test Coverage"
