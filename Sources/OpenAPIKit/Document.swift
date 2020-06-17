@@ -39,6 +39,11 @@ extension OpenAPI {
         /// If the servers property is not provided, or is an
         /// empty array, the default value is a Server Object with a url value of
         /// "/".
+        ///
+        /// - Important: If you want to get all servers mentioned anywhere in
+        ///     the whole document (including servers that appear in path items
+        ///     or operations but not at the root document level), use the
+        ///     `allServers` property instead.
         public var servers: [Server]
 
         /// All routes supported by this API. This property maps the path of each
@@ -166,14 +171,13 @@ extension OpenAPI.Document {
 
     /// All servers referenced anywhere in the whole document.
     ///
-    /// The `servers` property on `OpenAPI.Document` contains
-    /// servers that are applicable to all paths and operations that
-    /// do not define their own `serves` array that overrides the root
-    /// array.
-    ///
     /// This property contains all servers defined at any level the document
     /// and therefore may or may not contain servers not found in the
     /// root servers array.
+    ///
+    /// The `servers` property on `OpenAPI.Document`, by contrast, contains
+    /// servers that are applicable to all paths and operations that
+    /// do not define their own `serves` array to override the root array.
     ///
     /// - Important: For the purposes of returning one of each `Server`,
     ///     two servers are considered identical if they have the same `url`
