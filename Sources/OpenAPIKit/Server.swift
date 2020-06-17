@@ -11,6 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
     /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
+    ///
     public struct Server: Equatable, CodableVendorExtendable {
         public let url: URL
         public let description: String?
@@ -41,6 +42,7 @@ extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
     /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
+    ///
     public struct Variable: Equatable, CodableVendorExtendable {
         public var `enum`: [String]
         public var `default`: String
