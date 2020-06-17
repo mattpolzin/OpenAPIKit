@@ -144,6 +144,204 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(t4.allOperationIds, ["two"])
     }
 
+    func test_allServersEmpty() {
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    servers: [],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: []
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [])
+    }
+
+    func test_allServers_onlyRoot() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1, s2],
+            paths: [
+                "/hello/world": .init(
+                    servers: [],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: []
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
+    func test_allServers_onlyPathItem() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    servers: [s1, s2],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: []
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
+    func test_allServers_onlyOperation() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    servers: [],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: [s1, s2]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
+    func test_allServers_allDuplicates() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1, s2],
+            paths: [
+                "/hello/world": .init(
+                    servers: [s1, s2],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: [s1, s2]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
+    func test_allServers_distributedThroughout() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+        let s3 = OpenAPI.Server(url: URL(string: "https://website3.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1],
+            paths: [
+                "/hello/world": .init(
+                    servers: [s2],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: [s3]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2, s3])
+    }
+
+    func test_allServers_descriptionDoesNotFactorIn() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+        let s3 = OpenAPI.Server(url: URL(string: "https://website.com")!, description: "test")
+        let s4 = OpenAPI.Server(url: URL(string: "https://website2.com")!, description: "test2")
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1],
+            paths: [
+                "/hello/world": .init(
+                    servers: [s2, s4],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: [s3]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
+    func test_allServers_variablesDoFactorIn() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+        let s3 = OpenAPI.Server(url: URL(string: "https://website.com")!, variables: ["hi": .init(default: "there")])
+        let s4 = OpenAPI.Server(url: URL(string: "https://website.com")!, variables: ["hi": .init(default: "again")])
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1],
+            paths: [
+                "/hello/world": .init(
+                    servers: [s2, s4],
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        servers: [s3]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2, s4, s3])
+    }
+
+    func test_allServers_nilIsEmptyServers() {
+        let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
+        let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)
+
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [s1, s2],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [s1, s2])
+    }
+
     func test_existingSecuritySchemeSuccess() {
         let docData =
 """
