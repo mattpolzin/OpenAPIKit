@@ -212,14 +212,14 @@ extension OpenAPI.Document {
             return hasher.finalize()
         }
 
-        var seenHashes = Set<Int>()
-        var returnValues = servers
+        var collectedServers = servers
+        var seenHashes = Set(servers.map(hash(for:)))
 
         func insertUniquely(server: OpenAPI.Server) {
             let serverHash = hash(for: server)
             if !seenHashes.contains(serverHash) {
                 seenHashes.insert(serverHash)
-                returnValues.append(server)
+                collectedServers.append(server)
             }
         }
 
@@ -231,7 +231,7 @@ extension OpenAPI.Document {
             endpointServers.forEach(insertUniquely)
         }
 
-        return returnValues
+        return collectedServers
     }
 }
 
