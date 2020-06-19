@@ -66,7 +66,7 @@ extension OpenAPI.Components {
     ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
-    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType? {
+    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
         switch maybeReference {
         case .a(let reference):
             guard case .internal = reference else {
