@@ -47,15 +47,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// `true` if values for this schema are required, `false` if they
-    /// are optional (and can therefore be omitted from request/response data).
-    ///
-    /// - Important: This is distinct from the concept of nullability.
-    ///
-    ///     **Nullability:** Whether or not a value can be  `null`.
-    ///
-    ///     **Optionality:** Whether or not a key/value can be entirely
-    ///         omitted from request/response data.
+    // See `JSONSchemaContext`
     public var required: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -72,7 +64,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Get the description, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var description: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -89,7 +81,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Get the discriminator, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var discriminator: OpenAPI.Discriminator? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -108,51 +100,42 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// `true` if values for this schema can be `null`.
-    ///
-    /// - Important: This is distinct from the concept of optionality.
-    ///
-    ///     **Nullability:** Whether or not a value can be  `null`.
-    ///
-    ///     **Optionality:** Whether or not a key/value can be entirely
-    ///         omitted from request/response data.
+    // See `JSONSchemaContext`
     public var nullable: Bool {
         return generalContext?.nullable ?? false
     }
 
-    /// `true` if this schema can only be read from and is therefore
-    /// unsupported for request data.
+    // See `JSONSchemaContext`
     public var readOnly: Bool {
         return generalContext?.readOnly ?? false
     }
 
-    /// `true` if this schema can only be written to and is therefore
-    /// unavailable in response data.
+    // See `JSONSchemaContext`
     public var writeOnly: Bool {
         return generalContext?.writeOnly ?? false
     }
 
-    /// `true` if this schema is deprecated, `false` otherwise.
+    // See `JSONSchemaContext`
     public var deprecated: Bool {
         return generalContext?.deprecated ?? false
     }
 
-    /// Get the title, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var title: String? {
         return generalContext?.title
     }
 
-    /// Get the external docs, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
         return generalContext?.externalDocs
     }
 
-    /// Get the allowed values, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var allowedValues: [AnyCodable]? {
         return generalContext?.allowedValues
     }
 
-    /// Get an example, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var example: AnyCodable? {
         return generalContext?.example
     }
