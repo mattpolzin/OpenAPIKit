@@ -42,7 +42,7 @@ public struct ResolvedEndpoint: Equatable {
     public let requestBody: DereferencedRequest?
     /// All possible responses, keyed by the status code for each
     /// response.
-    public let responses: OrderedDictionary<OpenAPI.Response.StatusCode, DereferencedResponse>
+    public let responses: DereferencedResponse.Map
     /// Indicates whether this endpoint should be used anymore
     /// or not.
     public let deprecated: Bool

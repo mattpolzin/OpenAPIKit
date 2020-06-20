@@ -11,7 +11,7 @@
 @dynamicMemberLookup
 public struct DereferencedHeader: Equatable {
     public let underlyingHeader: OpenAPI.Header
-    public let schemaOrContent: Either<DereferencedSchemaContext, OrderedDictionary<OpenAPI.ContentType, DereferencedContent>>
+    public let schemaOrContent: Either<DereferencedSchemaContext, DereferencedContent.Map>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Header, T>) -> T {
         return underlyingHeader[keyPath: path]
@@ -46,4 +46,6 @@ public struct DereferencedHeader: Equatable {
 
         self.underlyingHeader = header
     }
+
+    public typealias Map = OrderedDictionary<String, DereferencedHeader>
 }

@@ -11,8 +11,8 @@
 @dynamicMemberLookup
 public struct DereferencedResponse: Equatable {
     public let underlyingResponse: OpenAPI.Response
-    public let headers: OrderedDictionary<String, DereferencedHeader>?
-    public let content: OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
+    public let headers: DereferencedHeader.Map?
+    public let content: DereferencedContent.Map
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Response, T>) -> T {
         return underlyingResponse[keyPath: path]
@@ -39,4 +39,6 @@ public struct DereferencedResponse: Equatable {
 
         self.underlyingResponse = response
     }
+
+    public typealias Map = OrderedDictionary<OpenAPI.Response.StatusCode, DereferencedResponse>
 }

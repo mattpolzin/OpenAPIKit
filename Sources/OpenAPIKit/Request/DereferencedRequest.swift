@@ -10,7 +10,7 @@
 @dynamicMemberLookup
 public struct DereferencedRequest: Equatable {
     public let underlyingRequest: OpenAPI.Request
-    public let content: OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
+    public let content: DereferencedContent.Map
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Request, T>) -> T {
         return underlyingRequest[keyPath: path]

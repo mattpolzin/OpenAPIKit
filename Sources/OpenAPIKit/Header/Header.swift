@@ -25,8 +25,6 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public typealias Map = OrderedDictionary<String, Either<JSONReference<Header>, Header>>
-
         public init(
             schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
             description: String? = nil,
@@ -97,6 +95,10 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
     }
+}
+
+extension OpenAPI.Header {
+    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Header>, OpenAPI.Header>>
 }
 
 // MARK: - Header Convenience

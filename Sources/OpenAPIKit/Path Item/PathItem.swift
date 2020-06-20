@@ -93,8 +93,6 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public typealias Map = OrderedDictionary<Path, PathItem>
-
         /// Set the `GET` endpoint operation.
         public mutating func get(_ op: Operation?) {
             get = op
@@ -135,6 +133,10 @@ extension OpenAPI {
             trace = op
         }
     }
+}
+
+extension OpenAPI.PathItem {
+    public typealias Map = OrderedDictionary<OpenAPI.Path, OpenAPI.PathItem>
 }
 
 extension OpenAPI.PathItem {

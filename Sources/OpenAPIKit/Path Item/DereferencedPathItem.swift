@@ -52,6 +52,8 @@ public struct DereferencedPathItem: Equatable {
 
         self.underlyingPathItem = pathItem
     }
+
+    public typealias Map = OrderedDictionary<OpenAPI.Path, DereferencedPathItem>
 }
 
 extension DereferencedPathItem {

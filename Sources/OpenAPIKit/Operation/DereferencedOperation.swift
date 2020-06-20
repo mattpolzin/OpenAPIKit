@@ -13,7 +13,7 @@ public struct DereferencedOperation: Equatable {
     public let underlyingOperation: OpenAPI.Operation
     public let parameters: [DereferencedParameter]
     public let requestBody: DereferencedRequest?
-    public let responses: OrderedDictionary<OpenAPI.Response.StatusCode, DereferencedResponse>
+    public let responses: DereferencedResponse.Map
     public let security: [DereferencedSecurityRequirement]?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Operation, T>) -> T {

@@ -48,4 +48,6 @@ public struct DereferencedContent: Equatable {
 
         self.underlyingContent = content
     }
+
+    public typealias Map = OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
 }

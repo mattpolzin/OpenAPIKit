@@ -11,7 +11,7 @@
 @dynamicMemberLookup
 public struct DereferencedParameter: Equatable {
     public let underlyingParameter: OpenAPI.Parameter
-    public let schemaOrContent: Either<DereferencedSchemaContext, OrderedDictionary<OpenAPI.ContentType, DereferencedContent>>
+    public let schemaOrContent: Either<DereferencedSchemaContext, DereferencedContent.Map>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Parameter, T>) -> T {
         return underlyingParameter[keyPath: path]

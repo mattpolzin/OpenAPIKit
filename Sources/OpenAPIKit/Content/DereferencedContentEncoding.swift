@@ -11,7 +11,7 @@
 @dynamicMemberLookup
 public struct DereferencedContentEncoding: Equatable {
     public let underlyingContentEncoding: OpenAPI.Content.Encoding
-    public let headers: OrderedDictionary<String, DereferencedHeader>?
+    public let headers: DereferencedHeader.Map?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Content.Encoding, T>) -> T {
         return underlyingContentEncoding[keyPath: path]

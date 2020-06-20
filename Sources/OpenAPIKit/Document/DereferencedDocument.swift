@@ -10,7 +10,7 @@
 @dynamicMemberLookup
 public struct DereferencedDocument: Equatable {
     public let underlyingDocument: OpenAPI.Document
-    public let paths: OrderedDictionary<OpenAPI.Path, DereferencedPathItem>
+    public let paths: DereferencedPathItem.Map
     public let security: [DereferencedSecurityRequirement]
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Document, T>) -> T {
