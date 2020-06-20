@@ -238,7 +238,29 @@ extension OpenAPI.Document {
 }
 
 extension OpenAPI.Document {
-    public func dereferenced() throws -> DereferencedDocument {
+    /// Create a locally-dereferenced OpenAPI
+    /// Document.
+    ///
+    /// A dereferenced document contains no
+    /// `JSONReferences`. All components have been
+    /// inlined.
+    ///
+    /// Dereferencing the document is a necessary
+    /// step toward **resolving** the document, which
+    /// exposes canonical representations of routes and
+    /// endpoints.
+    ///
+    /// - Important: Local dereferencing will `throw` if any
+    ///     `JSONReferences` point to other files or to
+    ///     locations within the same file other than the
+    ///     Components Object. It will also fail if any components
+    ///     are missing from the Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(document: self)
     }
 }

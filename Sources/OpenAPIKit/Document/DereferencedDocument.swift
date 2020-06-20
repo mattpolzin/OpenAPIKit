@@ -20,6 +20,10 @@ public struct DereferencedDocument: Equatable {
     /// Create a `DereferencedDocument` if all references in the
     /// document can be found in its Components Object.
     ///
+    /// - Important: This only attempts to dereference components in the
+    ///     Components Object. Any references pointing to other files or other
+    ///     locations in the same file will `throw`.
+    ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
