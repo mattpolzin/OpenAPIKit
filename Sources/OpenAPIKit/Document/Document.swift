@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 1/13/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
@@ -239,12 +237,21 @@ extension OpenAPI.Document {
     }
 }
 
+extension OpenAPI.Document {
+    public func dereferenced() throws -> DereferencedDocument {
+        return try DereferencedDocument(document: self)
+    }
+}
+
 extension OpenAPI {
+    /// OpenAPI Spec "Security Requirement Object"
+    ///
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.
     /// For other security scheme types, the array MUST be empty.
     ///
-    /// OpenAPI Spec "Security Requirement Object"
+    /// Multiple entries in this dictionary indicate all schemes named are
+    /// required on the same request.
     ///
     /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]

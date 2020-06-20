@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/17/20.
 //
 
+/// A `JSONSchema` type that guarantees none of its
+/// nodes are references.
 @dynamicMemberLookup
 public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public typealias Context<Format: OpenAPIFormat> = JSONSchema.Context<Format>

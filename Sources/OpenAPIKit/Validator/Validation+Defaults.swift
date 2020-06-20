@@ -269,12 +269,7 @@ extension Validation {
 fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> Bool {
     let parameters = parameters.compactMap(components.dereference)
 
-    let identities = parameters.map { PathItemParameterIdentity(name: $0.name, location: $0.location) }
+    let identities = parameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
 
     return Set(identities).count == parameters.count
-}
-
-fileprivate struct PathItemParameterIdentity: Hashable {
-    let name: String
-    let location: OpenAPI.Parameter.Context.Location
 }
