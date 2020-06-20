@@ -37,7 +37,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     ///
     /// Use the `init(jsonSchema:resolvingIn:)` initializer to resolve
     /// references to schemas in the Components Object when possible.
-    public init?(jsonSchema: JSONSchema) {
+    internal init?(jsonSchema: JSONSchema) {
         switch jsonSchema {
         case .reference:
             return nil
@@ -80,7 +80,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(jsonSchema: JSONSchema, resolvingIn components: OpenAPI.Components) throws {
+    internal init(jsonSchema: JSONSchema, resolvingIn components: OpenAPI.Components) throws {
         switch jsonSchema {
         case .reference(let reference):
             self = try DereferencedJSONSchema(jsonSchema: try components.forceDereference(reference), resolvingIn: components)
