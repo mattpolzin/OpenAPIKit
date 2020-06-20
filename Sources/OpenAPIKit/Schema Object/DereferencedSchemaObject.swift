@@ -10,8 +10,6 @@
 @dynamicMemberLookup
 public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public typealias Context<Format: OpenAPIFormat> = JSONSchema.Context<Format>
-    public typealias ObjectContext = JSONSchema.ObjectContext
-    public typealias ArrayContext = JSONSchema.ArrayContext
     public typealias NumericContext = JSONSchema.NumericContext
     public typealias IntegerContext = JSONSchema.IntegerContext
     public typealias StringContext = JSONSchema.StringContext
@@ -46,8 +44,10 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .boolean(let context):
             self = .boolean(context)
         case .object(let generalContext, let objectContext):
+            guard let objectContext = ObjectContext(objectContext) else { return nil }
             self = .object(generalContext, objectContext)
         case .array(let generalContext, let arrayContext):
+            guard let arrayContext = ArrayContext(arrayContext) else { return nil }
             self = .array(generalContext, arrayContext)
         case .number(let generalContext, let numberContext):
             self = .number(generalContext, numberContext)
@@ -87,9 +87,15 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .boolean(let context):
             self = .boolean(context)
         case .object(let generalContext, let objectContext):
-            self = .object(generalContext, objectContext)
+            self = try .object(
+                generalContext,
+                ObjectContext(objectContext, resolvingIn: components)
+            )
         case .array(let generalContext, let arrayContext):
-            self = .array(generalContext, arrayContext)
+            self = try .array(
+                generalContext,
+                ArrayContext(arrayContext, resolvingIn: components)
+            )
         case .number(let generalContext, let numberContext):
             self = .number(generalContext, numberContext)
         case .integer(let generalContext, let integerContext):
@@ -123,9 +129,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .boolean(let context):
             return .boolean(context)
         case .object(let generalContext, let objectContext):
-            return .object(generalContext, objectContext)
+            return .object(generalContext, objectContext.jsonSchemaObjectContext)
         case .array(let generalContext, let arrayContext):
-            return .array(generalContext, arrayContext)
+            return .array(generalContext, arrayContext.jsonSchemaArrayContext)
         case .number(let generalContext, let numberContext):
             return .number(generalContext, numberContext)
         case .integer(let generalContext, let integerContext):
@@ -182,4 +188,142 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var deprecated: Bool { underlyingJsonSchema.deprecated }
+}
+
+extension DereferencedJSONSchema {
+    /// The context that only applies to `.array` schemas.
+    public struct ArrayContext: Equatable {
+        /// A JSON Type Node that describes
+        /// the type of each element in the array.
+        public let items: DereferencedJSONSchema?
+
+        /// Maximum number of items in array.
+        public let maxItems: Int?
+
+        /// Minimum number of items in array.
+        /// Defaults to 0.
+        public let minItems: Int
+
+        /// Setting to true indicates all
+        /// elements of the array are expected
+        /// to be unique. Defaults to false.
+        public let uniqueItems: Bool
+
+        internal init?(_ arrayContext: JSONSchema.ArrayContext) {
+            guard let otherItems = arrayContext.items.map(DereferencedJSONSchema.init(jsonSchema:)) else {
+                return nil
+            }
+            items = otherItems
+            maxItems = arrayContext.maxItems
+            minItems = arrayContext.minItems
+            uniqueItems = arrayContext.uniqueItems
+        }
+
+        internal init(_ arrayContext: JSONSchema.ArrayContext, resolvingIn components: OpenAPI.Components) throws {
+            items = try arrayContext.items.map { try DereferencedJSONSchema(jsonSchema: $0, resolvingIn: components) }
+            maxItems = arrayContext.maxItems
+            minItems = arrayContext.minItems
+            uniqueItems = arrayContext.uniqueItems
+        }
+
+        internal var jsonSchemaArrayContext: JSONSchema.ArrayContext {
+            .init(
+                items: items.map { $0.underlyingJsonSchema },
+                maxItems: maxItems,
+                minItems: minItems,
+                uniqueItems: uniqueItems
+            )
+        }
+    }
+
+    /// The context that only applies to `.object` schemas.
+    public struct ObjectContext: Equatable {
+        public let maxProperties: Int?
+        let _minProperties: Int
+        public let properties: [String: DereferencedJSONSchema]
+        public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
+
+        // NOTE that an object's required properties
+        // array is determined by looking at its properties'
+        // required Bool.
+        public var requiredProperties: [String] {
+            return Array(properties.filter { (_, schemaObject) in
+                schemaObject.required
+            }.keys)
+        }
+
+        public var optionalProperties: [String] {
+            return Array(properties.filter { (_, schemaObject) in
+                !schemaObject.required
+            }.keys)
+        }
+
+        /// The minimum number of properties allowed.
+        ///
+        /// This might constradict a value explicitly specified on initialization
+        /// or when decoding if the number of required properties is greater
+        /// than the explicitly set minimum.
+        public var minProperties: Int {
+            return max(_minProperties, requiredProperties.count)
+        }
+
+        internal init?(_ objectContext: JSONSchema.ObjectContext) {
+
+            var otherProperties = [String: DereferencedJSONSchema]()
+            for (name, property) in objectContext.properties {
+                guard let dereferencedProperty = DereferencedJSONSchema(jsonSchema: property) else {
+                    return nil
+                }
+                otherProperties[name] = dereferencedProperty
+            }
+
+            properties = otherProperties
+            maxProperties = objectContext.maxProperties
+            _minProperties = objectContext._minProperties
+            switch objectContext.additionalProperties {
+            case .a(let bool):
+                additionalProperties = .a(bool)
+            case .b(let schema):
+                guard let schema = DereferencedJSONSchema(jsonSchema: schema) else {
+                    return nil
+                }
+                additionalProperties = .b(schema)
+            case nil:
+                additionalProperties = nil
+            }
+        }
+
+        internal init(_ objectContext: JSONSchema.ObjectContext, resolvingIn components: OpenAPI.Components) throws {
+            properties = try objectContext.properties.mapValues { try DereferencedJSONSchema(jsonSchema: $0, resolvingIn: components) }
+            maxProperties = objectContext.maxProperties
+            _minProperties = objectContext._minProperties
+            switch objectContext.additionalProperties {
+            case .a(let bool):
+                additionalProperties = .a(bool)
+            case .b(let schema):
+                additionalProperties = .b(try DereferencedJSONSchema(jsonSchema: schema, resolvingIn: components))
+            case nil:
+                additionalProperties = nil
+            }
+        }
+
+        internal var jsonSchemaObjectContext: JSONSchema.ObjectContext {
+            let underlyingAdditionalProperties: Either<Bool, JSONSchema>?
+            switch additionalProperties {
+            case .a(let bool):
+                underlyingAdditionalProperties = .a(bool)
+            case .b(let schema):
+                underlyingAdditionalProperties = .b(schema.underlyingJsonSchema)
+            case nil:
+                underlyingAdditionalProperties = nil
+            }
+
+            return .init(
+                properties: properties.mapValues { $0.underlyingJsonSchema },
+                additionalProperties: underlyingAdditionalProperties,
+                maxProperties: maxProperties,
+                minProperties: minProperties
+            )
+        }
+    }
 }
