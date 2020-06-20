@@ -210,10 +210,15 @@ extension DereferencedJSONSchema {
         public let uniqueItems: Bool
 
         internal init?(_ arrayContext: JSONSchema.ArrayContext) {
-            guard let otherItems = arrayContext.items.map(DereferencedJSONSchema.init(jsonSchema:)) else {
-                return nil
+            if let otherItems = arrayContext.items {
+                guard let dereferencedOtherItems = DereferencedJSONSchema.init(jsonSchema: otherItems) else {
+                    return nil
+                }
+                items = dereferencedOtherItems
+            } else {
+                items = nil
             }
-            items = otherItems
+
             maxItems = arrayContext.maxItems
             minItems = arrayContext.minItems
             uniqueItems = arrayContext.uniqueItems
