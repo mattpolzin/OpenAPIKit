@@ -10,11 +10,11 @@
 /// of referenced
 @dynamicMemberLookup
 public struct DereferencedContentEncoding: Equatable {
-    public let contentEncoding: OpenAPI.Content.Encoding
+    public let underlyingContentEncoding: OpenAPI.Content.Encoding
     public let headers: OrderedDictionary<String, DereferencedHeader>?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Content.Encoding, T>) -> T {
-        return contentEncoding[keyPath: path]
+        return underlyingContentEncoding[keyPath: path]
     }
 
     /// Create a `DereferencedContentEncoding` if all references in the
@@ -34,6 +34,6 @@ public struct DereferencedContentEncoding: Equatable {
             }
         }
 
-        self.contentEncoding = contentEncoding
+        self.underlyingContentEncoding = contentEncoding
     }
 }

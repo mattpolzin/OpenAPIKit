@@ -21,4 +21,9 @@ public struct ResolvedDocument: Equatable {
 
         self.underlyingDocument = dereferencedDocument
     }
+
+    // The following just mask the dynamic member lookup of the `OpenAPI.Document`
+    // to provide the values from the `DereferencedDocument` instead.
+    public var paths: OrderedDictionary<OpenAPI.Path, DereferencedPathItem> { underlyingDocument.paths }
+    public var security: [DereferencedSecurityRequirement] { underlyingDocument.security }
 }

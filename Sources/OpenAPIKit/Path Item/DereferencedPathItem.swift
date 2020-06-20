@@ -10,7 +10,7 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedPathItem: Equatable {
-    public let pathItem: OpenAPI.PathItem
+    public let underlyingPathItem: OpenAPI.PathItem
     public let parameters: [DereferencedParameter]
 
     public let get: DereferencedOperation?
@@ -23,7 +23,7 @@ public struct DereferencedPathItem: Equatable {
     public let trace: DereferencedOperation?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.PathItem, T>) -> T {
-        return pathItem[keyPath: path]
+        return underlyingPathItem[keyPath: path]
     }
 
     /// Create a `DereferencedPathItem` if all references in the
@@ -50,7 +50,7 @@ public struct DereferencedPathItem: Equatable {
         self.patch = try pathItem.patch.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
         self.trace = try pathItem.trace.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
 
-        self.pathItem = pathItem
+        self.underlyingPathItem = pathItem
     }
 }
 

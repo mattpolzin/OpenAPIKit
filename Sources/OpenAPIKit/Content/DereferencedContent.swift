@@ -10,14 +10,14 @@
 /// inlined instead of referenced.
 @dynamicMemberLookup
 public struct DereferencedContent: Equatable {
-    public let content: OpenAPI.Content
+    public let underlyingContent: OpenAPI.Content
     public let schema: DereferencedJSONSchema
     public let examples: OrderedDictionary<String, OpenAPI.Example>?
     public let example: AnyCodable?
     public let encoding: OrderedDictionary<String, DereferencedContentEncoding>?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Content, T>) -> T {
-        return content[keyPath: path]
+        return underlyingContent[keyPath: path]
     }
 
     /// Create a `DereferencedContent` if all references in the
@@ -46,6 +46,6 @@ public struct DereferencedContent: Equatable {
             }
         }
 
-        self.content = content
+        self.underlyingContent = content
     }
 }

@@ -10,13 +10,13 @@
 /// of referenced.
 @dynamicMemberLookup
 public struct DereferencedSchemaContext: Equatable {
-    public let schemaContext: OpenAPI.Parameter.SchemaContext
+    public let underlyingSchemaContext: OpenAPI.Parameter.SchemaContext
     public let schema: DereferencedJSONSchema
     public let examples: OrderedDictionary<String, OpenAPI.Example>?
     public let example: AnyCodable?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Parameter.SchemaContext, T>) -> T {
-        return schemaContext[keyPath: path]
+        return underlyingSchemaContext[keyPath: path]
     }
 
     /// Create a `DereferencedSchemaContext` if all references in the
@@ -36,6 +36,6 @@ public struct DereferencedSchemaContext: Equatable {
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
 
-        self.schemaContext = schemaContext
+        self.underlyingSchemaContext = schemaContext
     }
 }

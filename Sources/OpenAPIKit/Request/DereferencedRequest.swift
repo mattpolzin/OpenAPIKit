@@ -9,11 +9,11 @@
 /// its `content` is inlined instead of referenced.
 @dynamicMemberLookup
 public struct DereferencedRequest: Equatable {
-    public let request: OpenAPI.Request
+    public let underlyingRequest: OpenAPI.Request
     public let content: OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Request, T>) -> T {
-        return request[keyPath: path]
+        return underlyingRequest[keyPath: path]
     }
 
     /// Create a `DereferencedRequest` if all references in the
@@ -28,6 +28,6 @@ public struct DereferencedRequest: Equatable {
             try DereferencedContent(content: content, resolvingIn: components)
         }
 
-        self.request = request
+        self.underlyingRequest = request
     }
 }

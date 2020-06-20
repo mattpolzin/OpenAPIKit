@@ -12,7 +12,7 @@
 public struct DereferencedSecurityRequirement: Equatable {
     /// The `OpenAPI.SecurityRequirement` representation of this
     /// `DereferencedSecurityRequirement`.
-    public let securityRequirement: OpenAPI.SecurityRequirement
+    public let underlyingSecurityRequirement: OpenAPI.SecurityRequirement
 
     /// A dictionary mapping security scheme names to the schemes themselves
     /// and (when relevant) the security scopes required on the given schemes.
@@ -37,7 +37,7 @@ public struct DereferencedSecurityRequirement: Equatable {
         }
         self.schemes = Dictionary(scopedSchemes, uniquingKeysWith: { $1 })
 
-        self.securityRequirement = securityRequirement
+        self.underlyingSecurityRequirement = securityRequirement
     }
 
     /// A combination of a `SecurityScheme` and the scopes

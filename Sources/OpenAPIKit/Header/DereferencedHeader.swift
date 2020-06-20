@@ -10,11 +10,11 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedHeader: Equatable {
-    public let header: OpenAPI.Header
+    public let underlyingHeader: OpenAPI.Header
     public let schemaOrContent: Either<DereferencedSchemaContext, OrderedDictionary<OpenAPI.ContentType, DereferencedContent>>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Header, T>) -> T {
-        return header[keyPath: path]
+        return underlyingHeader[keyPath: path]
     }
 
     /// Create a `DereferencedHeader` if all references in the
@@ -44,6 +44,6 @@ public struct DereferencedHeader: Equatable {
             )
         }
 
-        self.header = header
+        self.underlyingHeader = header
     }
 }

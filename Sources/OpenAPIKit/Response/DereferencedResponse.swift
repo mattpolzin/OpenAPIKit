@@ -10,12 +10,12 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedResponse: Equatable {
-    public let response: OpenAPI.Response
+    public let underlyingResponse: OpenAPI.Response
     public let headers: OrderedDictionary<String, DereferencedHeader>?
     public let content: OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Response, T>) -> T {
-        return response[keyPath: path]
+        return underlyingResponse[keyPath: path]
     }
 
     /// Create a `DereferencedResponse` if all references in the
@@ -37,6 +37,6 @@ public struct DereferencedResponse: Equatable {
             try DereferencedContent(content: content, resolvingIn: components)
         }
 
-        self.response = response
+        self.underlyingResponse = response
     }
 }

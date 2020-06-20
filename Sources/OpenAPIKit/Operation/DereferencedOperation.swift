@@ -10,14 +10,14 @@
 /// and `security` are inlined instead of referenced.
 @dynamicMemberLookup
 public struct DereferencedOperation: Equatable {
-    public let operation: OpenAPI.Operation
+    public let underlyingOperation: OpenAPI.Operation
     public let parameters: [DereferencedParameter]
     public let requestBody: DereferencedRequest?
     public let responses: OrderedDictionary<OpenAPI.Response.StatusCode, DereferencedResponse>
     public let security: [DereferencedSecurityRequirement]?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Operation, T>) -> T {
-        return operation[keyPath: path]
+        return underlyingOperation[keyPath: path]
     }
 
     /// Create a `DereferencedOperation` if all references in the
@@ -51,7 +51,7 @@ public struct DereferencedOperation: Equatable {
 
         self.security = try operation.security?.map { try DereferencedSecurityRequirement(securityRequirement: $0, resolvingIn: components) }
 
-        self.operation = operation
+        self.underlyingOperation = operation
     }
 }
 

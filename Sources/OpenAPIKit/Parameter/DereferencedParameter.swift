@@ -10,11 +10,11 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedParameter: Equatable {
-    public let parameter: OpenAPI.Parameter
+    public let underlyingParameter: OpenAPI.Parameter
     public let schemaOrContent: Either<DereferencedSchemaContext, OrderedDictionary<OpenAPI.ContentType, DereferencedContent>>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Parameter, T>) -> T {
-        return parameter[keyPath: path]
+        return underlyingParameter[keyPath: path]
     }
 
     /// Create a `DereferencedParameter` if all references in the
@@ -44,6 +44,6 @@ public struct DereferencedParameter: Equatable {
             )
         }
 
-        self.parameter = parameter
+        self.underlyingParameter = parameter
     }
 }

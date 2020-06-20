@@ -118,7 +118,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// `DereferencedJSONSchema` as a
     /// `JSONSchema`, although the reverse is
     /// not true.
-    public var jsonSchema: JSONSchema {
+    public var underlyingJsonSchema: JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context)
@@ -135,11 +135,11 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .all(of: let fragments, discriminator: let discriminator):
             return .all(of: fragments, discriminator: discriminator)
         case .one(of: let schemas, discriminator: let discriminator):
-            return .one(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
+            return .one(of: schemas.map { $0.underlyingJsonSchema }, discriminator: discriminator)
         case .any(of: let schemas, discriminator: let discriminator):
-            return .any(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
+            return .any(of: schemas.map { $0.underlyingJsonSchema }, discriminator: discriminator)
         case .not(let schema):
-            return .not(schema.jsonSchema)
+            return .not(schema.underlyingJsonSchema)
         case .undefined(description: let description):
             return .undefined(description: description)
         }
@@ -147,39 +147,39 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // automatic forwarding where possible
     public subscript<T>(dynamicMember path: KeyPath<JSONSchema, T>) -> T {
-        return jsonSchema[keyPath: path]
+        return underlyingJsonSchema[keyPath: path]
     }
 
     // See `JSONSchemaContext`
-    public var required: Bool { jsonSchema.required }
+    public var required: Bool { underlyingJsonSchema.required }
 
     // See `JSONSchemaContext`
-    public var nullable: Bool { jsonSchema.nullable }
+    public var nullable: Bool { underlyingJsonSchema.nullable }
 
     // See `JSONSchemaContext`
-    public var title: String? { jsonSchema.title }
+    public var title: String? { underlyingJsonSchema.title }
 
     // See `JSONSchemaContext`
-    public var description: String? { jsonSchema.description }
+    public var description: String? { underlyingJsonSchema.description }
 
     // See `JSONSchemaContext`
-    public var discriminator: OpenAPI.Discriminator? { jsonSchema.discriminator }
+    public var discriminator: OpenAPI.Discriminator? { underlyingJsonSchema.discriminator }
 
     // See `JSONSchemaContext`
-    public var externalDocs: OpenAPI.ExternalDocumentation? { jsonSchema.externalDocs }
+    public var externalDocs: OpenAPI.ExternalDocumentation? { underlyingJsonSchema.externalDocs }
 
     // See `JSONSchemaContext`
-    public var allowedValues: [AnyCodable]? { jsonSchema.allowedValues }
+    public var allowedValues: [AnyCodable]? { underlyingJsonSchema.allowedValues }
 
     // See `JSONSchemaContext`
-    public var example: AnyCodable? { jsonSchema.example }
+    public var example: AnyCodable? { underlyingJsonSchema.example }
 
     // See `JSONSchemaContext`
-    public var readOnly: Bool { jsonSchema.readOnly }
+    public var readOnly: Bool { underlyingJsonSchema.readOnly }
 
     // See `JSONSchemaContext`
-    public var writeOnly: Bool { jsonSchema.writeOnly }
+    public var writeOnly: Bool { underlyingJsonSchema.writeOnly }
 
     // See `JSONSchemaContext`
-    public var deprecated: Bool { jsonSchema.deprecated }
+    public var deprecated: Bool { underlyingJsonSchema.deprecated }
 }
