@@ -191,6 +191,24 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 }
 
 extension DereferencedJSONSchema {
+    /// Get the context specific to an `object` schema. If not an
+    /// object schema, returns `nil`.
+    public var objectContext: ObjectContext? {
+        guard case .object(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+
+    /// Get the context specific to an `array` schema. If not an
+    /// array schema, returns `nil`.
+    public var arrayContext: ArrayContext? {
+        guard case .array(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
+    
     /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
@@ -209,7 +227,7 @@ extension DereferencedJSONSchema {
         /// to be unique. Defaults to false.
         public let uniqueItems: Bool
 
-        internal init?(_ arrayContext: JSONSchema.ArrayContext) {
+        public init?(_ arrayContext: JSONSchema.ArrayContext) {
             if let otherItems = arrayContext.items {
                 guard let dereferencedOtherItems = DereferencedJSONSchema.init(jsonSchema: otherItems) else {
                     return nil
@@ -272,7 +290,7 @@ extension DereferencedJSONSchema {
             return max(_minProperties, requiredProperties.count)
         }
 
-        internal init?(_ objectContext: JSONSchema.ObjectContext) {
+        public init?(_ objectContext: JSONSchema.ObjectContext) {
 
             var otherProperties = [String: DereferencedJSONSchema]()
             for (name, property) in objectContext.properties {

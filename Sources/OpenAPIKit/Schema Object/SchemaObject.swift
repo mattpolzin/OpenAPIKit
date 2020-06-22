@@ -773,6 +773,10 @@ extension JSONSchema {
         return .array(generalContext, arrayContext)
     }
 
+    public static var array: JSONSchema {
+        return .array()
+    }
+
     public static func all(
         of schemas: [JSONSchemaFragment]
     ) -> JSONSchema {

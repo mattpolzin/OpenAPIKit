@@ -39,7 +39,6 @@ public enum JSONSchemaFragment: Equatable {
         ArrayContext
     )
 
-    // object context
     case object(
         GeneralContext,
         ObjectContext
