@@ -26,9 +26,9 @@ public struct DereferencedSchemaContext: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(schemaContext: OpenAPI.Parameter.SchemaContext, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ schemaContext: OpenAPI.Parameter.SchemaContext, resolvingIn components: OpenAPI.Components) throws {
         self.schema = try DereferencedJSONSchema(
-            jsonSchema: try components.forceDereference(schemaContext.schema),
+            try components.forceDereference(schemaContext.schema),
             resolvingIn: components
         )
         let examples = try schemaContext.examples?.mapValues { try components.forceDereference($0) }

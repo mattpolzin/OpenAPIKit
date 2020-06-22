@@ -24,12 +24,12 @@ public struct DereferencedParameter: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(parameter: OpenAPI.Parameter, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ parameter: OpenAPI.Parameter, resolvingIn components: OpenAPI.Components) throws {
         switch parameter.schemaOrContent {
         case .a(let schemaContext):
             self.schemaOrContent = .a(
                 try DereferencedSchemaContext(
-                    schemaContext: schemaContext,
+                    schemaContext,
                     resolvingIn: components
                 )
             )
@@ -37,7 +37,7 @@ public struct DereferencedParameter: Equatable {
             self.schemaOrContent = .b(
                 try contentMap.mapValues {
                     try DereferencedContent(
-                        content: $0,
+                        $0,
                         resolvingIn: components
                     )
                 }

@@ -24,11 +24,11 @@ public struct DereferencedContentEncoding: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(contentEncoding: OpenAPI.Content.Encoding, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ contentEncoding: OpenAPI.Content.Encoding, resolvingIn components: OpenAPI.Components) throws {
         self.headers = try contentEncoding.headers.map { headersMap in
             try headersMap.mapValues { header in
                 try DereferencedHeader(
-                    header: try components.forceDereference(header),
+                    try components.forceDereference(header),
                     resolvingIn: components
                 )
             }

@@ -23,9 +23,9 @@ public struct DereferencedRequest: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(request: OpenAPI.Request, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ request: OpenAPI.Request, resolvingIn components: OpenAPI.Components) throws {
         self.content = try request.content.mapValues { content in
-            try DereferencedContent(content: content, resolvingIn: components)
+            try DereferencedContent(content, resolvingIn: components)
         }
 
         self.underlyingRequest = request

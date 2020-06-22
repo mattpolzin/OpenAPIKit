@@ -27,29 +27,34 @@ public struct DereferencedOperation: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(operation: OpenAPI.Operation, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ operation: OpenAPI.Operation, resolvingIn components: OpenAPI.Components) throws {
         self.parameters = try operation.parameters.map { parameter in
             try DereferencedParameter(
-                parameter: try components.forceDereference(parameter),
+                try components.forceDereference(parameter),
                 resolvingIn: components
             )
         }
 
         self.requestBody = try operation.requestBody.map { request in
             try DereferencedRequest(
-                request: try components.forceDereference(request),
+                try components.forceDereference(request),
                 resolvingIn: components
             )
         }
 
         self.responses = try operation.responses.mapValues { response in
             try DereferencedResponse(
-                response: try components.forceDereference(response),
+                try components.forceDereference(response),
                 resolvingIn: components
             )
         }
 
-        self.security = try operation.security?.map { try DereferencedSecurityRequirement(securityRequirement: $0, resolvingIn: components) }
+        self.security = try operation.security?.map {
+            try DereferencedSecurityRequirement(
+                $0,
+                resolvingIn: components
+            )
+        }
 
         self.underlyingOperation = operation
     }

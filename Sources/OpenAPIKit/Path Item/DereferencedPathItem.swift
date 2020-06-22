@@ -33,22 +33,22 @@ public struct DereferencedPathItem: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(pathItem: OpenAPI.PathItem, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ pathItem: OpenAPI.PathItem, resolvingIn components: OpenAPI.Components) throws {
         self.parameters = try pathItem.parameters.map { parameter in
             try DereferencedParameter(
-                parameter: try components.forceDereference(parameter),
+                try components.forceDereference(parameter),
                 resolvingIn: components
             )
         }
 
-        self.get = try pathItem.get.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.put = try pathItem.put.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.post = try pathItem.post.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.delete = try pathItem.delete.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.options = try pathItem.options.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.head = try pathItem.head.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.patch = try pathItem.patch.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
-        self.trace = try pathItem.trace.map { try DereferencedOperation(operation: $0, resolvingIn: components) }
+        self.get = try pathItem.get.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.put = try pathItem.put.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.post = try pathItem.post.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.delete = try pathItem.delete.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.options = try pathItem.options.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components) }
 
         self.underlyingPathItem = pathItem
     }

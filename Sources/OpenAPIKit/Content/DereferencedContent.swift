@@ -27,20 +27,21 @@ public struct DereferencedContent: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
+    public init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
         self.schema = try DereferencedJSONSchema(
-            jsonSchema: try components.forceDereference(content.schema),
+            try components.forceDereference(content.schema),
             resolvingIn: components
         )
         let examples = try content.examples?.mapValues { try components.forceDereference($0) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            ?? content.example
 
         self.encoding = try content.encoding.map { encodingMap in
             try encodingMap.mapValues { encoding in
                 try DereferencedContentEncoding(
-                    contentEncoding: encoding,
+                    encoding,
                     resolvingIn: components
                 )
             }

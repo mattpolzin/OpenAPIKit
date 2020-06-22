@@ -335,7 +335,7 @@ extension JSONSchema {
     /// To create a dereferenced schema object from a schema object
     /// that does have references, use `dereferencedSchemaObject(resolvingIn:)`.
     public func dereferencedSchemaObject() -> DereferencedJSONSchema? {
-        return DereferencedJSONSchema(jsonSchema: self)
+        return DereferencedJSONSchema(self)
     }
 
     /// Returns a dereferenced schema object if all references in
@@ -352,7 +352,7 @@ extension JSONSchema {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public func dereferencedSchemaObject(resolvingIn components: OpenAPI.Components) throws -> DereferencedJSONSchema {
-        return try DereferencedJSONSchema(jsonSchema: self, resolvingIn: components)
+        return try DereferencedJSONSchema(self, resolvingIn: components)
     }
 }
 

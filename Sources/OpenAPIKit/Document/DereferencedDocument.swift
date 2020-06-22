@@ -28,16 +28,16 @@ public struct DereferencedDocument: Equatable {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(document: OpenAPI.Document) throws {
+    internal init(_ document: OpenAPI.Document) throws {
         self.paths = try document.paths.mapValues {
             try DereferencedPathItem(
-                pathItem: $0,
+                $0,
                 resolvingIn: document.components
             )
         }
         self.security = try document.security.map {
             try DereferencedSecurityRequirement(
-                securityRequirement: $0,
+                $0,
                 resolvingIn: document.components
             )
         }

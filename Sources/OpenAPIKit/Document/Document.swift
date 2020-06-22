@@ -261,7 +261,7 @@ extension OpenAPI.Document {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public func locallyDereferenced() throws -> DereferencedDocument {
-        return try DereferencedDocument(document: self)
+        return try DereferencedDocument(self)
     }
 }
 

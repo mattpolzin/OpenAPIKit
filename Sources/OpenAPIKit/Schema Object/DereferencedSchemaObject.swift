@@ -37,7 +37,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     ///
     /// Use the `init(jsonSchema:resolvingIn:)` initializer to resolve
     /// references to schemas in the Components Object when possible.
-    internal init?(jsonSchema: JSONSchema) {
+    internal init?(_ jsonSchema: JSONSchema) {
         switch jsonSchema {
         case .reference:
             return nil
@@ -58,15 +58,15 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .all(of: let fragments, discriminator: let discriminator):
             self = .all(of: fragments, discriminator: discriminator)
         case .one(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init(jsonSchema:))
+            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init)
             guard schemas.count == jsonSchemas.count else { return nil }
             self = .one(of: schemas, discriminator: discriminator)
         case .any(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init(jsonSchema:))
+            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init)
             guard schemas.count == jsonSchemas.count else { return nil }
             self = .any(of: schemas, discriminator: discriminator)
         case .not(let jsonSchema):
-            guard let schema = DereferencedJSONSchema(jsonSchema: jsonSchema) else { return nil }
+            guard let schema = DereferencedJSONSchema(jsonSchema) else { return nil }
             self = .not(schema)
         case .undefined(description: let description):
             self = .undefined(description: description)
@@ -80,10 +80,10 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(jsonSchema: JSONSchema, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ jsonSchema: JSONSchema, resolvingIn components: OpenAPI.Components) throws {
         switch jsonSchema {
         case .reference(let reference):
-            self = try DereferencedJSONSchema(jsonSchema: try components.forceDereference(reference), resolvingIn: components)
+            self = try DereferencedJSONSchema(try components.forceDereference(reference), resolvingIn: components)
         case .boolean(let context):
             self = .boolean(context)
         case .object(let generalContext, let objectContext):
@@ -105,13 +105,13 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .all(of: let fragments, discriminator: let discriminator):
             self = .all(of: fragments, discriminator: discriminator)
         case .one(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init(jsonSchema: $0, resolvingIn: components) }
+            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init($0, resolvingIn: components) }
             self = .one(of: schemas, discriminator: discriminator)
         case .any(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init(jsonSchema: $0, resolvingIn: components) }
+            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init($0, resolvingIn: components) }
             self = .any(of: schemas, discriminator: discriminator)
         case .not(let jsonSchema):
-            self = .not(try DereferencedJSONSchema(jsonSchema: jsonSchema, resolvingIn: components))
+            self = .not(try DereferencedJSONSchema(jsonSchema, resolvingIn: components))
         case .undefined(description: let description):
             self = .undefined(description: description)
         }
@@ -208,7 +208,7 @@ extension DereferencedJSONSchema {
         }
         return context
     }
-    
+
     /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
@@ -229,7 +229,7 @@ extension DereferencedJSONSchema {
 
         public init?(_ arrayContext: JSONSchema.ArrayContext) {
             if let otherItems = arrayContext.items {
-                guard let dereferencedOtherItems = DereferencedJSONSchema.init(jsonSchema: otherItems) else {
+                guard let dereferencedOtherItems = DereferencedJSONSchema.init(otherItems) else {
                     return nil
                 }
                 items = dereferencedOtherItems
@@ -243,7 +243,7 @@ extension DereferencedJSONSchema {
         }
 
         internal init(_ arrayContext: JSONSchema.ArrayContext, resolvingIn components: OpenAPI.Components) throws {
-            items = try arrayContext.items.map { try DereferencedJSONSchema(jsonSchema: $0, resolvingIn: components) }
+            items = try arrayContext.items.map { try DereferencedJSONSchema($0, resolvingIn: components) }
             maxItems = arrayContext.maxItems
             minItems = arrayContext.minItems
             uniqueItems = arrayContext.uniqueItems
@@ -294,7 +294,7 @@ extension DereferencedJSONSchema {
 
             var otherProperties = [String: DereferencedJSONSchema]()
             for (name, property) in objectContext.properties {
-                guard let dereferencedProperty = DereferencedJSONSchema(jsonSchema: property) else {
+                guard let dereferencedProperty = DereferencedJSONSchema(property) else {
                     return nil
                 }
                 otherProperties[name] = dereferencedProperty
@@ -307,7 +307,7 @@ extension DereferencedJSONSchema {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                guard let schema = DereferencedJSONSchema(jsonSchema: schema) else {
+                guard let schema = DereferencedJSONSchema(schema) else {
                     return nil
                 }
                 additionalProperties = .b(schema)
@@ -317,14 +317,14 @@ extension DereferencedJSONSchema {
         }
 
         internal init(_ objectContext: JSONSchema.ObjectContext, resolvingIn components: OpenAPI.Components) throws {
-            properties = try objectContext.properties.mapValues { try DereferencedJSONSchema(jsonSchema: $0, resolvingIn: components) }
+            properties = try objectContext.properties.mapValues { try DereferencedJSONSchema($0, resolvingIn: components) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                additionalProperties = .b(try DereferencedJSONSchema(jsonSchema: schema, resolvingIn: components))
+                additionalProperties = .b(try DereferencedJSONSchema(schema, resolvingIn: components))
             case nil:
                 additionalProperties = nil
             }
