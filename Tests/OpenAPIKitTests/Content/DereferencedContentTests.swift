@@ -110,7 +110,7 @@ final class DereferencedContentTests: XCTestCase {
     func test_referencedHeaderInEncoding() throws {
         let components = OpenAPI.Components(
             headers: [
-                "test": .init(content: [.json: .init(schema: .string)])
+                "test": OpenAPI.Header(schema: .string)
             ]
         )
         let t1 = try DereferencedContent(
@@ -127,9 +127,11 @@ final class DereferencedContentTests: XCTestCase {
             resolvingIn: components
         )
         XCTAssertEqual(
-            t1.encoding?["test"]?.headers?["test"]?.schemaOrContent.contentValue?[.json]?.schema,
+            t1.encoding?["test"]?.headers?["test"]?.schemaOrContent.schemaValue,
             DereferencedJSONSchema.string(.init(), .init())
         )
+        // just test that dynamic member lookup is connected correctly
+        XCTAssertEqual(t1.encoding?["test"]?.style, OpenAPI.Content.Encoding.defaultStyle)
     }
 
     func test_missingHeaderInEncoding() {
