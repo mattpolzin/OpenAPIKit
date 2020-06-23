@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
-import Foundation
-
 /// A `VendorExtendable` type is a type that supports arbitrary
 /// additions as long as those additions are keyed by strings starting
 /// with "x-" (e.g. "x-customThing").

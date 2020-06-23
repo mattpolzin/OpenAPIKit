@@ -5,7 +5,6 @@
 //  Created by Mathew Polzin on 6/23/19.
 //
 
-import Foundation
 import XCTest
 
 let testEncoder = { () -> JSONEncoder in

@@ -35,6 +35,7 @@ public struct DereferencedSchemaContext: Equatable {
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            ?? schemaContext.example
 
         self.underlyingSchemaContext = schemaContext
     }

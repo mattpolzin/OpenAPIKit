@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-import Foundation
-
 // MARK: - General Context
 
 /// A schema context stores information about a schema.

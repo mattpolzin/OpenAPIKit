@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 1/17/20.
 //
 
-import Foundation
-
 /// A simple implementation of an Ordered Dictionary based
 /// on the existing Foundation `Dictionary` and `Array` types.
 /// Undoubtedly not the fastest performer, but should be sufficient

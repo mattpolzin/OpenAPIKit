@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 

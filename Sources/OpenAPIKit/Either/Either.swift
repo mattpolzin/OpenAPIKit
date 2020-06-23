@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 11/22/18.
 //
 
-import Foundation
-
 public enum Either<A, B> {
 	case a(A)
 	case b(B)

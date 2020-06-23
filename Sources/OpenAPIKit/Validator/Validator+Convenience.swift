@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 6/2/20.
 //
 
-import Foundation
-
 // MARK: - Operators
 
 // MARK: Context -> Error Array
