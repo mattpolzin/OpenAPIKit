@@ -160,3 +160,8 @@ extension Either where B == OpenAPI.Response {
     /// Construct a response value.
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
 }
+
+extension Either where B == OpenAPI.Header {
+    /// Construct a header value.
+    public static func header(_ header: OpenAPI.Header) -> Self { .b(header) }
+}
