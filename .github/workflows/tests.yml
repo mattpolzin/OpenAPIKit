@@ -20,13 +20,10 @@ jobs:
           - swift:5.2-focal
           - swift:5.2-centos8
           - swift:5.2-amazonlinux2
-          - swiftlang/swift:nightly-master-focal
-          - swiftlang/swift:nightly-master-centos8
-          - swiftlang/swift:nightly-master-amazonlinux2
+          - swiftlang/swift:nightly-5.3-xenial
+          - swiftlang/swift:nightly-5.3-bionic
     container: ${{ matrix.image }}
     steps:
-    - name: Install dependencies if needed
-      run: ${{ matrix.depscmd }}
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Run tests
