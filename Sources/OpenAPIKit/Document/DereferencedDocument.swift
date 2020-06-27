@@ -10,7 +10,19 @@
 @dynamicMemberLookup
 public struct DereferencedDocument: Equatable {
     public let underlyingDocument: OpenAPI.Document
+
+    /// This property maps the path of each route (`OpenAPI.Path`) to the
+    /// documentation for that route (`DereferencedPathItem`).
     public let paths: DereferencedPathItem.Map
+
+    /// A declaration of which security mechanisms can be used across the API.
+    ///
+    /// The list of values includes alternative security requirement objects that can
+    /// be used. Only one of the security requirement objects need to be satisfied
+    /// to authorize a request. Individual operations can override this definition.
+    ///
+    /// To make security optional, an empty security requirement can be included
+    /// in the array.
     public let security: [DereferencedSecurityRequirement]
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Document, T>) -> T {
@@ -60,6 +72,9 @@ extension DereferencedDocument {
         }
     }
 
+    /// Get an array of all routes in the document. A route is
+    /// the pairing of a path and the path item that describes the
+    /// route at that path.
     public var routes: [Route] {
         return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
     }

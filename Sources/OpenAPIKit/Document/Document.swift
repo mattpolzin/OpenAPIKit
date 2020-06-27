@@ -44,7 +44,7 @@ extension OpenAPI {
         ///     `allServers` property instead.
         public var servers: [Server]
 
-        /// All routes supported by this API. This property maps the path of each
+        /// All paths defined by this API. This property maps the path of each
         /// route (`OpenAPI.Path`) to the documentation for that route
         /// (`OpenAPI.PathItem`).
         public var paths: PathItem.Map
@@ -234,6 +234,19 @@ extension OpenAPI.Document {
         }
 
         return collectedServers
+    }
+
+    /// All Tags used anywhere in the document.
+    ///
+    /// The tags stored in the `OpenAPI.Document.tags`
+    /// property need not contain all tags used anywhere in
+    /// the document. This property is comprehensive.
+    public var allTags: Set<String> {
+        return Set(
+            (tags ?? []).map { $0.name }
+            + paths.values.flatMap { $0.endpoints }
+                .flatMap { $0.operation.tags ?? [] }
+        )
     }
 }
 

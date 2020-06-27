@@ -76,6 +76,11 @@ There are two ways to define validations:
 
 The first approach can be more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "**subject**"), and (c) the coding path of the value being validated.
 
+**Important:**
+Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are created and asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not.
+
+For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not.
+
 #### `Validator.validating()`
 
 The simplest possible validations are equalities and inequalities. Such validations can usually be expressed using a KeyPath syntax starting with any OpenAPIKit type and ending with the value being checked followed by the appropriate equality or inequality. 

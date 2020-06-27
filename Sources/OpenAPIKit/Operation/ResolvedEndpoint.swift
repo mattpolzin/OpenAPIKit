@@ -27,6 +27,10 @@ public struct ResolvedEndpoint: Equatable {
     /// The path for this endpoint.
     public let path: OpenAPI.Path
     /// The parameters this endpoint accepts.
+    ///
+    /// This array includes both parameters that apply to
+    /// all endpoints at the same route and also parameters
+    /// that only apply to this endpoint. It is comprehensive.
     public let parameters: [DereferencedParameter]
     /// Security requirements for this endpoint.
     ///
