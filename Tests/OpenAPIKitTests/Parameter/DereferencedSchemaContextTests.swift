@@ -16,7 +16,7 @@ final class DereferencedSchemaContextTests: XCTestCase {
             example: "hello world"
         ), resolvingIn: .noComponents)
         XCTAssertEqual(t1.example, "hello world")
-        XCTAssertEqual(t1.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schema.underlyingJSONSchema, .string)
         // test dynamic member access:
         XCTAssertEqual(t1.style, .default(for: .header))
     }

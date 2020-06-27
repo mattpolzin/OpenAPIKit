@@ -19,7 +19,7 @@ final class DereferencedHeaderTests: XCTestCase {
         )
 
         XCTAssertEqual(t1.description, "test")
-        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJSONSchema, .string)
     }
 
     func test_inlineContentHeader() throws {
@@ -32,7 +32,7 @@ final class DereferencedHeaderTests: XCTestCase {
             resolvingIn: .noComponents
         )
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJSONSchema, .string)
     }
 
     func test_referencedSchemaHeader() throws {
@@ -48,7 +48,7 @@ final class DereferencedHeaderTests: XCTestCase {
             resolvingIn: components
         )
 
-        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJSONSchema, .string)
     }
 
     func test_referencedContentHeader() throws {
@@ -64,6 +64,6 @@ final class DereferencedHeaderTests: XCTestCase {
             resolvingIn: components
         )
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJSONSchema, .string)
     }
 }

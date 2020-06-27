@@ -21,7 +21,7 @@ final class DereferencedParameterTests: XCTestCase {
 
         XCTAssertEqual(t1.name, "test")
         XCTAssertEqual(t1.context, .header)
-        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJSONSchema, .string)
     }
 
     func test_inlineContentParameter() throws {
@@ -36,7 +36,7 @@ final class DereferencedParameterTests: XCTestCase {
             resolvingIn: .noComponents
         )
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJSONSchema, .string)
     }
 
     func test_referencedSchemaParameter() throws {
@@ -54,7 +54,7 @@ final class DereferencedParameterTests: XCTestCase {
             resolvingIn: components
         )
 
-        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.schemaValue?.underlyingJSONSchema, .string)
     }
 
     func test_referencedContentParameter() throws {
@@ -72,7 +72,7 @@ final class DereferencedParameterTests: XCTestCase {
             resolvingIn: components
         )
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.underlyingJSONSchema, .string)
     }
 }
 

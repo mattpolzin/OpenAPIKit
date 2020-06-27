@@ -84,7 +84,7 @@ final class DereferencedResponseTests: XCTestCase {
             ),
             resolvingIn: components
         )
-        XCTAssertEqual(t1.content[.json]?.schema.underlyingJsonSchema, .string)
+        XCTAssertEqual(t1.content[.json]?.schema.underlyingJSONSchema, .string)
     }
 
     func test_referencedContentMissing() {

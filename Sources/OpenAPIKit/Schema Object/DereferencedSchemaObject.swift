@@ -124,7 +124,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// `DereferencedJSONSchema` as a
     /// `JSONSchema`, although the reverse is
     /// not true.
-    public var underlyingJsonSchema: JSONSchema {
+    public var underlyingJSONSchema: JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context)
@@ -141,11 +141,11 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .all(of: let fragments, discriminator: let discriminator):
             return .all(of: fragments, discriminator: discriminator)
         case .one(of: let schemas, discriminator: let discriminator):
-            return .one(of: schemas.map { $0.underlyingJsonSchema }, discriminator: discriminator)
+            return .one(of: schemas.map { $0.underlyingJSONSchema }, discriminator: discriminator)
         case .any(of: let schemas, discriminator: let discriminator):
-            return .any(of: schemas.map { $0.underlyingJsonSchema }, discriminator: discriminator)
+            return .any(of: schemas.map { $0.underlyingJSONSchema }, discriminator: discriminator)
         case .not(let schema):
-            return .not(schema.underlyingJsonSchema)
+            return .not(schema.underlyingJSONSchema)
         case .undefined(description: let description):
             return .undefined(description: description)
         }
@@ -153,41 +153,41 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // automatic forwarding where possible
     public subscript<T>(dynamicMember path: KeyPath<JSONSchema, T>) -> T {
-        return underlyingJsonSchema[keyPath: path]
+        return underlyingJSONSchema[keyPath: path]
     }
 
     // See `JSONSchemaContext`
-    public var required: Bool { underlyingJsonSchema.required }
+    public var required: Bool { underlyingJSONSchema.required }
 
     // See `JSONSchemaContext`
-    public var nullable: Bool { underlyingJsonSchema.nullable }
+    public var nullable: Bool { underlyingJSONSchema.nullable }
 
     // See `JSONSchemaContext`
-    public var title: String? { underlyingJsonSchema.title }
+    public var title: String? { underlyingJSONSchema.title }
 
     // See `JSONSchemaContext`
-    public var description: String? { underlyingJsonSchema.description }
+    public var description: String? { underlyingJSONSchema.description }
 
     // See `JSONSchemaContext`
-    public var discriminator: OpenAPI.Discriminator? { underlyingJsonSchema.discriminator }
+    public var discriminator: OpenAPI.Discriminator? { underlyingJSONSchema.discriminator }
 
     // See `JSONSchemaContext`
-    public var externalDocs: OpenAPI.ExternalDocumentation? { underlyingJsonSchema.externalDocs }
+    public var externalDocs: OpenAPI.ExternalDocumentation? { underlyingJSONSchema.externalDocs }
 
     // See `JSONSchemaContext`
-    public var allowedValues: [AnyCodable]? { underlyingJsonSchema.allowedValues }
+    public var allowedValues: [AnyCodable]? { underlyingJSONSchema.allowedValues }
 
     // See `JSONSchemaContext`
-    public var example: AnyCodable? { underlyingJsonSchema.example }
+    public var example: AnyCodable? { underlyingJSONSchema.example }
 
     // See `JSONSchemaContext`
-    public var readOnly: Bool { underlyingJsonSchema.readOnly }
+    public var readOnly: Bool { underlyingJSONSchema.readOnly }
 
     // See `JSONSchemaContext`
-    public var writeOnly: Bool { underlyingJsonSchema.writeOnly }
+    public var writeOnly: Bool { underlyingJSONSchema.writeOnly }
 
     // See `JSONSchemaContext`
-    public var deprecated: Bool { underlyingJsonSchema.deprecated }
+    public var deprecated: Bool { underlyingJSONSchema.deprecated }
 }
 
 extension DereferencedJSONSchema {
@@ -251,7 +251,7 @@ extension DereferencedJSONSchema {
 
         internal var jsonSchemaArrayContext: JSONSchema.ArrayContext {
             .init(
-                items: items.map { $0.underlyingJsonSchema },
+                items: items.map { $0.underlyingJSONSchema },
                 maxItems: maxItems,
                 minItems: minItems,
                 uniqueItems: uniqueItems
@@ -336,13 +336,13 @@ extension DereferencedJSONSchema {
             case .a(let bool):
                 underlyingAdditionalProperties = .a(bool)
             case .b(let schema):
-                underlyingAdditionalProperties = .b(schema.underlyingJsonSchema)
+                underlyingAdditionalProperties = .b(schema.underlyingJSONSchema)
             case nil:
                 underlyingAdditionalProperties = nil
             }
 
             return .init(
-                properties: properties.mapValues { $0.underlyingJsonSchema },
+                properties: properties.mapValues { $0.underlyingJSONSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
                 minProperties: minProperties
