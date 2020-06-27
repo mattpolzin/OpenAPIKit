@@ -6,9 +6,14 @@
 //
 
 /// An `OpenAPI.Document` type that guarantees
-/// its `paths` are inlined instead of referenced.
+/// its `paths` and `security` are inlined instead of
+/// referenced. You create a `DereferencedDocument`
+///  by calling the `locallyDereferenced()` method
+/// on an `OpenAPI.Document`.
 @dynamicMemberLookup
 public struct DereferencedDocument: Equatable {
+    /// The original OpenAPI document prior to being
+    /// dereferenced.
     public let underlyingDocument: OpenAPI.Document
 
     /// This property maps the path of each route (`OpenAPI.Path`) to the
@@ -59,6 +64,8 @@ public struct DereferencedDocument: Equatable {
 }
 
 extension DereferencedDocument {
+    /// The pairing of a path and the path item that describes the
+    /// route at that path.
     public struct Route: Equatable {
         public let path: OpenAPI.Path
         public let pathItem: DereferencedPathItem

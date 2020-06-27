@@ -5,17 +5,44 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+/// The canonical definition of an endpoint. All information
+/// from throughout the OpenAPI document that is relevant
+/// to a particular endpoint is collected and exposed in this
+/// type.
+///
+/// You can access resolved endpoints via the
+/// `ResolvedDocument` type. You make a `ResolvedDocument`
+/// from an `OpenAPI.Document` by calling:
+///
+///     try document
+///         .locallyDereferenced()
+///         .resolved()
+///
+/// See `ResolvedDocument` for more information.
 public struct ResolvedEndpoint: Equatable {
+    /// The summary for the route that contains this
+    /// endpoint.
     public let routeSummary: String?
+    /// The description of the route that contains this
+    /// endpoint.
     public let routeDescription: String?
+    /// The OpenAPI Specification Extensions available
+    /// on the route that contains this endpoint.
     public let routeVendorExtensions: [String: AnyCodable]
 
+    /// The tags that are applicable to this endpoint.
     public let tags: [String]
+    /// The summary for the operation this endpoint performs.
     public let operationSummary: String?
+    /// The description of the operation this endpoint performs.
     public let operationDescription: String?
+    /// The OpenAPI Specification Extensions available
+    /// on this endpoint.
     public let operationVendorExtensions: [String: AnyCodable]
+    /// The unique Id for the operation this endpoint performs.
     public let operationId: String?
 
+    /// Any external documentation for this endpoint.
     public let externalDocs: OpenAPI.ExternalDocumentation?
 
     /// Servers applicable to this endpoint.
@@ -71,6 +98,8 @@ public struct ResolvedEndpoint: Equatable {
 }
 
 extension DereferencedDocument {
+    /// Return an array of all resolved endpoints under
+    /// the given path.
     internal func resolvedEndpoints(at path: OpenAPI.Path) -> [ResolvedEndpoint] {
         guard let pathItem = paths[path] else { return [] }
 
@@ -113,10 +142,21 @@ extension DereferencedDocument {
         }
     }
 
+    /// Return all resolved endpoints for the whole document.
+    ///
+    /// If you are working with resolved endpoints and routes
+    /// the `ResolvedDocument` type might offer the best
+    /// interface.
     public func resolvedEndpoints() -> [ResolvedEndpoint] {
         return paths.keys.flatMap(resolvedEndpoints(at:))
     }
 
+    /// Returns all resolved endpoints for the whole document
+    /// grouped by the paths for the routes containing them.
+    ///
+    /// If you are working with resolved endpoints and routes
+    /// the `ResolvedDocument` type might offer the best
+    /// interface.
     public func resolvedEndpointsByPath() -> OrderedDictionary<OpenAPI.Path, [ResolvedEndpoint]> {
         return OrderedDictionary(grouping: resolvedEndpoints(), by: { $0.path })
     }

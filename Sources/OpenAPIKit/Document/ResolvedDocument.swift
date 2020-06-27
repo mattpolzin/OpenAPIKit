@@ -7,7 +7,9 @@
 
 /// A resolved document is a fully dereferenced
 /// OpenAPI document that has been further distilled
-/// to canonical representations of each component.
+/// to canonical representations of each component. You
+/// create a `ResolvedDocument` by calling the `resolved()`
+/// method on a `DereferencedDocument`.
 ///
 /// OpenAPI documents have two distinct forms of
 /// distributing information such that not all relevant
@@ -64,6 +66,19 @@
 ///
 @dynamicMemberLookup
 public struct ResolvedDocument: Equatable {
+    /// Access the underlying dereferenced document.
+    ///
+    /// The original `OpenAPI.Document` is the underlying
+    /// document of the dereferenced document available here.
+    ///
+    ///     let resolvedDocument: OpenAPI.Document = ...
+    ///
+    ///     let dereferencedDocument = resolvedDocument
+    ///         .underlyingDocument
+    ///
+    ///     let originalDocument = resolvedDocument
+    ///         .underlyingDocument
+    ///         .underlyingDocument
     public let underlyingDocument: DereferencedDocument
 
     /// The fully resolved routes of this API keyed by the
@@ -106,7 +121,6 @@ public struct ResolvedDocument: Equatable {
     /// be used. Only one of the security requirement objects need to be satisfied
     /// to authorize a request. Individual operations can override this definition.
     ///
-    /// To make security optional, an empty security requirement can be included
-    /// in the array.
+    /// An empty security requirement in the array means that security is optional.
     public var security: [DereferencedSecurityRequirement] { underlyingDocument.security }
 }
