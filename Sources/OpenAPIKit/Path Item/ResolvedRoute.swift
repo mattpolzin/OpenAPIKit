@@ -46,42 +46,76 @@ public struct ResolvedRoute: Equatable {
     /// The list of servers that support this route.
     public let servers: [OpenAPI.Server]
 
-    /// All endpoints at this route, keyed by
-    /// the HTTP method (`GET`, `PATCH`, etc.) the
-    /// endpoint supports.
-    ///
-    /// You can also retrieve individual endpoints
-    /// with properties named after the HTTP method
-    ///
-    ///     resolvedRoute.put
-    ///
-    /// Or using the `for(_:)` method
-    ///
-    ///     resolvedRoute.for(.patch)
-    public let endpointsByMethod: [OpenAPI.HttpMethod: ResolvedEndpoint]
-
     /// The HTTP `GET` endpoint at this route.
-    public var get: ResolvedEndpoint? { endpointsByMethod[.get] }
+    public let get: ResolvedEndpoint?
     /// The HTTP `PUT` endpoint at this route.
-    public var put: ResolvedEndpoint? { endpointsByMethod[.put] }
+    public let put: ResolvedEndpoint?
     /// The HTTP `POST` endpoint at this route.
-    public var post: ResolvedEndpoint? { endpointsByMethod[.post] }
+    public let post: ResolvedEndpoint?
     /// The HTTP `DELETE` endpoint at this route.
-    public var delete: ResolvedEndpoint? { endpointsByMethod[.delete] }
+    public let delete: ResolvedEndpoint?
     /// The HTTP `OPTIONS` endpoint at this route.
-    public var options: ResolvedEndpoint? { endpointsByMethod[.options] }
+    public let options: ResolvedEndpoint?
     /// The HTTP `HEAD` endpoint at this route.
-    public var head: ResolvedEndpoint? { endpointsByMethod[.head] }
+    public let head: ResolvedEndpoint?
     /// The HTTP `PATCH` endpoint at this route.
-    public var patch: ResolvedEndpoint? { endpointsByMethod[.patch] }
+    public let patch: ResolvedEndpoint?
     /// The HTTP `TRACE` endpoint at this route.
-    public var trace: ResolvedEndpoint? { endpointsByMethod[.trace] }
+    public let trace: ResolvedEndpoint?
+
+    /// Create a ResolvedRoute.
+    ///
+    /// `ResolvedRoute` creation is only publicly
+    /// exposed by methods on `ResolvedDocument`
+    /// and `DereferencedDocument`.
+    ///
+    /// - Important: The endpoints passed in must each
+    /// be associated with a different HTTP method. Naturally
+    /// a route can only define one operation for each method.
+    internal init(
+        summary: String?,
+        description: String?,
+        vendorExtensions: [String: AnyCodable],
+        path: OpenAPI.Path,
+        parameters: [DereferencedParameter],
+        servers: [OpenAPI.Server],
+        endpoints: [ResolvedEndpoint]
+    ) {
+        let endpoints = Dictionary(
+            endpoints.map { ($0.method, $0) },
+            uniquingKeysWith: { $1 }
+        )
+
+        self.summary = summary
+        self.description = description
+        self.vendorExtensions = vendorExtensions
+        self.path = path
+        self.parameters = parameters
+        self.servers = servers
+
+        self.get = endpoints[.get]
+        self.put = endpoints[.put]
+        self.post = endpoints[.post]
+        self.delete = endpoints[.delete]
+        self.options = endpoints[.options]
+        self.head = endpoints[.head]
+        self.patch = endpoints[.patch]
+        self.trace = endpoints[.trace]
+    }
 
     /// An array of all endpoints at this route.
-    ///
-    /// The ordering of this array is neither guaranteed
-    /// nor stable.
-    public var endpoints: [ResolvedEndpoint] { Array(endpointsByMethod.values) }
+    public var endpoints: [ResolvedEndpoint] {
+        [
+            self.get,
+            self.put,
+            self.post,
+            self.delete,
+            self.options,
+            self.head,
+            self.patch,
+            self.trace
+        ].compactMap { $0 }
+    }
 
     /// Retrieve the endpoint for the given method, if one exists for this route.
     public func `for`(_ verb: OpenAPI.HttpMethod) -> ResolvedEndpoint? {
@@ -104,15 +138,18 @@ public struct ResolvedRoute: Equatable {
             return self.trace
         }
     }
+
+    public subscript(verb: OpenAPI.HttpMethod) -> ResolvedEndpoint? {
+        get {
+            return `for`(verb)
+        }
+    }
 }
 
 extension DereferencedDocument {
     /// Return the resolved route for a given path.
     internal func resolvedRoute(at path: OpenAPI.Path) -> ResolvedRoute? {
         guard let pathItem = paths[path] else { return nil }
-
-        let endpoints = self.resolvedEndpoints(at: path)
-            .map { ($0.method, $0) }
 
         return ResolvedRoute(
             summary: pathItem.summary,
@@ -121,7 +158,7 @@ extension DereferencedDocument {
             path: path,
             parameters: pathItem.parameters,
             servers: pathItem.servers ?? self.servers,
-            endpointsByMethod: Dictionary(uniqueKeysWithValues: endpoints)
+            endpoints: self.resolvedEndpoints(at: path)
         )
     }
 
