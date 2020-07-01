@@ -104,7 +104,7 @@ extension DereferencedDocument {
         guard let pathItem = paths[path] else { return [] }
 
         func uniqueParametersForCurrentPath(_ operation: DereferencedOperation) -> [DereferencedParameter] {
-            let allParameters = pathItem.parameters + operation.parameters
+            let allParameters = operation.parameters + pathItem.parameters
 
             var seenParameterIdentities = Set<OpenAPI.Parameter.ParameterIdentity>()
             var uniqueParameters = [DereferencedParameter]()

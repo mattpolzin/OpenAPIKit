@@ -9,6 +9,11 @@ extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
     /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations).
+    ///
+    /// Query, Header, and Cookie parameters are
+    /// all optional by default unless you pass
+    /// `required: true` to the context construction.
+    /// Path parameters are always required.
     public enum Context: Equatable {
         case query(required: Bool, allowEmptyValue: Bool)
         case header(required: Bool)
@@ -19,10 +24,14 @@ extension OpenAPI.Parameter {
 
         public static func query(allowEmptyValue: Bool) -> Context { return .query(required: false, allowEmptyValue: allowEmptyValue) }
 
+        /// An optional query parameter that does not allow
+        /// empty values.
         public static var query: Context { return .query(required: false, allowEmptyValue: false) }
 
+        /// An optional header parameter.
         public static var header: Context { return .header(required: false) }
 
+        /// An optional cookie parameter.
         public static var cookie: Context { return .cookie(required: false) }
 
         public var inQuery: Bool {
