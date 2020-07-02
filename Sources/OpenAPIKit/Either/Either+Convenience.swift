@@ -100,6 +100,11 @@ extension Either where B == JSONSchema {
     public var schemaValue: B? { b }
 }
 
+extension Either where B == DereferencedJSONSchema {
+    /// Retrieve the schema if that is what this property contains.
+    public var schemaValue: B? { b }
+}
+
 extension Either where B == OpenAPI.Example {
     /// Retrieve the example if that is what this property contains.
     public var exampleValue: B? { b }
