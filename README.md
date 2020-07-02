@@ -20,42 +20,14 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Schemas](#schemas)
 			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 		- [JSON References](#json-references)
+		- [Security Requirements](#security-requirements)
 		- [Specification Extensions](#specification-extensions)
+	- [Dereferencing & Resolving](#dereferencing--resolving)
 - [Curated Integrations](#curated-integrations)
 	- [Generating OpenAPI Documents](#generating-openapi-documents)
 	- [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
-- [Project Status](#project-status)
-	- [OpenAPI Object (`OpenAPI.Document`)](#openapi-object-openapidocument)
-	- [Info Object (`OpenAPI.Document.Info`)](#info-object-openapidocumentinfo)
-	- [Contact Object (`OpenAPI.Document.Info.Contact`)](#contact-object-openapidocumentinfocontact)
-	- [License Object (`OpenAPI.Document.Info.License`)](#license-object-openapidocumentinfolicense)
-	- [Server Object (`OpenAPI.Server`)](#server-object-openapiserver)
-	- [Server Variable Object (`OpenAPI.Server.Variable`)](#server-variable-object-openapiservervariable)
-	- [Components Object (`OpenAPI.Components`)](#components-object-openapicomponents)
-	- [Paths Object (`OpenAPI.PathItem.Map`)](#paths-object-openapipathitemmap)
-	- [Path Item Object (`OpenAPI.PathItem`)](#path-item-object-openapipathitem)
-	- [Operation Object (`OpenAPI.Operation`)](#operation-object-openapioperation)
-	- [External Document Object (`OpenAPI.ExternalDocumentation`)](#external-document-object-openapiexternaldocumentation)
-	- [Parameter Object (`OpenAPI.Parameter`)](#parameter-object-openapiparameter)
-	- [Request Body Object (`OpenAPI.Request`)](#request-body-object-openapirequest)
-	- [Media Type Object (`OpenAPI.Content`)](#media-type-object-openapicontent)
-	- [Encoding Object (`OpenAPI.Content.Encoding`)](#encoding-object-openapicontentencoding)
-	- [Responses Object (`OpenAPI.Response.Map`)](#responses-object-openapiresponsemap)
-	- [Response Object (`OpenAPI.Response`)](#response-object-openapiresponse)
-	- [Callback Object](#callback-object)
-	- [Example Object (`OpenAPI.Example`)](#example-object-openapiexample)
-	- [Link Object](#link-object)
-	- [Header Object (`OpenAPI.Header`)](#header-object-openapiheader)
-	- [Tag Object (`OpenAPI.Tag`)](#tag-object-openapitag)
-	- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
-	- [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
-	- [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
-	- [XML Object (`OpenAPI.XML`)](#xml-object-openapixml)
-	- [Security Scheme Object (`OpenAPI.SecurityScheme`)](#security-scheme-object-openapisecurityscheme)
-	- [OAuth Flows Object (`OpenAPI.OauthFlows`)](#oauth-flows-object-openapioauthflows)
-	- [OAuth Flow Object (`OpenAPI.OauthFlows.*`)](#oauth-flow-object-openapioauthflows)
-	- [Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)](#security-requirement-object-openapidocumentsecurityrequirement)
+- [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
 ## Usage
 
@@ -199,6 +171,13 @@ let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
 let addBooksParameters: [OpenAPI.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
 ```
 
+Note that this looks a component up in the Components Object but it does not transform it into an entirely derefernced object in the same way as is described below in the [Dereferencing & Resolving](#dereferencing--resolving) section.
+
+#### Security Requirements
+In the OpenAPI specifcation, a security requirement (like can be found on the root Document or on Operations) is a dictionary where each key is the name of a security scheme found in the Components Object and each value is an array of applicable scopes (which is of course only a non-empty array when the security scheme type is one for which "scopes" are relevant).
+
+OpenAPIKit defines the `SecurityRequirement` typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
+
 #### Specification Extensions
 Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
 
@@ -215,6 +194,19 @@ document.vendorExtensions["x-specialProperty3"] = ["hello", "world"]
 document.vendorExtensions["x-specialProperty4"] = ["hello": "world"]
 document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
 ```
+
+### Dereferencing & Resolving
+In addition to using the `Components` type's `dereference()` method to look up a `JSONReference`, you can opt to work on an entirely dereferenced OpenAPI document with the `OpenAPI.Document` `locallyDereferenced()` method.
+
+As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object.
+
+Unlike what happens when you dereference an individual component using `Components` `dereference()` method, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
+
+Anywhere that a type would have had either a reference or a component, the dereferenced variety will simply have the component. For example, `PathItem` has an array of parameters, each of which is `Either<JSONReference<Parameter>, Parameter>` whereas a `DereferencedPathItem` has an array of `DereferencedParameter`s. The dereferenced variant of each type exposes all the same properties. This can make for a much more convenient way to traverse a document because you don't need to check for or look up references anywhere the OpenAPI Specification allows them.
+
+You can take things a step further and resolve the document. Calling `resolved()` on a `DereferencedDocument` will produce a canonical form of an `OpenAPI.Document`. The `ResolvedRoute`s and `ResolvedEndpoint`s that the `ResolvedDocument` exposes collect all relevant information from the whole document into themselves. For example, a `ResolvedEndpoint` knows what servers it can be used on, what path it is located at, and which parameters it supports (even if some of those parameters were defined in an `OpenAPI.Operation` and others were defined in the containing `OpenAPI.PathItem`).
+
+If your end goal is to analyze the OpenAPI Document or generate something entirely new (like code) from it, the `ResolvedDocument` is by far more convenient to traverse and query than the original `OpenAPI.Document`. The downside is, there is not currently support for mutating the `ResolvedDocument` and then turning it back into an `OpenAPI.Document` to encode it.
 
 ## Curated Integrations
 Following is a short list of integrations that might be immediately useful or just serve as examples of ways that OpenAPIKit can be used to harness the power of the OpenAPI specification.
@@ -244,252 +236,5 @@ This library *is* opinionated about a few defaults when you use the Swift types,
 
 See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before deciding on an encoder/decoder to use with this library.
 
-## Project Status
-
-### OpenAPI Object (`OpenAPI.Document`)
-- [x] openapi (`openAPIVersion`)
-- [x] info
-- [x] servers
-- [x] paths
-- [x] components
-- [x] security
-- [x] tags
-- [x] externalDocs
-- [x] specification extensions (`vendorExtensions`)
-
-### Info Object (`OpenAPI.Document.Info`)
-- [x] title
-- [x] description
-- [x] termsOfService
-- [x] contact
-- [x] license
-- [x] version
-- [x] specification extensions (`vendorExtensions`)
-
-### Contact Object (`OpenAPI.Document.Info.Contact`)
-- [x] name
-- [x] url
-- [x] email
-- [x] specification extensions (`vendorExtensions`)
-
-### License Object (`OpenAPI.Document.Info.License`)
-- [x] name
-- [x] url
-- [x] specification extensions (`vendorExtensions`)
-
-### Server Object (`OpenAPI.Server`)
-- [x] url
-- [x] description
-- [x] variables
-- [x] specification extensions (`vendorExtensions`)
-
-### Server Variable Object (`OpenAPI.Server.Variable`)
-- [x] enum
-- [x] default
-- [x] description
-- [x] specification extensions (`vendorExtensions`)
-
-### Components Object (`OpenAPI.Components`)
-- [x] schemas
-- [x] responses
-- [x] parameters
-- [x] examples
-- [x] requestBodies
-- [x] headers
-- [x] securitySchemes
-- [ ] links
-- [ ] callbacks
-- [x] specification extensions (`vendorExtensions`)
-
-### Paths Object (`OpenAPI.PathItem.Map`)
-- [x] *dictionary*
-- ~[ ] specification extensions~ (not a planned addition)
-
-### Path Item Object (`OpenAPI.PathItem`)
-- [x] summary
-- [x] description
-- [x] servers
-- [x] parameters
-- [x] get
-- [x] put
-- [x] post
-- [x] delete
-- [x] options
-- [x] head
-- [x] patch
-- [x] trace
-- [x] specification extensions (`vendorExtensions`)
-
-### Operation Object (`OpenAPI.Operation`)
-- [x] tags
-- [x] summary
-- [x] description
-- [x] externalDocs
-- [x] operationId
-- [x] parameters
-- [x] requestBody
-- [x] responses
-- [ ] callbacks
-- [x] deprecated
-- [x] security
-- [x] servers
-- [x] specification extensions (`vendorExtensions`)
-
-### External Document Object (`OpenAPI.ExternalDocumentation`)
-- [x] description
-- [x] url
-- [x] specification extensions (`vendorExtensions`)
-
-### Parameter Object (`OpenAPI.Parameter`)
-- [x] name
-- [x] in (`context`)
-- [x] description
-- [x] required (part of `context`)
-- [x] deprecated
-- [x] allowEmptyValue (part of `context`)
-- [x] content (`schemaOrContent`)
-- [x] schema (`schemaOrContent`)
-    - [x] style
-    - [x] explode
-    - [x] allowReserved
-    - [x] example
-    - [x] examples
-- [x] specification extensions (`vendorExtensions`)
-
-### Request Body Object (`OpenAPI.Request`)
-- [x] description
-- [x] content
-- [x] required
-- [x] specification extensions (`vendorExtensions`)
-
-### Media Type Object (`OpenAPI.Content`)
-- [x] schema
-- [x] example
-- [x] examples
-- [x] encoding
-- [x] specification extensions (`vendorExtensions`)
-
-### Encoding Object (`OpenAPI.Content.Encoding`)
-- [x] contentType
-- [x] headers
-- [x] style
-- [x] explode
-- [x] allowReserved
-- [ ] specification extensions
-
-### Responses Object (`OpenAPI.Response.Map`)
-- [x] *dictionary*
-- ~[ ] specification extensions~ (not a planned addition)
-
-### Response Object (`OpenAPI.Response`)
-- [x] description
-- [x] headers
-- [x] content
-- [ ] links
-- [x] specification extensions (`vendorExtensions`)
-
-### Callback Object
-- [ ] *{expression}*
-- [ ] specification extensions
-
-### Example Object (`OpenAPI.Example`)
-- [x] summary
-- [x] description
-- [x] value
-- [x] externalValue (part of `value`)
-- [x] specification extensions (`vendorExtensions`)
-
-### Link Object
-- [ ] operationRef
-- [ ] operationId
-- [ ] parameters
-- [ ] requestBody
-- [ ] description
-- [ ] server
-- [ ] specification extensions
-
-### Header Object (`OpenAPI.Header`)
-- [x] description
-- [x] required
-- [x] deprecated
-- [x] content
-- [x] schema
-    - [x] style
-    - [x] explode
-    - [x] allowReserved
-    - [x] example
-    - [x] examples
-- [x] specification extensions (`vendorExtensions`)
-
-### Tag Object (`OpenAPI.Tag`)
-- [x] name
-- [x] description
-- [x] externalDocs
-- [x] specification extensions (`vendorExtensions`)
-
-### Reference Object (`JSONReference`)
-- [x] $ref
-    - [x] local (same file) reference (`internal` case)
-        - [x] encode
-        - [x] decode
-        - [x] dereference
-    - [x] remote (different file) reference (`external` case)
-        - [x] encode
-        - [x] decode
-        - [ ] dereference
-
-### Schema Object (`JSONSchema`)
-- [x] Mostly complete support for JSON Schema inherited keywords
-- [x] nullable
-- [x] discriminator
-- [x] readOnly (`permissions` `.readOnly` case)
-- [x] writeOnly (`permissions` `.writeOnly` case)
-- [ ] xml
-- [x] externalDocs
-- [x] example
-- [x] deprecated
-- [ ] specification extensions
-
-### Discriminator Object (`OpenAPI.Discriminator`)
-- [x] propertyName
-- [x] mapping
-
-### XML Object (`OpenAPI.XML`)
-- [x] name
-- [x] namespace
-- [x] prefix
-- [x] attribute
-- [x] wrapped
-- [ ] specification extensions
-
-### Security Scheme Object (`OpenAPI.SecurityScheme`)
-- [x] type
-- [x] description
-- [x] name (`SecurityType` `.apiKey` case)
-- [x] in (`location` in `SecurityType` `.apiKey` case)
-- [x] scheme (`SecurityType` `.http` case)
-- [x] bearerFormat (`SecurityType` `.http` case)
-- [x] flows (`SecurityType` `.oauth2` case)
-- [x] openIdConnectUrl (`SecurityType` `.openIdConnect` case)
-- [x] specification extensions (`vendorExtensions`)
-
-### OAuth Flows Object (`OpenAPI.OauthFlows`)
-- [x] implicit
-- [x] password
-- [x] clientCredentials
-- [x] authorizationCode
-- [ ] specification extensions
-
-### OAuth Flow Object (`OpenAPI.OauthFlows.*`)
-- `OpenAPI.OauthFlows.Implicit`
-- `OpenAPI.OauthFlows.Password`
-- `OpenAPI.OauthFlows.ClientCredentials`
-- `OpenAPI.OauthFlows.AuthorizationCode`
-- [x] authorizationUrl
-- [x] tokenUrl
-- [x] refreshUrl
-- [x] scopes
-- [ ] specification extensions
-
-### Security Requirement Object (`OpenAPI.Document.SecurityRequirement`)
-- [x] *{name}* (using `JSONReferences` instead of a stringy API)
+## Specification Coverage & Type Reference
+For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).

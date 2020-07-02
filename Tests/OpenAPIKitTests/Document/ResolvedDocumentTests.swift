@@ -76,8 +76,8 @@ final class ResolvedDocumentTests: XCTestCase {
 
         XCTAssertEqual(t1.endpoints.count, 2)
         XCTAssertEqual(t1.endpoints, t1.routes.flatMap { $0.endpoints })
-        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.operationSummary == "Get world" })
-        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.operationSummary == "Create world" })
+        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.endpointSummary == "Get world" })
+        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.endpointSummary == "Create world" })
 
         XCTAssertEqual(t1.paths["/hello/world"]?.get?.summary, "Get world")
         XCTAssertEqual(t1.paths["/hello/world"]?.post?.summary, "Create world")
@@ -112,14 +112,14 @@ final class ResolvedDocumentTests: XCTestCase {
 
         XCTAssertEqual(t1.endpoints.count, 4)
         XCTAssertEqual(t1.endpoints, t1.routes.flatMap { $0.endpoints })
-        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.operationSummary == "Get world" })
-        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.operationSummary == "Create world" })
+        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.endpointSummary == "Get world" })
+        XCTAssert(t1.routesByPath["/hello/world"]!.endpoints.contains { $0.endpointSummary == "Create world" })
 
         XCTAssertEqual(t1.paths["/hello/world"]?.get?.summary, "Get world")
         XCTAssertEqual(t1.paths["/hello/world"]?.post?.summary, "Create world")
 
-        XCTAssert(t1.routesByPath["/hello/universe"]!.endpoints.contains { $0.operationSummary == "Get universe" })
-        XCTAssert(t1.routesByPath["/hello/universe"]!.endpoints.contains { $0.operationSummary == "Create universe" })
+        XCTAssert(t1.routesByPath["/hello/universe"]!.endpoints.contains { $0.endpointSummary == "Get universe" })
+        XCTAssert(t1.routesByPath["/hello/universe"]!.endpoints.contains { $0.endpointSummary == "Create universe" })
 
         XCTAssertEqual(t1.paths["/hello/universe"]?.get?.summary, "Get universe")
         XCTAssertEqual(t1.paths["/hello/universe"]?.post?.summary, "Create universe")

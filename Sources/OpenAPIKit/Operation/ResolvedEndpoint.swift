@@ -33,12 +33,12 @@ public struct ResolvedEndpoint: Equatable {
     /// The tags that are applicable to this endpoint.
     public let tags: [String]
     /// The summary for the operation this endpoint performs.
-    public let operationSummary: String?
+    public let endpointSummary: String?
     /// The description of the operation this endpoint performs.
-    public let operationDescription: String?
+    public let endpointDescription: String?
     /// The OpenAPI Specification Extensions available
     /// on this endpoint.
-    public let operationVendorExtensions: [String: AnyCodable]
+    public let endpointVendorExtensions: [String: AnyCodable]
     /// The unique Id for the operation this endpoint performs.
     public let operationId: String?
 
@@ -125,9 +125,9 @@ extension DereferencedDocument {
                 routeDescription: pathItem.description,
                 routeVendorExtensions: pathItem.vendorExtensions,
                 tags: endpoint.operation.tags ?? [],
-                operationSummary: endpoint.operation.summary,
-                operationDescription: endpoint.operation.description,
-                operationVendorExtensions: endpoint.operation.vendorExtensions,
+                endpointSummary: endpoint.operation.summary,
+                endpointDescription: endpoint.operation.description,
+                endpointVendorExtensions: endpoint.operation.vendorExtensions,
                 operationId: endpoint.operation.operationId,
                 externalDocs: endpoint.operation.externalDocs,
                 servers: endpoint.operation.servers ?? pathItem.servers ?? self.servers,
