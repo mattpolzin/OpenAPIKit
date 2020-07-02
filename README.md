@@ -208,6 +208,43 @@ You can take things a step further and resolve the document. Calling `resolved()
 
 If your end goal is to analyze the OpenAPI Document or generate something entirely new (like code) from it, the `ResolvedDocument` is by far more convenient to traverse and query than the original `OpenAPI.Document`. The downside is, there is not currently support for mutating the `ResolvedDocument` and then turning it back into an `OpenAPI.Document` to encode it.
 
+```swift
+let document: OpenAPI.Document = ...
+
+let resolvedDocument = try document
+    .locallyDereferenced()
+    .resolved()
+
+for endpoint in resolvedDocument.endpoints {
+    // The description found on the PathItem containing the Operation defining this endpoint:
+    let routeDescription = endpoint.routeDescription
+
+    // The description found directly on the Operation defining this endpoint:
+    let endpointDescription = endpoint.endpointDescription
+
+    // The path, which in the OpenAPI.Document is the key of the dictionary containing
+    // the PathItem under which the Operation for this endpoint lives:
+    let path = endpoint.path
+
+    // The method, which in the OpenAPI.Document is the way you access the Operation for
+    // this endpoint on the PathItem (GET, PATCH, etc.):
+    let httpMethod = endpoint.method
+
+    // All parameters defined for the Operation _or_ the PathItem containing it:
+    let parameters = endpoint.parameters
+
+    // Per the specification, this is 
+    // 1. the list of servers defined on the Operation if one is given.
+    // 2. the list of servers defined on the PathItem if one is given _and_ 
+    //	no list was found on the Operation.
+    // 3. the list of servers defined on the Document if no list was found on
+    //	the Operation _or_ the PathItem.
+    let servers = endpoint.servers
+
+    // and many more properties...
+}
+```
+
 ## Curated Integrations
 Following is a short list of integrations that might be immediately useful or just serve as examples of ways that OpenAPIKit can be used to harness the power of the OpenAPI specification.
 
