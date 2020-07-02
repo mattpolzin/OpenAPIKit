@@ -32,7 +32,7 @@ public struct DereferencedSecurityRequirement: Equatable {
             // we know it has a name because it was just found in the
             // Components Object (or else the previous line would have thrown).
             let name = reference.name!
-            let scopedScheme = ScopedScheme(securityScheme: scheme, requiredScopes: scopes)
+            let scopedScheme = ScopedScheme(name: name, securityScheme: scheme, requiredScopes: scopes)
             return (name, scopedScheme)
         }
         self.schemes = Dictionary(scopedSchemes, uniquingKeysWith: { $1 })
@@ -46,6 +46,10 @@ public struct DereferencedSecurityRequirement: Equatable {
     /// For example, a scheme might define both `read` and `write`
     /// scopes but a `GET` operation may only require the `read` scope.
     public struct ScopedScheme: Equatable {
+        /// The name used to identify the security scheme in the
+        /// Component Object.
+        public let name: String
+
         public let securityScheme: OpenAPI.SecurityScheme
         /// If the security scheme is of type "oauth2" or "openIdConnect",
         /// then `requiredScopes` is a list of scope names required for
