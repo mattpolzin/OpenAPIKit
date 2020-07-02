@@ -10,7 +10,12 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedParameter: Equatable {
+    /// The original `OpenAPI.Parameter` prior to being dereferenced.
     public let underlyingParameter: OpenAPI.Parameter
+    /// The dereferenced schema or content for the parameter.
+    ///
+    /// Only one of a "schema" or "content" can apply to any given
+    /// parameter.
     public let schemaOrContent: Either<DereferencedSchemaContext, DereferencedContent.Map>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Parameter, T>) -> T {

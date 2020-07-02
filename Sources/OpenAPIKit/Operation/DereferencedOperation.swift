@@ -10,10 +10,27 @@
 /// and `security` are inlined instead of referenced.
 @dynamicMemberLookup
 public struct DereferencedOperation: Equatable {
+    /// The original `OpenAPI.Operation` prior to being dereferenced.
     public let underlyingOperation: OpenAPI.Operation
+    /// A dereferenced array of parameters.
     public let parameters: [DereferencedParameter]
+    /// A dereferenced request body.
     public let requestBody: DereferencedRequest?
+    /// A dereferenced map of responses.
     public let responses: DereferencedResponse.Map
+    /// An array of dereferenced security requirements.
+    ///
+    /// If defined, overrides the security requirements in the
+    /// root document `security` array.
+    ///
+    /// Each secutity requirement in this array is an alternative, only
+    /// one of which must be met for the request to be authorized.
+    ///
+    /// By contrast, all entries in an individual `DereferencedSecurityRequirement`
+    /// (which is itself a dictionary) must be met.
+    ///
+    /// `nil` indicates this operation uses the security requirements
+    /// defined at the root of the document.
     public let security: [DereferencedSecurityRequirement]?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Operation, T>) -> T {

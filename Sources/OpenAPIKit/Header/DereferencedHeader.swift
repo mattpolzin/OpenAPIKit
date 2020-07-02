@@ -10,7 +10,10 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedHeader: Equatable {
+    /// The original `OpenAPI.Header` prior to being dereferenced.
     public let underlyingHeader: OpenAPI.Header
+    /// The dereferenced schema or content for the header, only one
+    /// of which can apply to a given Header.
     public let schemaOrContent: Either<DereferencedSchemaContext, DereferencedContent.Map>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Header, T>) -> T {

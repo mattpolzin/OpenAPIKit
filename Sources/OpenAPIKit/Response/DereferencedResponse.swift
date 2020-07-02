@@ -10,8 +10,11 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedResponse: Equatable {
+    /// The original `OpenAPI.Response` prior to being dereferenced.
     public let underlyingResponse: OpenAPI.Response
+    /// The map of dereferenced headers for this response.
     public let headers: DereferencedHeader.Map?
+    /// The map of dereferenced content for this response.
     public let content: DereferencedContent.Map
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Response, T>) -> T {

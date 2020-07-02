@@ -26,6 +26,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     /// description.
     case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
 
+    /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
         switch self {
         case .boolean(let context):
@@ -43,6 +44,16 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         case .all, .one, .any, .not, .reference, .undefined:
             return nil
         }
+    }
+
+    /// The fundamental type of the schema.
+    ///
+    /// - Important: "object," "array," "allOf,", "oneOf,"
+    ///     "anyOf," "not," "reference," and "undefined" are
+    ///     not considered types and such schemas will
+    ///     return `nil` for this property.
+    public var jsonType: JSONType? {
+        return jsonTypeFormat?.jsonType
     }
 
     // See `JSONSchemaContext`

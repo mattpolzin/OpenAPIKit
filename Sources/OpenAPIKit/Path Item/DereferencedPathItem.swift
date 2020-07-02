@@ -10,16 +10,26 @@
 /// referenced.
 @dynamicMemberLookup
 public struct DereferencedPathItem: Equatable {
+    /// The original `OpenAPI.PathItem` prior to being dereferenced.
     public let underlyingPathItem: OpenAPI.PathItem
+    /// The dereferenced list of parameters.
     public let parameters: [DereferencedParameter]
 
+    /// The dereferenced GET operation, if defined.
     public let get: DereferencedOperation?
+    /// The dereferenced PUT operation, if defined.
     public let put: DereferencedOperation?
+    /// The dereferenced POST operation, if defined.
     public let post: DereferencedOperation?
+    /// The dereferenced DELETE operation, if defined.
     public let delete: DereferencedOperation?
+    /// The dereferenced OPTIONS operation, if defined.
     public let options: DereferencedOperation?
+    /// The dereferenced HEAD operation, if defined.
     public let head: DereferencedOperation?
+    /// The dereferenced PATCH operation, if defined.
     public let patch: DereferencedOperation?
+    /// The dereferenced TRACE operation, if defined.
     public let trace: DereferencedOperation?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.PathItem, T>) -> T {

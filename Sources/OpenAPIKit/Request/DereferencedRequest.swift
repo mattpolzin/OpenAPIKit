@@ -9,7 +9,9 @@
 /// its `content` is inlined instead of referenced.
 @dynamicMemberLookup
 public struct DereferencedRequest: Equatable {
+    /// The original `OpenAPI.Request` prior to being dereferenced.
     public let underlyingRequest: OpenAPI.Request
+    /// The dereferenced map of content for this request.
     public let content: DereferencedContent.Map
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Request, T>) -> T {

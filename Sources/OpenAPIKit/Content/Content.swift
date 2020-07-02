@@ -95,6 +95,11 @@ extension OpenAPI.Content {
 }
 
 extension OpenAPI.Content {
+    /// Pulls the first (inlined, not referenced) example found
+    /// in the example dictionary given.
+    ///
+    /// Operates on a dictionary with values that may be either
+    /// an Example or a reference to and example.
     internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
             .lazy
@@ -102,6 +107,8 @@ extension OpenAPI.Content {
             .first
     }
 
+    /// Pulls the first example found in the example dictionary
+    /// given.
     internal static func firstExample(from exampleDict: OrderedDictionary<String, OpenAPI.Example>) -> AnyCodable? {
         return exampleDict
         .lazy

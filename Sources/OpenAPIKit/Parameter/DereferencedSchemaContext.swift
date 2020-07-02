@@ -10,9 +10,18 @@
 /// of referenced.
 @dynamicMemberLookup
 public struct DereferencedSchemaContext: Equatable {
+    /// The original `OpenAPI.Parameter.SchemaContext` prior to being dereferenced.
     public let underlyingSchemaContext: OpenAPI.Parameter.SchemaContext
+    /// The dereferenced schema.
     public let schema: DereferencedJSONSchema
+    /// The dereferenced examples (if defined).
     public let examples: OrderedDictionary<String, OpenAPI.Example>?
+    /// The dereferenced example (if defined).
+    ///
+    /// This will expose the first example in the `examples`
+    /// property if that is defined. OpenAPI also allows defining
+    /// a single `example` which results in this property being
+    /// non-`nil` while the `examples` property is `nil`.
     public let example: AnyCodable?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Parameter.SchemaContext, T>) -> T {
