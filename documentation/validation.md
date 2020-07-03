@@ -23,7 +23,7 @@ let document = OpenAPI.Document(...)
 try document.validate()
 ```
 
-If validation fails, `document.validate()` will throw a `ValidationErrors` value. `ValidationErrors` is a `Swift.Error` that holds all of the validation errors that occurred. You can access all of the validation errors with the `values` property. 
+If validation fails, `document.validate()` will throw a `ValidationErrors` (plural) value. `ValidationErrors` is a `Swift.Error` that holds all of the validation errors that occurred. You can access all of the validation errors with the `values` property. 
 
 Each element of the `ValdiationErrors` `values` property is a `ValidationError` (singular). Each `ValidationError` in turn offers you a `reason` (`String`) for the failure and the `codingPath` (`[CodingKey]`) where the failure occurred. 
 
@@ -45,7 +45,7 @@ do {
 
 ### Adding Validations
 
-There are a few built-in validations you can add that are not actually part of the OpenAPI Specifcation. For example, you might want to assert that your document should contain at least one `OpenAPI.PathItem`. This is not a default validation because the OpenAPI Specification allows omitting `PathItems` for security reasons depending upon the authorization of a person looking at the documentation.
+There are a few built-in validations you can add that are not actually spelled out by the OpenAPI Specification. For example, you might want to assert that your document should contain at least one `OpenAPI.PathItem`. This is not a default validation because the OpenAPI Specification allows omitting `PathItems` for security reasons depending upon the authorization of a person looking at the documentation.
 
 You can add a check for at least one `PathItem` with
 ```swift
@@ -57,7 +57,7 @@ validator.validating(.documentContainsPaths)
 try document.validate(using: validator)
 ```
 
-You can make that a bit more concise by chaining calls. Chaining makes it possible to add more than one validation. We can check that the document contains at least one path _and_ all paths contain at least one operation (`GET`, `POST`, etc.) _and_ all operations contain at least one response with
+You can chain validation additions together. For example, we can check that the document contains at least one path _and_ all paths contain at least one operation (`GET`, `POST`, etc.) _and_ all operations contain at least one response with
 ```swift
 try document.validate(using: Validator()
     .validating(.documentContainsPaths)
@@ -74,11 +74,16 @@ There are two ways to define validations:
 1. Using the various `validating()` helper methods on the `Validatior`.
 2. Creating values of the `Validation` type.
 
-The first approach can be more concise for most light-weight validations. The second approach is more verbose but it offers cleaner support for one validation producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "**subject**"), and (c) the coding path of the value being validated.
+The first approach is usually more concise for light-weight validations. The second approach is more verbose but it offers cleaner support for single validations producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "**subject**"), and (c) the coding path of the value being validated.
+
+**Important:**
+Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not.
+
+For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not.
 
 #### `Validator.validating()`
 
-The simplest possible validations are equalities and inequalities. Such validations can usually be expressed using a KeyPath syntax starting with any OpenAPIKit type and ending with the value being checked followed by the appropriate equality or inequality. 
+The simplest possible validations are equalities and inequalities. Such validations can usually be expressed using a KeyPath syntax starting with any OpenAPIKit type and the property being checked followed by the appropriate equality or inequality. 
 
 I'll call this the "Subject KeyPath syntax" because the type of the root of the KeyPath is the "subject" of the validation context.
 
@@ -98,9 +103,9 @@ Validator().validating(
 )
 ```
 
-Notice that when using the closure we are operating on the whole context and we drill into the `subject` which is the part of the context implicitly used by the Subject KeyPath syntax.
+Notice that when using the closure we are operating on the whole context and we must drill into the `subject` which is the part of the context implicitly used by the Subject KeyPath syntax.
 
-We could assert that all server arrays in the document have more than 1 element
+We could assert that all server arrays in the document have more than 1 element as follows
 ```swift
 Validator().validating(
    "All server arrays have more than 1 server",
@@ -108,7 +113,7 @@ Validator().validating(
 )
 ```
 
-Or target just the server arrays on `OpenAPI.PathItems`
+Or target just the server arrays on `OpenAPI.PathItems`.
 ```swift
 Validator().validating(
    "All Path Items have at least one server",
@@ -126,9 +131,9 @@ Validator().validating(
 
 ##### Predicates
 
-We can assign predicates to validations to make the validation logic only apply to some values of the given type. 
+We can assign predicates to validations to make the validation logic only apply to some values of the given subject type. 
 
-For example, we could assert that any time a server list contains a server with the "test server" URL, we expect there to be at least two servers listed.
+For example, we could assert that any time a server list contains a server with our test server URL, we expect there to be at least two servers listed.
 ```swift
 Validator().validating(
     "At least two servers are specified if one of them is the test server.",
@@ -176,27 +181,27 @@ For example
 Validator().validating(
     "Operations must contain a status code 500 or there must be two possible responses",
     check: take(\OpenAPI.Response.Map.keys) { $0.contains(500) }
-        || \.count == 2  // \.Response.Map.count == 2
+        || \.count == 2  // \OpenAPI.Response.Map.count == 2
 )
 ```
 
 #### The `Validation` Type
 
-The `Validation` type defines a validation. Each validation is specialized on one particular type that it applies to. For example, the `.pathsContainOperations` validation applies to `OpenAPI.PathItem`. When the Validator is validating an OpenAPI Document it will run the validation any time that type is encountered anywhere in the Document.
+The `Validation` type defines a validation. Each validation is specialized on one particular type that it applies to (a **subject** type). For example, the `.pathsContainOperations` validation applies to `OpenAPI.PathItem`. When the Validator is validating an OpenAPI Document it will run the validation any time that type is encountered anywhere in the Document.
 
 You create a new validation by specifying a check to perform on values and optionally a predicate that needs to return `true` for any value the check should be performed on. If you don't specify a predicate, the check is run for all values of the type the `Validation` is specialized for.
 
 Let's start unpacking `Validation` by looking at an incomplete construction of a validation:
 ```swift
 let validation = Validation<String>(
-    check: { context in ... },
-    when: { context in ... }
+    check: { context -> [ValidationError] in ... },
+    when: { context -> Bool in ... }
 )
 ```
 
 The context passed to both the `check` and `when` clause is a struct containing the entire OpenAPI Document (`.document`), the current coding path (`.codingPath`), and the value being validated (`.subject`).
 
-The function passed as the `check` must return an array of `ValidationErrors` (or an empty array if validation passes). The function passed as the `when` argument must return a `Bool` (`true` means the value should be checked, `false` means it should be skipped).
+The function passed as the `check` must return an array of `ValidationError`s (or an empty array if validation passes). The function passed as the `when` argument must return a `Bool` (`true` means the value should be checked, `false` means it should be skipped).
 
 To bring back a silly example from the above section, maybe we want to assert that any time our OpenAPI Document contains a Specification Extension named `"x-string"` we want the extension to contain the `String` value "hello":
 ```swift
@@ -213,7 +218,7 @@ let validation = Validation<String>(
 
 Because we return an array of errors from our `validate` function when constructing a `Validation` in this way, we don't have access to the same KeyPath helpers we used in the previous section. We can, however, use those helpers for our `predicate`.
 
-Here's the same example with a slightly more concise `when` clause.
+Here's the same example with a slightly more concise `when` clause that uses a Context KeyPath.
 ```swift
 let validation = Validation<String>(
     check: { context in
@@ -226,7 +231,7 @@ let validation = Validation<String>(
 )
 ```
 
-We can get the most concise syntax when we only need to produce a single error from our `Validation`. In that case, the construction will look identical to those in the previous section on the `validating()` method except for the `description` argument label being spelled out.
+We can get the most concise syntax when we only need to produce a single error from our `Validation` (as is the case in the example above). In that case, the construction can look identical to those in the previous section on the `validating()` method except for the `description` argument label being spelled out now.
 
 Note that in this example we can drop the explicit `<String>` specialization because the compiler can infer it.
 ```swift
@@ -237,7 +242,7 @@ let validation = Validation(
 )
 ```
 
-Naturally, you could just as easily define the `validate` and `predicate` functions elsewhere:
+Naturally, you can also define the `validate` and `predicate` functions elsewhere:
 ```swift
 let validate: (ValidationContext<String>) -> [ValidationError] = ...
 let predicate: (ValidationContext<String>) -> Bool = ...
@@ -261,8 +266,10 @@ Unfortunately, now you are also asserting that the content map that can be assoc
 
 We could add a `when` clause that looks at the context's `codingPath` to determine whether the current context is a parameter, a request, or a response, but that's going to get cumbersome fast.
 
-Instead, let's compose the content map validator with a validator that only runs against `OpenAPI.Response`. Then we will do the same thing with a validator that only runs against `OpenAPI.Request`. We need a new tool for this. The `lift()` function will let us use a KeyPath to map the current context to a new context and then run a validator in that new context.
+Instead, let's compose the content map validation with a validation that only runs against `OpenAPI.Response`. Then we will do the same thing with a validation that only runs against `OpenAPI.Request`. We need a new tool for this. The `lift()` function will let us use a KeyPath to map the current context to a new context and then run a validation in that new context.
 ```swift
+// we use the same `allRoutesOfferJSON` defined in the previous code example.
+
 let requestRoutesOfferJSON = Validation(
     check: lift(\OpenAPI.Request.content, into: allRoutesOfferJSON)
 )
@@ -279,14 +286,14 @@ try document.validate(using: Validator()
 
 Notice we are using the `Validation` initializer that does not take a description for the parent validations. These validations can potentially produce any of the errors of their children validations but because they don't themselves represent one distinct potential error there is no description associated with them.
 
-`lift()` can take a variadic list of any number of validations, so if we had an `allRoutesOfferXML` validation as well then we could write 
+`lift()` takes a variadic list of any number of validations, so if we had an `allRoutesOfferXML` validation as well then we could write 
 ```swift
 lift(\OpenAPI.Response.content, into: allRoutesOfferJSON, allRoutesOfferXML)
 ```
 
-`lift()` does have its limits, though. One you'll hit pretty quickly is that you can't use any optional chaining in your KeyPath if you are lifting into a validator that expects a non-optional value in its context. This is actually a good thing -- we must be explicit about whether or not to error out if the optional unwrapping results in `nil`.
+`lift()` does have its limitations, though. One you'll hit pretty quickly is that you can't use any optional chaining in your KeyPath if you are lifting into a validation that expects a non-optional **subject**. This is actually a good thing -- we must be explicit about whether or not to error out if the optional unwrapping results in `nil`.
 
-Let's pass a response's JSON content to a validation that operates on content:
+Let's try to lift a response's JSON content into a validation that operates on content:
 ```swift
 let contentValidation = Validation<OpenAPI.Content>(...)
 
@@ -302,8 +309,8 @@ let contentValidation = Validation<OpenAPI.Content>(...)
 
 let contentMapValidator = Validation(
     check: unwrap(\OpenAPI.Content.Map[.json], into: contentValidation)
-    // ^ produces validation errors produced by `contentValidation` if unwrapping non-nil value
-    // or produces a validation error about the subject being nil.
+    // ^ if unwrapping non-nil value, will produce validation errors produced by `contentValidation`.
+    //   if unwrapping nil, will produce a validation error about the subject being nil.
 )
 ```
 

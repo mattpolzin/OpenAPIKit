@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 8/25/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
@@ -26,8 +24,6 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
-
-        public typealias Map = OrderedDictionary<String, Either<JSONReference<Header>, Header>>
 
         public init(
             schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
@@ -99,6 +95,10 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
     }
+}
+
+extension OpenAPI.Header {
+    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Header>, OpenAPI.Header>>
 }
 
 // MARK: - Header Convenience

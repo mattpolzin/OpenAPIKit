@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
-import Foundation
-
 extension OpenAPI.Error.Decoding {
     public struct Operation: OpenAPIError {
         public let endpoint: OpenAPI.HttpMethod

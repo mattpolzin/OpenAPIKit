@@ -52,6 +52,24 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
     }
 }
 
+// This extension also covers `OpenAPI.Header.SchemaContext`
+// which is a typealias of `OpenAPI.Parameter.SchemaContext`.
+extension Either where A == DereferencedSchemaContext {
+    /// Retrieve the schema context if that is what this property contains.
+    public var schemaContextValue: A? { a }
+
+    /// Retrieve the schema value if this property contains a schema context.
+    ///
+    /// If the schema is a `JSONReference` this property will be `nil`
+    /// but the `schemaReference` property will be `non-nil`.
+    public var schemaValue: DereferencedJSONSchema? {
+        guard case .a(let schemaContext) = self else {
+            return nil
+        }
+        return schemaContext.schema
+    }
+}
+
 extension Either where B == OpenAPI.Parameter {
     /// Retrieve the parameter if that is what this property contains.
     public var parameterValue: B? { b }
@@ -72,7 +90,17 @@ extension Either where B == OpenAPI.Content.Map {
     public var contentValue: B? { b }
 }
 
+extension Either where B == DereferencedContent.Map {
+    /// Retrieve the content map if that is what this property contains.
+    public var contentValue: B? { b }
+}
+
 extension Either where B == JSONSchema {
+    /// Retrieve the schema if that is what this property contains.
+    public var schemaValue: B? { b }
+}
+
+extension Either where B == DereferencedJSONSchema {
     /// Retrieve the schema if that is what this property contains.
     public var schemaValue: B? { b }
 }
@@ -136,4 +164,9 @@ extension Either where B == OpenAPI.Request {
 extension Either where B == OpenAPI.Response {
     /// Construct a response value.
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
+}
+
+extension Either where B == OpenAPI.Header {
+    /// Construct a header value.
+    public static func header(_ header: OpenAPI.Header) -> Self { .b(header) }
 }

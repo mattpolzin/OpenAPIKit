@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-import Foundation
-
 // MARK: Types
 /// An OpenAPI type with an associated value representing its Swift type.
 ///

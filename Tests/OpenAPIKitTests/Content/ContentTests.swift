@@ -23,43 +23,57 @@ final class ContentTests: XCTestCase {
         XCTAssertNotNil(t3.schema.reference)
         XCTAssertNil(t3.schema.schemaValue)
 
-        let withExample = OpenAPI.Content(schema: .init(.string),
-                                          example: "hello",
-                                          encoding: [
-                                            "json": .init()
-            ])
+        let withExample = OpenAPI.Content(
+            schema: .init(.string),
+            example: "hello",
+            encoding: [
+                "json": .init()
+            ]
+        )
         XCTAssertNotNil(withExample.example)
         XCTAssertNil(withExample.examples)
 
-        let withExamples = OpenAPI.Content(schema: .init(.string),
-                                           examples: [
-                                            "hello": .example(.init(value: .init("world"))),
-                                            "bbbb": .example(.init(value: .b("pick me"))),
-                                            "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
-        ])
+        let withExamples = OpenAPI.Content(
+            schema: .init(.string),
+            examples: [
+                "hello": .example(.init(value: .init("world"))),
+                "bbbb": .example(.init(value: .b("pick me"))),
+                "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
+            ]
+        )
         XCTAssertNotNil(withExamples.examples)
-        XCTAssertEqual(withExamples.example?.value as? String, "pick me")
+        // we expect the example to be the first example where ordering
+        // is the order in which the examples are given:
+        XCTAssertEqual(withExamples.example?.value as? String, "world")
         XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
 
-        let t4 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!),
-                                examples: nil)
+        let t4 = OpenAPI.Content(
+            schemaReference: .external(URL(string: "hello.json#/world")!),
+            examples: nil
+        )
         XCTAssertNotNil(t4.schema.reference)
         XCTAssertNil(t4.schema.schemaValue)
 
-        let t5 = OpenAPI.Content(schema: .string,
-                                examples: nil)
+        let t5 = OpenAPI.Content(
+            schema: .string,
+            examples: nil
+        )
         XCTAssertNotNil(t5.schema.schemaValue)
         XCTAssertNil(t5.schema.reference)
 
-        let _ = OpenAPI.Content(schema: .init(.string),
-                                example: nil,
-                                encoding: [
-                                    "hello": .init(contentType: .json,
-                                                   headers: [
-                                                    "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
-                                        ],
-                                                   allowReserved: true)
-            ])
+        let _ = OpenAPI.Content(
+            schema: .init(.string),
+            example: nil,
+            encoding: [
+                "hello": .init(
+                    contentType: .json,
+                    headers: [
+                        "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
+                    ],
+                    allowReserved: true
+                )
+            ]
+        )
     }
 
     func test_contentMap() {

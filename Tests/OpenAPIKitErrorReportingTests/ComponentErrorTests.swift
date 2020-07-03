@@ -30,8 +30,6 @@ components:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            print(error)
-
             XCTAssertEqual(openAPIError.localizedDescription, #"Inconsistency encountered when parsing `h#llo` in Document.components.schemas: Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\.\-_]+$`. 'h#llo' does not..."#)
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "schemas", "h#llo"])
         }

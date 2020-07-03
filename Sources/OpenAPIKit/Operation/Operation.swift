@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
@@ -21,8 +19,30 @@ extension OpenAPI {
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
         public var responses: OpenAPI.Response.Map
 //      public let callbacks:
-        public var deprecated: Bool // default is false
-        public var security: [OpenAPI.SecurityRequirement]? // must be optional because an empty array here overrides a populated array in `Document`
+
+        /// Indicates that the operation is deprecated or not.
+        ///
+        /// By default, `deprecated` is `false`.
+        public var deprecated: Bool
+
+        /// If defined, overrides the security requirements in the
+        /// root `OpenAPI.Document` `security` array.
+        ///
+        /// Each secutity requirement in this array is an alternative, only
+        /// one of which must be met for the request to be authorized.
+        ///
+        /// By contrast, all entries in an individual `SecurityRequirement`
+        /// (which is itself a dictionary) must be met.
+        ///
+        /// `nil` indicates this operation uses the security requirements
+        /// defined at the root of the `OpenAPI.Document`.
+        public var security: [OpenAPI.SecurityRequirement]?
+
+        /// If defined, overrides the servers in the root of the
+        /// `OpenAPI.Document`.
+        ///
+        /// `nil` indicates the operation uses the servers defined at the
+        /// root of the `OpenAPI.Document`.
         public var servers: [OpenAPI.Server]?
 
         /// Dictionary of vendor extensions.

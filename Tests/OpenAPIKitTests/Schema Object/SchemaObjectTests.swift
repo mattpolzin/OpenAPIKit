@@ -72,6 +72,21 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(dateString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(dateTimeString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(passwordString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(boolean.jsonType, .boolean)
+        XCTAssertEqual(object.jsonType, .object)
+        XCTAssertEqual(array.jsonType, .array)
+        XCTAssertEqual(number.jsonType, .number)
+        XCTAssertEqual(floatNumber.jsonType, .number)
+        XCTAssertEqual(doubleNumber.jsonType, .number)
+        XCTAssertEqual(integer.jsonType, .integer)
+        XCTAssertEqual(integer32.jsonType, .integer)
+        XCTAssertEqual(integer64.jsonType, .integer)
+        XCTAssertEqual(string.jsonType, .string)
+        XCTAssertEqual(byteString.jsonType, .string)
+        XCTAssertEqual(binaryString.jsonType, .string)
+        XCTAssertEqual(dateString.jsonType, .string)
+        XCTAssertEqual(dateTimeString.jsonType, .string)
+        XCTAssertEqual(passwordString.jsonType, .string)
 
         // SwiftType
         XCTAssert(boolean.jsonTypeFormat?.swiftType == Bool.self)
@@ -4260,7 +4275,7 @@ extension SchemaObjectTests {
         ])
     }
 
-    func test_decodeNot() {
+    func test_decodeNot() throws {
         let notData = """
         {
             "not": {
@@ -4269,7 +4284,7 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        let not = try! testDecoder.decode(JSONSchema.self, from: notData)
+        let not = try testDecoder.decode(JSONSchema.self, from: notData)
 
         XCTAssertEqual(not, JSONSchema.not(.boolean(.init(format: .generic, required: false))))
     }
@@ -4282,10 +4297,10 @@ extension SchemaObjectTests {
         ])
     }
 
-    func test_decodeFileReference() {
+    func test_decodeFileReference() throws {
         let fileRefData = #"{ "$ref": "./other_file.json#/hello" }"#.data(using: .utf8)!
 
-        let fileRef = try! testDecoder.decode(JSONSchema.self, from: fileRefData)
+        let fileRef = try testDecoder.decode(JSONSchema.self, from: fileRefData)
 
         XCTAssertEqual(fileRef, JSONSchema.reference(.external(URL(string: "./other_file.json#/hello")!)))
     }
@@ -4298,8 +4313,15 @@ extension SchemaObjectTests {
         ])
     }
 
-    func test_decodeNodeReference() {
-        // TODO: implement feature, add test
+    func test_decodeNodeReference() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool" }"##.data(using: .utf8)!
+
+        let nodeRef = try testDecoder.decode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"))
+        )
     }
 }
 

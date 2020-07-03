@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 1/13/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
@@ -46,7 +44,7 @@ extension OpenAPI {
         ///     `allServers` property instead.
         public var servers: [Server]
 
-        /// All routes supported by this API. This property maps the path of each
+        /// All paths defined by this API. This property maps the path of each
         /// route (`OpenAPI.Path`) to the documentation for that route
         /// (`OpenAPI.PathItem`).
         public var paths: PathItem.Map
@@ -237,14 +235,58 @@ extension OpenAPI.Document {
 
         return collectedServers
     }
+
+    /// All Tags used anywhere in the document.
+    ///
+    /// The tags stored in the `OpenAPI.Document.tags`
+    /// property need not contain all tags used anywhere in
+    /// the document. This property is comprehensive.
+    public var allTags: Set<String> {
+        return Set(
+            (tags ?? []).map { $0.name }
+            + paths.values.flatMap { $0.endpoints }
+                .flatMap { $0.operation.tags ?? [] }
+        )
+    }
+}
+
+extension OpenAPI.Document {
+    /// Create a locally-dereferenced OpenAPI
+    /// Document.
+    ///
+    /// A dereferenced document contains no
+    /// `JSONReferences`. All components have been
+    /// inlined.
+    ///
+    /// Dereferencing the document is a necessary
+    /// step toward **resolving** the document, which
+    /// exposes canonical representations of routes and
+    /// endpoints.
+    ///
+    /// - Important: Local dereferencing will `throw` if any
+    ///     `JSONReferences` point to other files or to
+    ///     locations within the same file other than the
+    ///     Components Object. It will also fail if any components
+    ///     are missing from the Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func locallyDereferenced() throws -> DereferencedDocument {
+        return try DereferencedDocument(self)
+    }
 }
 
 extension OpenAPI {
+    /// OpenAPI Spec "Security Requirement Object"
+    ///
     /// If the security scheme is of type "oauth2" or "openIdConnect",
     /// then the value is a list of scope names required for the execution.
     /// For other security scheme types, the array MUST be empty.
     ///
-    /// OpenAPI Spec "Security Requirement Object"
+    /// Multiple entries in this dictionary indicate all schemes named are
+    /// required on the same request.
     ///
     /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]

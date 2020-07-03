@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 2/26/20.
 //
 
-import Foundation
-
 internal extension Swift.DecodingError {
     var subjectName: String {
         let name: String? = {

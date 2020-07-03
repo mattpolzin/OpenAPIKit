@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
-import Foundation
-
 extension OpenAPI.Error {
     // Just creating a namespace
     public enum Decoding {}

@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///

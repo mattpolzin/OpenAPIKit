@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///

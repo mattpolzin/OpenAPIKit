@@ -5,24 +5,82 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-import Foundation
-
 // MARK: - General Context
 
 /// A schema context stores information about a schema.
 /// All schemas can have the contextual information in
 /// this protocol.
 public protocol JSONSchemaContext {
+    /// `true` if values for this schema are required, `false` if they
+    /// are optional (and can therefore be omitted from request/response data).
+    ///
+    /// - Important: This is distinct from the concept of nullability.
+    ///
+    ///     **Nullability:** Whether or not a value can be  `null`.
+    ///
+    ///     **Optionality:** Whether or not a key/value can be entirely
+    ///         omitted from request/response data.
     var required: Bool { get }
+
+    /// `true` if values for this schema can be `null`.
+    ///
+    /// - Important: This is distinct from the concept of optionality.
+    ///
+    ///     **Nullability:** Whether or not a value can be  `null`.
+    ///
+    ///     **Optionality:** Whether or not a key/value can be entirely
+    ///         omitted from request/response data.
     var nullable: Bool { get }
+
+    /// Get the title, if specified. If unspecified, returns `nil`.
     var title: String? { get }
+
+    /// Get the description, if specified. If unspecified, returns `nil`.
     var description: String? { get }
+
+    /// An object used to discriminate upon the options for a child object's
+    /// schema in a polymorphic context.
+    ///
+    /// Discriminators are only applicable when used in conjunction with
+    /// `allOf`, `anyOf`, or `oneOf`.
+    ///
+    /// Still, they need to be supported on the
+    /// `JSONSchema.Context` (which is not used with those three special
+    /// schema types) because the specification states that a discriminator can
+    /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
+    /// or `oneOf`) as a way to reduce redundancy.
+    ///
+    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
+
+    /// Get the external docs, if specified. If unspecified, returns `nil`.
     var externalDocs: OpenAPI.ExternalDocumentation? { get }
+
+    /// The OpenAPI spec calls this "enum"
+    ///
+    /// If not specified, it is assumed that any
+    /// value of the given format is allowed.
+    /// NOTE: I would like the array of allowed
+    /// values to have the type `Format.SwiftType`
+    /// but this is not tractable because I also
+    /// want to be able to automatically turn any
+    /// Swift type that will get _encoded as
+    /// something compatible with_ `Format.SwiftType`
+    /// into an allowed value.
     var allowedValues: [AnyCodable]? { get }
+
+    /// Get an example, if specified. If unspecified, returns `nil`.
     var example: AnyCodable? { get }
+
+    /// `true` if this schema can only be read from and is therefore
+    /// unsupported for request data.
     var readOnly: Bool { get }
+
+    /// `true` if this schema can only be written to and is therefore
+    /// unavailable in response data.
     var writeOnly: Bool { get }
+
+    /// `true` if this schema is deprecated, `false` otherwise.
     var deprecated: Bool { get }
 }
 
@@ -40,36 +98,12 @@ extension JSONSchema {
         public let description: String?
         public let externalDocs: OpenAPI.ExternalDocumentation?
 
-        /// An object used to discriminate upon the options for a child object's
-        /// schema in a polymorphic context.
-        ///
-        /// Discriminators are only applicable when used in conjunction with
-        /// `allOf`, `anyOf`, or `oneOf`.
-        ///
-        /// Still, they need to be supported on the
-        /// `JSONSchema.Context` (which is not used with those three special
-        /// schema types) because the specification states that a discriminator can
-        /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
-        /// or `oneOf`) as a way to reduce redundancy.
-        ///
-        /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
         public let discriminator: OpenAPI.Discriminator?
 
         // NOTE: "const" is supported by the newest JSON Schema spec but not
         // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
 //        public let constantValue: Format.SwiftType?
 
-        /// The OpenAPI spec calls this "enum"
-        ///
-        /// If not specified, it is assumed that any
-        /// value of the given format is allowed.
-        /// NOTE: I would like the array of allowed
-        /// values to have the type `Format.SwiftType`
-        /// but this is not tractable because I also
-        /// want to be able to automatically turn any
-        /// Swift type that will get _encoded as
-        /// something compatible with_ `Format.SwiftType`
-        /// into an allowed value.
         public let allowedValues: [AnyCodable]?
 
         public let example: AnyCodable?

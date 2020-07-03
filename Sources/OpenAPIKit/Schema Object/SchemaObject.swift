@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-import Foundation
-
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
@@ -28,6 +26,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     /// description.
     case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
 
+    /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
         switch self {
         case .boolean(let context):
@@ -47,15 +46,17 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// `true` if values for this schema are required, `false` if they
-    /// are optional (and can therefore be omitted from request/response data).
+    /// The fundamental type of the schema.
     ///
-    /// - Important: This is distinct from the concept of nullability.
-    ///
-    ///     **Nullability:** Whether or not a value can be  `null`.
-    ///
-    ///     **Optionality:** Whether or not a key/value can be entirely
-    ///         omitted from request/response data.
+    /// - Important: "object," "array," "allOf,", "oneOf,"
+    ///     "anyOf," "not," "reference," and "undefined" are
+    ///     not considered types and such schemas will
+    ///     return `nil` for this property.
+    public var jsonType: JSONType? {
+        return jsonTypeFormat?.jsonType
+    }
+
+    // See `JSONSchemaContext`
     public var required: Bool {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -72,7 +73,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Get the description, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var description: String? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -89,7 +90,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// Get the discriminator, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var discriminator: OpenAPI.Discriminator? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
@@ -108,51 +109,42 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
-    /// `true` if values for this schema can be `null`.
-    ///
-    /// - Important: This is distinct from the concept of optionality.
-    ///
-    ///     **Nullability:** Whether or not a value can be  `null`.
-    ///
-    ///     **Optionality:** Whether or not a key/value can be entirely
-    ///         omitted from request/response data.
+    // See `JSONSchemaContext`
     public var nullable: Bool {
         return generalContext?.nullable ?? false
     }
 
-    /// `true` if this schema can only be read from and is therefore
-    /// unsupported for request data.
+    // See `JSONSchemaContext`
     public var readOnly: Bool {
         return generalContext?.readOnly ?? false
     }
 
-    /// `true` if this schema can only be written to and is therefore
-    /// unavailable in response data.
+    // See `JSONSchemaContext`
     public var writeOnly: Bool {
         return generalContext?.writeOnly ?? false
     }
 
-    /// `true` if this schema is deprecated, `false` otherwise.
+    // See `JSONSchemaContext`
     public var deprecated: Bool {
         return generalContext?.deprecated ?? false
     }
 
-    /// Get the title, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var title: String? {
         return generalContext?.title
     }
 
-    /// Get the external docs, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
         return generalContext?.externalDocs
     }
 
-    /// Get the allowed values, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var allowedValues: [AnyCodable]? {
         return generalContext?.allowedValues
     }
 
-    /// Get an example, if specified. If unspecified, returns `nil`.
+    // See `JSONSchemaContext`
     public var example: AnyCodable? {
         return generalContext?.example
     }
@@ -306,7 +298,6 @@ extension JSONSchema {
     /// Return a version of this `JSONSchema` that only allows the given
     /// values.
     public func with(allowedValues: [AnyCodable]) -> JSONSchema {
-
         switch self {
         case .boolean(let context):
             return .boolean(context.with(allowedValues: allowedValues))
@@ -344,6 +335,32 @@ extension JSONSchema {
         case .all, .one, .any, .not, .reference, .undefined:
             throw Self.Error.exampleNotSupported
         }
+    }
+
+    /// Returns a dereferenced schema object if this schema object
+    /// already does not contain any references.
+    ///
+    /// To create a dereferenced schema object from a schema object
+    /// that does have references, use `dereferencedSchemaObject(resolvingIn:)`.
+    public func dereferencedSchemaObject() -> DereferencedJSONSchema? {
+        return DereferencedJSONSchema(self)
+    }
+
+    /// Returns a dereferenced schema object if all references in
+    /// this schema object can be found in the Components Object.
+    ///
+    /// - Important: Local dereferencing will `throw` if any
+    ///     `JSONReferences` point to other files or to
+    ///     locations within the same file other than the
+    ///     Components Object. It will also fail if any components
+    ///     are missing from the Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferencedSchemaObject(resolvingIn components: OpenAPI.Components) throws -> DereferencedJSONSchema {
+        return try DereferencedJSONSchema(self, resolvingIn: components)
     }
 }
 
@@ -386,6 +403,7 @@ extension JSONSchema {
 
 extension JSONSchema {
     // array allowedValues
+    /// Construct a boolean schema.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -416,6 +434,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a boolean schema passing a variadic list of allowed values.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -444,11 +463,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable boolean schema.
     public static var boolean: JSONSchema {
         return .boolean()
     }
 
     // array allowedValues
+    /// Construct a string schema.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
@@ -487,6 +508,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a string schema passing a variadic list of allowed values.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
@@ -521,11 +543,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable string schema.
     public static var string: JSONSchema {
         return .string()
     }
 
     // array allowedValues
+    /// Construct a number schema.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
@@ -564,6 +588,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a number schema passing a variadic list of allowed values.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
@@ -598,11 +623,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable number schema.
     public static var number: JSONSchema {
         return .number()
     }
 
     // array allowedValues
+    /// Construct an integer schema.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
@@ -641,6 +668,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct an integer schema passing a variadic list of allowed values.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
@@ -675,11 +703,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable integer schema.
     public static var integer: JSONSchema {
         return .integer()
     }
 
     // array allowedValues
+    /// Construct an objecy schema.
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
@@ -719,11 +749,13 @@ extension JSONSchema {
         return .object(generalContext, objectContext)
     }
 
+    /// A required, non-nullable object schema.
     public static var object: JSONSchema {
         return .object()
     }
 
     // array allowedValues
+    /// Construct an array schema.
     public static func array(
         format: JSONTypeFormat.ArrayFormat = .unspecified,
         required: Bool = true,
@@ -764,12 +796,21 @@ extension JSONSchema {
         return .array(generalContext, arrayContext)
     }
 
+    /// A required, non-nullable array schema.
+    public static var array: JSONSchema {
+        return .array()
+    }
+
+    /// Construct a schema stating all of the given fragment
+    /// requirements are met.
     public static func all(
         of schemas: [JSONSchemaFragment]
     ) -> JSONSchema {
         return .all(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating all of the given fragment
+    /// requirements are met given a discriminator.
     public static func all(
         of schemas: JSONSchemaFragment...,
         discriminator: OpenAPI.Discriminator? = nil
@@ -777,12 +818,16 @@ extension JSONSchema {
         return .all(of: schemas, discriminator: discriminator)
     }
 
+    /// Construct a schema stating one of the given schema's
+    /// requirements are met.
     public static func one(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
         return .one(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating one of the given schema's
+    /// requirements are met given a discriminator.
     public static func one(
         of schemas: JSONSchema...,
         discriminator: OpenAPI.Discriminator? = nil
@@ -790,12 +835,16 @@ extension JSONSchema {
         return .one(of: schemas, discriminator: discriminator)
     }
 
+    /// Construct a schema stating any of the given schema's
+    /// requirements are met.
     public static func any(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
         return .any(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating any of the given schema's
+    /// requirements are met given a discriminator.
     public static func any(
         of schemas: JSONSchema...,
         discriminator: OpenAPI.Discriminator? = nil

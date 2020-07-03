@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 3/30/20.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// An `OpenAPI.Error` can be constructed from any error thrown while decoding
     /// an OpenAPI document.  This wrapper provides a superior human-readable error

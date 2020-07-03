@@ -178,6 +178,17 @@ final class ComponentsTests: XCTestCase {
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
         }
     }
+
+    func test_goodKeysNoProblems() {
+        XCTAssertNil(OpenAPI.ComponentKey.problem(with: "hello"))
+        XCTAssertNil(OpenAPI.ComponentKey.problem(with: "_hell.o-"))
+        XCTAssertNil(OpenAPI.ComponentKey.problem(with: "HELLO"))
+    }
+
+    func test_badKeysHaveProblems() {
+        XCTAssertEqual(OpenAPI.ComponentKey.problem(with: "#hello"), "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '#hello' does not..")
+        XCTAssertEqual(OpenAPI.ComponentKey.problem(with: ""), "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '' does not..")
+    }
 }
 
 // MARK: - Codable Tests

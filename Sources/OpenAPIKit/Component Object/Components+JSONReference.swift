@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 3/30/20.
 //
 
-import Foundation
-
 extension OpenAPI.Components {
     /// Check if the `Components` contains the given reference or not.
     ///
@@ -66,6 +64,11 @@ extension OpenAPI.Components {
     ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether the reference points to another file or just points to a component in
+    ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
         switch maybeReference {
         case .a(let reference):
@@ -97,6 +100,11 @@ extension OpenAPI.Components {
     ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether the reference points to another file or just points to a component in
+    ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
         guard case .internal = reference else {
             throw ReferenceError.cannotLookupRemoteReference
@@ -109,7 +117,7 @@ extension OpenAPI.Components {
 
     /// Create a `JSONReference`.
     ///
-    /// - throws: If the given name does not refer to an existing component of the given type.
+    /// - Throws: If the given name does not refer to an existing component of the given type.
     public func reference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType: ReferenceType.Type) throws -> JSONReference<ReferenceType> {
         let internalReference = JSONReference<ReferenceType>.InternalReference.component(name: name)
         let reference = JSONReference<ReferenceType>.internal(internalReference)

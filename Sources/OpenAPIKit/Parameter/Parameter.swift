@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
@@ -104,6 +102,18 @@ extension OpenAPI {
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
         }
+    }
+}
+
+extension OpenAPI.Parameter {
+    /// A parameter identity is just a hashable struct
+    /// containing exactly the things that differentiate
+    /// one parameter from another, per the specification.
+    ///
+    /// See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+    internal struct ParameterIdentity: Hashable {
+        let name: String
+        let location: Context.Location
     }
 }
 

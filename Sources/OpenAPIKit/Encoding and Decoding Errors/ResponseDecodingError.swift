@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 2/28/20.
 //
 
-import Foundation
-
 extension OpenAPI.Error.Decoding {
     public struct Response: OpenAPIError {
         public let statusCode: OpenAPI.Response.StatusCode

@@ -5,8 +5,6 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
-import Foundation
-
 extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 
@@ -97,11 +95,25 @@ extension OpenAPI.Content {
 }
 
 extension OpenAPI.Content {
+    /// Pulls the first (inlined, not referenced) example found
+    /// in the example dictionary given.
+    ///
+    /// Operates on a dictionary with values that may be either
+    /// an Example or a reference to and example.
     internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
-            .sorted { $0.key < $1.key }
+            .lazy
             .compactMap { $0.value.exampleValue?.value.codableValue }
             .first
+    }
+
+    /// Pulls the first example found in the example dictionary
+    /// given.
+    internal static func firstExample(from exampleDict: OrderedDictionary<String, OpenAPI.Example>) -> AnyCodable? {
+        return exampleDict
+        .lazy
+        .compactMap { $0.value.value.codableValue }
+        .first
     }
 }
 
