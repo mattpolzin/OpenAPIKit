@@ -18,7 +18,6 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 		- [Endpoints](#endpoints)
 		- [Request/Response Bodies](#requestresponse-bodies)
 		- [Schemas](#schemas)
-			- [Generating Schemas from Swift Types](#generating-schemas-from-swift-types)
 		- [JSON References](#json-references)
 		- [Security Requirements](#security-requirements)
 		- [Specification Extensions](#specification-extensions)
@@ -95,15 +94,17 @@ Request and response bodies can be defined in great detail using OpenAPI's deriv
 #### Schemas
 **Fundamental types** are specified as `JSONSchema.integer`, `JSONSchema.string`, `JSONSchema.boolean`, etc.
 
-**Properties** are given as arguments to static constructors. By default, types are **non-nullable**, **required**, and **generic**.
+**Schema properties** are given as arguments to static constructors. By default, schemas are **non-nullable**, **required**, and **generic**.
 
-A type can be made **optional** (i.e. it can be omitted) with `JSONSchema.integer(required: false)` or `JSONSchema.integer.optionalSchemaObject()`. A type can be made **nullable** with `JSONSchema.number(nullable: true)` or `JSONSchema.number.nullableSchemaObject()`.
+A schema can be made **optional** (i.e. it can be omitted) with `JSONSchema.integer(required: false)` or an existing schema can be asked for an `optionalSchemaObject()`. 
 
-A type's **format** can be further specified, for example `JSONSchema.number(format: .double)` or `JSONSchema.string(format: .dateTime)`.
+A schema can be made **nullable** with `JSONSchema.number(nullable: true)` or an existing schema can be asked for a `nullableSchemaObject()`.
+
+Some types of schemas can be further specialized with a **format**. For example, `JSONSchema.number(format: .double)` or `JSONSchema.string(format: .dateTime)`.
 
 You can specify a schema's **allowed values** (e.g. for an enumerated type) with `JSONSchema.string(allowedValues: "hello", "world")`.
 
-Each type has its own additional set of properties that can be specified. For example, integers can have a **minimum value**: `JSONSchema.integer(minimum: (0, exclusive: true))` (where exclusive means the number must be greater than 0, not greater-than-or-equal-to 0).
+Each type of schema has its own additional set of properties that can be specified. For example, integers can have a **minimum value**: `JSONSchema.integer(minimum: (0, exclusive: true))`. `exclusive: true` in this context means the number must be strictly greater than 0 whereas `exclusive: false` means the number must be greater-than or equal-to 0.
 
 Compound objects can be built with `JSONSchema.array`, `JSONSchema.object`, `JSONSchema.all(of:)`, etc.
 
@@ -120,37 +121,7 @@ JSONSchema.object(
 )
 ```
 
-##### Generating Schemas from Swift Types
-
-Some schemas can be easily generated from Swift types. Many of the fundamental Swift types support schema representations out-of-box.
-
-For example, the following are true
-```swift
-String.openAPISchema == JSONSchema.string
-
-Bool.openAPISchema == JSONSchema.boolean
-
-Double.openAPISchema == JSONSchema.number(format: .double)
-
-Float.openAPISchema == JSONSchema.number(format: .float)
-...
-```
-
-`Array` and `Optional` are supported out-of-box. For example, the following are true
-```swift
-[String].openAPISchema == .array(items: .string)
-
-[Int].openAPISchema == .array(items: .integer)
-
-Int32?.openAPISchema == .integer(format: .int32, required: false)
-
-[String?].openAPISchema == .array(items: .string(required: false))
-...
-```
-
-Additional schema generation support can be found in the [`mattpolzin/OpenAPIReflection`](https://github.com/mattpolzin/OpenAPIReflection) library.
-
-You can conform your own types to `OpenAPISchemaType` to make it convenient to generate `JSONSchemas` from them.
+Take a look at the [Schema Object](./documentation/schema_object.md) documentation for more information.
 
 #### JSON References
 The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. You cannot dereference documents (yet), but you can encode and decode references.

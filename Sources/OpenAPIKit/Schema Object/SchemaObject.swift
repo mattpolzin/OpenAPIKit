@@ -298,7 +298,6 @@ extension JSONSchema {
     /// Return a version of this `JSONSchema` that only allows the given
     /// values.
     public func with(allowedValues: [AnyCodable]) -> JSONSchema {
-
         switch self {
         case .boolean(let context):
             return .boolean(context.with(allowedValues: allowedValues))
@@ -404,6 +403,7 @@ extension JSONSchema {
 
 extension JSONSchema {
     // array allowedValues
+    /// Construct a boolean schema.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -434,6 +434,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a boolean schema passing a variadic list of allowed values.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
@@ -462,11 +463,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable boolean schema.
     public static var boolean: JSONSchema {
         return .boolean()
     }
 
     // array allowedValues
+    /// Construct a string schema.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
@@ -505,6 +508,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a string schema passing a variadic list of allowed values.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
@@ -539,11 +543,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable string schema.
     public static var string: JSONSchema {
         return .string()
     }
 
     // array allowedValues
+    /// Construct a number schema.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
@@ -582,6 +588,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct a number schema passing a variadic list of allowed values.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
@@ -616,11 +623,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable number schema.
     public static var number: JSONSchema {
         return .number()
     }
 
     // array allowedValues
+    /// Construct an integer schema.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
@@ -659,6 +668,7 @@ extension JSONSchema {
     }
 
     // variadic allowedValues
+    /// Construct an integer schema passing a variadic list of allowed values.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
@@ -693,11 +703,13 @@ extension JSONSchema {
         )
     }
 
+    /// A required, non-nullable integer schema.
     public static var integer: JSONSchema {
         return .integer()
     }
 
     // array allowedValues
+    /// Construct an objecy schema.
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
@@ -737,11 +749,13 @@ extension JSONSchema {
         return .object(generalContext, objectContext)
     }
 
+    /// A required, non-nullable object schema.
     public static var object: JSONSchema {
         return .object()
     }
 
     // array allowedValues
+    /// Construct an array schema.
     public static func array(
         format: JSONTypeFormat.ArrayFormat = .unspecified,
         required: Bool = true,
@@ -782,16 +796,21 @@ extension JSONSchema {
         return .array(generalContext, arrayContext)
     }
 
+    /// A required, non-nullable array schema.
     public static var array: JSONSchema {
         return .array()
     }
 
+    /// Construct a schema stating all of the given fragment
+    /// requirements are met.
     public static func all(
         of schemas: [JSONSchemaFragment]
     ) -> JSONSchema {
         return .all(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating all of the given fragment
+    /// requirements are met given a discriminator.
     public static func all(
         of schemas: JSONSchemaFragment...,
         discriminator: OpenAPI.Discriminator? = nil
@@ -799,12 +818,16 @@ extension JSONSchema {
         return .all(of: schemas, discriminator: discriminator)
     }
 
+    /// Construct a schema stating one of the given schema's
+    /// requirements are met.
     public static func one(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
         return .one(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating one of the given schema's
+    /// requirements are met given a discriminator.
     public static func one(
         of schemas: JSONSchema...,
         discriminator: OpenAPI.Discriminator? = nil
@@ -812,12 +835,16 @@ extension JSONSchema {
         return .one(of: schemas, discriminator: discriminator)
     }
 
+    /// Construct a schema stating any of the given schema's
+    /// requirements are met.
     public static func any(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
         return .any(of: schemas, discriminator: nil)
     }
 
+    /// Construct a schema stating any of the given schema's
+    /// requirements are met given a discriminator.
     public static func any(
         of schemas: JSONSchema...,
         discriminator: OpenAPI.Discriminator? = nil
