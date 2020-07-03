@@ -68,6 +68,9 @@ extension OpenAPI {
         }
 
         public init?(rawValue: String) {
+            guard !rawValue.isEmpty else {
+                return nil
+            }
             var allowedCharacters = CharacterSet.alphanumerics
             allowedCharacters.insert(charactersIn: "-_.")
             guard CharacterSet(charactersIn: rawValue).isSubset(of: allowedCharacters) else {
