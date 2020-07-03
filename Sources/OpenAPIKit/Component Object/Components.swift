@@ -60,6 +60,10 @@ extension OpenAPI {
 }
 
 extension OpenAPI {
+    /// A key for one of the component dictionaries.
+    ///
+    /// These keys must match the regex
+    /// `^[a-zA-Z0-9\.\-_]+$`.
     public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable, StringConvertibleHintProvider {
         public let rawValue: String
 
