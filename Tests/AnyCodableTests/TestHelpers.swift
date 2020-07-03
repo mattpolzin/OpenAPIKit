@@ -26,19 +26,6 @@ func testStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
     return String(data: try testEncoder.encode(entity), encoding: .utf8)
 }
 
-let testDecoder = { () -> JSONDecoder in
-    let decoder = JSONDecoder()
-    if #available(macOS 10.12, *) {
-        decoder.dateDecodingStrategy = .iso8601
-        decoder.keyDecodingStrategy = .useDefaultKeys
-    }
-    #if os(Linux)
-    decoder.dateDecodingStrategy = .iso8601
-    decoder.keyDecodingStrategy = .useDefaultKeys
-    #endif
-    return decoder
-}()
-
 func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString = #file, line: UInt = #line) {
 
     // when testing on Linux, pretty printing has slightly different
