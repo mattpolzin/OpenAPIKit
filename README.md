@@ -124,7 +124,7 @@ JSONSchema.object(
 Take a look at the [Schema Object](./documentation/schema_object.md) documentation for more information.
 
 #### JSON References
-The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. You cannot dereference documents (yet), but you can encode and decode references.
+The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
 
 You can create an external reference with `JSONReference.external(URL)`. Internal references usually refer to an object in the Components Object dictionary and are constructed with `JSONReference.component(named:)`. If you need to refer to something in the current file but not in the Components Object, you can use `JSONReference.internal(path:)`.
 
@@ -232,7 +232,7 @@ If you have a library you would like to propose for this section, please create 
 [**OpenAPIDiff**](https://github.com/mattpolzin/OpenAPIDiff) is a library and a CLI that implements semantic diffing; that is, rather than just comparing two OpenAPI documents line-by-line for textual differences, it parses the documents and describes the differences in the two OpenAPI ASTs.
 
 ## Notes
-This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in.
+This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in. You must read OpenAPI documentation into `Data` or `String` (depending on the decoder you want to use) and all references must be internal to the same file to be resolved.
 
 This library *is* opinionated about a few defaults when you use the Swift types, however encoding and decoding stays true to the spec. Some key things to note:
 
