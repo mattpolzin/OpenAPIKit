@@ -263,7 +263,7 @@ extension OpenAPI.Document.Info: Encodable {
 
         try container.encode(title, forKey: .title)
         try container.encodeIfPresent(description, forKey: .description)
-        try container.encodeIfPresent(termsOfService, forKey: .termsOfService)
+        try container.encodeIfPresent(termsOfService?.absoluteString, forKey: .termsOfService)
         try container.encodeIfPresent(contact, forKey: .contact)
         try container.encodeIfPresent(license, forKey: .license)
         try container.encode(version, forKey: .version)
@@ -278,10 +278,22 @@ extension OpenAPI.Document.Info: Decodable {
 
         title = try container.decode(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-        termsOfService = try container.decodeIfPresent(URL.self, forKey: .termsOfService)
         contact = try container.decodeIfPresent(Contact.self, forKey: .contact)
         license = try container.decodeIfPresent(License.self, forKey: .license)
         version = try container.decode(String.self, forKey: .version)
+
+        if let termsOfServiceString = try container.decodeIfPresent(String.self, forKey: .termsOfService) {
+            guard let url = URL(string: termsOfServiceString) else {
+                throw InconsistencyError(
+                    subjectName: "termsOfService",
+                    details: "If specified, the Terms of Service must be a valid URL",
+                    codingPath: container.codingPath
+                )
+            }
+            termsOfService = url
+        } else {
+            termsOfService = nil
+        }
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
