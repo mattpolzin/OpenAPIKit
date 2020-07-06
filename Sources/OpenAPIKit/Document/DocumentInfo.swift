@@ -125,7 +125,7 @@ extension OpenAPI.Document.Info.License: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(name, forKey: .name)
-        try container.encodeIfPresent(url, forKey: .url)
+        try container.encodeIfPresent(url?.absoluteString, forKey: .url)
 
         try encodeExtensions(to: &container)
     }
@@ -137,7 +137,7 @@ extension OpenAPI.Document.Info.License: Decodable {
 
         name = try container.decode(String.self, forKey: .name)
 
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
+        url = try container.decodeURLAsStringIfPresent(forKey: .url)
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
@@ -190,7 +190,7 @@ extension OpenAPI.Document.Info.Contact: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(name, forKey: .name)
-        try container.encodeIfPresent(url, forKey: .url)
+        try container.encodeIfPresent(url?.absoluteString, forKey: .url)
         try container.encodeIfPresent(email, forKey: .email)
 
         try encodeExtensions(to: &container)
@@ -202,7 +202,7 @@ extension OpenAPI.Document.Info.Contact: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         name = try container.decodeIfPresent(String.self, forKey: .name)
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
+        url = try container.decodeURLAsStringIfPresent(forKey: .url)
         email = try container.decodeIfPresent(String.self, forKey: .email)
 
         vendorExtensions = try Self.extensions(from: decoder)
@@ -278,22 +278,10 @@ extension OpenAPI.Document.Info: Decodable {
 
         title = try container.decode(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
+        termsOfService = try container.decodeURLAsStringIfPresent(forKey: .termsOfService)
         contact = try container.decodeIfPresent(Contact.self, forKey: .contact)
         license = try container.decodeIfPresent(License.self, forKey: .license)
         version = try container.decode(String.self, forKey: .version)
-
-        if let termsOfServiceString = try container.decodeIfPresent(String.self, forKey: .termsOfService) {
-            guard let url = URL(string: termsOfServiceString) else {
-                throw InconsistencyError(
-                    subjectName: "termsOfService",
-                    details: "If specified, the Terms of Service must be a valid URL",
-                    codingPath: container.codingPath
-                )
-            }
-            termsOfService = url
-        } else {
-            termsOfService = nil
-        }
 
         vendorExtensions = try Self.extensions(from: decoder)
     }

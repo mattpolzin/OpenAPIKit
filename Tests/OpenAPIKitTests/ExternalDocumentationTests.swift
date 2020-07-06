@@ -106,15 +106,27 @@ extension ExternalDocumentationTests {
         )
     }
 
-    func test_onlyUrl_decode() {
+    func test_onlyUrl_decode() throws {
         let externalDocsData =
 """
 {
   "url" : "http:\\/\\/google.com"
 }
 """.data(using: .utf8)!
-        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
+        let externalDocs = try testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
         XCTAssertEqual(externalDocs, OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!))
+    }
+
+    func test_onlyUrl_decode_fails() {
+        let externalDocsData =
+"""
+{
+  "url" : "#$^&*^#$^"
+}
+""".data(using: .utf8)!
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)) { error in
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `url`: If specified, must be a valid URL.")
+        }
     }
 }

@@ -70,23 +70,11 @@ extension OpenAPI.Server {
 }
 
 // MARK: - Codable
-extension OpenAPI.Server: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        url = try container.decode(URL.self, forKey: .url)
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
-
-        vendorExtensions = try Self.extensions(from: decoder)
-    }
-}
-
 extension OpenAPI.Server: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(url, forKey: .url)
+        try container.encode(url.absoluteString, forKey: .url)
 
         try container.encodeIfPresent(description, forKey: .description)
 
@@ -95,6 +83,18 @@ extension OpenAPI.Server: Encodable {
         }
 
         try encodeExtensions(to: &container)
+    }
+}
+
+extension OpenAPI.Server: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        url = try container.decodeURLAsString(forKey: .url)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
+
+        vendorExtensions = try Self.extensions(from: decoder)
     }
 }
 

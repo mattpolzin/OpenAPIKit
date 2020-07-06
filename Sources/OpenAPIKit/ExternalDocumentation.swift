@@ -41,7 +41,7 @@ extension OpenAPI.ExternalDocumentation: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(description, forKey: .description)
-        try container.encode(url, forKey: .url)
+        try container.encode(url.absoluteString, forKey: .url)
 
         try encodeExtensions(to: &container)
     }
@@ -52,7 +52,7 @@ extension OpenAPI.ExternalDocumentation: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
-        url = try container.decode(URL.self, forKey: .url)
+        url = try container.decodeURLAsString(forKey: .url)
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
