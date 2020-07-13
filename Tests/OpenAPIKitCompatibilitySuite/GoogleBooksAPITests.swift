@@ -55,6 +55,9 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         // contact name is Google
         XCTAssertEqual(apiDoc.info.contact?.name, "Google")
 
+        // contact URL was parsed as google.com
+        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://google.com")!)
+
         // no contact email is provided
         XCTAssert(apiDoc.info.contact?.email?.isEmpty ?? true)
 

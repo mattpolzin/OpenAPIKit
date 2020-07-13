@@ -50,7 +50,7 @@ extension OpenAPI.XML: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(name, forKey: .name)
-        try container.encodeIfPresent(namespace, forKey: .namespace)
+        try container.encodeIfPresent(namespace?.absoluteString, forKey: .namespace)
         try container.encodeIfPresent(prefix, forKey: .prefix)
         if attribute {
             try container.encode(true, forKey: .attribute)
@@ -66,7 +66,7 @@ extension OpenAPI.XML: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         name = try container.decodeIfPresent(String.self, forKey: .name)
-        namespace = try container.decodeIfPresent(URL.self, forKey: .namespace)
+        namespace = try container.decodeURLAsStringIfPresent(forKey: .namespace)
         prefix = try container.decodeIfPresent(String.self, forKey: .prefix)
         attribute = try container.decodeIfPresent(Bool.self, forKey: .attribute) ?? false
         wrapped = try container.decodeIfPresent(Bool.self, forKey: .wrapped) ?? false

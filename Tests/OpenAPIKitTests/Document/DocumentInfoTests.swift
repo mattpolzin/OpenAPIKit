@@ -387,6 +387,20 @@ extension DocumentInfoTests {
         )
     }
 
+    func test_info_withTOS_decode_fails() {
+        let infoData =
+"""
+{
+  "termsOfService" : "#$%^&*",
+  "title" : "title",
+  "version" : "1.0"
+}
+""".data(using: .utf8)!
+        XCTAssertThrowsError( try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)) { error in
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `termsOfService`: If specified, must be a valid URL.")
+        }
+    }
+
     func test_info_withContact_encode() throws {
         let info = OpenAPI.Document.Info(
             title: "title",

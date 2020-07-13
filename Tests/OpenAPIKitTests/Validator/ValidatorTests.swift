@@ -351,39 +351,6 @@ final class ValidatorTests: XCTestCase {
         }
     }
 
-    func test_failsParentURL() {
-        let server = OpenAPI.Server(
-            url: URL(string: "https://google.com")!,
-            description: "hello world",
-            variables: [:],
-            vendorExtensions: [
-                "x-string": "hello",
-                "x-int": 2244,
-                "x-double": 10.5,
-                "x-dict": [ "string": "world"],
-                "x-array": AnyCodable(["hello", nil, "world"])
-            ]
-        )
-
-        let document = OpenAPI.Document(
-            info: .init(title: "hello", version: "1.0"),
-            servers: [server],
-            paths: [:],
-            components: .noComponents
-        )
-
-        let validator = Validator()
-            .validating { (context: ValidationContext<URL>) in
-                [ ValidationError(reason: "just because", at: context.codingPath) ]
-        }
-
-        XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
-            XCTAssertEqual(error?.values.count, 1)
-            XCTAssertEqual(error?.values.first?.reason, "just because")
-        }
-    }
-
     func test_failsNestedString() {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,

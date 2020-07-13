@@ -103,7 +103,7 @@ extension OpenAPI.SecurityScheme: Encodable {
             try container.encodeIfPresent(bearerFormat, forKey: .bearerFormat)
         case .openIdConnect(openIdConnectUrl: let url):
             try container.encode(SecurityType.Name.openIdConnect, forKey: .type)
-            try container.encode(url, forKey: .openIdConnectUrl)
+            try container.encode(url.absoluteString, forKey: .openIdConnectUrl)
         case .oauth2(flows: let flows):
             try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
@@ -140,7 +140,7 @@ extension OpenAPI.SecurityScheme: Decodable {
             )
         case .openIdConnect:
             type = .openIdConnect(
-                openIdConnectUrl: try container.decode(URL.self, forKey: .openIdConnectUrl)
+                openIdConnectUrl: try container.decodeURLAsString(forKey: .openIdConnectUrl)
             )
         }
 

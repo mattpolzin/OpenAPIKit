@@ -171,7 +171,7 @@ extension OpenAPI.OAuthFlows.CommonFields: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encodeIfPresent(refreshUrl, forKey: .refreshUrl)
+        try container.encodeIfPresent(refreshUrl?.absoluteString, forKey: .refreshUrl)
         try container.encode(scopes, forKey: .scopes)
     }
 }
@@ -180,7 +180,7 @@ extension OpenAPI.OAuthFlows.CommonFields: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        refreshUrl = try container.decodeIfPresent(URL.self, forKey: .refreshUrl)
+        refreshUrl = try container.decodeURLAsStringIfPresent(forKey: .refreshUrl)
         scopes = try container.decode(OrderedDictionary<OpenAPI.OAuthFlows.Scope, OpenAPI.OAuthFlows.ScopeDescription>.self, forKey: .scopes)
     }
 }
@@ -191,7 +191,7 @@ extension OpenAPI.OAuthFlows.Implicit: Encodable {
 
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(authorizationUrl, forKey: .authorizationUrl)
+        try container.encode(authorizationUrl.absoluteString, forKey: .authorizationUrl)
     }
 }
 
@@ -201,7 +201,7 @@ extension OpenAPI.OAuthFlows.Implicit: Decodable {
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        authorizationUrl = try container.decode(URL.self, forKey: .authorizationUrl)
+        authorizationUrl = try container.decodeURLAsString(forKey: .authorizationUrl)
     }
 }
 
@@ -211,7 +211,7 @@ extension OpenAPI.OAuthFlows.Password: Encodable {
 
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(tokenUrl, forKey: .tokenUrl)
+        try container.encode(tokenUrl.absoluteString, forKey: .tokenUrl)
     }
 }
 
@@ -221,7 +221,7 @@ extension OpenAPI.OAuthFlows.Password: Decodable {
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        tokenUrl = try container.decode(URL.self, forKey: .tokenUrl)
+        tokenUrl = try container.decodeURLAsString(forKey: .tokenUrl)
     }
 }
 
@@ -231,7 +231,7 @@ extension OpenAPI.OAuthFlows.ClientCredentials: Encodable {
 
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(tokenUrl, forKey: .tokenUrl)
+        try container.encode(tokenUrl.absoluteString, forKey: .tokenUrl)
     }
 }
 
@@ -241,7 +241,7 @@ extension OpenAPI.OAuthFlows.ClientCredentials: Decodable {
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        tokenUrl = try container.decode(URL.self, forKey: .tokenUrl)
+        tokenUrl = try container.decodeURLAsString(forKey: .tokenUrl)
     }
 }
 
@@ -251,8 +251,8 @@ extension OpenAPI.OAuthFlows.AuthorizationCode: Encodable {
 
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(tokenUrl, forKey: .tokenUrl)
-        try container.encode(authorizationUrl, forKey: .authorizationUrl)
+        try container.encode(tokenUrl.absoluteString, forKey: .tokenUrl)
+        try container.encode(authorizationUrl.absoluteString, forKey: .authorizationUrl)
     }
 }
 
@@ -262,7 +262,7 @@ extension OpenAPI.OAuthFlows.AuthorizationCode: Decodable {
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        tokenUrl = try container.decode(URL.self, forKey: .tokenUrl)
-        authorizationUrl = try container.decode(URL.self, forKey: .authorizationUrl)
+        tokenUrl = try container.decodeURLAsString(forKey: .tokenUrl)
+        authorizationUrl = try container.decodeURLAsString(forKey: .authorizationUrl)
     }
 }

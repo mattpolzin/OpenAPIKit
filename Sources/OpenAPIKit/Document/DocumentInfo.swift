@@ -125,7 +125,7 @@ extension OpenAPI.Document.Info.License: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(name, forKey: .name)
-        try container.encodeIfPresent(url, forKey: .url)
+        try container.encodeIfPresent(url?.absoluteString, forKey: .url)
 
         try encodeExtensions(to: &container)
     }
@@ -137,7 +137,7 @@ extension OpenAPI.Document.Info.License: Decodable {
 
         name = try container.decode(String.self, forKey: .name)
 
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
+        url = try container.decodeURLAsStringIfPresent(forKey: .url)
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
@@ -190,7 +190,7 @@ extension OpenAPI.Document.Info.Contact: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(name, forKey: .name)
-        try container.encodeIfPresent(url, forKey: .url)
+        try container.encodeIfPresent(url?.absoluteString, forKey: .url)
         try container.encodeIfPresent(email, forKey: .email)
 
         try encodeExtensions(to: &container)
@@ -202,7 +202,7 @@ extension OpenAPI.Document.Info.Contact: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         name = try container.decodeIfPresent(String.self, forKey: .name)
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
+        url = try container.decodeURLAsStringIfPresent(forKey: .url)
         email = try container.decodeIfPresent(String.self, forKey: .email)
 
         vendorExtensions = try Self.extensions(from: decoder)
@@ -263,7 +263,7 @@ extension OpenAPI.Document.Info: Encodable {
 
         try container.encode(title, forKey: .title)
         try container.encodeIfPresent(description, forKey: .description)
-        try container.encodeIfPresent(termsOfService, forKey: .termsOfService)
+        try container.encodeIfPresent(termsOfService?.absoluteString, forKey: .termsOfService)
         try container.encodeIfPresent(contact, forKey: .contact)
         try container.encodeIfPresent(license, forKey: .license)
         try container.encode(version, forKey: .version)
@@ -278,7 +278,7 @@ extension OpenAPI.Document.Info: Decodable {
 
         title = try container.decode(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-        termsOfService = try container.decodeIfPresent(URL.self, forKey: .termsOfService)
+        termsOfService = try container.decodeURLAsStringIfPresent(forKey: .termsOfService)
         contact = try container.decodeIfPresent(Contact.self, forKey: .contact)
         license = try container.decodeIfPresent(License.self, forKey: .license)
         version = try container.decode(String.self, forKey: .version)
