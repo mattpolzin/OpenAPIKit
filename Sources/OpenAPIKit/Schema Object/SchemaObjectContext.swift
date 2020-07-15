@@ -379,24 +379,51 @@ extension JSONSchema {
 
     /// The context that only applies to `.object` schemas.
     public struct ObjectContext: Equatable {
+        /// The maximum number of properties the object
+        /// is allowed to have.
         public let maxProperties: Int?
         let _minProperties: Int
         public let properties: [String: JSONSchema]
+
+        /// Either a boolean or a schema defining or allowing
+        /// additional properties on this object.
+        ///
+        /// A value of `false` means that only properties listed
+        /// in the `properties` dictionary may be defined on
+        /// this object.
+        ///
+        /// A value of `true` means that properties
+        /// not named in the `properties` dictionary are
+        /// allowed.
+        ///
+        /// A `JSONSchema` value means that additional
+        /// properties not listed in the `properties` dictionary
+        /// are allowed but must match the given schema.
+        ///
+        /// A `nil` value is treated like a `true` value but
+        /// allows you to omit the property from encoding.
         public let additionalProperties: Either<Bool, JSONSchema>?
 
-        // NOTE that an object's required properties
-        // array is determined by looking at its properties'
-        // required Bool.
+        /// The properties of this object that are required.
+        ///
+        /// - Note: An object's required properties array
+        ///     is determined by looking at its properties'
+        ///     required Bool.
         public var requiredProperties: [String] {
             return Array(properties.filter { (_, schemaObject) in
                 schemaObject.required
-            }.keys)
+            }.keys).sorted()
         }
 
+        /// The properties of this object that are optional.
+        ///
+        /// - Note: An object's optional properties array
+        ///     is determined by looking at its properties'
+        ///     required Bool.
         public var optionalProperties: [String] {
             return Array(properties.filter { (_, schemaObject) in
                 !schemaObject.required
-            }.keys)
+            }.keys).sorted()
         }
 
         /// The minimum number of properties allowed.
