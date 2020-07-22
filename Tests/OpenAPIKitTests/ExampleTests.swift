@@ -56,7 +56,7 @@ extension ExampleTests {
         )
     }
 
-    func test_summaryAndExternalExample_decode() {
+    func test_summaryAndExternalExample_decode() throws {
         let exampleData =
 """
 {
@@ -64,17 +64,17 @@ extension ExampleTests {
     "summary": "hello"
 }
 """.data(using: .utf8)!
-        let example = try! orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
+        let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
 
         XCTAssertEqual(example, OpenAPI.Example(summary: "hello",
                                                 value: .init(URL(string: "https://google.com")!)))
         XCTAssertEqual(example.value.urlValue, URL(string: "https://google.com")!)
     }
 
-    func test_descriptionAndInternalExample_encode() {
+    func test_descriptionAndInternalExample_encode() throws {
         let example = OpenAPI.Example(description: "hello",
                                       value: .init("world"))
-        let encodedExample = try! orderUnstableTestStringFromEncoding(of: example)
+        let encodedExample = try orderUnstableTestStringFromEncoding(of: example)
 
         assertJSONEquivalent(encodedExample,
 """
@@ -86,7 +86,7 @@ extension ExampleTests {
         )
     }
 
-    func test_descriptionAndInternalExample_decode() {
+    func test_descriptionAndInternalExample_decode() throws {
         let exampleData =
 """
 {
@@ -94,16 +94,16 @@ extension ExampleTests {
   "value" : "world"
 }
 """.data(using: .utf8)!
-        let example = try! orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
+        let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
 
         XCTAssertEqual(example, OpenAPI.Example(description: "hello",
                                                 value: .init("world")))
     }
 
-    func test_vendorExtensionAndInternalExample_encode() {
+    func test_vendorExtensionAndInternalExample_encode() throws {
         let example = OpenAPI.Example(value: .init("world"),
                                       vendorExtensions: ["x-hello": 10])
-        let encodedExample = try! orderUnstableTestStringFromEncoding(of: example)
+        let encodedExample = try orderUnstableTestStringFromEncoding(of: example)
 
         assertJSONEquivalent(encodedExample,
                        """
@@ -142,21 +142,21 @@ extension ExampleTests {
         )
     }
 
-    func test_internalExample_decode() {
+    func test_internalExample_decode() throws {
         let exampleData =
             """
 {
   "value" : "world"
 }
 """.data(using: .utf8)!
-        let example = try! orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
+        let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
 
         XCTAssertEqual(example, OpenAPI.Example(value: .init("world")))
     }
 
-    func test_externalExample_encode() {
+    func test_externalExample_encode() throws {
         let example = OpenAPI.Example(value: .init(URL(string: "https://google.com")!))
-        let encodedExample = try! orderUnstableTestStringFromEncoding(of: example)
+        let encodedExample = try orderUnstableTestStringFromEncoding(of: example)
 
         assertJSONEquivalent(encodedExample,
 """
@@ -167,14 +167,14 @@ extension ExampleTests {
         )
     }
 
-    func test_externalExample_decode() {
+    func test_externalExample_decode() throws {
         let exampleData =
 """
 {
   "externalValue" : "https://google.com"
 }
 """.data(using: .utf8)!
-        let example = try! orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
+        let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
 
         XCTAssertEqual(example, OpenAPI.Example(value: .init(URL(string: "https://google.com")!)))
     }
