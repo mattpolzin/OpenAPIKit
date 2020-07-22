@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "pure-swift-json",
+        "repositoryURL": "https://github.com/fabianfett/pure-swift-json",
+        "state": {
+          "branch": null,
+          "revision": "5dc8ec1d857f3b56e3a718a01165ae80c7677d48",
+          "version": "0.4.0"
+        }
+      },
+      {
         "package": "RichJSONParser",
         "repositoryURL": "https://github.com/omochi/RichJSONParser.git",
         "state": {

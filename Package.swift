@@ -15,7 +15,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams.git", from: "3.0.0"), // just for tests
-        .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
+        .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0"), // just for tests
+        .package(url: "https://github.com/fabianfett/pure-swift-json", from: "0.4.0") // just for tests
     ],
     targets: [
         .target(
@@ -23,7 +24,7 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "OpenAPIKitTests",
-            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
+            dependencies: ["OpenAPIKit", "Yams", "FineJSON", .product(name: "PureSwiftJSON", package: "pure-swift-json")]),
         .testTarget(
             name: "OpenAPIKitCompatibilitySuite",
             dependencies: ["OpenAPIKit", "Yams"]),
