@@ -79,7 +79,7 @@ extension OAuthFlowsTests {
     func test_minimal_encode() throws {
         let oauthFlows = OpenAPI.OAuthFlows()
 
-        let encodedFlows = try testStringFromEncoding(of: oauthFlows)
+        let encodedFlows = try orderUnstableTestStringFromEncoding(of: oauthFlows)
 
         assertJSONEquivalent(
             encodedFlows,
@@ -97,7 +97,7 @@ extension OAuthFlowsTests {
 {}
 """.data(using: .utf8)!
 
-        let oauthFlows = try testDecoder.decode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
+        let oauthFlows = try orderUnstableDecode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
 
         XCTAssertEqual(oauthFlows, OpenAPI.OAuthFlows())
     }
@@ -132,7 +132,7 @@ extension OAuthFlowsTests {
             )
         )
 
-        let encodedFlows = try testStringFromEncoding(of: oauthFlows)
+        let encodedFlows = try orderUnstableTestStringFromEncoding(of: oauthFlows)
 
         assertJSONEquivalent(
             encodedFlows,
@@ -216,7 +216,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let oauthFlows = try testDecoder.decode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
+        let oauthFlows = try orderUnstableDecode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
 
         // can't compare whole object because of ordering of the ordered dictionary
 
@@ -249,7 +249,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow1 = try testStringFromEncoding(of: implicitFlow1)
+        let encodedFlow1 = try orderUnstableTestStringFromEncoding(of: implicitFlow1)
 
         assertJSONEquivalent(
             encodedFlow1,
@@ -269,7 +269,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow2 = try testStringFromEncoding(of: implicitFlow2)
+        let encodedFlow2 = try orderUnstableTestStringFromEncoding(of: implicitFlow2)
 
         assertJSONEquivalent(
             encodedFlow2,
@@ -296,7 +296,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let implicitFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow1Data)
+        let implicitFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow1Data)
 
         XCTAssertEqual(
             implicitFlow1,
@@ -313,7 +313,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let implicitFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow2Data)
+        let implicitFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow2Data)
 
         XCTAssertEqual(
             implicitFlow2,
@@ -328,7 +328,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow1 = try testStringFromEncoding(of: passwordFlow1)
+        let encodedFlow1 = try orderUnstableTestStringFromEncoding(of: passwordFlow1)
 
         assertJSONEquivalent(
             encodedFlow1,
@@ -348,7 +348,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow2 = try testStringFromEncoding(of: passwordFlow2)
+        let encodedFlow2 = try orderUnstableTestStringFromEncoding(of: passwordFlow2)
 
         assertJSONEquivalent(
             encodedFlow2,
@@ -375,7 +375,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let passwordFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow1Data)
+        let passwordFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow1Data)
 
         XCTAssertEqual(
             passwordFlow1,
@@ -392,7 +392,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let passwordFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow2Data)
+        let passwordFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow2Data)
 
         XCTAssertEqual(
             passwordFlow2,
@@ -407,7 +407,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow1 = try testStringFromEncoding(of: credentialsFlow1)
+        let encodedFlow1 = try orderUnstableTestStringFromEncoding(of: credentialsFlow1)
 
         assertJSONEquivalent(
             encodedFlow1,
@@ -427,7 +427,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow2 = try testStringFromEncoding(of: credentialsFlow2)
+        let encodedFlow2 = try orderUnstableTestStringFromEncoding(of: credentialsFlow2)
 
         assertJSONEquivalent(
             encodedFlow2,
@@ -454,7 +454,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let credentialsFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow1Data)
+        let credentialsFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow1Data)
 
         XCTAssertEqual(
             credentialsFlow1,
@@ -471,7 +471,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let credentialsFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow2Data)
+        let credentialsFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow2Data)
 
         XCTAssertEqual(
             credentialsFlow2,
@@ -487,7 +487,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow1 = try testStringFromEncoding(of: authorizationCodeFlow1)
+        let encodedFlow1 = try orderUnstableTestStringFromEncoding(of: authorizationCodeFlow1)
 
         assertJSONEquivalent(
             encodedFlow1,
@@ -509,7 +509,7 @@ extension OAuthFlowsTests {
             scopes: [:]
         )
 
-        let encodedFlow2 = try testStringFromEncoding(of: authorizationCodeFlow2)
+        let encodedFlow2 = try orderUnstableTestStringFromEncoding(of: authorizationCodeFlow2)
 
         assertJSONEquivalent(
             encodedFlow2,
@@ -538,7 +538,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let authorizationCodeFlow1 = try testDecoder.decode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow1Data)
+        let authorizationCodeFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow1Data)
 
         XCTAssertEqual(
             authorizationCodeFlow1,
@@ -556,7 +556,7 @@ extension OAuthFlowsTests {
 }
 """.data(using: .utf8)!
 
-        let authorizationCodeFlow2 = try testDecoder.decode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow2Data)
+        let authorizationCodeFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow2Data)
 
         XCTAssertEqual(
             authorizationCodeFlow2,

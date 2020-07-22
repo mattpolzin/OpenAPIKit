@@ -196,7 +196,7 @@ extension ComponentsTests {
     func test_minimal_encode() throws {
         let t1 = OpenAPI.Components()
 
-        let encoded = try testStringFromEncoding(of: t1)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
 
         assertJSONEquivalent(
             encoded,
@@ -216,7 +216,7 @@ extension ComponentsTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(OpenAPI.Components.self, from: t1)
+        let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
 
         XCTAssertEqual(decoded, OpenAPI.Components())
     }
@@ -247,7 +247,7 @@ extension ComponentsTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encoded = try testStringFromEncoding(of: t1)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
 
         assertJSONEquivalent(
             encoded,
@@ -361,7 +361,7 @@ extension ComponentsTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(OpenAPI.Components.self, from: t1)
+        let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
 
         XCTAssertEqual(
             decoded,
@@ -399,8 +399,8 @@ extension ComponentsTests {
         let t1 = ComponentKeyWrapper(key: "shell0")
         let t2 = ComponentKeyWrapper(key: "hello_world1234-.")
 
-        let encoded1 = try testStringFromEncoding(of: t1)
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded1 = try orderUnstableTestStringFromEncoding(of: t1)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded1,
@@ -436,8 +436,8 @@ extension ComponentsTests {
 }
 """.data(using: .utf8)!
 
-        let decoded1 = try testDecoder.decode(ComponentKeyWrapper.self, from: t1)
-        let decoded2 = try testDecoder.decode(ComponentKeyWrapper.self, from: t2)
+        let decoded1 = try orderUnstableDecode(ComponentKeyWrapper.self, from: t1)
+        let decoded2 = try orderUnstableDecode(ComponentKeyWrapper.self, from: t2)
 
         XCTAssertEqual(decoded1.key, "shell0")
         XCTAssertEqual(decoded2.key, "1234-_.")
@@ -447,8 +447,8 @@ extension ComponentsTests {
         let t1 = ComponentKeyWrapper(key: "$hell0")
         let t2 = ComponentKeyWrapper(key: "hello world")
 
-        XCTAssertThrowsError(try testEncoder.encode(t1))
-        XCTAssertThrowsError(try testEncoder.encode(t2))
+        XCTAssertThrowsError(try orderUnstableEncode(t1))
+        XCTAssertThrowsError(try orderUnstableEncode(t2))
     }
 
     func test_unacceptableKeys_decode() {
@@ -466,8 +466,8 @@ extension ComponentsTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(ComponentKeyWrapper.self, from: t1))
-        XCTAssertThrowsError(try testDecoder.decode(ComponentKeyWrapper.self, from: t2))
+        XCTAssertThrowsError(try orderUnstableDecode(ComponentKeyWrapper.self, from: t1))
+        XCTAssertThrowsError(try orderUnstableDecode(ComponentKeyWrapper.self, from: t2))
     }
 }
 

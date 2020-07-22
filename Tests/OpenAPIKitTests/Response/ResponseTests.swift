@@ -93,7 +93,7 @@ extension ResponseTests {
 extension ResponseTests {
     func test_emptyDescriptionEmptyContent_encode() {
         let response = OpenAPI.Response(description: "", content: [:])
-        let encodedResponse = try! testStringFromEncoding(of: response)
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
         assertJSONEquivalent(encodedResponse,
 """
@@ -104,7 +104,7 @@ extension ResponseTests {
                        )
 
         let response2 = OpenAPI.Response(description: "", headers: [:], content: [:])
-        let encodedResponse2 = try! testStringFromEncoding(of: response2)
+        let encodedResponse2 = try! orderUnstableTestStringFromEncoding(of: response2)
 
         assertJSONEquivalent(encodedResponse2,
 """
@@ -125,7 +125,7 @@ extension ResponseTests {
   "description" : ""
 }
 """.data(using: .utf8)!
-        let response = try! testDecoder.decode(OpenAPI.Response.self, from: responseData)
+        let response = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
         XCTAssertEqual(response, OpenAPI.Response(description: "", content: [:]))
 
@@ -136,7 +136,7 @@ extension ResponseTests {
   "description" : ""
 }
 """.data(using: .utf8)!
-        let response2 = try! testDecoder.decode(OpenAPI.Response.self, from: responseData2)
+        let response2 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData2)
 
         XCTAssertEqual(response2, OpenAPI.Response(description: "", content: [:]))
 
@@ -148,7 +148,7 @@ extension ResponseTests {
   "headers": {}
 }
 """.data(using: .utf8)!
-        let response3 = try! testDecoder.decode(OpenAPI.Response.self, from: responseData3)
+        let response3 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData3)
 
         XCTAssertEqual(response3, OpenAPI.Response(description: "", headers: [:], content: [:]))
     }
@@ -160,7 +160,7 @@ extension ResponseTests {
                                         headers: ["hello": .init(header)],
                                         content: [.json: content])
 
-        let encodedResponse = try! testStringFromEncoding(of: response)
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
         assertJSONEquivalent(encodedResponse,
 """
@@ -197,7 +197,7 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        let response = try testDecoder.decode(OpenAPI.Response.self, from: responseData)
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
         let content = OpenAPI.Content(schema: .init(.string(required: false)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
@@ -216,7 +216,7 @@ extension ResponseTests {
             vendorExtensions: [ "x-specialFeature": true ]
         )
 
-        let encodedResponse = try! testStringFromEncoding(of: response)
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
         assertJSONEquivalent(encodedResponse,
 """
@@ -255,7 +255,7 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        let response = try testDecoder.decode(OpenAPI.Response.self, from: responseData)
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
         let content = OpenAPI.Content(schema: .init(.string(required: false)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
@@ -280,7 +280,7 @@ extension ResponseTests {
 
     func test_defaultStatusCode_encode() throws {
         let status = StatusCodeWrapper(status: .default)
-        let encodedStatus = try testStringFromEncoding(of: status)
+        let encodedStatus = try orderUnstableTestStringFromEncoding(of: status)
 
         assertJSONEquivalent(encodedStatus,
 """
@@ -299,12 +299,12 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertEqual(try testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: .default))
+        XCTAssertEqual(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: .default))
     }
 
     func test_numberStatusCode_encode() throws {
         let status = StatusCodeWrapper(status: 123)
-        let encodedStatus = try testStringFromEncoding(of: status)
+        let encodedStatus = try orderUnstableTestStringFromEncoding(of: status)
 
         assertJSONEquivalent(encodedStatus,
 """
@@ -323,7 +323,7 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertEqual(try testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
+        XCTAssertEqual(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
     }
 
     func test_nonesenseStatusCode_decode_throws() {
@@ -334,6 +334,6 @@ extension ResponseTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(StatusCodeWrapper.self, from: statusCodeData))
+        XCTAssertThrowsError(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData))
     }
 }

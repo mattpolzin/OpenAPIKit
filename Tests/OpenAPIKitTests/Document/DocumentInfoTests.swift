@@ -38,7 +38,7 @@ extension DocumentInfoTests {
     func test_license_encode() throws {
         let license = OpenAPI.Document.Info.License.MIT
 
-        let encodedLicense = try testStringFromEncoding(of: license)
+        let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
 
         assertJSONEquivalent(encodedLicense,
 """
@@ -58,7 +58,7 @@ extension DocumentInfoTests {
   "url" : "https:\\/\\/www.mit.edu\\/~amini\\/LICENSE.md"
 }
 """.data(using: .utf8)!
-        let license = try testDecoder.decode(OpenAPI.Document.Info.License.self, from: licenseData)
+        let license = try orderUnstableDecode(OpenAPI.Document.Info.License.self, from: licenseData)
 
         XCTAssertEqual(
             license,
@@ -69,7 +69,7 @@ extension DocumentInfoTests {
     func test_license_withUrl_encode() throws {
         let license = OpenAPI.Document.Info.License.MIT(url: URL(string: "http://google.com")!)
 
-        let encodedLicense = try testStringFromEncoding(of: license)
+        let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
 
         assertJSONEquivalent(encodedLicense,
 """
@@ -89,7 +89,7 @@ extension DocumentInfoTests {
   "url" : "http://google.com"
 }
 """.data(using: .utf8)!
-        let license = try testDecoder.decode(OpenAPI.Document.Info.License.self, from: licenseData)
+        let license = try orderUnstableDecode(OpenAPI.Document.Info.License.self, from: licenseData)
 
         XCTAssertEqual(
             license,
@@ -104,7 +104,7 @@ extension DocumentInfoTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encodedLicense = try testStringFromEncoding(of: license)
+        let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
 
         assertJSONEquivalent(encodedLicense,
 """
@@ -132,7 +132,7 @@ extension DocumentInfoTests {
   ]
 }
 """.data(using: .utf8)!
-        let license = try testDecoder.decode(OpenAPI.Document.Info.License.self, from: licenseData)
+        let license = try orderUnstableDecode(OpenAPI.Document.Info.License.self, from: licenseData)
 
         XCTAssertEqual(
             license,
@@ -147,7 +147,7 @@ extension DocumentInfoTests {
     func test_contact_name_encode() throws {
         let contact = OpenAPI.Document.Info.Contact(name: "contact")
 
-        let encodedContact = try testStringFromEncoding(of: contact)
+        let encodedContact = try orderUnstableTestStringFromEncoding(of: contact)
 
         assertJSONEquivalent(encodedContact,
 """
@@ -165,7 +165,7 @@ extension DocumentInfoTests {
   "name" : "contact"
 }
 """.data(using: .utf8)!
-        let contact = try testDecoder.decode(OpenAPI.Document.Info.Contact.self, from: contactData)
+        let contact = try orderUnstableDecode(OpenAPI.Document.Info.Contact.self, from: contactData)
 
         XCTAssertEqual(
             contact,
@@ -176,7 +176,7 @@ extension DocumentInfoTests {
     func test_contact_url_encode() throws {
         let contact = OpenAPI.Document.Info.Contact(url: URL(string: "http://google.com")!)
 
-        let encodedContact = try testStringFromEncoding(of: contact)
+        let encodedContact = try orderUnstableTestStringFromEncoding(of: contact)
 
         assertJSONEquivalent(encodedContact,
 """
@@ -194,7 +194,7 @@ extension DocumentInfoTests {
   "url" : "http://google.com"
 }
 """.data(using: .utf8)!
-        let contact = try testDecoder.decode(OpenAPI.Document.Info.Contact.self, from: contactData)
+        let contact = try orderUnstableDecode(OpenAPI.Document.Info.Contact.self, from: contactData)
 
         XCTAssertEqual(
             contact,
@@ -205,7 +205,7 @@ extension DocumentInfoTests {
     func test_contact_email_encode() throws {
         let contact = OpenAPI.Document.Info.Contact(email: "email")
 
-        let encodedContact = try testStringFromEncoding(of: contact)
+        let encodedContact = try orderUnstableTestStringFromEncoding(of: contact)
 
         assertJSONEquivalent(encodedContact,
 """
@@ -223,7 +223,7 @@ extension DocumentInfoTests {
   "email" : "email"
 }
 """.data(using: .utf8)!
-        let contact = try testDecoder.decode(OpenAPI.Document.Info.Contact.self, from: contactData)
+        let contact = try orderUnstableDecode(OpenAPI.Document.Info.Contact.self, from: contactData)
 
         XCTAssertEqual(
             contact,
@@ -237,7 +237,7 @@ extension DocumentInfoTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encodedContact = try testStringFromEncoding(of: contact)
+        let encodedContact = try orderUnstableTestStringFromEncoding(of: contact)
 
         assertJSONEquivalent(encodedContact,
  """
@@ -263,7 +263,7 @@ extension DocumentInfoTests {
   ]
 }
 """.data(using: .utf8)!
-        let contact = try testDecoder.decode(OpenAPI.Document.Info.Contact.self, from: contactData)
+        let contact = try orderUnstableDecode(OpenAPI.Document.Info.Contact.self, from: contactData)
 
         XCTAssertEqual(
             contact,
@@ -277,7 +277,7 @@ extension DocumentInfoTests {
     func test_info_minimal_encode() throws {
         let info = OpenAPI.Document.Info(title: "title", version: "1.0")
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
 """
@@ -297,7 +297,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,
@@ -312,7 +312,7 @@ extension DocumentInfoTests {
             version: "1.0"
         )
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
 """
@@ -334,7 +334,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,
@@ -353,7 +353,7 @@ extension DocumentInfoTests {
             version: "1.0"
         )
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
 """
@@ -375,7 +375,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,
@@ -396,7 +396,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        XCTAssertThrowsError( try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)) { error in
+        XCTAssertThrowsError( try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)) { error in
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `termsOfService`: If specified, must be a valid URL.")
         }
     }
@@ -408,7 +408,7 @@ extension DocumentInfoTests {
             version: "1.0"
         )
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
                        """
@@ -434,7 +434,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,
@@ -453,7 +453,7 @@ extension DocumentInfoTests {
             version: "1.0"
         )
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
 """
@@ -479,7 +479,7 @@ extension DocumentInfoTests {
   "version" : "1.0"
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,
@@ -499,7 +499,7 @@ extension DocumentInfoTests {
             vendorExtensions: ["x-speacialFeature": ["hello", "world"]]
         )
 
-        let encodedInfo = try testStringFromEncoding(of: info)
+        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
 
         assertJSONEquivalent(encodedInfo,
 """
@@ -533,7 +533,7 @@ extension DocumentInfoTests {
   ]
 }
 """.data(using: .utf8)!
-        let info = try testDecoder.decode(OpenAPI.Document.Info.self, from: infoData)
+        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
 
         XCTAssertEqual(
             info,

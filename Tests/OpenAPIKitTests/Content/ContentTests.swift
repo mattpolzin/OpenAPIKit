@@ -161,7 +161,7 @@ final class ContentTests: XCTestCase {
 extension ContentTests {
     func test_referenceContent_encode() {
         let content = OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!)))
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -183,14 +183,14 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!))))
     }
 
     func test_schemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.string))
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -212,7 +212,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false))))
     }
@@ -220,7 +220,7 @@ extension ContentTests {
     func test_exampleAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
                                       example: [ "hello": "world" ])
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -264,7 +264,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
 
@@ -274,7 +274,7 @@ extension ContentTests {
     func test_examplesAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
                                       examples: ["hello": .b(OpenAPI.Example(value: .init([ "hello": "world" ])))])
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -326,7 +326,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
 
@@ -361,13 +361,13 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Content.self, from: contentData))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Content.self, from: contentData))
     }
 
     func test_encodingAndSchema_encode() {
         let content = OpenAPI.Content(schema: .init(.string),
                                       encoding: ["json": .init(contentType: .json)])
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -400,7 +400,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false)),
                                                 encoding: ["json": .init(contentType: .json)]))
@@ -410,7 +410,7 @@ extension ContentTests {
         let content = OpenAPI.Content(schema: .init(.string),
                                       vendorExtensions: [ "x-hello": [ "world": 123 ] ])
 
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -430,7 +430,7 @@ extension ContentTests {
         let content = OpenAPI.Content(schema: .init(.string),
                                       vendorExtensions: [ "hello": [ "world": 123 ] ])
 
-        let encodedContent = try! testStringFromEncoding(of: content)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(encodedContent,
 """
@@ -458,7 +458,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let content = try! testDecoder.decode(OpenAPI.Content.self, from: contentData)
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         let contentToMatch = OpenAPI.Content(schema: .init(.string(required: false)),
                                              vendorExtensions: ["x-hello": AnyCodable(["world": 123])])
@@ -487,7 +487,7 @@ extension ContentTests {
   10: "hello"
 }
 """.data(using: .utf8)!
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Content.self, from: contentData))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Content.self, from: contentData))
     }
 }
 
@@ -517,7 +517,7 @@ extension ContentTests {
     func test_encoding_minimal_encode() throws {
         let encoding = OpenAPI.Content.Encoding()
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -533,7 +533,7 @@ extension ContentTests {
 """
 {}
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(encoding, OpenAPI.Content.Encoding())
     }
@@ -541,7 +541,7 @@ extension ContentTests {
     func test_encoding_contentType_encode() throws {
         let encoding = OpenAPI.Content.Encoding(contentType: .csv)
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -559,7 +559,7 @@ extension ContentTests {
     "contentType": "text/csv"
 }
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentType: .csv))
     }
@@ -569,7 +569,7 @@ extension ContentTests {
             "X-CustomThing": .init(OpenAPI.Header(schema: .string))
         ])
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -599,7 +599,7 @@ extension ContentTests {
   }
 }
 """.data(using: .utf8)!
-        let encoding = try testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(
             encoding,
@@ -612,7 +612,7 @@ extension ContentTests {
     func test_encoding_style_encode() throws {
         let encoding = OpenAPI.Content.Encoding(style: .pipeDelimited)
 
-        let encodedEncoding = try testStringFromEncoding(of: encoding)
+        let encodedEncoding = try orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -630,7 +630,7 @@ extension ContentTests {
   "style" : "pipeDelimited"
 }
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(
             encoding,
@@ -641,7 +641,7 @@ extension ContentTests {
     func test_encoding_explode_encode() throws {
         let encoding = OpenAPI.Content.Encoding(explode: false)
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -659,7 +659,7 @@ extension ContentTests {
   "explode" : false
 }
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(
             encoding,
@@ -670,7 +670,7 @@ extension ContentTests {
     func test_encoding_allowReserved_encode() throws {
         let encoding = OpenAPI.Content.Encoding(allowReserved: true)
 
-        let encodedEncoding = try! testStringFromEncoding(of: encoding)
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
         assertJSONEquivalent(encodedEncoding,
 """
@@ -688,7 +688,7 @@ extension ContentTests {
   "allowReserved" : true
 }
 """.data(using: .utf8)!
-        let encoding = try! testDecoder.decode(OpenAPI.Content.Encoding.self, from: encodingData)
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
         XCTAssertEqual(
             encoding,

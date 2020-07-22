@@ -128,7 +128,7 @@ extension SchemaFragmentTests {
     func test_decodeFailsWithNoProperties() {
         let t = "{}".data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t))
     }
 
     func test_decodeFailsWithConflictingProperties() {
@@ -144,7 +144,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t))
     }
 
     func test_decodeFailsWithTypeAndPropertyConflict() {
@@ -158,7 +158,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t))
     }
 
     func test_decodeFailsWithIntegerWithFloatingPointMin() {
@@ -170,13 +170,13 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t))
     }
 
     func test_generalEncode() throws {
         let t = JSONSchemaFragment.general(.init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -189,7 +189,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.general(.init(format: "date", title: "creation date", readOnly: true))
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -213,7 +213,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(
             decoded,
@@ -224,7 +224,7 @@ extension SchemaFragmentTests {
     func test_booleanEncode() throws {
         let t = JSONSchemaFragment.boolean(.init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -237,7 +237,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.boolean(.init(description: "hello"))
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -258,7 +258,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.boolean(.init()))
 
@@ -270,7 +270,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.boolean(.init(description: "hello world")))
     }
@@ -278,7 +278,7 @@ extension SchemaFragmentTests {
     func test_integerEncode() throws {
         let t = JSONSchemaFragment.integer(.init(), .init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -291,7 +291,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.integer(.init(title: "hi"), .init())
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -305,7 +305,7 @@ extension SchemaFragmentTests {
 
         let t3 = JSONSchemaFragment.integer(.init(), .init(minimum: 10))
 
-        let encoded3 = try testStringFromEncoding(of: t3)
+        let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
         assertJSONEquivalent(
             encoded3,
@@ -326,7 +326,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.integer(.init(), .init()))
 
@@ -338,7 +338,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.integer(.init(title: "hi"), .init()))
 
@@ -350,7 +350,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded3 = try testDecoder.decode(JSONSchemaFragment.self, from: t3)
+        let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
         XCTAssertEqual(decoded3, JSONSchemaFragment.integer(.init(), .init(minimum: 10)))
     }
@@ -358,7 +358,7 @@ extension SchemaFragmentTests {
     func test_numberEncode() throws {
         let t = JSONSchemaFragment.number(.init(), .init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -371,7 +371,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.number(.init(title: "hi"), .init())
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -385,7 +385,7 @@ extension SchemaFragmentTests {
 
         let t3 = JSONSchemaFragment.number(.init(), .init(minimum: 10))
 
-        let encoded3 = try testStringFromEncoding(of: t3)
+        let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
         assertJSONEquivalent(
             encoded3,
@@ -406,7 +406,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.number(.init(), .init()))
 
@@ -418,7 +418,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.number(.init(title: "hi"), .init()))
 
@@ -430,7 +430,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded3 = try testDecoder.decode(JSONSchemaFragment.self, from: t3)
+        let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
         XCTAssertEqual(decoded3, JSONSchemaFragment.number(.init(), .init(minimum: 10)))
 
@@ -441,7 +441,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded4 = try testDecoder.decode(JSONSchemaFragment.self, from: t4)
+        let decoded4 = try orderUnstableDecode(JSONSchemaFragment.self, from: t4)
 
         XCTAssertEqual(decoded4, JSONSchemaFragment.number(.init(), .init(minimum: 10.5)))
     }
@@ -449,7 +449,7 @@ extension SchemaFragmentTests {
     func test_stringEncode() throws {
         let t = JSONSchemaFragment.string(.init(), .init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -462,7 +462,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.string(.init(writeOnly: false), .init())
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -476,7 +476,7 @@ extension SchemaFragmentTests {
 
         let t3 = JSONSchemaFragment.string(.init(), .init(maxLength: 3))
 
-        let encoded3 = try testStringFromEncoding(of: t3)
+        let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
         assertJSONEquivalent(
             encoded3,
@@ -497,7 +497,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.string(.init(), .init()))
 
@@ -509,7 +509,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.string(.init(writeOnly: false), .init()))
 
@@ -521,7 +521,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded3 = try testDecoder.decode(JSONSchemaFragment.self, from: t3)
+        let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
         XCTAssertEqual(decoded3, JSONSchemaFragment.string(.init(), .init(maxLength: 3)))
 
@@ -532,7 +532,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded4 = try testDecoder.decode(JSONSchemaFragment.self, from: t4)
+        let decoded4 = try orderUnstableDecode(JSONSchemaFragment.self, from: t4)
 
         XCTAssertEqual(decoded4, JSONSchemaFragment.string(.init(), .init(minLength: 7)))
     }
@@ -540,7 +540,7 @@ extension SchemaFragmentTests {
     func test_arrayEncode() throws {
         let t = JSONSchemaFragment.array(.init(), .init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -553,7 +553,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.array(.init(writeOnly: true), .init())
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -567,7 +567,7 @@ extension SchemaFragmentTests {
 
         let t3 = JSONSchemaFragment.array(.init(), .init(uniqueItems: true))
 
-        let encoded3 = try testStringFromEncoding(of: t3)
+        let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
         assertJSONEquivalent(
             encoded3,
@@ -581,7 +581,7 @@ extension SchemaFragmentTests {
 
         let t4 = JSONSchemaFragment.array(.init(), .init(items: .string))
 
-        let encoded4 = try testStringFromEncoding(of: t4)
+        let encoded4 = try orderUnstableTestStringFromEncoding(of: t4)
 
         assertJSONEquivalent(
             encoded4,
@@ -604,7 +604,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.array(.init(), .init()))
 
@@ -616,7 +616,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.array(.init(writeOnly: true), .init()))
 
@@ -628,7 +628,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded3 = try testDecoder.decode(JSONSchemaFragment.self, from: t3)
+        let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
         XCTAssertEqual(decoded3, JSONSchemaFragment.array(.init(), .init(maxItems: 3)))
 
@@ -639,7 +639,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded4 = try testDecoder.decode(JSONSchemaFragment.self, from: t4)
+        let decoded4 = try orderUnstableDecode(JSONSchemaFragment.self, from: t4)
 
         XCTAssertEqual(decoded4, JSONSchemaFragment.array(.init(), .init(minItems: 7)))
 
@@ -652,7 +652,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded5 = try testDecoder.decode(JSONSchemaFragment.self, from: t5)
+        let decoded5 = try orderUnstableDecode(JSONSchemaFragment.self, from: t5)
 
         XCTAssertEqual(decoded5, JSONSchemaFragment.array(.init(), .init(items: .string(required: false))))
     }
@@ -660,7 +660,7 @@ extension SchemaFragmentTests {
     func test_objectEncode() throws {
         let t = JSONSchemaFragment.object(.init(), .init())
 
-        let encoded = try testStringFromEncoding(of: t)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
         assertJSONEquivalent(
             encoded,
@@ -673,7 +673,7 @@ extension SchemaFragmentTests {
 
         let t2 = JSONSchemaFragment.object(.init(writeOnly: true), .init())
 
-        let encoded2 = try testStringFromEncoding(of: t2)
+        let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
         assertJSONEquivalent(
             encoded2,
@@ -687,7 +687,7 @@ extension SchemaFragmentTests {
 
         let t3 = JSONSchemaFragment.object(.init(), .init(required: ["hello"]))
 
-        let encoded3 = try testStringFromEncoding(of: t3)
+        let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
         assertJSONEquivalent(
             encoded3,
@@ -703,7 +703,7 @@ extension SchemaFragmentTests {
 
         let t4 = JSONSchemaFragment.object(.init(), .init(properties: ["hello": .string]))
 
-        let encoded4 = try testStringFromEncoding(of: t4)
+        let encoded4 = try orderUnstableTestStringFromEncoding(of: t4)
 
         assertJSONEquivalent(
             encoded4,
@@ -728,7 +728,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t)
 
         XCTAssertEqual(decoded, JSONSchemaFragment.object(.init(), .init()))
 
@@ -740,7 +740,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded2 = try testDecoder.decode(JSONSchemaFragment.self, from: t2)
+        let decoded2 = try orderUnstableDecode(JSONSchemaFragment.self, from: t2)
 
         XCTAssertEqual(decoded2, JSONSchemaFragment.object(.init(writeOnly: true), .init()))
 
@@ -754,7 +754,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded3 = try testDecoder.decode(JSONSchemaFragment.self, from: t3)
+        let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
         XCTAssertEqual(decoded3, JSONSchemaFragment.object(.init(), .init(required: ["hello"])))
 
@@ -770,7 +770,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded4 = try testDecoder.decode(JSONSchemaFragment.self, from: t4)
+        let decoded4 = try orderUnstableDecode(JSONSchemaFragment.self, from: t4)
 
         XCTAssertEqual(decoded4, JSONSchemaFragment.object(.init(), .init(properties: ["hello": .string(required: false)])))
 
@@ -785,7 +785,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded5 = try testDecoder.decode(JSONSchemaFragment.self, from: t5)
+        let decoded5 = try orderUnstableDecode(JSONSchemaFragment.self, from: t5)
 
         XCTAssertEqual(decoded5, JSONSchemaFragment.object(.init(), .init(properties: ["hello": .string(required: false)])))
     }

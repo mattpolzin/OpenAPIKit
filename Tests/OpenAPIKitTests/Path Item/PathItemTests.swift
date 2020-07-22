@@ -7,7 +7,6 @@
 
 import XCTest
 import OpenAPIKit
-import FineJSON
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {
@@ -140,7 +139,7 @@ extension PathItemTests {
     func test_minimal_encode() throws {
         let pathItem = OpenAPI.PathItem()
 
-        let encodedPathItem = try testStringFromEncoding(of: pathItem)
+        let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
 
         assertJSONEquivalent(
             encodedPathItem,
@@ -160,7 +159,7 @@ extension PathItemTests {
 }
 """.data(using: .utf8)!
 
-        let pathItem = try testDecoder.decode(OpenAPI.PathItem.self, from: pathItemData)
+        let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
         XCTAssertEqual(pathItem, OpenAPI.PathItem())
     }
@@ -174,7 +173,7 @@ extension PathItemTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encodedPathItem = try testStringFromEncoding(of: pathItem)
+        let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
 
         assertJSONEquivalent(
             encodedPathItem,
@@ -232,7 +231,7 @@ extension PathItemTests {
 }
 """.data(using: .utf8)!
 
-        let pathItem = try testDecoder.decode(OpenAPI.PathItem.self, from: pathItemData)
+        let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
         XCTAssertEqual(
             pathItem,
@@ -260,7 +259,7 @@ extension PathItemTests {
             trace: op
         )
 
-        let encodedPathItem = try testStringFromEncoding(of: pathItem)
+        let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
 
         assertJSONEquivalent(
             encodedPathItem,
@@ -358,7 +357,7 @@ extension PathItemTests {
 }
 """.data(using: .utf8)!
 
-        let pathItem = try testDecoder.decode(OpenAPI.PathItem.self, from: pathItemData)
+        let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
         let op = OpenAPI.Operation(responses: [:])
 
@@ -380,7 +379,7 @@ extension PathItemTests {
     func test_pathComponents_encode() throws {
         let test: [OpenAPI.Path] = ["/hello/world", "hi/there"]
 
-        let encodedTest = try testStringFromEncoding(of: test)
+        let encodedTest = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encodedTest,
@@ -402,7 +401,7 @@ extension PathItemTests {
 ]
 """.data(using: .utf8)!
 
-        let test = try testDecoder.decode([OpenAPI.Path].self, from: testData)
+        let test = try orderUnstableDecode([OpenAPI.Path].self, from: testData)
 
         XCTAssertEqual(
             test,
@@ -419,7 +418,7 @@ extension PathItemTests {
             "hi/there": .init()
         ]
 
-        let encodedMap = try testStringFromEncoding(of: map)
+        let encodedMap = try orderUnstableTestStringFromEncoding(of: map)
 
         assertJSONEquivalent(
             encodedMap,
@@ -449,7 +448,7 @@ extension PathItemTests {
 }
 """.data(using: .utf8)!
 
-        let map = try FineJSONDecoder().decode(OpenAPI.PathItem.Map.self, from: mapData)
+        let map = try orderStableDecode(OpenAPI.PathItem.Map.self, from: mapData)
 
         XCTAssertEqual(
             map,

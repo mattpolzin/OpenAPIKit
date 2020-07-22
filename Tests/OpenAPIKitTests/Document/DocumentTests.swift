@@ -368,7 +368,7 @@ final class DocumentTests: XCTestCase {
 }
 """.data(using: .utf8)!
 
-        XCTAssertNoThrow(try JSONDecoder().decode(OpenAPI.Document.self, from: docData))
+        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Document.self, from: docData))
     }
 }
 
@@ -381,7 +381,7 @@ extension DocumentTests {
             paths: [:],
             components: .noComponents
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -414,7 +414,7 @@ extension DocumentTests {
   }
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -435,7 +435,7 @@ extension DocumentTests {
             paths: [:],
             components: .noComponents
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -468,7 +468,7 @@ extension DocumentTests {
   }
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -489,7 +489,7 @@ extension DocumentTests {
             paths: [:],
             components: .noComponents
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -532,7 +532,7 @@ extension DocumentTests {
   ]
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -552,7 +552,7 @@ extension DocumentTests {
             paths: ["test": .init(summary: "hi")],
             components: .noComponents
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -589,7 +589,7 @@ extension DocumentTests {
   }
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -616,7 +616,7 @@ extension DocumentTests {
                               securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]),
             security: [[.component( named: "security"):[]]]
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -681,7 +681,7 @@ extension DocumentTests {
   ]
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -709,7 +709,7 @@ extension DocumentTests {
             components: .noComponents,
             tags: [.init(name: "hi")]
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -752,7 +752,7 @@ extension DocumentTests {
   ]
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -774,7 +774,7 @@ extension DocumentTests {
             components: .noComponents,
             externalDocs: .init(url: URL(string: "http://google.com")!)
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -813,7 +813,7 @@ extension DocumentTests {
   }
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
@@ -836,7 +836,7 @@ extension DocumentTests {
             externalDocs: .init(url: URL(string: "http://google.com")!),
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
-        let encodedDocument = try testStringFromEncoding(of: document)
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
@@ -883,7 +883,7 @@ extension DocumentTests {
   ]
 }
 """.data(using: .utf8)!
-        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentData)
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
             document,
