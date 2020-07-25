@@ -67,8 +67,36 @@ components:
             // test validating
             try doc.validate()
 
+            XCTAssertEqual(
+                doc.paths["/pets"]?.patch?.requestBody?.requestValue?
+                    .content[.json]?.schema.schemaValue,
+                JSONSchema.one(
+                    of: .reference(.component(named: "Cat")),
+                        .reference(.component(named: "Dog")),
+                    discriminator: .init(propertyName: "pet_type")
+                )
+            )
+
             // test dereferencing and resolving
-            _ = try doc.locallyDereferenced().resolved()
+            let resolvedDoc = try doc.locallyDereferenced().resolved()
+
+            XCTAssertEqual(resolvedDoc.routes.count, 1)
+            XCTAssertEqual(resolvedDoc.endpoints.count, 1)
+
+            let dogSchema = doc.components.schemas["Dog"]!
+            let catSchema = doc.components.schemas["Cat"]!
+
+            XCTAssertEqual(
+                resolvedDoc.endpoints[0].requestBody?
+                    .content[.json]?.schema.underlyingJSONSchema,
+                JSONSchema.one(
+                    of: [
+                        catSchema,
+                        dogSchema
+                    ],
+                    discriminator: .init(propertyName: "pet_type")
+                )
+            )
         } catch let error {
             let friendlyError = OpenAPI.Error(from: error)
             throw friendlyError
