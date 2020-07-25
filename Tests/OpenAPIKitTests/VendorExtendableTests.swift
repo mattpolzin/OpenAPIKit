@@ -23,7 +23,7 @@ final class VendorExtendableTests: XCTestCase {
 }
 """.data(using: .utf8)!
 
-        let test = try JSONDecoder().decode(TestStruct.self, from: data)
+        let test = try orderUnstableDecode(TestStruct.self, from: data)
         XCTAssertEqual(test.vendorExtensions.count, 3)
 
         XCTAssertEqual(test.vendorExtensions["x-tension"]?.value as? String, "hello")
@@ -60,7 +60,7 @@ final class VendorExtendableTests: XCTestCase {
 ]
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try JSONDecoder().decode(TestStruct.self, from: data)) { error in
+        XCTAssertThrowsError(try orderUnstableDecode(TestStruct.self, from: data)) { error in
             XCTAssertEqual(error as? VendorExtensionDecodingError, VendorExtensionDecodingError.selfIsArrayNotDict)
             XCTAssertEqual(String(describing: error), "Tried to get vendor extensions on a list. Vendor extensions are necessarily keyed and therefore can only be retrieved from hashes.")
         }
@@ -75,7 +75,7 @@ final class VendorExtendableTests: XCTestCase {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try JSONDecoder().decode(TestStruct.self, from: data)) { error in
+        XCTAssertThrowsError(try orderUnstableDecode(TestStruct.self, from: data)) { error in
             XCTAssertNotNil(error as? InconsistencyError)
         }
     }
@@ -94,7 +94,7 @@ extension VendorExtendableTests {
             ]
         ])
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(encoded,
 """

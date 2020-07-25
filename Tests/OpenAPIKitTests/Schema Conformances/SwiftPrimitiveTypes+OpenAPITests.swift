@@ -114,6 +114,4 @@ class SwiftPrimitiveTypesTests: XCTestCase {
 
         XCTAssertEqual([String: String?].openAPISchema, .object(additionalProperties: .schema(.string(required: false))))
     }
-
-    static let localTestEncoder = JSONEncoder()
 }

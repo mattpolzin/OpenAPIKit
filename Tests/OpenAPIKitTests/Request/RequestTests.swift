@@ -47,14 +47,14 @@ extension RequestTests {
     func test_onlyEmptyContent_encode() {
         let content: OpenAPI.Content.Map = [:]
         let request = OpenAPI.Request(content: content)
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString, "{\n  \"content\" : {\n\n  }\n}")
     }
 
     func test_onlyEmptyContent_decode() {
         let requestData = #"{ "content": {} }"#.data(using: .utf8)!
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [:]))
     }
@@ -63,7 +63,7 @@ extension RequestTests {
         let request = OpenAPI.Request(content: [
             .json: .init(schema: .init(.external(URL(string: "hello.json#/world")!)))
             ])
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
 """
@@ -82,7 +82,7 @@ extension RequestTests {
 
     func test_onlyReferenceContent_decode() {
         let requestData = #"{ "content": { "application/json": { "schema": { "$ref": "hello.json#/world" } } } }"#.data(using: .utf8)!
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [
             .json : .init(schema: .init(.external(URL(string: "hello.json#/world")!)))
@@ -98,7 +98,7 @@ extension RequestTests {
         let request = OpenAPI.Request(content: [
             .json: .init(schema: .init(schema))
         ])
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
 """
@@ -139,7 +139,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [
             .json : .init(schema: .init(
@@ -152,7 +152,7 @@ extension RequestTests {
     func test_withDescription_encode() {
         let request = OpenAPI.Request(description: "A request",
                                       content: [:])
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
 """
@@ -175,7 +175,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(description: "A request",
                                                 content: [:]))
@@ -187,7 +187,7 @@ extension RequestTests {
             content: [:],
             vendorExtensions: [ "x-specialFeature": "ok" ]
         )
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
 """
@@ -212,7 +212,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(
             request,
@@ -227,7 +227,7 @@ extension RequestTests {
     func test_withRequired_encode() {
         let request = OpenAPI.Request(content: [:],
                                       required: true)
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
 """
@@ -250,7 +250,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [:],
                                                 required: true))
@@ -268,7 +268,7 @@ extension RequestTests {
         let request = OpenAPI.Request(content: [
             .xml: .init(schema: .init(schema))
             ])
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
                        """
@@ -309,7 +309,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [
             .xml : .init(schema: .init(
@@ -328,7 +328,7 @@ extension RequestTests {
         let request = OpenAPI.Request(content: [
             .form: .init(schema: .init(schema))
             ])
-        let encodedString = try! testStringFromEncoding(of: request)
+        let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(encodedString,
                        """
@@ -369,7 +369,7 @@ extension RequestTests {
 }
 """.data(using: .utf8)!
 
-        let request = try! testDecoder.decode(OpenAPI.Request.self, from: requestData)
+        let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
         XCTAssertEqual(request, OpenAPI.Request(content: [
             .form : .init(schema: .init(

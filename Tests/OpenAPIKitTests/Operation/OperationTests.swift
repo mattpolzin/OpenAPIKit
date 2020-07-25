@@ -8,7 +8,6 @@
 import XCTest
 import OpenAPIKit
 import Yams
-import FineJSON
 
 final class OperationTests: XCTestCase {
     func test_init() {
@@ -66,7 +65,7 @@ extension OperationTests {
             responses: [:]
         )
 
-        let encodedOperation = try testStringFromEncoding(of: operation)
+        let encodedOperation = try orderUnstableTestStringFromEncoding(of: operation)
 
         assertJSONEquivalent(
             encodedOperation,
@@ -88,7 +87,7 @@ extension OperationTests {
 }
 """.data(using: .utf8)!
 
-        let operation = try testDecoder.decode(OpenAPI.Operation.self, from: operationData)
+        let operation = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData)
 
         XCTAssertEqual(
             operation,
@@ -114,7 +113,7 @@ extension OperationTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encodedOperation = try testStringFromEncoding(of: operation)
+        let encodedOperation = try orderUnstableTestStringFromEncoding(of: operation)
 
         assertJSONEquivalent(
             encodedOperation,
@@ -224,7 +223,7 @@ extension OperationTests {
 }
 """.data(using: .utf8)!
 
-        let operation = try testDecoder.decode(OpenAPI.Operation.self, from: operationData)
+        let operation = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData)
 
         XCTAssertEqual(
             operation,
@@ -261,7 +260,7 @@ extension OperationTests {
         )
 
         let encodedOperation = String(
-            data: try FineJSONEncoder().encode(operation),
+            data: try orderStableEncode(operation),
             encoding: .utf8
         )!
 
@@ -289,7 +288,7 @@ extension OperationTests {
         )
 
         let encodedOperation2 = String(
-            data: try FineJSONEncoder().encode(operation2),
+            data: try orderStableEncode(operation2),
             encoding: .utf8
             )!
 

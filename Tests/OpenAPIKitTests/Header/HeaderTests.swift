@@ -67,7 +67,7 @@ extension HeaderTests {
             .json: .init(schema: .string)
         ])
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -97,7 +97,7 @@ extension HeaderTests {
   }
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -110,7 +110,7 @@ extension HeaderTests {
     func test_header_schema_encode() throws {
         let header = OpenAPI.Header(schema: .string)
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -132,7 +132,7 @@ extension HeaderTests {
   }
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -143,7 +143,7 @@ extension HeaderTests {
     func test_header_schema_withExntesion_encode() throws {
         let header = OpenAPI.Header(schema: .string, vendorExtensions: ["x-hello": "hi"])
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -167,7 +167,7 @@ extension HeaderTests {
   "x-hello" : "hi"
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -183,7 +183,7 @@ extension HeaderTests {
             required: true
         )
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -215,7 +215,7 @@ extension HeaderTests {
   "required" : true
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -236,7 +236,7 @@ extension HeaderTests {
             description: "hello"
         )
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -268,7 +268,7 @@ extension HeaderTests {
   "description" : "hello"
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -289,7 +289,7 @@ extension HeaderTests {
             deprecated: true
         )
 
-        let headerEncoding = try testStringFromEncoding(of: header)
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
         assertJSONEquivalent(headerEncoding,
 """
@@ -321,7 +321,7 @@ extension HeaderTests {
   "deprecated" : true
 }
 """.data(using: .utf8)!
-        let header = try testDecoder.decode(OpenAPI.Header.self, from: headerData)
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
             header,
@@ -351,6 +351,6 @@ extension HeaderTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Header.self, from: headerData))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Header.self, from: headerData))
     }
 }

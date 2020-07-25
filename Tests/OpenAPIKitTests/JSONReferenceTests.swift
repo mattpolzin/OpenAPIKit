@@ -133,7 +133,7 @@ extension JSONReferenceTests {
     func test_externalFileOnly_encode() throws {
         let test = ReferenceWrapper(reference: .external(URL(string: "hello.json")!))
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encoded,
@@ -157,7 +157,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+        let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
         XCTAssertEqual(
             decoded,
@@ -168,7 +168,7 @@ extension JSONReferenceTests {
     func test_external_encode() throws {
         let test = ReferenceWrapper(reference: .external(URL(string: "hello.json#/hello/world")!))
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encoded,
@@ -192,7 +192,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+        let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
         XCTAssertEqual(
             decoded,
@@ -203,7 +203,7 @@ extension JSONReferenceTests {
     func test_validComponent_encode() throws {
         let test = ReferenceWrapper(reference: .component(named: "hello"))
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encoded,
@@ -227,7 +227,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+        let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
         XCTAssertEqual(
             decoded,
@@ -238,7 +238,7 @@ extension JSONReferenceTests {
     func test_nonComponentLocal_encode() throws {
         let test = ReferenceWrapper(reference: .internal(path: "/hello/world"))
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encoded,
@@ -262,7 +262,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+        let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
         XCTAssertEqual(
             decoded,
@@ -273,7 +273,7 @@ extension JSONReferenceTests {
     func test_nonComponentSpecialCharacterLocal_encode() throws {
         let test = ReferenceWrapper(reference: .internal(path: "/hello~1to/the~0~1world"))
 
-        let encoded = try testStringFromEncoding(of: test)
+        let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
         assertJSONEquivalent(
             encoded,
@@ -297,7 +297,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(ReferenceWrapper.self, from: test)
+        let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
         XCTAssertEqual(
             decoded,
@@ -316,7 +316,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(ReferenceWrapper.self, from: test))
+        XCTAssertThrowsError(try orderUnstableDecode(ReferenceWrapper.self, from: test))
     }
 
     func test_emptyStringFailure_decode() {
@@ -329,7 +329,7 @@ extension JSONReferenceTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(ReferenceWrapper.self, from: test))
+        XCTAssertThrowsError(try orderUnstableDecode(ReferenceWrapper.self, from: test))
     }
 }
 

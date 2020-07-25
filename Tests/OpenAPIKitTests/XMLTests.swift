@@ -25,7 +25,7 @@ final class XMLTests: XCTestCase {
 extension XMLTests {
     func test_empty_encode() throws {
         let xml = OpenAPI.XML()
-        let encodedXML = try testStringFromEncoding(of: xml)
+        let encodedXML = try orderUnstableTestStringFromEncoding(of: xml)
 
         assertJSONEquivalent(
             encodedXML,
@@ -45,7 +45,7 @@ extension XMLTests {
 }
 """.data(using: .utf8)!
 
-        let xml = try testDecoder.decode(OpenAPI.XML.self, from: xmlData)
+        let xml = try orderUnstableDecode(OpenAPI.XML.self, from: xmlData)
 
         XCTAssertEqual(
             xml,
@@ -61,7 +61,7 @@ extension XMLTests {
             attribute: true,
             wrapped: true
         )
-        let encodedXML = try testStringFromEncoding(of: xml)
+        let encodedXML = try orderUnstableTestStringFromEncoding(of: xml)
 
         assertJSONEquivalent(
             encodedXML,
@@ -89,7 +89,7 @@ extension XMLTests {
 }
 """.data(using: .utf8)!
 
-        let xml = try testDecoder.decode(OpenAPI.XML.self, from: xmlData)
+        let xml = try orderUnstableDecode(OpenAPI.XML.self, from: xmlData)
 
         XCTAssertEqual(
             xml,

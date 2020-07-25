@@ -30,7 +30,7 @@ final class TagTests: XCTestCase {
 extension TagTests {
     func test_onlyName_encode() {
         let tag = OpenAPI.Tag(name: "hello")
-        let encodedTag = try! testStringFromEncoding(of: tag)
+        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
 
         assertJSONEquivalent(encodedTag,
 """
@@ -48,7 +48,7 @@ extension TagTests {
     "name": "hello"
 }
 """.data(using: .utf8)!
-        let tag = try! testDecoder.decode(OpenAPI.Tag.self, from: tagData)
+        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(tag, OpenAPI.Tag(name: "hello"))
     }
@@ -56,7 +56,7 @@ extension TagTests {
     func test_nameAndDescription_encode() {
         let tag = OpenAPI.Tag(name: "hello",
                               description: "world")
-        let encodedTag = try! testStringFromEncoding(of: tag)
+        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
 
         assertJSONEquivalent(encodedTag,
 """
@@ -76,7 +76,7 @@ extension TagTests {
     "description": "world"
 }
 """.data(using: .utf8)!
-        let tag = try! testDecoder.decode(OpenAPI.Tag.self, from: tagData)
+        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(tag, OpenAPI.Tag(name: "hello", description: "world"))
     }
@@ -90,7 +90,7 @@ extension TagTests {
             ),
             vendorExtensions: ["x-specialFeature": false]
         )
-        let encodedTag = try! testStringFromEncoding(of: tag)
+        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
 
         assertJSONEquivalent(encodedTag,
 """
@@ -118,7 +118,7 @@ extension TagTests {
     "x-specialFeature" : false
 }
 """.data(using: .utf8)!
-        let tag = try! testDecoder.decode(OpenAPI.Tag.self, from: tagData)
+        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(
             tag,
