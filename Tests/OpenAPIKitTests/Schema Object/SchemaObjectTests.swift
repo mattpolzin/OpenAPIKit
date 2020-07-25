@@ -3952,6 +3952,12 @@ extension SchemaObjectTests {
             ],
             discriminator: .init(propertyName: "hello")
         )
+        let allOfWithReference = JSONSchema.all(
+            of: [
+                .object(.init(), .init()),
+                .reference(.component(named: "test"))
+            ]
+        )
 
         testEncodingPropertyLines(entity: allOf, propertyLines: [
             "\"allOf\" : [",
@@ -3987,6 +3993,17 @@ extension SchemaObjectTests {
             "  \"propertyName\" : \"hello\"",
             "}"
         ])
+
+        testEncodingPropertyLines(entity: allOfWithReference, propertyLines: [
+            "\"allOf\" : [",
+            "  {",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"$ref\" : \"#\\/components\\/schemas\\/test\"",
+            "  }",
+            "]"
+        ])
     }
 
     func test_decodeAll() throws {
@@ -4008,9 +4025,18 @@ extension SchemaObjectTests {
             "discriminator": { "propertyName": "hello" }
         }
         """.data(using: .utf8)!
+        let allWithReferenceData = """
+        {
+            "allOf": [
+                { "type": "object" },
+                { "$ref": "#/components/schemas/test" }
+            ]
+        }
+        """.data(using: .utf8)!
 
         let all = try orderUnstableDecode(JSONSchema.self, from: allData)
         let allWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: allWithDiscriminatorData)
+        let allWithReference = try orderUnstableDecode(JSONSchema.self, from: allWithReferenceData)
 
         XCTAssertEqual(
             all,
@@ -4030,6 +4056,16 @@ extension SchemaObjectTests {
                     .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
                 ],
                 discriminator: .init(propertyName: "hello")
+            )
+        )
+
+        XCTAssertEqual(
+            allWithReference,
+            JSONSchema.all(
+                of: [
+                    .object(.init(), .init()),
+                    .reference(.component(named: "test"))
+                ]
             )
         )
     }
