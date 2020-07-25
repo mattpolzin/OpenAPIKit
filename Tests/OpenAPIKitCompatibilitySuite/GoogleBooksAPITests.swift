@@ -44,13 +44,13 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     }
 
     func test_passesValidation() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         try apiDoc.validate()
     }
 
     func test_successfullyParsedBasicMetadata() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // title is Books
         XCTAssertEqual(apiDoc.info.title, "Books API")
@@ -75,7 +75,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedRoutes() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
         XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/addBook"))
@@ -96,7 +96,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedComponents() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["alt"])
@@ -110,7 +110,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     }
 
     func test_someReferences() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
 
@@ -120,5 +120,18 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(addBooksParameters?.count, 11)
         XCTAssertEqual(addBooksParameters?.first?.description, "JSONP")
         XCTAssertEqual(addBooksParameters?.first?.context, .query)
+    }
+
+    func test_dereferencedComponents() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let dereferencedDoc = try apiDoc.locallyDereferenced()
+
+        // params are all $refs to Components Object
+        XCTAssertTrue(
+            dereferencedDoc.paths["/books/v1/volumes/{volumeId}/layersummary/{summaryId}"]?.parameters
+                .contains { param in param.description == "OAuth access token." }
+                ?? false
+        )
     }
 }

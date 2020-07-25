@@ -44,13 +44,13 @@ final class TomTomAPICampatibilityTests: XCTestCase {
     }
 
     func test_passesValidation() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         try apiDoc.validate()
     }
 
     func test_successfullyParsedBasicMetadata() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // title is Search
         XCTAssertEqual(apiDoc.info.title, "Search")
@@ -69,7 +69,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedRoutes() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
         XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/additionalData.{ext}"))
@@ -90,7 +90,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedComponents() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["btmRight"])
@@ -101,5 +101,14 @@ final class TomTomAPICampatibilityTests: XCTestCase {
 
         // check for known security scheme
         XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
+    }
+
+    func test_dereferencedComponents() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let dereferencedDoc = try apiDoc.locallyDereferenced()
+
+        // response is a $ref to Components Object
+        XCTAssertEqual(dereferencedDoc.paths["/search/{versionNumber}/cS/{category}.{ext}"]?.get?.responses[.status(code: 200)]?.description, "OK: the search successfully returned zero or more results.")
     }
 }

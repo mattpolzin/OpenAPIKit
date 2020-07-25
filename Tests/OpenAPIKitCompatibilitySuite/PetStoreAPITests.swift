@@ -44,13 +44,13 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
     }
 
     func test_passesValidation() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         try apiDoc.validate()
     }
 
     func test_successfullyParsedBasicMetadata() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // title is Swagger Petstore - OpenAPI 3.0
         XCTAssertEqual(apiDoc.info.title, "Swagger Petstore - OpenAPI 3.0")
@@ -70,13 +70,13 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedTags() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         XCTAssertEqual(apiDoc.tags?.map { $0.name }, ["pet", "store", "user"])
     }
 
     func test_successfullyParsedRoutes() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
         XCTAssert(apiDoc.paths.contains(key: "/pet"))
@@ -100,7 +100,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedComponents() throws {
-        guard let apiDoc = apiDoc else { throw XCTSkip() }
+        guard let apiDoc = apiDoc else { return }
 
         // check for known schema
         XCTAssertNotNil(apiDoc.components.schemas["Customer"])
@@ -113,5 +113,14 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         // check for known security scheme
         XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
         XCTAssertEqual(apiDoc.components.securitySchemes["api_key"], OpenAPI.SecurityScheme.apiKey(name: "api_key", location: .header))
+    }
+
+    func test_dereferencedComponents() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let dereferencedDoc = try apiDoc.locallyDereferenced()
+
+        // Pet schema is a $ref to Components Object
+        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.underlyingJSONSchema, try JSONSchema.string.with(example: "doggie"))
     }
 }
