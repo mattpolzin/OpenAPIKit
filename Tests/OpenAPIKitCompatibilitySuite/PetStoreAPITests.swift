@@ -123,4 +123,14 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         // Pet schema is a $ref to Components Object
         XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.underlyingJSONSchema, try JSONSchema.string.with(example: "doggie"))
     }
+
+    func test_resolveDocument() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
+
+        XCTAssertEqual(resolvedDoc.routes.count, 13)
+        XCTAssertEqual(resolvedDoc.endpoints.count, 19)
+        XCTAssertEqual(resolvedDoc.tags?.count, resolvedDoc.allTags.count)
+    }
 }

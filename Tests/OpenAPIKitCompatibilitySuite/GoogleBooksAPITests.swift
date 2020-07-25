@@ -134,4 +134,14 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
                 ?? false
         )
     }
+
+    func test_resolveDocument() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
+
+        XCTAssertEqual(resolvedDoc.routes.count, 49)
+        XCTAssertEqual(resolvedDoc.endpoints.count, 51)
+        XCTAssertEqual(resolvedDoc.tags?.count, resolvedDoc.allTags.count)
+    }
 }
