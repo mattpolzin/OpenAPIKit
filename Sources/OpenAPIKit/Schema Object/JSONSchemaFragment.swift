@@ -43,6 +43,8 @@ public enum JSONSchemaFragment: Equatable {
         GeneralContext,
         ObjectContext
     )
+
+    case reference(JSONReference<JSONSchema>)
 }
 
 extension JSONSchemaFragment {
@@ -223,6 +225,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.format
+        case .reference:
+            return nil
         }
     }
 
@@ -236,6 +240,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.description
+        case .reference:
+            return nil
         }
     }
 
@@ -249,6 +255,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.title
+        case .reference:
+            return nil
         }
     }
 
@@ -262,6 +270,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.nullable
+        case .reference:
+            return nil
         }
     }
 
@@ -275,6 +285,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.deprecated
+        case .reference:
+            return nil
         }
     }
 
@@ -288,6 +300,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.externalDocs
+        case .reference:
+            return nil
         }
     }
 
@@ -301,6 +315,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.allowedValues
+        case .reference:
+            return nil
         }
     }
 
@@ -314,6 +330,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.example
+        case .reference:
+            return nil
         }
     }
 
@@ -327,6 +345,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.readOnly
+        case .reference:
+            return nil
         }
     }
 
@@ -340,6 +360,8 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.writeOnly
+        case .reference:
+            return nil
         }
     }
 }
@@ -428,6 +450,10 @@ extension JSONSchemaFragment: Encodable {
             try container.encodeIfPresent(objectContext.properties, forKey: .properties)
             try container.encodeIfPresent(objectContext.additionalProperties, forKey: .additionalProperties)
             try container.encodeIfPresent(objectContext.required, forKey: .required)
+        case .reference(let reference):
+            var container = encoder.singleValueContainer()
+
+            try container.encode(reference)
         }
     }
 }
@@ -508,6 +534,13 @@ extension JSONSchemaFragment.ObjectContext: Decodable {
 
 extension JSONSchemaFragment: Decodable {
     public init(from decoder: Decoder) throws {
+
+        if let singleValueContainer = try? decoder.singleValueContainer() {
+            if let ref = try? singleValueContainer.decode(JSONReference<JSONSchema>.self) {
+                self = .reference(ref)
+                return
+            }
+        }
 
         let generalContext = try GeneralContext(from: decoder)
 
