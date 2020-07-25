@@ -43,11 +43,17 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedBasicMetadata() {
-        guard let apiDoc = apiDoc else { return }
+    func test_passesValidation() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
+
+        try apiDoc.validate()
+    }
+
+    func test_successfullyParsedBasicMetadata() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // title is Books
-        XCTAssertEqual(apiDoc.info.title, "Books")
+        XCTAssertEqual(apiDoc.info.title, "Books API")
 
         // description is set
         XCTAssertFalse(apiDoc.info.description?.isEmpty ?? true)
@@ -68,29 +74,29 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         XCTAssertNotNil(apiDoc.servers.first)
     }
 
-    func test_successfullyParsedRoutes() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedRoutes() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // just check for a few of the known paths
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/addBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/deleteBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/cloudloading/updateBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/dictionary/listOfflineMetadata"))
-        XCTAssert(apiDoc.paths.contains(key: "/familysharing/getFamilyInfo"))
-        XCTAssert(apiDoc.paths.contains(key: "/familysharing/share"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/addBook"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/deleteBook"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/updateBook"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/dictionary/listOfflineMetadata"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/familysharing/getFamilyInfo"))
+        XCTAssert(apiDoc.paths.contains(key: "/books/v1/familysharing/share"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/cloudloading/addBook"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/books/v1/cloudloading/addBook"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/dictionary/listOfflineMetadata"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/dictionary/listOfflineMetadata"]?.parameters.isEmpty ?? true)
+        XCTAssertFalse(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.parameters.isEmpty ?? true)
     }
 
-    func test_successfullyParsedComponents() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedComponents() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["alt"])
@@ -103,16 +109,16 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         XCTAssertNotNil(apiDoc.components.securitySchemes["Oauth2"])
     }
 
-    func test_someReferences() {
-        guard let apiDoc = apiDoc else { return }
+    func test_someReferences() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
-        let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
+        let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
 
         let addBooksParameters = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
 
         XCTAssertNotNil(addBooksParameters)
-        XCTAssertEqual(addBooksParameters?.count, 7)
-        XCTAssertEqual(addBooksParameters?.first?.description, "Data format for the response.")
+        XCTAssertEqual(addBooksParameters?.count, 11)
+        XCTAssertEqual(addBooksParameters?.first?.description, "JSONP")
         XCTAssertEqual(addBooksParameters?.first?.context, .query)
     }
 }

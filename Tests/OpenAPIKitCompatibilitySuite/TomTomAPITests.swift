@@ -43,8 +43,14 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedBasicMetadata() {
-        guard let apiDoc = apiDoc else { return }
+    func test_passesValidation() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
+
+        try apiDoc.validate()
+    }
+
+    func test_successfullyParsedBasicMetadata() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // title is Search
         XCTAssertEqual(apiDoc.info.title, "Search")
@@ -62,8 +68,8 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         XCTAssertNotNil(apiDoc.servers.first)
     }
 
-    func test_successfullyParsedRoutes() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedRoutes() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // just check for a few of the known paths
         XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/additionalData.{ext}"))
@@ -83,8 +89,8 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         XCTAssertFalse(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.parameters.isEmpty ?? true)
     }
 
-    func test_successfullyParsedComponents() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedComponents() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // check for a known parameter
         XCTAssertNotNil(apiDoc.components.parameters["btmRight"])

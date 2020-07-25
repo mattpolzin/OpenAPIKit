@@ -43,8 +43,14 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedBasicMetadata() {
-        guard let apiDoc = apiDoc else { return }
+    func test_passesValidation() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
+
+        try apiDoc.validate()
+    }
+
+    func test_successfullyParsedBasicMetadata() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // title is Swagger Petstore - OpenAPI 3.0
         XCTAssertEqual(apiDoc.info.title, "Swagger Petstore - OpenAPI 3.0")
@@ -63,14 +69,14 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(apiDoc.servers.first?.url.path, "/v3")
     }
 
-    func test_successfullyParsedTags() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedTags() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         XCTAssertEqual(apiDoc.tags?.map { $0.name }, ["pet", "store", "user"])
     }
 
-    func test_successfullyParsedRoutes() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedRoutes() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // just check for a few of the known paths
         XCTAssert(apiDoc.paths.contains(key: "/pet"))
@@ -93,8 +99,8 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64, required: false))
     }
 
-    func test_successfullyParsedComponents() {
-        guard let apiDoc = apiDoc else { return }
+    func test_successfullyParsedComponents() throws {
+        guard let apiDoc = apiDoc else { throw XCTSkip() }
 
         // check for known schema
         XCTAssertNotNil(apiDoc.components.schemas["Customer"])
