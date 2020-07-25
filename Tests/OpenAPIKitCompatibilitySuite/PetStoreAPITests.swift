@@ -43,7 +43,13 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedBasicMetadata() {
+    func test_passesValidation() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        try apiDoc.validate()
+    }
+
+    func test_successfullyParsedBasicMetadata() throws {
         guard let apiDoc = apiDoc else { return }
 
         // title is Swagger Petstore - OpenAPI 3.0
@@ -63,13 +69,13 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(apiDoc.servers.first?.url.path, "/v3")
     }
 
-    func test_successfullyParsedTags() {
+    func test_successfullyParsedTags() throws {
         guard let apiDoc = apiDoc else { return }
 
         XCTAssertEqual(apiDoc.tags?.map { $0.name }, ["pet", "store", "user"])
     }
 
-    func test_successfullyParsedRoutes() {
+    func test_successfullyParsedRoutes() throws {
         guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
@@ -93,7 +99,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64, required: false))
     }
 
-    func test_successfullyParsedComponents() {
+    func test_successfullyParsedComponents() throws {
         guard let apiDoc = apiDoc else { return }
 
         // check for known schema
@@ -107,5 +113,24 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         // check for known security scheme
         XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
         XCTAssertEqual(apiDoc.components.securitySchemes["api_key"], OpenAPI.SecurityScheme.apiKey(name: "api_key", location: .header))
+    }
+
+    func test_dereferencedComponents() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let dereferencedDoc = try apiDoc.locallyDereferenced()
+
+        // Pet schema is a $ref to Components Object
+        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.underlyingJSONSchema, try JSONSchema.string.with(example: "doggie"))
+    }
+
+    func test_resolveDocument() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
+
+        XCTAssertEqual(resolvedDoc.routes.count, 13)
+        XCTAssertEqual(resolvedDoc.endpoints.count, 19)
+        XCTAssertEqual(resolvedDoc.tags?.count, resolvedDoc.allTags.count)
     }
 }
