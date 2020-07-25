@@ -190,9 +190,9 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t1))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t1))
 
-        XCTAssertThrowsError(try testDecoder.decode(JSONSchemaFragment.self, from: t2))
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t2))
     }
 
     func test_generalEncode() throws {
@@ -815,7 +815,7 @@ extension SchemaFragmentTests {
     func test_referenceEncode() throws {
         let t1 = JSONSchemaFragment.reference(.component(named: "test"))
 
-        let encoded = try testStringFromEncoding(of: t1)
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
 
         assertJSONEquivalent(
             encoded,
@@ -835,7 +835,7 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try testDecoder.decode(JSONSchemaFragment.self, from: t1)
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t1)
 
         XCTAssertEqual(decoded, .reference(.component(named: "test")))
     }
