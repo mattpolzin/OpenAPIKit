@@ -43,7 +43,13 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedBasicMetadata() {
+    func test_passesValidation() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        try apiDoc.validate()
+    }
+
+    func test_successfullyParsedBasicMetadata() throws {
         guard let apiDoc = apiDoc else { return }
 
         // title is Search
@@ -62,7 +68,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         XCTAssertNotNil(apiDoc.servers.first)
     }
 
-    func test_successfullyParsedRoutes() {
+    func test_successfullyParsedRoutes() throws {
         guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
@@ -83,7 +89,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         XCTAssertFalse(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.parameters.isEmpty ?? true)
     }
 
-    func test_successfullyParsedComponents() {
+    func test_successfullyParsedComponents() throws {
         guard let apiDoc = apiDoc else { return }
 
         // check for a known parameter
@@ -95,5 +101,25 @@ final class TomTomAPICampatibilityTests: XCTestCase {
 
         // check for known security scheme
         XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
+    }
+
+    func test_dereferencedComponents() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let dereferencedDoc = try apiDoc.locallyDereferenced()
+
+        // response is a $ref to Components Object
+        XCTAssertEqual(dereferencedDoc.paths["/search/{versionNumber}/cS/{category}.{ext}"]?.get?.responses[.status(code: 200)]?.description, "OK: the search successfully returned zero or more results.")
+    }
+
+    func test_resolveDocument() throws {
+        guard let apiDoc = apiDoc else { return }
+
+        let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
+
+        XCTAssertEqual(resolvedDoc.routes.count, 16)
+        XCTAssertEqual(resolvedDoc.endpoints.count, 19)
+        XCTAssertNil(resolvedDoc.tags)
+        XCTAssertEqual(resolvedDoc.allTags.count, 5)
     }
 }
