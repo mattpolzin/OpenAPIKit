@@ -72,7 +72,7 @@ extension OpenAPI.Example: Encodable {
 
         switch value {
         case .a(let url):
-            try container.encode(url, forKey: .externalValue)
+            try container.encode(url.absoluteURL, forKey: .externalValue)
         case .b(let example):
             try container.encode(example, forKey: .value)
         }
@@ -93,7 +93,7 @@ extension OpenAPI.Example: Decodable {
             )
         }
 
-        let externalValue = try container.decodeIfPresent(URL.self, forKey: .externalValue)
+        let externalValue = try container.decodeURLAsStringIfPresent(forKey: .externalValue)
 
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
         description = try container.decodeIfPresent(String.self, forKey: .description)

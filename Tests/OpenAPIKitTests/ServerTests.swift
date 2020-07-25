@@ -57,14 +57,14 @@ extension ServerTests {
 }
 """.data(using: .utf8)!
 
-        let serverDecoded = try! testDecoder.decode(Server.self, from: serverData)
+        let serverDecoded = try! orderUnstableDecode(Server.self, from: serverData)
 
         XCTAssertEqual(serverDecoded, Server(url: URL(string: "https://hello.com")!))
     }
 
     func test_minimalServer_encode() {
         let server = Server(url: URL(string: "https://hello.com")!)
-        let encodedServer = try! testStringFromEncoding(of: server)
+        let encodedServer = try! orderUnstableTestStringFromEncoding(of: server)
 
         assertJSONEquivalent(encodedServer,
 """
@@ -96,7 +96,7 @@ extension ServerTests {
 }
 """.data(using: .utf8)!
 
-        let serverDecoded = try! testDecoder.decode(Server.self, from: serverData)
+        let serverDecoded = try! orderUnstableDecode(Server.self, from: serverData)
 
         XCTAssertEqual(
             serverDecoded,
@@ -130,7 +130,7 @@ extension ServerTests {
             ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
-        let encodedServer = try! testStringFromEncoding(of: server)
+        let encodedServer = try! orderUnstableTestStringFromEncoding(of: server)
 
         assertJSONEquivalent(encodedServer,
 """

@@ -133,7 +133,7 @@ extension ParameterTests {
             content: [ .json: .init(schema: .string)]
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -171,7 +171,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -191,7 +191,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -221,7 +221,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -240,7 +240,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -268,7 +268,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(parameter.location, .query)
         XCTAssertEqual(
@@ -293,7 +293,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -323,7 +323,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -342,7 +342,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -372,7 +372,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -391,7 +391,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -419,7 +419,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(parameter.location, .header)
         XCTAssertEqual(
@@ -439,7 +439,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -469,7 +469,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -488,7 +488,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -516,7 +516,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(parameter.location, .cookie)
         XCTAssertEqual(
@@ -536,7 +536,7 @@ extension ParameterTests {
             schema: .string
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -566,7 +566,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -586,7 +586,7 @@ extension ParameterTests {
             deprecated: true
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -618,7 +618,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(
             parameter,
@@ -639,7 +639,7 @@ extension ParameterTests {
             description: "world"
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -671,7 +671,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(parameter.location, .path)
         XCTAssertEqual(
@@ -694,7 +694,7 @@ extension ParameterTests {
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
-        let encodedParameter = try testStringFromEncoding(of: parameter)
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
 
         assertJSONEquivalent(
             encodedParameter,
@@ -734,7 +734,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        let parameter = try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData)
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
         XCTAssertEqual(parameter.location, .path)
         XCTAssertEqual(
@@ -769,7 +769,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData))
     }
 
     func test_decodeNonRequiredPathParam_throws() {
@@ -785,7 +785,7 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData))
 
         let parameterData2 =
 """
@@ -798,6 +798,6 @@ extension ParameterTests {
 }
 """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Parameter.self, from: parameterData2))
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData2))
     }
 }

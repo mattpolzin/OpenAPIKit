@@ -220,7 +220,7 @@ extension ParameterSchemaTests {
             style: .default(for: .path)
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -250,7 +250,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,
@@ -268,7 +268,7 @@ extension ParameterSchemaTests {
             example: "hello"
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -300,7 +300,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,
@@ -321,7 +321,7 @@ extension ParameterSchemaTests {
             ]
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -361,7 +361,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,
@@ -381,7 +381,7 @@ extension ParameterSchemaTests {
             style: .form
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -413,7 +413,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,
@@ -431,7 +431,7 @@ extension ParameterSchemaTests {
             explode: true
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -463,7 +463,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,
@@ -482,7 +482,7 @@ extension ParameterSchemaTests {
             allowReserved: true
         )
 
-        let encodedSchema = try testStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
+        let encodedSchema = try orderUnstableTestStringFromEncoding(of: SchemaWrapper(location: .path, schema: schema))
 
         assertJSONEquivalent(
             encodedSchema,
@@ -514,7 +514,7 @@ extension ParameterSchemaTests {
 }
 """.data(using: .utf8)!
 
-        let schema = try testDecoder.decode(SchemaWrapper.self, from: schemaData).schema
+        let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
         XCTAssertEqual(
             schema,

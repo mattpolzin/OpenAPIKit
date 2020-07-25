@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FineJSON
 import XCTest
 
-let testEncoder = { () -> JSONEncoder in
+fileprivate let foundationTestEncoder = { () -> JSONEncoder in
     let encoder = JSONEncoder()
     if #available(macOS 10.13, *) {
         encoder.dateEncodingStrategy = .iso8601
@@ -23,11 +24,23 @@ let testEncoder = { () -> JSONEncoder in
     return encoder
 }()
 
-func testStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
-    return String(data: try testEncoder.encode(entity), encoding: .utf8)
+func orderUnstableEncode<T: Encodable>(_ value: T) throws -> Data {
+    return try foundationTestEncoder.encode(value)
 }
 
-let testDecoder = { () -> JSONDecoder in
+func orderUnstableTestStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
+    return String(data: try orderUnstableEncode(entity), encoding: .utf8)
+}
+
+fileprivate let fineJSONTestEncoder = { () -> FineJSONEncoder in
+    return FineJSONEncoder()
+}()
+
+func orderStableEncode<T: Encodable>(_ value: T) throws -> Data {
+    return try fineJSONTestEncoder.encode(value)
+}
+
+fileprivate let foundationTestDecoder = { () -> JSONDecoder in
     let decoder = JSONDecoder()
     if #available(macOS 10.12, *) {
         decoder.dateDecodingStrategy = .iso8601
@@ -39,6 +52,18 @@ let testDecoder = { () -> JSONDecoder in
     #endif
     return decoder
 }()
+
+func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+    return try foundationTestDecoder.decode(T.self, from: data)
+}
+
+fileprivate let fineJSONTestDecoder = { () -> FineJSONDecoder in
+    return FineJSONDecoder()
+}()
+
+func orderStableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+    return try fineJSONTestDecoder.decode(T.self, from: data)
+}
 
 func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString = #file, line: UInt = #line) {
 

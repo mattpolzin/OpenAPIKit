@@ -62,7 +62,7 @@ extension SecuritySchemeTests {
     func test_apiKeyWithoutDescription_encode() throws {
         let apiKey = OpenAPI.SecurityScheme.apiKey(name: "hi", location: .header)
 
-        let encodedApiKey = try testStringFromEncoding(of: apiKey)
+        let encodedApiKey = try orderUnstableTestStringFromEncoding(of: apiKey)
 
         assertJSONEquivalent(
             encodedApiKey,
@@ -86,7 +86,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let apiKey = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: apiKeyData)
+        let apiKey = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: apiKeyData)
 
         XCTAssertEqual(
             apiKey,
@@ -97,7 +97,7 @@ extension SecuritySchemeTests {
     func test_apiKeyWithDescription_encode() throws {
         let apiKey = OpenAPI.SecurityScheme.apiKey(name: "hi", location: .header, description: "hello")
 
-        let encodedApiKey = try testStringFromEncoding(of: apiKey)
+        let encodedApiKey = try orderUnstableTestStringFromEncoding(of: apiKey)
 
         assertJSONEquivalent(
             encodedApiKey,
@@ -123,7 +123,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let apiKey = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: apiKeyData)
+        let apiKey = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: apiKeyData)
 
         XCTAssertEqual(
             apiKey,
@@ -134,7 +134,7 @@ extension SecuritySchemeTests {
     func test_http_encode() throws {
         let http = OpenAPI.SecurityScheme.http(scheme: "hi")
 
-        let encodedHttp = try testStringFromEncoding(of: http)
+        let encodedHttp = try orderUnstableTestStringFromEncoding(of: http)
 
         assertJSONEquivalent(
             encodedHttp,
@@ -156,7 +156,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let http = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: httpData)
+        let http = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: httpData)
 
         XCTAssertEqual(
             http,
@@ -167,7 +167,7 @@ extension SecuritySchemeTests {
     func test_httpWithBearer_encode() throws {
         let http = OpenAPI.SecurityScheme.http(scheme: "hi", bearerFormat: "hello")
 
-        let encodedHttp = try testStringFromEncoding(of: http)
+        let encodedHttp = try orderUnstableTestStringFromEncoding(of: http)
 
         assertJSONEquivalent(
             encodedHttp,
@@ -191,7 +191,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let http = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: httpData)
+        let http = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: httpData)
 
         XCTAssertEqual(
             http,
@@ -209,7 +209,7 @@ extension SecuritySchemeTests {
             )
         )
 
-        let encodedOAuth = try testStringFromEncoding(of: oauth)
+        let encodedOAuth = try orderUnstableTestStringFromEncoding(of: oauth)
 
         assertJSONEquivalent(
             encodedOAuth,
@@ -245,7 +245,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let oauth = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: oauthData)
+        let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
 
         XCTAssertEqual(
             oauth,
@@ -263,7 +263,7 @@ extension SecuritySchemeTests {
     func test_openIdConnect_encode() throws {
         let openIdConnect = OpenAPI.SecurityScheme.openIdConnect(url: URL(string: "http://google.com")!)
 
-        let encodedOpenIdConnect = try testStringFromEncoding(of: openIdConnect)
+        let encodedOpenIdConnect = try orderUnstableTestStringFromEncoding(of: openIdConnect)
 
         assertJSONEquivalent(
             encodedOpenIdConnect,
@@ -285,7 +285,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let openIdConnect = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
+        let openIdConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
 
         XCTAssertEqual(
             openIdConnect,
@@ -301,7 +301,7 @@ extension SecuritySchemeTests {
             vendorExtensions: [ "x-specialFeature": "hello" ]
         )
 
-        let encodedOpenIdConnect = try testStringFromEncoding(of: openIdConnect)
+        let encodedOpenIdConnect = try orderUnstableTestStringFromEncoding(of: openIdConnect)
 
         assertJSONEquivalent(
             encodedOpenIdConnect,
@@ -325,7 +325,7 @@ extension SecuritySchemeTests {
 }
 """.data(using: .utf8)!
 
-        let openIdConnect = try testDecoder.decode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
+        let openIdConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
 
         XCTAssertEqual(
             openIdConnect,

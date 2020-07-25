@@ -28,7 +28,7 @@ extension ExternalDocumentationTests {
             vendorExtensions: [ "x-specialFeature": "hi" ]
         )
 
-        let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
+        let encodedExternalDoc = try! orderUnstableTestStringFromEncoding(of: externalDoc)
 
         assertJSONEquivalent(encodedExternalDoc,
 """
@@ -50,7 +50,7 @@ extension ExternalDocumentationTests {
   "x-specialFeature" : "hi"
 }
 """.data(using: .utf8)!
-        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
+        let externalDocs = try! orderUnstableDecode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
         XCTAssertEqual(
             externalDocs,
@@ -66,7 +66,7 @@ extension ExternalDocumentationTests {
         let externalDoc = OpenAPI.ExternalDocumentation(description: "hello world",
                                               url: URL(string: "http://google.com")!)
 
-        let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
+        let encodedExternalDoc = try! orderUnstableTestStringFromEncoding(of: externalDoc)
 
         assertJSONEquivalent(encodedExternalDoc,
 """
@@ -86,7 +86,7 @@ extension ExternalDocumentationTests {
   "url" : "http:\\/\\/google.com"
 }
 """.data(using: .utf8)!
-        let externalDocs = try! testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
+        let externalDocs = try! orderUnstableDecode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
         XCTAssertEqual(externalDocs, OpenAPI.ExternalDocumentation(description: "hello world",
                                                 url: URL(string: "http://google.com")!))
@@ -95,7 +95,7 @@ extension ExternalDocumentationTests {
     func test_onlyUrl_encode() {
         let externalDoc = OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!)
 
-        let encodedExternalDoc = try! testStringFromEncoding(of: externalDoc)
+        let encodedExternalDoc = try! orderUnstableTestStringFromEncoding(of: externalDoc)
 
         assertJSONEquivalent(encodedExternalDoc,
 """
@@ -113,7 +113,7 @@ extension ExternalDocumentationTests {
   "url" : "http:\\/\\/google.com"
 }
 """.data(using: .utf8)!
-        let externalDocs = try testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
+        let externalDocs = try orderUnstableDecode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)
 
         XCTAssertEqual(externalDocs, OpenAPI.ExternalDocumentation(url: URL(string: "http://google.com")!))
     }
@@ -125,7 +125,7 @@ extension ExternalDocumentationTests {
   "url" : "#$^&*^#$^"
 }
 """.data(using: .utf8)!
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)) { error in
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)) { error in
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `url`: If specified, must be a valid URL.")
         }
     }

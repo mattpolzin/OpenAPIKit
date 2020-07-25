@@ -26,7 +26,7 @@ final class DiscriminatorTests: XCTestCase {
 extension DiscriminatorTests {
     func test_noMapping_encode() {
         let discriminator = OpenAPI.Discriminator(propertyName: "hello")
-        let encodedDiscriminator = try! testStringFromEncoding(of: discriminator)
+        let encodedDiscriminator = try! orderUnstableTestStringFromEncoding(of: discriminator)
 
         assertJSONEquivalent(encodedDiscriminator,
 """
@@ -44,7 +44,7 @@ extension DiscriminatorTests {
     "propertyName": "hello"
 }
 """.data(using: .utf8)!
-        let discriminator = try! testDecoder.decode(OpenAPI.Discriminator.self, from: discriminatorData)
+        let discriminator = try! orderUnstableDecode(OpenAPI.Discriminator.self, from: discriminatorData)
 
         XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello"))
     }
@@ -52,7 +52,7 @@ extension DiscriminatorTests {
     func test_withMapping_encode() {
         let discriminator = OpenAPI.Discriminator(propertyName: "hello",
                                                   mapping: ["hello": "world"])
-        let encodedDiscriminator = try! testStringFromEncoding(of: discriminator)
+        let encodedDiscriminator = try! orderUnstableTestStringFromEncoding(of: discriminator)
 
         assertJSONEquivalent(encodedDiscriminator,
 """
@@ -76,7 +76,7 @@ extension DiscriminatorTests {
     }
 }
 """.data(using: .utf8)!
-        let discriminator = try! testDecoder.decode(OpenAPI.Discriminator.self, from: discriminatorData)
+        let discriminator = try! orderUnstableDecode(OpenAPI.Discriminator.self, from: discriminatorData)
 
         XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello",
                                                             mapping: [ "hello": "world"]))
