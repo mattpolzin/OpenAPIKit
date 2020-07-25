@@ -30,6 +30,7 @@ final class SchemaFragmentTests: XCTestCase {
         assertNoGeneralProperties(JSONSchemaFragment.number(.init(), .init()))
         assertNoGeneralProperties(JSONSchemaFragment.array(.init(), .init()))
         assertNoGeneralProperties(JSONSchemaFragment.object(.init(), .init()))
+        assertNoGeneralProperties(JSONSchemaFragment.reference(.component(named: "test")))
 
         func assertSameGeneralProperties(_ fragment: JSONSchemaFragment, as properties: JSONSchemaFragment.GeneralContext, file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(fragment.allowedValues, properties.allowedValues, file: file, line: line)
@@ -171,6 +172,27 @@ extension SchemaFragmentTests {
 """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t))
+    }
+
+    func test_decodeFailsWithInvalidReference() {
+        let t1 =
+"""
+{
+    "$ref": "not a ref !@#$%%^"
+}
+""".data(using: .utf8)!
+
+        // should be a schema reference, not a response reference.
+        let t2 =
+"""
+{
+    "$ref": "#/components/responses/test"
+}
+""".data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t1))
+
+        XCTAssertThrowsError(try orderUnstableDecode(JSONSchemaFragment.self, from: t2))
     }
 
     func test_generalEncode() throws {
@@ -788,5 +810,33 @@ extension SchemaFragmentTests {
         let decoded5 = try orderUnstableDecode(JSONSchemaFragment.self, from: t5)
 
         XCTAssertEqual(decoded5, JSONSchemaFragment.object(.init(), .init(properties: ["hello": .string(required: false)])))
+    }
+
+    func test_referenceEncode() throws {
+        let t1 = JSONSchemaFragment.reference(.component(named: "test"))
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+  "$ref" : "#\\/components\\/schemas\\/test"
+}
+"""
+        )
+    }
+
+    func test_referenceDecode() throws {
+        let t1 =
+"""
+{
+  "$ref": "#/components/schemas/test"
+}
+""".data(using: .utf8)!
+
+        let decoded = try orderUnstableDecode(JSONSchemaFragment.self, from: t1)
+
+        XCTAssertEqual(decoded, .reference(.component(named: "test")))
     }
 }
