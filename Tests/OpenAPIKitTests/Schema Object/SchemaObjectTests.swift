@@ -4085,6 +4085,12 @@ extension SchemaObjectTests {
             ],
             discriminator: .init(propertyName: "hello")
         )
+        let oneOfWithReference = JSONSchema.one(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .reference(.component(named: "test"))
+            ]
+        )
 
         testEncodingPropertyLines(
             entity: oneOf,
@@ -4136,6 +4142,25 @@ extension SchemaObjectTests {
                 "]"
             ]
         )
+
+        testEncodingPropertyLines(
+            entity: oneOfWithReference,
+            propertyLines: [
+                "\"oneOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"$ref\" : \"#\\/components\\/schemas\\/test\"",
+                "  }",
+                "]"
+            ]
+        )
     }
 
     func test_decodeOne() throws {
@@ -4158,8 +4183,18 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let oneWithReferenceData = """
+        {
+            "oneOf": [
+                { "type": "object" },
+                { "$ref": "#/components/schemas/test" }
+            ]
+        }
+        """.data(using: .utf8)!
+
         let one = try orderUnstableDecode(JSONSchema.self, from: oneData)
         let oneWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: oneWithDiscriminatorData)
+        let oneWithReference = try orderUnstableDecode(JSONSchema.self, from: oneWithReferenceData)
 
         XCTAssertEqual(
             one,
@@ -4181,6 +4216,16 @@ extension SchemaObjectTests {
                 discriminator: .init(propertyName: "hello")
             )
         )
+
+        XCTAssertEqual(
+            oneWithReference,
+            JSONSchema.one(
+                of: [
+                    .object(.init(format: .generic, required: false), .init(properties: [:])),
+                    .reference(.component(named: "test"))
+                ]
+            )
+        )
     }
 
     func test_encodeAny() {
@@ -4197,6 +4242,13 @@ extension SchemaObjectTests {
                 .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
             ],
             discriminator: .init(propertyName: "hello")
+        )
+
+        let anyOfWithReference = JSONSchema.any(
+            of: [
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .reference(.component(named: "test"))
+            ]
         )
 
         testEncodingPropertyLines(
@@ -4249,6 +4301,25 @@ extension SchemaObjectTests {
                 "}"
             ]
         )
+
+        testEncodingPropertyLines(
+            entity: anyOfWithReference,
+            propertyLines: [
+                "\"anyOf\" : [",
+                "  {",
+                "    \"properties\" : {",
+                "      \"hello\" : {",
+                "        \"type\" : \"string\"",
+                "      }",
+                "    },",
+                "    \"type\" : \"object\"",
+                "  },",
+                "  {",
+                "    \"$ref\" : \"#\\/components\\/schemas\\/test\"",
+                "  }",
+                "]"
+            ]
+        )
     }
 
     func test_decodeAny() throws {
@@ -4271,8 +4342,18 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let anyWithReferenceData = """
+        {
+            "anyOf": [
+                { "type": "boolean" },
+                { "$ref": "#/components/schemas/test" }
+            ]
+        }
+        """.data(using: .utf8)!
+
         let any = try orderUnstableDecode(JSONSchema.self, from: anyData)
         let anyWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: anyWithDiscriminatorData)
+        let anyWithReference = try orderUnstableDecode(JSONSchema.self, from: anyWithReferenceData)
 
         XCTAssertEqual(
             any,
@@ -4292,6 +4373,16 @@ extension SchemaObjectTests {
                     .object(.init(format: .generic, required: false), .init(properties: [:]))
                 ],
                 discriminator: .init(propertyName: "hello")
+            )
+        )
+
+        XCTAssertEqual(
+            anyWithReference,
+            JSONSchema.any(
+                of: [
+                    .boolean(.init(format: .generic, required: false)),
+                    .reference(.component(named: "test"))
+                ]
             )
         )
     }
