@@ -207,8 +207,8 @@ extension OpenAPI.Components {
         case requestBodies
         case headers
         case securitySchemes
-        // case links
-        // case callbacks
+        case links
+        case callbacks
 
         case extended(String)
 
@@ -220,7 +220,9 @@ extension OpenAPI.Components {
                 .examples,
                 .requestBodies,
                 .headers,
-                .securitySchemes
+                .securitySchemes,
+                .links,
+                .callbacks
             ]
         }
 
@@ -244,6 +246,10 @@ extension OpenAPI.Components {
                 self = .headers
             case "securitySchemes":
                 self = .securitySchemes
+            case "links":
+                self = .links
+            case "callbacks":
+                self = .callbacks
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -265,6 +271,10 @@ extension OpenAPI.Components {
                 return "headers"
             case .securitySchemes:
                 return "securitySchemes"
+            case .links:
+                return "links"
+            case .callbacks:
+                return "callbacks"
             case .extended(let key):
                 return key
             }

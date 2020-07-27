@@ -391,6 +391,46 @@ extension ComponentsTests {
             )
         )
     }
+
+    func test_doesNotFailDecodingLinks() {
+        let t1 = """
+{
+  "links" : {
+    "link" : {
+      "operationId" : "test",
+      "parameters" : {
+        "userId" : "$response.body#/id",
+        "description" : "A link test"
+      }
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
+    }
+
+    func test_doesNotFailDecodingCallbacks() {
+        let t1 = """
+{
+  "callbacks" : {
+    "callback" : {
+      "{$request.query.queryUrl}" : {
+        "post" : {
+          "responses" : {
+            "200" : {
+              "description" : "callback successfully processed"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
+    }
 }
 
 // MARK: ComponentKey
