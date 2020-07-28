@@ -160,6 +160,12 @@ extension OpenAPI.Header {
         case content
         case schema
 
+        // the following are parsed as part of Schema
+        case style
+        case allowReserved
+        case example
+        case examples
+
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
@@ -168,7 +174,11 @@ extension OpenAPI.Header {
                 .required,
                 .deprecated,
                 .content,
-                .schema
+                .schema,
+                .style,
+                .allowReserved,
+                .example,
+                .examples
             ]
         }
 
@@ -188,6 +198,14 @@ extension OpenAPI.Header {
                 self = .content
             case "schema":
                 self = .schema
+            case "style":
+                self = .style
+            case "allowReserved":
+                self = .allowReserved
+            case "example":
+                self = .example
+            case "examples":
+                self = .examples
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -205,6 +223,14 @@ extension OpenAPI.Header {
                 return "content"
             case .schema:
                 return "schema"
+            case .style:
+                return "style"
+            case .allowReserved:
+                return "allowReserved"
+            case .example:
+                return "example"
+            case .examples:
+                return "examples"
             case .extended(let key):
                 return key
             }
