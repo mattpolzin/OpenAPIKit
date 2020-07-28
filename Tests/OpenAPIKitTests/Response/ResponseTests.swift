@@ -269,6 +269,25 @@ extension ResponseTests {
             )
         )
     }
+
+    func test_doesNotFailDecodingLinks() {
+        let t1 = """
+{
+  "description" : "test",
+  "links" : {
+    "link" : {
+      "operationId" : "test",
+      "parameters" : {
+        "userId" : "$response.body#/id",
+        "description" : "A link test"
+      }
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Response.self, from: t1))
+    }
 }
 
 // MARK: Response Status Code
