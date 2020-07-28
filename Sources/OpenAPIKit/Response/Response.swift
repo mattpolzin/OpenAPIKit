@@ -151,15 +151,15 @@ extension OpenAPI.Response {
         case description
         case headers
         case content
-        //        case links
+        case links
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .description,
                 .headers,
-                .content
-//                .links
+                .content,
+                .links
             ]
         }
 
@@ -175,6 +175,8 @@ extension OpenAPI.Response {
                 self = .headers
             case "content":
                 self = .content
+            case "links":
+                self = .links
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -188,6 +190,8 @@ extension OpenAPI.Response {
                 return "headers"
             case .content:
                 return "content"
+            case .links:
+                return "links"
             case .extended(let key):
                 return key
             }
