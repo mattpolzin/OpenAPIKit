@@ -140,7 +140,7 @@ paths:
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `Vendor Extension` in .content['application/json'] for the request body of the **GET** endpoint under `/hello/world`: Found a vendor extension property that does not begin with the required 'x-' prefix.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `Vendor Extension` in .content['application/json'] for the request body of the **GET** endpoint under `/hello/world`: Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: [ invalid ].")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",
