@@ -176,6 +176,7 @@ extension OpenAPI.Header {
                 .content,
                 .schema,
                 .style,
+                .allowReserved,
                 .example,
                 .examples
             ]
