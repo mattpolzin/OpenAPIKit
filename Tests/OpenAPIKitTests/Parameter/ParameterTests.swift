@@ -685,6 +685,66 @@ extension ParameterTests {
         )
     }
 
+    func test_example_encode() throws {
+        let parameter = OpenAPI.Parameter(
+            name: "hello",
+            context: .header(required: true),
+            schema: .init(
+                .string,
+                style: .default(for: .header),
+                example: "hello string"
+            )
+        )
+
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
+
+        assertJSONEquivalent(
+            encodedParameter,
+"""
+{
+  "example" : "hello string",
+  "in" : "header",
+  "name" : "hello",
+  "required" : true,
+  "schema" : {
+    "type" : "string"
+  }
+}
+"""
+        )
+    }
+
+    func test_example_decode() throws {
+        let parameterData =
+            """
+{
+  "example" : "hello string",
+  "in" : "header",
+  "name" : "hello",
+  "required" : true,
+  "schema" : {
+    "type" : "string"
+  }
+}
+""".data(using: .utf8)!
+
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
+
+        XCTAssertEqual(parameter.location, .header)
+        XCTAssertEqual(
+            parameter,
+            OpenAPI.Parameter(
+                name: "hello",
+                context: .header(required: true),
+                schema: .init(
+                    .string(required: false),
+                    style: .default(for: .header),
+                    example: "hello string"
+                )
+            )
+        )
+    }
+
     func test_vendorExtension_encode() throws {
         let parameter = OpenAPI.Parameter(
             name: "hello",
