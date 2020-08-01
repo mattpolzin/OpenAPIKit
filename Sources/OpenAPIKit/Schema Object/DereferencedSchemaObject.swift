@@ -286,7 +286,7 @@ extension JSONSchema: LocallyDereferenceable {
     public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedJSONSchema {
         switch self {
         case .reference(let reference):
-            return try components.forceDereference(reference)
+            return try reference.dereferenced(in: components)
         case .boolean(let context):
             return .boolean(context)
         case .object(let generalContext, let objectContext):

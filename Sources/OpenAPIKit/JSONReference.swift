@@ -342,3 +342,15 @@ extension JSONReference: Decodable {
         }
     }
 }
+
+// MARK: - LocallyDereferenceable
+extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
+    /// Look up the component this reference points to and then
+    /// dereference it.
+    ///
+    /// If you just want to look the reference up, use the `subscript` or the
+    /// `lookup()` method on `Components`.
+    public func dereferenced(in components: OpenAPI.Components) throws -> ReferenceType.DereferencedSelf {
+        return try components.lookup(self).dereferenced(in: components)
+    }
+}

@@ -152,3 +152,13 @@ extension OpenAPI.Example {
         }
     }
 }
+
+// MARK: - LocallyDereferenceable
+extension OpenAPI.Example: LocallyDereferenceable {
+
+    /// Examples do not contain any references but for convenience
+    /// they can be "dereferenced" to themselves.
+    public func dereferenced(in components: OpenAPI.Components) throws -> OpenAPI.Example {
+        return self
+    }
+}

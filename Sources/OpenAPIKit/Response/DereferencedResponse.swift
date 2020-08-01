@@ -28,20 +28,30 @@ public struct DereferencedResponse: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ response: OpenAPI.Response, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ response: OpenAPI.Response, resolvingIn components: OpenAPI.Components) throws {
         self.headers = try response.headers?.mapValues { header in
-            try DereferencedHeader(
-                try components.forceDereference(header),
-                resolvingIn: components
-            )
+            try header.dereferenced(in: components)
         }
 
         self.content = try response.content.mapValues { content in
-            try DereferencedContent(content, resolvingIn: components)
+            try content.dereferenced(in: components)
         }
 
         self.underlyingResponse = response
     }
 
     public typealias Map = OrderedDictionary<OpenAPI.Response.StatusCode, DereferencedResponse>
+}
+
+extension OpenAPI.Response: LocallyDereferenceable {
+    /// Create a `DereferencedResponse` if all references in the
+    /// response can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedResponse {
+        return try DereferencedResponse(self, resolvingIn: components)
+    }
 }

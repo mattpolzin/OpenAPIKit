@@ -18,22 +18,32 @@ public struct DereferencedContentEncoding: Equatable {
     }
 
     /// Create a `DereferencedContentEncoding` if all references in the
-    /// content can be found in the given Components Object.
+    /// content encoding can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ contentEncoding: OpenAPI.Content.Encoding, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ contentEncoding: OpenAPI.Content.Encoding, resolvingIn components: OpenAPI.Components) throws {
         self.headers = try contentEncoding.headers.map { headersMap in
             try headersMap.mapValues { header in
-                try DereferencedHeader(
-                    try components.forceDereference(header),
-                    resolvingIn: components
-                )
+                try header.dereferenced(in: components)
             }
         }
 
         self.underlyingContentEncoding = contentEncoding
+    }
+}
+
+extension OpenAPI.Content.Encoding: LocallyDereferenceable {
+    /// Create a `DereferencedContentEncoding` if all references in the
+    /// content encoding can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedContentEncoding {
+        return try DereferencedContentEncoding(self, resolvingIn: components)
     }
 }

@@ -36,3 +36,15 @@ public enum Either<A, B> {
 }
 
 extension Either: Equatable where A: Equatable, B: Equatable {}
+
+// MARK: - LocallyDereferenceable
+extension Either: LocallyDereferenceable where A: LocallyDereferenceable, B: LocallyDereferenceable, A.DereferencedSelf == B.DereferencedSelf {
+    public func dereferenced(in components: OpenAPI.Components) throws -> A.DereferencedSelf {
+        switch self {
+        case .a(let value):
+            return try value.dereferenced(in: components)
+        case .b(let value):
+            return try value.dereferenced(in: components)
+        }
+    }
+}

@@ -27,8 +27,8 @@ public struct DereferencedContent: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try components.forceDereference(content.schema)
+    internal init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
+        self.schema = try content.schema.dereferenced(in: components)
         let examples = try content.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 
@@ -48,4 +48,17 @@ public struct DereferencedContent: Equatable {
     }
 
     public typealias Map = OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
+}
+
+extension OpenAPI.Content: LocallyDereferenceable {
+    /// Create a `DereferencedContent` if all references in the
+    /// content can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedContent {
+        return try DereferencedContent(self, resolvingIn: components)
+    }
 }

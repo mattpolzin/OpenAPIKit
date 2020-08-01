@@ -29,23 +29,33 @@ public struct DereferencedSchemaContext: Equatable {
     }
 
     /// Create a `DereferencedSchemaContext` if all references in the
-    /// content can be found in the given Components Object.
+    /// schema context can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ schemaContext: OpenAPI.Parameter.SchemaContext, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try DereferencedJSONSchema(
-            try components.forceDereference(schemaContext.schema),
-            resolvingIn: components
-        )
-        let examples = try schemaContext.examples?.mapValues { try components.forceDereference($0) }
+    internal init(_ schemaContext: OpenAPI.Parameter.SchemaContext, resolvingIn components: OpenAPI.Components) throws {
+        self.schema = try schemaContext.schema.dereferenced(in: components)
+        let examples = try schemaContext.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
             ?? schemaContext.example
 
         self.underlyingSchemaContext = schemaContext
+    }
+}
+
+extension OpenAPI.Parameter.SchemaContext: LocallyDereferenceable {
+    /// Create a `DereferencedSchemaContext` if all references in the
+    /// schema context can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSchemaContext {
+        return try DereferencedSchemaContext(self, resolvingIn: components)
     }
 }
