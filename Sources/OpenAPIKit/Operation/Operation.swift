@@ -259,7 +259,7 @@ extension OpenAPI.Operation {
         case parameters
         case requestBody
         case responses
-//      case callbacks
+        case callbacks
         case deprecated
         case security
         case servers
@@ -276,7 +276,7 @@ extension OpenAPI.Operation {
                 .parameters,
                 .requestBody,
                 .responses,
-//                .callbacks,
+                .callbacks,
                 .deprecated,
                 .security,
                 .servers
@@ -305,6 +305,8 @@ extension OpenAPI.Operation {
                 self = .requestBody
             case "responses":
                 self = .responses
+            case "callbacks":
+                self = .callbacks
             case "deprecated":
                 self = .deprecated
             case "security":
@@ -334,6 +336,8 @@ extension OpenAPI.Operation {
                 return "requestBody"
             case .responses:
                 return "responses"
+            case .callbacks:
+                return "callbacks"
             case .deprecated:
                 return "deprecated"
             case .security:

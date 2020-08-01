@@ -250,6 +250,30 @@ extension OperationTests {
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
     }
 
+    func test_doesNotFailDecodingCallbacks() {
+        let operationData =
+"""
+{
+  "responses" : {},
+  "callbacks" : {
+    "callback" : {
+      "{$request.query.queryUrl}" : {
+        "post" : {
+          "responses" : {
+            "200" : {
+              "description" : "callback successfully processed"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+""".data(using: .utf8)!
+
+        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Operation.self, from: operationData))
+    }
+
     // Note that JSONEncoder for Linux Foundation does not respect order
     func test_responseOrder_encode() throws {
         let operation = OpenAPI.Operation(
