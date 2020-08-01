@@ -11,7 +11,7 @@ import OpenAPIKit
 
 final class DereferencedContentTests: XCTestCase {
     func test_oneExampleInline() throws {
-        let t1 = try DereferencedContent(OpenAPI.Content(schema: .string, example: "hello world"), resolvingIn: .noComponents)
+        let t1 = try OpenAPI.Content(schema: .string, example: "hello world").dereferenced(in: .noComponents)
         XCTAssertEqual(t1.example, "hello world")
     }
 
@@ -19,13 +19,10 @@ final class DereferencedContentTests: XCTestCase {
         let components = OpenAPI.Components(
             examples: ["test": .init(value: .init("hello world"))]
         )
-        let t1 = try DereferencedContent(
-            OpenAPI.Content(
-                schema: .string,
-                examples: ["test": .reference(.component(named: "test"))]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Content(
+            schema: .string,
+            examples: ["test": .reference(.component(named: "test"))]
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.example, "hello world")
         XCTAssertEqual(t1.examples, ["test": .init(value: .init("hello world"))])
     }
@@ -37,16 +34,13 @@ final class DereferencedContentTests: XCTestCase {
                 "test2": .init(value: .a(URL(string: "http://website.com")!))
             ]
         )
-        let t1 = try DereferencedContent(
-            OpenAPI.Content(
-                schema: .string,
-                examples: [
-                    "test1": .reference(.component(named: "test1")),
-                    "test2": .reference(.component(named: "test2"))
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Content(
+            schema: .string,
+            examples: [
+                "test1": .reference(.component(named: "test1")),
+                "test2": .reference(.component(named: "test2"))
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.example, "hello world")
         XCTAssertEqual(
             t1.examples,
@@ -60,18 +54,15 @@ final class DereferencedContentTests: XCTestCase {
     func test_missingExample() {
         let components = OpenAPI.Components.noComponents
         XCTAssertThrowsError(
-            try DereferencedContent(
-                OpenAPI.Content(
-                    schema: .string,
-                    examples: ["test": .reference(.component(named: "test"))]
-                ),
-                resolvingIn: components
-            )
+            try OpenAPI.Content(
+                schema: .string,
+                examples: ["test": .reference(.component(named: "test"))]
+            ).dereferenced(in: components)
         )
     }
 
     func test_inlineSchema() throws {
-        let t1 = try DereferencedContent(OpenAPI.Content(schema: .string), resolvingIn: .noComponents)
+        let t1 = try OpenAPI.Content(schema: .string).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.schema, .string(.init(), .init()))
     }
 
@@ -81,30 +72,24 @@ final class DereferencedContentTests: XCTestCase {
                 "test": .string
             ]
         )
-        let t1 = try DereferencedContent(
-            OpenAPI.Content(
-                schemaReference: .component(named: "test")
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Content(
+            schemaReference: .component(named: "test")
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.schema, .string(.init(), .init()))
     }
 
     func test_missingSchema() {
-        let components = OpenAPI.Components.noComponents
         XCTAssertThrowsError(
-            try DereferencedContent(
-                OpenAPI.Content(
-                    schemaReference: .component(named: "missing")
-                ),
-                resolvingIn: components
-            )
+            try OpenAPI.Content(
+                schemaReference: .component(named: "missing")
+            ).dereferenced(in: .noComponents)
         )
     }
 
     func test_inlineEncoding() throws {
-        let t1 = try DereferencedContent(OpenAPI.Content(schema: .string, encoding: ["test": .init()]), resolvingIn: .noComponents)
-        XCTAssertEqual(t1.encoding, ["test": try .init(.init(), resolvingIn: .noComponents)])
+        let t1 = try OpenAPI.Content(schema: .string, encoding: ["test": .init()]).dereferenced(in: .noComponents)
+        XCTAssertNotNil(t1.encoding?["test"])
+        XCTAssertNil(t1.encoding?["test"]?.headers)
     }
 
     func test_referencedHeaderInEncoding() throws {
@@ -113,19 +98,16 @@ final class DereferencedContentTests: XCTestCase {
                 "test": OpenAPI.Header(schema: .string)
             ]
         )
-        let t1 = try DereferencedContent(
-            OpenAPI.Content(
-                schema: .string,
-                encoding: [
-                    "test": .init(
-                        headers: [
-                            "test": .reference(.component(named: "test"))
-                        ]
-                    )
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Content(
+            schema: .string,
+            encoding: [
+                "test": .init(
+                    headers: [
+                        "test": .reference(.component(named: "test"))
+                    ]
+                )
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(
             t1.encoding?["test"]?.headers?["test"]?.schemaOrContent.schemaValue,
             DereferencedJSONSchema.string(.init(), .init())
@@ -136,25 +118,22 @@ final class DereferencedContentTests: XCTestCase {
 
     func test_missingHeaderInEncoding() {
         XCTAssertThrowsError(
-            try DereferencedContent(
-                OpenAPI.Content(
-                    schema: .string,
-                    encoding: [
-                        "test": .init(
-                            headers: [
-                                "test": .reference(.component(named: "test"))
-                            ]
-                        )
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Content(
+                schema: .string,
+                encoding: [
+                    "test": .init(
+                        headers: [
+                            "test": .reference(.component(named: "test"))
+                        ]
+                    )
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 
     func test_vendorExtensionThroughUnderlyingContent() throws {
         let content = OpenAPI.Content(schema: .string, vendorExtensions: ["hello": "world"])
-        let dereferencedContent = try DereferencedContent(content, resolvingIn: .noComponents)
+        let dereferencedContent = try content.dereferenced(in: .noComponents)
         XCTAssertEqual(dereferencedContent.vendorExtensions, content.vendorExtensions)
     }
 }

@@ -37,10 +37,7 @@ public struct DereferencedContent: Equatable {
 
         self.encoding = try content.encoding.map { encodingMap in
             try encodingMap.mapValues { encoding in
-                try DereferencedContentEncoding(
-                    encoding,
-                    resolvingIn: components
-                )
+                try encoding.dereferenced(in: components)
             }
         }
 

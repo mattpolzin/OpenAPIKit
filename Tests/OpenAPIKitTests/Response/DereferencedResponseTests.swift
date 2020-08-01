@@ -10,10 +10,7 @@ import OpenAPIKit
 
 final class DereferencedResponseTests: XCTestCase {
     func test_noReferencedComponents() throws {
-        let t1 = try DereferencedResponse(
-            OpenAPI.Response(description: "test"),
-            resolvingIn: .noComponents
-        )
+        let t1 = try OpenAPI.Response(description: "test").dereferenced(in: .noComponents)
         XCTAssertNil(t1.headers)
         XCTAssertEqual(t1.content.count, 0)
         // test dynamic member lookup
@@ -21,18 +18,15 @@ final class DereferencedResponseTests: XCTestCase {
     }
 
     func test_allInlinedComponents() throws {
-        let t1 = try DereferencedResponse(
-            OpenAPI.Response(
-                description: "test",
-                headers: [
-                    "Header": .header(.init(schema: .string))
-                ],
-                content: [
-                    .json: .init(schema: .string)
-                ]
-            ),
-            resolvingIn: .noComponents
-        )
+        let t1 = try OpenAPI.Response(
+            description: "test",
+            headers: [
+                "Header": .header(.init(schema: .string))
+            ],
+            content: [
+                .json: .init(schema: .string)
+            ]
+        ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.headers?["Header"]?.underlyingHeader, .init(schema: .string))
         XCTAssertEqual(t1.content[.json]?.underlyingContent, .init(schema: .string))
     }
@@ -43,29 +37,23 @@ final class DereferencedResponseTests: XCTestCase {
                 "test": .init(schema: .string)
             ]
         )
-        let t1 = try DereferencedResponse(
-            OpenAPI.Response(
-                description: "test",
-                headers: [
-                    "Header": .reference(.component(named: "test"))
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Response(
+            description: "test",
+            headers: [
+                "Header": .reference(.component(named: "test"))
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.headers?["Header"]?.underlyingHeader, .init(schema: .string))
     }
 
     func test_referencedHeaderMissing() {
         XCTAssertThrowsError(
-            try DereferencedResponse(
-                OpenAPI.Response(
-                    description: "test",
-                    headers: [
-                        "Header": .reference(.component(named: "test"))
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Response(
+                description: "test",
+                headers: [
+                    "Header": .reference(.component(named: "test"))
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 
@@ -75,29 +63,23 @@ final class DereferencedResponseTests: XCTestCase {
                 "test": .string
             ]
         )
-        let t1 = try DereferencedResponse(
-            OpenAPI.Response(
-                description: "test",
-                content: [
-                    .json: .init(schemaReference: .component(named: "test"))
-                ]
-            ),
-            resolvingIn: components
-        )
-        XCTAssertEqual(t1.content[.json]?.schema.underlyingJSONSchema, .string)
+        let t1 = try OpenAPI.Response(
+            description: "test",
+            content: [
+                .json: .init(schemaReference: .component(named: "test"))
+            ]
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.content[.json]?.schema.jsonSchema, .string)
     }
 
     func test_referencedContentMissing() {
         XCTAssertThrowsError(
-            try DereferencedResponse(
-                OpenAPI.Response(
-                    description: "test",
-                    content: [
-                        .json: .init(schemaReference: .component(named: "test"))
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Response(
+                description: "test",
+                content: [
+                    .json: .init(schemaReference: .component(named: "test"))
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 }

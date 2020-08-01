@@ -88,7 +88,7 @@ components:
 
             XCTAssertEqual(
                 resolvedDoc.endpoints[0].requestBody?
-                    .content[.json]?.schema.underlyingJSONSchema,
+                    .content[.json]?.schema.jsonSchema,
                 JSONSchema.one(
                     of: [
                         catSchema,

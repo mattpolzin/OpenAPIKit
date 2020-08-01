@@ -32,6 +32,18 @@ extension OpenAPI.Components {
             ?? false
     }
 
+    /// Retrieve a referenced item from the `Components` or
+    /// just return the item directly depending on what value
+    /// the `Either` contains.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
+        switch maybeReference {
+        case .a(let reference):
+            return self[reference]
+        case .b(let value):
+            return value
+        }
+    }
+
     /// Retrieve item referenced from the `Components`.
     ///
     /// If you want a throwing lookup, use the `lookup()` method.

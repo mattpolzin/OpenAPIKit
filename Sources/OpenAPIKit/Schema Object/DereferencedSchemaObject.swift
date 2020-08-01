@@ -326,43 +326,7 @@ extension JSONSchema: LocallyDereferenceable {
     ///
     /// To create a dereferenced schema object from a schema object
     /// that does have references, use `dereferenced(in:)`.
-    ///
-    /// - Important: This operation currently does not support the `all(of:)` schema
-    /// but you can dereference `all(of:)` schemas with the
-    /// `dereferenced(in:)` method.
     public func dereferenced() -> DereferencedJSONSchema? {
-        switch self {
-        case .reference:
-            return nil
-        case .boolean(let context):
-            return .boolean(context)
-        case .object(let generalContext, let objectContext):
-            guard let objectContext = DereferencedJSONSchema.ObjectContext(objectContext) else { return nil }
-            return .object(generalContext, objectContext)
-        case .array(let generalContext, let arrayContext):
-            guard let arrayContext = DereferencedJSONSchema.ArrayContext(arrayContext) else { return nil }
-            return .array(generalContext, arrayContext)
-        case .number(let generalContext, let numberContext):
-            return .number(generalContext, numberContext)
-        case .integer(let generalContext, let integerContext):
-            return .integer(generalContext, integerContext)
-        case .string(let generalContext, let stringContext):
-            return .string(generalContext, stringContext)
-        case .all(of: _, discriminator: _):
-            return nil
-        case .one(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap { $0.dereferenced() }
-            guard schemas.count == jsonSchemas.count else { return nil }
-            return .one(of: schemas, discriminator: discriminator)
-        case .any(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap { $0.dereferenced() }
-            guard schemas.count == jsonSchemas.count else { return nil }
-            return .any(of: schemas, discriminator: discriminator)
-        case .not(let jsonSchema):
-            guard let schema = jsonSchema.dereferenced() else { return nil }
-            return .not(schema)
-        case .undefined(description: let description):
-            return .undefined(description: description)
-        }
+        return try? dereferenced(in: .noComponents)
     }
 }
