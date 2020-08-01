@@ -28,11 +28,8 @@ public struct DereferencedContent: Equatable {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try DereferencedJSONSchema(
-            try components.forceDereference(content.schema),
-            resolvingIn: components
-        )
-        let examples = try content.examples?.mapValues { try components.forceDereference($0) }
+        self.schema = try components.forceDereference(content.schema)
+        let examples = try content.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))

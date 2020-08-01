@@ -28,7 +28,7 @@ public struct DereferencedSecurityRequirement: Equatable {
     public init(_ securityRequirement: OpenAPI.SecurityRequirement, resolvingIn components: OpenAPI.Components) throws {
 
         let scopedSchemes = try securityRequirement.map { reference, scopes -> (String, ScopedScheme) in
-            let scheme = try components.forceDereference(reference)
+            let scheme = try components.lookup(reference)
             // we know it has a name because it was just found in the
             // Components Object (or else the previous line would have thrown).
             let name = reference.name!

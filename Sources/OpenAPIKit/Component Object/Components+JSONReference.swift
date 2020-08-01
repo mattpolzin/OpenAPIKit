@@ -33,6 +33,8 @@ extension OpenAPI.Components {
     }
 
     /// Retrieve item referenced from the `Components`.
+    ///
+    /// If you want a throwing lookup, use the `lookup()` method.
     public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
         guard case .internal(let localReference) = reference else {
             return nil
@@ -42,25 +44,88 @@ extension OpenAPI.Components {
     }
 
     /// Retrieve item referenced from the `Components`.
+    ///
+    /// If you want a throwing lookup, use the `lookup()` method.
     public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> ReferenceType? {
         return reference.name
             .flatMap(OpenAPI.ComponentKey.init(rawValue:))
             .flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
     }
 
+    /// Pass a reference to a component.
+    /// `lookup()` will return the component value if it is found
+    /// in the Components Object.
+    ///
+    /// If you want to look something up without throwing, you might want to use the subscript
+    /// operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead
+    /// of just looking it up see the various `dereference` functions
+    /// on this type for more information.
+    ///
+    /// - Important: Looking up an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether the reference points to another file or just points to a component in
+    ///     the same file that cannot be found in the Components Object.
+    public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
+        guard case .internal = reference else {
+            throw ReferenceError.cannotLookupRemoteReference
+        }
+        guard let value = self[reference] else {
+            throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+        }
+        return value
+    }
+
+    /// Pass an `Either` with a reference or a component.
+    /// `lookup()` will return the component value if it is found
+    /// in the Components Object.
+    ///
+    /// If you want to look something up without throwing, you might want to use the subscript
+    /// operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead
+    /// of just looking it up see the various `dereference` functions
+    /// on this type for more information.
+    ///
+    /// - Important: Looking up an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether the reference points to another file or just points to a component in
+    ///     the same file that cannot be found in the Components Object.
+    public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
+        switch maybeReference {
+        case .a(let reference):
+            return try lookup(reference)
+        case .b(let value):
+            return value
+        }
+    }
+
     /// Pass a value that can be either a reference to a component or the component itself.
     /// `dereference()` will return the component value if it is found (in the Either wrapper
     /// or in the Components Object).
     ///
+    /// This is a recursive operation that will fully dereference everything found within the given
+    /// value.
+    ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
-    public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
+    public func dereference<ReferenceType: LocallyDereferenceable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType.DereferencedSelf? {
         return try? forceDereference(maybeReference)
     }
 
     /// Pass a value that can be either a reference to a component or the component itself.
     /// `forceDereference()` will return the component value if it is found (in the Either wrapper
     /// or in the Components Object).
+    ///
+    /// This is a recursive operation that will fully dereference everything found within the given
+    /// value.
     ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
@@ -69,7 +134,7 @@ extension OpenAPI.Components {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
-    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
+    public func forceDereference<ReferenceType: LocallyDereferenceable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType.DereferencedSelf {
         switch maybeReference {
         case .a(let reference):
             guard case .internal = reference else {
@@ -78,9 +143,9 @@ extension OpenAPI.Components {
             guard let value = self[reference] else {
                 throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
             }
-            return value
+            return try value.dereferenced(in: self)
         case .b(let value):
-            return value
+            return try value.dereferenced(in: self)
         }
     }
 
@@ -88,15 +153,21 @@ extension OpenAPI.Components {
     /// `dereference()` will return the component value if it is found
     /// in the Components Object.
     ///
+    /// This is a recursive operation that will fully dereference everything found within the given
+    /// value.
+    ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always result in `nil`.
-    public func dereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType? {
+    public func dereference<ReferenceType: LocallyDereferenceable>(_ reference: JSONReference<ReferenceType>) -> ReferenceType.DereferencedSelf? {
         return try? forceDereference(reference)
     }
 
     /// Pass a reference to a component.
     /// `forceDereference()` will return the component value if it is found
     /// in the Components Object.
+    ///
+    /// This is a recursive operation that will fully dereference everything found within the given
+    /// value.
     ///
     /// - Important: Dereferencing an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
@@ -105,14 +176,14 @@ extension OpenAPI.Components {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
-    public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
+    public func forceDereference<ReferenceType: LocallyDereferenceable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType.DereferencedSelf {
         guard case .internal = reference else {
             throw ReferenceError.cannotLookupRemoteReference
         }
         guard let value = self[reference] else {
             throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
         }
-        return value
+        return try value.dereferenced(in: self)
     }
 
     /// Create a `JSONReference`.

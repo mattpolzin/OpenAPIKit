@@ -50,3 +50,12 @@ extension OpenAPI.SecurityScheme: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "securitySchemes" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.securitySchemes }
 }
+
+/// A dereferenceable type can be recursively looked up in
+/// the `OpenAPI.Components` until there are no `JSONReferences`
+/// left in it or any of its properties.
+public protocol LocallyDereferenceable {
+    associatedtype DereferencedSelf
+
+    func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSelf
+}

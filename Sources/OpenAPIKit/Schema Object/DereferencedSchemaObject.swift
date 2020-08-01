@@ -20,7 +20,6 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
     indirect case one(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case not(DereferencedJSONSchema)
@@ -30,101 +29,18 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// description.
     case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
 
-    /// Create a `DereferencedJSONSchema` if possible.
-    ///
-    /// If the `JSONSchema` passed to this initializer has any `references`
-    /// this initializer will return `nil`.
-    ///
-    /// Use the `init(jsonSchema:resolvingIn:)` initializer to resolve
-    /// references to schemas in the Components Object when possible.
-    internal init?(_ jsonSchema: JSONSchema) {
-        switch jsonSchema {
-        case .reference:
-            return nil
-        case .boolean(let context):
-            self = .boolean(context)
-        case .object(let generalContext, let objectContext):
-            guard let objectContext = ObjectContext(objectContext) else { return nil }
-            self = .object(generalContext, objectContext)
-        case .array(let generalContext, let arrayContext):
-            guard let arrayContext = ArrayContext(arrayContext) else { return nil }
-            self = .array(generalContext, arrayContext)
-        case .number(let generalContext, let numberContext):
-            self = .number(generalContext, numberContext)
-        case .integer(let generalContext, let integerContext):
-            self = .integer(generalContext, integerContext)
-        case .string(let generalContext, let stringContext):
-            self = .string(generalContext, stringContext)
-        case .all(of: let fragments, discriminator: let discriminator):
-            self = .all(of: fragments, discriminator: discriminator)
-        case .one(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init)
-            guard schemas.count == jsonSchemas.count else { return nil }
-            self = .one(of: schemas, discriminator: discriminator)
-        case .any(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = jsonSchemas.compactMap(DereferencedJSONSchema.init)
-            guard schemas.count == jsonSchemas.count else { return nil }
-            self = .any(of: schemas, discriminator: discriminator)
-        case .not(let jsonSchema):
-            guard let schema = DereferencedJSONSchema(jsonSchema) else { return nil }
-            self = .not(schema)
-        case .undefined(description: let description):
-            self = .undefined(description: description)
-        }
-    }
-
-    /// Create a `DereferencedJSONSchema` if all references in the
-    /// schema can be found in the given Components Object.
-    ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
-    ///     on whether an unresolvable reference points to another file or just points to a
-    ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ jsonSchema: JSONSchema, resolvingIn components: OpenAPI.Components) throws {
-        switch jsonSchema {
-        case .reference(let reference):
-            self = try DereferencedJSONSchema(try components.forceDereference(reference), resolvingIn: components)
-        case .boolean(let context):
-            self = .boolean(context)
-        case .object(let generalContext, let objectContext):
-            self = try .object(
-                generalContext,
-                ObjectContext(objectContext, resolvingIn: components)
-            )
-        case .array(let generalContext, let arrayContext):
-            self = try .array(
-                generalContext,
-                ArrayContext(arrayContext, resolvingIn: components)
-            )
-        case .number(let generalContext, let numberContext):
-            self = .number(generalContext, numberContext)
-        case .integer(let generalContext, let integerContext):
-            self = .integer(generalContext, integerContext)
-        case .string(let generalContext, let stringContext):
-            self = .string(generalContext, stringContext)
-        case .all(of: let fragments, discriminator: let discriminator):
-            self = .all(of: fragments, discriminator: discriminator)
-        case .one(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init($0, resolvingIn: components) }
-            self = .one(of: schemas, discriminator: discriminator)
-        case .any(of: let jsonSchemas, discriminator: let discriminator):
-            let schemas = try jsonSchemas.map { try DereferencedJSONSchema.init($0, resolvingIn: components) }
-            self = .any(of: schemas, discriminator: discriminator)
-        case .not(let jsonSchema):
-            self = .not(try DereferencedJSONSchema(jsonSchema, resolvingIn: components))
-        case .undefined(description: let description):
-            self = .undefined(description: description)
-        }
-    }
-
     /// Get the JSONSchema representation of this
     /// dereferenced schema.
+    ///
+    /// This will not necessarily be the same schema that
+    /// was used to create this dereferenced schema if
+    /// there was one.
     ///
     /// It is always possible to represent a
     /// `DereferencedJSONSchema` as a
     /// `JSONSchema`, although the reverse is
     /// not true.
-    public var underlyingJSONSchema: JSONSchema {
+    public var jsonSchema: JSONSchema {
         switch self {
         case .boolean(let context):
             return .boolean(context)
@@ -138,14 +54,12 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .integer(generalContext, integerContext)
         case .string(let generalContext, let stringContext):
             return .string(generalContext, stringContext)
-        case .all(of: let fragments, discriminator: let discriminator):
-            return .all(of: fragments, discriminator: discriminator)
         case .one(of: let schemas, discriminator: let discriminator):
-            return .one(of: schemas.map { $0.underlyingJSONSchema }, discriminator: discriminator)
+            return .one(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
         case .any(of: let schemas, discriminator: let discriminator):
-            return .any(of: schemas.map { $0.underlyingJSONSchema }, discriminator: discriminator)
+            return .any(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
         case .not(let schema):
-            return .not(schema.underlyingJSONSchema)
+            return .not(schema.jsonSchema)
         case .undefined(description: let description):
             return .undefined(description: description)
         }
@@ -153,41 +67,41 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // automatic forwarding where possible
     public subscript<T>(dynamicMember path: KeyPath<JSONSchema, T>) -> T {
-        return underlyingJSONSchema[keyPath: path]
+        return jsonSchema[keyPath: path]
     }
 
     // See `JSONSchemaContext`
-    public var required: Bool { underlyingJSONSchema.required }
+    public var required: Bool { jsonSchema.required }
 
     // See `JSONSchemaContext`
-    public var nullable: Bool { underlyingJSONSchema.nullable }
+    public var nullable: Bool { jsonSchema.nullable }
 
     // See `JSONSchemaContext`
-    public var title: String? { underlyingJSONSchema.title }
+    public var title: String? { jsonSchema.title }
 
     // See `JSONSchemaContext`
-    public var description: String? { underlyingJSONSchema.description }
+    public var description: String? { jsonSchema.description }
 
     // See `JSONSchemaContext`
-    public var discriminator: OpenAPI.Discriminator? { underlyingJSONSchema.discriminator }
+    public var discriminator: OpenAPI.Discriminator? { jsonSchema.discriminator }
 
     // See `JSONSchemaContext`
-    public var externalDocs: OpenAPI.ExternalDocumentation? { underlyingJSONSchema.externalDocs }
+    public var externalDocs: OpenAPI.ExternalDocumentation? { jsonSchema.externalDocs }
 
     // See `JSONSchemaContext`
-    public var allowedValues: [AnyCodable]? { underlyingJSONSchema.allowedValues }
+    public var allowedValues: [AnyCodable]? { jsonSchema.allowedValues }
 
     // See `JSONSchemaContext`
-    public var example: AnyCodable? { underlyingJSONSchema.example }
+    public var example: AnyCodable? { jsonSchema.example }
 
     // See `JSONSchemaContext`
-    public var readOnly: Bool { underlyingJSONSchema.readOnly }
+    public var readOnly: Bool { jsonSchema.readOnly }
 
     // See `JSONSchemaContext`
-    public var writeOnly: Bool { underlyingJSONSchema.writeOnly }
+    public var writeOnly: Bool { jsonSchema.writeOnly }
 
     // See `JSONSchemaContext`
-    public var deprecated: Bool { underlyingJSONSchema.deprecated }
+    public var deprecated: Bool { jsonSchema.deprecated }
 }
 
 extension DereferencedJSONSchema {
@@ -229,7 +143,7 @@ extension DereferencedJSONSchema {
 
         public init?(_ arrayContext: JSONSchema.ArrayContext) {
             if let otherItems = arrayContext.items {
-                guard let dereferencedOtherItems = DereferencedJSONSchema.init(otherItems) else {
+                guard let dereferencedOtherItems = otherItems.dereferenced() else {
                     return nil
                 }
                 items = dereferencedOtherItems
@@ -243,7 +157,7 @@ extension DereferencedJSONSchema {
         }
 
         internal init(_ arrayContext: JSONSchema.ArrayContext, resolvingIn components: OpenAPI.Components) throws {
-            items = try arrayContext.items.map { try DereferencedJSONSchema($0, resolvingIn: components) }
+            items = try arrayContext.items.map { try $0.dereferenced(in: components) }
             maxItems = arrayContext.maxItems
             minItems = arrayContext.minItems
             uniqueItems = arrayContext.uniqueItems
@@ -251,7 +165,7 @@ extension DereferencedJSONSchema {
 
         internal var jsonSchemaArrayContext: JSONSchema.ArrayContext {
             .init(
-                items: items.map { $0.underlyingJSONSchema },
+                items: items.map { $0.jsonSchema },
                 maxItems: maxItems,
                 minItems: minItems,
                 uniqueItems: uniqueItems
@@ -294,7 +208,7 @@ extension DereferencedJSONSchema {
 
             var otherProperties = [String: DereferencedJSONSchema]()
             for (name, property) in objectContext.properties {
-                guard let dereferencedProperty = DereferencedJSONSchema(property) else {
+                guard let dereferencedProperty = property.dereferenced() else {
                     return nil
                 }
                 otherProperties[name] = dereferencedProperty
@@ -307,7 +221,7 @@ extension DereferencedJSONSchema {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                guard let schema = DereferencedJSONSchema(schema) else {
+                guard let schema = schema.dereferenced() else {
                     return nil
                 }
                 additionalProperties = .b(schema)
@@ -317,14 +231,14 @@ extension DereferencedJSONSchema {
         }
 
         internal init(_ objectContext: JSONSchema.ObjectContext, resolvingIn components: OpenAPI.Components) throws {
-            properties = try objectContext.properties.mapValues { try DereferencedJSONSchema($0, resolvingIn: components) }
+            properties = try objectContext.properties.mapValues { try $0.dereferenced(in: components) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                additionalProperties = .b(try DereferencedJSONSchema(schema, resolvingIn: components))
+                additionalProperties = .b(try schema.dereferenced(in: components))
             case nil:
                 additionalProperties = nil
             }
@@ -336,17 +250,117 @@ extension DereferencedJSONSchema {
             case .a(let bool):
                 underlyingAdditionalProperties = .a(bool)
             case .b(let schema):
-                underlyingAdditionalProperties = .b(schema.underlyingJSONSchema)
+                underlyingAdditionalProperties = .b(schema.jsonSchema)
             case nil:
                 underlyingAdditionalProperties = nil
             }
 
             return .init(
-                properties: properties.mapValues { $0.underlyingJSONSchema },
+                properties: properties.mapValues { $0.jsonSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
                 minProperties: minProperties
             )
+        }
+    }
+}
+
+extension JSONSchema: LocallyDereferenceable {
+
+    /// Returns a dereferenced schema object if all references in
+    /// this schema object can be found in the Components Object.
+    ///
+    /// Dereferencing a `JSONSchema` currently relies on resolving
+    /// `all(of:)` schemas (thus removing all `JSONSchemaFragments`).
+    ///
+    /// - Important: Local dereferencing will `throw` if any
+    ///     `JSONReferences` point to other files or to
+    ///     locations within the same file other than the
+    ///     Components Object. It will also fail if any components
+    ///     are missing from the Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedJSONSchema {
+        switch self {
+        case .reference(let reference):
+            return try components.forceDereference(reference)
+        case .boolean(let context):
+            return .boolean(context)
+        case .object(let generalContext, let objectContext):
+            return try .object(
+                generalContext,
+                DereferencedJSONSchema.ObjectContext(objectContext, resolvingIn: components)
+            )
+        case .array(let generalContext, let arrayContext):
+            return try .array(
+                generalContext,
+                DereferencedJSONSchema.ArrayContext(arrayContext, resolvingIn: components)
+            )
+        case .number(let generalContext, let numberContext):
+            return .number(generalContext, numberContext)
+        case .integer(let generalContext, let integerContext):
+            return .integer(generalContext, integerContext)
+        case .string(let generalContext, let stringContext):
+            return .string(generalContext, stringContext)
+        case .all(of: let fragments, discriminator: let discriminator):
+            #error("this is where to resolve the fragments")
+        case .one(of: let jsonSchemas, discriminator: let discriminator):
+            let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
+            return .one(of: schemas, discriminator: discriminator)
+        case .any(of: let jsonSchemas, discriminator: let discriminator):
+            let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
+            return .any(of: schemas, discriminator: discriminator)
+        case .not(let jsonSchema):
+            return .not(try jsonSchema.dereferenced(in: components))
+        case .undefined(description: let description):
+            return .undefined(description: description)
+        }
+    }
+
+    /// Returns a dereferenced schema object if this schema object
+    /// already does not contain any references.
+    ///
+    /// To create a dereferenced schema object from a schema object
+    /// that does have references, use `dereferenced(in:)`.
+    ///
+    /// Dereferencing a `JSONSchema` currently relies on resolving
+    /// `all(of:)` schemas (thus removing all `JSONSchemaFragments`).
+    public func dereferenced() -> DereferencedJSONSchema? {
+        switch self {
+        case .reference:
+            return nil
+        case .boolean(let context):
+            return .boolean(context)
+        case .object(let generalContext, let objectContext):
+            guard let objectContext = DereferencedJSONSchema.ObjectContext(objectContext) else { return nil }
+            return .object(generalContext, objectContext)
+        case .array(let generalContext, let arrayContext):
+            guard let arrayContext = DereferencedJSONSchema.ArrayContext(arrayContext) else { return nil }
+            return .array(generalContext, arrayContext)
+        case .number(let generalContext, let numberContext):
+            return .number(generalContext, numberContext)
+        case .integer(let generalContext, let integerContext):
+            return .integer(generalContext, integerContext)
+        case .string(let generalContext, let stringContext):
+            return .string(generalContext, stringContext)
+        case .all(of: let fragments, discriminator: let discriminator):
+            #error("this is where to resolve the fragments")
+        case .one(of: let jsonSchemas, discriminator: let discriminator):
+            let schemas = jsonSchemas.compactMap { $0.dereferenced() }
+            guard schemas.count == jsonSchemas.count else { return nil }
+            return .one(of: schemas, discriminator: discriminator)
+        case .any(of: let jsonSchemas, discriminator: let discriminator):
+            let schemas = jsonSchemas.compactMap { $0.dereferenced() }
+            guard schemas.count == jsonSchemas.count else { return nil }
+            return .any(of: schemas, discriminator: discriminator)
+        case .not(let jsonSchema):
+            guard let schema = jsonSchema.dereferenced() else { return nil }
+            return .not(schema)
+        case .undefined(description: let description):
+            return .undefined(description: description)
         }
     }
 }
