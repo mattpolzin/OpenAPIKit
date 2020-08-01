@@ -336,32 +336,6 @@ extension JSONSchema {
             throw Self.Error.exampleNotSupported
         }
     }
-
-    /// Returns a dereferenced schema object if this schema object
-    /// already does not contain any references.
-    ///
-    /// To create a dereferenced schema object from a schema object
-    /// that does have references, use `dereferencedSchemaObject(resolvingIn:)`.
-    public func dereferencedSchemaObject() -> DereferencedJSONSchema? {
-        return DereferencedJSONSchema(self)
-    }
-
-    /// Returns a dereferenced schema object if all references in
-    /// this schema object can be found in the Components Object.
-    ///
-    /// - Important: Local dereferencing will `throw` if any
-    ///     `JSONReferences` point to other files or to
-    ///     locations within the same file other than the
-    ///     Components Object. It will also fail if any components
-    ///     are missing from the Components Object.
-    ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `ReferenceError.missingOnLookup(name:key:)` depending
-    ///     on whether an unresolvable reference points to another file or just points to a
-    ///     component in the same file that cannot be found in the Components Object.
-    public func dereferencedSchemaObject(resolvingIn components: OpenAPI.Components) throws -> DereferencedJSONSchema {
-        return try DereferencedJSONSchema(self, resolvingIn: components)
-    }
 }
 
 extension JSONSchema {

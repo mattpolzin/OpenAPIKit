@@ -43,12 +43,9 @@ public struct DereferencedPathItem: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ pathItem: OpenAPI.PathItem, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ pathItem: OpenAPI.PathItem, resolvingIn components: OpenAPI.Components) throws {
         self.parameters = try pathItem.parameters.map { parameter in
-            try DereferencedParameter(
-                try components.forceDereference(parameter),
-                resolvingIn: components
-            )
+            try parameter.dereferenced(in: components)
         }
 
         self.get = try pathItem.get.map { try DereferencedOperation($0, resolvingIn: components) }
@@ -110,5 +107,18 @@ extension DereferencedPathItem {
         return OpenAPI.HttpMethod.allCases.compactMap { method in
             self.for(method).map { .init(method: method, operation: $0) }
         }
+    }
+}
+
+extension OpenAPI.PathItem: LocallyDereferenceable {
+    /// Create a `DereferencedPathItem` if all references in the
+    /// path item can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedPathItem {
+        return try DereferencedPathItem(self, resolvingIn: components)
     }
 }

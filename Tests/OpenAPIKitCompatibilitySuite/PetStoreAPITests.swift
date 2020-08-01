@@ -121,7 +121,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         let dereferencedDoc = try apiDoc.locallyDereferenced()
 
         // Pet schema is a $ref to Components Object
-        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.underlyingJSONSchema, try JSONSchema.string.with(example: "doggie"))
+        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.jsonSchema, try JSONSchema.string.with(example: "doggie"))
     }
 
     func test_resolveDocument() throws {

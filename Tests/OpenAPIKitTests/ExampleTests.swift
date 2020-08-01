@@ -11,20 +11,24 @@ import XCTest
 
 final class ExampleTests: XCTestCase {
     func test_init() {
-        let full1 = OpenAPI.Example(summary: "hello",
-                                    description: "world",
-                                    value: .init(URL(string: "https://google.com")!),
-                                    vendorExtensions: ["hello": "world"])
+        let full1 = OpenAPI.Example(
+            summary: "hello",
+            description: "world",
+            value: .init(URL(string: "https://google.com")!),
+            vendorExtensions: ["hello": "world"]
+        )
 
         XCTAssertEqual(full1.summary, "hello")
         XCTAssertEqual(full1.description, "world")
         XCTAssertEqual(full1.value, .init(URL(string: "https://google.com")!))
         XCTAssertEqual(full1.vendorExtensions["hello"]?.value as? String, "world")
 
-        let full2 = OpenAPI.Example(summary: "hello",
-                                    description: "world",
-                                    value: .init("hello"),
-                                    vendorExtensions: ["hello": "world"])
+        let full2 = OpenAPI.Example(
+            summary: "hello",
+            description: "world",
+            value: .init("hello"),
+            vendorExtensions: ["hello": "world"]
+        )
 
         XCTAssertEqual(full2.summary, "hello")
         XCTAssertEqual(full2.description, "world")
@@ -36,6 +40,28 @@ final class ExampleTests: XCTestCase {
         XCTAssertNil(small.description)
         XCTAssertEqual(small.value, .init("hello"))
         XCTAssertEqual(small.vendorExtensions, [:])
+    }
+
+    func test_locallyDereferenceable() throws {
+        // should just be self
+        let full1 = OpenAPI.Example(
+            summary: "hello",
+            description: "world",
+            value: .init(URL(string: "https://google.com")!),
+            vendorExtensions: ["hello": "world"]
+        )
+        XCTAssertEqual(try full1.dereferenced(in: .noComponents), full1)
+
+        let full2 = OpenAPI.Example(
+            summary: "hello",
+            description: "world",
+            value: .init("hello"),
+            vendorExtensions: ["hello": "world"]
+        )
+        XCTAssertEqual(try full2.dereferenced(in: .noComponents), full2)
+
+        let small = OpenAPI.Example(value: .init("hello"))
+        XCTAssertEqual(try small.dereferenced(in: .noComponents), small)
     }
 }
 

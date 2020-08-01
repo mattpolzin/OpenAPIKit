@@ -29,7 +29,7 @@ public struct DereferencedParameter: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ parameter: OpenAPI.Parameter, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ parameter: OpenAPI.Parameter, resolvingIn components: OpenAPI.Components) throws {
         switch parameter.schemaOrContent {
         case .a(let schemaContext):
             self.schemaOrContent = .a(
@@ -50,5 +50,18 @@ public struct DereferencedParameter: Equatable {
         }
 
         self.underlyingParameter = parameter
+    }
+}
+
+extension OpenAPI.Parameter: LocallyDereferenceable {
+    /// Create a `DereferencedParameter` if all references in the
+    /// parameter can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedParameter {
+        return try DereferencedParameter(self, resolvingIn: components)
     }
 }
