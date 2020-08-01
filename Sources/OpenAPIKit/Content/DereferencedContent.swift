@@ -24,7 +24,7 @@ public struct DereferencedContent: Equatable {
     /// content can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {

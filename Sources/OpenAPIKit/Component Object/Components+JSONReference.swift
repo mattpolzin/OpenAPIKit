@@ -66,7 +66,7 @@ extension OpenAPI.Components {
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
@@ -102,7 +102,7 @@ extension OpenAPI.Components {
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
