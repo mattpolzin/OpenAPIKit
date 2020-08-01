@@ -270,7 +270,7 @@ extension OpenAPI.Document {
     ///     are missing from the Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public func locallyDereferenced() throws -> DereferencedDocument {

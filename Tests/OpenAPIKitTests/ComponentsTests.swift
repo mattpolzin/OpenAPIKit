@@ -150,8 +150,8 @@ final class ComponentsTests: XCTestCase {
         let schema2: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
 
         XCTAssertThrowsError(try components.forceDereference(schema2)) { error in
-            XCTAssertEqual(error as? OpenAPI.Components.MissingReferenceError, .referenceMissingOnLookup(name: "not_there", key: "schemas"))
-            XCTAssertEqual((error as? OpenAPI.Components.MissingReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
         }
 
         let schema3: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
@@ -169,7 +169,7 @@ final class ComponentsTests: XCTestCase {
         let reference2: JSONReference<JSONSchema> = .component(named: "not_there")
 
         XCTAssertThrowsError(try components.forceDereference(reference2)) { error in
-            XCTAssertEqual(error as? OpenAPI.Components.MissingReferenceError, .referenceMissingOnLookup(name: "not_there", key: "schemas"))
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
         }
 
         let reference3: JSONReference<JSONSchema> = .external(URL(string: "https://hi.com/hi.json#/hello/world")!)
