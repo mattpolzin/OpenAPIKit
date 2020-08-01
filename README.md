@@ -7,24 +7,24 @@
 A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) Documents and their components.
 
 - [Usage](#usage)
-	- [Decoding OpenAPI Documents](#decoding-openapi-documents)
-		- [Decoding Errors](#decoding-errors)
-	- [Encoding OpenAPI Documents](#encoding-openapi-documents)
-	- [Validating OpenAPI Documents](#validating-openapi-documents)
-	- [A note on dictionary ordering](#a-note-on-dictionary-ordering)
-	- [OpenAPI Document structure](#openapi-document-structure)
-		- [Document Root](#document-root)
-		- [Routes](#routes)
-		- [Endpoints](#endpoints)
-		- [Request/Response Bodies](#requestresponse-bodies)
-		- [Schemas](#schemas)
-		- [JSON References](#json-references)
-		- [Security Requirements](#security-requirements)
-		- [Specification Extensions](#specification-extensions)
-	- [Dereferencing & Resolving](#dereferencing--resolving)
+  - [Decoding OpenAPI Documents](#decoding-openapi-documents)
+    - [Decoding Errors](#decoding-errors)
+  - [Encoding OpenAPI Documents](#encoding-openapi-documents)
+  - [Validating OpenAPI Documents](#validating-openapi-documents)
+  - [A note on dictionary ordering](#a-note-on-dictionary-ordering)
+  - [OpenAPI Document structure](#openapi-document-structure)
+    - [Document Root](#document-root)
+    - [Routes](#routes)
+    - [Endpoints](#endpoints)
+    - [Request/Response Bodies](#requestresponse-bodies)
+    - [Schemas](#schemas)
+    - [JSON References](#json-references)
+    - [Security Requirements](#security-requirements)
+    - [Specification Extensions](#specification-extensions)
+  - [Dereferencing & Resolving](#dereferencing--resolving)
 - [Curated Integrations](#curated-integrations)
-	- [Generating OpenAPI Documents](#generating-openapi-documents)
-	- [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
+  - [Generating OpenAPI Documents](#generating-openapi-documents)
+  - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
 - [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
@@ -132,14 +132,14 @@ You can check whether a given `JSONReference` exists in the Components Object wi
 
 You can create references from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
 
-You can use `document.components.dereference()` to turn an `Either` containing either a reference or a component into an optional value of that component's type (having either pulled it out of the `Either` or looked it up in the Components Object).
+You can use `document.components.lookup()` or the `Components` type's `subscript` to turn an `Either` containing either a reference or a component into an optional value of that component's type (having either pulled it out of the `Either` or looked it up in the Components Object). The `lookup()` method throws when it can't find an item whereas `subscript` returns `nil`.
 
 For example,
 ```swift
 let apiDoc: OpenAPI.Document = ...
 let addBooksPath = apiDoc.paths["/cloudloading/addBook"]
 
-let addBooksParameters: [OpenAPI.Parameter]? = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+let addBooksParameters: [OpenAPI.Parameter]? = addBooksPath?.parameters.compactMap { apiDoc.components[$0] }
 ```
 
 Note that this looks a component up in the Components Object but it does not transform it into an entirely derefernced object in the same way as is described below in the [Dereferencing & Resolving](#dereferencing--resolving) section.
@@ -167,11 +167,13 @@ document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
 ```
 
 ### Dereferencing & Resolving
-In addition to using the `Components` type's `dereference()` method to look up a `JSONReference`, you can opt to work on an entirely dereferenced OpenAPI document with the `OpenAPI.Document` `locallyDereferenced()` method.
+In addition to looking something up in the `Components` object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
 
-As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object.
+You use a value's `dereferenced(in:)` method to fully dereference it.
 
-Unlike what happens when you dereference an individual component using `Components` `dereference()` method, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
+You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object.
+
+Unlike what happens when you lookup an individual component using the `lookup()` method on `Components`, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
 
 Anywhere that a type would have had either a reference or a component, the dereferenced variety will simply have the component. For example, `PathItem` has an array of parameters, each of which is `Either<JSONReference<Parameter>, Parameter>` whereas a `DereferencedPathItem` has an array of `DereferencedParameter`s. The dereferenced variant of each type exposes all the same properties and you can get at the underlying `OpenAPI` type via an `underlying{TypeName}` property. This can make for a much more convenient way to traverse a document because you don't need to check for or look up references anywhere the OpenAPI Specification allows them.
 
