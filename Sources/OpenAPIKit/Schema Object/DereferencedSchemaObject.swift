@@ -306,7 +306,8 @@ extension JSONSchema: LocallyDereferenceable {
         case .string(let generalContext, let stringContext):
             return .string(generalContext, stringContext)
         case .all(of: let fragments, discriminator: let discriminator):
-            #error("this is where to resolve the fragments")
+            #warning("do something with discriminator")
+            return try fragments.resolved(against: components)
         case .one(of: let jsonSchemas, discriminator: let discriminator):
             let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
             return .one(of: schemas, discriminator: discriminator)
@@ -326,8 +327,9 @@ extension JSONSchema: LocallyDereferenceable {
     /// To create a dereferenced schema object from a schema object
     /// that does have references, use `dereferenced(in:)`.
     ///
-    /// Dereferencing a `JSONSchema` currently relies on resolving
-    /// `all(of:)` schemas (thus removing all `JSONSchemaFragments`).
+    /// - Important: This operation currently does not support the `all(of:)` schema
+    /// but you can dereference `all(of:)` schemas with the
+    /// `dereferenced(in:)` method.
     public func dereferenced() -> DereferencedJSONSchema? {
         switch self {
         case .reference:
@@ -346,8 +348,8 @@ extension JSONSchema: LocallyDereferenceable {
             return .integer(generalContext, integerContext)
         case .string(let generalContext, let stringContext):
             return .string(generalContext, stringContext)
-        case .all(of: let fragments, discriminator: let discriminator):
-            #error("this is where to resolve the fragments")
+        case .all(of: _, discriminator: _):
+            return nil
         case .one(of: let jsonSchemas, discriminator: let discriminator):
             let schemas = jsonSchemas.compactMap { $0.dereferenced() }
             guard schemas.count == jsonSchemas.count else { return nil }
