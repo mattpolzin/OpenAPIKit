@@ -66,7 +66,7 @@ extension OpenAPI.Components {
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
@@ -76,7 +76,7 @@ extension OpenAPI.Components {
                 throw ReferenceError.cannotLookupRemoteReference
             }
             guard let value = self[reference] else {
-                throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+                throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
             }
             return value
         case .b(let value):
@@ -102,7 +102,7 @@ extension OpenAPI.Components {
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
     public func forceDereference<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>) throws -> ReferenceType {
@@ -110,7 +110,7 @@ extension OpenAPI.Components {
             throw ReferenceError.cannotLookupRemoteReference
         }
         guard let value = self[reference] else {
-            throw MissingReferenceError.referenceMissingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+            throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
         }
         return value
     }
@@ -123,34 +123,23 @@ extension OpenAPI.Components {
         let reference = JSONReference<ReferenceType>.internal(internalReference)
 
         guard contains(internalReference) else {
-            throw ReferenceError.missingComponentOnReferenceCreation(name: name, key: ReferenceType.openAPIComponentsKey)
+            throw ReferenceError.missingOnCreation(name: name, key: ReferenceType.openAPIComponentsKey)
         }
         return reference
     }
 
     public enum ReferenceError: Swift.Error, Equatable, CustomStringConvertible {
         case cannotLookupRemoteReference
-        case missingComponentOnReferenceCreation(name: String, key: String)
+        case missingOnCreation(name: String, key: String)
+        case missingOnLookup(name: String, key: String)
 
         public var description: String {
             switch self {
             case .cannotLookupRemoteReference:
                 return "You cannot look up remote JSON references in the Components Object local to this file."
-            case .missingComponentOnReferenceCreation(name: let name, key: let key):
+            case .missingOnCreation(name: let name, key: let key):
                 return "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. '\(name)' was not found in \(key)."
-            }
-        }
-    }
-
-    // TODO: combine with `ReferenceError` upon next Major release.
-    // This is only its own type to avoid any chance of a breaking change
-    // in a minor version release.
-    public enum MissingReferenceError: Swift.Error, Equatable, CustomStringConvertible {
-        case referenceMissingOnLookup(name: String, key: String)
-
-        public var description: String {
-            switch self {
-            case .referenceMissingOnLookup(name: let name, key: let key):
+            case .missingOnLookup(name: let name, key: let key):
                 return "Failed to look up a JSON Reference. '\(name)' was not found in \(key)."
             }
         }
