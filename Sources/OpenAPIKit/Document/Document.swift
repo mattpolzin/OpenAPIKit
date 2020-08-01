@@ -315,14 +315,12 @@ extension OpenAPI.Document: Encodable {
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
         try container.encode(info, forKey: .info)
 
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+
+        try container.encodeIfPresent(tags, forKey: .tags)
+
         if !servers.isEmpty {
             try container.encode(servers, forKey: .servers)
-        }
-
-        try container.encode(paths, forKey: .paths)
-
-        if !components.isEmpty {
-            try container.encode(components, forKey: .components)
         }
 
         // A real mess here because we've got an Array of non-string-keyed
@@ -331,10 +329,13 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        try container.encodeIfPresent(tags, forKey: .tags)
-        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encode(paths, forKey: .paths)
 
         try encodeExtensions(to: &container)
+
+        if !components.isEmpty {
+            try container.encode(components, forKey: .components)
+        }
     }
 }
 
