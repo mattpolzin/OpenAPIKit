@@ -132,7 +132,7 @@ internal struct FragmentResolver {
         case (.array(let leftGeneralContext, let leftArrayContext), .array(let rightGeneralContext, let rightArrayContext)):
             combinedFragment = .array(try leftGeneralContext.combined(with: rightGeneralContext), try leftArrayContext.combined(with: rightArrayContext))
         case (.object(let leftGeneralContext, let leftObjectContext), .object(let rightGeneralContext, let rightObjectContext)):
-            combinedFragment = .object(try leftGeneralContext.combined(with: rightGeneralContext), try leftObjectContext.combined(with: rightObjectContext))
+            combinedFragment = .object(try leftGeneralContext.combined(with: rightGeneralContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
         case (.boolean, _),
              (.integer, _),
              (.number, _),
@@ -376,9 +376,12 @@ extension JSONSchemaFragment.ArrayContext {
 }
 
 extension JSONSchemaFragment.ObjectContext {
-    internal func combined(with other: JSONSchemaFragment.ObjectContext) throws -> JSONSchemaFragment.ObjectContext {
+    internal func combined(with other: JSONSchemaFragment.ObjectContext, resolvingIn components: OpenAPI.Components) throws -> JSONSchemaFragment.ObjectContext {
+        let newProperties: [String : JSONSchema]?
         if let conflict = conflicting(properties, other.properties) {
-            throw JSONSchemaResolutionError(.attributeConflict(jsonType: .object, name: "properties", original: String(describing: conflict.0), new: String(describing: conflict.1)))
+            newProperties = try combine(properties: conflict.0, with: conflict.1, resolvingIn: components)
+        } else {
+            newProperties = properties ?? other.properties
         }
         if let conflict = conflicting(maxProperties, other.maxProperties) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .object, name: "maxProperties", original: String(conflict.0), new: String(conflict.1)))
@@ -415,7 +418,6 @@ extension JSONSchemaFragment.ObjectContext {
         }
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
-        let newProperties = properties ?? other.properties
         let newMaxProperties = maxProperties ?? other.maxProperties
         let newMinProperties = minProperties ?? other.minProperties
         let newAdditionalProperties = additionalProperties ?? other.additionalProperties
@@ -428,6 +430,16 @@ extension JSONSchemaFragment.ObjectContext {
             required: newRequired
         )
     }
+}
+
+internal func combine(properties left: [String: JSONSchema], with right: [String: JSONSchema], resolvingIn components: OpenAPI.Components) throws -> [String: JSONSchema] {
+    var combined = left
+    try combined.merge(right) { (left, right) throws -> JSONSchema in
+        var resolve = FragmentResolver(components: components)
+        try resolve.combine([try left.asFragment(), try right.asFragment()])
+        return try resolve.dereferencedSchema().jsonSchema
+    }
+    return combined
 }
 
 fileprivate extension JSONSchema {
@@ -524,7 +536,7 @@ extension JSONSchemaFragment.GeneralContext {
             throw JSONSchemaResolutionError(.inconsistency("Schemas cannot be read-only and write-only"))
         case (true, _):
             permissions = .readOnly
-        case (_, false):
+        case (_, true):
             permissions = .writeOnly
         default:
             permissions = .readWrite

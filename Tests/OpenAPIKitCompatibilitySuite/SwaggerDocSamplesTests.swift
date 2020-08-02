@@ -83,8 +83,24 @@ components:
             XCTAssertEqual(resolvedDoc.routes.count, 1)
             XCTAssertEqual(resolvedDoc.endpoints.count, 1)
 
-            let dogSchema = doc.components.schemas["Dog"]!
-            let catSchema = doc.components.schemas["Cat"]!
+            let dogSchema = JSONSchema.object(
+                discriminator: .init(propertyName: "pet_type"),
+                minProperties: 1,
+                properties: [
+                    "pet_type": .string,
+                    "bark": .boolean(required: false),
+                    "breed": .string(required: false, allowedValues: "Dingo", "Husky", "Retriever", "Shepherd")
+                ]
+            )
+            let catSchema = JSONSchema.object(
+                discriminator: .init(propertyName: "pet_type"),
+                minProperties: 1,
+                properties: [
+                    "pet_type": .string,
+                    "hunts": .boolean(required: false),
+                    "age": .integer(required: false)
+                ]
+            )
 
             XCTAssertEqual(
                 resolvedDoc.endpoints[0].requestBody?
