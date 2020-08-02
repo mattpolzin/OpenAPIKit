@@ -163,7 +163,6 @@ internal struct FragmentResolver {
         let jsonSchema: JSONSchema
         switch combinedFragment {
         case .general(let generalContext):
-            #warning("should probably fail if anything other than description is set")
             jsonSchema = .undefined(description: generalContext.description)
         case .reference(let reference):
             jsonSchema = .reference(reference)
