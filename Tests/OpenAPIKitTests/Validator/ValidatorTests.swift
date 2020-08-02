@@ -1173,7 +1173,7 @@ final class ValidatorTests: XCTestCase {
 
         let successResponseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+                \OpenAPI.Response.Map[status: 201]?.responseValue,
                 into: responseBodyContainsNameAndId,
                 description: "201 status response value"
             )
@@ -1301,7 +1301,7 @@ final class ValidatorTests: XCTestCase {
 
         let successResponseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+                \OpenAPI.Response.Map[status: 201]?.responseValue,
                 into: responseBodyContainsNameAndId,
                 description: "201 status response value"
             )

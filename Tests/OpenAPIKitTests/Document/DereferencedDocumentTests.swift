@@ -39,7 +39,7 @@ final class DereferencedDocumentTests: XCTestCase {
         ).locallyDereferenced()
 
         XCTAssertEqual(t1.paths.count, 1)
-        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[.status(code: 200)]?.description, "success")
+        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[status: 200]?.description, "success")
     }
 
     func test_noSecurityReferencedResponseInPath() throws {
@@ -64,7 +64,7 @@ final class DereferencedDocumentTests: XCTestCase {
         ).locallyDereferenced()
 
         XCTAssertEqual(t1.paths.count, 1)
-        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[.status(code: 200)]?.description, "success")
+        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[status: 200]?.description, "success")
 
         XCTAssertEqual(t1.routes.first?.path, "/hello/world")
         XCTAssertNotNil(t1.routes.first?.pathItem.get)
@@ -96,7 +96,7 @@ final class DereferencedDocumentTests: XCTestCase {
         ).locallyDereferenced()
 
         XCTAssertEqual(t1.paths.count, 1)
-        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[.status(code: 200)]?.description, "success")
+        XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[status: 200]?.description, "success")
 
         XCTAssertEqual(t1.security.count, 1)
         XCTAssertEqual(t1.security.first?.schemes["test"]?.securityScheme.type, .apiKey(name: "Api-Key", location: .header))

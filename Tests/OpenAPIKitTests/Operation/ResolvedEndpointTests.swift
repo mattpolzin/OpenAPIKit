@@ -57,7 +57,7 @@ final class ResolvedEndpointTests: XCTestCase {
         XCTAssertEqual(endpoints.first?.method, .get)
         XCTAssertEqual(endpoints.first?.path, "/hello/world")
         XCTAssertEqual(endpoints.first?.requestBody?.description, "requestBody")
-        XCTAssertEqual(endpoints.first?.responses[.status(code: 200)]?.description, "hello world")
+        XCTAssertEqual(endpoints.first?.responses[status: 200]?.description, "hello world")
         XCTAssertEqual(endpoints.first?.deprecated, true)
 
         let t2 = try OpenAPI.Document(

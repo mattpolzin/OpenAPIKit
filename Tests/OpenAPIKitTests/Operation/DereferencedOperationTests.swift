@@ -43,7 +43,7 @@ final class DereferencedOperationTests: XCTestCase {
         XCTAssertEqual(t1.parameters.count, 1)
         XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .init(schema: .string)]))
         XCTAssertEqual(t1.responses.count, 1)
-        XCTAssertEqual(t1.responseOutcomes.first?.response, t1.responses[.status(code: 200)])
+        XCTAssertEqual(t1.responseOutcomes.first?.response, t1.responses[status: 200])
         XCTAssertEqual(t1.responseOutcomes.first?.status, 200)
     }
 
@@ -137,7 +137,7 @@ final class DereferencedOperationTests: XCTestCase {
             resolvingIn: components
         )
         XCTAssertEqual(
-            t1.responses[.status(code: 200)]?.underlyingResponse,
+            t1.responses[status: 200]?.underlyingResponse,
             .init(description: "test")
         )
     }
