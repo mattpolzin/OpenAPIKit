@@ -454,7 +454,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let document = testDocument
 
         let endpoint = document.paths["/widgets/{id}"]?.get
-        let response = endpoint?.responses[.status(code: 200)]?.responseValue
+        let response = endpoint?.responses[status: 200]?.responseValue
         let responseSchemaReference = response?.content[.json]?.schema
         // this response schema is a reference found in the Components Object. We dereference
         // it to get at the schema.
