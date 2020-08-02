@@ -31,6 +31,14 @@ public struct JSONSchemaResolutionError: Swift.Error, CustomStringConvertible {
     public var description: String {
         underlyingError.description
     }
+
+    // The following can be used for pattern matching but are not good
+    // errors for totally lacking any context:
+    public static let unsupported: JSONSchemaResolutionError = .init(.unsupported(because: ""))
+    public static let typeConflict: JSONSchemaResolutionError = .init(.typeConflict(original: .string, new: .string))
+    public static let formatConflict: JSONSchemaResolutionError = .init(.formatConflict(original: "", new: ""))
+    public static let attributeConflict: JSONSchemaResolutionError = .init(.attributeConflict(jsonType: nil, name: "", original: "", new: ""))
+    public static let inconsistency: JSONSchemaResolutionError = .init(.inconsistency(""))
 }
 
 public func ~=(lhs: JSONSchemaResolutionError, rhs: JSONSchemaResolutionError) -> Bool {
@@ -104,7 +112,19 @@ internal struct FragmentResolver {
     /// - Throws: If any fragments combined together would result in an invalid schema or
     ///     if there is not enough information in the fragments to build a complete schema.
     mutating func combine(_ fragment: JSONSchemaFragment) throws {
+        // make sure any less specialized fragment (i.e. general) is on the left
+        let lessSpecializedFragment: JSONSchemaFragment
+        let equallyOrMoreSpecializedFragment: JSONSchemaFragment
         switch (combinedFragment, fragment) {
+        case (.general, _):
+            lessSpecializedFragment = combinedFragment
+            equallyOrMoreSpecializedFragment = fragment
+         default:
+            lessSpecializedFragment = fragment
+            equallyOrMoreSpecializedFragment = combinedFragment
+        }
+
+        switch (lessSpecializedFragment, equallyOrMoreSpecializedFragment) {
         case (_, .reference(let reference)), (.reference(let reference), _):
             try combine(components.lookup(reference).asFragment())
         case (.general(let leftGeneralContext), .general(let rightGeneralContext)):

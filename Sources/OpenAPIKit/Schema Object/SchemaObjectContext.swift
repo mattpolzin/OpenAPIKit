@@ -258,6 +258,23 @@ extension JSONSchema.Context {
             example: example
         )
     }
+
+    /// Return this context with the given discriminator
+    public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema.Context<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
 }
 
 // MARK: - Specific Contexts

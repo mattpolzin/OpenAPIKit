@@ -336,6 +336,32 @@ extension JSONSchema {
             throw Self.Error.exampleNotSupported
         }
     }
+
+    /// Returns a version of this `JSONSchema` that has the given discriminator.
+    public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(discriminator: discriminator))
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(discriminator: discriminator), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(discriminator: discriminator), contextB)
+        case .number(let context, let contextB):
+            return .number(context.with(discriminator: discriminator), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.with(discriminator: discriminator), contextB)
+        case .string(let context, let contextB):
+            return .string(context.with(discriminator: discriminator), contextB)
+        case .all(of: let fragments, discriminator: _):
+            return .all(of: fragments, discriminator: discriminator)
+        case .one(of: let schemas, discriminator: _):
+            return .one(of: schemas, discriminator: discriminator)
+        case .any(of: let schemas, discriminator: _):
+            return .any(of: schemas, discriminator: discriminator)
+        case .not, .reference, .undefined:
+            return self
+        }
+    }
 }
 
 extension JSONSchema {
