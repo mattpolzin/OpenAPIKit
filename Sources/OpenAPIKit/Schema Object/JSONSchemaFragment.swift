@@ -421,6 +421,7 @@ extension JSONSchemaFragment: Encodable {
         try container.encodeIfPresent(type, forKey: .type)
         try container.encodeIfPresent(format, forKey: .format)
         try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(title, forKey: .title)
         try container.encodeIfPresent(nullable, forKey: .nullable)
         try container.encodeIfPresent(deprecated, forKey: .deprecated)
@@ -503,6 +504,7 @@ extension JSONSchemaFragment.GeneralContext: Decodable {
 
         format = try container.decodeIfPresent(String.self, forKey: .format)
         description = try container.decodeIfPresent(String.self, forKey: .description)
+        discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         title = try container.decodeIfPresent(String.self, forKey: .title)
         nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
