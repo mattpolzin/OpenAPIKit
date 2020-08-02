@@ -109,7 +109,7 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         let dereferencedDoc = try apiDoc.locallyDereferenced()
 
         // response is a $ref to Components Object
-        XCTAssertEqual(dereferencedDoc.paths["/search/{versionNumber}/cS/{category}.{ext}"]?.get?.responses[.status(code: 200)]?.description, "OK: the search successfully returned zero or more results.")
+        XCTAssertEqual(dereferencedDoc.paths["/search/{versionNumber}/cS/{category}.{ext}"]?.get?.responses[status: 200]?.description, "OK: the search successfully returned zero or more results.")
     }
 
     func test_resolveDocument() throws {

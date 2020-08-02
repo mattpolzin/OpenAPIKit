@@ -17,6 +17,46 @@ extension OpenAPI {
         public var operationId: String?
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
+        /// The possible responses for this operation, keyed by status code.
+        ///
+        /// The status code keys can be integer values, ranges, or even the
+        /// `default` which just refers to the response to expect where no
+        /// other respones apply.
+        ///
+        /// Because the map is ordered, you can access responses by either
+        /// status code or index. Notice that the values of this dictionary are actually
+        /// `Either` an inline `Response` or a reference to a `Response` that is
+        /// defined elsewhere.
+        ///
+        /// **Example:**
+        ///
+        ///     let firstResponse: (OpenAPI.Response.StatusCode, Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>)
+        ///     firstResponse = operation.responses[0]!
+        ///
+        ///     // literally documented as "200" status code:
+        ///     let successResponse: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ///     successResponse = operation.responses[status: 200]!
+        ///
+        ///     // documented as "2XX" status code:
+        ///     let successResponse2: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ///     successResponse2 = operation.responses[.range(.success)]!
+        ///
+        /// If you want to access the response (assuming it is inlined) you need to grab
+        /// it out of the `Either`.
+        ///
+        /// **Example:**
+        ///
+        ///     let inlinedResponse = successResponse.responseValue
+        ///
+        /// You can also look the response up in the `Components`. For convenience, you
+        /// can ask to have the `Either` looked up and the result will be the `Response`
+        /// regardless of whether the `Response` was inlined or found in the `Components`.
+        ///
+        /// **Example:**
+        ///
+        ///     let foundResponse: OpenAPI.Response
+        ///     foundResponse = document.components.lookup(successResponse)!
+        ///
         public var responses: OpenAPI.Response.Map
 //      public let callbacks:
 
