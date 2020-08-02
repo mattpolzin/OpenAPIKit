@@ -10,11 +10,11 @@
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
 public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
-    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
-    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
+    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
+    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
     indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)

@@ -274,6 +274,8 @@ extension JSONSchema {
         public struct Bound: Equatable {
             public let value: Double
             public let exclusive: Bool
+
+            internal static let defaultExclusion: Bool = false
         }
 
         /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
@@ -298,6 +300,8 @@ extension JSONSchema {
         public struct Bound: Equatable {
             public let value: Int
             public let exclusive: Bool
+
+            internal static let defaultExclusion: Bool = false
         }
 
         /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
@@ -587,8 +591,8 @@ extension JSONSchema.NumericContext: Decodable {
 
         multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
 
-        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
-        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
+        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? Bound.defaultExclusion
+        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? Bound.defaultExclusion
 
         maximum = (try container.decodeIfPresent(Double.self, forKey: .maximum))
             .map { Bound(value: $0, exclusive: exclusiveMaximum) }

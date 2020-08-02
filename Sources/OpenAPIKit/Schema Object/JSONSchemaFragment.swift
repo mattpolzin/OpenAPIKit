@@ -6,6 +6,7 @@
 //
 
 public protocol JSONSchemaFragmentContext {
+    var jsonType: JSONType? { get }
     var format: String? { get }
     var description: String? { get }
     var title: String? { get }
@@ -214,6 +215,25 @@ extension JSONSchemaFragment {
 }
 
 extension JSONSchemaFragment: JSONSchemaFragmentContext {
+
+    public var jsonType: JSONType? {
+        switch self {
+        case .general, .reference:
+            return nil
+        case .boolean:
+            return .boolean
+        case .integer:
+            return .integer
+        case .number:
+            return .number
+        case .string:
+            return .string
+        case .array:
+            return .array
+        case .object:
+            return .object
+        }
+    }
 
     public var format: String? {
         switch self {

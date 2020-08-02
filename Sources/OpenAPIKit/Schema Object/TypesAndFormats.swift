@@ -97,7 +97,7 @@ public enum JSONTypeFormat: Equatable {
 ///
 /// See "formats" under the OpenAPI [data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types)
 /// documentation.
-public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
+public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable where RawValue == String {
     static var unspecified: Self { get }
 
     var jsonType: JSONType { get }
