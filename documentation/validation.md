@@ -496,7 +496,7 @@ let responseBodyContainsNameAndId = Validation(
 // a missing `201` response definition.
 let successResponseBodyContainsNameAndId = Validation(
    check: unwrap(
-       \OpenAPI.Response.Map[.status(code: 201)]?.responseValue,
+       \OpenAPI.Response.Map[status: 201]?.responseValue,
        into: responseBodyContainsNameAndId,
        description: "201 status response value"
     )
