@@ -196,6 +196,9 @@ extension JSONSchemaFragment.GeneralContext {
         if let conflict = conflicting(description, other.description) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "description", original: conflict.0, new: conflict.1))
         }
+        if let conflict = conflicting(discriminator, other.discriminator) {
+            throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "discriminator", original: String(describing: conflict.0), new: String(describing: conflict.1)))
+        }
         if let conflict = conflicting(title, other.title) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "title", original: conflict.0, new: conflict.1))
         }
@@ -231,6 +234,7 @@ extension JSONSchemaFragment.GeneralContext {
         // helps the type checker a lot.
         let newFormat = format ?? other.format
         let newDescription = description ?? other.description
+        let newDiscriminator = discriminator ?? other.discriminator
         let newTitle = title ?? other.title
         let newNullable = nullable ?? other.nullable
         let newDeprecated = deprecated ?? other.deprecated
@@ -242,6 +246,7 @@ extension JSONSchemaFragment.GeneralContext {
         return .init(
             format: newFormat,
             description: newDescription,
+            discriminator: newDiscriminator,
             title: newTitle,
             nullable: newNullable,
             deprecated: newDeprecated,
@@ -516,6 +521,7 @@ fileprivate extension JSONSchema.Context {
         return .init(
             format: formatString,
             description: description,
+            discriminator: discriminator,
             title: title,
             nullable: nullable,
             deprecated: deprecated,
@@ -558,7 +564,7 @@ extension JSONSchemaFragment.GeneralContext {
             deprecated: deprecated ?? false,
             title: title,
             description: description,
-            discriminator: nil,
+            discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             example: example
