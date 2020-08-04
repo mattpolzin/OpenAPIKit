@@ -122,24 +122,40 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     // MARK: - Fragment Combinations
-    func test_resolveStringFragmentAndDisciminatorFragment() {
-        let fragments: [JSONSchemaFragment] = [
-            .string(.init(), .init()),
-            .general(.init(discriminator: .init(propertyName: "test")))
-        ]
+    func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchemaFragment], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
+        let resolved1 = try fragments.resolved(against: .noComponents)
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            resolved1,
+            schema,
+            file: file,
+            line: line
+        )
+        let resolved2 = try fragments.reversed().resolved(against: .noComponents)
+        XCTAssertEqual(
+            resolved2,
+            schema,
+            file: file,
+            line: line
+        )
+    }
+
+    func test_resolveStringFragmentAndDisciminatorFragment() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(.init(), .init()),
+                .general(.init(discriminator: .init(propertyName: "test")))
+            ],
             .string(.init(discriminator: .init(propertyName: "test")), .init())
         )
+    }
 
-        // at least in one test, make sure order of fragments does not matter
-        let fragments2: [JSONSchemaFragment] = [
-            .general(.init(discriminator: .init(propertyName: "test"))),
-            .string(.init(), .init())
-        ]
-        XCTAssertEqual(
-            try fragments2.resolved(against: .noComponents),
-            .string(.init(discriminator: .init(propertyName: "test")), .init())
+    func test_resolveStringFragmentAndFormatFragment() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(.init(), .init()),
+                .general(.init(format: "binary"))
+            ],
+            .string(.init(format: .binary), .init())
         )
     }
 
@@ -410,7 +426,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         for fragments in fragmentsArray1 + fragmentsArray2 {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
@@ -453,7 +469,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             let fragments: [JSONSchemaFragment] = difference.map { .integer(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
@@ -496,7 +512,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             let fragments: [JSONSchemaFragment] = difference.map { .number(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
@@ -527,7 +543,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             let fragments: [JSONSchemaFragment] = difference.map { .string(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
@@ -564,7 +580,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             let fragments: [JSONSchemaFragment] = difference.map { .array(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
@@ -619,11 +635,173 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             let fragments: [JSONSchemaFragment] = difference.map { .object(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents), "\(fragments)") { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
-                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.formatConflict` --  \(fragments)")
+                XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
     }
 
     // MARK: - Inconsistency Failures
-    #warning("TODO")
+    func test_generalInconsistencyErrors() {
+
+        let readAndWriteOnly = [
+            JSONSchemaFragment.GeneralContext(readOnly: true),
+            JSONSchemaFragment.GeneralContext(writeOnly: true)
+        ]
+
+        let inconsistencies = [
+            readAndWriteOnly
+        ]
+
+        // break up for type checking
+        let fragmentsArray1: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .boolean($0) } }
+            + inconsistencies.map { $0.map { .integer($0, .init()) } }
+            + inconsistencies.map { $0.map { .number($0, .init()) } }
+        let fragmentsArray2: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .string($0, .init()) } }
+            + inconsistencies.map { $0.map { .array($0, .init()) } }
+            + inconsistencies.map { $0.map { .object($0, .init()) } }
+
+        for fragments in fragmentsArray1 + fragmentsArray2 {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    func test_integerInconsistencyErrors() {
+
+        let minBelowZero = [
+            JSONSchemaFragment.IntegerContext(minimum: -1)
+        ]
+
+        let minHigherThanMax = [
+            JSONSchemaFragment.IntegerContext(minimum: 10),
+            JSONSchemaFragment.IntegerContext(maximum: 2)
+        ]
+
+        let inconsistencies = [
+            minBelowZero,
+            minHigherThanMax
+        ]
+
+        // break up for type checking
+        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .integer(.init(), $0) } }
+
+        for fragments in fragmentsArray {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    func test_numberInconsistencyErrors() {
+
+        let minBelowZero = [
+            JSONSchemaFragment.NumericContext(minimum: -1)
+        ]
+
+        let minHigherThanMax = [
+            JSONSchemaFragment.NumericContext(minimum: 10),
+            JSONSchemaFragment.NumericContext(maximum: 2)
+        ]
+
+        let inconsistencies = [
+            minBelowZero,
+            minHigherThanMax
+        ]
+
+        // break up for type checking
+        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .number(.init(), $0) } }
+
+        for fragments in fragmentsArray {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    func test_stringInconsistencyErrors() {
+
+        let minBelowZero = [
+            JSONSchemaFragment.StringContext(minLength: -1)
+        ]
+
+        let minHigherThanMax = [
+            JSONSchemaFragment.StringContext(minLength: 10),
+            JSONSchemaFragment.StringContext(maxLength: 2)
+        ]
+
+        let inconsistencies = [
+            minBelowZero,
+            minHigherThanMax
+        ]
+
+        // break up for type checking
+        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .string(.init(), $0) } }
+
+        for fragments in fragmentsArray {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    func test_arrayInconsistencyErrors() {
+
+        let minBelowZero = [
+            JSONSchemaFragment.ArrayContext(minItems: -1)
+        ]
+
+        let minHigherThanMax = [
+            JSONSchemaFragment.ArrayContext(minItems: 10),
+            JSONSchemaFragment.ArrayContext(maxItems: 2)
+        ]
+
+        let inconsistencies = [
+            minBelowZero,
+            minHigherThanMax
+        ]
+
+        // break up for type checking
+        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .array(.init(), $0) } }
+
+        for fragments in fragmentsArray {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    func test_objectInconsistencyErrors() {
+
+        let minBelowZero = [
+            JSONSchemaFragment.ObjectContext(minProperties: -1)
+        ]
+
+        let minHigherThanMax = [
+            JSONSchemaFragment.ObjectContext(minProperties: 10),
+            JSONSchemaFragment.ObjectContext(maxProperties: 2)
+        ]
+
+        let inconsistencies = [
+            minBelowZero,
+            minHigherThanMax
+        ]
+
+        // break up for type checking
+        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .object(.init(), $0) } }
+
+        for fragments in fragmentsArray {
+            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
+                XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
+            }
+        }
+    }
+
+    #warning("write more inconsistency errors")
 }

@@ -203,6 +203,8 @@ internal struct FragmentResolver {
     }
 }
 
+// MARK: - Combining Fragments
+
 func conflicting<T>(_ left: T?, _ right: T?) -> (T, T)? where T: Equatable {
     return zip(left, right).flatMap { $0 == $1 ? nil : ($0, $1) }
 }
@@ -466,6 +468,8 @@ internal func combine(properties left: [String: JSONSchema], with right: [String
     return combined
 }
 
+// MARK: - Full Context -> Fragment Context
+
 fileprivate extension JSONSchema {
     /// - Throws: If the schema cannot be represented as a fragment.
     func asFragment() throws -> JSONSchemaFragment {
@@ -553,6 +557,8 @@ fileprivate extension JSONSchema.Context {
     }
 }
 
+// MARK: - Fragment Context -> Full Context
+
 extension JSONSchemaFragment.GeneralContext {
     internal func validatedContext<T: OpenAPIFormat>() throws -> JSONSchema.Context<T> {
         let permissions: JSONSchema.Context<T>.Permissions
@@ -593,19 +599,28 @@ extension JSONSchemaFragment.GeneralContext {
 
 extension JSONSchemaFragment.IntegerContext {
     internal func validatedContext() throws -> JSONSchema.IntegerContext {
-        let validatedMaximum: (Int, exclusive: Bool)?
+        let validatedMaximum: (value: Int, exclusive: Bool)?
         if let maximum = maximum {
             let exclusive = exclusiveMaximum ?? JSONSchema.IntegerContext.Bound.defaultExclusion
             validatedMaximum = (maximum, exclusive: exclusive)
         } else {
             validatedMaximum = nil
         }
-        let validatedMinimum: (Int, exclusive: Bool)?
+        let validatedMinimum: (value: Int, exclusive: Bool)?
         if let minimum = minimum {
+            guard minimum >= 0 else {
+                throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(minimum) cannot be below 0"))
+            }
+
             let exclusive = exclusiveMinimum ?? JSONSchema.IntegerContext.Bound.defaultExclusion
             validatedMinimum = (minimum, exclusive: exclusive)
         } else {
             validatedMinimum = nil
+        }
+        if let (min, max) = zip(validatedMinimum, validatedMaximum) {
+            guard min.value <= max.value else {
+                throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
+            }
         }
         return .init(
             multipleOf: multipleOf,
@@ -617,19 +632,28 @@ extension JSONSchemaFragment.IntegerContext {
 
 extension JSONSchemaFragment.NumericContext {
     internal func validatedContext() throws -> JSONSchema.NumericContext {
-        let validatedMaximum: (Double, exclusive: Bool)?
+        let validatedMaximum: (value: Double, exclusive: Bool)?
         if let maximum = maximum {
             let exclusive = exclusiveMaximum ?? JSONSchema.NumericContext.Bound.defaultExclusion
             validatedMaximum = (maximum, exclusive: exclusive)
         } else {
             validatedMaximum = nil
         }
-        let validatedMinimum: (Double, exclusive: Bool)?
+        let validatedMinimum: (value: Double, exclusive: Bool)?
         if let minimum = minimum {
+            guard minimum >= 0 else {
+                throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(minimum) cannot be below 0"))
+            }
+
             let exclusive = exclusiveMinimum ?? JSONSchema.NumericContext.Bound.defaultExclusion
             validatedMinimum = (minimum, exclusive: exclusive)
         } else {
             validatedMinimum = nil
+        }
+        if let (min, max) = zip(validatedMinimum, validatedMaximum) {
+            guard min.value <= max.value else {
+                throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
+            }
         }
         return .init(
             multipleOf: multipleOf,
@@ -641,6 +665,16 @@ extension JSONSchemaFragment.NumericContext {
 
 extension JSONSchemaFragment.StringContext {
     internal func validatedContext() throws -> JSONSchema.StringContext {
+        if let minimum = minLength {
+            guard minimum >= 0 else {
+                throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(minimum) cannot be less than 0"))
+            }
+        }
+        if let (min, max) = zip(minLength, maxLength) {
+            guard min <= max else {
+                throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(min) cannot be higher than maximum (\(max)"))
+            }
+        }
         return .init(
             maxLength: maxLength,
             minLength: minLength ?? 0,
@@ -651,6 +685,16 @@ extension JSONSchemaFragment.StringContext {
 
 extension JSONSchemaFragment.ArrayContext {
     internal func validatedContext() throws -> JSONSchema.ArrayContext {
+        if let minimum = minItems {
+            guard minimum >= 0 else {
+                throw JSONSchemaResolutionError(.inconsistency("Array minimum length (\(minimum) cannot be less than 0"))
+            }
+        }
+        if let (min, max) = zip(minItems, maxItems) {
+            guard min <= max else {
+                throw JSONSchemaResolutionError(.inconsistency("Array minimum length (\(min) cannot be higher than maximum (\(max)"))
+            }
+        }
         return .init(
             items: items,
             maxItems: maxItems,
@@ -662,6 +706,16 @@ extension JSONSchemaFragment.ArrayContext {
 
 extension JSONSchemaFragment.ObjectContext {
     internal func validatedContext() throws -> JSONSchema.ObjectContext {
+        if let minimum = minProperties {
+            guard minimum >= 0 else {
+                throw JSONSchemaResolutionError(.inconsistency("Object minimum number of properties (\(minimum) cannot be less than 0"))
+            }
+        }
+        if let (min, max) = zip(minProperties, maxProperties) {
+            guard min <= max else {
+                throw JSONSchemaResolutionError(.inconsistency("Object minimum number of properties (\(min) cannot be higher than maximum (\(max)"))
+            }
+        }
         return .init(
             properties: properties ?? [:],
             additionalProperties: additionalProperties,
