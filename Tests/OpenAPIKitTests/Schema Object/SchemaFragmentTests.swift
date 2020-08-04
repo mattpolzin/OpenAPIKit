@@ -59,7 +59,7 @@ final class SchemaFragmentTests: XCTestCase {
         assertSameGeneralProperties(t4, as: generalProperties)
         let t5 = JSONSchemaFragment.array(generalProperties, .init(items: .string, maxItems: 7, minItems: 2, uniqueItems: true))
         assertSameGeneralProperties(t5, as: generalProperties)
-        let t6 = JSONSchemaFragment.object(generalProperties, .init(maxProperties: 100, minProperties: 0, properties: ["hello": .string], additionalProperties: .init(.string), required: ["hello"]))
+        let t6 = JSONSchemaFragment.object(generalProperties, .init(maxProperties: 100, minProperties: 0, properties: ["hello": .string], additionalProperties: .init(.string), requiredProperties: ["hello"]))
         assertSameGeneralProperties(t6, as: generalProperties)
     }
 
@@ -726,7 +726,7 @@ extension SchemaFragmentTests {
 """
         )
 
-        let t3 = JSONSchemaFragment.object(.init(), .init(required: ["hello"]))
+        let t3 = JSONSchemaFragment.object(.init(), .init(requiredProperties: ["hello"]))
 
         let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
@@ -797,7 +797,7 @@ extension SchemaFragmentTests {
 
         let decoded3 = try orderUnstableDecode(JSONSchemaFragment.self, from: t3)
 
-        XCTAssertEqual(decoded3, JSONSchemaFragment.object(.init(), .init(required: ["hello"])))
+        XCTAssertEqual(decoded3, JSONSchemaFragment.object(.init(), .init(requiredProperties: ["hello"])))
 
         let t4 =
 """

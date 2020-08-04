@@ -200,20 +200,20 @@ extension JSONSchemaFragment {
         public var minProperties: Int?
         public var properties: [String: JSONSchema]?
         public var additionalProperties: Either<Bool, JSONSchema>?
-        public var required: [String]?
+        public var requiredProperties: [String]?
 
         public init(
             maxProperties: Int? = nil,
             minProperties: Int? = nil,
             properties: [String: JSONSchema]? = nil,
             additionalProperties: Either<Bool, JSONSchema>? = nil,
-            required: [String]? = nil
+            requiredProperties: [String]? = nil
         ) {
             self.maxProperties = maxProperties
             self.minProperties = minProperties
             self.properties = properties
             self.additionalProperties = additionalProperties
-            self.required = required
+            self.requiredProperties = requiredProperties
         }
     }
 }
@@ -489,7 +489,7 @@ extension JSONSchemaFragment: Encodable {
             try container.encodeIfPresent(objectContext.minProperties, forKey: .minProperties)
             try container.encodeIfPresent(objectContext.properties, forKey: .properties)
             try container.encodeIfPresent(objectContext.additionalProperties, forKey: .additionalProperties)
-            try container.encodeIfPresent(objectContext.required, forKey: .required)
+            try container.encodeIfPresent(objectContext.requiredProperties, forKey: .required)
         case .reference(let reference):
             var container = encoder.singleValueContainer()
 
@@ -569,7 +569,7 @@ extension JSONSchemaFragment.ObjectContext: Decodable {
         minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
         properties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties)
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
-        required = try container.decodeIfPresent([String].self, forKey: .required)
+        requiredProperties = try container.decodeIfPresent([String].self, forKey: .required)
     }
 }
 

@@ -430,7 +430,7 @@ extension JSONSchemaFragment.ObjectContext {
             }
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .object, name: "additionalProperties", original: originalDescription, new: newDescription))
         }
-        if let conflict = conflicting(required, other.required) {
+        if let conflict = conflicting(requiredProperties, other.requiredProperties) {
             throw JSONSchemaResolutionError(
                 .attributeConflict(
                     jsonType: .object,
@@ -445,13 +445,13 @@ extension JSONSchemaFragment.ObjectContext {
         let newMaxProperties = maxProperties ?? other.maxProperties
         let newMinProperties = minProperties ?? other.minProperties
         let newAdditionalProperties = additionalProperties ?? other.additionalProperties
-        let newRequired = required ?? other.required
+        let newRequired = requiredProperties ?? other.requiredProperties
         return .init(
             maxProperties: newMaxProperties,
             minProperties: newMinProperties,
             properties: newProperties,
             additionalProperties: newAdditionalProperties,
-            required: newRequired
+            requiredProperties: newRequired
         )
     }
 }
@@ -494,7 +494,7 @@ fileprivate extension JSONSchema {
                     minProperties: objectContext.minProperties,
                     properties: objectContext.properties,
                     additionalProperties: objectContext.additionalProperties,
-                    required: objectContext.requiredProperties
+                    requiredProperties: objectContext.requiredProperties
                 )
             )
         case .string(let generalContext, let stringContext):
