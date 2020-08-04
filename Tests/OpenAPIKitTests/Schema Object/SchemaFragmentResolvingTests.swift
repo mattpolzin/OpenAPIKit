@@ -124,9 +124,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     // MARK: - Fragment Combinations
     func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchemaFragment], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
         let resolved1 = try fragments.resolved(against: .noComponents)
+        let schemaString = try orderUnstableTestStringFromEncoding(of: schema.jsonSchema)
+        let resolvedSchemaString = try orderUnstableTestStringFromEncoding(of: resolved1.jsonSchema)
         XCTAssertEqual(
             resolved1,
             schema,
+            "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
             file: file,
             line: line
         )
@@ -134,19 +137,31 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         XCTAssertEqual(
             resolved2,
             schema,
+            "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
             file: file,
             line: line
         )
     }
 
-    func test_resolveStringFragmentAndDisciminatorFragment() throws {
-        try assertOrderIndependentCombinedEqual(
-            [
-                .string(.init(), .init()),
-                .general(.init(discriminator: .init(propertyName: "test")))
-            ],
-            .string(.init(discriminator: .init(propertyName: "test")), .init())
-        )
+    func test_resolveAnyFragmentAndDisciminatorFragment() throws {
+        let fragmentsAndResults: [(JSONSchemaFragment, DereferencedJSONSchema)] = [
+            (.boolean(.init()), .boolean(.init(discriminator: .init(propertyName: "test")))),
+            (.integer(.init(), .init()), .integer(.init(discriminator: .init(propertyName: "test")), .init())),
+            (.number(.init(), .init()), .number(.init(discriminator: .init(propertyName: "test")), .init())),
+            (.string(.init(), .init()), .string(.init(discriminator: .init(propertyName: "test")), .init())),
+            (.array(.init(), .init()), .array(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ArrayContext(.init())!)),
+            (.object(.init(), .init()), .object(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!))
+        ]
+
+        for (fragment, result) in fragmentsAndResults {
+            try assertOrderIndependentCombinedEqual(
+                [
+                    fragment,
+                    .general(.init(discriminator: .init(propertyName: "test")))
+                ],
+                result
+            )
+        }
     }
 
     func test_resolveStringFragmentAndFormatFragment() throws {
@@ -156,6 +171,62 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                 .general(.init(format: "binary"))
             ],
             .string(.init(format: .binary), .init())
+        )
+    }
+
+    func test_threeStringFragments() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(.init(description: "test"), .init(minLength: 2)),
+                .string(.init(format: "byte"), .init(maxLength: 5)),
+                .string(.init(description: "test"), .init())
+            ],
+            .string(.init(format: .byte, description: "test"), .init(maxLength: 5, minLength: 2))
+        )
+    }
+
+    func test_deeperObjectFragments() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(additionalProperties: .init(true))),
+                .object(.init(description: "nested"), .init()),
+                .object(
+                    .init(),
+                    .init(
+                        minProperties: 2,
+                        properties: [
+                            "required": .string
+                        ],
+                        requiredProperties: ["required"]
+                    )
+                ),
+                .object(
+                    .init(),
+                    .init(
+                        minProperties: 2,
+                        properties: [
+                            "optional": .boolean(required: false),
+                            "someObject": .object(required: false),
+                            "anything": .undefined(description: nil)
+                        ]
+                    )
+                )
+            ],
+            .object(
+                .init(description: "nested"),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(
+                        properties: [
+                            "required": .string,
+                            "optional": .boolean(required: false),
+                            "someObject": .object(required: false),
+                            "anything": .undefined(description: nil)
+                        ],
+                        additionalProperties: .init(true),
+                        minProperties: 2
+                    )
+                )!
+            )
         )
     }
 
@@ -802,6 +873,4 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             }
         }
     }
-
-    #warning("write more inconsistency errors")
 }
