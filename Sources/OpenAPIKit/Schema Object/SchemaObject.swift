@@ -10,11 +10,11 @@
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
 public enum JSONSchema: Equatable, JSONSchemaContext {
     case boolean(Context<JSONTypeFormat.BooleanFormat>)
-    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
-    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(Context<JSONTypeFormat.StringFormat>, StringContext)
+    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
+    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
     indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
     indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
@@ -334,6 +334,32 @@ extension JSONSchema {
             return .string(context.with(example: example), contextB)
         case .all, .one, .any, .not, .reference, .undefined:
             throw Self.Error.exampleNotSupported
+        }
+    }
+
+    /// Returns a version of this `JSONSchema` that has the given discriminator.
+    public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(discriminator: discriminator))
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(discriminator: discriminator), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(discriminator: discriminator), contextB)
+        case .number(let context, let contextB):
+            return .number(context.with(discriminator: discriminator), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.with(discriminator: discriminator), contextB)
+        case .string(let context, let contextB):
+            return .string(context.with(discriminator: discriminator), contextB)
+        case .all(of: let fragments, discriminator: _):
+            return .all(of: fragments, discriminator: discriminator)
+        case .one(of: let schemas, discriminator: _):
+            return .one(of: schemas, discriminator: discriminator)
+        case .any(of: let schemas, discriminator: _):
+            return .any(of: schemas, discriminator: discriminator)
+        case .not, .reference, .undefined:
+            return self
         }
     }
 }

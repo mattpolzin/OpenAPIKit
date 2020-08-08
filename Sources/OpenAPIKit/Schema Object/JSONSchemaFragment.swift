@@ -6,8 +6,10 @@
 //
 
 public protocol JSONSchemaFragmentContext {
+    var jsonType: JSONType? { get }
     var format: String? { get }
     var description: String? { get }
+    var discriminator: OpenAPI.Discriminator? { get }
     var title: String? { get }
     var nullable: Bool? { get }
     var deprecated: Bool? { get }
@@ -49,20 +51,22 @@ public enum JSONSchemaFragment: Equatable {
 
 extension JSONSchemaFragment {
     public struct GeneralContext: Equatable {
-        public var format: String? = nil
-        public var description: String? = nil
-        public var title: String? = nil
-        public var nullable: Bool? = nil
-        public var deprecated: Bool? = nil
-        public var externalDocs: OpenAPI.ExternalDocumentation? = nil
-        public var allowedValues: [AnyCodable]? = nil
-        public var example: AnyCodable? = nil
-        public var readOnly: Bool? = nil
-        public var writeOnly: Bool? = nil
+        public var format: String?
+        public var description: String?
+        public var discriminator: OpenAPI.Discriminator?
+        public var title: String?
+        public var nullable: Bool?
+        public var deprecated: Bool?
+        public var externalDocs: OpenAPI.ExternalDocumentation?
+        public var allowedValues: [AnyCodable]?
+        public var example: AnyCodable?
+        public var readOnly: Bool?
+        public var writeOnly: Bool?
 
         public init(
             format: String? = nil,
             description: String? = nil,
+            discriminator: OpenAPI.Discriminator? = nil,
             title: String? = nil,
             nullable: Bool? = nil,
             deprecated: Bool? = nil,
@@ -74,6 +78,7 @@ extension JSONSchemaFragment {
         ) {
             self.format = format
             self.description = description
+            self.discriminator = discriminator
             self.title = title
             self.nullable = nullable
             self.deprecated = deprecated
@@ -86,11 +91,11 @@ extension JSONSchemaFragment {
     }
 
     public struct IntegerContext: Equatable {
-        public var multipleOf: Int? = nil
-        public var maximum: Int? = nil
-        public var exclusiveMaximum: Bool? = nil
-        public var minimum: Int? = nil
-        public var exclusiveMinimum: Bool? = nil
+        public var multipleOf: Int?
+        public var maximum: Int?
+        public var exclusiveMaximum: Bool?
+        public var minimum: Int?
+        public var exclusiveMinimum: Bool?
 
         public init(
             multipleOf: Int? = nil,
@@ -134,11 +139,11 @@ extension JSONSchemaFragment {
     }
 
     public struct NumericContext: Equatable {
-        public var multipleOf: Double? = nil
-        public var maximum: Double? = nil
-        public var exclusiveMaximum: Bool? = nil
-        public var minimum: Double? = nil
-        public var exclusiveMinimum: Bool? = nil
+        public var multipleOf: Double?
+        public var maximum: Double?
+        public var exclusiveMaximum: Bool?
+        public var minimum: Double?
+        public var exclusiveMinimum: Bool?
 
         public init(
             multipleOf: Double? = nil,
@@ -156,9 +161,9 @@ extension JSONSchemaFragment {
     }
 
     public struct StringContext: Equatable {
-        public var maxLength: Int? = nil
-        public var minLength: Int? = nil
-        public var pattern: String? = nil // regex
+        public var maxLength: Int?
+        public var minLength: Int?
+        public var pattern: String? // regex
 
         public init(
             maxLength: Int? = nil,
@@ -172,10 +177,10 @@ extension JSONSchemaFragment {
     }
 
     public struct ArrayContext: Equatable {
-        public var items: JSONSchema? = nil
-        public var maxItems: Int? = nil
-        public var minItems: Int? = nil
-        public var uniqueItems: Bool? = nil
+        public var items: JSONSchema?
+        public var maxItems: Int?
+        public var minItems: Int?
+        public var uniqueItems: Bool?
 
         public init(
             items: JSONSchema? = nil,
@@ -191,29 +196,48 @@ extension JSONSchemaFragment {
     }
 
     public struct ObjectContext: Equatable {
-        public var maxProperties: Int? = nil
-        public var minProperties: Int? = nil
-        public var properties: [String: JSONSchema]? = nil
-        public var additionalProperties: Either<Bool, JSONSchema>? = nil
-        public var required: [String]? = nil
+        public var maxProperties: Int?
+        public var minProperties: Int?
+        public var properties: [String: JSONSchema]?
+        public var additionalProperties: Either<Bool, JSONSchema>?
+        public var requiredProperties: [String]?
 
         public init(
             maxProperties: Int? = nil,
             minProperties: Int? = nil,
             properties: [String: JSONSchema]? = nil,
             additionalProperties: Either<Bool, JSONSchema>? = nil,
-            required: [String]? = nil
+            requiredProperties: [String]? = nil
         ) {
             self.maxProperties = maxProperties
             self.minProperties = minProperties
             self.properties = properties
             self.additionalProperties = additionalProperties
-            self.required = required
+            self.requiredProperties = requiredProperties
         }
     }
 }
 
 extension JSONSchemaFragment: JSONSchemaFragmentContext {
+
+    public var jsonType: JSONType? {
+        switch self {
+        case .general, .reference:
+            return nil
+        case .boolean:
+            return .boolean
+        case .integer:
+            return .integer
+        case .number:
+            return .number
+        case .string:
+            return .string
+        case .array:
+            return .array
+        case .object:
+            return .object
+        }
+    }
 
     public var format: String? {
         switch self {
@@ -240,6 +264,21 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
              .array(let generalContext, _),
              .object(let generalContext, _):
             return generalContext.description
+        case .reference:
+            return nil
+        }
+    }
+
+    public var discriminator: OpenAPI.Discriminator? {
+        switch self {
+        case .general(let generalContext),
+             .boolean(let generalContext),
+             .integer(let generalContext, _),
+             .number(let generalContext, _),
+             .string(let generalContext, _),
+             .array(let generalContext, _),
+             .object(let generalContext, _):
+            return generalContext.discriminator
         case .reference:
             return nil
         }
@@ -382,6 +421,7 @@ extension JSONSchemaFragment: Encodable {
         try container.encodeIfPresent(type, forKey: .type)
         try container.encodeIfPresent(format, forKey: .format)
         try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(title, forKey: .title)
         try container.encodeIfPresent(nullable, forKey: .nullable)
         try container.encodeIfPresent(deprecated, forKey: .deprecated)
@@ -449,7 +489,7 @@ extension JSONSchemaFragment: Encodable {
             try container.encodeIfPresent(objectContext.minProperties, forKey: .minProperties)
             try container.encodeIfPresent(objectContext.properties, forKey: .properties)
             try container.encodeIfPresent(objectContext.additionalProperties, forKey: .additionalProperties)
-            try container.encodeIfPresent(objectContext.required, forKey: .required)
+            try container.encodeIfPresent(objectContext.requiredProperties, forKey: .required)
         case .reference(let reference):
             var container = encoder.singleValueContainer()
 
@@ -464,6 +504,7 @@ extension JSONSchemaFragment.GeneralContext: Decodable {
 
         format = try container.decodeIfPresent(String.self, forKey: .format)
         description = try container.decodeIfPresent(String.self, forKey: .description)
+        discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         title = try container.decodeIfPresent(String.self, forKey: .title)
         nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
@@ -528,7 +569,7 @@ extension JSONSchemaFragment.ObjectContext: Decodable {
         minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
         properties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties)
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
-        required = try container.decodeIfPresent([String].self, forKey: .required)
+        requiredProperties = try container.decodeIfPresent([String].self, forKey: .required)
     }
 }
 

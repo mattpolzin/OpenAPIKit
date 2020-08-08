@@ -102,6 +102,30 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var deprecated: Bool { jsonSchema.deprecated }
+
+    /// Returns a version of this `JSONSchema` that has the given discriminator.
+    public func with(discriminator: OpenAPI.Discriminator) -> DereferencedJSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(discriminator: discriminator))
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(discriminator: discriminator), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(discriminator: discriminator), contextB)
+        case .number(let context, let contextB):
+            return .number(context.with(discriminator: discriminator), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.with(discriminator: discriminator), contextB)
+        case .string(let context, let contextB):
+            return .string(context.with(discriminator: discriminator), contextB)
+        case .one(of: let schemas, discriminator: _):
+            return .one(of: schemas, discriminator: discriminator)
+        case .any(of: let schemas, discriminator: _):
+            return .any(of: schemas, discriminator: discriminator)
+        case .not, .undefined:
+            return self
+        }
+    }
 }
 
 extension DereferencedJSONSchema {
@@ -259,7 +283,7 @@ extension DereferencedJSONSchema {
                 properties: properties.mapValues { $0.jsonSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
-                minProperties: minProperties
+                minProperties: _minProperties
             )
         }
     }
@@ -272,6 +296,8 @@ extension JSONSchema: LocallyDereferenceable {
     ///
     /// Dereferencing a `JSONSchema` currently relies on resolving
     /// `all(of:)` schemas (thus removing all `JSONSchemaFragments`).
+    /// All fragments are combined into a new schema if possible and an error
+    /// is thrown if no valid schema can be created.
     ///
     /// - Important: Local dereferencing will `throw` if any
     ///     `JSONReferences` point to other files or to
@@ -306,8 +332,8 @@ extension JSONSchema: LocallyDereferenceable {
         case .string(let generalContext, let stringContext):
             return .string(generalContext, stringContext)
         case .all(of: let fragments, discriminator: let discriminator):
-            #warning("do something with discriminator")
-            return try fragments.resolved(against: components)
+            let resolvedFragments = try fragments.resolved(against: components)
+            return discriminator.map { resolvedFragments.with(discriminator: $0) } ?? resolvedFragments
         case .one(of: let jsonSchemas, discriminator: let discriminator):
             let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
             return .one(of: schemas, discriminator: discriminator)
@@ -326,6 +352,12 @@ extension JSONSchema: LocallyDereferenceable {
     ///
     /// To create a dereferenced schema object from a schema object
     /// that does have references, use `dereferenced(in:)`.
+    ///
+    /// - Important: Dereferencing an `all(of:)` schema will
+    ///     also attempt to resolve it and fail if it cannot. Resolving
+    ///     an `all(of:)` schema involves combining the fragments
+    ///     of the `all(of:)` into one schema and failing if no
+    ///     valid schema can be created.
     public func dereferenced() -> DereferencedJSONSchema? {
         return try? dereferenced(in: .noComponents)
     }
