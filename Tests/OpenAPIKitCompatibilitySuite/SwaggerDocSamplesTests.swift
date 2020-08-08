@@ -85,7 +85,6 @@ components:
 
             let dogSchema = JSONSchema.object(
                 discriminator: .init(propertyName: "pet_type"),
-                minProperties: 1,
                 properties: [
                     "pet_type": .string,
                     "bark": .boolean(required: false),
@@ -94,7 +93,6 @@ components:
             )
             let catSchema = JSONSchema.object(
                 discriminator: .init(propertyName: "pet_type"),
-                minProperties: 1,
                 properties: [
                     "pet_type": .string,
                     "hunts": .boolean(required: false),

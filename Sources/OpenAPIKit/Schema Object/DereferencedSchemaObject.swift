@@ -283,7 +283,7 @@ extension DereferencedJSONSchema {
                 properties: properties.mapValues { $0.jsonSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
-                minProperties: minProperties
+                minProperties: _minProperties
             )
         }
     }

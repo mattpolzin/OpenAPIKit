@@ -250,6 +250,62 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
+    func test_evenDeeperObjectFragments() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(
+                    .init(),
+                    .init(
+                        properties: [
+                            "more_object": .object(properties: ["boolean": .boolean])
+                        ]
+                    )
+                ),
+                .object(
+                    .init(),
+                    .init(
+                        properties: [
+                            "more_fragments": .all(
+                                of: [
+                                    .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
+                                    .object(.init(title: "nested test"), .init(
+                                        properties: [
+                                            "string": .string,
+                                            "integer": .integer,
+                                            "number": .number,
+                                            "array": .array
+                                        ]
+                                    ))
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(
+                        properties: [
+                            "more_object": .object(properties: ["boolean": .boolean]),
+                            "more_fragments": .object(
+                                title: "nested test",
+                                description: "nested",
+                                properties: [
+                                    "someObject": .object,
+                                    "string": .string,
+                                    "integer": .integer,
+                                    "number": .number,
+                                    "array": .array
+                                ]
+                            )
+                        ]
+                    )
+                )!
+            )
+        )
+    }
+
     func test_minLessThanMaxObject() throws {
         try assertOrderIndependentCombinedEqual(
             [

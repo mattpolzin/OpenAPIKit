@@ -491,11 +491,13 @@ fileprivate extension JSONSchema {
                 )
             )
         case .object(let generalContext, let objectContext):
+            // a _minProperties of 0 is also the default if omitted, so omit (as `nil`) if it is 0.
+            let minProperties = objectContext._minProperties > 0 ? objectContext._minProperties : nil
             return .object(
                 generalContext.fragmentContext,
                 .init(
                     maxProperties: objectContext.maxProperties,
-                    minProperties: objectContext.minProperties,
+                    minProperties: minProperties,
                     properties: objectContext.properties,
                     additionalProperties: objectContext.additionalProperties,
                     requiredProperties: objectContext.requiredProperties
