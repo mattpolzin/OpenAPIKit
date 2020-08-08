@@ -233,7 +233,45 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     #warning("TODO: add more fragment combination tests")
 
     // MARK: - Dereferencing
-    #warning("TODO")
+    func test_referenceNotFound() {
+        let t1 = [JSONSchemaFragment.reference(.component(named: "test"))]
+        XCTAssertThrowsError(try t1.resolved(against: .noComponents)) { error in
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
+        }
+
+        let t2 = [
+            JSONSchemaFragment.object(.init(description: "test"), .init()),
+            JSONSchemaFragment.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+        ]
+        XCTAssertThrowsError(try t2.resolved(against: .noComponents)) { error in
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
+        }
+    }
+
+    func test_referenceFound() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "test": .string
+            ]
+        )
+
+        let t1 = [JSONSchemaFragment.reference(.component(named: "test"))]
+        let schema1 = try t1.resolved(against: components)
+        XCTAssertEqual(
+            schema1,
+            JSONSchema.string.dereferenced()
+        )
+
+        let t2 = [
+            JSONSchemaFragment.object(.init(description: "test"), .init()),
+            JSONSchemaFragment.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+        ]
+        let schema2 = try t2.resolved(against: components)
+        XCTAssertEqual(
+            schema2,
+            JSONSchema.object(description: "test", properties: ["test": .string]).dereferenced()
+        )
+    }
 
     // MARK: - Conflict Failures
     func test_typeConflicts() {
