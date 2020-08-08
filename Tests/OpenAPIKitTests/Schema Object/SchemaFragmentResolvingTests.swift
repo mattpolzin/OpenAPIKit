@@ -270,10 +270,20 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                                     .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
                                     .object(.init(title: "nested test"), .init(
                                         properties: [
-                                            "string": .string,
-                                            "integer": .integer,
-                                            "number": .number,
-                                            "array": .array
+                                            "boolean": .boolean(format: .other("integer")),
+                                            "string": .string(maxLength: 50),
+                                            "integer": .integer(maximum: (10, exclusive: false)),
+                                            "number": .number(maximum: (33.2, exclusive: false)),
+                                            "array": .array(maxItems: 22)
+                                        ]
+                                    )),
+                                    .object(.init(title: "nested test"), .init(
+                                        properties: [
+                                            "boolean": .boolean(description: "boolean"),
+                                            "string": .string(description: "string"),
+                                            "integer": .integer(description: "integer"),
+                                            "number": .number(description: "number"),
+                                            "array": .array(description: "array")
                                         ]
                                     ))
                                 ]
@@ -293,10 +303,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                                 description: "nested",
                                 properties: [
                                     "someObject": .object,
-                                    "string": .string,
-                                    "integer": .integer,
-                                    "number": .number,
-                                    "array": .array
+                                    "boolean": .boolean(format: .other("integer"), description: "boolean"),
+                                    "string": .string(description: "string", maxLength: 50),
+                                    "integer": .integer(description: "integer", maximum: (10, exclusive: false)),
+                                    "number": .number(description: "number", maximum: (33.2, exclusive: false)),
+                                    "array": .array(description: "array", maxItems: 22)
                                 ]
                             )
                         ]
