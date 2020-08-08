@@ -90,6 +90,26 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
+    func test_resolvingSingleObjectReadOnly() {
+        let fragments: [JSONSchemaFragment] = [
+            .object(.init(readOnly: true), .init())
+        ]
+        XCTAssertEqual(
+            try fragments.resolved(against: .noComponents),
+            .object(.init(permissions: .readOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
+        )
+    }
+
+    func test_resolvingSingleObjectWriteOnly() {
+        let fragments: [JSONSchemaFragment] = [
+            .object(.init(writeOnly: true), .init())
+        ]
+        XCTAssertEqual(
+            try fragments.resolved(against: .noComponents),
+            .object(.init(permissions: .writeOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
+        )
+    }
+
     // MARK: - Formats
     func test_resolvingSingleIntegerWithFormat() {
         let fragments: [JSONSchemaFragment] = [
@@ -230,7 +250,55 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
-    #warning("TODO: add more fragment combination tests")
+    func test_minLessThanMaxObject() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(minProperties: 2)),
+                .object(.init(), .init(maxProperties: 3))
+            ],
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:], maxProperties: 3, minProperties: 2))!)
+        )
+    }
+
+    func test_minLessThanMaxArray() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .array(.init(), .init(minItems: 2)),
+                .array(.init(), .init(maxItems: 3))
+            ],
+            .array(.init(), DereferencedJSONSchema.ArrayContext(.init(maxItems: 3, minItems: 2))!)
+        )
+    }
+
+    func test_minLessThanMaxString() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(.init(), .init(minLength: 2)),
+                .string(.init(), .init(maxLength: 3))
+            ],
+            .string(.init(), .init(maxLength: 3, minLength: 2))
+        )
+    }
+
+    func test_minLessThanMaxNumber() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .number(.init(), .init(minimum: 2)),
+                .number(.init(), .init(maximum: 3))
+            ],
+            .number(.init(), .init(maximum: (3, exclusive: false), minimum: (2, exclusive: false)))
+        )
+    }
+
+    func test_minLessThanMaxInteger() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .integer(.init(), .init(minimum: 2)),
+                .integer(.init(), .init(maximum: 3))
+            ],
+            .integer(.init(), .init(maximum: (3, exclusive: false), minimum: (2, exclusive: false)))
+        )
+    }
 
     // MARK: - Dereferencing
     func test_referenceNotFound() {

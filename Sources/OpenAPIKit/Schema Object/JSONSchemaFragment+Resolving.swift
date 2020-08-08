@@ -205,7 +205,7 @@ internal struct FragmentResolver {
 
 // MARK: - Combining Fragments
 
-func conflicting<T>(_ left: T?, _ right: T?) -> (T, T)? where T: Equatable {
+internal func conflicting<T>(_ left: T?, _ right: T?) -> (T, T)? where T: Equatable {
     return zip(left, right).flatMap { $0 == $1 ? nil : ($0, $1) }
 }
 
