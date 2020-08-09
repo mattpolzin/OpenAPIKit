@@ -96,7 +96,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertFalse(apiDoc.paths["/pet/{petId}"]?.get?.parameters.isEmpty ?? true)
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.name, "petId")
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.context, .path)
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64, required: false))
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64))
     }
 
     func test_successfullyParsedComponents() throws {

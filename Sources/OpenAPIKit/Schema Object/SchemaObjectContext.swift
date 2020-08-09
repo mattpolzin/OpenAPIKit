@@ -14,7 +14,7 @@ public protocol JSONSchemaContext {
     /// `true` if values for this schema are required, `false` if they
     /// are optional (and can therefore be omitted from request/response data).
     ///
-    /// - Important: This is distinct from the concept of nullability.
+    /// - Important: Required/optional are distinct from the concept of nullability.
     ///
     ///     **Nullability:** Whether or not a value can be  `null`.
     ///
@@ -88,7 +88,7 @@ extension JSONSchema {
     /// The context that applies to all schemas.
     public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
-        public let required: Bool // default true (except on decode, where required depends on whether there is a parent schema scope to contain a 'required' property)
+        public let required: Bool // default true
         public let nullable: Bool // default false
 
         public let permissions: Permissions // default `.readWrite`
@@ -535,10 +535,10 @@ extension JSONSchema.Context: Decodable {
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
-        // default to false at decoding site. It is the responsibility of
-        // decoders farther upstream to mark this as required if needed
-        // using `.requiredContext()`.
-        required = false
+        // default to true at decoding site. It is the responsibility of
+        // decoders farther upstream to mark this as _not_ required if needed
+        // using `.optionalContext()`.
+        required = true
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
@@ -804,10 +804,17 @@ extension JSONSchema.ObjectContext: Decodable {
 
         var decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
 
-        decodedProperties.forEach { (propertyName, property) in
-            if requiredArray.contains(propertyName) {
-                decodedProperties[propertyName] = property.requiredSchemaObject()
-            }
+        // make any property not in this object's "required" array
+        // optional. All schemas are assumed required until a parent
+        // object schema omits the property containing the schema from
+        // its required array. This allows OpenAPIKit to store the concept
+        // of "requried" on each schema instead of on the parenting object
+        // and to consider root schemas (those not living in another object's
+        // properties dictionary) to be required.
+        decodedProperties
+        .filter { !requiredArray.contains($0.key) }
+        .forEach { (propertyName, property) in
+            decodedProperties[propertyName] = property.optionalSchemaObject()
         }
 
         properties = decodedProperties

@@ -695,7 +695,7 @@ extension SchemaFragmentTests {
 
         let decoded5 = try orderUnstableDecode(JSONSchemaFragment.self, from: t5)
 
-        XCTAssertEqual(decoded5, JSONSchemaFragment.array(.init(), .init(items: .string(required: false))))
+        XCTAssertEqual(decoded5, JSONSchemaFragment.array(.init(), .init(items: .string)))
     }
 
     func test_objectEncode() throws {

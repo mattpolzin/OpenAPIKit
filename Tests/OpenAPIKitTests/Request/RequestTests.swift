@@ -141,12 +141,20 @@ extension RequestTests {
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .json : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .json : .init(
+                        schema: .init(
+                            .object(
+                                properties: ["hello": .string(required: false)]
+                            )
+                        )
+                    )
+                ]
+            )
+        )
     }
 
     func test_withDescription_encode() {
@@ -311,12 +319,18 @@ extension RequestTests {
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .xml : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .xml : .init(
+                        schema: .init(
+                            .object(properties: ["hello": .string(required: false)])
+                        )
+                    )
+                ]
+            )
+        )
     }
 
     func test_form_onlySchemaContent_encode() {
@@ -371,11 +385,17 @@ extension RequestTests {
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .form : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .form : .init(
+                        schema: .init(
+                            .object(properties: ["hello": .string(required: false)])
+                        )
+                    )
+                ]
+            )
+        )
     }
 }

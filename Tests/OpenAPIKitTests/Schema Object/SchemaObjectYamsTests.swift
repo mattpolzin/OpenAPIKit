@@ -28,7 +28,7 @@ maximum: 10.0
 
         XCTAssertEqual(
             integer,
-            JSONSchema.integer(required: false, maximum: (10, exclusive: false), minimum: (1, exclusive: false))
+            JSONSchema.integer(maximum: (10, exclusive: false), minimum: (1, exclusive: false))
         )
     }
 
