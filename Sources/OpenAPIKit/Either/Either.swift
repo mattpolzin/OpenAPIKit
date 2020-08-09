@@ -48,3 +48,5 @@ extension Either: LocallyDereferenceable where A: LocallyDereferenceable, B: Loc
         }
     }
 }
+
+extension Either: Validatable where A: Validatable, B: Validatable {}

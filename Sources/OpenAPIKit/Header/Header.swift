@@ -298,3 +298,5 @@ extension OpenAPI.Header: Decodable {
         vendorExtensions = try Self.extensions(from: decoder)
     }
 }
+
+extension OpenAPI.Header: Validatable {}

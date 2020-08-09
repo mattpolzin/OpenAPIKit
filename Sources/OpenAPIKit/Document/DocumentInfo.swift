@@ -351,3 +351,7 @@ extension OpenAPI.Document.Info {
         }
     }
 }
+
+extension OpenAPI.Document.Info: Validatable {}
+extension OpenAPI.Document.Info.Contact: Validatable {}
+extension OpenAPI.Document.Info.License: Validatable {}

@@ -227,52 +227,52 @@ final class ValidationConvenienceTests: XCTestCase {
     }
 
     func test_context_unwrap() {
-        let v = Validation<Character>(
-            description: "int is 5",
-            check: \.self == "h"
+        let v = Validation<Int>(
+            description: "string is 'H'",
+            check: \.self == 1
         )
 
         XCTAssertTrue(
-            unwrap(\.subject.first, into: v)(dummyContext(for: "hello")).isEmpty
+            unwrap(\.subject.first?.wholeNumberValue, into: v)(dummyContext(for: "12345")).isEmpty
         )
         XCTAssertFalse(
-            unwrap(\.subject.first, into: v)(dummyContext(for: "12345")).isEmpty
+            unwrap(\.subject.first?.wholeNumberValue, into: v)(dummyContext(for: "hello")).isEmpty
         )
         XCTAssertTrue(
-            unwrap(\.subject.first, into: v)(dummyContext(for: "heads up")).isEmpty
+            unwrap(\.subject.first?.wholeNumberValue, into: v)(dummyContext(for: "1eads up")).isEmpty
         )
         // default unwrap nil error message
         XCTAssertFalse(
-            unwrap(\.subject.first, into: v)(dummyContext(for: "")).isEmpty
+            unwrap(\.subject.first?.wholeNumberValue, into: v)(dummyContext(for: "")).isEmpty
         )
         // given description
         XCTAssertFalse(
-            unwrap(\.subject.first, into: v, description: "test")(dummyContext(for: "")).isEmpty
+            unwrap(\.subject.first?.wholeNumberValue, into: v, description: "test")(dummyContext(for: "")).isEmpty
         )
     }
 
     func test_subject_unwrap() {
-        let v = Validation<Character>(
-            description: "int is 5",
-            check: \.self == "h"
+        let v = Validation<Int>(
+            description: "character is 'h'",
+            check: \.self == 1
         )
 
         XCTAssertTrue(
-            unwrap(\.first, into: v)(dummyContext(for: "hello")).isEmpty
+            unwrap(\.first?.wholeNumberValue, into: v)(dummyContext(for: "12345")).isEmpty
         )
         XCTAssertFalse(
-            unwrap(\.first, into: v)(dummyContext(for: "12345")).isEmpty
+            unwrap(\.first?.wholeNumberValue, into: v)(dummyContext(for: "hello")).isEmpty
         )
         XCTAssertTrue(
-            unwrap(\.first, into: v)(dummyContext(for: "heads up")).isEmpty
+            unwrap(\.first?.wholeNumberValue, into: v)(dummyContext(for: "1eads up")).isEmpty
         )
         // default unwrap nil error message
         XCTAssertFalse(
-            unwrap(\.first, into: v)(dummyContext(for: "")).isEmpty
+            unwrap(\.first?.wholeNumberValue, into: v)(dummyContext(for: "")).isEmpty
         )
         // given description
         XCTAssertFalse(
-            unwrap(\.first, into: v, description: "test")(dummyContext(for: "")).isEmpty
+            unwrap(\.first?.wholeNumberValue, into: v, description: "test")(dummyContext(for: "")).isEmpty
         )
     }
 }

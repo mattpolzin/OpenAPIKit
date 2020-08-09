@@ -162,3 +162,5 @@ extension OpenAPI.Example: LocallyDereferenceable {
         return self
     }
 }
+
+extension OpenAPI.Example: Validatable {}

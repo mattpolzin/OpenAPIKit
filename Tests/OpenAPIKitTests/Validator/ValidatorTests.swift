@@ -165,7 +165,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "just because")
         }
@@ -263,7 +263,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "just because")
         }
@@ -296,7 +296,7 @@ final class ValidatorTests: XCTestCase {
         }
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "just because")
             XCTAssertEqual(error?.values.last?.reason, "just because")
@@ -345,7 +345,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "hello world")
         }
@@ -381,7 +381,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "world")
         }
@@ -417,7 +417,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 5)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "world" }.count, 2)
@@ -454,7 +454,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "hello" }.count, 3)
             XCTAssertEqual(error?.values.map { $0.reason }.filter { $0 == "world" }.count, 0)
@@ -490,7 +490,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: there should be two servers")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["info", "title"])
@@ -597,7 +597,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must have at least one Response and they all must be status code 200")
         }
@@ -673,7 +673,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations must contain a status code 500 or there must be two possible responses")
         }
@@ -745,7 +745,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: x-string is 'hello'")
         }
@@ -802,7 +802,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Items must have at least one Operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
@@ -943,7 +943,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: x-string is 'hello'")
         }
@@ -987,7 +987,7 @@ final class ValidatorTests: XCTestCase {
             .validating(validation)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 2)
             XCTAssertEqual(error?.values.first?.reason, "x-string needs to be 'hello'")
         }
@@ -1029,7 +1029,7 @@ final class ValidatorTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 1)
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All server arrays have more than 1 server")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "servers"])
@@ -1196,7 +1196,7 @@ final class ValidatorTests: XCTestCase {
             .validating(postRequestAndResponsesAreValid)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 3)
             XCTAssertEqual(error?.values.map { $0.reason }, [
                 "Failed to satisfy: All JSON resources must have a String name",
@@ -1401,7 +1401,7 @@ final class ValidatorTests: XCTestCase {
             .validating("bool", check: \Bool.self == false)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let errors = error as? ValidationErrors
+            let errors = error as? ValidationErrorCollection
             XCTAssertEqual(errors?.values.count, 7)
         }
     }

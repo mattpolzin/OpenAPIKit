@@ -220,3 +220,6 @@ extension OpenAPI.Server.Variable {
         }
     }
 }
+
+extension OpenAPI.Server: Validatable {}
+extension OpenAPI.Server.Variable: Validatable {}

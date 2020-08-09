@@ -285,3 +285,5 @@ extension OpenAPI.Response.StatusCode: Decodable {
         self = value
     }
 }
+
+extension OpenAPI.Response: Validatable {}

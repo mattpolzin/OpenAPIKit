@@ -247,3 +247,6 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         return self
     }
 }
+
+extension OpenAPI.SecurityScheme.Location: Validatable {}
+extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}
