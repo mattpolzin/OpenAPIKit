@@ -1,5 +1,5 @@
 //
-//  SchemaObject.swift
+//  JSONSchema.swift
 //  OpenAPI
 //
 //  Created by Mathew Polzin on 6/22/19.
@@ -9,12 +9,12 @@
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
 public enum JSONSchema: Equatable, JSONSchemaContext {
-    case boolean(Context<JSONTypeFormat.BooleanFormat>)
-    case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
-    case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
-    case string(Context<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
-    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
+    case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
+    case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
+    case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
+    case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
+    indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
+    indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
     indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
     indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
@@ -111,42 +111,42 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
-        return generalContext?.nullable ?? false
+        return coreContext?.nullable ?? false
     }
 
     // See `JSONSchemaContext`
     public var readOnly: Bool {
-        return generalContext?.readOnly ?? false
+        return coreContext?.readOnly ?? false
     }
 
     // See `JSONSchemaContext`
     public var writeOnly: Bool {
-        return generalContext?.writeOnly ?? false
+        return coreContext?.writeOnly ?? false
     }
 
     // See `JSONSchemaContext`
     public var deprecated: Bool {
-        return generalContext?.deprecated ?? false
+        return coreContext?.deprecated ?? false
     }
 
     // See `JSONSchemaContext`
     public var title: String? {
-        return generalContext?.title
+        return coreContext?.title
     }
 
     // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
-        return generalContext?.externalDocs
+        return coreContext?.externalDocs
     }
 
     // See `JSONSchemaContext`
     public var allowedValues: [AnyCodable]? {
-        return generalContext?.allowedValues
+        return coreContext?.allowedValues
     }
 
     // See `JSONSchemaContext`
     public var example: AnyCodable? {
-        return generalContext?.example
+        return coreContext?.example
     }
 }
 
@@ -164,7 +164,7 @@ extension JSONSchema {
     /// - `reference`
     /// - `undefined`
     ///
-    public var generalContext: JSONSchemaContext? {
+    public var coreContext: JSONSchemaContext? {
         switch self {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
@@ -408,7 +408,7 @@ extension JSONSchema {
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -417,7 +417,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let context = JSONSchema.Context<JSONTypeFormat.BooleanFormat>(
+        let context = JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -439,7 +439,7 @@ extension JSONSchema {
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -474,7 +474,7 @@ extension JSONSchema {
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -486,7 +486,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let genericContext = JSONSchema.Context<JSONTypeFormat.StringFormat>(
+        let genericContext = JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -513,7 +513,7 @@ extension JSONSchema {
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -554,7 +554,7 @@ extension JSONSchema {
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -566,7 +566,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let genericContext = JSONSchema.Context<JSONTypeFormat.NumberFormat>(
+        let genericContext = JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -593,7 +593,7 @@ extension JSONSchema {
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -634,7 +634,7 @@ extension JSONSchema {
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -646,7 +646,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let genericContext = JSONSchema.Context<JSONTypeFormat.IntegerFormat>(
+        let genericContext = JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -673,7 +673,7 @@ extension JSONSchema {
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -714,7 +714,7 @@ extension JSONSchema {
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.ObjectFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -727,7 +727,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let generalContext = JSONSchema.Context<JSONTypeFormat.ObjectFormat>(
+        let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -746,7 +746,7 @@ extension JSONSchema {
             maxProperties: maxProperties,
             minProperties: minProperties
         )
-        return .object(generalContext, objectContext)
+        return .object(coreContext, objectContext)
     }
 
     /// A required, non-nullable object schema.
@@ -760,7 +760,7 @@ extension JSONSchema {
         format: JSONTypeFormat.ArrayFormat = .unspecified,
         required: Bool = true,
         nullable: Bool = false,
-        permissions: JSONSchema.Context<JSONTypeFormat.ArrayFormat>.Permissions = .readWrite,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>.Permissions = .readWrite,
         deprecated: Bool = false,
         title: String? = nil,
         description: String? = nil,
@@ -773,7 +773,7 @@ extension JSONSchema {
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
-        let generalContext = JSONSchema.Context<JSONTypeFormat.ArrayFormat>(
+        let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(
             format: format,
             required: required,
             nullable: nullable,
@@ -793,7 +793,7 @@ extension JSONSchema {
             minItems: minItems,
             uniqueItems: uniqueItems
         )
-        return .array(generalContext, arrayContext)
+        return .array(coreContext, arrayContext)
     }
 
     /// A required, non-nullable array schema.
@@ -990,30 +990,30 @@ extension JSONSchema: Decodable {
 
         if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
             if typeHint == .integer {
-                self = .integer(try Context<JSONTypeFormat.IntegerFormat>(from: decoder),
+                self = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
                                 try IntegerContext(from: decoder))
             } else {
-                self = .number(try Context<JSONTypeFormat.NumberFormat>(from: decoder),
+                self = .number(try CoreContext<JSONTypeFormat.NumberFormat>(from: decoder),
                                try NumericContext(from: decoder))
             }
 
         } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .string)
-            self = .string(try Context<JSONTypeFormat.StringFormat>(from: decoder),
+            self = .string(try CoreContext<JSONTypeFormat.StringFormat>(from: decoder),
                            try StringContext(from: decoder))
 
         } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .array)
-            self = .array(try Context<JSONTypeFormat.ArrayFormat>(from: decoder),
+            self = .array(try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder),
                           try ArrayContext(from: decoder))
 
         } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .object)
-            self = .object(try Context<JSONTypeFormat.ObjectFormat>(from: decoder),
+            self = .object(try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder),
                            try ObjectContext(from: decoder))
 
         } else if typeHint == .boolean {
-            self = .boolean(try Context<JSONTypeFormat.BooleanFormat>(from: decoder))
+            self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
         } else if hintContainerCount == 0 || (hintContainerCount == 1 && hintContainer.contains(.description)) {
             let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)

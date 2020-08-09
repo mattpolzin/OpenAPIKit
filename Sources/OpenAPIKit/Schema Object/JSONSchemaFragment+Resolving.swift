@@ -127,32 +127,32 @@ internal struct FragmentResolver {
         switch (lessSpecializedFragment, equallyOrMoreSpecializedFragment) {
         case (_, .reference(let reference)), (.reference(let reference), _):
             try combine(components.lookup(reference).asFragment())
-        case (.general(let leftGeneralContext), .general(let rightGeneralContext)):
-            combinedFragment = .general(try leftGeneralContext.combined(with: rightGeneralContext))
-        case (.general(let leftGeneralContext), .boolean(let rightGeneralContext)):
-            combinedFragment = .boolean(try leftGeneralContext.combined(with: rightGeneralContext))
-        case (.general(let leftGeneralContext), .integer(let rightGeneralContext, let integerContext)):
-            combinedFragment = .integer(try leftGeneralContext.combined(with: rightGeneralContext), integerContext)
-        case (.general(let leftGeneralContext), .number(let rightGeneralContext, let numericContext)):
-            combinedFragment = .number(try leftGeneralContext.combined(with: rightGeneralContext), numericContext)
-        case (.general(let leftGeneralContext), .string(let rightGeneralContext, let stringContext)):
-            combinedFragment = .string(try leftGeneralContext.combined(with: rightGeneralContext), stringContext)
-        case (.general(let leftGeneralContext), .array(let rightGeneralContext, let arrayContext)):
-            combinedFragment = .array(try leftGeneralContext.combined(with: rightGeneralContext), arrayContext)
-        case (.general(let leftGeneralContext), .object(let rightGeneralContext, let objectContext)):
-            combinedFragment = .object(try leftGeneralContext.combined(with: rightGeneralContext), objectContext)
-        case (.boolean(let leftGeneralContext), .boolean(let rightGeneralContext)):
-            combinedFragment = .boolean(try leftGeneralContext.combined(with: rightGeneralContext))
-        case (.integer(let leftGeneralContext, let leftIntegerContext), .integer(let rightGeneralContext, let rightIntegerContext)):
-            combinedFragment = .integer(try leftGeneralContext.combined(with: rightGeneralContext), try leftIntegerContext.combined(with: rightIntegerContext))
-        case (.number(let leftGeneralContext, let leftNumericContext), .number(let rightGeneralContext, let rightNumericContext)):
-            combinedFragment = .number(try leftGeneralContext.combined(with: rightGeneralContext), try leftNumericContext.combined(with: rightNumericContext))
-        case (.string(let leftGeneralContext, let leftStringContext), .string(let rightGeneralContext, let rightStringContext)):
-            combinedFragment = .string(try leftGeneralContext.combined(with: rightGeneralContext), try leftStringContext.combined(with: rightStringContext))
-        case (.array(let leftGeneralContext, let leftArrayContext), .array(let rightGeneralContext, let rightArrayContext)):
-            combinedFragment = .array(try leftGeneralContext.combined(with: rightGeneralContext), try leftArrayContext.combined(with: rightArrayContext))
-        case (.object(let leftGeneralContext, let leftObjectContext), .object(let rightGeneralContext, let rightObjectContext)):
-            combinedFragment = .object(try leftGeneralContext.combined(with: rightGeneralContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
+        case (.general(let leftCoreContext), .general(let rightCoreContext)):
+            combinedFragment = .general(try leftCoreContext.combined(with: rightCoreContext))
+        case (.general(let leftCoreContext), .boolean(let rightCoreContext)):
+            combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
+        case (.general(let leftCoreContext), .integer(let rightCoreContext, let integerContext)):
+            combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), integerContext)
+        case (.general(let leftCoreContext), .number(let rightCoreContext, let numericContext)):
+            combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), numericContext)
+        case (.general(let leftCoreContext), .string(let rightCoreContext, let stringContext)):
+            combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), stringContext)
+        case (.general(let leftCoreContext), .array(let rightCoreContext, let arrayContext)):
+            combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
+        case (.general(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
+            combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+        case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
+            combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
+        case (.integer(let leftCoreContext, let leftIntegerContext), .integer(let rightCoreContext, let rightIntegerContext)):
+            combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), try leftIntegerContext.combined(with: rightIntegerContext))
+        case (.number(let leftCoreContext, let leftNumericContext), .number(let rightCoreContext, let rightNumericContext)):
+            combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), try leftNumericContext.combined(with: rightNumericContext))
+        case (.string(let leftCoreContext, let leftStringContext), .string(let rightCoreContext, let rightStringContext)):
+            combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), try leftStringContext.combined(with: rightStringContext))
+        case (.array(let leftCoreContext, let leftArrayContext), .array(let rightCoreContext, let rightArrayContext)):
+            combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), try leftArrayContext.combined(with: rightArrayContext))
+        case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
+            combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
         case (.boolean, _),
              (.integer, _),
              (.number, _),
@@ -182,22 +182,22 @@ internal struct FragmentResolver {
     func dereferencedSchema() throws -> DereferencedJSONSchema {
         let jsonSchema: JSONSchema
         switch combinedFragment {
-        case .general(let generalContext):
-            jsonSchema = .undefined(description: generalContext.description)
+        case .general(let coreContext):
+            jsonSchema = .undefined(description: coreContext.description)
         case .reference(let reference):
             jsonSchema = .reference(reference)
-        case .boolean(let generalContext):
-            jsonSchema = .boolean(try generalContext.validatedContext())
-        case .integer(let generalContext, let integerContext):
-            jsonSchema = .integer(try generalContext.validatedContext(), try integerContext.validatedContext())
-        case .number(let generalContext, let numericContext):
-            jsonSchema = .number(try generalContext.validatedContext(), try numericContext.validatedContext())
-        case .string(let generalContext, let stringContext):
-            jsonSchema = .string(try generalContext.validatedContext(), try stringContext.validatedContext())
-        case .array(let generalContext, let arrayContext):
-            jsonSchema = .array(try generalContext.validatedContext(), try arrayContext.validatedContext())
-        case .object(let generalContext, let objectContext):
-            jsonSchema = .object(try generalContext.validatedContext(), try objectContext.validatedContext())
+        case .boolean(let coreContext):
+            jsonSchema = .boolean(try coreContext.validatedContext())
+        case .integer(let coreContext, let integerContext):
+            jsonSchema = .integer(try coreContext.validatedContext(), try integerContext.validatedContext())
+        case .number(let coreContext, let numericContext):
+            jsonSchema = .number(try coreContext.validatedContext(), try numericContext.validatedContext())
+        case .string(let coreContext, let stringContext):
+            jsonSchema = .string(try coreContext.validatedContext(), try stringContext.validatedContext())
+        case .array(let coreContext, let arrayContext):
+            jsonSchema = .array(try coreContext.validatedContext(), try arrayContext.validatedContext())
+        case .object(let coreContext, let objectContext):
+            jsonSchema = .object(try coreContext.validatedContext(), try objectContext.validatedContext())
         }
         return try jsonSchema.dereferenced(in: components)
     }
@@ -209,8 +209,8 @@ internal func conflicting<T>(_ left: T?, _ right: T?) -> (T, T)? where T: Equata
     return zip(left, right).flatMap { $0 == $1 ? nil : ($0, $1) }
 }
 
-extension JSONSchemaFragment.GeneralContext {
-    internal func combined(with other: JSONSchemaFragment.GeneralContext) throws -> JSONSchemaFragment.GeneralContext {
+extension JSONSchemaFragment.CoreContext {
+    internal func combined(with other: JSONSchemaFragment.CoreContext) throws -> JSONSchemaFragment.CoreContext {
         if let conflict = conflicting(format, other.format) {
             throw JSONSchemaResolutionError(.formatConflict(original: conflict.0, new: conflict.1))
         }
@@ -480,9 +480,9 @@ fileprivate extension JSONSchema {
             return .reference(reference)
         case .undefined(description: let description):
             return .general(.init(description: description))
-        case .array(let generalContext, let arrayContext):
+        case .array(let coreContext, let arrayContext):
             return .array(
-                generalContext.fragmentContext,
+                coreContext.fragmentContext,
                 .init(
                     items: arrayContext.items,
                     maxItems: arrayContext.maxItems,
@@ -490,11 +490,11 @@ fileprivate extension JSONSchema {
                     uniqueItems: arrayContext.uniqueItems
                 )
             )
-        case .object(let generalContext, let objectContext):
+        case .object(let coreContext, let objectContext):
             // a _minProperties of 0 is also the default if omitted, so omit (as `nil`) if it is 0.
             let minProperties = objectContext._minProperties > 0 ? objectContext._minProperties : nil
             return .object(
-                generalContext.fragmentContext,
+                coreContext.fragmentContext,
                 .init(
                     maxProperties: objectContext.maxProperties,
                     minProperties: minProperties,
@@ -503,18 +503,18 @@ fileprivate extension JSONSchema {
                     requiredProperties: objectContext.requiredProperties
                 )
             )
-        case .string(let generalContext, let stringContext):
+        case .string(let coreContext, let stringContext):
             return .string(
-                generalContext.fragmentContext,
+                coreContext.fragmentContext,
                 .init(
                     maxLength: stringContext.maxLength,
                     minLength: stringContext.minLength,
                     pattern: stringContext.pattern
                 )
             )
-        case .integer(let generalContext, let integerContext):
+        case .integer(let coreContext, let integerContext):
             return .integer(
-                generalContext.fragmentContext,
+                coreContext.fragmentContext,
                 .init(
                     multipleOf: integerContext.multipleOf,
                     maximum: integerContext.maximum?.value,
@@ -523,9 +523,9 @@ fileprivate extension JSONSchema {
                     exclusiveMinimum: integerContext.minimum?.exclusive
                 )
             )
-        case .number(let generalContext, let numberContext):
+        case .number(let coreContext, let numberContext):
             return .number(
-                generalContext.fragmentContext,
+                coreContext.fragmentContext,
                 .init(
                     multipleOf: numberContext.multipleOf,
                     maximum: numberContext.maximum?.value,
@@ -534,14 +534,14 @@ fileprivate extension JSONSchema {
                     exclusiveMinimum: numberContext.minimum?.exclusive
                 )
             )
-        case .boolean(let generalContext):
-            return .boolean(generalContext.fragmentContext)
+        case .boolean(let coreContext):
+            return .boolean(coreContext.fragmentContext)
         }
     }
 }
 
-fileprivate extension JSONSchema.Context {
-    var fragmentContext: JSONSchemaFragment.GeneralContext {
+fileprivate extension JSONSchema.CoreContext {
+    var fragmentContext: JSONSchemaFragment.CoreContext {
         let formatString: String? = format.rawValue == "" ? nil : format.rawValue
         return .init(
             format: formatString,
@@ -561,9 +561,9 @@ fileprivate extension JSONSchema.Context {
 
 // MARK: - Fragment Context -> Full Context
 
-extension JSONSchemaFragment.GeneralContext {
-    internal func validatedContext<T: OpenAPIFormat>() throws -> JSONSchema.Context<T> {
-        let permissions: JSONSchema.Context<T>.Permissions
+extension JSONSchemaFragment.CoreContext {
+    internal func validatedContext<T: OpenAPIFormat>() throws -> JSONSchema.CoreContext<T> {
+        let permissions: JSONSchema.CoreContext<T>.Permissions
         switch (self.readOnly, self.writeOnly) {
         case (true, true):
             throw JSONSchemaResolutionError(.inconsistency("Schemas cannot be read-only and write-only"))

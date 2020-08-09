@@ -1,5 +1,5 @@
 //
-//  DereferencedSchemaObject.swift
+//  DereferencedJSONSchema.swift
 //  
 //
 //  Created by Mathew Polzin on 6/17/20.
@@ -9,17 +9,17 @@
 /// nodes are references.
 @dynamicMemberLookup
 public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
-    public typealias Context<Format: OpenAPIFormat> = JSONSchema.Context<Format>
+    public typealias CoreContext<Format: OpenAPIFormat> = JSONSchema.CoreContext<Format>
     public typealias NumericContext = JSONSchema.NumericContext
     public typealias IntegerContext = JSONSchema.IntegerContext
     public typealias StringContext = JSONSchema.StringContext
 
-    case boolean(Context<JSONTypeFormat.BooleanFormat>)
-    indirect case object(Context<JSONTypeFormat.ObjectFormat>, ObjectContext)
-    indirect case array(Context<JSONTypeFormat.ArrayFormat>, ArrayContext)
-    case number(Context<JSONTypeFormat.NumberFormat>, NumericContext)
-    case integer(Context<JSONTypeFormat.IntegerFormat>, IntegerContext)
-    case string(Context<JSONTypeFormat.StringFormat>, StringContext)
+    case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
+    indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
+    indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
+    case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
+    case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
+    case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
     indirect case one(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case not(DereferencedJSONSchema)
@@ -44,16 +44,16 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         switch self {
         case .boolean(let context):
             return .boolean(context)
-        case .object(let generalContext, let objectContext):
-            return .object(generalContext, objectContext.jsonSchemaObjectContext)
-        case .array(let generalContext, let arrayContext):
-            return .array(generalContext, arrayContext.jsonSchemaArrayContext)
-        case .number(let generalContext, let numberContext):
-            return .number(generalContext, numberContext)
-        case .integer(let generalContext, let integerContext):
-            return .integer(generalContext, integerContext)
-        case .string(let generalContext, let stringContext):
-            return .string(generalContext, stringContext)
+        case .object(let coreContext, let objectContext):
+            return .object(coreContext, objectContext.jsonSchemaObjectContext)
+        case .array(let coreContext, let arrayContext):
+            return .array(coreContext, arrayContext.jsonSchemaArrayContext)
+        case .number(let coreContext, let numberContext):
+            return .number(coreContext, numberContext)
+        case .integer(let coreContext, let integerContext):
+            return .integer(coreContext, integerContext)
+        case .string(let coreContext, let stringContext):
+            return .string(coreContext, stringContext)
         case .one(of: let schemas, discriminator: let discriminator):
             return .one(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
         case .any(of: let schemas, discriminator: let discriminator):
@@ -315,22 +315,22 @@ extension JSONSchema: LocallyDereferenceable {
             return try reference.dereferenced(in: components)
         case .boolean(let context):
             return .boolean(context)
-        case .object(let generalContext, let objectContext):
+        case .object(let coreContext, let objectContext):
             return try .object(
-                generalContext,
+                coreContext,
                 DereferencedJSONSchema.ObjectContext(objectContext, resolvingIn: components)
             )
-        case .array(let generalContext, let arrayContext):
+        case .array(let coreContext, let arrayContext):
             return try .array(
-                generalContext,
+                coreContext,
                 DereferencedJSONSchema.ArrayContext(arrayContext, resolvingIn: components)
             )
-        case .number(let generalContext, let numberContext):
-            return .number(generalContext, numberContext)
-        case .integer(let generalContext, let integerContext):
-            return .integer(generalContext, integerContext)
-        case .string(let generalContext, let stringContext):
-            return .string(generalContext, stringContext)
+        case .number(let coreContext, let numberContext):
+            return .number(coreContext, numberContext)
+        case .integer(let coreContext, let integerContext):
+            return .integer(coreContext, integerContext)
+        case .string(let coreContext, let stringContext):
+            return .string(coreContext, stringContext)
         case .all(of: let fragments, discriminator: let discriminator):
             let resolvedFragments = try fragments.resolved(against: components)
             return discriminator.map { resolvedFragments.with(discriminator: $0) } ?? resolvedFragments

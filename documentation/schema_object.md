@@ -10,24 +10,24 @@ A `JSONSchema` can be:
 5. `not` another schema.
 6. `undefined` (which means not even the type of schema is being specified).
 
-The fundamental schema types and arrays and objects all share a common set of properties (accessible from their `generalContext`) and each (except for boolean) also has some properties that only apply to that one type (accessible from properties named after the type like `objectContext`, `arrayContext`, `integerContext`, etc.).
+The fundamental schema types and arrays and objects all share a common set of properties (accessible from their `coreContext`) and each (except for boolean) also has some properties that only apply to that one type (accessible from properties named after the type like `objectContext`, `arrayContext`, `integerContext`, etc.).
 
 You can also extract these properties with pattern matching on a `JSONSchema`.
 
 ```swift
 let schema: JSONSchema = ...
 switch schema {
-  case .boolean(let generalContext):
+  case .boolean(let coreContext):
     break
-  case .object(let generalContext, let objectContext):
+  case .object(let coreContext, let objectContext):
     break
-  case .array(let generalContext, let arrayContext):
+  case .array(let coreContext, let arrayContext):
     break
-  case .number(let generalContext, let numberContext):
+  case .number(let coreContext, let numberContext):
     break
-  case .integer(let generalContext, let integerContext):
+  case .integer(let coreContext, let integerContext):
     break
-  case .string(let generalContext, let stringContext):
+  case .string(let coreContext, let stringContext):
     break
 }
 ```

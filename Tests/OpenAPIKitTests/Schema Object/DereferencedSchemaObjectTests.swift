@@ -29,7 +29,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                 )!
             )
         )
-        XCTAssertEqual(t3?.generalContext as? JSONSchema.Context<JSONTypeFormat.ObjectFormat>, JSONSchema.Context<JSONTypeFormat.ObjectFormat>())
+        XCTAssertEqual(t3?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>, JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>())
 
         let t4 = JSONSchema.object(required: false).dereferenced()
         XCTAssertEqual(
@@ -41,7 +41,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                     )!
             )
         )
-        XCTAssertEqual(t4?.generalContext as? JSONSchema.Context<JSONTypeFormat.ObjectFormat>, JSONSchema.Context<JSONTypeFormat.ObjectFormat>(required: false))
+        XCTAssertEqual(t4?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>, JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(required: false))
         XCTAssertEqual(t4?.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!)
         XCTAssertNil(t4?.arrayContext)
 
@@ -55,7 +55,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                 )!
             )
         )
-        XCTAssertEqual(t5?.generalContext as? JSONSchema.Context<JSONTypeFormat.ArrayFormat>, JSONSchema.Context<JSONTypeFormat.ArrayFormat>())
+        XCTAssertEqual(t5?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>, JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>())
 
         let t6 = JSONSchema.array(required: false).dereferenced()
         XCTAssertEqual(
@@ -67,46 +67,46 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                     )!
             )
         )
-        XCTAssertEqual(t6?.generalContext as? JSONSchema.Context<JSONTypeFormat.ArrayFormat>, JSONSchema.Context<JSONTypeFormat.ArrayFormat>(required: false))
+        XCTAssertEqual(t6?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>, JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(required: false))
         XCTAssertEqual(t6?.arrayContext, DereferencedJSONSchema.ArrayContext(.init())!)
         XCTAssertNil(t6?.objectContext)
 
         let t7 = JSONSchema.number.dereferenced()
         XCTAssertEqual(t7, .number(.init(), .init()))
-        XCTAssertEqual(t7?.generalContext as? JSONSchema.Context<JSONTypeFormat.NumberFormat>, JSONSchema.Context<JSONTypeFormat.NumberFormat>())
+        XCTAssertEqual(t7?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>, JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>())
 
         let t8 = JSONSchema.number(required: false).dereferenced()
         XCTAssertEqual(t8, .number(.init(required: false), .init()))
-        XCTAssertEqual(t8?.generalContext as? JSONSchema.Context<JSONTypeFormat.NumberFormat>, JSONSchema.Context<JSONTypeFormat.NumberFormat>(required: false))
+        XCTAssertEqual(t8?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>, JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(required: false))
 
         let t9 = JSONSchema.number(required: false, minimum: (10.5, exclusive: false)).dereferenced()
         XCTAssertEqual(t9, .number(.init(required: false), .init(minimum: (10.5, exclusive: false))))
 
         let t10 = JSONSchema.integer.dereferenced()
         XCTAssertEqual(t10, .integer(.init(), .init()))
-        XCTAssertEqual(t10?.generalContext as? JSONSchema.Context<JSONTypeFormat.IntegerFormat>, JSONSchema.Context<JSONTypeFormat.IntegerFormat>())
+        XCTAssertEqual(t10?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>, JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>())
 
         let t11 = JSONSchema.integer(required: false).dereferenced()
         XCTAssertEqual(t11, .integer(.init(required: false), .init()))
-        XCTAssertEqual(t11?.generalContext as? JSONSchema.Context<JSONTypeFormat.IntegerFormat>, JSONSchema.Context<JSONTypeFormat.IntegerFormat>(required: false))
+        XCTAssertEqual(t11?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>, JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(required: false))
 
         let t12 = JSONSchema.integer(required: false, minimum: (10, exclusive: false)).dereferenced()
         XCTAssertEqual(t12, .integer(.init(required: false), .init(minimum: (10, exclusive: false))))
 
         let t13 = JSONSchema.string.dereferenced()
         XCTAssertEqual(t13, .string(.init(), .init()))
-        XCTAssertEqual(t13?.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>, JSONSchema.Context<JSONTypeFormat.StringFormat>())
+        XCTAssertEqual(t13?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, JSONSchema.CoreContext<JSONTypeFormat.StringFormat>())
 
         let t14 = JSONSchema.string(required: false).dereferenced()
         XCTAssertEqual(t14, .string(.init(required: false), .init()))
-        XCTAssertEqual(t14?.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>, JSONSchema.Context<JSONTypeFormat.StringFormat>(required: false))
+        XCTAssertEqual(t14?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(required: false))
 
         let t15 = JSONSchema.string(required: false, minLength: 5).dereferenced()
         XCTAssertEqual(t15, .string(.init(required: false), .init(minLength: 5)))
 
         let t16 = JSONSchema.undefined(description: nil).dereferenced()
         XCTAssertEqual(t16, .undefined(description: nil))
-        XCTAssertNil(t16?.generalContext)
+        XCTAssertNil(t16?.coreContext)
 
         let t17 = JSONSchema.undefined(description: "test").dereferenced()
         XCTAssertEqual(t17, .undefined(description: "test"))
@@ -118,12 +118,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t18 = JSONSchema.all(of: []).dereferenced()
         XCTAssertEqual(t18, .undefined(description: nil))
         XCTAssertNil(t18?.discriminator)
-        XCTAssertNil(t18?.generalContext)
+        XCTAssertNil(t18?.coreContext)
 
         let t19 = JSONSchema.all(of: [.string(.init(), .init())]).dereferenced()
         XCTAssertEqual(t19, .string(.init(), .init()))
         XCTAssertNil(t19?.discriminator)
-        XCTAssertEqual(t19?.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>, .init())
+        XCTAssertEqual(t19?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
 
         let t20 = JSONSchema.all(of: [.string(.init(), .init())], discriminator: .init(propertyName: "test")).dereferenced()
         XCTAssertEqual(t20, .string(.init(discriminator: .init(propertyName: "test")), .init()))
@@ -223,12 +223,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t18 = try JSONSchema.all(of: []).dereferenced(in: components)
         XCTAssertEqual(t18, .undefined(description: nil))
         XCTAssertNil(t18.discriminator)
-        XCTAssertNil(t18.generalContext)
+        XCTAssertNil(t18.coreContext)
 
         let t19 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced(in: components)
         XCTAssertEqual(t19, .string(.init(), .init()))
         XCTAssertNil(t19.discriminator)
-        XCTAssertEqual(t19.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>, .init())
+        XCTAssertEqual(t19.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
 
         let t20 = try JSONSchema.all(of: [.string(.init(), .init())], discriminator: .init(propertyName: "test")).dereferenced(in: components)
         XCTAssertEqual(t20, .string(.init(discriminator: .init(propertyName: "test")), .init()))
@@ -351,7 +351,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             t1,
             .one(of: [.boolean(.init())], discriminator: nil)
         )
-        XCTAssertNil(t1.generalContext)
+        XCTAssertNil(t1.coreContext)
         XCTAssertThrowsError(try JSONSchema.one(of: .reference(.component(named: "missing"))).dereferenced(in: components))
     }
 
@@ -385,7 +385,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             t1,
             .any(of: [.boolean(.init())], discriminator: nil)
         )
-        XCTAssertNil(t1.generalContext)
+        XCTAssertNil(t1.coreContext)
         XCTAssertThrowsError(try JSONSchema.any(of: .reference(.component(named: "missing"))).dereferenced(in: components))
     }
 
@@ -413,7 +413,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             t1,
             .not(.boolean(.init()))
         )
-        XCTAssertNil(t1.generalContext)
+        XCTAssertNil(t1.coreContext)
         XCTAssertThrowsError(try JSONSchema.not(.reference(.component(named: "missing"))).dereferenced(in: components))
     }
 }
