@@ -33,7 +33,7 @@ final class SchemaFragmentTests: XCTestCase {
         assertNoGeneralProperties(JSONSchemaFragment.object(.init(), .init()))
         assertNoGeneralProperties(JSONSchemaFragment.reference(.component(named: "test")))
 
-        func assertSameGeneralProperties(_ fragment: JSONSchemaFragment, as properties: JSONSchemaFragment.GeneralContext, file: StaticString = #file, line: UInt = #line) {
+        func assertSameGeneralProperties(_ fragment: JSONSchemaFragment, as properties: JSONSchemaFragment.CoreContext, file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(fragment.allowedValues, properties.allowedValues, file: file, line: line)
             XCTAssertEqual(fragment.deprecated, properties.deprecated, file: file, line: line)
             XCTAssertEqual(fragment.description, properties.description, file: file, line: line)
@@ -48,7 +48,7 @@ final class SchemaFragmentTests: XCTestCase {
         }
 
         // maximal
-        let generalProperties = JSONSchemaFragment.GeneralContext(format: "date", description: "a date", discriminator: .init(propertyName: "test"), title: "Date", nullable: false, deprecated: false, externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], example: "2020-01-01", readOnly: false, writeOnly: false)
+        let generalProperties = JSONSchemaFragment.CoreContext(format: "date", description: "a date", discriminator: .init(propertyName: "test"), title: "Date", nullable: false, deprecated: false, externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], example: "2020-01-01", readOnly: false, writeOnly: false)
         let t1 = JSONSchemaFragment.general(generalProperties)
         assertSameGeneralProperties(t1, as: generalProperties)
         let t2 = JSONSchemaFragment.integer(generalProperties, .init(multipleOf: 10, maximum: 20, exclusiveMaximum: false, minimum: 0, exclusiveMinimum: true))
@@ -64,8 +64,8 @@ final class SchemaFragmentTests: XCTestCase {
     }
 
     func test_jsonType() {
-        let generalContext = JSONSchemaFragment.general(.init())
-        XCTAssertNil(generalContext.jsonType)
+        let coreContext = JSONSchemaFragment.general(.init())
+        XCTAssertNil(coreContext.jsonType)
         let booleanContext = JSONSchemaFragment.boolean(.init())
         XCTAssertEqual(booleanContext.jsonType, .boolean)
         let integerContext = JSONSchemaFragment.integer(.init(), .init())

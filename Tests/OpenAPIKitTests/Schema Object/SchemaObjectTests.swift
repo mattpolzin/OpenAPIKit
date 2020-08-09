@@ -450,7 +450,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(undefined.externalDocs)
     }
 
-    func test_generalContextAccessor() {
+    func test_coreContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
@@ -465,19 +465,19 @@ final class SchemaObjectTests: XCTestCase {
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
         let undefined = JSONSchema.undefined(description: nil)
 
-        XCTAssertNotNil(boolean.generalContext as? JSONSchema.Context<JSONTypeFormat.BooleanFormat>)
-        XCTAssertNotNil(object.generalContext as? JSONSchema.Context<JSONTypeFormat.ObjectFormat>)
-        XCTAssertNotNil(array.generalContext as? JSONSchema.Context<JSONTypeFormat.ArrayFormat>)
-        XCTAssertNotNil(number.generalContext as? JSONSchema.Context<JSONTypeFormat.NumberFormat>)
-        XCTAssertNotNil(integer.generalContext as? JSONSchema.Context<JSONTypeFormat.IntegerFormat>)
-        XCTAssertNotNil(string.generalContext as? JSONSchema.Context<JSONTypeFormat.StringFormat>)
+        XCTAssertNotNil(boolean.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>)
+        XCTAssertNotNil(object.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>)
+        XCTAssertNotNil(array.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>)
+        XCTAssertNotNil(number.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>)
+        XCTAssertNotNil(integer.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>)
+        XCTAssertNotNil(string.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>)
 
-        XCTAssertNil(allOf.generalContext)
-        XCTAssertNil(anyOf.generalContext)
-        XCTAssertNil(oneOf.generalContext)
-        XCTAssertNil(not.generalContext)
-        XCTAssertNil(reference.generalContext)
-        XCTAssertNil(undefined.generalContext)
+        XCTAssertNil(allOf.coreContext)
+        XCTAssertNil(anyOf.coreContext)
+        XCTAssertNil(oneOf.coreContext)
+        XCTAssertNil(not.coreContext)
+        XCTAssertNil(reference.coreContext)
+        XCTAssertNil(undefined.coreContext)
     }
 
     func test_objectContextAccessor() {

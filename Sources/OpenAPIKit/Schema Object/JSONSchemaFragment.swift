@@ -22,27 +22,27 @@ public protocol JSONSchemaFragmentContext {
 
 public enum JSONSchemaFragment: Equatable {
 
-    case general(GeneralContext)
-    case boolean(GeneralContext)
+    case general(CoreContext)
+    case boolean(CoreContext)
     case integer(
-        GeneralContext,
+        CoreContext,
         IntegerContext
     )
     case number(
-        GeneralContext,
+        CoreContext,
         NumericContext
     )
     case string(
-        GeneralContext,
+        CoreContext,
         StringContext
     )
     case array(
-        GeneralContext,
+        CoreContext,
         ArrayContext
     )
 
     case object(
-        GeneralContext,
+        CoreContext,
         ObjectContext
     )
 
@@ -50,7 +50,7 @@ public enum JSONSchemaFragment: Equatable {
 }
 
 extension JSONSchemaFragment {
-    public struct GeneralContext: Equatable {
+    public struct CoreContext: Equatable {
         public var format: String?
         public var description: String?
         public var discriminator: OpenAPI.Discriminator?
@@ -241,14 +241,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var format: String? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.format
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.format
         case .reference:
             return nil
         }
@@ -256,14 +256,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var description: String? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.description
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.description
         case .reference:
             return nil
         }
@@ -271,14 +271,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var discriminator: OpenAPI.Discriminator? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.discriminator
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.discriminator
         case .reference:
             return nil
         }
@@ -286,14 +286,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var title: String? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.title
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.title
         case .reference:
             return nil
         }
@@ -301,14 +301,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var nullable: Bool? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.nullable
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.nullable
         case .reference:
             return nil
         }
@@ -316,14 +316,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var deprecated: Bool? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.deprecated
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.deprecated
         case .reference:
             return nil
         }
@@ -331,14 +331,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var externalDocs: OpenAPI.ExternalDocumentation? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.externalDocs
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.externalDocs
         case .reference:
             return nil
         }
@@ -346,14 +346,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var allowedValues: [AnyCodable]? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.allowedValues
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.allowedValues
         case .reference:
             return nil
         }
@@ -361,14 +361,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var example: AnyCodable? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.example
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.example
         case .reference:
             return nil
         }
@@ -376,14 +376,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var readOnly: Bool? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.readOnly
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.readOnly
         case .reference:
             return nil
         }
@@ -391,14 +391,14 @@ extension JSONSchemaFragment: JSONSchemaFragmentContext {
 
     public var writeOnly: Bool? {
         switch self {
-        case .general(let generalContext),
-             .boolean(let generalContext),
-             .integer(let generalContext, _),
-             .number(let generalContext, _),
-             .string(let generalContext, _),
-             .array(let generalContext, _),
-             .object(let generalContext, _):
-            return generalContext.writeOnly
+        case .general(let coreContext),
+             .boolean(let coreContext),
+             .integer(let coreContext, _),
+             .number(let coreContext, _),
+             .string(let coreContext, _),
+             .array(let coreContext, _),
+             .object(let coreContext, _):
+            return coreContext.writeOnly
         case .reference:
             return nil
         }
@@ -498,7 +498,7 @@ extension JSONSchemaFragment: Encodable {
     }
 }
 
-extension JSONSchemaFragment.GeneralContext: Decodable {
+extension JSONSchemaFragment.CoreContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: JSONSchemaFragment.GeneralCodingKeys.self)
 
@@ -603,7 +603,7 @@ extension JSONSchemaFragment: Decodable {
             }
         }
 
-        let generalContext = try GeneralContext(from: decoder)
+        let coreContext = try CoreContext(from: decoder)
 
         let generalContainer = try decoder.container(keyedBy: JSONSchemaFragment.GeneralCodingKeys.self)
         let numericOrIntegerContainer = try decoder.container(keyedBy: JSONSchemaFragment.NumericCodingKeys.self)
@@ -641,27 +641,27 @@ extension JSONSchemaFragment: Decodable {
 
         if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
             if typeHint == .integer {
-                self = .integer(generalContext, try .init(from: decoder))
+                self = .integer(coreContext, try .init(from: decoder))
             } else {
-                self = .number(generalContext, try .init(from: decoder))
+                self = .number(coreContext, try .init(from: decoder))
             }
         } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .string)
-            self = .string(generalContext, try .init(from: decoder))
+            self = .string(coreContext, try .init(from: decoder))
 
         } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .array)
-            self = .array(generalContext, try .init(from: decoder))
+            self = .array(coreContext, try .init(from: decoder))
 
         } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
             try assertNoTypeConflict(with: .object)
-            self = .object(generalContext, try .init(from: decoder))
+            self = .object(coreContext, try .init(from: decoder))
 
         } else if typeHint == .boolean {
-            self = .boolean(generalContext)
+            self = .boolean(coreContext)
             
         } else if !generalContainer.allKeys.isEmpty {
-            self = .general(generalContext)
+            self = .general(coreContext)
 
         } else {
             throw InconsistencyError(

@@ -596,53 +596,53 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_generalAttributeConflicts() {
 
         let differentDescription = [
-            JSONSchemaFragment.GeneralContext(description: "string1"),
-            JSONSchemaFragment.GeneralContext(description: "string2")
+            JSONSchemaFragment.CoreContext(description: "string1"),
+            JSONSchemaFragment.CoreContext(description: "string2")
         ]
 
         let differentDiscriminator = [
-            JSONSchemaFragment.GeneralContext(discriminator: .init(propertyName: "string1")),
-            JSONSchemaFragment.GeneralContext(discriminator: .init(propertyName: "string2"))
+            JSONSchemaFragment.CoreContext(discriminator: .init(propertyName: "string1")),
+            JSONSchemaFragment.CoreContext(discriminator: .init(propertyName: "string2"))
         ]
 
         let differentTitle = [
-            JSONSchemaFragment.GeneralContext(title: "string1"),
-            JSONSchemaFragment.GeneralContext(title: "string2")
+            JSONSchemaFragment.CoreContext(title: "string1"),
+            JSONSchemaFragment.CoreContext(title: "string2")
         ]
 
         let differentNullable = [
-            JSONSchemaFragment.GeneralContext(nullable: true),
-            JSONSchemaFragment.GeneralContext(nullable: false)
+            JSONSchemaFragment.CoreContext(nullable: true),
+            JSONSchemaFragment.CoreContext(nullable: false)
         ]
 
         let differentDeprecated = [
-            JSONSchemaFragment.GeneralContext(deprecated: true),
-            JSONSchemaFragment.GeneralContext(deprecated: false)
+            JSONSchemaFragment.CoreContext(deprecated: true),
+            JSONSchemaFragment.CoreContext(deprecated: false)
         ]
 
         let differentExternalDocs = [
-            JSONSchemaFragment.GeneralContext(externalDocs: .init(url: URL(string: "https://string1.com")!)),
-            JSONSchemaFragment.GeneralContext(externalDocs: .init(url: URL(string: "https://string2.com")!))
+            JSONSchemaFragment.CoreContext(externalDocs: .init(url: URL(string: "https://string1.com")!)),
+            JSONSchemaFragment.CoreContext(externalDocs: .init(url: URL(string: "https://string2.com")!))
         ]
 
         let differentAllowedValues = [
-            JSONSchemaFragment.GeneralContext(allowedValues: ["string1"]),
-            JSONSchemaFragment.GeneralContext(allowedValues: ["string2"])
+            JSONSchemaFragment.CoreContext(allowedValues: ["string1"]),
+            JSONSchemaFragment.CoreContext(allowedValues: ["string2"])
         ]
 
         let differentExample = [
-            JSONSchemaFragment.GeneralContext(example: "string1"),
-            JSONSchemaFragment.GeneralContext(example: "string2")
+            JSONSchemaFragment.CoreContext(example: "string1"),
+            JSONSchemaFragment.CoreContext(example: "string2")
         ]
 
         let differentReadOnly = [
-            JSONSchemaFragment.GeneralContext(readOnly: true),
-            JSONSchemaFragment.GeneralContext(readOnly: false)
+            JSONSchemaFragment.CoreContext(readOnly: true),
+            JSONSchemaFragment.CoreContext(readOnly: false)
         ]
 
         let differentWriteOnly = [
-            JSONSchemaFragment.GeneralContext(writeOnly: true),
-            JSONSchemaFragment.GeneralContext(writeOnly: false)
+            JSONSchemaFragment.CoreContext(writeOnly: true),
+            JSONSchemaFragment.CoreContext(writeOnly: false)
         ]
 
         let differences = [
@@ -888,8 +888,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_generalInconsistencyErrors() {
 
         let readAndWriteOnly = [
-            JSONSchemaFragment.GeneralContext(readOnly: true),
-            JSONSchemaFragment.GeneralContext(writeOnly: true)
+            JSONSchemaFragment.CoreContext(readOnly: true),
+            JSONSchemaFragment.CoreContext(writeOnly: true)
         ]
 
         let inconsistencies = [

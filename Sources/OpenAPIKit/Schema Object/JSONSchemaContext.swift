@@ -1,11 +1,11 @@
 //
-//  SchemaObjectContext.swift
+//  JSONSchemaContext.swift
 //  
 //
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-// MARK: - General Context
+// MARK: - Core Context
 
 /// A schema context stores information about a schema.
 /// All schemas can have the contextual information in
@@ -86,7 +86,7 @@ public protocol JSONSchemaContext {
 
 extension JSONSchema {
     /// The context that applies to all schemas.
-    public struct Context<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
+    public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
         public let required: Bool // default true
         public let nullable: Bool // default false
@@ -173,9 +173,9 @@ extension JSONSchema {
 
 // MARK: - Transformations
 
-extension JSONSchema.Context {
+extension JSONSchema.CoreContext {
     /// Return the optional version of this Context
-    public func optionalContext() -> JSONSchema.Context<Format> {
+    public func optionalContext() -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: false,
@@ -192,7 +192,7 @@ extension JSONSchema.Context {
     }
 
     /// Return the required version of this context
-    public func requiredContext() -> JSONSchema.Context<Format> {
+    public func requiredContext() -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: true,
@@ -209,7 +209,7 @@ extension JSONSchema.Context {
     }
 
     /// Return the nullable version of this context
-    public func nullableContext() -> JSONSchema.Context<Format> {
+    public func nullableContext() -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: required,
@@ -226,7 +226,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given list of possible values
-    public func with(allowedValues: [AnyCodable]) -> JSONSchema.Context<Format> {
+    public func with(allowedValues: [AnyCodable]) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: required,
@@ -243,7 +243,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given example
-    public func with(example: AnyCodable) -> JSONSchema.Context<Format> {
+    public func with(example: AnyCodable) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: required,
@@ -260,7 +260,7 @@ extension JSONSchema.Context {
     }
 
     /// Return this context with the given discriminator
-    public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema.Context<Format> {
+    public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
             required: required,
@@ -491,7 +491,7 @@ extension JSONSchema {
     }
 }
 
-extension JSONSchema.Context: Encodable {
+extension JSONSchema.CoreContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
@@ -529,7 +529,7 @@ extension JSONSchema.Context: Encodable {
     }
 }
 
-extension JSONSchema.Context: Decodable {
+extension JSONSchema.CoreContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
