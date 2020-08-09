@@ -236,7 +236,7 @@ extension OperationTests {
                 parameters: [
                     .reference(.component(named: "hello"))
                 ],
-                requestBody: .init(content: [.json: .init(schema: .init(.string(required:false)))]),
+                requestBody: .init(content: [.json: .init(schema: .init(.string))]),
                 responses: [200: .reference(.component(named: "test"))],
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
@@ -245,7 +245,7 @@ extension OperationTests {
             )
         )
 
-        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string(required:false)))]))
+        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string))]))
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
     }

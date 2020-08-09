@@ -373,7 +373,7 @@ extension ComponentsTests {
             decoded,
             OpenAPI.Components(
                 schemas: [
-                    "one": .string(required: false)
+                    "one": .string
                 ],
                 responses: [
                     "two": .init(description: "hello", content: [:])
@@ -388,7 +388,7 @@ extension ComponentsTests {
                     "five": .init(content: [:])
                 ],
                 headers: [
-                    "six": .init(schema: .string(required: false))
+                    "six": .init(schema: .string)
                 ],
                 securitySchemes: [
                     "seven": .http(scheme: "cool")
