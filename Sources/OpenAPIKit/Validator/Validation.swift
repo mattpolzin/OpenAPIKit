@@ -11,9 +11,9 @@
 /// to know what the whole `OpenAPI.Document` looks like
 /// or the coding path where the validation is being applied,
 /// but it always has access to these two pieces of information
-/// in addition to the subject (a value of the type on which the
+/// in addition to the **subject** (a value of the type on which the
 /// validation is specialized).
-public struct ValidationContext<Subject> {
+public struct ValidationContext<Subject: Validatable> {
     public let document: OpenAPI.Document
     public let subject: Subject
     public let codingPath: [CodingKey]
@@ -22,7 +22,7 @@ public struct ValidationContext<Subject> {
 /// Holds a function to determine if a validation
 /// applies (`predicate`) and a function that applies
 /// a validation (`validate`).
-public struct Validation<Subject> {
+public struct Validation<Subject: Validatable> {
     /// Applies validation on type `Subject`. Throws if validation fails.
     ///
     /// The context includes
@@ -129,7 +129,10 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
 }
 
 /// Collects `ValidationErrors`.
-public struct ValidationErrors: Swift.Error {
+///
+/// This type is responsible for making it possible to collect validation
+/// errors and throw one value (this collection) at the end of validation.
+public struct ValidationErrorCollection: Swift.Error {
     public let values: [ValidationError]
 }
 

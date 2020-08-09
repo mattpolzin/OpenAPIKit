@@ -390,3 +390,5 @@ extension OpenAPI.Operation {
         }
     }
 }
+
+extension OpenAPI.Operation: Validatable {}

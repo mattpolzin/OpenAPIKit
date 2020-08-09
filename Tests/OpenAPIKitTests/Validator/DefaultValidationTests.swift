@@ -21,7 +21,7 @@ final class DefaultValidatorTests: XCTestCase {
         let validator = Validator.blank.validating(.documentContainsPaths)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
         }
@@ -54,7 +54,7 @@ final class DefaultValidatorTests: XCTestCase {
         let validator = Validator.blank.validating(.pathsContainOperations)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Paths contain at least one operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }
@@ -87,7 +87,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Tags in the Document are unique")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
         }
@@ -120,7 +120,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
         }
@@ -165,7 +165,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unqiue (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello", "get"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello'].get")
@@ -243,7 +243,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All Operation Ids in Document are unique")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
         }
@@ -316,7 +316,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unqiue (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello']")
@@ -411,7 +411,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 6)
             XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
             XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")

@@ -1027,3 +1027,5 @@ extension JSONSchema: Decodable {
         }
     }
 }
+
+extension JSONSchema: Validatable {}

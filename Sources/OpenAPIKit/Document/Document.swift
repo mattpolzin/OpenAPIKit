@@ -544,3 +544,6 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
         }
     }
 }
+
+extension OpenAPI.Document: Validatable {}
+extension OpenAPI.Document.Version: Validatable {}

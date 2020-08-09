@@ -354,3 +354,5 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
         return try components.lookup(self).dereferenced(in: components)
     }
 }
+
+extension JSONReference: Validatable where ReferenceType: Validatable {}

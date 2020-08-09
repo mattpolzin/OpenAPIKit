@@ -672,3 +672,5 @@ extension JSONSchemaFragment: Decodable {
         }
     }
 }
+
+extension JSONSchemaFragment: Validatable {}

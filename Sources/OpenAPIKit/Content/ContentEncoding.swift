@@ -93,3 +93,5 @@ extension OpenAPI.Content.Encoding {
         case allowReserved
     }
 }
+
+extension OpenAPI.Content.Encoding: Validatable {}

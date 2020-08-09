@@ -77,9 +77,11 @@ There are two ways to define validations:
 The first approach is usually more concise for light-weight validations. The second approach is more verbose but it offers cleaner support for single validations producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "**subject**"), and (c) the coding path of the value being validated.
 
 **Important:**
-Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not.
+Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not. All types that can be validated are marked with the `Validatable` protocol, so you can't actually write validations against types that won't be hit.
 
-For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not.
+For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not. There are a small number of surprising side-effects of this setup:
+1. `URLs` are explicitly encoded as `String` and therefore you cannot write a validation that operates on all `URLs`; You can validate all `Strings` and that validation will be called against urls, or more likely you will write your validation against the type containing a `URL` (like an `OpenAPI.Server`).
+2. Dictionary keys are not technically encoded directly (they are used as the `String`-typed keys of keyed-containers during encoding) so types like `OpenAPI.Path` and `OpenAPI.Response.StatusCode` cannot be the subjects of validations -- again, you can still operate on these values during validation by creating validations against the types containing those dictionaries.
 
 #### `Validator.validating()`
 
