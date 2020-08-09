@@ -199,8 +199,8 @@ extension ResponseTests {
 
         let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
-        let content = OpenAPI.Content(schema: .init(.string(required: false)))
-        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
+        let content = OpenAPI.Content(schema: .init(.string))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         XCTAssertEqual(response, OpenAPI.Response(description: "hello world",
                                                   headers: ["hello": .init(header)],
                                                   content: [.json: content]))
@@ -257,8 +257,8 @@ extension ResponseTests {
 
         let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
-        let content = OpenAPI.Content(schema: .init(.string(required: false)))
-        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string(required: false))))
+        let content = OpenAPI.Content(schema: .init(.string))
+        let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         XCTAssertEqual(
             response,
             OpenAPI.Response(
