@@ -66,7 +66,8 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
 
         // server is specified
         XCTAssertNotNil(apiDoc.servers.first)
-        XCTAssertEqual(apiDoc.servers.first?.url.path, "/v3")
+        XCTAssertNotNil(apiDoc.servers.first?.urlTemplate.url)
+        XCTAssertEqual(apiDoc.servers.first?.urlTemplate.url!.path, "/v3")
     }
 
     func test_successfullyParsedTags() throws {

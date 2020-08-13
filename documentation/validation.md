@@ -127,7 +127,7 @@ If we want to stay more light-weight than the full `(ValidationContext<T>) -> Bo
 ```swift
 Validator().validating(
     "All servers have URLs containing the word 'prod'",
-    check: take(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+    check: take(\OpenAPI.Server.urlTemplate.absoluteString) { $0.contains("prod") }
 )
 ```
 
@@ -141,7 +141,7 @@ Validator().validating(
     "At least two servers are specified if one of them is the test server.",
     check: \[OpenAPI.Server].count >= 2,
     when: { context in
-        context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
+        context.subject.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
     }
 )
 ```
