@@ -414,6 +414,97 @@ extension OpenAPI.ServerURL {
         }
     }
 
+    internal func parse(
+        _ tokens: [Token],
+        context: ParseContext?,
+        from remainder: ArraySlice<Token>,
+        addingTo url: OpenAPI.ServerURL
+    ) -> OpenAPI.ServerURL {
+        guard let next = remainder.first else {
+            return url
+        }
+
+        switch (context, next) {
+        case (nil)
+        }
+    }
+
+    /// Collect tokens until hitting the next context
+    /// switch, then return the collected tokens in
+    /// addition to the context.
+    internal func collect(
+        _ tokens: [Token],
+        partialCollection: [Component],
+        latestContext: ParseContext?,
+        from remainder: ArraySlice<Token>
+    ) -> (components: [Component], context: ParseContext?) {
+        guard let next = remainder.first else {
+            return (components: partialCollection, context: latestContext)
+        }
+
+        switch (latestContext, next) {
+        case (nil, .separator(.scheme)): // http://...
+            return (components: partialCollection, context: .scheme)
+        case (nil, .separator(.colon)): // username:...   OR   domain.com:port...
+            if remainder.contains(.separator(.at)) {
+                return (components: partialCollection, context: .username)
+            } else {
+                return (components: partialCollection, context: .host)
+            }
+        case (nil, .separator(.at)): // username@...
+            return (components: partialCollection, context: .username)
+        case (nil, .separator(.slash)): // domain.com/...
+            return (components: partialCollection, context: .host)
+        case (nil, .separator(.question)): // /path/to/something?...   OR   domain.com?...
+            if partialCollection.contains(.constant("/")) {
+                return (components: partialCollection, context: .path)
+            } else {
+                return (components: partialCollection, context: .host)
+            }
+
+        case (.scheme, .separator(.colon)): // [http://]username:...   OR   [http://]domain.com:port...
+            if remainder.contains(.separator(.at)) {
+                return (components: partialCollection, context: .username)
+            } else {
+                return (components: partialCollection, context: .host)
+            }
+        case (.scheme, .separator(.at)): // [http://]username@...
+            return (components: partialCollection, context: .username)
+        case (.scheme, .separator(.slash)): // [http://]domain.com/...
+            return (components: partialCollection, context: .host)
+        case (.scheme, .separator(.question)): // [http://]domain.com?...
+            return (components: partialCollection, context: .host)
+
+        case (.username, .separator(.at)): // [username:]password@...
+            return (components: partialCollection, context: .password)
+        case (.username, .separator(.colon)): // [username@]domain.com:port...
+            return (components: partialCollection, context: .host)
+        case (.username, .separator(.slash)): // [username@]domain.com/path...
+            return (components: partialCollection, context: .host)
+        case (.username, .separator(.question)): // [username@]domain.com?query...
+            return (components: partialCollection, context: .host)
+
+        case (.password, .separator(.colon)): // [password@]domain.com:port...
+            return (components: partialCollection, context: .host)
+        case (.password, .separator(.slash)): // [password@]domain.com/...
+            return (components: partialCollection, context: .host)
+        case (.password, .separator(.question)): // [password@]domain.com?...
+            return (components: partialCollection, context: .host)
+
+        case (.host, .separator(.slash))
+        }
+    }
+
+    internal enum ParseContext: String, CaseIterable {
+        case scheme
+        case username
+        case password
+        case host
+        case port
+        case path
+        case query
+    }
+
 //    internal struct Parser {
 //        let urlString: String
 //        var serverUrl: OpenAPI.ServerURL
