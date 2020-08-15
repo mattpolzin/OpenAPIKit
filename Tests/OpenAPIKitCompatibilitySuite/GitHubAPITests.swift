@@ -114,7 +114,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
 
         let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
 
-        let addBooksParameters = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+        let addBooksParameters = try addBooksPath?.parameters.compactMap(apiDoc.components.lookup)
 
         XCTAssertNotNil(addBooksParameters)
         XCTAssertEqual(addBooksParameters?.count, 11)
