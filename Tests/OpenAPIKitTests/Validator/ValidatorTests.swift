@@ -30,21 +30,21 @@ final class ValidatorTests: XCTestCase {
 
         _ = validator.validating(
             "",
-            check: take(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+            check: take(\OpenAPI.Server.urlTemplate.absoluteString) { $0.contains("prod") }
         )
 
         _ = validator.validating(
             "",
             check: \[OpenAPI.Server].count >= 2,
             when: { context in
-                context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
+                context.subject.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
             }
         )
 
         _ = validator.validating(
             "At least two servers are specified if one of them is the test server.",
             check: \[OpenAPI.Server].count >= 2,
-            when: take(\.subject) { $0.map { $0.url.absoluteString }.contains("https://test.server.com") }
+            when: take(\.subject) { $0.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com") }
         )
 
         _ = Validation(
@@ -834,7 +834,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified on root Document if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                when: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+                when: \OpenAPI.Server.urlTemplate == TemplatedURL(rawValue: "https://test.server.com")!
                     && \.codingPath.first?.stringValue == "servers"
         )
 
@@ -851,7 +851,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                when: \OpenAPI.Server.url == URL(string: "https://test.server.com")!
+                when: \OpenAPI.Server.urlTemplate == TemplatedURL(rawValue: "https://test.server.com")!
         )
 
         XCTAssertNoThrow(try document2.validate(using: validator2))
@@ -886,7 +886,7 @@ final class ValidatorTests: XCTestCase {
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
                 when: take(\OpenAPI.Document.servers) { servers in
-                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                    servers.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
                 }
         )
 
@@ -904,7 +904,7 @@ final class ValidatorTests: XCTestCase {
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
                 when: take(\OpenAPI.Document.servers) { servers in
-                    servers.map { $0.url.absoluteString }.contains("https://test.server.com")
+                    servers.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
                 }
         )
 

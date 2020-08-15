@@ -201,7 +201,7 @@ extension OpenAPI.Document {
         // We hash `Server` without its `description` or
         // `vendorExtensions`.
         func hash(server: OpenAPI.Server, into hasher: inout Hasher) {
-            hasher.combine(server.url)
+            hasher.combine(server.urlTemplate)
             for (key, value) in server.variables {
                 hasher.combine(key)
                 hash(variable: value, into: &hasher)
