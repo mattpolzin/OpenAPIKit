@@ -67,11 +67,33 @@ extension TemplatedURLTests {
     }
 
     func test_encode_withVariables() throws {
+        let t1 = TemplatedURLWrapper(
+            url: TemplatedURL(rawValue: "{scheme}://{host}.com")
+        )
 
+        assertJSONEquivalent(
+            try orderUnstableTestStringFromEncoding(of: t1),
+            """
+            {
+              "url" : "{scheme}:\\/\\/{host}.com"
+            }
+            """
+        )
     }
 
     func test_decode_withVariables() throws {
+        let t1Data = """
+        {
+          "url": "{scheme}://{host}.com"
+        }
+        """.data(using: .utf8)!
 
+        let t1 = try orderUnstableDecode(TemplatedURLWrapper.self, from: t1Data)
+
+        XCTAssertEqual(
+            t1.url,
+            TemplatedURL(rawValue: "{scheme}://{host}.com")
+        )
     }
 }
 
