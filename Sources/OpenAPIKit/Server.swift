@@ -150,7 +150,9 @@ extension OpenAPI.Server.Variable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(`enum`, forKey: .enum)
+        if !`enum`.isEmpty {
+            try container.encode(`enum`, forKey: .enum)
+        }
 
         try container.encode(`default`, forKey: .default)
 
@@ -164,7 +166,7 @@ extension OpenAPI.Server.Variable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        `enum` = try container.decode([String].self, forKey: .enum)
+        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) ?? []
 
         `default` = try container.decode(String.self, forKey: .default)
 
