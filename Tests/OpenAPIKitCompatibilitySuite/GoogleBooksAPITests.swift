@@ -118,9 +118,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
 
         XCTAssertNotNil(addBooksParameters)
         XCTAssertEqual(addBooksParameters?.count, 11)
-        let parameter = addBooksParameters?.first { $0.description == "JSONP" }
-        XCTAssertNotNil(parameter)
-        XCTAssertEqual(parameter?.context, .query)
+        XCTAssert(addBooksParameters?.contains { $0.description == "JSONP" && $0.context == .query } ?? false)
     }
 
     func test_dereferencedComponents() throws {
