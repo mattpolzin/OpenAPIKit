@@ -69,7 +69,7 @@ components:
 
             XCTAssertEqual(
                 doc.paths["/pets"]?.patch?.requestBody?.requestValue?
-                    .content[.json]?.schema.schemaValue,
+                    .content[.json]?.schema?.schemaValue,
                 JSONSchema.one(
                     of: .reference(.component(named: "Cat")),
                         .reference(.component(named: "Dog")),
@@ -102,7 +102,7 @@ components:
 
             XCTAssertEqual(
                 resolvedDoc.endpoints[0].requestBody?
-                    .content[.json]?.schema.jsonSchema,
+                    .content[.json]?.schema?.jsonSchema,
                 JSONSchema.one(
                     of: [
                         catSchema,

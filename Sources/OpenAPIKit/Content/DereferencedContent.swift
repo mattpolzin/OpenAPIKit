@@ -11,7 +11,7 @@
 @dynamicMemberLookup
 public struct DereferencedContent: Equatable {
     public let underlyingContent: OpenAPI.Content
-    public let schema: DereferencedJSONSchema
+    public let schema: DereferencedJSONSchema?
     public let examples: OrderedDictionary<String, OpenAPI.Example>?
     public let example: AnyCodable?
     public let encoding: OrderedDictionary<String, DereferencedContentEncoding>?
@@ -28,7 +28,7 @@ public struct DereferencedContent: Equatable {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     internal init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try content.schema.dereferenced(in: components)
+        self.schema = try content.schema?.dereferenced(in: components)
         let examples = try content.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 

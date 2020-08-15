@@ -12,16 +12,16 @@ import OpenAPIKit
 final class ContentTests: XCTestCase {
     func test_init() {
         let t1 = OpenAPI.Content(schema: .init(.external(URL(string:"hello.json#/world")!)))
-        XCTAssertNotNil(t1.schema.reference)
-        XCTAssertNil(t1.schema.schemaValue)
+        XCTAssertNotNil(t1.schema?.reference)
+        XCTAssertNil(t1.schema?.schemaValue)
 
         let t2 = OpenAPI.Content(schema: .init(.string))
-        XCTAssertNotNil(t2.schema.schemaValue)
-        XCTAssertNil(t2.schema.reference)
+        XCTAssertNotNil(t2.schema?.schemaValue)
+        XCTAssertNil(t2.schema?.reference)
 
         let t3 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!))
-        XCTAssertNotNil(t3.schema.reference)
-        XCTAssertNil(t3.schema.schemaValue)
+        XCTAssertNotNil(t3.schema?.reference)
+        XCTAssertNil(t3.schema?.schemaValue)
 
         let withExample = OpenAPI.Content(
             schema: .init(.string),
@@ -51,15 +51,15 @@ final class ContentTests: XCTestCase {
             schemaReference: .external(URL(string: "hello.json#/world")!),
             examples: nil
         )
-        XCTAssertNotNil(t4.schema.reference)
-        XCTAssertNil(t4.schema.schemaValue)
+        XCTAssertNotNil(t4.schema?.reference)
+        XCTAssertNil(t4.schema?.schemaValue)
 
         let t5 = OpenAPI.Content(
             schema: .string,
             examples: nil
         )
-        XCTAssertNotNil(t5.schema.schemaValue)
-        XCTAssertNil(t5.schema.reference)
+        XCTAssertNotNil(t5.schema?.schemaValue)
+        XCTAssertNil(t5.schema?.reference)
 
         let _ = OpenAPI.Content(
             schema: .init(.string),
@@ -215,6 +215,31 @@ extension ContentTests {
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string)))
+    }
+
+    func test_schemalessContent_encode() {
+        let content = OpenAPI.Content(schema: nil, example: "hello world")
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
+
+        assertJSONEquivalent(encodedContent,
+"""
+{
+  "example" : "hello world"
+}
+"""
+        )
+    }
+
+    func test_schemalessContent_decode() {
+        let contentData =
+"""
+{
+  "example" : "hello world"
+}
+""".data(using: .utf8)!
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content, OpenAPI.Content(schema: nil, example: "hello world"))
     }
 
     func test_exampleAndSchemaContent_encode() {

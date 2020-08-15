@@ -30,7 +30,7 @@ final class DereferencedParameterTests: XCTestCase {
             ]
         ).dereferenced(in: .noComponents)
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema?.jsonSchema, .string)
     }
 
     func test_referencedSchemaParameter() throws {
@@ -60,7 +60,7 @@ final class DereferencedParameterTests: XCTestCase {
             content: [.json: .init(schemaReference: .component(named: "test"))]
         ).dereferenced(in: components)
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema?.jsonSchema, .string)
     }
 }
 
