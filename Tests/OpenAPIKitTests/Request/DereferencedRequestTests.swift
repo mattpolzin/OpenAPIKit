@@ -24,7 +24,7 @@ final class DereferencedRequestTests: XCTestCase {
             description: "test",
             content: [.json: .init(schema: .string)]
         ).dereferenced(in: .noComponents)
-        XCTAssertEqual(t1.content[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
         // test dynamic member lookup
         XCTAssertEqual(t1.description, "test")
     }
@@ -41,7 +41,7 @@ final class DereferencedRequestTests: XCTestCase {
                 .json: .init(schemaReference: .component(named: "test"))
             ]
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.content[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
     }
 
     func test_referencedContentMissing() {

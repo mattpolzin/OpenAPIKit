@@ -472,17 +472,17 @@ let responseResourceContainsId = Validation<JSONSchema>(
 // clause to skip over any requests that do not have such schemas
 // without error.
 let requestBodyContainsName = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName),
 
-   when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
 )
 
 // Similarly, we check JSON response schemas. This time we check
 // for both a 'name' and an 'id'.
 let responseBodyContainsNameAndId = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName, responseResourceContainsId),
 
-   when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
 )
 
 // We are specifically looking only at 201 ("created") status code
