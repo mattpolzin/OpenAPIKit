@@ -201,7 +201,7 @@ extension OpenAPI.Document {
         // We hash `Server` without its `description` or
         // `vendorExtensions`.
         func hash(server: OpenAPI.Server, into hasher: inout Hasher) {
-            hasher.combine(server.url)
+            hasher.combine(server.urlTemplate)
             for (key, value) in server.variables {
                 hasher.combine(key)
                 hash(variable: value, into: &hasher)
@@ -270,7 +270,7 @@ extension OpenAPI.Document {
     ///     are missing from the Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public func locallyDereferenced() throws -> DereferencedDocument {
@@ -315,14 +315,12 @@ extension OpenAPI.Document: Encodable {
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
         try container.encode(info, forKey: .info)
 
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+
+        try container.encodeIfPresent(tags, forKey: .tags)
+
         if !servers.isEmpty {
             try container.encode(servers, forKey: .servers)
-        }
-
-        try container.encode(paths, forKey: .paths)
-
-        if !components.isEmpty {
-            try container.encode(components, forKey: .components)
         }
 
         // A real mess here because we've got an Array of non-string-keyed
@@ -331,10 +329,13 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        try container.encodeIfPresent(tags, forKey: .tags)
-        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encode(paths, forKey: .paths)
 
         try encodeExtensions(to: &container)
+
+        if !components.isEmpty {
+            try container.encode(components, forKey: .components)
+        }
     }
 }
 
@@ -543,3 +544,6 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
         }
     }
 }
+
+extension OpenAPI.Document: Validatable {}
+extension OpenAPI.Document.Version: Validatable {}

@@ -24,15 +24,12 @@ public struct DereferencedContent: Equatable {
     /// content can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try DereferencedJSONSchema(
-            try components.forceDereference(content.schema),
-            resolvingIn: components
-        )
-        let examples = try content.examples?.mapValues { try components.forceDereference($0) }
+    internal init(_ content: OpenAPI.Content, resolvingIn components: OpenAPI.Components) throws {
+        self.schema = try content.schema.dereferenced(in: components)
+        let examples = try content.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
@@ -40,10 +37,7 @@ public struct DereferencedContent: Equatable {
 
         self.encoding = try content.encoding.map { encodingMap in
             try encodingMap.mapValues { encoding in
-                try DereferencedContentEncoding(
-                    encoding,
-                    resolvingIn: components
-                )
+                try encoding.dereferenced(in: components)
             }
         }
 
@@ -51,4 +45,17 @@ public struct DereferencedContent: Equatable {
     }
 
     public typealias Map = OrderedDictionary<OpenAPI.ContentType, DereferencedContent>
+}
+
+extension OpenAPI.Content: LocallyDereferenceable {
+    /// Create a `DereferencedContent` if all references in the
+    /// content can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedContent {
+        return try DereferencedContent(self, resolvingIn: components)
+    }
 }

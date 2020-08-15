@@ -30,7 +30,7 @@ class ServerTests: XCTestCase {
     func test_serverInitialization() {
         let s1 = Server(url: URL(string: "https://hello.com")!)
 
-        XCTAssertEqual(s1.url, URL(string: "https://hello.com")!)
+        XCTAssertEqual(s1.urlTemplate, TemplatedURL(rawValue: "https://hello.com")!)
         XCTAssertNil(s1.description)
         XCTAssertEqual(s1.variables, [:])
 
@@ -41,7 +41,7 @@ class ServerTests: XCTestCase {
                             "hello": variable
             ])
 
-        XCTAssertEqual(s2.url, URL(string: "https://hello.com")!)
+        XCTAssertEqual(s2.urlTemplate, TemplatedURL(rawValue: "https://hello.com")!)
         XCTAssertEqual(s2.description, "hello world")
         XCTAssertEqual(s2.variables, ["hello": variable])
     }

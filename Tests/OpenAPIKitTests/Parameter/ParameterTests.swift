@@ -178,10 +178,10 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                content: [ .json: .init(schema: .string(required: false))]
+                content: [ .json: .init(schema: .string)]
             )
         )
-        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string(required: false)) ])
+        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string) ])
     }
 
     func test_minimalSchema_encode() throws {
@@ -228,7 +228,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -276,12 +276,12 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query,
-                schema: .string(required: false)
+                schema: .string
             )
         )
         XCTAssertEqual(
             parameter.schemaOrContent.schemaContextValue,
-            OpenAPI.Parameter.SchemaContext(.string(required: false), style: .default(for: .query))
+            OpenAPI.Parameter.SchemaContext(.string, style: .default(for: .query))
         )
         XCTAssertEqual(parameter.schemaOrContent.schemaValue, parameter.schemaOrContent.schemaContextValue?.schema.schemaValue)
     }
@@ -330,7 +330,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query(allowEmptyValue: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -379,7 +379,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -427,7 +427,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .header,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -476,7 +476,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .header(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -524,7 +524,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .cookie,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -573,7 +573,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .cookie(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -625,7 +625,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 deprecated: true
             )
         )
@@ -679,7 +679,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 description: "world"
             )
         )
@@ -737,7 +737,7 @@ extension ParameterTests {
                 name: "hello",
                 context: .header(required: true),
                 schema: .init(
-                    .string(required: false),
+                    .string,
                     style: .default(for: .header),
                     example: "hello string"
                 )
@@ -802,7 +802,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 description: "world",
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )

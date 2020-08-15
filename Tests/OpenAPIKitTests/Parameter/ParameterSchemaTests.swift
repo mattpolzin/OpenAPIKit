@@ -255,7 +255,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .default(for: .path)
             )
         )
@@ -305,7 +305,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .default(for: .path),
                 example: "hello"
             )
@@ -366,7 +366,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .default(for: .path),
                 examples: [
                     "one": .example(value: .init("hello"))
@@ -418,7 +418,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .form
             )
         )
@@ -468,7 +468,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .default(for: .path),
                 explode: true
             )
@@ -519,7 +519,7 @@ extension ParameterSchemaTests {
         XCTAssertEqual(
             schema,
             Schema(
-                .string(required: false),
+                .string,
                 style: .default(for: .path),
                 allowReserved: true
             )

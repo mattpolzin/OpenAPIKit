@@ -10,10 +10,7 @@ import OpenAPIKit
 
 final class DereferencedOperationTests: XCTestCase {
     func test_noReferencedComponents() throws {
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(tags: "test", responses: [:]),
-            resolvingIn: .noComponents
-        )
+        let t1 = try OpenAPI.Operation(tags: "test", responses: [:]).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.parameters.count, 0)
         XCTAssertNil(t1.requestBody)
         XCTAssertEqual(t1.responses.count, 0)
@@ -24,26 +21,23 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_allInlinedComponents() throws {
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(
-                parameters: [
-                    .parameter(
-                        name: "test",
-                        context: .header,
-                        schema: .string
-                    )
-                ],
-                requestBody: OpenAPI.Request(content: [.json: .init(schema: .string)]),
-                responses: [
-                    200: .response(description: "test")
-                ]
-            ),
-            resolvingIn: .noComponents
-        )
+        let t1 = try OpenAPI.Operation(
+            parameters: [
+                .parameter(
+                    name: "test",
+                    context: .header,
+                    schema: .string
+                )
+            ],
+            requestBody: OpenAPI.Request(content: [.json: .init(schema: .string)]),
+            responses: [
+                200: .response(description: "test")
+            ]
+        ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.parameters.count, 1)
         XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .init(schema: .string)]))
         XCTAssertEqual(t1.responses.count, 1)
-        XCTAssertEqual(t1.responseOutcomes.first?.response, t1.responses[.status(code: 200)])
+        XCTAssertEqual(t1.responseOutcomes.first?.response, t1.responses[status: 200])
         XCTAssertEqual(t1.responseOutcomes.first?.status, 200)
     }
 
@@ -57,15 +51,12 @@ final class DereferencedOperationTests: XCTestCase {
                 )
             ]
         )
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(
-                parameters: [
-                    .reference(.component(named: "test"))
-                ],
-                responses: [:]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Operation(
+            parameters: [
+                .reference(.component(named: "test"))
+            ],
+            responses: [:]
+        ).dereferenced(in: components)
         XCTAssertEqual(
             t1.parameters.first?.underlyingParameter,
             .init(
@@ -78,15 +69,12 @@ final class DereferencedOperationTests: XCTestCase {
 
     func test_parameterReferenceMissing() {
         XCTAssertThrowsError(
-            try DereferencedOperation(
-                OpenAPI.Operation(
-                    parameters: [
-                        .reference(.component(named: "test"))
-                    ],
-                    responses: [:]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Operation(
+                parameters: [
+                    .reference(.component(named: "test"))
+                ],
+                responses: [:]
+            ).dereferenced(in: .noComponents)
         )
     }
 
@@ -96,29 +84,23 @@ final class DereferencedOperationTests: XCTestCase {
                 "test": OpenAPI.Request(content: [.json: .init(schema: .string)])
             ]
         )
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(
-                requestBody: .reference(.component(named: "test")),
-                responses: [
-                    200: .response(description: "test")
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Operation(
+            requestBody: .reference(.component(named: "test")),
+            responses: [
+                200: .response(description: "test")
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .init(schema: .string)]))
     }
 
     func test_requestReferenceMissing() {
         XCTAssertThrowsError(
-            try DereferencedOperation(
-                OpenAPI.Operation(
-                    requestBody: .reference(.component(named: "test")),
-                    responses: [
-                        200: .response(description: "test")
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Operation(
+                requestBody: .reference(.component(named: "test")),
+                responses: [
+                    200: .response(description: "test")
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 
@@ -128,30 +110,24 @@ final class DereferencedOperationTests: XCTestCase {
                 "test": .init(description: "test")
             ]
         )
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(
-                responses: [
-                    200: .reference(.component(named: "test"))
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Operation(
+            responses: [
+                200: .reference(.component(named: "test"))
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(
-            t1.responses[.status(code: 200)]?.underlyingResponse,
+            t1.responses[status: 200]?.underlyingResponse,
             .init(description: "test")
         )
     }
 
     func test_responseReferenceMissing() {
         XCTAssertThrowsError(
-            try DereferencedOperation(
-                OpenAPI.Operation(
-                    responses: [
-                        200: .reference(.component(named: "test"))
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Operation(
+                responses: [
+                    200: .reference(.component(named: "test"))
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 
@@ -159,29 +135,23 @@ final class DereferencedOperationTests: XCTestCase {
         let components = OpenAPI.Components(
             securitySchemes: ["requirement": .apiKey(name: "Api-Key", location: .header)]
         )
-        let t1 = try DereferencedOperation(
-            OpenAPI.Operation(
-                responses: [:],
-                security: [
-                    [.component(named: "requirement"): []]
-                ]
-            ),
-            resolvingIn: components
-        )
+        let t1 = try OpenAPI.Operation(
+            responses: [:],
+            security: [
+                [.component(named: "requirement"): []]
+            ]
+        ).dereferenced(in: components)
         XCTAssertEqual(t1.security?.first?.schemes["requirement"]?.securityScheme, .apiKey(name: "Api-Key", location: .header))
     }
 
     func test_securityReferenceMissing() {
         XCTAssertThrowsError(
-            try DereferencedOperation(
-                OpenAPI.Operation(
-                    responses: [:],
-                    security: [
-                        [.component(named: "requirement"): []]
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Operation(
+                responses: [:],
+                security: [
+                    [.component(named: "requirement"): []]
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 }

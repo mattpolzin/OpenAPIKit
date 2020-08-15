@@ -22,7 +22,7 @@ final class ComponentsTests: XCTestCase {
         let ref3 = JSONReference<OpenAPI.Parameter>.component(named: "param")
 
         XCTAssertEqual(components[ref1], .integer(required: false))
-        XCTAssertEqual(components.dereference(ref1), components[ref1])
+        XCTAssertEqual(try? components.lookup(ref1), components[ref1])
         XCTAssertNil(components[ref2])
         XCTAssertNil(components[ref3])
 
@@ -116,7 +116,7 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
     }
 
-    func test_dereference() {
+    func test_subscriptLookup() throws {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .boolean
@@ -129,12 +129,18 @@ final class ComponentsTests: XCTestCase {
             .reference(.component(named: "not_there"))
         ]
 
-        let resolvedSchemas = schemas.map(components.dereference)
+        let foundSchemas = schemas.map { components[$0] }
 
-        XCTAssertEqual(resolvedSchemas, [.string, .boolean, nil])
+        XCTAssertEqual(foundSchemas, [.string, .boolean, nil])
+
+        let schemas2 = schemas[0...1]
+
+        let foundSchemas2 = try schemas2.map(components.lookup)
+
+        XCTAssertEqual(foundSchemas2, [.string, .boolean])
     }
 
-    func test_forceDereference() throws {
+    func test_lookup() throws {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .boolean
@@ -143,38 +149,38 @@ final class ComponentsTests: XCTestCase {
 
         let schema1: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "hello"))
 
-        let resolvedSchema = try components.forceDereference(schema1)
+        let resolvedSchema = try components.lookup(schema1)
 
         XCTAssertEqual(resolvedSchema, .boolean)
 
         let schema2: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
 
-        XCTAssertThrowsError(try components.forceDereference(schema2)) { error in
-            XCTAssertEqual(error as? OpenAPI.Components.MissingReferenceError, .referenceMissingOnLookup(name: "not_there", key: "schemas"))
-            XCTAssertEqual((error as? OpenAPI.Components.MissingReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
+        XCTAssertThrowsError(try components.lookup(schema2)) { error in
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
         }
 
         let schema3: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
 
-        XCTAssertThrowsError(try components.forceDereference(schema3)) { error in
+        XCTAssertThrowsError(try components.lookup(schema3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
         }
 
         let reference1: JSONReference<JSONSchema> = .component(named: "hello")
 
-        let resolvedSchema2 = try components.forceDereference(reference1)
+        let resolvedSchema2 = try components.lookup(reference1)
 
         XCTAssertEqual(resolvedSchema2, .boolean)
 
         let reference2: JSONReference<JSONSchema> = .component(named: "not_there")
 
-        XCTAssertThrowsError(try components.forceDereference(reference2)) { error in
-            XCTAssertEqual(error as? OpenAPI.Components.MissingReferenceError, .referenceMissingOnLookup(name: "not_there", key: "schemas"))
+        XCTAssertThrowsError(try components.lookup(reference2)) { error in
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
         }
 
         let reference3: JSONReference<JSONSchema> = .external(URL(string: "https://hi.com/hi.json#/hello/world")!)
 
-        XCTAssertThrowsError(try components.forceDereference(reference3)) { error in
+        XCTAssertThrowsError(try components.lookup(reference3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
         }
     }
@@ -367,7 +373,7 @@ extension ComponentsTests {
             decoded,
             OpenAPI.Components(
                 schemas: [
-                    "one": .string(required: false)
+                    "one": .string
                 ],
                 responses: [
                     "two": .init(description: "hello", content: [:])
@@ -382,7 +388,7 @@ extension ComponentsTests {
                     "five": .init(content: [:])
                 ],
                 headers: [
-                    "six": .init(schema: .string(required: false))
+                    "six": .init(schema: .string)
                 ],
                 securitySchemes: [
                     "seven": .http(scheme: "cool")

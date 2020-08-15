@@ -34,6 +34,15 @@ final class SecuritySchemeTests: XCTestCase {
         )
     }
 
+    func test_locallyDereferenced() throws {
+        // should just be self
+        let t1 = OpenAPI.SecurityScheme(type: .apiKey(name: "hi", location: .header))
+        XCTAssertEqual(try t1.dereferenced(in: .noComponents), t1)
+
+        let t2 = OpenAPI.SecurityScheme(type: .apiKey(name: "hi", location: .header), description: "description")
+        XCTAssertEqual(try t2.dereferenced(in: .noComponents), t2)
+    }
+
     func test_names() {
         XCTAssertEqual(
             OpenAPI.SecurityScheme(type: .apiKey(name: "hi", location: .header), description: "description").type.name,

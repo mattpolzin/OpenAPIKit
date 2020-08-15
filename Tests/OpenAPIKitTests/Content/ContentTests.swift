@@ -214,7 +214,7 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false))))
+        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string)))
     }
 
     func test_exampleAndSchemaContent_encode() {
@@ -266,7 +266,7 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
+        XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
     }
@@ -328,7 +328,7 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content.schema, .init(.object(required: false, properties: ["hello": .string])))
+        XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
         XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value.codableValue?.value as? [String: String], [ "hello": "world" ])
@@ -402,7 +402,7 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string(required: false)),
+        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string),
                                                 encoding: ["json": .init(contentType: .json)]))
     }
 
@@ -460,8 +460,10 @@ extension ContentTests {
 """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        let contentToMatch = OpenAPI.Content(schema: .init(.string(required: false)),
-                                             vendorExtensions: ["x-hello": AnyCodable(["world": 123])])
+        let contentToMatch = OpenAPI.Content(
+            schema: .init(.string),
+            vendorExtensions: ["x-hello": AnyCodable(["world": 123])]
+        )
 
         // make sure we don't lose VendorExtendable existential support
         let ve = content as VendorExtendable
@@ -603,9 +605,11 @@ extension ContentTests {
 
         XCTAssertEqual(
             encoding,
-            OpenAPI.Content.Encoding(headers: [
-                "X-CustomThing": .init(OpenAPI.Header(schema: .string(required: false)))
-            ])
+            OpenAPI.Content.Encoding(
+                headers: [
+                    "X-CustomThing": .init(OpenAPI.Header(schema: .string))
+                ]
+            )
         )
     }
 

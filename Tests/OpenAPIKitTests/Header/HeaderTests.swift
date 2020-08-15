@@ -102,7 +102,7 @@ extension HeaderTests {
         XCTAssertEqual(
             header,
             OpenAPI.Header(content: [
-                .json: .init(schema: .string(required: false))
+                .json: .init(schema: .string)
             ])
         )
     }
@@ -136,7 +136,7 @@ extension HeaderTests {
 
         XCTAssertEqual(
             header,
-            OpenAPI.Header(schema: .string(required: false))
+            OpenAPI.Header(schema: .string)
         )
     }
 
@@ -171,7 +171,7 @@ extension HeaderTests {
 
         XCTAssertEqual(
             header,
-            OpenAPI.Header(schema: .string(required: false), vendorExtensions: ["x-hello": "hi"])
+            OpenAPI.Header(schema: .string, vendorExtensions: ["x-hello": "hi"])
         )
     }
 
@@ -221,7 +221,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string(required: false))
+                    .json: .init(schema: .string)
                 ],
                 required: true
             )
@@ -274,7 +274,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string(required: false))
+                    .json: .init(schema: .string)
                 ],
                 description: "hello"
             )
@@ -327,7 +327,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string(required: false))
+                    .json: .init(schema: .string)
                 ],
                 deprecated: true
             )
@@ -378,7 +378,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 schema: .init(
-                    .string(required: false),
+                    .string,
                     style: .default(for: .header),
                     example: "hello string"
                 ),
@@ -436,7 +436,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 schema: .init(
-                    .array(required: false, items: .string(required: false)),
+                    .array(items: .string),
                     style: .pipeDelimited
                 ),
                 required: true

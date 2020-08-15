@@ -265,9 +265,9 @@ extension Validation {
 /// Used by both the Path Item parameter check and the
 /// Operation parameter check in the default validations.
 fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> Bool {
-    let parameters = parameters.compactMap(components.dereference)
+    let foundParameters = parameters.compactMap { try? components.lookup($0) }
 
-    let identities = parameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
+    let identities = foundParameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
 
-    return Set(identities).count == parameters.count
+    return Set(identities).count == foundParameters.count
 }

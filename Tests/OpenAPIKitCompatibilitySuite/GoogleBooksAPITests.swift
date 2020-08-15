@@ -114,12 +114,13 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
 
         let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
 
-        let addBooksParameters = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+        let addBooksParameters = addBooksPath?.parameters.compactMap { apiDoc.components[$0] }
 
         XCTAssertNotNil(addBooksParameters)
         XCTAssertEqual(addBooksParameters?.count, 11)
-        XCTAssertEqual(addBooksParameters?.first?.description, "JSONP")
-        XCTAssertEqual(addBooksParameters?.first?.context, .query)
+        let parameter = addBooksParameters?.first { $0.description == "JSONP" }
+        XCTAssertNotNil(parameter)
+        XCTAssertEqual(parameter?.context, .query)
     }
 
     func test_dereferencedComponents() throws {

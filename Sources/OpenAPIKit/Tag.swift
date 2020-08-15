@@ -117,3 +117,5 @@ extension OpenAPI.Tag {
         }
     }
 }
+
+extension OpenAPI.Tag: Validatable {}

@@ -66,7 +66,8 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
 
         // server is specified
         XCTAssertNotNil(apiDoc.servers.first)
-        XCTAssertEqual(apiDoc.servers.first?.url.path, "/v3")
+        XCTAssertNotNil(apiDoc.servers.first?.urlTemplate.url)
+        XCTAssertEqual(apiDoc.servers.first?.urlTemplate.url!.path, "/v3")
     }
 
     func test_successfullyParsedTags() throws {
@@ -96,7 +97,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssertFalse(apiDoc.paths["/pet/{petId}"]?.get?.parameters.isEmpty ?? true)
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.name, "petId")
         XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.context, .path)
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64, required: false))
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64))
     }
 
     func test_successfullyParsedComponents() throws {
@@ -121,7 +122,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         let dereferencedDoc = try apiDoc.locallyDereferenced()
 
         // Pet schema is a $ref to Components Object
-        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[.status(code: 200)]?.content[.json]?.schema.objectContext?.properties["name"]?.underlyingJSONSchema, try JSONSchema.string.with(example: "doggie"))
+        XCTAssertEqual(dereferencedDoc.paths["/pet"]?.post?.responses[status: 200]?.content[.json]?.schema.objectContext?.properties["name"]?.jsonSchema, try JSONSchema.string.with(example: "doggie"))
     }
 
     func test_resolveDocument() throws {

@@ -40,6 +40,28 @@ extension OpenAPI.Response {
     public typealias Map = OrderedDictionary<StatusCode, Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>>
 }
 
+extension OrderedDictionary where Key == OpenAPI.Response.StatusCode {
+    /// This subscript makes it possible to disambiguate the call to the integer-based
+    /// (indexed) subscript and the key-based (hashed) subscript of the `OrderedDictionary`
+    /// for `StatusCode` keys.
+    ///
+    /// A problem of ambiguity arises from the fact that `StatusCode` is `ExpressibleByIntegerLiteral`
+    /// so both `OrderedDictionary` unlabled subscript accessors are applicable.
+    ///
+    /// **Example**:
+    ///
+    ///     let successfulDeleteOperation = document.paths["/hello/world"]?.delete?.responses[status: 204]
+    ///
+    public subscript(status status: OpenAPI.Response.StatusCode) -> Value? {
+        get {
+            return self[status]
+        }
+        set {
+            self[status] = newValue
+        }
+    }
+}
+
 // MARK: - Status Code
 extension OpenAPI.Response {
     /// An HTTP Status code or status code range.
@@ -263,3 +285,5 @@ extension OpenAPI.Response.StatusCode: Decodable {
         self = value
     }
 }
+
+extension OpenAPI.Response: Validatable {}

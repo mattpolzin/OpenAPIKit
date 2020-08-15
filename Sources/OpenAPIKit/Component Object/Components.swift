@@ -281,3 +281,5 @@ extension OpenAPI.Components {
         }
     }
 }
+
+extension OpenAPI.Components: Validatable {}

@@ -239,7 +239,7 @@ extension PathItemTests {
                 summary: "summary",
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-                parameters: [.parameter(name: "hello", context: .query, schema: .string(required: false))],
+                parameters: [.parameter(name: "hello", context: .query, schema: .string)],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )

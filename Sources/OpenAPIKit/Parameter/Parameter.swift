@@ -30,9 +30,6 @@ extension OpenAPI {
         public var required: Bool { context.required }
         public var location: Context.Location { return context.location }
 
-        /// An array of parameters that are `Either` `Parameters` or references to parameters.
-        public typealias Array = [Either<JSONReference<Parameter>, Parameter>]
-
         public init(name: String,
                     context: Context,
                     schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
@@ -103,6 +100,11 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
     }
+}
+
+extension OpenAPI.Parameter {
+    /// An array of parameters that are `Either` `Parameters` or references to parameters.
+    public typealias Array = [Either<JSONReference<OpenAPI.Parameter>, OpenAPI.Parameter>]
 }
 
 extension OpenAPI.Parameter {
@@ -388,3 +390,5 @@ extension OpenAPI.Parameter {
         }
     }
 }
+
+extension OpenAPI.Parameter: Validatable {}

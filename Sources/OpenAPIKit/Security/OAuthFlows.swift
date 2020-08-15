@@ -266,3 +266,9 @@ extension OpenAPI.OAuthFlows.AuthorizationCode: Decodable {
         authorizationUrl = try container.decodeURLAsString(forKey: .authorizationUrl)
     }
 }
+
+extension OpenAPI.OAuthFlows: Validatable {}
+extension OpenAPI.OAuthFlows.Implicit: Validatable {}
+extension OpenAPI.OAuthFlows.Password: Validatable {}
+extension OpenAPI.OAuthFlows.ClientCredentials: Validatable {}
+extension OpenAPI.OAuthFlows.AuthorizationCode: Validatable {}

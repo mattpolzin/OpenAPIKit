@@ -215,3 +215,5 @@ extension OpenAPI.Content {
         }
     }
 }
+
+extension OpenAPI.Content: Validatable {}
