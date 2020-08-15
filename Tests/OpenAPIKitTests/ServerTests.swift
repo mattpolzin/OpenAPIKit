@@ -75,6 +75,59 @@ extension ServerTests {
                        )
     }
 
+    func test_minimalServerVariable_decode() {
+        let serverData =
+"""
+{
+    "url": "https://hello.com",
+    "variables": {
+        "world": {
+            "default": "cool"
+        }
+    }
+}
+""".data(using: .utf8)!
+
+        let serverDecoded = try! orderUnstableDecode(Server.self, from: serverData)
+
+        XCTAssertEqual(
+            serverDecoded,
+            Server(
+                url: URL(string: "https://hello.com")!,
+                variables: [
+                    "world": .init(
+                        default: "cool"
+                    )
+                ]
+            )
+        )
+    }
+
+    func test_minimalServerVariable_encode() {
+        let server = Server(
+            url: URL(string: "https://hello.com")!,
+            variables: [
+                "world": .init(
+                    default: "cool"
+                )
+            ]
+        )
+        let encodedServer = try! orderUnstableTestStringFromEncoding(of: server)
+
+        assertJSONEquivalent(encodedServer,
+"""
+{
+  "url" : "https:\\/\\/hello.com",
+  "variables" : {
+    "world" : {
+      "default" : "cool"
+    }
+  }
+}
+"""
+        )
+    }
+
     func test_maximalServer_decode() {
         let serverData =
 """
