@@ -13,7 +13,7 @@ extension OpenAPI {
     /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
     ///
     public struct Server: Equatable, CodableVendorExtendable {
-        public let urlTemplate: TemplatedURL
+        public let urlTemplate: URLTemplate
         public let description: String?
         public let variables: OrderedDictionary<String, Variable>
 
@@ -30,7 +30,7 @@ extension OpenAPI {
             variables: OrderedDictionary<String, Variable> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.urlTemplate = TemplatedURL(url: url)
+            self.urlTemplate = URLTemplate(url: url)
             self.description = description
             self.variables = variables
             self.vendorExtensions = vendorExtensions
@@ -90,7 +90,7 @@ extension OpenAPI.Server: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        urlTemplate = try container.decode(TemplatedURL.self, forKey: .url)
+        urlTemplate = try container.decode(URLTemplate.self, forKey: .url)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
 
