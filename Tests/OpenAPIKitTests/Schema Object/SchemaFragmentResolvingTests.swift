@@ -110,6 +110,49 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
+    func test_rootObjectRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init())
+            ],
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!)
+        )
+    }
+
+    func test_rootObjectPropertiesOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(properties: ["test": .string]))
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(properties: ["test": .string(required: false)])
+                )!
+            )
+        )
+    }
+
+    func test_rootObjectPropertiesRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(
+                    .init(),
+                    .init(
+                        properties: ["test": .string],
+                        requiredProperties: ["test"]
+                    )
+                )
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(properties: ["test": .string(required: true)])
+                )!
+            )
+        )
+    }
+
     // MARK: - Formats
     func test_resolvingSingleIntegerWithFormat() {
         let fragments: [JSONSchemaFragment] = [
@@ -251,69 +294,74 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_evenDeeperObjectFragments() throws {
-        try assertOrderIndependentCombinedEqual(
-            [
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "more_object": .object(properties: ["boolean": .boolean])
-                        ]
-                    )
-                ),
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "more_fragments": .all(
-                                of: [
-                                    .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
-                                    .object(.init(title: "nested test"), .init(
-                                        properties: [
-                                            "boolean": .boolean(format: .other("integer")),
-                                            "string": .string(maxLength: 50),
-                                            "integer": .integer(maximum: (10, exclusive: false)),
-                                            "number": .number(maximum: (33.2, exclusive: false)),
-                                            "array": .array(maxItems: 22)
-                                        ]
-                                    )),
-                                    .object(.init(title: "nested test"), .init(
-                                        properties: [
-                                            "boolean": .boolean(description: "boolean"),
-                                            "string": .string(description: "string"),
-                                            "integer": .integer(description: "integer"),
-                                            "number": .number(description: "number"),
-                                            "array": .array(description: "array")
-                                        ]
-                                    ))
-                                ]
-                            )
-                        ]
-                    )
-                )
-            ],
+        let fragments: [JSONSchemaFragment] = [
             .object(
                 .init(),
-                DereferencedJSONSchema.ObjectContext(
-                    .init(
-                        properties: [
-                            "more_object": .object(properties: ["boolean": .boolean]),
-                            "more_fragments": .object(
-                                title: "nested test",
-                                description: "nested",
-                                properties: [
-                                    "someObject": .object,
-                                    "boolean": .boolean(format: .other("integer"), description: "boolean"),
-                                    "string": .string(description: "string", maxLength: 50),
-                                    "integer": .integer(description: "integer", maximum: (10, exclusive: false)),
-                                    "number": .number(description: "number", maximum: (33.2, exclusive: false)),
-                                    "array": .array(description: "array", maxItems: 22)
-                                ]
-                            )
-                        ]
-                    )
-                )!
+                .init(
+                    properties: [
+                        "more_object": .object(properties: ["boolean": .boolean])
+                    ]
+                )
+            ),
+            .object(
+                .init(),
+                .init(
+                    properties: [
+                        "more_fragments": .all(
+                            of: [
+                                .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
+                                .object(.init(title: "nested test"), .init(
+                                    properties: [
+                                        "boolean": .boolean(format: .other("integer")),
+                                        "string": .string(maxLength: 50),
+                                        "integer": .integer(maximum: (10, exclusive: false)),
+                                        "number": .number(maximum: (33.2, exclusive: false)),
+                                        "array": .array(maxItems: 22)
+                                    ]
+                                )),
+                                .object(.init(title: "nested test"), .init(
+                                    properties: [
+                                        "boolean": .boolean(description: "boolean"),
+                                        "string": .string(description: "string"),
+                                        "integer": .integer(description: "integer"),
+                                        "number": .number(description: "number"),
+                                        "array": .array(description: "array")
+                                    ],
+                                    requiredProperties: ["string", "array"]
+                                ))
+                            ]
+                        )
+                    ]
+                )
             )
+        ]
+
+        let expectedResult = DereferencedJSONSchema.object(
+            .init(),
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [
+                        "more_object": .object(required: false, properties: ["boolean": .boolean]),
+                        "more_fragments": .object(
+                            title: "nested test",
+                            description: "nested",
+                            properties: [
+                                "someObject": .object(required: false),
+                                "boolean": .boolean(format: .other("integer"), required: false, description: "boolean"),
+                                "string": .string(required: true, description: "string", maxLength: 50),
+                                "integer": .integer(required: false, description: "integer", maximum: (10, exclusive: false)),
+                                "number": .number(required: false, description: "number", maximum: (33.2, exclusive: false)),
+                                "array": .array(required: true, description: "array", maxItems: 22)
+                            ]
+                        )
+                    ]
+                )
+            )!
+        )
+
+        try assertOrderIndependentCombinedEqual(
+            fragments,
+            expectedResult
         )
     }
 
