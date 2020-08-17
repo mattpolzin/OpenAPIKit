@@ -572,23 +572,9 @@ extension JSONSchemaFragment.ObjectContext: Decodable {
         self.requiredProperties = maybeRequiredProperties
 
         let requiredProperties = maybeRequiredProperties ?? []
-        if var decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) {
-            // make any property not in this object's "required" array
-            // optional. All schemas are assumed required until a parent
-            // object schema omits the property containing the schema from
-            // its required array. This allows OpenAPIKit to store the concept
-            // of "requried" on each schema instead of on the parenting object
-            // and to consider root schemas (those not living in another object's
-            // properties dictionary) to be required.
-            decodedProperties
-                .filter { !requiredProperties.contains($0.key) }
-                .forEach { (propertyName, property) in
-                    decodedProperties[propertyName] = property.optionalSchemaObject()
-                }
-
-            properties = decodedProperties
-        } else {
-            properties = nil
+        let decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties)
+        properties = decodedProperties.map {
+            JSONSchema.ObjectContext.properties($0, takingRequirementsFrom: requiredProperties)
         }
     }
 }

@@ -802,21 +802,35 @@ extension JSONSchema.ObjectContext: Decodable {
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
 
-        var decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
+        let decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
+        properties = Self.properties(decodedProperties, takingRequirementsFrom: requiredArray)
+    }
 
-        // make any property not in this object's "required" array
-        // optional. All schemas are assumed required until a parent
-        // object schema omits the property containing the schema from
-        // its required array. This allows OpenAPIKit to store the concept
-        // of "requried" on each schema instead of on the parenting object
-        // and to consider root schemas (those not living in another object's
-        // properties dictionary) to be required.
-        decodedProperties
-        .filter { !requiredArray.contains($0.key) }
-        .forEach { (propertyName, property) in
-            decodedProperties[propertyName] = property.optionalSchemaObject()
-        }
+    /// Make any property not in the given "required" array optional.
+    ///
+    /// All schemas are assumed required until a parent object schema
+    /// omits the property containing the schema from its required array.
+    ///
+    /// This allows OpenAPIKit to store the concept of "requried" on each
+    /// schema instead of on the parenting object and to consider root
+    /// schemas (those not living in another object's properties dictionary)
+    /// to be required.
+    ///
+    /// - Parameters:
+    ///     - properties: The properties before resolving optionality.
+    ///     - required: The array of names of properties that should be required.
+    internal static func properties(
+        _ properties: [String: JSONSchema],
+        takingRequirementsFrom required: [String]
+    ) -> [String: JSONSchema] {
+        var properties = properties
 
-        properties = decodedProperties
+        properties
+            .filter { !required.contains($0.key) }
+            .forEach { (propertyName, property) in
+                properties[propertyName] = property.optionalSchemaObject()
+            }
+
+        return properties
     }
 }

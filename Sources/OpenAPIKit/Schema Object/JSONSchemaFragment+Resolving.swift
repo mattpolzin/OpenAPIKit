@@ -403,11 +403,11 @@ extension JSONSchemaFragment.ArrayContext {
 
 extension JSONSchemaFragment.ObjectContext {
     internal func combined(with other: JSONSchemaFragment.ObjectContext, resolvingIn components: OpenAPI.Components) throws -> JSONSchemaFragment.ObjectContext {
-        let newProperties: [String : JSONSchema]?
+        let combinedProperties: [String : JSONSchema]?
         if let conflict = conflicting(properties, other.properties) {
-            newProperties = try combine(properties: conflict.0, with: conflict.1, resolvingIn: components)
+            combinedProperties = try combine(properties: conflict.0, with: conflict.1, resolvingIn: components)
         } else {
-            newProperties = properties ?? other.properties
+            combinedProperties = properties ?? other.properties
         }
         if let conflict = conflicting(maxProperties, other.maxProperties) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .object, name: "maxProperties", original: String(conflict.0), new: String(conflict.1)))
@@ -448,6 +448,10 @@ extension JSONSchemaFragment.ObjectContext {
         let newMinProperties = minProperties ?? other.minProperties
         let newAdditionalProperties = additionalProperties ?? other.additionalProperties
         let newRequired = requiredProperties ?? other.requiredProperties
+        // set required on properties based on newly combined requried array
+        let newProperties = combinedProperties.map {
+            JSONSchema.ObjectContext.properties($0, takingRequirementsFrom: newRequired ?? [])
+        }
         return .init(
             maxProperties: newMaxProperties,
             minProperties: newMinProperties,
@@ -718,8 +722,13 @@ extension JSONSchemaFragment.ObjectContext {
                 throw JSONSchemaResolutionError(.inconsistency("Object minimum number of properties (\(min) cannot be higher than maximum (\(max)"))
             }
         }
+        // set required on properties based on newly combined requried array
+        let resolvedProperties = JSONSchema.ObjectContext.properties(
+            properties ?? [:],
+            takingRequirementsFrom: requiredProperties ?? []
+        )
         return .init(
-            properties: properties ?? [:],
+            properties: resolvedProperties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
             minProperties: minProperties ?? 0
