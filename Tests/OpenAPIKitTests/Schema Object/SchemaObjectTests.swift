@@ -31,7 +31,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         // JSONTypeFormat
         XCTAssertEqual(boolean.jsonTypeFormat, .boolean(.unspecified))
@@ -140,7 +140,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: false), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: false), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: false), .init())
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(required: false, description: nil))
 
         XCTAssertFalse(boolean.required)
         XCTAssertFalse(object.required)
@@ -180,7 +180,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertFalse(boolean.nullable)
         XCTAssertFalse(object.nullable)
@@ -208,7 +208,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertFalse(boolean.readOnly)
         XCTAssertFalse(boolean.writeOnly)
@@ -293,7 +293,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertFalse(boolean.deprecated)
         XCTAssertFalse(object.deprecated)
@@ -339,7 +339,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertEqual(boolean.title, "hello")
         XCTAssertEqual(object.title, "hello")
@@ -369,8 +369,8 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
-        let undefinedWithDescription = JSONSchema.undefined(description: "hello")
+        let undefined = JSONSchema.fragment(.init(description: nil))
+        let undefinedWithDescription = JSONSchema.fragment(.init(description: "hello"))
 
         XCTAssertEqual(boolean.description, "hello")
         XCTAssertEqual(object.description, "hello")
@@ -401,8 +401,8 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean], discriminator: .init(propertyName: "name"))
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
-        let undefinedWithDescription = JSONSchema.undefined(description: "hello")
+        let undefined = JSONSchema.fragment(.init(description: nil))
+        let undefinedWithDescription = JSONSchema.fragment(.init(description: "hello"))
 
         XCTAssertEqual(boolean.discriminator?.propertyName, "name")
         XCTAssertEqual(object.discriminator?.propertyName, "name")
@@ -433,7 +433,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertEqual(boolean.externalDocs, .init(url: URL(string: "http://google.com")!))
         XCTAssertEqual(object.externalDocs, .init(url: URL(string: "http://google.com")!))
@@ -463,7 +463,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         XCTAssertNotNil(boolean.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>)
         XCTAssertNotNil(object.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>)
@@ -471,13 +471,13 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNotNil(number.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>)
         XCTAssertNotNil(integer.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>)
         XCTAssertNotNil(string.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>)
+        XCTAssertNotNil(undefined.coreContext as? JSONSchema.FragmentContext)
 
         XCTAssertNil(allOf.coreContext)
         XCTAssertNil(anyOf.coreContext)
         XCTAssertNil(oneOf.coreContext)
         XCTAssertNil(not.coreContext)
         XCTAssertNil(reference.coreContext)
-        XCTAssertNil(undefined.coreContext)
     }
 
     func test_objectContextAccessor() {
@@ -493,7 +493,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.objectContext)
         XCTAssertEqual(object.objectContext, .init(properties: ["hello": .string]))
@@ -523,7 +523,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.arrayContext)
         XCTAssertNil(object.arrayContext)
@@ -553,7 +553,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.numberContext)
         XCTAssertNil(object.numberContext)
@@ -583,7 +583,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.integerContext)
         XCTAssertNil(object.integerContext)
@@ -613,7 +613,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.undefined(description: "hello world")
+        let undefined = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.stringContext)
         XCTAssertNil(object.stringContext)
@@ -1002,11 +1002,11 @@ extension SchemaObjectTests {
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: undefinedData)
 
-        XCTAssertEqual(decoded, .undefined(description: nil))
+        XCTAssertEqual(decoded, .fragment(.init(description: nil)))
     }
 
     func test_encodeUndefined() throws {
-        let undefined = JSONSchema.undefined(description: nil)
+        let undefined = JSONSchema.fragment(.init(description: nil))
 
         let encoded = try orderUnstableTestStringFromEncoding(of: undefined)
 
@@ -1029,11 +1029,11 @@ extension SchemaObjectTests {
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: undefinedWithDescriptionData)
 
-        XCTAssertEqual(decoded, .undefined(description: "hello world"))
+        XCTAssertEqual(decoded, .fragment(.init(description: "hello world")))
     }
 
     func test_encodeUndefinedWithDescription() throws {
-        let undefinedWithDescription = JSONSchema.undefined(description: "hello world")
+        let undefinedWithDescription = JSONSchema.fragment(.init(description: "hello world"))
 
         let encoded = try orderUnstableTestStringFromEncoding(of: undefinedWithDescription)
 

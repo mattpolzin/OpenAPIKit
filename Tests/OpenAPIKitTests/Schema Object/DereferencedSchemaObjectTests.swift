@@ -104,11 +104,11 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t15 = JSONSchema.string(required: false, minLength: 5).dereferenced()
         XCTAssertEqual(t15, .string(.init(required: false), .init(minLength: 5)))
 
-        let t16 = JSONSchema.undefined(description: nil).dereferenced()
+        let t16 = JSONSchema.fragment(.init(description: nil)).dereferenced()
         XCTAssertEqual(t16, .undefined(description: nil))
-        XCTAssertNil(t16?.coreContext)
+        XCTAssertNotNil(t16?.coreContext)
 
-        let t17 = JSONSchema.undefined(description: "test").dereferenced()
+        let t17 = JSONSchema.fragment(.init(description: "test")).dereferenced()
         XCTAssertEqual(t17, .undefined(description: "test"))
 
         // expect dereferencing to also resolve `all(of:)`
@@ -118,7 +118,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t18 = JSONSchema.all(of: []).dereferenced()
         XCTAssertEqual(t18, .undefined(description: nil))
         XCTAssertNil(t18?.discriminator)
-        XCTAssertNil(t18?.coreContext)
+        XCTAssertNotNil(t18?.coreContext)
 
         let t19 = JSONSchema.all(of: [.string(.init(), .init())]).dereferenced()
         XCTAssertEqual(t19, .string(.init(), .init()))
@@ -210,10 +210,10 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t15 = try JSONSchema.string(required: false, minLength: 5).dereferenced(in: components)
         XCTAssertEqual(t15, .string(.init(required: false), .init(minLength: 5)))
 
-        let t16 = try JSONSchema.undefined(description: nil).dereferenced(in: components)
+        let t16 = try JSONSchema.fragment(.init(description: nil)).dereferenced(in: components)
         XCTAssertEqual(t16, .undefined(description: nil))
 
-        let t17 = try JSONSchema.undefined(description: "test").dereferenced(in: components)
+        let t17 = try JSONSchema.fragment(.init(description: "test")).dereferenced(in: components)
         XCTAssertEqual(t17, .undefined(description: "test"))
 
         // expect dereferencing to also resolve `all(of:)`
@@ -223,7 +223,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t18 = try JSONSchema.all(of: []).dereferenced(in: components)
         XCTAssertEqual(t18, .undefined(description: nil))
         XCTAssertNil(t18.discriminator)
-        XCTAssertNil(t18.coreContext)
+        XCTAssertNotNil(t18.coreContext)
 
         let t19 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced(in: components)
         XCTAssertEqual(t19, .string(.init(), .init()))

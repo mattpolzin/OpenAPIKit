@@ -61,7 +61,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         case .not(let schema):
             return .not(schema.jsonSchema)
         case .undefined(description: let description):
-            return .undefined(description: description)
+            return .fragment(.init(description: description))
         }
     }
 
@@ -342,8 +342,8 @@ extension JSONSchema: LocallyDereferenceable {
             return .any(of: schemas, discriminator: discriminator)
         case .not(let jsonSchema):
             return .not(try jsonSchema.dereferenced(in: components))
-        case .undefined(description: let description):
-            return .undefined(description: description)
+        case .fragment(let context):
+            return .undefined(description: context.description)
         }
     }
 

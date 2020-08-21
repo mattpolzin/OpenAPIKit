@@ -183,7 +183,7 @@ internal struct FragmentResolver {
         let jsonSchema: JSONSchema
         switch combinedFragment {
         case .general(let coreContext):
-            jsonSchema = .undefined(description: coreContext.description)
+            jsonSchema = .fragment(.init(description: coreContext.description))
         case .reference(let reference):
             jsonSchema = .reference(reference)
         case .boolean(let coreContext):
@@ -482,8 +482,8 @@ fileprivate extension JSONSchema {
             throw JSONSchemaResolutionError(.unsupported(because: "`any`, `all`, `one`, and `not` aren't yet supported for schema fragment resolution."))
         case .reference(let reference):
             return .reference(reference)
-        case .undefined(description: let description):
-            return .general(.init(description: description))
+        case .fragment(let context):
+            return .general(.init(description: context.description))
         case .array(let coreContext, let arrayContext):
             return .array(
                 coreContext.fragmentContext,

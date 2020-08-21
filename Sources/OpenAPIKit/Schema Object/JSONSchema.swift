@@ -20,11 +20,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case not(JSONSchema)
     case reference(JSONReference<JSONSchema>)
-    /// This schema does not have a `type` specified. This is allowed
-    /// but does not offer much in the way of documenting the schema
-    /// so it is represented here as "undefined" with an optional
-    /// description.
-    case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
+    /// Schemas without a `type`.
+    case fragment(FragmentContext) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
 
     /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
@@ -41,7 +38,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
             return .integer(context.format)
         case .string(let context, _):
             return .string(context.format)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return nil
         }
     }
@@ -56,6 +53,33 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         return jsonTypeFormat?.jsonType
     }
 
+    /// The format of the schema as a string value.
+    ///
+    /// This can be set even when a schema type has
+    /// not be specified. If a type has been specified,
+    /// a type-safe format can be used and retrieved
+    /// via the `jsonTypeFormat` property.
+    public var formatString: String? {
+        switch self {
+        case .boolean(let context):
+            return context.format.rawValue
+        case .object(let context, _):
+            return context.format.rawValue
+        case .array(let context, _):
+            return context.format.rawValue
+        case .number(let context, _):
+            return context.format.rawValue
+        case .integer(let context, _):
+            return context.format.rawValue
+        case .string(let context, _):
+            return context.format.rawValue
+        case .fragment(let context):
+            return context.format
+        case .all, .one, .any, .not, .reference:
+            return nil
+        }
+    }
+
     // See `JSONSchemaContext`
     public var required: Bool {
         switch self {
@@ -66,8 +90,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .integer(let context as JSONSchemaContext, _),
              .string(let context as JSONSchemaContext, _):
             return context.required
-        case .undefined:
-            return false
+        case .fragment(let context):
+            return context.required
         case .all, .one, .any, .not, .reference:
             return true
         }
@@ -83,8 +107,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .integer(let context as JSONSchemaContext, _),
              .string(let context as JSONSchemaContext, _):
             return context.description
-        case .undefined(description: let description):
-            return description
+        case .fragment(let context):
+            return context.description
         case .all, .one, .any, .not, .reference:
             return nil
         }
@@ -104,7 +128,9 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .one(_, let discriminator),
              .any(_, let discriminator):
             return discriminator
-        case .undefined, .not, .reference:
+        case .fragment(let context):
+            return context.discriminator
+        case .not, .reference:
             return nil
         }
     }
@@ -152,17 +178,16 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
 // MARK: - Context Accessors
 extension JSONSchema {
-    /// Get the general context most JSONSchemas have.
+    /// Get the core context most JSONSchemas have.
     ///
     /// This is the information shared by most schemas.
     ///
-    /// Notably missing this general context are:
+    /// Notably missing this core context are:
     /// - `all`
     /// - `one`
     /// - `any`
     /// - `not`
     /// - `reference`
-    /// - `undefined`
     ///
     public var coreContext: JSONSchemaContext? {
         switch self {
@@ -171,9 +196,10 @@ extension JSONSchema {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext):
             return context
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference:
             return nil
         }
     }
@@ -250,7 +276,7 @@ extension JSONSchema {
             return .integer(context.optionalContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.optionalContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return self
         }
     }
@@ -270,7 +296,7 @@ extension JSONSchema {
             return .integer(context.requiredContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.requiredContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return self
         }
     }
@@ -290,7 +316,7 @@ extension JSONSchema {
             return .integer(context.nullableContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.nullableContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return self
         }
     }
@@ -311,7 +337,7 @@ extension JSONSchema {
             return .integer(context.with(allowedValues: allowedValues), contextB)
         case .string(let context, let contextB):
             return .string(context.with(allowedValues: allowedValues), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return self
         }
     }
@@ -332,7 +358,7 @@ extension JSONSchema {
             return .integer(context.with(example: example), contextB)
         case .string(let context, let contextB):
             return .string(context.with(example: example), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             throw Self.Error.exampleNotSupported
         }
     }
@@ -358,7 +384,7 @@ extension JSONSchema {
             return .one(of: schemas, discriminator: discriminator)
         case .any(of: let schemas, discriminator: _):
             return .any(of: schemas, discriminator: discriminator)
-        case .not, .reference, .undefined:
+        case .not, .reference, .fragment:
             return self
         }
     }
@@ -908,16 +934,10 @@ extension JSONSchema: Encodable {
 
             try container.encode(reference)
 
-        case .undefined(description: let description):
+        case .fragment(let context):
             var container = encoder.singleValueContainer()
 
-            let dict = Dictionary(
-                uniqueKeysWithValues: [
-                    description.map { ("description", $0) }
-                ].compactMap { $0 }
-            )
-
-            try container.encode(dict)
+            try container.encode(context)
         }
     }
 }
@@ -1015,15 +1035,8 @@ extension JSONSchema: Decodable {
         } else if typeHint == .boolean {
             self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
-        } else if hintContainerCount == 0 || (hintContainerCount == 1 && hintContainer.contains(.description)) {
-            let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)
-            self = .undefined(description: description)
         } else {
-            throw InconsistencyError(
-                subjectName: "OpenAPI Schema",
-                details: "No `type` or other identifying properties were found in the schema.",
-                codingPath: decoder.codingPath
-            )
+            self = .fragment(try FragmentContext(from: decoder))
         }
     }
 }

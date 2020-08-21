@@ -270,7 +270,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                         properties: [
                             "optional": .boolean(required: false),
                             "someObject": .object(required: false),
-                            "anything": .undefined(description: nil)
+                            "anything": .fragment(.init(description: nil))
                         ]
                     )
                 )
@@ -283,7 +283,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                             "required": .string,
                             "optional": .boolean(required: false),
                             "someObject": .object(required: false),
-                            "anything": .undefined(description: nil)
+                            "anything": .fragment(.init(description: nil))
                         ],
                         additionalProperties: .init(true),
                         minProperties: 2

@@ -169,6 +169,71 @@ extension JSONSchema {
             case readWrite
         }
     }
+
+    /// The conext used by any schema that does not have a type or needs to
+    /// represent part of a schema.
+    public struct FragmentContext: JSONSchemaContext, Equatable {
+        public var format: String?
+        var _required: Bool? // defaults to true
+        var _nullable: Bool? // defaults to false
+        public var description: String?
+        public var discriminator: OpenAPI.Discriminator?
+        public var title: String?
+        var _deprecated: Bool? // defaults to false
+        public var externalDocs: OpenAPI.ExternalDocumentation?
+        public var allowedValues: [AnyCodable]?
+        public var example: AnyCodable?
+        var _readOnly: Bool? // defaults to false
+        var _writeOnly: Bool? // defaults to false
+
+        public init(
+            format: String? = nil,
+            required: Bool? = nil,
+            nullable: Bool? = nil,
+            description: String? = nil,
+            discriminator: OpenAPI.Discriminator? = nil,
+            title: String? = nil,
+            deprecated: Bool? = nil,
+            externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            allowedValues: [AnyCodable]? = nil,
+            example: AnyCodable? = nil,
+            readOnly: Bool? = nil,
+            writeOnly: Bool? = nil
+        ) {
+            self.format = format
+            self._required = required
+            self._nullable = nullable
+            self.description = description
+            self.discriminator = discriminator
+            self.title = title
+            self._deprecated = deprecated
+            self.externalDocs = externalDocs
+            self.allowedValues = allowedValues
+            self.example = example
+            self._readOnly = readOnly
+            self._writeOnly = writeOnly
+        }
+
+        public var required: Bool {
+            return _required ?? true
+        }
+
+        public var nullable: Bool {
+            return _nullable ?? false
+        }
+
+        public var readOnly: Bool {
+            return _readOnly ?? false
+        }
+
+        public var writeOnly: Bool {
+            return _writeOnly ?? false
+        }
+
+        public var deprecated: Bool {
+            return _deprecated ?? false
+        }
+    }
 }
 
 // MARK: - Transformations
@@ -567,6 +632,42 @@ extension JSONSchema.CoreContext: Decodable {
 
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
+    }
+}
+
+extension JSONSchema.FragmentContext: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
+
+        try container.encodeIfPresent(format, forKey: .format)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encodeIfPresent(discriminator, forKey: .discriminator)
+        try container.encodeIfPresent(title, forKey: .title)
+        try container.encodeIfPresent(_nullable, forKey: .nullable)
+        try container.encodeIfPresent(_deprecated, forKey: .deprecated)
+        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        try container.encodeIfPresent(example, forKey: .example)
+        try container.encodeIfPresent(_readOnly, forKey: .readOnly)
+        try container.encodeIfPresent(_writeOnly, forKey: .writeOnly)
+    }
+}
+
+extension JSONSchema.FragmentContext: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
+
+        format = try container.decodeIfPresent(String.self, forKey: .format)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
+        _deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
+        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
+        allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+        example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
+        _readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
+        _writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
     }
 }
 
