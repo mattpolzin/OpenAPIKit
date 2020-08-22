@@ -441,7 +441,7 @@ extension JSONSchema {
     /// Construct a boolean schema.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -472,7 +472,7 @@ extension JSONSchema {
     /// Construct a boolean schema passing a variadic list of allowed values.
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -507,7 +507,7 @@ extension JSONSchema {
     /// Construct a string schema.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -546,7 +546,7 @@ extension JSONSchema {
     /// Construct a string schema passing a variadic list of allowed values.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -587,7 +587,7 @@ extension JSONSchema {
     /// Construct a number schema.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -626,7 +626,7 @@ extension JSONSchema {
     /// Construct a number schema passing a variadic list of allowed values.
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -667,7 +667,7 @@ extension JSONSchema {
     /// Construct an integer schema.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -706,7 +706,7 @@ extension JSONSchema {
     /// Construct an integer schema passing a variadic list of allowed values.
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -747,7 +747,7 @@ extension JSONSchema {
     /// Construct an objecy schema.
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -793,7 +793,7 @@ extension JSONSchema {
     /// Construct an array schema.
     public static func array(
         format: JSONTypeFormat.ArrayFormat = .unspecified,
-        required: Bool? = nil,
+        required: Bool = true,
         nullable: Bool? = nil,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
@@ -803,7 +803,7 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minItems: Int? = nil,
         maxItems: Int? = nil,
-        uniqueItems: Bool = false,
+        uniqueItems: Bool? = nil,
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
         example: AnyCodable? = nil

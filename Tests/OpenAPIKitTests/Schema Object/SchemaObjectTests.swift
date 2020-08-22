@@ -2418,8 +2418,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: true))])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic, required: true))])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic))])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic))])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2427,7 +2427,7 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: true))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic))]))
     }
 
     func test_encodeArray() {

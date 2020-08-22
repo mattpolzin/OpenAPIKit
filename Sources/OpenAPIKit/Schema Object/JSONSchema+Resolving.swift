@@ -226,7 +226,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
 
         let transformedContext = OtherContext(
             format: newFormat,
-            required: _required,
+            required: required,
             nullable: _nullable,
             permissions: _permissions.map(OtherContext.Permissions.init),
             deprecated: _deprecated,
@@ -311,7 +311,7 @@ extension JSONSchema.CoreContext {
         }
         let newExample = example ?? other.example
 
-        let newRequired = _required ?? other._required
+        let newRequired = required || other.required
         return .init(
             format: newFormat,
             required: newRequired,
@@ -487,25 +487,13 @@ extension JSONSchema.ObjectContext {
             }
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .object, name: "additionalProperties", original: originalDescription, new: newDescription))
         }
-        if let conflict = conflicting(requiredProperties, other.requiredProperties) {
-            throw JSONSchemaResolutionError(
-                .attributeConflict(
-                    jsonType: .object,
-                    name: "required",
-                    original: conflict.0.joined(separator: ", "),
-                    new: conflict.1.joined(separator: ", ")
-                )
-            )
-        }
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxProperties = maxProperties ?? other.maxProperties
         let newMinProperties = _minProperties ?? other._minProperties
         let newAdditionalProperties = additionalProperties ?? other.additionalProperties
-        // set required on properties based on newly combined requried array
-        let newProperties = JSONSchema.ObjectContext.properties(combinedProperties, takingRequirementsFrom: requiredProperties)
         return .init(
-            properties: newProperties,
+            properties: combinedProperties,
             additionalProperties: newAdditionalProperties,
             maxProperties: newMaxProperties,
             minProperties: newMinProperties
@@ -556,7 +544,7 @@ extension JSONSchema.CoreContext {
 
         return .init(
             format: newFormat,
-            required: _required,
+            required: required,
             nullable: _nullable,
             permissions: newPermissions,
             deprecated: _deprecated,

@@ -88,7 +88,7 @@ extension JSONSchema {
     /// The context that applies to all schemas.
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
-        let _required: Bool? // default true
+        public let required: Bool // default true
         let _nullable: Bool? // default false
 
         let _permissions: Permissions? // default `.readWrite`
@@ -108,7 +108,6 @@ extension JSONSchema {
 
         public let example: AnyCodable?
 
-        public var required: Bool { _required ?? true }
         public var nullable: Bool { _nullable ?? false }
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
@@ -118,7 +117,6 @@ extension JSONSchema {
 
         public var isEmpty: Bool {
             return format == .unspecified
-                && _required == nil
                 && _nullable == nil
                 && description == nil
                 && discriminator == nil
@@ -132,7 +130,7 @@ extension JSONSchema {
 
         public init(
             format: Format = .unspecified,
-            required: Bool? = nil,
+            required: Bool = true,
             nullable: Bool? = nil,
             permissions: Permissions? = nil,
             deprecated: Bool? = nil,
@@ -144,7 +142,7 @@ extension JSONSchema {
             example: AnyCodable? = nil
         ) {
             self.format = format
-            self._required = required
+            self.required = required
             self._nullable = nullable
             self._permissions = permissions
             self._deprecated = deprecated
@@ -158,7 +156,7 @@ extension JSONSchema {
 
         public init(
             format: Format = .unspecified,
-            required: Bool? = nil,
+            required: Bool = true,
             nullable: Bool? = nil,
             permissions: Permissions? = nil,
             deprecated: Bool? = nil,
@@ -170,7 +168,7 @@ extension JSONSchema {
             example: String
         ) {
             self.format = format
-            self._required = required
+            self.required = required
             self._nullable = nullable
             self._permissions = permissions
             self._deprecated = deprecated
@@ -244,7 +242,7 @@ extension JSONSchema.CoreContext {
     public func nullableContext() -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: _required,
+            required: required,
             nullable: true,
             permissions: _permissions,
             deprecated: _deprecated,
@@ -261,7 +259,7 @@ extension JSONSchema.CoreContext {
     public func with(allowedValues: [AnyCodable]) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: _required,
+            required: required,
             nullable: _nullable,
             permissions: _permissions,
             deprecated: _deprecated,
@@ -278,7 +276,7 @@ extension JSONSchema.CoreContext {
     public func with(example: AnyCodable) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: _required,
+            required: required,
             nullable: _nullable,
             permissions: _permissions,
             deprecated: _deprecated,
@@ -295,7 +293,7 @@ extension JSONSchema.CoreContext {
     public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: _required,
+            required: required,
             nullable: _nullable,
             permissions: _permissions,
             deprecated: _deprecated,
@@ -451,7 +449,7 @@ extension JSONSchema {
             items: JSONSchema? = nil,
             maxItems: Int? = nil,
             minItems: Int? = nil,
-            uniqueItems: Bool? = false
+            uniqueItems: Bool? = nil
         ) {
             self.items = items
             self.maxItems = maxItems
@@ -600,11 +598,11 @@ extension JSONSchema.CoreContext: Decodable {
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
-        // default to `nil` (which is `true`) at decoding site.
+        // default to `true` at decoding site.
         // It is the responsibility of decoders farther upstream
         // to mark this as _not_ required if needed using
         // `.optionalContext()`.
-        _required = nil
+        required = true
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
