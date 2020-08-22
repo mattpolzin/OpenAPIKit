@@ -200,7 +200,7 @@ extension DereferencedJSONSchema {
     /// The context that only applies to `.object` schemas.
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
-        let _minProperties: Int
+        let _minProperties: Int?
         public let properties: [String: DereferencedJSONSchema]
         public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
 
@@ -225,7 +225,7 @@ extension DereferencedJSONSchema {
         /// or when decoding if the number of required properties is greater
         /// than the explicitly set minimum.
         public var minProperties: Int {
-            return max(_minProperties, requiredProperties.count)
+            return max(_minProperties ?? 0, requiredProperties.count)
         }
 
         public init?(_ objectContext: JSONSchema.ObjectContext) {

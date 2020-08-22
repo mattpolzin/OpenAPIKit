@@ -471,7 +471,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNotNil(number.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>)
         XCTAssertNotNil(integer.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>)
         XCTAssertNotNil(string.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>)
-        XCTAssertNotNil(undefined.coreContext as? JSONSchema.FragmentContext)
+        XCTAssertNotNil(undefined.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>)
 
         XCTAssertNil(allOf.coreContext)
         XCTAssertNil(anyOf.coreContext)
@@ -4006,19 +4006,19 @@ extension SchemaObjectTests {
         let allOf = JSONSchema.all(
             of: [
                 .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init())
+                .object(.init(), .init(properties: [:]))
             ]
         )
         let allOfWithDisciminator = JSONSchema.all(
             of: [
                 .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init())
+                .object(.init(), .init(properties: [:]))
             ],
             discriminator: .init(propertyName: "hello")
         )
         let allOfWithReference = JSONSchema.all(
             of: [
-                .object(.init(), .init()),
+                .object(.init(), .init(properties: [:])),
                 .reference(.component(named: "test"))
             ]
         )
@@ -4106,7 +4106,7 @@ extension SchemaObjectTests {
             all,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init()),
+                    .object(.init(), .init(properties: [:])),
                     .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
                 ]
             )
@@ -4116,7 +4116,7 @@ extension SchemaObjectTests {
             allWithDiscriminator,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init()),
+                    .object(.init(), .init(properties: [:])),
                     .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
                 ],
                 discriminator: .init(propertyName: "hello")
@@ -4127,7 +4127,7 @@ extension SchemaObjectTests {
             allWithReference,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init()),
+                    .object(.init(), .init(properties: [:])),
                     .reference(.component(named: "test"))
                 ]
             )

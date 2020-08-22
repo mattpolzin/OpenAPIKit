@@ -15,13 +15,13 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
     indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
     indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
-    indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
+    indirect case all(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
     indirect case not(JSONSchema)
     case reference(JSONReference<JSONSchema>)
     /// Schemas without a `type`.
-    case fragment(FragmentContext) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
+    case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
 
     /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
@@ -74,7 +74,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         case .string(let context, _):
             return context.format.rawValue
         case .fragment(let context):
-            return context.format
+            return context.format.rawValue
         case .all, .one, .any, .not, .reference:
             return nil
         }
@@ -88,9 +88,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.required
-        case .fragment(let context):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext):
             return context.required
         case .all, .one, .any, .not, .reference:
             return true
@@ -105,9 +104,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
-            return context.description
-        case .fragment(let context):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext):
             return context.description
         case .all, .one, .any, .not, .reference:
             return nil
@@ -122,14 +120,13 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext):
             return context.discriminator
         case .all(_, let discriminator),
              .one(_, let discriminator),
              .any(_, let discriminator):
             return discriminator
-        case .fragment(let context):
-            return context.discriminator
         case .not, .reference:
             return nil
         }
@@ -276,7 +273,9 @@ extension JSONSchema {
             return .integer(context.optionalContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.optionalContext(), contextB)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .fragment(let context):
+            return .fragment(context.optionalContext())
+        case .all, .one, .any, .not, .reference:
             return self
         }
     }
@@ -296,7 +295,9 @@ extension JSONSchema {
             return .integer(context.requiredContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.requiredContext(), contextB)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .fragment(let context):
+            return .fragment(context.requiredContext())
+        case .all, .one, .any, .not, .reference:
             return self
         }
     }
@@ -316,7 +317,9 @@ extension JSONSchema {
             return .integer(context.nullableContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.nullableContext(), contextB)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .fragment(let context):
+            return .fragment(context.nullableContext())
+        case .all, .one, .any, .not, .reference:
             return self
         }
     }
@@ -337,7 +340,9 @@ extension JSONSchema {
             return .integer(context.with(allowedValues: allowedValues), contextB)
         case .string(let context, let contextB):
             return .string(context.with(allowedValues: allowedValues), contextB)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .fragment(let context):
+            return .fragment(context.with(allowedValues: allowedValues))
+        case .all, .one, .any, .not, .reference:
             return self
         }
     }
@@ -358,7 +363,9 @@ extension JSONSchema {
             return .integer(context.with(example: example), contextB)
         case .string(let context, let contextB):
             return .string(context.with(example: example), contextB)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .fragment(let context):
+            return .fragment(context.with(example: example))
+        case .all, .one, .any, .not, .reference:
             throw Self.Error.exampleNotSupported
         }
     }
@@ -378,13 +385,15 @@ extension JSONSchema {
             return .integer(context.with(discriminator: discriminator), contextB)
         case .string(let context, let contextB):
             return .string(context.with(discriminator: discriminator), contextB)
+        case .fragment(let context):
+            return .fragment(context.with(discriminator: discriminator))
         case .all(of: let fragments, discriminator: _):
             return .all(of: fragments, discriminator: discriminator)
         case .one(of: let schemas, discriminator: _):
             return .one(of: schemas, discriminator: discriminator)
         case .any(of: let schemas, discriminator: _):
             return .any(of: schemas, discriminator: discriminator)
-        case .not, .reference, .fragment:
+        case .not, .reference:
             return self
         }
     }
@@ -830,7 +839,7 @@ extension JSONSchema {
     /// Construct a schema stating all of the given fragment
     /// requirements are met.
     public static func all(
-        of schemas: [JSONSchemaFragment]
+        of schemas: [JSONSchema]
     ) -> JSONSchema {
         return .all(of: schemas, discriminator: nil)
     }
@@ -838,7 +847,7 @@ extension JSONSchema {
     /// Construct a schema stating all of the given fragment
     /// requirements are met given a discriminator.
     public static func all(
-        of schemas: JSONSchemaFragment...,
+        of schemas: JSONSchema...,
         discriminator: OpenAPI.Discriminator? = nil
     ) -> JSONSchema {
         return .all(of: schemas, discriminator: discriminator)
@@ -966,7 +975,7 @@ extension JSONSchema: Decodable {
 
         if container.contains(.allOf) {
             let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-            self = .all(of: try container.decode([JSONSchemaFragment].self, forKey: .allOf), discriminator: discriminator)
+            self = .all(of: try container.decode([JSONSchema].self, forKey: .allOf), discriminator: discriminator)
             return
         }
 
@@ -1050,7 +1059,7 @@ extension JSONSchema: Decodable {
             self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
         } else {
-            let fragmentContext = try FragmentContext(from: decoder)
+            let fragmentContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             if fragmentContext.isEmpty && hintContainerCount > 0 {
                 throw InconsistencyError(
                     subjectName: "OpenAPI Schema",

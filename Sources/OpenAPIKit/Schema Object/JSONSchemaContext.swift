@@ -88,11 +88,11 @@ extension JSONSchema {
     /// The context that applies to all schemas.
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
-        public let required: Bool // default true
-        public let nullable: Bool // default false
+        let _required: Bool? // default true
+        let _nullable: Bool? // default false
 
-        public let permissions: Permissions // default `.readWrite`
-        public let deprecated: Bool // default false
+        let _permissions: Permissions? // default `.readWrite`
+        let _deprecated: Bool? // default false
 
         public let title: String?
         public let description: String?
@@ -108,15 +108,34 @@ extension JSONSchema {
 
         public let example: AnyCodable?
 
+        public var required: Bool { _required ?? true }
+        public var nullable: Bool { _nullable ?? false }
+        public var permissions: Permissions { _permissions ?? .readWrite}
+        public var deprecated: Bool { _deprecated ?? false }
+
         public var readOnly: Bool { permissions == .readOnly }
         public var writeOnly: Bool { permissions == .writeOnly }
 
+        public var isEmpty: Bool {
+            return format == .unspecified
+                && _required == nil
+                && _nullable == nil
+                && description == nil
+                && discriminator == nil
+                && title == nil
+                && _deprecated == nil
+                && externalDocs == nil
+                && allowedValues == nil
+                && example == nil
+                && _permissions == nil
+        }
+
         public init(
             format: Format = .unspecified,
-            required: Bool = true,
-            nullable: Bool = false,
-            permissions: Permissions = .readWrite,
-            deprecated: Bool = false,
+            required: Bool? = true,
+            nullable: Bool? = false,
+            permissions: Permissions? = .readWrite,
+            deprecated: Bool? = false,
             title: String? = nil,
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
@@ -125,10 +144,10 @@ extension JSONSchema {
             example: AnyCodable? = nil
         ) {
             self.format = format
-            self.required = required
-            self.nullable = nullable
-            self.permissions = permissions
-            self.deprecated = deprecated
+            self._required = required
+            self._nullable = nullable
+            self._permissions = permissions
+            self._deprecated = deprecated
             self.title = title
             self.description = description
             self.discriminator = discriminator
@@ -139,10 +158,10 @@ extension JSONSchema {
 
         public init(
             format: Format = .unspecified,
-            required: Bool = true,
-            nullable: Bool = false,
-            permissions: Permissions = .readWrite,
-            deprecated: Bool = false,
+            required: Bool? = true,
+            nullable: Bool? = false,
+            permissions: Permissions? = .readWrite,
+            deprecated: Bool? = false,
             title: String? = nil,
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
@@ -151,10 +170,10 @@ extension JSONSchema {
             example: String
         ) {
             self.format = format
-            self.required = required
-            self.nullable = nullable
-            self.permissions = permissions
-            self.deprecated = deprecated
+            self._required = required
+            self._nullable = nullable
+            self._permissions = permissions
+            self._deprecated = deprecated
             self.title = title
             self.description = description
             self.discriminator = discriminator
@@ -167,86 +186,19 @@ extension JSONSchema {
             case readOnly
             case writeOnly
             case readWrite
-        }
-    }
 
-    /// The conext used by any schema that does not have a type or needs to
-    /// represent part of a schema.
-    public struct FragmentContext: JSONSchemaContext, Equatable {
-        public var format: String?
-        var _required: Bool? // defaults to true
-        var _nullable: Bool? // defaults to false
-        public var description: String?
-        public var discriminator: OpenAPI.Discriminator?
-        public var title: String?
-        var _deprecated: Bool? // defaults to false
-        public var externalDocs: OpenAPI.ExternalDocumentation?
-        public var allowedValues: [AnyCodable]?
-        public var example: AnyCodable?
-        var _readOnly: Bool? // defaults to false
-        var _writeOnly: Bool? // defaults to false
-
-        public init(
-            format: String? = nil,
-            required: Bool? = nil,
-            nullable: Bool? = nil,
-            description: String? = nil,
-            discriminator: OpenAPI.Discriminator? = nil,
-            title: String? = nil,
-            deprecated: Bool? = nil,
-            externalDocs: OpenAPI.ExternalDocumentation? = nil,
-            allowedValues: [AnyCodable]? = nil,
-            example: AnyCodable? = nil,
-            readOnly: Bool? = nil,
-            writeOnly: Bool? = nil
-        ) {
-            self.format = format
-            self._required = required
-            self._nullable = nullable
-            self.description = description
-            self.discriminator = discriminator
-            self.title = title
-            self._deprecated = deprecated
-            self.externalDocs = externalDocs
-            self.allowedValues = allowedValues
-            self.example = example
-            self._readOnly = readOnly
-            self._writeOnly = writeOnly
-        }
-
-        public var required: Bool {
-            return _required ?? true
-        }
-
-        public var nullable: Bool {
-            return _nullable ?? false
-        }
-
-        public var readOnly: Bool {
-            return _readOnly ?? false
-        }
-
-        public var writeOnly: Bool {
-            return _writeOnly ?? false
-        }
-
-        public var deprecated: Bool {
-            return _deprecated ?? false
-        }
-
-        public var isEmpty: Bool {
-            return format == nil
-                && _required == nil
-                && _nullable == nil
-                && description == nil
-                && discriminator == nil
-                && title == nil
-                && _deprecated == nil
-                && externalDocs == nil
-                && allowedValues == nil
-                && example == nil
-                && _readOnly == nil
-                && _writeOnly == nil
+            public init<Format: OpenAPIFormat>(
+                _ permissions: CoreContext<Format>.Permissions
+            ) {
+                switch permissions {
+                case .readOnly:
+                    self = .readOnly
+                case .writeOnly:
+                    self = .writeOnly
+                case .readWrite:
+                    self = .readWrite
+                }
+            }
         }
     }
 }
@@ -390,6 +342,16 @@ extension JSONSchema {
             self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
             self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
         }
+
+        internal init(
+            multipleOf: Double?,
+            maximum: Bound?,
+            minimum: Bound?
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
+        }
     }
 
     /// The context that only applies to `.integer` schemas.
@@ -417,6 +379,16 @@ extension JSONSchema {
             self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
         }
 
+        internal init(
+            multipleOf: Int?,
+            maximum: Bound?,
+            minimum: Bound?
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
+        }
+
         /// Get the `NumericContext` that describes this
         /// `IntegerContext`.
         public var numericContext: NumericContext {
@@ -431,18 +403,22 @@ extension JSONSchema {
     /// The context that only applies to `.string` schemas.
     public struct StringContext: Equatable {
         public let maxLength: Int?
-        public let minLength: Int
+        let _minLength: Int?
+
+        public var minLength: Int {
+            return _minLength ?? 0
+        }
 
         /// Regular expression
         public let pattern: String?
 
         public init(
             maxLength: Int? = nil,
-            minLength: Int = 0,
+            minLength: Int? = 0,
             pattern: String? = nil
         ) {
             self.maxLength = maxLength
-            self.minLength = minLength
+            self._minLength = minLength
             self.pattern = pattern
         }
     }
@@ -456,25 +432,31 @@ extension JSONSchema {
         /// Maximum number of items in array.
         public let maxItems: Int?
 
+        let _minItems: Int?
         /// Minimum number of items in array.
         /// Defaults to 0.
-        public let minItems: Int
+        public var minItems: Int {
+            return _minItems ?? 0
+        }
 
+        let _uniqueItems: Bool?
         /// Setting to true indicates all
         /// elements of the array are expected
         /// to be unique. Defaults to false.
-        public let uniqueItems: Bool
+        public var uniqueItems: Bool {
+            return _uniqueItems ?? false
+        }
 
         public init(
             items: JSONSchema? = nil,
             maxItems: Int? = nil,
-            minItems: Int = 0,
-            uniqueItems: Bool = false
+            minItems: Int? = 0,
+            uniqueItems: Bool? = false
         ) {
             self.items = items
             self.maxItems = maxItems
-            self.minItems = minItems
-            self.uniqueItems = uniqueItems
+            self._minItems = minItems
+            self._uniqueItems = uniqueItems
         }
     }
 
@@ -483,7 +465,7 @@ extension JSONSchema {
         /// The maximum number of properties the object
         /// is allowed to have.
         public let maxProperties: Int?
-        let _minProperties: Int
+        let _minProperties: Int?
         public let properties: [String: JSONSchema]
 
         /// Either a boolean or a schema defining or allowing
@@ -533,14 +515,14 @@ extension JSONSchema {
         /// or when decoding if the number of required properties is greater
         /// than the explicitly set minimum.
         public var minProperties: Int {
-            return max(_minProperties, requiredProperties.count)
+            return max(_minProperties ?? 0, requiredProperties.count)
         }
 
         public init(
             properties: [String: JSONSchema],
             additionalProperties: Either<Bool, JSONSchema>? = nil,
             maxProperties: Int? = nil,
-            minProperties: Int = 0
+            minProperties: Int? = 0
         ) {
             self.properties = properties
             self.additionalProperties = additionalProperties
@@ -575,7 +557,9 @@ extension JSONSchema.CoreContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
-        try container.encode(format.jsonType, forKey: .type)
+        if Format.self != JSONTypeFormat.AnyFormat.self {
+            try container.encode(format.jsonType, forKey: .type)
+        }
 
         if format != Format.unspecified {
             try container.encode(format, forKey: .format)
@@ -586,12 +570,19 @@ extension JSONSchema.CoreContext: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encodeIfPresent(example, forKey: .example)
 
         // nullable is false if omitted
         if nullable {
             try container.encode(nullable, forKey: .nullable)
         }
 
+        // deprecated is false if omitted
+        if deprecated {
+            try container.encode(deprecated, forKey: .deprecated)
+        }
+
+        // permissions are readWrite if omitted
         switch permissions {
         case .readOnly:
             try container.encode(true, forKey: .readOnly)
@@ -600,12 +591,6 @@ extension JSONSchema.CoreContext: Encodable {
         case .readWrite:
             break
         }
-
-        if deprecated {
-            try container.encode(deprecated, forKey: .deprecated)
-        }
-
-        try container.encodeIfPresent(example, forKey: .example)
     }
 }
 
@@ -615,74 +600,46 @@ extension JSONSchema.CoreContext: Decodable {
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
-        // default to true at decoding site. It is the responsibility of
-        // decoders farther upstream to mark this as _not_ required if needed
-        // using `.optionalContext()`.
-        required = true
+        // default to `nil` (which is `true`) at decoding site.
+        // It is the responsibility of decoders farther upstream
+        // to mark this as _not_ required if needed using
+        // `.optionalContext()`.
+        _required = nil
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
-        nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
+        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
 
-        let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly) ?? false
-        let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly) ?? false
+        let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
+        let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
 
-        switch (readOnly, writeOnly) {
-        case (false, false):
-            permissions = .readWrite
-        case (false, true):
-            permissions = .writeOnly
-        case (true, false):
-            permissions = .readOnly
-        case (true, true):
-            throw InconsistencyError(
-                subjectName: "JSONSchema",
-                details: "Either `readOnly` or `writeOnly` can be true but not both",
-                codingPath: decoder.codingPath
-            )
+        if readOnly == nil && writeOnly == nil {
+            _permissions = nil
+        } else {
+            let inferredReadOnly = readOnly ?? false
+            let inferredWriteOnly = writeOnly ?? false
+
+            switch (inferredReadOnly, inferredWriteOnly) {
+            case (false, false):
+                _permissions = .readWrite
+            case (false, true):
+                _permissions = .writeOnly
+            case (true, false):
+                _permissions = .readOnly
+            case (true, true):
+                throw InconsistencyError(
+                    subjectName: "JSONSchema",
+                    details: "Either `readOnly` or `writeOnly` can be true but not both",
+                    codingPath: decoder.codingPath
+                )
+            }
         }
 
-        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
-        example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
-    }
-}
-
-extension JSONSchema.FragmentContext: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
-
-        try container.encodeIfPresent(format, forKey: .format)
-        try container.encodeIfPresent(description, forKey: .description)
-        try container.encodeIfPresent(discriminator, forKey: .discriminator)
-        try container.encodeIfPresent(title, forKey: .title)
-        try container.encodeIfPresent(_nullable, forKey: .nullable)
-        try container.encodeIfPresent(_deprecated, forKey: .deprecated)
-        try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
-        try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
-        try container.encodeIfPresent(example, forKey: .example)
-        try container.encodeIfPresent(_readOnly, forKey: .readOnly)
-        try container.encodeIfPresent(_writeOnly, forKey: .writeOnly)
-    }
-}
-
-extension JSONSchema.FragmentContext: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
-
-        format = try container.decodeIfPresent(String.self, forKey: .format)
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-        title = try container.decodeIfPresent(String.self, forKey: .title)
-        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
         _deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
-        externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
-        allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
-        _readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
-        _writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
     }
 }
 
@@ -818,11 +775,7 @@ extension JSONSchema.StringContext: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(maxLength, forKey: .maxLength)
-
-        if minLength > 0 {
-            try container.encode(minLength, forKey: .minLength)
-        }
-
+        try container.encodeIfPresent(_minLength, forKey: .minLength)
         try container.encodeIfPresent(pattern, forKey: .pattern)
     }
 }
@@ -832,7 +785,7 @@ extension JSONSchema.StringContext: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         maxLength = try container.decodeIfPresent(Int.self, forKey: .maxLength)
-        minLength = try container.decodeIfPresent(Int.self, forKey: .minLength) ?? 0
+        _minLength = try container.decodeIfPresent(Int.self, forKey: .minLength)
         pattern = try container.decodeIfPresent(String.self, forKey: .pattern)
     }
 }
@@ -852,16 +805,8 @@ extension JSONSchema.ArrayContext: Encodable {
 
         try container.encodeIfPresent(items, forKey: .items)
         try container.encodeIfPresent(maxItems, forKey: .maxItems)
-
-        if minItems > 0 {
-            // omission is the same as 0
-            try container.encode(minItems, forKey: .minItems)
-        }
-
-        if uniqueItems {
-            // omission is the same as false
-            try container.encode(uniqueItems, forKey: .uniqueItems)
-        }
+        try container.encodeIfPresent(_minItems, forKey: .minItems)
+        try container.encodeIfPresent(_uniqueItems, forKey: .uniqueItems)
     }
 }
 
@@ -871,8 +816,8 @@ extension JSONSchema.ArrayContext: Decodable {
 
         items = try container.decodeIfPresent(JSONSchema.self, forKey: .items)
         maxItems = try container.decodeIfPresent(Int.self, forKey: .maxItems)
-        minItems = try container.decodeIfPresent(Int.self, forKey: .minItems) ?? 0
-        uniqueItems = try container.decodeIfPresent(Bool.self, forKey: .uniqueItems) ?? false
+        _minItems = try container.decodeIfPresent(Int.self, forKey: .minItems)
+        _uniqueItems = try container.decodeIfPresent(Bool.self, forKey: .uniqueItems)
     }
 }
 
@@ -902,9 +847,7 @@ extension JSONSchema.ObjectContext: Encodable {
             try container.encode(requiredProperties, forKey: .required)
         }
 
-        if _minProperties > 0 {
-            try container.encode(_minProperties, forKey: .minProperties)
-        }
+        try container.encodeIfPresent(_minProperties, forKey: .minProperties)
     }
 }
 
