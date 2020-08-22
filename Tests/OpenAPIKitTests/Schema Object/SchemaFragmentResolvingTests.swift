@@ -119,10 +119,24 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
-    func test_rootObjectPropertiesOptional() throws {
+    func test_rootObjectPropertiesRequired() throws {
         try assertOrderIndependentCombinedEqual(
             [
                 .object(.init(), .init(properties: ["test": .string]))
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(properties: ["test": .string])
+                )!
+            )
+        )
+    }
+
+    func test_rootObjectPropertiesOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(properties: ["test": .string(required: false)]))
             ],
             .object(
                 .init(),

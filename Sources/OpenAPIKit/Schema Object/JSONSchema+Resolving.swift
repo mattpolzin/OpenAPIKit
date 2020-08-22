@@ -251,18 +251,18 @@ extension JSONSchema.CoreContext {
         let newDescription = description ?? other.description
 
         if let conflict = conflicting(_permissions, other._permissions) {
-            throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "readOnly/writeOnly", original: String(conflict.0.rawValue), new: String(conflict.1.rawValue)))
+            throw JSONSchemaResolutionError(.inconsistency("A schema cannot be both \(conflict.0.rawValue) and \(conflict.1.rawValue)."))
         }
         let newPermissions: JSONSchema.CoreContext<Format>.Permissions?
         if _permissions == nil && other._permissions == nil {
             newPermissions = nil
         } else {
-            switch (self.readOnly && other.readOnly, self.writeOnly && other.writeOnly) {
-            case (true, true):
+            switch (_permissions, other._permissions) {
+            case (.readOnly, .writeOnly), (.writeOnly, .readOnly):
                 throw JSONSchemaResolutionError(.inconsistency("Schemas cannot be read-only and write-only"))
-            case (true, _):
+            case (.readOnly, .readOnly), (nil, .readOnly), (.readOnly, nil):
                 newPermissions = .readOnly
-            case (_, true):
+            case (.writeOnly, .writeOnly), (nil, .writeOnly), (.writeOnly, nil):
                 newPermissions = .writeOnly
             default:
                 newPermissions = .readWrite
@@ -516,7 +516,7 @@ internal func combine(properties left: [String: JSONSchema], with right: [String
 fileprivate extension JSONSchema.CoreContext {
     var anyCoreContext: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat> {
         let newFormat = JSONTypeFormat.AnyFormat(rawValue: format.rawValue)
-        let newPermissions = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions(permissions)
+        let newPermissions = _permissions.map(JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions.init)
         return JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
             format: newFormat,
             required: required,
@@ -540,7 +540,7 @@ extension JSONSchema.CoreContext {
         guard let newFormat = NewFormat(rawValue: format.rawValue) else {
             throw JSONSchemaResolutionError(.inconsistency("Tried to create a \(NewFormat.self) from the incompatible format value: \(format.rawValue)"))
         }
-        let newPermissions = _permissions.map { JSONSchema.CoreContext<NewFormat>.Permissions($0) }
+        let newPermissions = _permissions.map(JSONSchema.CoreContext<NewFormat>.Permissions.init)
 
         return .init(
             format: newFormat,
