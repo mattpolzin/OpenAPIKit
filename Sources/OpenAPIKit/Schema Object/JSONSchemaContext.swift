@@ -132,10 +132,10 @@ extension JSONSchema {
 
         public init(
             format: Format = .unspecified,
-            required: Bool? = true,
-            nullable: Bool? = false,
-            permissions: Permissions? = .readWrite,
-            deprecated: Bool? = false,
+            required: Bool? = nil,
+            nullable: Bool? = nil,
+            permissions: Permissions? = nil,
+            deprecated: Bool? = nil,
             title: String? = nil,
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
@@ -158,10 +158,10 @@ extension JSONSchema {
 
         public init(
             format: Format = .unspecified,
-            required: Bool? = true,
-            nullable: Bool? = false,
-            permissions: Permissions? = .readWrite,
-            deprecated: Bool? = false,
+            required: Bool? = nil,
+            nullable: Bool? = nil,
+            permissions: Permissions? = nil,
+            deprecated: Bool? = nil,
             title: String? = nil,
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
@@ -211,9 +211,9 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: false,
-            nullable: nullable,
-            permissions: permissions,
-            deprecated: deprecated,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -228,9 +228,9 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: true,
-            nullable: nullable,
-            permissions: permissions,
-            deprecated: deprecated,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -244,10 +244,10 @@ extension JSONSchema.CoreContext {
     public func nullableContext() -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: required,
+            required: _required,
             nullable: true,
-            permissions: permissions,
-            deprecated: deprecated,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -261,10 +261,10 @@ extension JSONSchema.CoreContext {
     public func with(allowedValues: [AnyCodable]) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: required,
-            nullable: nullable,
-            permissions: permissions,
-            deprecated: deprecated,
+            required: _required,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -278,10 +278,10 @@ extension JSONSchema.CoreContext {
     public func with(example: AnyCodable) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: required,
-            nullable: nullable,
-            permissions: permissions,
-            deprecated: deprecated,
+            required: _required,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -295,10 +295,10 @@ extension JSONSchema.CoreContext {
     public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema.CoreContext<Format> {
         return .init(
             format: format,
-            required: required,
-            nullable: nullable,
-            permissions: permissions,
-            deprecated: deprecated,
+            required: _required,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
@@ -414,7 +414,7 @@ extension JSONSchema {
 
         public init(
             maxLength: Int? = nil,
-            minLength: Int? = 0,
+            minLength: Int? = nil,
             pattern: String? = nil
         ) {
             self.maxLength = maxLength
@@ -450,7 +450,7 @@ extension JSONSchema {
         public init(
             items: JSONSchema? = nil,
             maxItems: Int? = nil,
-            minItems: Int? = 0,
+            minItems: Int? = nil,
             uniqueItems: Bool? = false
         ) {
             self.items = items
@@ -522,7 +522,7 @@ extension JSONSchema {
             properties: [String: JSONSchema],
             additionalProperties: Either<Bool, JSONSchema>? = nil,
             maxProperties: Int? = nil,
-            minProperties: Int? = 0
+            minProperties: Int? = nil
         ) {
             self.properties = properties
             self.additionalProperties = additionalProperties
