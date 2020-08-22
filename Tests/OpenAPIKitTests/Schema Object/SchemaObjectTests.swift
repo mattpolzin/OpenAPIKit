@@ -971,16 +971,6 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: readOnlyWriteOnlyData))
     }
 
-    func test_decodingFailsForNoIdentifyingProperties() {
-        let badSchema = """
-        {
-            "example" : "hello"
-        }
-        """.data(using: .utf8)!
-
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: badSchema))
-    }
-
     func test_decodingFailsForTypeAndPropertyConflict() {
         // has type "string" but "items" property that belongs with the "array" type.
         let badSchema = """
@@ -993,6 +983,34 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: badSchema))
+    }
+
+    func test_decodeExampleFragment() throws {
+        let exampleSchema = """
+        {
+            "example" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: exampleSchema),
+            .fragment(.init(example: "hello"))
+        )
+    }
+
+    func test_encodeExampleFragment() throws {
+        let fragment = JSONSchema.fragment(.init(example: "hello"))
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
+
+        assertJSONEquivalent(
+            encoded,
+"""
+{
+  "example" : "hello"
+}
+"""
+        )
     }
 
     func test_decodeUndefined() throws {

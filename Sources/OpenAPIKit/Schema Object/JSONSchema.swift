@@ -946,11 +946,10 @@ extension JSONSchema: Decodable {
 
     private enum HintCodingKeys: String, CodingKey {
         case type
-        case description
-        case unknown
+        case other
 
         init(stringValue: String) {
-            self = Self(rawValue: stringValue) ?? .unknown
+            self = Self(rawValue: stringValue) ?? .other
         }
     }
 
@@ -1036,7 +1035,15 @@ extension JSONSchema: Decodable {
             self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
         } else {
-            self = .fragment(try FragmentContext(from: decoder))
+            let fragmentContext = try FragmentContext(from: decoder)
+            if fragmentContext.isEmpty && hintContainerCount > 0 {
+                throw InconsistencyError(
+                    subjectName: "OpenAPI Schema",
+                    details: "Found nothing but unsupported attributes.",
+                    codingPath: decoder.codingPath
+                )
+            }
+            self = .fragment(fragmentContext)
         }
     }
 }

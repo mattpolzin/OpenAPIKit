@@ -233,6 +233,21 @@ extension JSONSchema {
         public var deprecated: Bool {
             return _deprecated ?? false
         }
+
+        public var isEmpty: Bool {
+            return format == nil
+                && _required == nil
+                && _nullable == nil
+                && description == nil
+                && discriminator == nil
+                && title == nil
+                && _deprecated == nil
+                && externalDocs == nil
+                && allowedValues == nil
+                && example == nil
+                && _readOnly == nil
+                && _writeOnly == nil
+        }
     }
 }
 
