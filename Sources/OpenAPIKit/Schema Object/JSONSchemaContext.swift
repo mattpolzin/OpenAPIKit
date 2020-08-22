@@ -856,7 +856,7 @@ extension JSONSchema.ObjectContext: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         maxProperties = try container.decodeIfPresent(Int.self, forKey: .maxProperties)
-        _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties) ?? 0
+        _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
