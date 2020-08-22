@@ -611,7 +611,7 @@ extension JSONSchema.CoreContext: Decodable {
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
-        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable) ?? false
+        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
 
         let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
         let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
