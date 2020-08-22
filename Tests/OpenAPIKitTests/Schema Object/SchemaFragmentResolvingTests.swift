@@ -702,16 +702,6 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             AnyContext(example: "string2")
         ]
 
-        let differentReadOnly = [
-            AnyContext(permissions: .readOnly),
-            AnyContext(permissions: .readWrite)
-        ]
-
-        let differentWriteOnly = [
-            AnyContext(permissions: .writeOnly),
-            AnyContext(permissions: .readWrite)
-        ]
-
         let differences = [
             differentDescription,
             differentDiscriminator,
@@ -720,9 +710,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             differentDeprecated,
             differentExternalDocs,
             differentAllowedValues,
-            differentExample,
-            differentReadOnly,
-            differentWriteOnly
+            differentExample
         ]
 
         // break up for type checking
@@ -964,29 +952,83 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_generalInconsistencyErrors() {
 
         let fragmentsArray: [[JSONSchema]] = [
+            // boolean readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
             [
                 .boolean(.init(permissions: .readOnly)),
                 .boolean(.init(permissions: .writeOnly))
             ],
             [
+                .boolean(.init(permissions: .readOnly)),
+                .boolean(.init(permissions: .readWrite))
+            ],
+            [
+                .boolean(.init(permissions: .writeOnly)),
+                .boolean(.init(permissions: .readWrite))
+            ],
+            // integer readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
                 .integer(.init(permissions: .readOnly), .init()),
                 .integer(.init(permissions: .writeOnly), .init())
             ],
+            [
+                .integer(.init(permissions: .readOnly), .init()),
+                .integer(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .integer(.init(permissions: .writeOnly), .init()),
+                .integer(.init(permissions: .readWrite), .init())
+            ],
+            // number readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
             [
                 .number(.init(permissions: .readOnly), .init()),
                 .number(.init(permissions: .writeOnly), .init())
             ],
             [
+                .number(.init(permissions: .readOnly), .init()),
+                .number(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .number(.init(permissions: .writeOnly), .init()),
+                .number(.init(permissions: .readWrite), .init())
+            ],
+            // string readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
                 .string(.init(permissions: .readOnly), .init()),
                 .string(.init(permissions: .writeOnly), .init())
             ],
+            [
+                .string(.init(permissions: .readOnly), .init()),
+                .string(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .string(.init(permissions: .writeOnly), .init()),
+                .string(.init(permissions: .readWrite), .init())
+            ],
+            // array readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
             [
                 .array(.init(permissions: .readOnly), .init()),
                 .array(.init(permissions: .writeOnly), .init())
             ],
             [
+                .array(.init(permissions: .readOnly), .init()),
+                .array(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .array(.init(permissions: .writeOnly), .init()),
+                .array(.init(permissions: .readWrite), .init())
+            ],
+            // object readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
                 .object(.init(permissions: .readOnly), .init(properties: [:])),
                 .object(.init(permissions: .writeOnly), .init(properties: [:]))
+            ],
+            [
+                .object(.init(permissions: .readOnly), .init(properties: [:])),
+                .object(.init(permissions: .readWrite), .init(properties: [:]))
+            ],
+            [
+                .object(.init(permissions: .writeOnly), .init(properties: [:])),
+                .object(.init(permissions: .readWrite), .init(properties: [:]))
             ]
         ]
 
