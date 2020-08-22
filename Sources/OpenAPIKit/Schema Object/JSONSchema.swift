@@ -996,6 +996,21 @@ extension JSONSchema: Decodable {
         let arrayContainer = try decoder.container(keyedBy: JSONSchema.ArrayContext.CodingKeys.self)
         let objectContainer = try decoder.container(keyedBy: JSONSchema.ObjectContext.CodingKeys.self)
 
+        let keysFrom = [
+            numericOrIntegerContainer.allKeys.isEmpty ? nil : "number/integer",
+            stringContainer.allKeys.isEmpty ? nil : "string",
+            arrayContainer.allKeys.isEmpty ? nil : "array",
+            objectContainer.allKeys.isEmpty ? nil : "object"
+        ].compactMap { $0 }
+
+        if keysFrom.count > 1 {
+            throw InconsistencyError(
+                subjectName: "Schema Fragment",
+                details: "A schema fragment within an `allOf` contains properties for multiple types of schemas, namely: \(keysFrom).",
+                codingPath: decoder.codingPath
+            )
+        }
+
         func assertNoTypeConflict(with type: JSONType) throws {
             guard let typeHint = typeHint else { return }
             guard typeHint == type else {
