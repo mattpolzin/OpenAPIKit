@@ -143,11 +143,6 @@ final class SchemaFragmentTests: XCTestCase {
 
 // MARK: - Codable Tests
 extension SchemaFragmentTests {
-    func test_decodeFailsWithNoProperties() {
-        let t = "{}".data(using: .utf8)!
-
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t))
-    }
 
     func test_decodeFailsWithConflictingProperties() {
         let t =
@@ -243,7 +238,13 @@ extension SchemaFragmentTests {
     }
 
     func test_generalDecode() throws {
-        let t =
+        let t1 = "{}".data(using: .utf8)!
+
+        let decoded1 = try orderUnstableDecode(JSONSchema.self, from: t1)
+
+        XCTAssertEqual(decoded1, JSONSchema.fragment(.init()))
+
+        let t2 =
 """
 {
   "format" : "date",
@@ -252,10 +253,10 @@ extension SchemaFragmentTests {
 }
 """.data(using: .utf8)!
 
-        let decoded = try orderUnstableDecode(JSONSchema.self, from: t)
+        let decoded2 = try orderUnstableDecode(JSONSchema.self, from: t2)
 
         XCTAssertEqual(
-            decoded,
+            decoded2,
             JSONSchema.fragment(.init(format: .other("date"), permissions: .readOnly, title: "creation date"))
         )
     }
@@ -507,8 +508,7 @@ extension SchemaFragmentTests {
             encoded2,
 """
 {
-  "type" : "string",
-  "writeOnly" : false
+  "type" : "string"
 }
 """
         )
@@ -550,7 +550,7 @@ extension SchemaFragmentTests {
 
         let decoded2 = try orderUnstableDecode(JSONSchema.self, from: t2)
 
-        XCTAssertEqual(decoded2, JSONSchema.string(.init(), .init()))
+        XCTAssertEqual(decoded2, JSONSchema.string(.init(permissions: .readWrite), .init()))
 
         let t3 =
 """
@@ -732,18 +732,20 @@ extension SchemaFragmentTests {
             encoded3,
 """
 {
+  "properties" : {
+    "hello" : {
+
+    }
+  },
   "required" : [
     "hello"
   ],
-  "properties" : {
-    "hello" : {}
-  },
   "type" : "object"
 }
 """
         )
 
-        let t4 = JSONSchema.object(.init(), .init(properties: ["hello": .string]))
+        let t4 = JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)]))
 
         let encoded4 = try orderUnstableTestStringFromEncoding(of: t4)
 

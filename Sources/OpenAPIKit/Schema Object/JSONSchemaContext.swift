@@ -932,10 +932,19 @@ extension JSONSchema.ObjectContext: Decodable {
     ) -> [String: JSONSchema] {
         var properties = properties
 
+        // mark any optional properties as optional.
         properties
             .filter { !required.contains($0.key) }
             .forEach { (propertyName, property) in
                 properties[propertyName] = property.optionalSchemaObject()
+            }
+
+        // add any required properties not in the properties dict to
+        // the properties dict as fragments.
+        required
+            .filter { !properties.keys.contains($0) }
+            .forEach { propertyName in
+                properties[propertyName] = .fragment(.init(required: true))
             }
 
         return properties
