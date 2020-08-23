@@ -483,17 +483,13 @@ extension JSONSchema {
         let _minItems: Int?
         /// Minimum number of items in array.
         /// Defaults to 0.
-        public var minItems: Int {
-            return _minItems ?? 0
-        }
+        public var minItems: Int { _minItems ?? 0 }
 
         let _uniqueItems: Bool?
         /// Setting to true indicates all
         /// elements of the array are expected
         /// to be unique. Defaults to false.
-        public var uniqueItems: Bool {
-            return _uniqueItems ?? false
-        }
+        public var uniqueItems: Bool { _uniqueItems ?? false }
 
         public init(
             items: JSONSchema? = nil,

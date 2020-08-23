@@ -105,18 +105,18 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t15, .string(.init(required: false), .init(minLength: 5)))
 
         let t16 = JSONSchema.fragment(.init(description: nil)).dereferenced()
-        XCTAssertEqual(t16, .undefined(description: nil))
+        XCTAssertEqual(t16, .fragment(.init(description: nil)))
         XCTAssertNotNil(t16?.coreContext)
 
         let t17 = JSONSchema.fragment(.init(description: "test")).dereferenced()
-        XCTAssertEqual(t17, .undefined(description: "test"))
+        XCTAssertEqual(t17, .fragment(.init(description: "test")))
 
         // expect dereferencing to also resolve `all(of:)`
         // (resulting in `all(of:)` being replaced by a
         // representative "combined" schema built from its
         // fragments.
         let t18 = JSONSchema.all(of: []).dereferenced()
-        XCTAssertEqual(t18, .undefined(description: nil))
+        XCTAssertEqual(t18, .fragment(.init(description: nil)))
         XCTAssertNil(t18?.discriminator)
         XCTAssertNotNil(t18?.coreContext)
 
@@ -211,17 +211,17 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t15, .string(.init(required: false), .init(minLength: 5)))
 
         let t16 = try JSONSchema.fragment(.init(description: nil)).dereferenced(in: components)
-        XCTAssertEqual(t16, .undefined(description: nil))
+        XCTAssertEqual(t16, .fragment(.init()))
 
         let t17 = try JSONSchema.fragment(.init(description: "test")).dereferenced(in: components)
-        XCTAssertEqual(t17, .undefined(description: "test"))
+        XCTAssertEqual(t17, .fragment(.init(description: "test")))
 
         // expect dereferencing to also resolve `all(of:)`
         // (resulting in `all(of:)` being replaced by a
         // representative "combined" schema built from its
         // fragments.
         let t18 = try JSONSchema.all(of: []).dereferenced(in: components)
-        XCTAssertEqual(t18, .undefined(description: nil))
+        XCTAssertEqual(t18, .fragment(.init()))
         XCTAssertNil(t18.discriminator)
         XCTAssertNotNil(t18.coreContext)
 

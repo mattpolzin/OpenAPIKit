@@ -661,13 +661,8 @@ extension JSONSchema.ObjectContext {
                 throw JSONSchemaResolutionError(.inconsistency("Object minimum number of properties (\(min) cannot be higher than maximum (\(max)"))
             }
         }
-        // set required on properties based on newly combined requried array
-        let resolvedProperties = JSONSchema.ObjectContext.properties(
-            properties,
-            takingRequirementsFrom: requiredProperties
-        )
         return .init(
-            properties: resolvedProperties,
+            properties: properties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
             minProperties: _minProperties
