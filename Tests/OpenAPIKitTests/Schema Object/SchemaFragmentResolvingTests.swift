@@ -12,26 +12,26 @@ import OpenAPIKit
 final class SchemaFragmentResolvingTests: XCTestCase {
     // MARK: - Empty
     func test_resolveEmptyFragmentsList() throws {
-        let fragments: [JSONSchemaFragment] = []
+        let fragments: [JSONSchema] = []
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
-            .undefined(description: nil)
+            .fragment(.init())
         )
     }
 
     // MARK: - Single Fragment
     func test_resolvingSingleDescription() {
-        let fragments: [JSONSchemaFragment] = [
-            .general(.init(description: "hello world"))
+        let fragments: [JSONSchema] = [
+            .fragment(.init(description: "hello world"))
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
-            .undefined(description: "hello world")
+            .fragment(.init(description: "hello world"))
         )
     }
 
     func test_resolvingSingleBoolean() {
-        let fragments: [JSONSchemaFragment] = [
+        let fragments: [JSONSchema] = [
             .boolean(.init())
         ]
         XCTAssertEqual(
@@ -41,7 +41,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleInteger() {
-        let fragments: [JSONSchemaFragment] = [
+        let fragments: [JSONSchema] = [
             .integer(.init(), .init())
         ]
         XCTAssertEqual(
@@ -51,7 +51,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleNumber() {
-        let fragments: [JSONSchemaFragment] = [
+        let fragments: [JSONSchema] = [
             .number(.init(), .init())
         ]
         XCTAssertEqual(
@@ -61,7 +61,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolveSingleString() {
-        let fragments: [JSONSchemaFragment] = [
+        let fragments: [JSONSchema] = [
             .string(.init(), .init())
         ]
         XCTAssertEqual(
@@ -71,7 +71,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleArray() {
-        let fragments: [JSONSchemaFragment] = [
+        let fragments: [JSONSchema] = [
             .array(.init(), .init())
         ]
         XCTAssertEqual(
@@ -81,8 +81,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleObject() {
-        let fragments: [JSONSchemaFragment] = [
-            .object(.init(), .init())
+        let fragments: [JSONSchema] = [
+            .object(.init(), .init(properties: [:]))
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -91,8 +91,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleObjectReadOnly() {
-        let fragments: [JSONSchemaFragment] = [
-            .object(.init(readOnly: true), .init())
+        let fragments: [JSONSchema] = [
+            .object(.init(permissions: .readOnly), .init(properties: [:]))
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -101,8 +101,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleObjectWriteOnly() {
-        let fragments: [JSONSchemaFragment] = [
-            .object(.init(writeOnly: true), .init())
+        let fragments: [JSONSchema] = [
+            .object(.init(permissions: .writeOnly), .init(properties: [:]))
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -110,10 +110,47 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
+    func test_rootObjectRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(properties: [:]))
+            ],
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!)
+        )
+    }
+
+    func test_rootObjectPropertiesRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(properties: ["test": .string]))
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(properties: ["test": .string])
+                )!
+            )
+        )
+    }
+
+    func test_rootObjectPropertiesOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .object(.init(), .init(properties: ["test": .string(required: false)]))
+            ],
+            .object(
+                .init(),
+                DereferencedJSONSchema.ObjectContext(
+                    .init(properties: ["test": .string(required: false)])
+                )!
+            )
+        )
+    }
+
     // MARK: - Formats
     func test_resolvingSingleIntegerWithFormat() {
-        let fragments: [JSONSchemaFragment] = [
-            .integer(.init(format: "int32"), .init())
+        let fragments: [JSONSchema] = [
+            .integer(.init(format: .int32), .init())
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -122,8 +159,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolvingSingleNumberWithFormat() {
-        let fragments: [JSONSchemaFragment] = [
-            .number(.init(format: "double"), .init())
+        let fragments: [JSONSchema] = [
+            .number(.init(format: .double), .init())
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -132,8 +169,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolveSingleStringWithFormat() {
-        let fragments: [JSONSchemaFragment] = [
-            .string(.init(format: "binary"), .init())
+        let fragments: [JSONSchema] = [
+            .string(.init(format: .binary), .init())
         ]
         XCTAssertEqual(
             try fragments.resolved(against: .noComponents),
@@ -142,7 +179,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     // MARK: - Fragment Combinations
-    func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchemaFragment], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
+    func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchema], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
         let resolved1 = try fragments.resolved(against: .noComponents)
         let schemaString = try orderUnstableTestStringFromEncoding(of: schema.jsonSchema)
         let resolvedSchemaString = try orderUnstableTestStringFromEncoding(of: resolved1.jsonSchema)
@@ -164,20 +201,20 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_resolveAnyFragmentAndDisciminatorFragment() throws {
-        let fragmentsAndResults: [(JSONSchemaFragment, DereferencedJSONSchema)] = [
+        let fragmentsAndResults: [(JSONSchema, DereferencedJSONSchema)] = [
             (.boolean(.init()), .boolean(.init(discriminator: .init(propertyName: "test")))),
             (.integer(.init(), .init()), .integer(.init(discriminator: .init(propertyName: "test")), .init())),
             (.number(.init(), .init()), .number(.init(discriminator: .init(propertyName: "test")), .init())),
             (.string(.init(), .init()), .string(.init(discriminator: .init(propertyName: "test")), .init())),
             (.array(.init(), .init()), .array(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ArrayContext(.init())!)),
-            (.object(.init(), .init()), .object(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!))
+            (.object(.init(), .init(properties: [:])), .object(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!))
         ]
 
         for (fragment, result) in fragmentsAndResults {
             try assertOrderIndependentCombinedEqual(
                 [
                     fragment,
-                    .general(.init(discriminator: .init(propertyName: "test")))
+                    .fragment(.init(discriminator: .init(propertyName: "test")))
                 ],
                 result
             )
@@ -188,7 +225,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(), .init()),
-                .general(.init(format: "binary"))
+                .fragment(.init(format: .other("binary")))
             ],
             .string(.init(format: .binary), .init())
         )
@@ -198,37 +235,66 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(description: "test"), .init(minLength: 2)),
-                .string(.init(format: "byte"), .init(maxLength: 5)),
+                .string(.init(format: .byte), .init(maxLength: 5)),
                 .string(.init(description: "test"), .init())
             ],
             .string(.init(format: .byte, description: "test"), .init(maxLength: 5, minLength: 2))
         )
     }
 
+    func test_optionalAndOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: false),
+                .string(required: false)
+            ],
+            .string(.init(required: false), .init())
+        )
+    }
+
+    func test_requiredAndOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: false),
+                .string(required: true)
+            ],
+            .string(.init(), .init())
+        )
+    }
+
+    func test_requiredAndRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: true),
+                .string(required: true)
+            ],
+            .string(.init(), .init())
+        )
+    }
+
     func test_deeperObjectFragments() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(additionalProperties: .init(true))),
-                .object(.init(description: "nested"), .init()),
+                .object(.init(), .init(properties: [:], additionalProperties: .init(true))),
+                .object(.init(description: "nested"), .init(properties: [:])),
                 .object(
                     .init(),
                     .init(
-                        minProperties: 2,
                         properties: [
                             "required": .string
                         ],
-                        requiredProperties: ["required"]
+                        minProperties: 2
                     )
                 ),
                 .object(
                     .init(),
                     .init(
-                        minProperties: 2,
                         properties: [
                             "optional": .boolean(required: false),
                             "someObject": .object(required: false),
-                            "anything": .undefined(description: nil)
-                        ]
+                            "anything": .fragment(.init(description: nil))
+                        ],
+                        minProperties: 2
                     )
                 )
             ],
@@ -240,7 +306,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                             "required": .string,
                             "optional": .boolean(required: false),
                             "someObject": .object(required: false),
-                            "anything": .undefined(description: nil)
+                            "anything": .fragment(.init(description: nil))
                         ],
                         additionalProperties: .init(true),
                         minProperties: 2
@@ -251,77 +317,81 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 
     func test_evenDeeperObjectFragments() throws {
-        try assertOrderIndependentCombinedEqual(
-            [
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "more_object": .object(properties: ["boolean": .boolean])
-                        ]
-                    )
-                ),
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "more_fragments": .all(
-                                of: [
-                                    .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
-                                    .object(.init(title: "nested test"), .init(
-                                        properties: [
-                                            "boolean": .boolean(format: .other("integer")),
-                                            "string": .string(maxLength: 50),
-                                            "integer": .integer(maximum: (10, exclusive: false)),
-                                            "number": .number(maximum: (33.2, exclusive: false)),
-                                            "array": .array(maxItems: 22)
-                                        ]
-                                    )),
-                                    .object(.init(title: "nested test"), .init(
-                                        properties: [
-                                            "boolean": .boolean(description: "boolean"),
-                                            "string": .string(description: "string"),
-                                            "integer": .integer(description: "integer"),
-                                            "number": .number(description: "number"),
-                                            "array": .array(description: "array")
-                                        ]
-                                    ))
-                                ]
-                            )
-                        ]
-                    )
-                )
-            ],
+        let fragments: [JSONSchema] = [
             .object(
                 .init(),
-                DereferencedJSONSchema.ObjectContext(
-                    .init(
-                        properties: [
-                            "more_object": .object(properties: ["boolean": .boolean]),
-                            "more_fragments": .object(
-                                title: "nested test",
-                                description: "nested",
-                                properties: [
-                                    "someObject": .object,
-                                    "boolean": .boolean(format: .other("integer"), description: "boolean"),
-                                    "string": .string(description: "string", maxLength: 50),
-                                    "integer": .integer(description: "integer", maximum: (10, exclusive: false)),
-                                    "number": .number(description: "number", maximum: (33.2, exclusive: false)),
-                                    "array": .array(description: "array", maxItems: 22)
-                                ]
-                            )
-                        ]
-                    )
-                )!
+                .init(
+                    properties: [
+                        "more_object": .object(required: false, properties: ["boolean": .boolean])
+                    ]
+                )
+            ),
+            .object(
+                .init(),
+                .init(
+                    properties: [
+                        "more_fragments": .all(
+                            of: [
+                                .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
+                                .object(.init(title: "nested test"), .init(
+                                    properties: [
+                                        "boolean": .boolean(format: .other("integer"), required: false),
+                                        "string": .string(maxLength: 50),
+                                        "integer": .integer(required: false, maximum: (10, exclusive: false)),
+                                        "number": .number(required: false, maximum: (33.2, exclusive: false)),
+                                        "array": .array(required: false, maxItems: 22)
+                                    ]
+                                )),
+                                .object(.init(title: "nested test"), .init(
+                                    properties: [
+                                        "boolean": .boolean(required: false, description: "boolean"),
+                                        "string": .string(description: "string"),
+                                        "integer": .integer(required: false, description: "integer"),
+                                        "number": .number(required: false, description: "number"),
+                                        "array": .array(required: true, description: "array")
+                                    ]
+                                ))
+                            ]
+                        )
+                    ]
+                )
             )
+        ]
+
+        let expectedResult = DereferencedJSONSchema.object(
+            .init(),
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [
+                        "more_object": .object(required: false, properties: ["boolean": .boolean]),
+                        "more_fragments": .object(
+                            title: "nested test",
+                            description: "nested",
+                            properties: [
+                                "someObject": .object,
+                                "boolean": .boolean(format: .other("integer"), required: false, description: "boolean"),
+                                "string": .string(required: true, description: "string", maxLength: 50),
+                                "integer": .integer(required: false, description: "integer", maximum: (10, exclusive: false)),
+                                "number": .number(required: false, description: "number", maximum: (33.2, exclusive: false)),
+                                "array": .array(required: true, description: "array", maxItems: 22)
+                            ]
+                        )
+                    ]
+                )
+            )!
+        )
+
+        try assertOrderIndependentCombinedEqual(
+            fragments,
+            expectedResult
         )
     }
 
     func test_minLessThanMaxObject() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(minProperties: 2)),
-                .object(.init(), .init(maxProperties: 3))
+                .object(.init(), .init(properties: [:], minProperties: 2)),
+                .object(.init(), .init(properties: [:], maxProperties: 3))
             ],
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:], maxProperties: 3, minProperties: 2))!)
         )
@@ -350,8 +420,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_minLessThanMaxNumber() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .number(.init(), .init(minimum: 2)),
-                .number(.init(), .init(maximum: 3))
+                .number(.init(), .init(minimum: (2, exclusive: false))),
+                .number(.init(), .init(maximum: (3, exclusive: false)))
             ],
             .number(.init(), .init(maximum: (3, exclusive: false), minimum: (2, exclusive: false)))
         )
@@ -360,8 +430,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_minLessThanMaxInteger() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .integer(.init(), .init(minimum: 2)),
-                .integer(.init(), .init(maximum: 3))
+                .integer(.init(), .init(minimum: (2, exclusive: false))),
+                .integer(.init(), .init(maximum: (3, exclusive: false)))
             ],
             .integer(.init(), .init(maximum: (3, exclusive: false), minimum: (2, exclusive: false)))
         )
@@ -369,14 +439,14 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     // MARK: - Dereferencing
     func test_referenceNotFound() {
-        let t1 = [JSONSchemaFragment.reference(.component(named: "test"))]
+        let t1 = [JSONSchema.reference(.component(named: "test"))]
         XCTAssertThrowsError(try t1.resolved(against: .noComponents)) { error in
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
         }
 
         let t2 = [
-            JSONSchemaFragment.object(.init(description: "test"), .init()),
-            JSONSchemaFragment.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+            JSONSchema.object(.init(description: "test"), .init(properties: [:])),
+            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
         ]
         XCTAssertThrowsError(try t2.resolved(against: .noComponents)) { error in
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
@@ -390,7 +460,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             ]
         )
 
-        let t1 = [JSONSchemaFragment.reference(.component(named: "test"))]
+        let t1 = [JSONSchema.reference(.component(named: "test"))]
         let schema1 = try t1.resolved(against: components)
         XCTAssertEqual(
             schema1,
@@ -398,8 +468,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
 
         let t2 = [
-            JSONSchemaFragment.object(.init(description: "test"), .init()),
-            JSONSchemaFragment.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+            JSONSchema.object(.init(description: "test"), .init(properties: [:])),
+            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
         ]
         let schema2 = try t2.resolved(against: components)
         XCTAssertEqual(
@@ -410,12 +480,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     // MARK: - Conflict Failures
     func test_typeConflicts() {
-        let booleanFragment = JSONSchemaFragment.boolean(.init())
-        let integerFragment = JSONSchemaFragment.integer(.init(), .init())
-        let numberFragment = JSONSchemaFragment.number(.init(), .init())
-        let stringFragment = JSONSchemaFragment.string(.init(), .init())
-        let arrayFragment = JSONSchemaFragment.array(.init(), .init())
-        let objectFragment = JSONSchemaFragment.object(.init(), .init())
+        let booleanFragment = JSONSchema.boolean(.init())
+        let integerFragment = JSONSchema.integer(.init(), .init())
+        let numberFragment = JSONSchema.number(.init(), .init())
+        let stringFragment = JSONSchema.string(.init(), .init())
+        let arrayFragment = JSONSchema.array(.init(), .init())
+        let objectFragment = JSONSchema.object(.init(), .init(properties: [:]))
 
         let fragments = [
             booleanFragment,
@@ -444,11 +514,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let formatStrings = [
             format1,
             format2
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
+                let fragments: [JSONSchema] = [
                     .boolean(.init(format: left)),
                     .boolean(.init(format: right))
                 ]
@@ -471,11 +541,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             int64,
             uint32,
             other
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
+                let fragments: [JSONSchema] = [
                     .integer(.init(format: left), .init()),
                     .integer(.init(format: right), .init())
                 ]
@@ -496,11 +566,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             float,
             double,
             other
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
+                let fragments: [JSONSchema] = [
                     .number(.init(format: left), .init()),
                     .number(.init(format: right), .init())
                 ]
@@ -529,11 +599,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             password,
             uuid,
             other
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
+                let fragments: [JSONSchema] = [
                     .string(.init(format: left), .init()),
                     .string(.init(format: right), .init())
                 ]
@@ -553,11 +623,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let formatStrings = [
             format1,
             format2
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
+                let fragments: [JSONSchema] = [
                     .array(.init(format: left), .init()),
                     .array(.init(format: right), .init())
                 ]
@@ -577,13 +647,13 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let formatStrings = [
             format1,
             format2
-        ].map { $0.rawValue }
+        ]
 
         for left in formatStrings {
             for right in formatStrings where left != right {
-                let fragments: [JSONSchemaFragment] = [
-                    .object(.init(format: left), .init()),
-                    .object(.init(format: right), .init())
+                let fragments: [JSONSchema] = [
+                    .object(.init(format: left), .init(properties: [:])),
+                    .object(.init(format: right), .init(properties: [:]))
                 ]
                 XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
@@ -595,54 +665,46 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_generalAttributeConflicts() {
 
+        typealias AnyContext = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>
+
         let differentDescription = [
-            JSONSchemaFragment.CoreContext(description: "string1"),
-            JSONSchemaFragment.CoreContext(description: "string2")
+            AnyContext(description: "string1"),
+            AnyContext(description: "string2")
         ]
 
         let differentDiscriminator = [
-            JSONSchemaFragment.CoreContext(discriminator: .init(propertyName: "string1")),
-            JSONSchemaFragment.CoreContext(discriminator: .init(propertyName: "string2"))
+            AnyContext(discriminator: .init(propertyName: "string1")),
+            AnyContext(discriminator: .init(propertyName: "string2"))
         ]
 
         let differentTitle = [
-            JSONSchemaFragment.CoreContext(title: "string1"),
-            JSONSchemaFragment.CoreContext(title: "string2")
+            AnyContext(title: "string1"),
+            AnyContext(title: "string2")
         ]
 
         let differentNullable = [
-            JSONSchemaFragment.CoreContext(nullable: true),
-            JSONSchemaFragment.CoreContext(nullable: false)
+            AnyContext(nullable: true),
+            AnyContext(nullable: false)
         ]
 
         let differentDeprecated = [
-            JSONSchemaFragment.CoreContext(deprecated: true),
-            JSONSchemaFragment.CoreContext(deprecated: false)
+            AnyContext(deprecated: true),
+            AnyContext(deprecated: false)
         ]
 
         let differentExternalDocs = [
-            JSONSchemaFragment.CoreContext(externalDocs: .init(url: URL(string: "https://string1.com")!)),
-            JSONSchemaFragment.CoreContext(externalDocs: .init(url: URL(string: "https://string2.com")!))
+            AnyContext(externalDocs: .init(url: URL(string: "https://string1.com")!)),
+            AnyContext(externalDocs: .init(url: URL(string: "https://string2.com")!))
         ]
 
         let differentAllowedValues = [
-            JSONSchemaFragment.CoreContext(allowedValues: ["string1"]),
-            JSONSchemaFragment.CoreContext(allowedValues: ["string2"])
+            AnyContext(allowedValues: ["string1"]),
+            AnyContext(allowedValues: ["string2"])
         ]
 
         let differentExample = [
-            JSONSchemaFragment.CoreContext(example: "string1"),
-            JSONSchemaFragment.CoreContext(example: "string2")
-        ]
-
-        let differentReadOnly = [
-            JSONSchemaFragment.CoreContext(readOnly: true),
-            JSONSchemaFragment.CoreContext(readOnly: false)
-        ]
-
-        let differentWriteOnly = [
-            JSONSchemaFragment.CoreContext(writeOnly: true),
-            JSONSchemaFragment.CoreContext(writeOnly: false)
+            AnyContext(example: "string1"),
+            AnyContext(example: "string2")
         ]
 
         let differences = [
@@ -653,21 +715,27 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             differentDeprecated,
             differentExternalDocs,
             differentAllowedValues,
-            differentExample,
-            differentReadOnly,
-            differentWriteOnly
+            differentExample
         ]
 
         // break up for type checking
-        let fragmentsArray1: [[JSONSchemaFragment]] = differences.map { $0.map { .general($0) } }
-            + differences.map { $0.map { .boolean($0) } }
-            + differences.map { $0.map { .integer($0, .init()) } }
-            + differences.map { $0.map { .number($0, .init()) } }
-        let fragmentsArray2: [[JSONSchemaFragment]] = differences.map { $0.map { .string($0, .init()) } }
-            + differences.map { $0.map { .array($0, .init()) } }
-            + differences.map { $0.map { .object($0, .init()) } }
+        let fragmentsArray1: [[JSONSchema]] = differences.map { $0.map { .fragment($0) } }
+        let fragmentsArray2: [[JSONSchema]] = differences.map { $0.map { .boolean($0.transformed()) } }
+        let fragmentsArray3: [[JSONSchema]] = differences.map { $0.map { .integer($0.transformed(), .init()) } }
+        let fragmentsArray4: [[JSONSchema]] = differences.map { $0.map { .number($0.transformed(), .init()) } }
+        let fragmentsArray5: [[JSONSchema]] = differences.map { $0.map { .string($0.transformed(), .init()) } }
+        let fragmentsArray6: [[JSONSchema]] = differences.map { $0.map { .array($0.transformed(), .init()) } }
+        let fragmentsArray7: [[JSONSchema]] = differences.map { $0.map { .object($0.transformed(), .init(properties: [:])) } }
 
-        for fragments in fragmentsArray1 + fragmentsArray2 {
+        let allFragmentsArrays  = fragmentsArray1
+            + fragmentsArray2
+            + fragmentsArray3
+            + fragmentsArray4
+            + fragmentsArray5
+            + fragmentsArray6
+            + fragmentsArray7
+
+        for fragments in allFragmentsArrays {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -677,28 +745,28 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_integerAttributeConflicts() {
         let differentMultipleOf = [
-            JSONSchemaFragment.IntegerContext(multipleOf: 10),
-            JSONSchemaFragment.IntegerContext(multipleOf: 2)
+            JSONSchema.IntegerContext(multipleOf: 10),
+            JSONSchema.IntegerContext(multipleOf: 2)
         ]
 
         let differentMaximum = [
-            JSONSchemaFragment.IntegerContext(maximum: 10),
-            JSONSchemaFragment.IntegerContext(maximum: 100)
+            JSONSchema.IntegerContext(maximum: (10, exclusive: false)),
+            JSONSchema.IntegerContext(maximum: (100, exclusive: false))
         ]
 
         let differentExclusiveMaximum = [
-            JSONSchemaFragment.IntegerContext(exclusiveMaximum: true),
-            JSONSchemaFragment.IntegerContext(exclusiveMaximum: false)
+            JSONSchema.IntegerContext(maximum: (10, exclusive: true)),
+            JSONSchema.IntegerContext(maximum: (10, exclusive: false))
         ]
 
         let differentMinimum = [
-            JSONSchemaFragment.IntegerContext(minimum: 1),
-            JSONSchemaFragment.IntegerContext(minimum: 3)
+            JSONSchema.IntegerContext(minimum: (1, exclusive: false)),
+            JSONSchema.IntegerContext(minimum: (3, exclusive: false))
         ]
 
         let differentExclusiveMinimum = [
-            JSONSchemaFragment.IntegerContext(exclusiveMinimum: true),
-            JSONSchemaFragment.IntegerContext(exclusiveMinimum: false)
+            JSONSchema.IntegerContext(minimum: (10, exclusive: true)),
+            JSONSchema.IntegerContext(minimum: (10, exclusive: false))
         ]
 
         let differences = [
@@ -710,7 +778,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         for difference in differences {
-            let fragments: [JSONSchemaFragment] = difference.map { .integer(.init(), $0) }
+            let fragments: [JSONSchema] = difference.map { .integer(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -720,28 +788,28 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_numberAttributeConflicts() {
         let differentMultipleOf = [
-            JSONSchemaFragment.NumericContext(multipleOf: 10),
-            JSONSchemaFragment.NumericContext(multipleOf: 2)
+            JSONSchema.NumericContext(multipleOf: 10),
+            JSONSchema.NumericContext(multipleOf: 2)
         ]
 
         let differentMaximum = [
-            JSONSchemaFragment.NumericContext(maximum: 10),
-            JSONSchemaFragment.NumericContext(maximum: 100)
+            JSONSchema.NumericContext(maximum: (10, exclusive: false)),
+            JSONSchema.NumericContext(maximum: (100, exclusive: false))
         ]
 
         let differentExclusiveMaximum = [
-            JSONSchemaFragment.NumericContext(exclusiveMaximum: true),
-            JSONSchemaFragment.NumericContext(exclusiveMaximum: false)
+            JSONSchema.NumericContext(maximum: (10, exclusive: true)),
+            JSONSchema.NumericContext(maximum: (10, exclusive: false))
         ]
 
         let differentMinimum = [
-            JSONSchemaFragment.NumericContext(minimum: 1),
-            JSONSchemaFragment.NumericContext(minimum: 3)
+            JSONSchema.NumericContext(minimum: (1, exclusive: false)),
+            JSONSchema.NumericContext(minimum: (3, exclusive: false))
         ]
 
         let differentExclusiveMinimum = [
-            JSONSchemaFragment.NumericContext(exclusiveMinimum: true),
-            JSONSchemaFragment.NumericContext(exclusiveMinimum: false)
+            JSONSchema.NumericContext(minimum: (10, exclusive: true)),
+            JSONSchema.NumericContext(minimum: (10, exclusive: false))
         ]
 
         let differences = [
@@ -753,7 +821,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         for difference in differences {
-            let fragments: [JSONSchemaFragment] = difference.map { .number(.init(), $0) }
+            let fragments: [JSONSchema] = difference.map { .number(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -763,18 +831,18 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_StringAttributeConflicts() {
         let differentMaxLength = [
-            JSONSchemaFragment.StringContext(maxLength: 10),
-            JSONSchemaFragment.StringContext(maxLength: 2)
+            JSONSchema.StringContext(maxLength: 10),
+            JSONSchema.StringContext(maxLength: 2)
         ]
 
         let differentMinLength = [
-            JSONSchemaFragment.StringContext(minLength: 10),
-            JSONSchemaFragment.StringContext(minLength: 100)
+            JSONSchema.StringContext(minLength: 10),
+            JSONSchema.StringContext(minLength: 100)
         ]
 
         let differentPattern = [
-            JSONSchemaFragment.StringContext(pattern: "string1"),
-            JSONSchemaFragment.StringContext(pattern: "string2")
+            JSONSchema.StringContext(pattern: "string1"),
+            JSONSchema.StringContext(pattern: "string2")
         ]
 
         let differences = [
@@ -784,7 +852,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         for difference in differences {
-            let fragments: [JSONSchemaFragment] = difference.map { .string(.init(), $0) }
+            let fragments: [JSONSchema] = difference.map { .string(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -794,23 +862,23 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_ArrayAttributeConflicts() {
         let differentItems = [
-            JSONSchemaFragment.ArrayContext(items: .string),
-            JSONSchemaFragment.ArrayContext(items: .boolean)
+            JSONSchema.ArrayContext(items: .string),
+            JSONSchema.ArrayContext(items: .boolean)
         ]
 
         let differentMaxItems = [
-            JSONSchemaFragment.ArrayContext(maxItems: 10),
-            JSONSchemaFragment.ArrayContext(maxItems: 100)
+            JSONSchema.ArrayContext(maxItems: 10),
+            JSONSchema.ArrayContext(maxItems: 100)
         ]
 
         let differentMinItems = [
-            JSONSchemaFragment.ArrayContext(minItems: 1),
-            JSONSchemaFragment.ArrayContext(minItems: 2)
+            JSONSchema.ArrayContext(minItems: 1),
+            JSONSchema.ArrayContext(minItems: 2)
         ]
 
         let differentUniqueItems = [
-            JSONSchemaFragment.ArrayContext(uniqueItems: true),
-            JSONSchemaFragment.ArrayContext(uniqueItems: false)
+            JSONSchema.ArrayContext(uniqueItems: true),
+            JSONSchema.ArrayContext(uniqueItems: false)
         ]
 
         let differences = [
@@ -821,7 +889,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         for difference in differences {
-            let fragments: [JSONSchemaFragment] = difference.map { .array(.init(), $0) }
+            let fragments: [JSONSchema] = difference.map { .array(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -831,39 +899,40 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
     func test_ObjectAttributeConflicts() {
         let differentMaxProperties = [
-            JSONSchemaFragment.ObjectContext(maxProperties: 10),
-            JSONSchemaFragment.ObjectContext(maxProperties: 2)
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 10),
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 2)
         ]
 
         let differentMinProperties = [
-            JSONSchemaFragment.ObjectContext(minProperties: 10),
-            JSONSchemaFragment.ObjectContext(minProperties: 100)
+            JSONSchema.ObjectContext(properties: [:], minProperties: 10),
+            JSONSchema.ObjectContext(properties: [:], minProperties: 100)
         ]
 
         let differentProperties = [
-            JSONSchemaFragment.ObjectContext(properties: ["string1": .string(description: "truth")]),
-            JSONSchemaFragment.ObjectContext(properties: ["string1": .string(description: "falsity")])
+            JSONSchema.ObjectContext(properties: ["string1": .string(description: "truth")]),
+            JSONSchema.ObjectContext(properties: ["string1": .string(description: "falsity")])
         ]
 
         let differentAdditionalProperties1 = [
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(true)),
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(false))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true)),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(false))
         ]
 
         let differentAdditionalProperties2 = [
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(true)),
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(.string))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true)),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string))
         ]
 
         let differentAdditionalProperties3 = [
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(.boolean)),
-            JSONSchemaFragment.ObjectContext(additionalProperties: .init(.string))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.boolean)),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string))
         ]
 
-        let differentRequiredProeprties = [
-            JSONSchemaFragment.ObjectContext(requiredProperties: []),
-            JSONSchemaFragment.ObjectContext(requiredProperties: ["string1"])
-        ]
+        #warning("TODO: figure out required properties array in the absence of any property defintiions")
+//        let differentRequiredProeprties = [
+//            JSONSchema.ObjectContext(properties: [:], requiredProperties: []),
+//            JSONSchema.ObjectContext(properties: [:], requiredProperties: ["string1"])
+//        ]
 
         let differences = [
             differentMaxProperties,
@@ -872,11 +941,11 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             differentAdditionalProperties1,
             differentAdditionalProperties2,
             differentAdditionalProperties3,
-            differentRequiredProeprties
+//            differentRequiredProeprties
         ]
 
         for difference in differences {
-            let fragments: [JSONSchemaFragment] = difference.map { .object(.init(), $0) }
+            let fragments: [JSONSchema] = difference.map { .object(.init(), $0) }
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents), "\(fragments)") { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
@@ -887,24 +956,88 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     // MARK: - Inconsistency Failures
     func test_generalInconsistencyErrors() {
 
-        let readAndWriteOnly = [
-            JSONSchemaFragment.CoreContext(readOnly: true),
-            JSONSchemaFragment.CoreContext(writeOnly: true)
+        let fragmentsArray: [[JSONSchema]] = [
+            // boolean readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .boolean(.init(permissions: .readOnly)),
+                .boolean(.init(permissions: .writeOnly))
+            ],
+            [
+                .boolean(.init(permissions: .readOnly)),
+                .boolean(.init(permissions: .readWrite))
+            ],
+            [
+                .boolean(.init(permissions: .writeOnly)),
+                .boolean(.init(permissions: .readWrite))
+            ],
+            // integer readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .integer(.init(permissions: .readOnly), .init()),
+                .integer(.init(permissions: .writeOnly), .init())
+            ],
+            [
+                .integer(.init(permissions: .readOnly), .init()),
+                .integer(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .integer(.init(permissions: .writeOnly), .init()),
+                .integer(.init(permissions: .readWrite), .init())
+            ],
+            // number readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .number(.init(permissions: .readOnly), .init()),
+                .number(.init(permissions: .writeOnly), .init())
+            ],
+            [
+                .number(.init(permissions: .readOnly), .init()),
+                .number(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .number(.init(permissions: .writeOnly), .init()),
+                .number(.init(permissions: .readWrite), .init())
+            ],
+            // string readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .string(.init(permissions: .readOnly), .init()),
+                .string(.init(permissions: .writeOnly), .init())
+            ],
+            [
+                .string(.init(permissions: .readOnly), .init()),
+                .string(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .string(.init(permissions: .writeOnly), .init()),
+                .string(.init(permissions: .readWrite), .init())
+            ],
+            // array readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .array(.init(permissions: .readOnly), .init()),
+                .array(.init(permissions: .writeOnly), .init())
+            ],
+            [
+                .array(.init(permissions: .readOnly), .init()),
+                .array(.init(permissions: .readWrite), .init())
+            ],
+            [
+                .array(.init(permissions: .writeOnly), .init()),
+                .array(.init(permissions: .readWrite), .init())
+            ],
+            // object readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
+            [
+                .object(.init(permissions: .readOnly), .init(properties: [:])),
+                .object(.init(permissions: .writeOnly), .init(properties: [:]))
+            ],
+            [
+                .object(.init(permissions: .readOnly), .init(properties: [:])),
+                .object(.init(permissions: .readWrite), .init(properties: [:]))
+            ],
+            [
+                .object(.init(permissions: .writeOnly), .init(properties: [:])),
+                .object(.init(permissions: .readWrite), .init(properties: [:]))
+            ]
         ]
 
-        let inconsistencies = [
-            readAndWriteOnly
-        ]
-
-        // break up for type checking
-        let fragmentsArray1: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .boolean($0) } }
-            + inconsistencies.map { $0.map { .integer($0, .init()) } }
-            + inconsistencies.map { $0.map { .number($0, .init()) } }
-        let fragmentsArray2: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .string($0, .init()) } }
-            + inconsistencies.map { $0.map { .array($0, .init()) } }
-            + inconsistencies.map { $0.map { .object($0, .init()) } }
-
-        for fragments in fragmentsArray1 + fragmentsArray2 {
+        for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
@@ -915,12 +1048,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_integerInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchemaFragment.IntegerContext(minimum: -1)
+            JSONSchema.IntegerContext(minimum: (-1, exclusive: false))
         ]
 
         let minHigherThanMax = [
-            JSONSchemaFragment.IntegerContext(minimum: 10),
-            JSONSchemaFragment.IntegerContext(maximum: 2)
+            JSONSchema.IntegerContext(minimum: (10, exclusive: false)),
+            JSONSchema.IntegerContext(maximum: (2, exclusive: false))
         ]
 
         let inconsistencies = [
@@ -929,7 +1062,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         // break up for type checking
-        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .integer(.init(), $0) } }
+        let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .integer(.init(), $0) } }
 
         for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
@@ -942,12 +1075,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_numberInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchemaFragment.NumericContext(minimum: -1)
+            JSONSchema.NumericContext(minimum: (-1, exclusive: false))
         ]
 
         let minHigherThanMax = [
-            JSONSchemaFragment.NumericContext(minimum: 10),
-            JSONSchemaFragment.NumericContext(maximum: 2)
+            JSONSchema.NumericContext(minimum: (10, exclusive: false)),
+            JSONSchema.NumericContext(maximum: (2, exclusive: false))
         ]
 
         let inconsistencies = [
@@ -956,7 +1089,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         // break up for type checking
-        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .number(.init(), $0) } }
+        let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .number(.init(), $0) } }
 
         for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
@@ -969,12 +1102,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_stringInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchemaFragment.StringContext(minLength: -1)
+            JSONSchema.StringContext(minLength: -1)
         ]
 
         let minHigherThanMax = [
-            JSONSchemaFragment.StringContext(minLength: 10),
-            JSONSchemaFragment.StringContext(maxLength: 2)
+            JSONSchema.StringContext(minLength: 10),
+            JSONSchema.StringContext(maxLength: 2)
         ]
 
         let inconsistencies = [
@@ -983,7 +1116,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         // break up for type checking
-        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .string(.init(), $0) } }
+        let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .string(.init(), $0) } }
 
         for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
@@ -996,12 +1129,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_arrayInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchemaFragment.ArrayContext(minItems: -1)
+            JSONSchema.ArrayContext(minItems: -1)
         ]
 
         let minHigherThanMax = [
-            JSONSchemaFragment.ArrayContext(minItems: 10),
-            JSONSchemaFragment.ArrayContext(maxItems: 2)
+            JSONSchema.ArrayContext(minItems: 10),
+            JSONSchema.ArrayContext(maxItems: 2)
         ]
 
         let inconsistencies = [
@@ -1010,7 +1143,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         // break up for type checking
-        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .array(.init(), $0) } }
+        let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .array(.init(), $0) } }
 
         for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
@@ -1023,12 +1156,12 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     func test_objectInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchemaFragment.ObjectContext(minProperties: -1)
+            JSONSchema.ObjectContext(properties: [:], minProperties: -1)
         ]
 
         let minHigherThanMax = [
-            JSONSchemaFragment.ObjectContext(minProperties: 10),
-            JSONSchemaFragment.ObjectContext(maxProperties: 2)
+            JSONSchema.ObjectContext(properties: [:], minProperties: 10),
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 2)
         ]
 
         let inconsistencies = [
@@ -1037,7 +1170,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         // break up for type checking
-        let fragmentsArray: [[JSONSchemaFragment]] = inconsistencies.map { $0.map { .object(.init(), $0) } }
+        let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .object(.init(), $0) } }
 
         for fragments in fragmentsArray {
             XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
@@ -1045,5 +1178,24 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
         }
+    }
+}
+
+extension JSONSchema.CoreContext {
+    internal func transformed<NewFormat: OpenAPIFormat>() -> JSONSchema.CoreContext<NewFormat> {
+
+        return .init(
+            format: NewFormat(rawValue: format.rawValue)!,
+            required: required,
+            nullable: nullable,
+            permissions: JSONSchema.CoreContext<NewFormat>.Permissions(permissions),
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
     }
 }

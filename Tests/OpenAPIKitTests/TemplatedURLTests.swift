@@ -1,5 +1,5 @@
 //
-//  TemplatedURLTests.swift
+//  URLTemplateTests.swift
 //  
 //
 //  Created by Mathew Polzin on 8/13/20.
@@ -9,24 +9,24 @@ import Foundation
 import OpenAPIKit
 import XCTest
 
-final class TemplatedURLTests: XCTestCase {
+final class URLTemplateTests: XCTestCase {
     func test_init() {
-        XCTAssertNotNil(TemplatedURL(rawValue: "https://website.com"))
-        XCTAssertEqual(TemplatedURL(rawValue: "https://website.com"), TemplatedURL(url: URL(string: "https://website.com")!))
+        XCTAssertNotNil(URLTemplate(rawValue: "https://website.com"))
+        XCTAssertEqual(URLTemplate(rawValue: "https://website.com"), URLTemplate(url: URL(string: "https://website.com")!))
     }
 
     func test_urlAccess() {
-        let t1 = TemplatedURL(rawValue: "https://website.com")
-        let t2 = TemplatedURL(rawValue: "{scheme}://website.com")
+        let t1 = URLTemplate(rawValue: "https://website.com")
+        let t2 = URLTemplate(rawValue: "{scheme}://website.com")
 
         XCTAssertEqual(t1?.url, URL(string: "https://website.com"))
         XCTAssertNil(t2?.url)
     }
 
     func test_absoluteString() {
-        let t1 = TemplatedURL(rawValue: "https://website.com")
-        let t2 = TemplatedURL(rawValue: "/a/relative/path")
-        let t3 = TemplatedURL(rawValue: "website.com?query=value")
+        let t1 = URLTemplate(rawValue: "https://website.com")
+        let t2 = URLTemplate(rawValue: "/a/relative/path")
+        let t3 = URLTemplate(rawValue: "website.com?query=value")
 
         XCTAssertEqual(t1?.absoluteString, URL(string: "https://website.com")?.absoluteString)
         XCTAssertEqual(t2?.absoluteString, URL(string: "/a/relative/path")?.absoluteString)
@@ -35,10 +35,10 @@ final class TemplatedURLTests: XCTestCase {
 }
 
 // MARK: - Codable
-extension TemplatedURLTests {
+extension URLTemplateTests {
     func test_encode() throws {
         let t1 = TemplatedURLWrapper(
-            url: TemplatedURL(rawValue: "https://website.com")
+            url: URLTemplate(rawValue: "https://website.com")
         )
 
         assertJSONEquivalent(
@@ -62,13 +62,13 @@ extension TemplatedURLTests {
 
         XCTAssertEqual(
             t1.url,
-            TemplatedURL(rawValue: "https://website.com")
+            URLTemplate(rawValue: "https://website.com")
         )
     }
 
     func test_encode_withVariables() throws {
         let t1 = TemplatedURLWrapper(
-            url: TemplatedURL(rawValue: "{scheme}://{host}.com")
+            url: URLTemplate(rawValue: "{scheme}://{host}.com")
         )
 
         assertJSONEquivalent(
@@ -92,11 +92,11 @@ extension TemplatedURLTests {
 
         XCTAssertEqual(
             t1.url,
-            TemplatedURL(rawValue: "{scheme}://{host}.com")
+            URLTemplate(rawValue: "{scheme}://{host}.com")
         )
     }
 }
 
 fileprivate struct TemplatedURLWrapper: Codable {
-    let url: TemplatedURL?
+    let url: URLTemplate?
 }

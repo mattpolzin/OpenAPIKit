@@ -26,7 +26,7 @@ final class DereferencedHeaderTests: XCTestCase {
             ]
         ).dereferenced(in: .noComponents)
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema?.jsonSchema, .string)
     }
 
     func test_referencedSchemaHeader() throws {
@@ -52,6 +52,6 @@ final class DereferencedHeaderTests: XCTestCase {
             content: [.json: .init(schemaReference: .component(named: "test"))]
         ).dereferenced(in: components)
 
-        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema.jsonSchema, .string)
+        XCTAssertEqual(t1.schemaOrContent.contentValue?[.json]?.schema?.jsonSchema, .string)
     }
 }

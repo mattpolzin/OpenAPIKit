@@ -27,7 +27,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// but does not offer much in the way of documenting the schema
     /// so it is represented here as "undefined" with an optional
     /// description.
-    case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
+    case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This is the "{}" case where not even a type constraint is given.
 
     /// Get the JSONSchema representation of this
     /// dereferenced schema.
@@ -60,8 +60,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .any(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
         case .not(let schema):
             return .not(schema.jsonSchema)
-        case .undefined(description: let description):
-            return .undefined(description: description)
+        case .fragment(let context):
+            return .fragment(context)
         }
     }
 
@@ -69,6 +69,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public subscript<T>(dynamicMember path: KeyPath<JSONSchema, T>) -> T {
         return jsonSchema[keyPath: path]
     }
+
+    // See `JSONSchemaContext`
+    public var formatString: String? { jsonSchema.formatString }
 
     // See `JSONSchemaContext`
     public var required: Bool { jsonSchema.required }
@@ -122,7 +125,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .one(of: schemas, discriminator: discriminator)
         case .any(of: let schemas, discriminator: _):
             return .any(of: schemas, discriminator: discriminator)
-        case .not, .undefined:
+        case .fragment(let context):
+            return .fragment(context.with(discriminator: discriminator))
+        case .not:
             return self
         }
     }
@@ -156,14 +161,16 @@ extension DereferencedJSONSchema {
         /// Maximum number of items in array.
         public let maxItems: Int?
 
+        let _minItems: Int?
         /// Minimum number of items in array.
         /// Defaults to 0.
-        public let minItems: Int
+        public var minItems: Int { _minItems ?? 0 }
 
+        let _uniqueItems: Bool?
         /// Setting to true indicates all
         /// elements of the array are expected
         /// to be unique. Defaults to false.
-        public let uniqueItems: Bool
+        public var uniqueItems: Bool { _uniqueItems ?? false }
 
         public init?(_ arrayContext: JSONSchema.ArrayContext) {
             if let otherItems = arrayContext.items {
@@ -176,23 +183,23 @@ extension DereferencedJSONSchema {
             }
 
             maxItems = arrayContext.maxItems
-            minItems = arrayContext.minItems
-            uniqueItems = arrayContext.uniqueItems
+            _minItems = arrayContext._minItems
+            _uniqueItems = arrayContext._uniqueItems
         }
 
         internal init(_ arrayContext: JSONSchema.ArrayContext, resolvingIn components: OpenAPI.Components) throws {
             items = try arrayContext.items.map { try $0.dereferenced(in: components) }
             maxItems = arrayContext.maxItems
-            minItems = arrayContext.minItems
-            uniqueItems = arrayContext.uniqueItems
+            _minItems = arrayContext._minItems
+            _uniqueItems = arrayContext._uniqueItems
         }
 
         internal var jsonSchemaArrayContext: JSONSchema.ArrayContext {
             .init(
                 items: items.map { $0.jsonSchema },
                 maxItems: maxItems,
-                minItems: minItems,
-                uniqueItems: uniqueItems
+                minItems: _minItems,
+                uniqueItems: _uniqueItems
             )
         }
     }
@@ -200,7 +207,7 @@ extension DereferencedJSONSchema {
     /// The context that only applies to `.object` schemas.
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
-        let _minProperties: Int
+        let _minProperties: Int?
         public let properties: [String: DereferencedJSONSchema]
         public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
 
@@ -225,7 +232,7 @@ extension DereferencedJSONSchema {
         /// or when decoding if the number of required properties is greater
         /// than the explicitly set minimum.
         public var minProperties: Int {
-            return max(_minProperties, requiredProperties.count)
+            return max(_minProperties ?? 0, requiredProperties.count)
         }
 
         public init?(_ objectContext: JSONSchema.ObjectContext) {
@@ -342,8 +349,8 @@ extension JSONSchema: LocallyDereferenceable {
             return .any(of: schemas, discriminator: discriminator)
         case .not(let jsonSchema):
             return .not(try jsonSchema.dereferenced(in: components))
-        case .undefined(description: let description):
-            return .undefined(description: description)
+        case .fragment(let context):
+            return .fragment(context)
         }
     }
 

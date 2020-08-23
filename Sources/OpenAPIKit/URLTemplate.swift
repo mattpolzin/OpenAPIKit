@@ -1,5 +1,5 @@
 //
-//  TemplatedURL.swift
+//  URLTemplate.swift
 //  
 //
 //  Created by Mathew Polzin on 8/13/20.
@@ -31,7 +31,7 @@ import Foundation
 ///
 ///     // etc.
 ///
-public struct TemplatedURL: Hashable, RawRepresentable {
+public struct URLTemplate: Hashable, RawRepresentable {
 
     /// The string value of the URL.
     ///
@@ -43,7 +43,7 @@ public struct TemplatedURL: Hashable, RawRepresentable {
     ///
     /// This is equivalent to the `absoluteString` provided
     /// by the Foundation `URL` type except that a
-    /// `TemplatedURL`'s `absoluteString` can contain
+    /// `URLTemplate`'s `absoluteString` can contain
     /// variable placeholders.
     public var absoluteString: String {
         rawValue
@@ -57,7 +57,7 @@ public struct TemplatedURL: Hashable, RawRepresentable {
         return URL(string: rawValue)
     }
 
-    /// Create a TemplatedURL from the string if possible.
+    /// Create a URLTemplate from the string if possible.
     public init?(rawValue: String) {
         // currently this is guaranteed to succeed but
         // in the future it will fail if variable placeholders
@@ -71,7 +71,7 @@ public struct TemplatedURL: Hashable, RawRepresentable {
     }
 }
 
-extension TemplatedURL: Encodable {
+extension URLTemplate: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
@@ -79,7 +79,7 @@ extension TemplatedURL: Encodable {
     }
 }
 
-extension TemplatedURL: Decodable {
+extension URLTemplate: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
@@ -91,4 +91,4 @@ extension TemplatedURL: Decodable {
     }
 }
 
-extension TemplatedURL: Validatable {}
+extension URLTemplate: Validatable {}

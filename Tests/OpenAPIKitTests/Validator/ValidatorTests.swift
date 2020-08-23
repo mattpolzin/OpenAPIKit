@@ -834,7 +834,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified on root Document if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                when: \OpenAPI.Server.urlTemplate == TemplatedURL(rawValue: "https://test.server.com")!
+                when: \OpenAPI.Server.urlTemplate == URLTemplate(rawValue: "https://test.server.com")!
                     && \.codingPath.first?.stringValue == "servers"
         )
 
@@ -851,7 +851,7 @@ final class ValidatorTests: XCTestCase {
             .validating(
                 "At least two servers are specified if one of them is the test server.",
                 check: \.document.servers.count >= 2,
-                when: \OpenAPI.Server.urlTemplate == TemplatedURL(rawValue: "https://test.server.com")!
+                when: \OpenAPI.Server.urlTemplate == URLTemplate(rawValue: "https://test.server.com")!
         )
 
         XCTAssertNoThrow(try document2.validate(using: validator2))
@@ -1155,20 +1155,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema.schemaValue,
+                \.content[.json]?.schema?.schemaValue,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+            when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema.schemaValue,
+                \.content[.json]?.schema?.schemaValue,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+            when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
@@ -1283,20 +1283,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema.schemaValue,
+                \.content[.json]?.schema?.schemaValue,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+            when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema.schemaValue,
+                \.content[.json]?.schema?.schemaValue,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+            when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
