@@ -78,48 +78,48 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         guard let apiDoc = apiDoc else { return }
 
         // just check for a few of the known paths
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/addBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/deleteBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/cloudloading/updateBook"))
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/dictionary/listOfflineMetadata"))
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/familysharing/getFamilyInfo"))
-        XCTAssert(apiDoc.paths.contains(key: "/books/v1/familysharing/share"))
+        XCTAssert(apiDoc.paths.contains(key: "/"))
+        XCTAssert(apiDoc.paths.contains(key: "/app"))
+        XCTAssert(apiDoc.paths.contains(key: "/app-manifests/{code}/conversions"))
+        XCTAssert(apiDoc.paths.contains(key: "/app/installations"))
+        XCTAssert(apiDoc.paths.contains(key: "/app/installations/{installation_id}"))
+        XCTAssert(apiDoc.paths.contains(key: "/app/installations/{installation_id}/access_tokens"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/books/v1/cloudloading/addBook"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/app/installations/{installation_id}/access_tokens"]?.post?.responses[status: 201])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/app/installations/{installation_id}"]?.get?.responses[status: 200])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.parameters.isEmpty ?? true)
+        XCTAssertFalse(apiDoc.paths["/app/installations/{installation_id}"]?.get?.parameters.isEmpty ?? true)
     }
 
     func test_successfullyParsedComponents() throws {
         guard let apiDoc = apiDoc else { return }
 
         // check for a known parameter
-        XCTAssertNotNil(apiDoc.components.parameters["alt"])
-        XCTAssertTrue(apiDoc.components.parameters["alt"]?.context.inQuery ?? false)
+        XCTAssertNotNil(apiDoc.components.parameters["per_page"])
+        XCTAssertTrue(apiDoc.components.parameters["per_page"]?.context.inQuery ?? false)
 
         // check for known schema
-        XCTAssertNotNil(apiDoc.components.schemas["Annotation"])
+        XCTAssertNotNil(apiDoc.components.schemas["simple-user"])
 
-        // check for oauth flow
-        XCTAssertNotNil(apiDoc.components.securitySchemes["Oauth2"])
+        // check for header
+        XCTAssertNotNil(apiDoc.components.headers["link"])
     }
 
     func test_someReferences() throws {
         guard let apiDoc = apiDoc else { return }
 
-        let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
+        let installationsPath = apiDoc.paths["/app/installations/{installation_id}"]
 
-        let addBooksParameters = try addBooksPath?.parameters.compactMap(apiDoc.components.lookup)
+        let installationsParameters = try installationsPath?.get?.parameters.compactMap(apiDoc.components.lookup)
 
-        XCTAssertNotNil(addBooksParameters)
-        XCTAssertEqual(addBooksParameters?.count, 11)
-        XCTAssertEqual(addBooksParameters?.first?.description, "JSONP")
-        XCTAssertEqual(addBooksParameters?.first?.context, .query)
+        XCTAssertNotNil(installationsParameters)
+        XCTAssertEqual(installationsParameters?.count, 1)
+        XCTAssertEqual(installationsParameters?.first?.description, "installation_id parameter")
+        XCTAssertEqual(installationsParameters?.first?.context, .path)
     }
 
     func test_dereferencedComponents() throws {
@@ -129,7 +129,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
 
         // params are all $refs to Components Object
         XCTAssertTrue(
-            dereferencedDoc.paths["/books/v1/volumes/{volumeId}/layersummary/{summaryId}"]?.parameters
+            dereferencedDoc.paths["/app/installations/{installation_id}"]?.get?.parameters
                 .contains { param in param.description == "OAuth access token." }
                 ?? false
         )
