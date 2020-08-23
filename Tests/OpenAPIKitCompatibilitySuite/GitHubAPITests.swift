@@ -130,7 +130,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         // params are all $refs to Components Object
         XCTAssertTrue(
             dereferencedDoc.paths["/app/installations/{installation_id}"]?.get?.parameters
-                .contains { param in param.description == "OAuth access token." }
+                .contains { param in param.description == "installation_id parameter" }
                 ?? false
         )
     }
