@@ -52,17 +52,17 @@ final class GitHubAPICampatibilityTests: XCTestCase {
     func test_successfullyParsedBasicMetadata() throws {
         guard let apiDoc = apiDoc else { return }
 
-        // title is Books
-        XCTAssertEqual(apiDoc.info.title, "Books API")
+        // title is GitHub v3 REST API
+        XCTAssertEqual(apiDoc.info.title, "GitHub v3 REST API")
 
         // description is set
         XCTAssertFalse(apiDoc.info.description?.isEmpty ?? true)
 
-        // contact name is Google
-        XCTAssertEqual(apiDoc.info.contact?.name, "Google")
+        // contact name is Support
+        XCTAssertEqual(apiDoc.info.contact?.name, "Support")
 
-        // contact URL was parsed as google.com
-        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://google.com")!)
+        // contact URL was parsed as https://support.github.com
+        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://support.github.com")!)
 
         // no contact email is provided
         XCTAssert(apiDoc.info.contact?.email?.isEmpty ?? true)
@@ -140,8 +140,8 @@ final class GitHubAPICampatibilityTests: XCTestCase {
 
         let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
 
-        XCTAssertEqual(resolvedDoc.routes.count, 49)
-        XCTAssertEqual(resolvedDoc.endpoints.count, 51)
+        XCTAssert(resolvedDoc.routes.count >= 403)
+        XCTAssert(resolvedDoc.endpoints.count >= 623)
         XCTAssertEqual(resolvedDoc.tags?.count, resolvedDoc.allTags.count)
     }
 }
