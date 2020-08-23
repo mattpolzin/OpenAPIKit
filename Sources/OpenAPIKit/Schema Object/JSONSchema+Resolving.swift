@@ -164,8 +164,7 @@ internal struct FragmentResolver {
         case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
         case (_, .any), (.any, _), (_, .all), (.all, _), (_, .not), (.not, _), (_, .one), (.one, _):
-            #warning("TODO")
-            fatalError("not implemented")
+            throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), all(of:), and one(of:) are not yet supported for schema resolution"))
         case (.boolean, _),
              (.integer, _),
              (.number, _),
@@ -216,8 +215,7 @@ internal struct FragmentResolver {
         case .object(let coreContext, let objectContext):
             jsonSchema = .object(try coreContext.validatedContext(), try objectContext.validatedContext())
         case .any, .all, .not, .one:
-            #warning("TODO")
-            fatalError("not implemented")
+            throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), all(of:), and one(of:) are not yet supported for schema resolution"))
         }
         return try jsonSchema.dereferenced(in: components)
     }
