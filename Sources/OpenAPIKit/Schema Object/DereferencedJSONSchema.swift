@@ -71,6 +71,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     }
 
     // See `JSONSchemaContext`
+    public var formatString: String? { jsonSchema.formatString }
+
+    // See `JSONSchemaContext`
     public var required: Bool { jsonSchema.required }
 
     // See `JSONSchemaContext`

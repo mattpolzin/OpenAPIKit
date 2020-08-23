@@ -11,6 +11,14 @@
 /// All schemas can have the contextual information in
 /// this protocol.
 public protocol JSONSchemaContext {
+    /// The format of the schema as a string value.
+    ///
+    /// This can be set even when a schema type has
+    /// not be specified. If a type has been specified,
+    /// a type-safe format can be used and retrieved
+    /// via the `jsonTypeFormat` property.
+    var formatString: String? { get }
+
     /// `true` if values for this schema are required, `false` if they
     /// are optional (and can therefore be omitted from request/response data).
     ///
@@ -111,6 +119,8 @@ extension JSONSchema {
         public var nullable: Bool { _nullable ?? false }
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
+
+        public var formatString: String? { format.rawValue }
 
         public var readOnly: Bool { permissions == .readOnly }
         public var writeOnly: Bool { permissions == .writeOnly }
@@ -375,6 +385,46 @@ extension JSONSchema {
             self.multipleOf = multipleOf
             self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
             self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+        }
+
+        /// Create an `IntegerContext` from the given `NumericContext`.
+        ///
+        /// This will only succeed if all properties of the `NumericContext` are
+        /// integers.
+        public init?(from numericContext: NumericContext) {
+            let multipleOf: Int?
+            if let numericMultipleOf = numericContext.multipleOf {
+                guard let intMultipleOf = Int(exactly: numericMultipleOf) else {
+                    return nil
+                }
+                multipleOf = intMultipleOf
+            } else {
+                multipleOf = nil
+            }
+
+            let maximum: Bound?
+            if let numericMax = numericContext.maximum {
+                guard let intMaxValue = Int(exactly: numericMax.value) else {
+                    return nil
+                }
+                maximum = Bound(value: intMaxValue, exclusive: numericMax.exclusive)
+            } else {
+                maximum = nil
+            }
+
+            let minimum: Bound?
+            if let numericMin = numericContext.minimum {
+                guard let intMinValue = Int(exactly: numericMin.value) else {
+                    return nil
+                }
+                minimum = Bound(value: intMinValue, exclusive: numericMin.exclusive)
+            } else {
+                minimum = nil
+            }
+
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
         }
 
         internal init(

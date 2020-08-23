@@ -1176,8 +1176,8 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     }
 }
 
-fileprivate extension JSONSchema.CoreContext {
-    func transformed<NewFormat: OpenAPIFormat>() -> JSONSchema.CoreContext<NewFormat> {
+extension JSONSchema.CoreContext {
+    internal func transformed<NewFormat: OpenAPIFormat>() -> JSONSchema.CoreContext<NewFormat> {
 
         return .init(
             format: NewFormat(rawValue: format.rawValue)!,
