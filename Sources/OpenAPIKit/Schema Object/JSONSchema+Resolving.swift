@@ -96,7 +96,7 @@ internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
 /// - Does not handle inversion via `not` or combination via `any`, `one`, `all`.
 internal struct FragmentResolver {
     private let components: OpenAPI.Components
-    private var combinedFragment: JSONSchema
+    private var combinedFragment: JSONSchema?
 
     /// Set up for constructing a schema using the given Components Object. Call `combine(_:)`
     /// to start adding schema fragments to the partial schema definition.
@@ -104,7 +104,6 @@ internal struct FragmentResolver {
     /// Once all fragments have been combined, call `dereferencedSchema` to attempt to build a `DereferencedJSONSchema`.
     init(components: OpenAPI.Components) {
         self.components = components
-        self.combinedFragment = .fragment(.init())
     }
 
     /// Combine the existing partial schema with the given fragment.
@@ -112,6 +111,17 @@ internal struct FragmentResolver {
     /// - Throws: If any fragments combined together would result in an invalid schema or
     ///     if there is not enough information in the fragments to build a complete schema.
     mutating func combine(_ fragment: JSONSchema) throws {
+
+        let combinedFragment: JSONSchema
+        if let currentFragment = self.combinedFragment {
+            combinedFragment = currentFragment
+        } else {
+            // combination can turn `required: false` into `required: true`
+            // but not the other way around. We start optional and the first
+            // time we combine with something required we become required.
+            combinedFragment = .fragment(.init(required: false))
+        }
+
         // make sure any less specialized fragment (i.e. general) is on the left
         let lessSpecializedFragment: JSONSchema
         let equallyOrMoreSpecializedFragment: JSONSchema
@@ -128,31 +138,31 @@ internal struct FragmentResolver {
         case (_, .reference(let reference)), (.reference(let reference), _):
             try combine(components.lookup(reference))
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
-            combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))
+            self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))
         case (.fragment(let leftCoreContext), .boolean(let rightCoreContext)):
-            combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
+            self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.fragment(let leftCoreContext), .integer(let rightCoreContext, let integerContext)):
-            combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), integerContext)
+            self.combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), integerContext)
         case (.fragment(let leftCoreContext), .number(let rightCoreContext, let numericContext)):
-            combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), numericContext)
+            self.combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), numericContext)
         case (.fragment(let leftCoreContext), .string(let rightCoreContext, let stringContext)):
-            combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), stringContext)
+            self.combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), stringContext)
         case (.fragment(let leftCoreContext), .array(let rightCoreContext, let arrayContext)):
-            combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
+            self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
         case (.fragment(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
-            combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+            self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
         case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
-            combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
+            self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.integer(let leftCoreContext, let leftIntegerContext), .integer(let rightCoreContext, let rightIntegerContext)):
-            combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), try leftIntegerContext.combined(with: rightIntegerContext))
+            self.combinedFragment = .integer(try leftCoreContext.combined(with: rightCoreContext), try leftIntegerContext.combined(with: rightIntegerContext))
         case (.number(let leftCoreContext, let leftNumericContext), .number(let rightCoreContext, let rightNumericContext)):
-            combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), try leftNumericContext.combined(with: rightNumericContext))
+            self.combinedFragment = .number(try leftCoreContext.combined(with: rightCoreContext), try leftNumericContext.combined(with: rightNumericContext))
         case (.string(let leftCoreContext, let leftStringContext), .string(let rightCoreContext, let rightStringContext)):
-            combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), try leftStringContext.combined(with: rightStringContext))
+            self.combinedFragment = .string(try leftCoreContext.combined(with: rightCoreContext), try leftStringContext.combined(with: rightStringContext))
         case (.array(let leftCoreContext, let leftArrayContext), .array(let rightCoreContext, let rightArrayContext)):
-            combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), try leftArrayContext.combined(with: rightArrayContext))
+            self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), try leftArrayContext.combined(with: rightArrayContext))
         case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
-            combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
+            self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
         case (_, .any), (.any, _), (_, .all), (.all, _), (_, .not), (.not, _), (_, .one), (.one, _):
             #warning("TODO")
             fatalError("not implemented")
@@ -183,6 +193,12 @@ internal struct FragmentResolver {
     }
 
     func dereferencedSchema() throws -> DereferencedJSONSchema {
+        guard let combinedFragment = self.combinedFragment else {
+            // just give the more bare-bones schema possible if nothing
+            // has been combined yet. This schema is `{ }` (empty).
+            return .fragment(.init())
+        }
+
         let jsonSchema: JSONSchema
         switch combinedFragment {
         case .fragment, .reference:

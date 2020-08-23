@@ -242,6 +242,36 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
     }
 
+    func test_optionalAndOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: false),
+                .string(required: false)
+            ],
+            .string(.init(required: false), .init())
+        )
+    }
+
+    func test_requiredAndOptional() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: false),
+                .string(required: true)
+            ],
+            .string(.init(), .init())
+        )
+    }
+
+    func test_requiredAndRequired() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .string(required: true),
+                .string(required: true)
+            ],
+            .string(.init(), .init())
+        )
+    }
+
     func test_deeperObjectFragments() throws {
         try assertOrderIndependentCombinedEqual(
             [
@@ -318,7 +348,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                                         "string": .string(description: "string"),
                                         "integer": .integer(required: false, description: "integer"),
                                         "number": .number(required: false, description: "number"),
-                                        "array": .array(required: false, description: "array")
+                                        "array": .array(required: true, description: "array")
                                     ]
                                 ))
                             ]
@@ -338,7 +368,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                             title: "nested test",
                             description: "nested",
                             properties: [
-                                "someObject": .object(required: false),
+                                "someObject": .object,
                                 "boolean": .boolean(format: .other("integer"), required: false, description: "boolean"),
                                 "string": .string(required: true, description: "string", maxLength: 50),
                                 "integer": .integer(required: false, description: "integer", maximum: (10, exclusive: false)),
