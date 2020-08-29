@@ -4699,7 +4699,7 @@ extension SchemaObjectTests {
             "    }",
             "  },",
             "  \"type\" : \"object\"",
-            "}",
+            "},",
             "\"title\" : \"hello\""
         ])
     }
