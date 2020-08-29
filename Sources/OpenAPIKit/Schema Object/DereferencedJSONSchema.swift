@@ -20,13 +20,10 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
     case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case one(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
-    indirect case any(of: [DereferencedJSONSchema], discriminator: OpenAPI.Discriminator?)
-    indirect case not(DereferencedJSONSchema)
-    /// This schema does not have a `type` specified. This is allowed
-    /// but does not offer much in the way of documenting the schema
-    /// so it is represented here as "undefined" with an optional
-    /// description.
+    indirect case one(of: [DereferencedJSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+    indirect case any(of: [DereferencedJSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+    indirect case not(DereferencedJSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
+    /// Schemas without a `type`.
     case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This is the "{}" case where not even a type constraint is given.
 
     /// Get the JSONSchema representation of this
@@ -54,12 +51,12 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .integer(coreContext, integerContext)
         case .string(let coreContext, let stringContext):
             return .string(coreContext, stringContext)
-        case .one(of: let schemas, discriminator: let discriminator):
-            return .one(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
-        case .any(of: let schemas, discriminator: let discriminator):
-            return .any(of: schemas.map { $0.jsonSchema }, discriminator: discriminator)
-        case .not(let schema):
-            return .not(schema.jsonSchema)
+        case .one(of: let schemas, core: let coreContext):
+            return .one(of: schemas.map { $0.jsonSchema }, core: coreContext)
+        case .any(of: let schemas, core: let coreContext):
+            return .any(of: schemas.map { $0.jsonSchema }, core: coreContext)
+        case .not(let schema, core: let coreContext):
+            return .not(schema.jsonSchema, core: coreContext)
         case .fragment(let context):
             return .fragment(context)
         }
@@ -121,14 +118,14 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .integer(context.with(discriminator: discriminator), contextB)
         case .string(let context, let contextB):
             return .string(context.with(discriminator: discriminator), contextB)
-        case .one(of: let schemas, discriminator: _):
-            return .one(of: schemas, discriminator: discriminator)
-        case .any(of: let schemas, discriminator: _):
-            return .any(of: schemas, discriminator: discriminator)
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.optionalContext())
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.optionalContext())
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.optionalContext())
         case .fragment(let context):
             return .fragment(context.with(discriminator: discriminator))
-        case .not:
-            return self
         }
     }
 }
@@ -338,17 +335,19 @@ extension JSONSchema: LocallyDereferenceable {
             return .integer(coreContext, integerContext)
         case .string(let coreContext, let stringContext):
             return .string(coreContext, stringContext)
-        case .all(of: let fragments, discriminator: let discriminator):
+        case .all(of: let fragments, core: let coreContext):
+            // TODO: use the core context of the `allOf` schema somehow here
+            // on the resolved schema.
             let resolvedFragments = try fragments.resolved(against: components)
-            return discriminator.map { resolvedFragments.with(discriminator: $0) } ?? resolvedFragments
-        case .one(of: let jsonSchemas, discriminator: let discriminator):
+            return coreContext.discriminator.map { resolvedFragments.with(discriminator: $0) } ?? resolvedFragments
+        case .one(of: let jsonSchemas, core: let coreContext):
             let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
-            return .one(of: schemas, discriminator: discriminator)
-        case .any(of: let jsonSchemas, discriminator: let discriminator):
+            return .one(of: schemas, core: coreContext)
+        case .any(of: let jsonSchemas, core: let coreContext):
             let schemas = try jsonSchemas.map { try $0.dereferenced(in: components) }
-            return .any(of: schemas, discriminator: discriminator)
-        case .not(let jsonSchema):
-            return .not(try jsonSchema.dereferenced(in: components))
+            return .any(of: schemas, core: coreContext)
+        case .not(let jsonSchema, core: let coreContext):
+            return .not(try jsonSchema.dereferenced(in: components), core: coreContext)
         case .fragment(let context):
             return .fragment(context)
         }
