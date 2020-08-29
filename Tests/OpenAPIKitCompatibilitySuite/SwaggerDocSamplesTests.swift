@@ -108,7 +108,7 @@ components:
                         catSchema,
                         dogSchema
                     ],
-                    discriminator: .init(propertyName: "pet_type")
+                    core: .init(discriminator: .init(propertyName: "pet_type"))
                 )
             )
         } catch let error {
