@@ -4081,6 +4081,13 @@ extension SchemaObjectTests {
                 .object(.init(), .init(properties: [:]))
             ]
         )
+        let allOfWithTitle = JSONSchema.all(
+            of: [
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(), .init(properties: [:]))
+            ],
+            core: .init(title: "hello")
+        )
         let allOfWithDisciminator = JSONSchema.all(
             of: [
                 .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
@@ -4109,6 +4116,23 @@ extension SchemaObjectTests {
             "    \"type\" : \"object\"",
             "  }",
             "]"
+        ])
+
+        testEncodingPropertyLines(entity: allOfWithTitle, propertyLines: [
+            "\"allOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"type\" : \"object\"",
+            "  }",
+            "],",
+            "\"title\" : \"hello\""
         ])
 
         testEncodingPropertyLines(entity: allOfWithDisciminator, propertyLines: [
@@ -4152,6 +4176,16 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let allWithTitleData = """
+        {
+            "allOf": [
+                { "type": "object" },
+                { "properties": { "hello": { "type": "boolean" } } }
+            ],
+            "title": "hello"
+        }
+        """.data(using: .utf8)!
+
         let allWithDiscriminatorData = """
         {
             "allOf": [
@@ -4161,6 +4195,7 @@ extension SchemaObjectTests {
             "discriminator": { "propertyName": "hello" }
         }
         """.data(using: .utf8)!
+
         let allWithReferenceData = """
         {
             "allOf": [
@@ -4171,6 +4206,7 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
 
         let all = try orderUnstableDecode(JSONSchema.self, from: allData)
+        let allWithTitle = try orderUnstableDecode(JSONSchema.self, from: allWithTitleData)
         let allWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: allWithDiscriminatorData)
         let allWithReference = try orderUnstableDecode(JSONSchema.self, from: allWithReferenceData)
 
@@ -4181,6 +4217,17 @@ extension SchemaObjectTests {
                     .object(.init(), .init(properties: [:])),
                     .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
                 ]
+            )
+        )
+
+        XCTAssertEqual(
+            allWithTitle,
+            JSONSchema.all(
+                of: [
+                    .object(.init(), .init(properties: [:])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ],
+                core: .init(title: "hello")
             )
         )
 
@@ -4212,6 +4259,14 @@ extension SchemaObjectTests {
                 .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
                 .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
             ]
+        )
+
+        let oneOfWithTitle = JSONSchema.one(
+            of: [
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(), .init(properties: [:]))
+            ],
+            core: .init(title: "hello")
         )
 
         let oneOfWithDiscriminator = JSONSchema.one(
@@ -4251,6 +4306,23 @@ extension SchemaObjectTests {
                 "]"
             ]
         )
+
+        testEncodingPropertyLines(entity: oneOfWithTitle, propertyLines: [
+            "\"oneOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"type\" : \"object\"",
+            "  }",
+            "],",
+            "\"title\" : \"hello\""
+        ])
 
         testEncodingPropertyLines(
             entity: oneOfWithDiscriminator,
@@ -4309,6 +4381,16 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let oneWithTitleData = """
+        {
+            "oneOf": [
+                { "type": "object" },
+                { "properties": { "hello": { "type": "boolean" } } }
+            ],
+            "title": "hello"
+        }
+        """.data(using: .utf8)!
+
         let oneWithDiscriminatorData = """
         {
             "oneOf": [
@@ -4329,6 +4411,7 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
 
         let one = try orderUnstableDecode(JSONSchema.self, from: oneData)
+        let oneWithTitle = try orderUnstableDecode(JSONSchema.self, from: oneWithTitleData)
         let oneWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: oneWithDiscriminatorData)
         let oneWithReference = try orderUnstableDecode(JSONSchema.self, from: oneWithReferenceData)
 
@@ -4339,6 +4422,17 @@ extension SchemaObjectTests {
                     .object(.init(format: .generic), .init(properties: [:])),
                     .object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
                 ]
+            )
+        )
+
+        XCTAssertEqual(
+            oneWithTitle,
+            JSONSchema.one(
+                of: [
+                    .object(.init(), .init(properties: [:])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ],
+                core: .init(title: "hello")
             )
         )
 
@@ -4370,6 +4464,14 @@ extension SchemaObjectTests {
                 .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
                 .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
             ]
+        )
+
+        let anyOfWithTitle = JSONSchema.any(
+            of: [
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(), .init(properties: [:]))
+            ],
+            core: .init(title: "hello")
         )
 
         let anyOfWithDiscriminator = JSONSchema.any(
@@ -4410,6 +4512,23 @@ extension SchemaObjectTests {
                 "]"
             ]
         )
+
+        testEncodingPropertyLines(entity: anyOfWithTitle, propertyLines: [
+            "\"anyOf\" : [",
+            "  {",
+            "    \"properties\" : {",
+            "      \"hello\" : {",
+            "        \"type\" : \"string\"",
+            "      }",
+            "    },",
+            "    \"type\" : \"object\"",
+            "  },",
+            "  {",
+            "    \"type\" : \"object\"",
+            "  }",
+            "],",
+            "\"title\" : \"hello\""
+        ])
 
         testEncodingPropertyLines(
             entity: anyOfWithDiscriminator,
@@ -4468,6 +4587,16 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let anyWithTitleData = """
+        {
+            "anyOf": [
+                { "type": "object" },
+                { "properties": { "hello": { "type": "boolean" } } }
+            ],
+            "title": "hello"
+        }
+        """.data(using: .utf8)!
+
         let anyWithDiscriminatorData = """
         {
             "anyOf": [
@@ -4488,6 +4617,7 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
 
         let any = try orderUnstableDecode(JSONSchema.self, from: anyData)
+        let anyWithTitle = try orderUnstableDecode(JSONSchema.self, from: anyWithTitleData)
         let anyWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: anyWithDiscriminatorData)
         let anyWithReference = try orderUnstableDecode(JSONSchema.self, from: anyWithReferenceData)
 
@@ -4498,6 +4628,17 @@ extension SchemaObjectTests {
                     .boolean(.init(format: .generic)),
                     .object(.init(format: .generic), .init(properties: [:]))
                 ]
+            )
+        )
+
+        XCTAssertEqual(
+            anyWithTitle,
+            JSONSchema.any(
+                of: [
+                    .object(.init(), .init(properties: [:])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                ],
+                core: .init(title: "hello")
             )
         )
 
@@ -4524,7 +4665,20 @@ extension SchemaObjectTests {
     }
 
     func test_encodeNot() {
-        let not = JSONSchema.not(.object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])))
+        let not = JSONSchema.not(
+            .object(
+                .init(format: .unspecified, required: true),
+                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])
+            )
+        )
+
+        let notWithTitle = JSONSchema.not(
+            .object(
+                .init(format: .unspecified, required: true),
+                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])
+            ),
+            core: .init(title: "hello")
+        )
 
         testEncodingPropertyLines(entity: not, propertyLines: [
             "\"not\" : {",
@@ -4535,6 +4689,18 @@ extension SchemaObjectTests {
             "  },",
             "  \"type\" : \"object\"",
             "}"
+        ])
+
+        testEncodingPropertyLines(entity: notWithTitle, propertyLines: [
+            "\"not\" : {",
+            "  \"properties\" : {",
+            "    \"hello\" : {",
+            "      \"type\" : \"string\"",
+            "    }",
+            "  },",
+            "  \"type\" : \"object\"",
+            "}",
+            "\"title\" : \"hello\""
         ])
     }
 
@@ -4547,9 +4713,20 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let notWithTitleData = """
+        {
+            "title": "hello",
+            "not": {
+                "type": "boolean"
+            }
+        }
+        """.data(using: .utf8)!
+
         let not = try orderUnstableDecode(JSONSchema.self, from: notData)
+        let notWithTitle = try orderUnstableDecode(JSONSchema.self, from: notWithTitleData)
 
         XCTAssertEqual(not, JSONSchema.not(.boolean(.init(format: .generic))))
+        XCTAssertEqual(notWithTitle, JSONSchema.not(.boolean(.init(format: .generic)), core: .init(title: "hello")))
     }
 
     func test_encodeFileReference() {
@@ -4953,6 +5130,13 @@ extension SchemaObjectTests {
             .object(properties: ["world": .boolean])
             ]
         )
+
+        XCTAssertEqual(t1, t2)
+    }
+
+    func test_not() {
+        let t1: JSONSchema = .not(.string)
+        let t2: JSONSchema = .not(.string, core: .init())
 
         XCTAssertEqual(t1, t2)
     }
