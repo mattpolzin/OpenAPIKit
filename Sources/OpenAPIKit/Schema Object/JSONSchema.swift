@@ -901,6 +901,7 @@ extension JSONSchema {
     /// requirements are met given a discriminator.
     public static func all(
         of schemas: JSONSchema...,
+        required: Bool = true,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
@@ -908,6 +909,7 @@ extension JSONSchema {
         return .all(
             of: schemas,
             core: .init(
+                required: required,
                 title: title,
                 description: description,
                 discriminator: discriminator
@@ -927,6 +929,7 @@ extension JSONSchema {
     /// requirements are met given a discriminator.
     public static func one(
         of schemas: JSONSchema...,
+        required: Bool = true,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
@@ -934,6 +937,7 @@ extension JSONSchema {
         return .one(
             of: schemas,
             core: .init(
+                required: required,
                 title: title,
                 description: description,
                 discriminator: discriminator
@@ -953,6 +957,7 @@ extension JSONSchema {
     /// requirements are met given a discriminator.
     public static func any(
         of schemas: JSONSchema...,
+        required: Bool = true,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
@@ -960,6 +965,7 @@ extension JSONSchema {
         return .any(
             of: schemas,
             core: .init(
+                required: required,
                 title: title,
                 description: description,
                 discriminator: discriminator
@@ -976,6 +982,7 @@ extension JSONSchema {
     /// this schema _is_ as opposed to what it _is not_.
     public static func not(
         _ schema: JSONSchema,
+        required: Bool = true,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
@@ -983,6 +990,7 @@ extension JSONSchema {
         return .not(
             schema,
             core: .init(
+                required: required,
                 title: title,
                 description: description,
                 discriminator: discriminator
