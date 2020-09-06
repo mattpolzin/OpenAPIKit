@@ -1,5 +1,5 @@
 //
-//  SchemaFragmentResolvingTests.swift
+//  SchemaFragmentCombiningTests.swift
 //  
 //
 //  Created by Mathew Polzin on 8/2/20.
@@ -9,12 +9,12 @@ import Foundation
 import XCTest
 import OpenAPIKit
 
-final class SchemaFragmentResolvingTests: XCTestCase {
+final class SchemaFragmentCombiningTests: XCTestCase {
     // MARK: - Empty
     func test_resolveEmptyFragmentsList() throws {
         let fragments: [JSONSchema] = []
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .fragment(.init())
         )
     }
@@ -25,7 +25,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .fragment(.init(description: "hello world"))
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .fragment(.init(description: "hello world"))
         )
     }
@@ -35,7 +35,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .boolean(.init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .boolean(.init())
         )
     }
@@ -45,7 +45,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .integer(.init(), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .integer(.init(), .init())
         )
     }
@@ -55,7 +55,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .number(.init(), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .number(.init(), .init())
         )
     }
@@ -65,7 +65,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .string(.init(), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .string(.init(), .init())
         )
     }
@@ -75,7 +75,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .array(.init(), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .array(.init(), DereferencedJSONSchema.ArrayContext(JSONSchema.ArrayContext())!)
         )
     }
@@ -85,7 +85,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .object(.init(), .init(properties: [:]))
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .object(.init(), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
         )
     }
@@ -95,7 +95,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .object(.init(permissions: .readOnly), .init(properties: [:]))
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .object(.init(permissions: .readOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
         )
     }
@@ -105,7 +105,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .object(.init(permissions: .writeOnly), .init(properties: [:]))
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .object(.init(permissions: .writeOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
         )
     }
@@ -153,7 +153,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .integer(.init(format: .int32), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .integer(.init(format: .int32), .init())
         )
     }
@@ -163,7 +163,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .number(.init(format: .double), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .number(.init(format: .double), .init())
         )
     }
@@ -173,14 +173,14 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             .string(.init(format: .binary), .init())
         ]
         XCTAssertEqual(
-            try fragments.resolved(against: .noComponents),
+            try fragments.combined(resolvingAgainst: .noComponents),
             .string(.init(format: .binary), .init())
         )
     }
 
     // MARK: - Fragment Combinations
     func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchema], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
-        let resolved1 = try fragments.resolved(against: .noComponents)
+        let resolved1 = try fragments.combined(resolvingAgainst: .noComponents)
         let schemaString = try orderUnstableTestStringFromEncoding(of: schema.jsonSchema)
         let resolvedSchemaString = try orderUnstableTestStringFromEncoding(of: resolved1.jsonSchema)
         XCTAssertEqual(
@@ -190,7 +190,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             file: file,
             line: line
         )
-        let resolved2 = try fragments.reversed().resolved(against: .noComponents)
+        let resolved2 = try fragments.reversed().combined(resolvingAgainst: .noComponents)
         XCTAssertEqual(
             resolved2,
             schema,
@@ -440,7 +440,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
     // MARK: - Dereferencing
     func test_referenceNotFound() {
         let t1 = [JSONSchema.reference(.component(named: "test"))]
-        XCTAssertThrowsError(try t1.resolved(against: .noComponents)) { error in
+        XCTAssertThrowsError(try t1.combined(resolvingAgainst: .noComponents)) { error in
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
         }
 
@@ -448,7 +448,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             JSONSchema.object(.init(description: "test"), .init(properties: [:])),
             JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
         ]
-        XCTAssertThrowsError(try t2.resolved(against: .noComponents)) { error in
+        XCTAssertThrowsError(try t2.combined(resolvingAgainst: .noComponents)) { error in
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
         }
     }
@@ -461,7 +461,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         )
 
         let t1 = [JSONSchema.reference(.component(named: "test"))]
-        let schema1 = try t1.resolved(against: components)
+        let schema1 = try t1.combined(resolvingAgainst: components)
         XCTAssertEqual(
             schema1,
             JSONSchema.string.dereferenced()
@@ -471,7 +471,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             JSONSchema.object(.init(description: "test"), .init(properties: [:])),
             JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
         ]
-        let schema2 = try t2.resolved(against: components)
+        let schema2 = try t2.combined(resolvingAgainst: components)
         XCTAssertEqual(
             schema2,
             JSONSchema.object(description: "test", properties: ["test": .string]).dereferenced()
@@ -498,7 +498,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for left in fragments {
             for right in fragments where right != left {
-                XCTAssertThrowsError(try [left, right].resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try [left, right].combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .typeConflict)
                 }
@@ -522,7 +522,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .boolean(.init(format: left)),
                     .boolean(.init(format: right))
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -549,7 +549,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .integer(.init(format: left), .init()),
                     .integer(.init(format: right), .init())
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -574,7 +574,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .number(.init(format: left), .init()),
                     .number(.init(format: right), .init())
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -607,7 +607,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .string(.init(format: left), .init()),
                     .string(.init(format: right), .init())
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -631,7 +631,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .array(.init(format: left), .init()),
                     .array(.init(format: right), .init())
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -655,7 +655,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
                     .object(.init(format: left), .init(properties: [:])),
                     .object(.init(format: right), .init(properties: [:]))
                 ]
-                XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+                XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                     XCTAssert(error ~= .formatConflict)
                 }
@@ -736,7 +736,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
             + fragmentsArray7
 
         for fragments in allFragmentsArrays {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -779,7 +779,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for difference in differences {
             let fragments: [JSONSchema] = difference.map { .integer(.init(), $0) }
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -822,7 +822,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for difference in differences {
             let fragments: [JSONSchema] = difference.map { .number(.init(), $0) }
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -853,7 +853,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for difference in differences {
             let fragments: [JSONSchema] = difference.map { .string(.init(), $0) }
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -890,7 +890,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for difference in differences {
             let fragments: [JSONSchema] = difference.map { .array(.init(), $0) }
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -946,7 +946,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
 
         for difference in differences {
             let fragments: [JSONSchema] = difference.map { .object(.init(), $0) }
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents), "\(fragments)") { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents), "\(fragments)") { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
@@ -1038,7 +1038,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         ]
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
@@ -1065,7 +1065,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .integer(.init(), $0) } }
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
@@ -1092,7 +1092,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .number(.init(), $0) } }
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
@@ -1119,7 +1119,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .string(.init(), $0) } }
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
@@ -1146,7 +1146,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .array(.init(), $0) } }
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }
@@ -1173,7 +1173,7 @@ final class SchemaFragmentResolvingTests: XCTestCase {
         let fragmentsArray: [[JSONSchema]] = inconsistencies.map { $0.map { .object(.init(), $0) } }
 
         for fragments in fragmentsArray {
-            XCTAssertThrowsError(try fragments.resolved(against: .noComponents)) { error in
+            XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                 guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
                 XCTAssert(error ~= .inconsistency, "\(error) is not ~= `.inconsistency` --  \(fragments)")
             }

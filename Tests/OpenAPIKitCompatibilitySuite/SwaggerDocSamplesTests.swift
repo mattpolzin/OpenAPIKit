@@ -101,8 +101,7 @@ components:
             )
 
             XCTAssertEqual(
-                resolvedDoc.endpoints[0].requestBody?
-                    .content[.json]?.schema?.jsonSchema,
+                try resolvedDoc.endpoints[0].requestBody?.content[.json]?.schema?.simplified().jsonSchema,
                 JSONSchema.one(
                     of: [
                         catSchema,
