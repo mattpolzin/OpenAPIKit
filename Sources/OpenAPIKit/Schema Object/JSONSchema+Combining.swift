@@ -1,21 +1,21 @@
 //
-//  JSONSchema+Resolving.swift
+//  JSONSchema+Combining.swift
 //  
 //
 //  Created by Mathew Polzin on 8/1/20.
 //
 
 extension Array where Element == JSONSchema {
-    /// An array of schema fragments can be resolved into a
+    /// An array of schema fragments can be combined into a
     /// single `DereferencedJSONSchema` if all references can
     /// be looked up locally and none of the fragments conflict.
     ///
-    /// Resolving fragments will both remove references and attempt
+    /// Combining fragments will both remove references and attempt
     /// to reject any results that would represent impossible schemas
     /// -- that is, schemas that cannot be satisfied and could not ever
     /// be used to validate anything (guaranteed validation failure).
-    public func resolved(against components: OpenAPI.Components) throws -> DereferencedJSONSchema {
-        var resolver = FragmentResolver(components: components)
+    public func combined(resolvingAgainst components: OpenAPI.Components) throws -> DereferencedJSONSchema {
+        var resolver = FragmentCombiner(components: components)
         try resolver.combine(self)
         return try resolver.dereferencedSchema()
     }
@@ -71,7 +71,7 @@ internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
     var description: String {
         switch self {
         case .unsupported(because: let reason):
-            return "The given `all(of:)` schema does not yet support resolving in OpenAPIKit because \(reason)."
+            return "The given schema does not yet support combining in OpenAPIKit because \(reason)."
         case .typeConflict(original: let original, new: let new):
             return "Found conflicting schema types. A schema cannot be both \(original.rawValue) and \(new.rawValue)."
         case .formatConflict(original: let original, new: let new):
@@ -85,7 +85,7 @@ internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
     }
 }
 
-/// The FragmentResolver takes any number of fragments and determines if they can be
+/// The FragmentCombiner takes any number of fragments and determines if they can be
 /// meaningfully combined.
 ///
 /// Conflicts will be determined as fragments are added and when you ask for
@@ -94,7 +94,7 @@ internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
 ///
 /// Current Limitations (will throw `.unsupported` for these reasons):
 /// - Does not handle inversion via `not` or combination via `any`, `one`, `all`.
-internal struct FragmentResolver {
+internal struct FragmentCombiner {
     private let components: OpenAPI.Components
     private var combinedFragment: JSONSchema?
 
@@ -135,8 +135,13 @@ internal struct FragmentResolver {
         }
 
         switch (lessSpecializedFragment, equallyOrMoreSpecializedFragment) {
+        case (.all(let schemas, core: let core), let other), (let other, .all(let schemas, core: let core)):
+            // tease apart one allOf if there is one and continue from there.
+            try self.combine(schemas + [.fragment(core), other])
+
         case (_, .reference(let reference)), (.reference(let reference), _):
             try combine(components.lookup(reference))
+
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
             self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))
         case (.fragment(let leftCoreContext), .boolean(let rightCoreContext)):
@@ -163,8 +168,9 @@ internal struct FragmentResolver {
             self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), try leftArrayContext.combined(with: rightArrayContext))
         case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
-        case (_, .any), (.any, _), (_, .all), (.all, _), (_, .not), (.not, _), (_, .one), (.one, _):
-            throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), all(of:), and one(of:) are not yet supported for schema resolution"))
+
+        case (_, .any), (.any, _), (_, .not), (.not, _), (_, .one), (.one, _):
+            throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), and one(of:) are not yet supported for schema resolution"))
         case (.boolean, _),
              (.integer, _),
              (.number, _),
@@ -214,10 +220,12 @@ internal struct FragmentResolver {
             jsonSchema = .array(try coreContext.validatedContext(), try arrayContext.validatedContext())
         case .object(let coreContext, let objectContext):
             jsonSchema = .object(try coreContext.validatedContext(), try objectContext.validatedContext())
-        case .any, .all, .not, .one:
+        case .all(of: let schemas, core: let coreContext):
+            jsonSchema = try .all(of: schemas, core: coreContext.validatedContext())
+        case .any, .not, .one:
             throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), all(of:), and one(of:) are not yet supported for schema resolution"))
         }
-        return try jsonSchema.dereferenced(in: components)
+        return try jsonSchema.simplified(given: components)
     }
 }
 
@@ -518,9 +526,9 @@ extension JSONSchema.ObjectContext {
 internal func combine(properties left: [String: JSONSchema], with right: [String: JSONSchema], resolvingIn components: OpenAPI.Components) throws -> [String: JSONSchema] {
     var combined = left
     try combined.merge(right) { (left, right) throws -> JSONSchema in
-        var resolve = FragmentResolver(components: components)
-        try resolve.combine([left, right])
-        return try resolve.dereferencedSchema().jsonSchema
+        var resolver = FragmentCombiner(components: components)
+        try resolver.combine([left, right])
+        return try resolver.dereferencedSchema().jsonSchema
     }
     return combined
 }
