@@ -8,7 +8,7 @@ A `JSONSchema` can be:
 3. A `reference` to a schema in the Components Object or elsewhere.
 4. `all(of:)`, `one(of:)`, or `any(of:)` a list of other schemas.
 5. `not` another schema.
-6. `undefined` (which means not even the type of schema is being specified).
+6. `fragment` (which means the type of schema is not specified).
 
 The fundamental schema types and arrays and objects all share a common set of properties (accessible from their `coreContext`) and each (except for boolean) also has some properties that only apply to that one type (accessible from properties named after the type like `objectContext`, `arrayContext`, `integerContext`, etc.).
 
@@ -29,6 +29,7 @@ switch schema {
     break
   case .string(let coreContext, let stringContext):
     break
+  ...
 }
 ```
 
