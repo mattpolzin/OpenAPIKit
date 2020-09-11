@@ -928,20 +928,13 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string))
         ]
 
-        #warning("TODO: figure out required properties array in the absence of any property defintiions")
-//        let differentRequiredProeprties = [
-//            JSONSchema.ObjectContext(properties: [:], requiredProperties: []),
-//            JSONSchema.ObjectContext(properties: [:], requiredProperties: ["string1"])
-//        ]
-
         let differences = [
             differentMaxProperties,
             differentMinProperties,
             differentProperties,
             differentAdditionalProperties1,
             differentAdditionalProperties2,
-            differentAdditionalProperties3,
-//            differentRequiredProeprties
+            differentAdditionalProperties3
         ]
 
         for difference in differences {

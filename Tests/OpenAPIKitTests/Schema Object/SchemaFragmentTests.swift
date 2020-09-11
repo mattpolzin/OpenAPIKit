@@ -764,7 +764,7 @@ extension SchemaFragmentTests {
         )
     }
 
-    func test_minimalObjectDecode() throws {
+    func test_objectDecode() throws {
         let t =
         """
         {
@@ -788,6 +788,9 @@ extension SchemaFragmentTests {
 
         XCTAssertEqual(decoded2, JSONSchema.object(.init(permissions: .writeOnly), .init(properties: [:])))
 
+        // t3 tests that a required array without any properties will decode as
+        // an object with a required property by the given name that is a fragment
+        // with nothing specified about it other than it is required.
         let t3 =
         """
         {
