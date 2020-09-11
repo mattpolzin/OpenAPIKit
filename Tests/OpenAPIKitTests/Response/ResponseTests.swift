@@ -95,59 +95,61 @@ extension ResponseTests {
         let response = OpenAPI.Response(description: "", content: [:])
         let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
-        assertJSONEquivalent(encodedResponse,
-"""
-{
-  "description" : ""
-}
-"""
-                       )
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "description" : ""
+            }
+            """
+        )
 
         let response2 = OpenAPI.Response(description: "", headers: [:], content: [:])
         let encodedResponse2 = try! orderUnstableTestStringFromEncoding(of: response2)
 
-        assertJSONEquivalent(encodedResponse2,
-"""
-{
-  "description" : "",
-  "headers" : {
+        assertJSONEquivalent(
+            encodedResponse2,
+            """
+            {
+              "description" : "",
+              "headers" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_emptyDescriptionEmptyContent_decode() {
         let responseData =
-"""
-{
-  "description" : ""
-}
-""".data(using: .utf8)!
+        """
+        {
+          "description" : ""
+        }
+        """.data(using: .utf8)!
         let response = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
         XCTAssertEqual(response, OpenAPI.Response(description: "", content: [:]))
 
         let responseData2 =
-"""
-{
-  "content": {},
-  "description" : ""
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content": {},
+          "description" : ""
+        }
+        """.data(using: .utf8)!
         let response2 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData2)
 
         XCTAssertEqual(response2, OpenAPI.Response(description: "", content: [:]))
 
         let responseData3 =
-            """
-{
-  "content": {},
-  "description" : "",
-  "headers": {}
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content": {},
+          "description" : "",
+          "headers": {}
+        }
+        """.data(using: .utf8)!
         let response3 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData3)
 
         XCTAssertEqual(response3, OpenAPI.Response(description: "", headers: [:], content: [:]))
@@ -156,54 +158,62 @@ extension ResponseTests {
     func test_populatedDescriptionPopulatedContent_encode() {
         let content = OpenAPI.Content(schema: .init(.string))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
-        let response = OpenAPI.Response(description: "hello world",
-                                        headers: ["hello": .init(header)],
-                                        content: [.json: content])
+        let response = OpenAPI.Response(
+            description: "hello world",
+            headers: ["hello": .init(header)],
+            content: [.json: content]
+        )
 
         let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
-        assertJSONEquivalent(encodedResponse,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "description" : "hello world",
-  "headers" : {
-    "hello" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  }
-}
-"""
-                       )
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "description" : "hello world",
+              "headers" : {
+                "hello" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+            """
+        )
     }
 
     func test_populatedDescriptionPopulatedContent_decode() throws {
         let responseData =
-"""
-{
-    "description": "hello world",
-    "content": { "application/json": { "schema": { "type": "string" } } },
-    "headers": {
-        "hello": { "schema" : { "type" : "string" } }
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "description": "hello world",
+            "content": { "application/json": { "schema": { "type": "string" } } },
+            "headers": {
+                "hello": { "schema" : { "type" : "string" } }
+            }
+        }
+        """.data(using: .utf8)!
 
         let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
         let content = OpenAPI.Content(schema: .init(.string))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
-        XCTAssertEqual(response, OpenAPI.Response(description: "hello world",
-                                                  headers: ["hello": .init(header)],
-                                                  content: [.json: content]))
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                headers: ["hello": .init(header)],
+                content: [.json: content]
+            )
+        )
     }
 
     func test_populatedDescriptionPopulatedContent_withExtension_encode() {
@@ -218,42 +228,43 @@ extension ResponseTests {
 
         let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
 
-        assertJSONEquivalent(encodedResponse,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "description" : "hello world",
-  "headers" : {
-    "hello" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "x-specialFeature" : true
-}
-"""
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "description" : "hello world",
+              "headers" : {
+                "hello" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "x-specialFeature" : true
+            }
+            """
         )
     }
 
     func test_populatedDescriptionPopulatedContent_withExtension_decode() throws {
         let responseData =
-"""
-{
-    "description": "hello world",
-    "content": { "application/json": { "schema": { "type": "string" } } },
-    "headers": {
-        "hello": { "schema" : { "type" : "string" } }
-    },
-    "x-specialFeature": true
-}
-""".data(using: .utf8)!
+        """
+        {
+            "description": "hello world",
+            "content": { "application/json": { "schema": { "type": "string" } } },
+            "headers": {
+                "hello": { "schema" : { "type" : "string" } }
+            },
+            "x-specialFeature": true
+        }
+        """.data(using: .utf8)!
 
         let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
 
@@ -272,19 +283,19 @@ extension ResponseTests {
 
     func test_doesNotFailDecodingLinks() {
         let t1 = """
-{
-  "description" : "test",
-  "links" : {
-    "link" : {
-      "operationId" : "test",
-      "parameters" : {
-        "userId" : "$response.body#/id",
-        "description" : "A link test"
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        {
+          "description" : "test",
+          "links" : {
+            "link" : {
+              "operationId" : "test",
+              "parameters" : {
+                "userId" : "$response.body#/id",
+                "description" : "A link test"
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Response.self, from: t1))
     }
@@ -301,22 +312,23 @@ extension ResponseTests {
         let status = StatusCodeWrapper(status: .default)
         let encodedStatus = try orderUnstableTestStringFromEncoding(of: status)
 
-        assertJSONEquivalent(encodedStatus,
-"""
-{
-  "status" : "default"
-}
-"""
-                       )
+        assertJSONEquivalent(
+            encodedStatus,
+            """
+            {
+              "status" : "default"
+            }
+            """
+        )
     }
 
     func test_defaultStatusCode_decode() throws {
         let statusCodeData =
-"""
-{
-    "status": "default"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "status": "default"
+        }
+        """.data(using: .utf8)!
 
         XCTAssertEqual(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: .default))
     }
@@ -325,33 +337,34 @@ extension ResponseTests {
         let status = StatusCodeWrapper(status: 123)
         let encodedStatus = try orderUnstableTestStringFromEncoding(of: status)
 
-        assertJSONEquivalent(encodedStatus,
-"""
-{
-  "status" : "123"
-}
-"""
+        assertJSONEquivalent(
+            encodedStatus,
+            """
+            {
+              "status" : "123"
+            }
+            """
         )
     }
 
     func test_numberStatusCode_decode() throws {
         let statusCodeData =
-"""
-{
-    "status": "123"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "status": "123"
+        }
+        """.data(using: .utf8)!
 
         XCTAssertEqual(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
     }
 
     func test_nonesenseStatusCode_decode_throws() {
         let statusCodeData =
-"""
-{
-    "status": "hello world"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "status": "hello world"
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData))
     }

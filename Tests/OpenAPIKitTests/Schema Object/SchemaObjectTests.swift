@@ -1077,11 +1077,11 @@ extension SchemaObjectTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "example" : "hello"
-}
-"""
+            """
+            {
+              "example" : "hello"
+            }
+            """
         )
     }
 
@@ -1102,11 +1102,11 @@ extension SchemaObjectTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
+            """
+            {
 
-}
-"""
+            }
+            """
         )
     }
 
@@ -1129,11 +1129,11 @@ extension SchemaObjectTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "description" : "hello world"
-}
-"""
+            """
+            {
+              "description" : "hello world"
+            }
+            """
         )
     }
 
@@ -1394,15 +1394,15 @@ extension SchemaObjectTests {
 
     func test_decodeObjectWithTypeInferred() throws {
         let objectData =
-"""
-{
-    "properties": {
-        "hello": {
-            "type": "boolean"
+        """
+        {
+            "properties": {
+                "hello": {
+                    "type": "boolean"
+                }
+            }
         }
-    }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -3828,11 +3828,11 @@ extension SchemaObjectTests {
 
     func test_decodeStringWithTypeInferred() throws {
         let objectData =
-"""
-{
-    "pattern": ".*"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "pattern": ".*"
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -5002,54 +5002,68 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
     deprecatedEntity: T,
     allowedValues: (entity: T, value: String)
     ) {
-    testEncodingPropertyLines(entity: requiredEntity,
-                              propertyLines: [
-                                "\"format\" : \"\(formatName)\",",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: requiredEntity,
+        propertyLines: [
+            "\"format\" : \"\(formatName)\",",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: optionalEntity,
-                              propertyLines: [
-                                "\"format\" : \"\(formatName)\",",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: optionalEntity,
+        propertyLines: [
+            "\"format\" : \"\(formatName)\",",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: nullableEntity,
-                              propertyLines: [
-                                "\"format\" : \"\(formatName)\",",
-                                "\"nullable\" : true,",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: nullableEntity,
+        propertyLines: [
+            "\"format\" : \"\(formatName)\",",
+            "\"nullable\" : true,",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: readOnlyEntity,
-                              propertyLines: [
-                                "\"format\" : \"\(formatName)\",",
-                                "\"readOnly\" : true,",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: readOnlyEntity,
+        propertyLines: [
+            "\"format\" : \"\(formatName)\",",
+            "\"readOnly\" : true,",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: writeOnlyEntity,
-                              propertyLines: [
-                                "\"format\" : \"\(formatName)\",",
-                                "\"type\" : \"\(typeName)\",",
-                                "\"writeOnly\" : true"
-    ])
+    testEncodingPropertyLines(
+        entity: writeOnlyEntity,
+        propertyLines: [
+            "\"format\" : \"\(formatName)\",",
+            "\"type\" : \"\(typeName)\",",
+            "\"writeOnly\" : true"
+        ]
+    )
 
-    testEncodingPropertyLines(entity: deprecatedEntity,
-                              propertyLines: [
-                                "\"deprecated\" : true,",
-                                "\"format\" : \"\(formatName)\",",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: deprecatedEntity,
+        propertyLines: [
+            "\"deprecated\" : true,",
+            "\"format\" : \"\(formatName)\",",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 
-    testEncodingPropertyLines(entity: allowedValues.entity,
-                              propertyLines: [
-                                "\"enum\" : [",
-                                "  \(allowedValues.value)",
-                                "],",
-                                "\"format\" : \"\(formatName)\",",
-                                "\"type\" : \"\(typeName)\""
-    ])
+    testEncodingPropertyLines(
+        entity: allowedValues.entity,
+        propertyLines: [
+            "\"enum\" : [",
+            "  \(allowedValues.value)",
+            "],",
+            "\"format\" : \"\(formatName)\",",
+            "\"type\" : \"\(typeName)\""
+        ]
+    )
 }
 
 // MARK: - Building

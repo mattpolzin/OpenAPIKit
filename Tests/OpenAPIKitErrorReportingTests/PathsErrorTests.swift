@@ -13,12 +13,12 @@ import Yams
 final class PathsErrorTests: XCTestCase {
     func test_missingPaths() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -31,21 +31,21 @@ info:
 
     func test_wrongTypeParameter() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: header
-              schema:
-                type: string
-            - invalid: hi
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: header
+                      schema:
+                        type: string
+                    - invalid: hi
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -57,21 +57,21 @@ paths:
         }
 
         let documentYML2 =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: header
-              schema:
-                type: string
-            - []
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: header
+                      schema:
+                        type: string
+                    - []
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML2)) { error in
 
@@ -85,20 +85,20 @@ paths:
 
     func test_optionalPositionalPathParam() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: path
-              schema:
-                type: string
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: path
+                      schema:
+                        type: string
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -120,18 +120,18 @@ paths:
 
     func test_noContentOrSchemaParam() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: query
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: query
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -153,24 +153,24 @@ paths:
 
     func test_bothContentAndSchemaParam() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: query
-              schema:
-                type: string
-              content:
-                application/json:
-                    schema:
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: query
+                      schema:
                         type: string
-"""
+                      content:
+                        application/json:
+                            schema:
+                                type: string
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -192,25 +192,25 @@ paths:
 
     func test_paramSchemaHasProblemDeeplyNestedInSchema() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        summary: hello
-        parameters:
-            - name: world
-              in: query
-              schema:
-                type: object
-                properties:
-                    hi:
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                summary: hello
+                parameters:
+                    - name: world
+                      in: query
+                      schema:
                         type: object
-                        items:
-                            type: string
-"""
+                        properties:
+                            hi:
+                                type: object
+                                items:
+                                    type: string
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -219,8 +219,8 @@ paths:
             XCTAssertEqual(
                 openAPIError.localizedDescription,
                 """
-Inconsistency encountered when parsing `OpenAPI Schema` in .parameters[0].schema.properties.hi under the `/hello/world` path: Found schema attributes not consistent with the type specified: object.
-"""
+                Inconsistency encountered when parsing `OpenAPI Schema` in .parameters[0].schema.properties.hi under the `/hello/world` path: Found schema attributes not consistent with the type specified: object.
+                """
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
