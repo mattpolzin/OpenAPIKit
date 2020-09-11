@@ -14,12 +14,12 @@ final class DocumentErrorTests: XCTestCase {
 
     func test_missingOpenAPIVersion() {
         let documentYML =
-"""
-info:
-    title: test
-    version: 1.0
-paths: {}
-"""
+        """
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -32,13 +32,13 @@ paths: {}
 
     func test_wrongTypesOpenAPIVersion() {
         let documentYML =
-"""
-openapi: null
-info:
-    title: test
-    version: 1.0
-paths: {}
-"""
+        """
+        openapi: null
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -51,13 +51,13 @@ paths: {}
         }
 
         let documentYML2 =
-"""
-openapi: []
-info:
-    title: test
-    version: 1.0
-paths: {}
-"""
+        """
+        openapi: []
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML2)) { error in
 
@@ -71,12 +71,12 @@ paths: {}
 
         let documentYML3 =
         """
-openapi: {}
-info:
-    title: test
-    version: 1.0
-paths: {}
-"""
+        openapi: {}
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML3)) { error in
 
@@ -91,10 +91,10 @@ paths: {}
 
     func test_missingInfo() {
         let documentYML =
-"""
-openapi: "3.0.0"
-paths: {}
-"""
+        """
+        openapi: "3.0.0"
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -107,11 +107,11 @@ paths: {}
 
     func test_wrongTypesInfo() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info: null
-paths: {}
-"""
+        """
+        openapi: "3.0.0"
+        info: null
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -124,11 +124,11 @@ paths: {}
         }
 
         let documentYML2 =
-"""
-openapi: "3.0.0"
-info: []
-paths: {}
-"""
+        """
+        openapi: "3.0.0"
+        info: []
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML2)) { error in
 
@@ -143,11 +143,11 @@ paths: {}
 
     func test_missingTitleInsideInfo() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info: {}
-paths: {}
-"""
+        """
+        openapi: "3.0.0"
+        info: {}
+        paths: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -162,17 +162,17 @@ paths: {}
 
     func test_missingNameInsideSecondTag() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths: {}
-tags:
-    - name: hi
-    - description: missing
-    - name: hello
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        tags:
+            - name: hi
+            - description: missing
+            - name: hello
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

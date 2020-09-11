@@ -18,9 +18,11 @@ final class TagTests: XCTestCase {
         XCTAssertEqual(t2.description, "world")
         XCTAssertNil(t2.externalDocs)
 
-        let t3 = OpenAPI.Tag(name: "hello",
-                             description: "world",
-                             externalDocs: .init(url: URL(string: "http://google.com")!))
+        let t3 = OpenAPI.Tag(
+            name: "hello",
+            description: "world",
+            externalDocs: .init(url: URL(string: "http://google.com")!)
+        )
         XCTAssertEqual(t3.description, "world")
         XCTAssertEqual(t3.externalDocs, .init(url: URL(string: "http://google.com")!))
     }
@@ -28,60 +30,66 @@ final class TagTests: XCTestCase {
 
 // MARK: - Codable
 extension TagTests {
-    func test_onlyName_encode() {
+    func test_onlyName_encode() throws {
         let tag = OpenAPI.Tag(name: "hello")
-        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
+        let encodedTag = try orderUnstableTestStringFromEncoding(of: tag)
 
-        assertJSONEquivalent(encodedTag,
-"""
-{
-  "name" : "hello"
-}
-"""
+        assertJSONEquivalent(
+            encodedTag,
+            """
+            {
+              "name" : "hello"
+            }
+            """
         )
     }
 
-    func test_onlyName_decode() {
+    func test_onlyName_decode() throws {
         let tagData =
-"""
-{
-    "name": "hello"
-}
-""".data(using: .utf8)!
-        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
+        """
+        {
+            "name": "hello"
+        }
+        """.data(using: .utf8)!
+
+        let tag = try orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(tag, OpenAPI.Tag(name: "hello"))
     }
 
-    func test_nameAndDescription_encode() {
-        let tag = OpenAPI.Tag(name: "hello",
-                              description: "world")
-        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
+    func test_nameAndDescription_encode() throws {
+        let tag = OpenAPI.Tag(
+            name: "hello",
+            description: "world"
+        )
+        let encodedTag = try orderUnstableTestStringFromEncoding(of: tag)
 
-        assertJSONEquivalent(encodedTag,
-"""
-{
-  "description" : "world",
-  "name" : "hello"
-}
-"""
+        assertJSONEquivalent(
+            encodedTag,
+            """
+            {
+              "description" : "world",
+              "name" : "hello"
+            }
+            """
         )
     }
 
-    func test_nameAndDescription_decode() {
+    func test_nameAndDescription_decode() throws {
         let tagData =
-"""
-{
-    "name": "hello",
-    "description": "world"
-}
-""".data(using: .utf8)!
-        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
+        """
+        {
+            "name": "hello",
+            "description": "world"
+        }
+        """.data(using: .utf8)!
+
+        let tag = try orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(tag, OpenAPI.Tag(name: "hello", description: "world"))
     }
 
-    func test_allFields_encode() {
+    func test_allFields_encode() throws {
         let tag = OpenAPI.Tag(
             name: "hello",
             description: "world",
@@ -90,35 +98,37 @@ extension TagTests {
             ),
             vendorExtensions: ["x-specialFeature": false]
         )
-        let encodedTag = try! orderUnstableTestStringFromEncoding(of: tag)
+        let encodedTag = try orderUnstableTestStringFromEncoding(of: tag)
 
-        assertJSONEquivalent(encodedTag,
-"""
-{
-  "description" : "world",
-  "externalDocs" : {
-    "url" : "http:\\/\\/google.com"
-  },
-  "name" : "hello",
-  "x-specialFeature" : false
-}
-"""
+        assertJSONEquivalent(
+            encodedTag,
+            """
+            {
+              "description" : "world",
+              "externalDocs" : {
+                "url" : "http:\\/\\/google.com"
+              },
+              "name" : "hello",
+              "x-specialFeature" : false
+            }
+            """
         )
     }
 
-    func test_allFields_decode() {
+    func test_allFields_decode() throws {
         let tagData =
-"""
-{
-    "name": "hello",
-    "description": "world",
-    "externalDocs": {
-        "url": "http://google.com"
-    },
-    "x-specialFeature" : false
-}
-""".data(using: .utf8)!
-        let tag = try! orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
+        """
+        {
+            "name": "hello",
+            "description": "world",
+            "externalDocs": {
+                "url": "http://google.com"
+            },
+            "x-specialFeature" : false
+        }
+        """.data(using: .utf8)!
+
+        let tag = try orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
 
         XCTAssertEqual(
             tag,

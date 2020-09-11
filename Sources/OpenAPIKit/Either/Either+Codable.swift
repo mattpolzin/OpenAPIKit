@@ -29,11 +29,11 @@ public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomDebugStringCon
         }.joined(separator: "\n\n")
 
         return
-"""
-Either failed to decode any of its types at: "\(codingPathString)"
+        """
+        Either failed to decode any of its types at: "\(codingPathString)"
 
-\(failureStrings)
-"""
+        \(failureStrings)
+        """
     }
 }
 

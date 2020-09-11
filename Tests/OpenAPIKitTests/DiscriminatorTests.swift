@@ -28,22 +28,24 @@ extension DiscriminatorTests {
         let discriminator = OpenAPI.Discriminator(propertyName: "hello")
         let encodedDiscriminator = try! orderUnstableTestStringFromEncoding(of: discriminator)
 
-        assertJSONEquivalent(encodedDiscriminator,
-"""
-{
-  "propertyName" : "hello"
-}
-"""
+        assertJSONEquivalent(
+            encodedDiscriminator,
+            """
+            {
+              "propertyName" : "hello"
+            }
+            """
         )
     }
 
     func test_noMapping_decode() {
         let discriminatorData =
-"""
-{
-    "propertyName": "hello"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "propertyName": "hello"
+        }
+        """.data(using: .utf8)!
+
         let discriminator = try! orderUnstableDecode(OpenAPI.Discriminator.self, from: discriminatorData)
 
         XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello"))
@@ -54,28 +56,30 @@ extension DiscriminatorTests {
                                                   mapping: ["hello": "world"])
         let encodedDiscriminator = try! orderUnstableTestStringFromEncoding(of: discriminator)
 
-        assertJSONEquivalent(encodedDiscriminator,
-"""
-{
-  "mapping" : {
-    "hello" : "world"
-  },
-  "propertyName" : "hello"
-}
-"""
+        assertJSONEquivalent(
+            encodedDiscriminator,
+            """
+            {
+              "mapping" : {
+                "hello" : "world"
+              },
+              "propertyName" : "hello"
+            }
+            """
         )
     }
 
     func test_withMapping_decode() {
         let discriminatorData =
-"""
-{
-    "propertyName": "hello",
-    "mapping": {
-        "hello": "world"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "propertyName": "hello",
+            "mapping": {
+                "hello": "world"
+            }
+        }
+        """.data(using: .utf8)!
+
         let discriminator = try! orderUnstableDecode(OpenAPI.Discriminator.self, from: discriminatorData)
 
         XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello",

@@ -53,19 +53,19 @@ final class RequestContentMapErrorTests: XCTestCase {
 
     func test_wrongTypeContentValue() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json: hello
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    requestBody:
+                        content:
+                            application/json: hello
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -85,23 +85,23 @@ paths:
 
     func test_incorrectVendorExtension() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            type: string
-                        x-hello: world
-                        invalid: extension
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    type: string
+                                x-hello: world
+                                invalid: extension
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

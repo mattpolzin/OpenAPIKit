@@ -83,19 +83,19 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlows,
-"""
-{
+            """
+            {
 
-}
-"""
+            }
+            """
             )
     }
 
     func test_minimal_decode() throws {
         let oauthFlowsData =
-"""
-{}
-""".data(using: .utf8)!
+        """
+        {}
+        """.data(using: .utf8)!
 
         let oauthFlows = try orderUnstableDecode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
 
@@ -136,85 +136,85 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlows,
-"""
-{
-  "authorizationCode" : {
-    "authorizationUrl" : "http:\\/\\/google.com",
-    "refreshUrl" : "http:\\/\\/google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http:\\/\\/google.com"
-  },
-  "clientCredentials" : {
-    "refreshUrl" : "http:\\/\\/google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http:\\/\\/google.com"
-  },
-  "implicit" : {
-    "authorizationUrl" : "http:\\/\\/google.com",
-    "refreshUrl" : "http:\\/\\/google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    }
-  },
-  "password" : {
-    "refreshUrl" : "http:\\/\\/google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http:\\/\\/google.com"
-  }
-}
-"""
+            """
+            {
+              "authorizationCode" : {
+                "authorizationUrl" : "http:\\/\\/google.com",
+                "refreshUrl" : "http:\\/\\/google.com",
+                "scopes" : {
+                  "read:test" : "read things",
+                  "write:test" : "write things"
+                },
+                "tokenUrl" : "http:\\/\\/google.com"
+              },
+              "clientCredentials" : {
+                "refreshUrl" : "http:\\/\\/google.com",
+                "scopes" : {
+                  "read:test" : "read things",
+                  "write:test" : "write things"
+                },
+                "tokenUrl" : "http:\\/\\/google.com"
+              },
+              "implicit" : {
+                "authorizationUrl" : "http:\\/\\/google.com",
+                "refreshUrl" : "http:\\/\\/google.com",
+                "scopes" : {
+                  "read:test" : "read things",
+                  "write:test" : "write things"
+                }
+              },
+              "password" : {
+                "refreshUrl" : "http:\\/\\/google.com",
+                "scopes" : {
+                  "read:test" : "read things",
+                  "write:test" : "write things"
+                },
+                "tokenUrl" : "http:\\/\\/google.com"
+              }
+            }
+            """
             )
     }
 
     func test_maximal_decode() throws {
         let oauthFlowsData =
-"""
-{
-  "authorizationCode" : {
-    "authorizationUrl" : "http://google.com",
-    "refreshUrl" : "http://google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http://google.com"
-  },
-  "clientCredentials" : {
-    "refreshUrl" : "http://google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http://google.com"
-  },
-  "implicit" : {
-    "authorizationUrl" : "http://google.com",
-    "refreshUrl" : "http://google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    }
-  },
-  "password" : {
-    "refreshUrl" : "http://google.com",
-    "scopes" : {
-      "read:test" : "read things",
-      "write:test" : "write things"
-    },
-    "tokenUrl" : "http://google.com"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "authorizationCode" : {
+            "authorizationUrl" : "http://google.com",
+            "refreshUrl" : "http://google.com",
+            "scopes" : {
+              "read:test" : "read things",
+              "write:test" : "write things"
+            },
+            "tokenUrl" : "http://google.com"
+          },
+          "clientCredentials" : {
+            "refreshUrl" : "http://google.com",
+            "scopes" : {
+              "read:test" : "read things",
+              "write:test" : "write things"
+            },
+            "tokenUrl" : "http://google.com"
+          },
+          "implicit" : {
+            "authorizationUrl" : "http://google.com",
+            "refreshUrl" : "http://google.com",
+            "scopes" : {
+              "read:test" : "read things",
+              "write:test" : "write things"
+            }
+          },
+          "password" : {
+            "refreshUrl" : "http://google.com",
+            "scopes" : {
+              "read:test" : "read things",
+              "write:test" : "write things"
+            },
+            "tokenUrl" : "http://google.com"
+          }
+        }
+        """.data(using: .utf8)!
 
         let oauthFlows = try orderUnstableDecode(OpenAPI.OAuthFlows.self, from: oauthFlowsData)
 
@@ -253,15 +253,15 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow1,
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "refreshUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
 
         let implicitFlow2 = OpenAPI.OAuthFlows.Implicit(
@@ -273,45 +273,45 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow2,
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  }
-}
-"""
-            )
+              }
+            }
+            """
+        )
     }
 
     func test_implicitFlow_decode() throws {
         let implicitFlow1Data =
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "authorizationUrl" : "http:\\/\\/google.com",
+          "refreshUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
 
         let implicitFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow1Data)
 
         XCTAssertEqual(
             implicitFlow1,
             OpenAPI.OAuthFlows.Implicit(authorizationUrl: testUrl, refreshUrl: testUrl, scopes: [:])
-            )
+        )
 
         let implicitFlow2Data =
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "authorizationUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
 
         let implicitFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.Implicit.self, from: implicitFlow2Data)
 
@@ -332,15 +332,15 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow1,
-"""
-{
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "refreshUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
 
         let passwordFlow2 = OpenAPI.OAuthFlows.Password(
@@ -352,28 +352,28 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow2,
-"""
-{
-  "scopes" : {
+            """
+            {
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
     }
 
     func test_passwordFlow_decode() throws {
         let passwordFlow1Data =
-"""
-{
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "refreshUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let passwordFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow1Data)
 
@@ -383,14 +383,14 @@ extension OAuthFlowsTests {
         )
 
         let passwordFlow2Data =
-"""
-{
-  "scopes" : {
+        """
+        {
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let passwordFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.Password.self, from: passwordFlow2Data)
 
@@ -411,15 +411,15 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow1,
-"""
-{
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "refreshUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
 
         let credentialsFlow2 = OpenAPI.OAuthFlows.ClientCredentials(
@@ -431,28 +431,28 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow2,
-"""
-{
-  "scopes" : {
+            """
+            {
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
     }
 
     func test_clientsideCredentialsFlow_decode() throws {
         let credentialsFlow1Data =
-"""
-{
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "refreshUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let credentialsFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow1Data)
 
@@ -462,14 +462,14 @@ extension OAuthFlowsTests {
         )
 
         let credentialsFlow2Data =
-"""
-{
-  "scopes" : {
+        """
+        {
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let credentialsFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.ClientCredentials.self, from: credentialsFlow2Data)
 
@@ -491,16 +491,16 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow1,
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "refreshUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
 
         let authorizationCodeFlow2 = OpenAPI.OAuthFlows.AuthorizationCode(
@@ -513,30 +513,30 @@ extension OAuthFlowsTests {
 
         assertJSONEquivalent(
             encodedFlow2,
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+            """
+            {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-"""
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+            """
         )
     }
 
     func test_authorizationCodeFlow_decode() throws {
         let authorizationCodeFlow1Data =
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "refreshUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "authorizationUrl" : "http:\\/\\/google.com",
+          "refreshUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let authorizationCodeFlow1 = try orderUnstableDecode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow1Data)
 
@@ -546,15 +546,15 @@ extension OAuthFlowsTests {
         )
 
         let authorizationCodeFlow2Data =
-"""
-{
-  "authorizationUrl" : "http:\\/\\/google.com",
-  "scopes" : {
+        """
+        {
+          "authorizationUrl" : "http:\\/\\/google.com",
+          "scopes" : {
 
-  },
-  "tokenUrl" : "http:\\/\\/google.com"
-}
-""".data(using: .utf8)!
+          },
+          "tokenUrl" : "http:\\/\\/google.com"
+        }
+        """.data(using: .utf8)!
 
         let authorizationCodeFlow2 = try orderUnstableDecode(OpenAPI.OAuthFlows.AuthorizationCode.self, from: authorizationCodeFlow2Data)
 

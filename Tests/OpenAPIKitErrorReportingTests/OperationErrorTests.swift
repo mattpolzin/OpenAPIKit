@@ -13,15 +13,15 @@ import Yams
 final class OperationErrorTests: XCTestCase {
     func test_missingResponses() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -38,17 +38,17 @@ paths:
 
     func test_wrongTypeTags() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            tags: 1234
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    tags: 1234
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -66,20 +66,20 @@ paths:
 
     func test_missingUrlInServer() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            servers:
-                - url: http://google.com
-                  description: google
-                - description: missing a url
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    servers:
+                        - url: http://google.com
+                          description: google
+                        - description: missing a url
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -100,22 +100,22 @@ paths:
 extension OperationErrorTests {
     func test_missingResponseFromSSWGPitchConversation() {
         let documentYML =
-"""
-openapi: 3.0.0
-info:
-  title: API
-  version: 1.0.0
-paths:
-  /all-items:
-    summary: Get all items
-    get:
-      responses:
-        "200":
-          description: All items
-  /one-item:
-    get:
-      summary: Get one item
-"""
+        """
+        openapi: 3.0.0
+        info:
+          title: API
+          version: 1.0.0
+        paths:
+          /all-items:
+            summary: Get all items
+            get:
+              responses:
+                "200":
+                  description: All items
+          /one-item:
+            get:
+              summary: Get one item
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

@@ -206,21 +206,21 @@ extension ComponentsTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
+            """
+            {
 
-}
-"""
+            }
+            """
         )
     }
 
     func test_minimal_decode() throws {
         let t1 =
-"""
-{
+        """
+        {
 
-}
-""".data(using: .utf8)!
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
 
@@ -257,115 +257,115 @@ extension ComponentsTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "examples" : {
-    "four" : {
-      "externalValue" : "http:\\/\\/address.com"
-    }
-  },
-  "headers" : {
-    "six" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "parameters" : {
-    "three" : {
-      "content" : {
+            """
+            {
+              "examples" : {
+                "four" : {
+                  "externalValue" : "http:\\/\\/address.com"
+                }
+              },
+              "headers" : {
+                "six" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "parameters" : {
+                "three" : {
+                  "content" : {
 
-      },
-      "in" : "query",
-      "name" : "hi"
-    }
-  },
-  "requestBodies" : {
-    "five" : {
-      "content" : {
+                  },
+                  "in" : "query",
+                  "name" : "hi"
+                }
+              },
+              "requestBodies" : {
+                "five" : {
+                  "content" : {
 
-      }
-    }
-  },
-  "responses" : {
-    "two" : {
-      "description" : "hello"
-    }
-  },
-  "schemas" : {
-    "one" : {
-      "type" : "string"
-    }
-  },
-  "securitySchemes" : {
-    "seven" : {
-      "scheme" : "cool",
-      "type" : "http"
-    }
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+                  }
+                }
+              },
+              "responses" : {
+                "two" : {
+                  "description" : "hello"
+                }
+              },
+              "schemas" : {
+                "one" : {
+                  "type" : "string"
+                }
+              },
+              "securitySchemes" : {
+                "seven" : {
+                  "scheme" : "cool",
+                  "type" : "http"
+                }
+              },
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 
     func test_maximal_decode() throws {
         let t1 =
-"""
-{
-  "examples" : {
-    "four" : {
-      "externalValue" : "http:\\/\\/address.com"
-    }
-  },
-  "headers" : {
-    "six" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "parameters" : {
-    "three" : {
-      "content" : {
+        """
+        {
+          "examples" : {
+            "four" : {
+              "externalValue" : "http:\\/\\/address.com"
+            }
+          },
+          "headers" : {
+            "six" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "parameters" : {
+            "three" : {
+              "content" : {
 
-      },
-      "in" : "query",
-      "name" : "hi"
-    }
-  },
-  "requestBodies" : {
-    "five" : {
-      "content" : {
+              },
+              "in" : "query",
+              "name" : "hi"
+            }
+          },
+          "requestBodies" : {
+            "five" : {
+              "content" : {
 
-      }
-    }
-  },
-  "responses" : {
-    "two" : {
-      "description" : "hello"
-    }
-  },
-  "schemas" : {
-    "one" : {
-      "type" : "string"
-    }
-  },
-  "securitySchemes" : {
-    "seven" : {
-      "scheme" : "cool",
-      "type" : "http"
-    }
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-""".data(using: .utf8)!
+              }
+            }
+          },
+          "responses" : {
+            "two" : {
+              "description" : "hello"
+            }
+          },
+          "schemas" : {
+            "one" : {
+              "type" : "string"
+            }
+          },
+          "securitySchemes" : {
+            "seven" : {
+              "scheme" : "cool",
+              "type" : "http"
+            }
+          },
+          "x-specialFeature" : [
+            "hello",
+            "world"
+          ]
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
 
@@ -400,40 +400,40 @@ extension ComponentsTests {
 
     func test_doesNotFailDecodingLinks() {
         let t1 = """
-{
-  "links" : {
-    "link" : {
-      "operationId" : "test",
-      "parameters" : {
-        "userId" : "$response.body#/id",
-        "description" : "A link test"
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        {
+          "links" : {
+            "link" : {
+              "operationId" : "test",
+              "parameters" : {
+                "userId" : "$response.body#/id",
+                "description" : "A link test"
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
     }
 
     func test_doesNotFailDecodingCallbacks() {
         let t1 = """
-{
-  "callbacks" : {
-    "callback" : {
-      "{$request.query.queryUrl}" : {
-        "post" : {
-          "responses" : {
-            "200" : {
-              "description" : "callback successfully processed"
+        {
+          "callbacks" : {
+            "callback" : {
+              "{$request.query.queryUrl}" : {
+                "post" : {
+                  "responses" : {
+                    "200" : {
+                      "description" : "callback successfully processed"
+                    }
+                  }
+                }
+              }
             }
           }
         }
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
     }
@@ -450,37 +450,37 @@ extension ComponentsTests {
 
         assertJSONEquivalent(
             encoded1,
-"""
-{
-  "key" : "shell0"
-}
-"""
+            """
+            {
+              "key" : "shell0"
+            }
+            """
         )
 
         assertJSONEquivalent(
             encoded2,
-"""
-{
-  "key" : "hello_world1234-."
-}
-"""
+            """
+            {
+              "key" : "hello_world1234-."
+            }
+            """
         )
     }
 
     func test_acceptableKeys_decode() throws {
         let t1 =
-"""
-{
-    "key": "shell0"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "key": "shell0"
+        }
+        """.data(using: .utf8)!
 
         let t2 =
-"""
-{
-    "key": "1234-_."
-}
-""".data(using: .utf8)!
+        """
+        {
+            "key": "1234-_."
+        }
+        """.data(using: .utf8)!
 
         let decoded1 = try orderUnstableDecode(ComponentKeyWrapper.self, from: t1)
         let decoded2 = try orderUnstableDecode(ComponentKeyWrapper.self, from: t2)
@@ -499,18 +499,18 @@ extension ComponentsTests {
 
     func test_unacceptableKeys_decode() {
         let t1 =
-"""
-{
-    "key": "$hell0"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "key": "$hell0"
+        }
+        """.data(using: .utf8)!
 
         let t2 =
-"""
-{
-    "key": "hello world"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "key": "hello world"
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(ComponentKeyWrapper.self, from: t1))
         XCTAssertThrowsError(try orderUnstableDecode(ComponentKeyWrapper.self, from: t2))

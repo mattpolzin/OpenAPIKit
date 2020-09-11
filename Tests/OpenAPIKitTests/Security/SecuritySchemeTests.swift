@@ -75,25 +75,25 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedApiKey,
-"""
-{
-  "in" : "header",
-  "name" : "hi",
-  "type" : "apiKey"
-}
-"""
+            """
+            {
+              "in" : "header",
+              "name" : "hi",
+              "type" : "apiKey"
+            }
+            """
         )
     }
 
     func test_apiKeyWithoutDescription_decode() throws {
         let apiKeyData =
-"""
-{
-  "in" : "header",
-  "name" : "hi",
-  "type" : "apiKey"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "header",
+          "name" : "hi",
+          "type" : "apiKey"
+        }
+        """.data(using: .utf8)!
 
         let apiKey = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: apiKeyData)
 
@@ -110,27 +110,27 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedApiKey,
-"""
-{
-  "description" : "hello",
-  "in" : "header",
-  "name" : "hi",
-  "type" : "apiKey"
-}
-"""
+            """
+            {
+              "description" : "hello",
+              "in" : "header",
+              "name" : "hi",
+              "type" : "apiKey"
+            }
+            """
         )
     }
 
     func test_apiKeyWithDescription_decode() throws {
         let apiKeyData =
-"""
-{
-  "description" : "hello",
-  "in" : "header",
-  "name" : "hi",
-  "type" : "apiKey"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "description" : "hello",
+          "in" : "header",
+          "name" : "hi",
+          "type" : "apiKey"
+        }
+        """.data(using: .utf8)!
 
         let apiKey = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: apiKeyData)
 
@@ -147,23 +147,23 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedHttp,
-"""
-{
-  "scheme" : "hi",
-  "type" : "http"
-}
-"""
+            """
+            {
+              "scheme" : "hi",
+              "type" : "http"
+            }
+            """
         )
     }
 
     func test_http_decode() throws {
         let httpData =
-"""
-{
-  "scheme" : "hi",
-  "type" : "http"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "scheme" : "hi",
+          "type" : "http"
+        }
+        """.data(using: .utf8)!
 
         let http = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: httpData)
 
@@ -180,25 +180,25 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedHttp,
-"""
-{
-  "bearerFormat" : "hello",
-  "scheme" : "hi",
-  "type" : "http"
-}
-"""
+            """
+            {
+              "bearerFormat" : "hello",
+              "scheme" : "hi",
+              "type" : "http"
+            }
+            """
         )
     }
 
     func test_httpWithBearer_decode() throws {
         let httpData =
-"""
-{
-  "bearerFormat" : "hello",
-  "scheme" : "hi",
-  "type" : "http"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "bearerFormat" : "hello",
+          "scheme" : "hi",
+          "type" : "http"
+        }
+        """.data(using: .utf8)!
 
         let http = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: httpData)
 
@@ -222,37 +222,37 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedOAuth,
-"""
-{
-  "flows" : {
-    "implicit" : {
-      "authorizationUrl" : "http:\\/\\/google.com",
-      "scopes" : {
-        "read:test" : "read test"
-      }
-    }
-  },
-  "type" : "oauth2"
-}
-"""
+            """
+            {
+              "flows" : {
+                "implicit" : {
+                  "authorizationUrl" : "http:\\/\\/google.com",
+                  "scopes" : {
+                    "read:test" : "read test"
+                  }
+                }
+              },
+              "type" : "oauth2"
+            }
+            """
         )
     }
 
     func test_oauth2_decode() throws {
         let oauthData =
-"""
-{
-  "flows" : {
-    "implicit" : {
-      "authorizationUrl" : "http:\\/\\/google.com",
-      "scopes" : {
-        "read:test" : "read test"
-      }
-    }
-  },
-  "type" : "oauth2"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "flows" : {
+            "implicit" : {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "scopes" : {
+                "read:test" : "read test"
+              }
+            }
+          },
+          "type" : "oauth2"
+        }
+        """.data(using: .utf8)!
 
         let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
 
@@ -276,23 +276,23 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedOpenIdConnect,
-"""
-{
-  "openIdConnectUrl" : "http:\\/\\/google.com",
-  "type" : "openIdConnect"
-}
-"""
+            """
+            {
+              "openIdConnectUrl" : "http:\\/\\/google.com",
+              "type" : "openIdConnect"
+            }
+            """
         )
     }
 
     func test_openIdConnect_decode() throws {
         let openIdConnectData =
-"""
-{
-  "openIdConnectUrl" : "http:\\/\\/google.com",
-  "type" : "openIdConnect"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "openIdConnectUrl" : "http:\\/\\/google.com",
+          "type" : "openIdConnect"
+        }
+        """.data(using: .utf8)!
 
         let openIdConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
 
@@ -314,25 +314,25 @@ extension SecuritySchemeTests {
 
         assertJSONEquivalent(
             encodedOpenIdConnect,
-"""
-{
-  "openIdConnectUrl" : "http:\\/\\/google.com",
-  "type" : "openIdConnect",
-  "x-specialFeature" : "hello"
-}
-"""
+            """
+            {
+              "openIdConnectUrl" : "http:\\/\\/google.com",
+              "type" : "openIdConnect",
+              "x-specialFeature" : "hello"
+            }
+            """
         )
     }
 
     func test_openIdConnect_withExtension_decode() throws {
         let openIdConnectData =
-"""
-{
-  "openIdConnectUrl" : "http:\\/\\/google.com",
-  "type" : "openIdConnect",
-  "x-specialFeature" : "hello"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "openIdConnectUrl" : "http:\\/\\/google.com",
+          "type" : "openIdConnect",
+          "x-specialFeature" : "hello"
+        }
+        """.data(using: .utf8)!
 
         let openIdConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: openIdConnectData)
 
