@@ -187,7 +187,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             resolved1,
             schema,
             "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
-            file: file,
+            file: (file),
             line: line
         )
         let resolved2 = try fragments.reversed().combined(resolvingAgainst: .noComponents)
@@ -195,7 +195,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             resolved2,
             schema,
             "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
-            file: file,
+            file: (file),
             line: line
         )
     }

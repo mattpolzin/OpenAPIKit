@@ -12,17 +12,17 @@ import XCTest
 final class SchemaFragmentTests: XCTestCase {
     func test_init() {
         func assertNoGeneralProperties(_ fragment: JSONSchema, file: StaticString = #file, line: UInt = #line) {
-            XCTAssertNil(fragment.allowedValues, file: file, line: line)
-            XCTAssertEqual(fragment.deprecated, false, file: file, line: line)
-            XCTAssertNil(fragment.description, file: file, line: line)
-            XCTAssertNil(fragment.discriminator, file: file, line: line)
-            XCTAssertNil(fragment.example, file: file, line: line)
-            XCTAssertNil(fragment.externalDocs, file: file, line: line)
-            XCTAssertEqual(fragment.formatString ?? "", "", file: file, line: line)
-            XCTAssertEqual(fragment.nullable, false, file: file, line: line)
-            XCTAssertEqual(fragment.readOnly, false, file: file, line: line)
-            XCTAssertEqual(fragment.writeOnly, false, file: file, line: line)
-            XCTAssertNil(fragment.title, file: file, line: line)
+            XCTAssertNil(fragment.allowedValues, file: (file), line: line)
+            XCTAssertEqual(fragment.deprecated, false, file: (file), line: line)
+            XCTAssertNil(fragment.description, file: (file), line: line)
+            XCTAssertNil(fragment.discriminator, file: (file), line: line)
+            XCTAssertNil(fragment.example, file: (file), line: line)
+            XCTAssertNil(fragment.externalDocs, file: (file), line: line)
+            XCTAssertEqual(fragment.formatString ?? "", "", file: (file), line: line)
+            XCTAssertEqual(fragment.nullable, false, file: (file), line: line)
+            XCTAssertEqual(fragment.readOnly, false, file: (file), line: line)
+            XCTAssertEqual(fragment.writeOnly, false, file: (file), line: line)
+            XCTAssertNil(fragment.title, file: (file), line: line)
         }
 
         // minimal
@@ -34,17 +34,17 @@ final class SchemaFragmentTests: XCTestCase {
         assertNoGeneralProperties(JSONSchema.reference(.component(named: "test")))
 
         func assertSameGeneralProperties(_ fragment: JSONSchema, as properties: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(fragment.allowedValues, properties.allowedValues, file: file, line: line)
-            XCTAssertEqual(fragment.deprecated, properties.deprecated, file: file, line: line)
-            XCTAssertEqual(fragment.description, properties.description, file: file, line: line)
-            XCTAssertEqual(fragment.discriminator, properties.discriminator, file: file, line: line)
-            XCTAssertEqual(fragment.example, properties.example, file: file, line: line)
-            XCTAssertEqual(fragment.externalDocs, properties.externalDocs, file: file, line: line)
-            XCTAssertEqual(fragment.formatString, properties.formatString, file: file, line: line)
-            XCTAssertEqual(fragment.nullable, properties.nullable, file: file, line: line)
-            XCTAssertEqual(fragment.readOnly, properties.readOnly, file: file, line: line)
-            XCTAssertEqual(fragment.title, properties.title, file: file, line: line)
-            XCTAssertEqual(fragment.writeOnly, properties.writeOnly, file: file, line: line)
+            XCTAssertEqual(fragment.allowedValues, properties.allowedValues, file: (file), line: line)
+            XCTAssertEqual(fragment.deprecated, properties.deprecated, file: (file), line: line)
+            XCTAssertEqual(fragment.description, properties.description, file: (file), line: line)
+            XCTAssertEqual(fragment.discriminator, properties.discriminator, file: (file), line: line)
+            XCTAssertEqual(fragment.example, properties.example, file: (file), line: line)
+            XCTAssertEqual(fragment.externalDocs, properties.externalDocs, file: (file), line: line)
+            XCTAssertEqual(fragment.formatString, properties.formatString, file: (file), line: line)
+            XCTAssertEqual(fragment.nullable, properties.nullable, file: (file), line: line)
+            XCTAssertEqual(fragment.readOnly, properties.readOnly, file: (file), line: line)
+            XCTAssertEqual(fragment.title, properties.title, file: (file), line: line)
+            XCTAssertEqual(fragment.writeOnly, properties.writeOnly, file: (file), line: line)
         }
 
         // maximal
