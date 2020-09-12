@@ -131,7 +131,12 @@ final class BuiltinValidationTests: XCTestCase {
         )
 
         let validator = Validator.blank.validating(.schemaComponentsAreDefined)
-        XCTAssertThrowsError(try document.validate(using: validator))
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(
+                (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
+                [#"Failed to satisfy: JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema.properties.nested"#]
+            )
+        }
     }
 
     func test_noEmptySchemasSucceeds() throws {
