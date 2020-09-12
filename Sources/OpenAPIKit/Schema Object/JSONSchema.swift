@@ -185,6 +185,39 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     }
 }
 
+// MARK: - Case Checks
+extension JSONSchema {
+    /// Check if this schema is an _empty_ `.fragment`.
+    ///
+    /// A special case of the `.fragment` schema is the "empty"
+    /// schema where no information about the schema component
+    /// is available.
+    ///
+    /// This is equivalent to the following JSON Schema:
+    ///
+    ///     {
+    ///     }
+    ///
+    public var isEmpty: Bool {
+        guard case .fragment(let context) = self, context.isEmpty else {
+            return false
+        }
+        return true
+    }
+
+    /// Check if this schema is a `.fragment`.
+    public var isFragment: Bool {
+        guard case .fragment = self else { return false }
+        return true
+    }
+
+    // bool
+
+    // array
+
+    // ...
+}
+
 // MARK: - Context Accessors
 extension JSONSchema {
     /// Get the core context most JSONSchemas have.

@@ -66,7 +66,7 @@ try document.validate(using: Validator()
 )
 ```
 
-You can find all such built-in validations in `Validation+Defaults.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
+You can find all such built-in validations in `Validation+Builtins.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
 
 ### Creating New Validations
 
