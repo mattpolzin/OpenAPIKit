@@ -30,6 +30,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 
 ## Usage
 
+If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [migration guide](./documentation/v2_migration_guide.md).
+
 ### Decoding OpenAPI Documents
 
 You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
