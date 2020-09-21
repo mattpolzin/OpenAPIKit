@@ -20,8 +20,11 @@ jobs:
           - swift:5.2-focal
           - swift:5.2-centos8
           - swift:5.2-amazonlinux2
-          - swiftlang/swift:nightly-5.3-xenial
-          - swiftlang/swift:nightly-5.3-bionic
+          - swift:5.3-xenial
+          - swift:5.3-bionic
+          - swift:5.3-focal
+          - swift:5.3-centos8
+          - swift:5.3-amazonlinux2
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
