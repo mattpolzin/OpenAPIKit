@@ -28,7 +28,7 @@ public enum ErrorCategory {
     }
 }
 
-public protocol OpenAPIError: Swift.Error {
+public protocol OpenAPIError: Swift.Error, CustomStringConvertible {
     /// The subject of the error (i.e. the thing being worked with
     ///     when the error occurred).
     ///
@@ -115,6 +115,8 @@ public extension OpenAPIError {
 
         return "\(subjectString)\(contextString)\(errorTypeString)."
     }
+
+    var description: String { localizedDescription }
 }
 
 internal extension Swift.Array where Element == CodingKey {
