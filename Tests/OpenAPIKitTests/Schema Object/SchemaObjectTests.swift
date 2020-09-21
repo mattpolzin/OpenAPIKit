@@ -749,6 +749,7 @@ final class SchemaObjectTests: XCTestCase {
             .optionalSchemaObject()
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .optionalSchemaObject()
+        let fragment = JSONSchema.fragment(.init(required: true)).optionalSchemaObject()
 
         XCTAssertFalse(boolean.required)
         XCTAssertFalse(object.required)
@@ -760,6 +761,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(anyOf.required)
         XCTAssertFalse(oneOf.required)
         XCTAssertFalse(not.required)
+        XCTAssertFalse(fragment.required)
 
         XCTAssertTrue(reference.required)
     }
@@ -787,6 +789,7 @@ final class SchemaObjectTests: XCTestCase {
             .requiredSchemaObject()
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .requiredSchemaObject()
+        let fragment = JSONSchema.fragment(.init(required: false)).requiredSchemaObject()
 
         XCTAssertTrue(boolean.required)
         XCTAssertTrue(object.required)
@@ -799,6 +802,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(oneOf.required)
         XCTAssertTrue(not.required)
         XCTAssertTrue(reference.required)
+        XCTAssertTrue(fragment.required)
     }
 
     func test_notNullableToNullable() {
@@ -824,6 +828,7 @@ final class SchemaObjectTests: XCTestCase {
             .nullableSchemaObject()
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .nullableSchemaObject()
+        let fragment = JSONSchema.fragment(.init(nullable: false)).nullableSchemaObject()
 
         XCTAssertTrue(boolean.nullable)
         XCTAssertTrue(object.nullable)
@@ -835,6 +840,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(anyOf.nullable)
         XCTAssertTrue(oneOf.nullable)
         XCTAssertTrue(not.nullable)
+        XCTAssertTrue(fragment.nullable)
 
         XCTAssertFalse(reference.nullable)
     }
@@ -846,6 +852,7 @@ final class SchemaObjectTests: XCTestCase {
         let number = JSONSchema.number(.init(format: .unspecified, required: true, allowedValues: [2.5]), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, allowedValues: [5]), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true, allowedValues: ["hello"]), .init())
+        let fragment = JSONSchema.fragment(.init(allowedValues: [false]))
 
         XCTAssertEqual(boolean.allowedValues, [false])
         XCTAssertEqual(object.allowedValues, [[:]])
@@ -853,6 +860,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
         XCTAssertEqual(string.allowedValues, ["hello"])
+        XCTAssertEqual(fragment.allowedValues, [false])
     }
 
     func test_withAddedAllowedValues() {
@@ -877,6 +885,8 @@ final class SchemaObjectTests: XCTestCase {
             .with(allowedValues: ["hello"])
         let not = JSONSchema.not(boolean)
             .with(allowedValues: ["hello"])
+        let fragment = JSONSchema.fragment(.init()).with(allowedValues: [false])
+
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .with(allowedValues: ["hello"])
 
@@ -891,12 +901,14 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(anyOf.allowedValues, ["hello"])
         XCTAssertEqual(oneOf.allowedValues, ["hello"])
         XCTAssertEqual(not.allowedValues, ["hello"])
+        XCTAssertEqual(fragment.allowedValues, [false])
 
         XCTAssertNil(reference.allowedValues)
     }
 
     func test_withInitialExample() {
         let object = JSONSchema.object(.init(format: .unspecified, required: true, example: [:]), .init(properties: [:]))
+        let fragment = JSONSchema.fragment(.init(example: "hi"))
 
         // nonsense
         let all = JSONSchema.all(of: [])
@@ -906,6 +918,7 @@ final class SchemaObjectTests: XCTestCase {
         let ref = JSONSchema.reference(.external(URL(string: "hello.yml")!))
 
         XCTAssertEqual(object.example?.value as? [String:String], [:])
+        XCTAssertEqual(fragment.example?.value as? String, "hi")
 
         XCTAssertNil(all.example)
         XCTAssertNil(one.example)
@@ -939,6 +952,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(example: ["hello"])
         let not = try JSONSchema.not(object)
             .with(example: ["hello"])
+        let fragment = try JSONSchema.fragment(.init()).with(example: "hi")
 
         XCTAssertThrowsError(try JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .with(example: ["hello"]))
@@ -956,6 +970,39 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(anyOf.example?.value as? [String], ["hello"])
         XCTAssertEqual(oneOf.example?.value as? [String], ["hello"])
         XCTAssertEqual(not.example?.value as? [String], ["hello"])
+        XCTAssertEqual(fragment.example?.value as? String, "hi")
+    }
+
+    func test_withDiscriminator() throws {
+        let object = JSONSchema.object.with(discriminator: .init(propertyName: "test"))
+        let array = JSONSchema.array.with(discriminator: .init(propertyName: "test"))
+
+        let boolean = JSONSchema.boolean.with(discriminator: .init(propertyName: "test"))
+        let number = JSONSchema.number.with(discriminator: .init(propertyName: "test"))
+        let integer = JSONSchema.integer.with(discriminator: .init(propertyName: "test"))
+        let string = JSONSchema.string.with(discriminator: .init(propertyName: "test"))
+        let fragment = JSONSchema.fragment(.init()).with(discriminator: .init(propertyName: "test"))
+        let all = JSONSchema.all(of: .string).with(discriminator: .init(propertyName: "test"))
+        let one = JSONSchema.one(of: .string).with(discriminator: .init(propertyName: "test"))
+        let any = JSONSchema.any(of: .string).with(discriminator: .init(propertyName: "test"))
+        let not = JSONSchema.not(.string).with(discriminator: .init(propertyName: "test"))
+        let reference = JSONSchema.reference(.component(named: "test")).with(discriminator: .init(propertyName: "test"))
+
+        XCTAssertEqual(object.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(array.discriminator, .init(propertyName: "test"))
+
+        XCTAssertEqual(boolean.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(number.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(integer.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(string.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(fragment.discriminator, .init(propertyName: "test"))
+
+        XCTAssertEqual(all.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(one.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(any.discriminator, .init(propertyName: "test"))
+        XCTAssertEqual(not.discriminator, .init(propertyName: "test"))
+
+        XCTAssertNil(reference.discriminator)
     }
 
     func test_minObjectProperties() {
