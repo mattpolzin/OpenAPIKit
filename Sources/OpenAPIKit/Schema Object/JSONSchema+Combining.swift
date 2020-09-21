@@ -29,7 +29,7 @@ public struct JSONSchemaResolutionError: Swift.Error, CustomStringConvertible {
     }
 
     public var description: String {
-        underlyingError.description
+        String(describing: underlyingError)
     }
 
     // The following can be used for pattern matching but are not good

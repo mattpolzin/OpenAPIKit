@@ -7,7 +7,7 @@
 
 // MARK: - Generic Decoding
 
-public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomDebugStringConvertible {
+public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomStringConvertible {
 
     public struct IndividualFailure: Swift.Error {
         public let type: Any.Type
@@ -17,7 +17,7 @@ public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomDebugStringCon
     public let codingPath: [CodingKey]
     public let individualTypeFailures: [IndividualFailure]
 
-    public var debugDescription: String {
+    public var description: String {
         let codingPathString = codingPath
             .map { $0.intValue.map(String.init) ?? $0.stringValue }
             .joined(separator: "/")
@@ -28,8 +28,7 @@ public struct EitherDecodeNoTypesMatchedError: Swift.Error, CustomDebugStringCon
             return "\(String(describing: type)) could not be decoded because:\n\(error)"
         }.joined(separator: "\n\n")
 
-        return
-        """
+        return """
         Either failed to decode any of its types at: "\(codingPathString)"
 
         \(failureStrings)
