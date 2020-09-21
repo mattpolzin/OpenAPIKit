@@ -17,6 +17,7 @@ extension OpenAPI {
         public var operationId: String?
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
+
         /// The possible responses for this operation, keyed by status code.
         ///
         /// The status code keys can be integer values, ranges, or even the

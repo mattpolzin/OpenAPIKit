@@ -245,7 +245,11 @@ extension OperationTests {
             )
         )
 
+        // compare request to construction of Either
+        XCTAssertEqual(operation.requestBody, .request(.init(content: [.json: .init(schema: .init(.string))])))
+        // compare request having extracted from Either
         XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string))]))
+
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
     }

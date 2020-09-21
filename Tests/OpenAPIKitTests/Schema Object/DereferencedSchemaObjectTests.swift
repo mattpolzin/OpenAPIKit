@@ -281,6 +281,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             t1,
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
         )
+
+        let t2 = JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced()
+        XCTAssertEqual(
+            t2?.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
     }
 
     func test_throwingObjectWithoutReferences() throws {
@@ -291,6 +297,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
         )
         XCTAssertEqual(t1.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
+
+        let t2 = try JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced(in: components)
+        XCTAssertEqual(
+            t2.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
     }
 
     func test_optionalObjectWithReferences() {
