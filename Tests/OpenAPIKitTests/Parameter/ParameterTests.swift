@@ -745,6 +745,82 @@ extension ParameterTests {
         )
     }
 
+    func test_examples_encode() throws {
+        let parameter = OpenAPI.Parameter(
+            name: "hello",
+            context: .header(required: true),
+            schema: .init(
+                .string,
+                style: .default(for: .header),
+                allowReserved: true,
+                examples: [
+                    "test": .example(value: .init(URL(string: "http://website.com")!))
+                ]
+            )
+        )
+
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
+
+        assertJSONEquivalent(
+            encodedParameter,
+            """
+            {
+              "allowReserved" : true,
+              "examples" : {
+                "test" : {
+                  "externalValue" : "http:\\/\\/website.com"
+                }
+              },
+              "in" : "header",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
+        )
+    }
+
+    func test_examples_decode() throws {
+        let parameterData =
+        """
+        {
+          "allowReserved" : true,
+          "examples" : {
+            "test" : {
+              "externalValue" : "http://website.com"
+            }
+          },
+          "in" : "header",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
+
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
+
+        XCTAssertEqual(parameter.location, .header)
+        XCTAssertEqual(
+            parameter,
+            OpenAPI.Parameter(
+                name: "hello",
+                context: .header(required: true),
+                schema: .init(
+                    .string,
+                    style: .default(for: .header),
+                    allowReserved: true,
+                    examples: [
+                        "test": .example(value: .init(URL(string: "http://website.com")!))
+                    ]
+                )
+            )
+        )
+    }
+
     func test_vendorExtension_encode() throws {
         let parameter = OpenAPI.Parameter(
             name: "hello",
