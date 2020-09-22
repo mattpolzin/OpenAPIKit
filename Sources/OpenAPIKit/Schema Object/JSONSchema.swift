@@ -590,6 +590,75 @@ extension JSONSchema {
     }
 
     // array allowedValues
+    /// Construct a fragment of a schema.
+    public static func fragment(
+        format: JSONTypeFormat.AnyFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
+        title: String? = nil,
+        description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
+        allowedValues: [AnyCodable]? = nil,
+        example: AnyCodable? = nil
+    ) -> JSONSchema {
+        let context = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
+        return .fragment(context)
+    }
+
+    // variadic allowedValues
+    /// Construct a fragment of a schema passing a variadic list of allowed values.
+    public static func fragment(
+        format: JSONTypeFormat.AnyFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
+        title: String? = nil,
+        description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
+        allowedValues: AnyCodable...,
+        example: AnyCodable? = nil
+    ) -> JSONSchema {
+        return .fragment(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            example: example
+        )
+    }
+
+    /// A required, non-nullable fragment of a schema.
+    ///
+    /// This is also known as the "empty" schema because
+    /// its representation in JSON is just an empty object `{ }`.
+    public static var fragment: JSONSchema {
+        return .fragment()
+    }
+
+    // array allowedValues
     /// Construct a string schema.
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,

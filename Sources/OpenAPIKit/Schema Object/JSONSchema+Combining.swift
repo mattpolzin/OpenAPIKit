@@ -533,28 +533,6 @@ internal func combine(properties left: [String: JSONSchema], with right: [String
     return combined
 }
 
-// MARK: - Full Context -> Fragment Context
-
-fileprivate extension JSONSchema.CoreContext {
-    var anyCoreContext: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat> {
-        let newFormat = JSONTypeFormat.AnyFormat(rawValue: format.rawValue)
-        let newPermissions = _permissions.map(JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions.init)
-        return JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
-            format: newFormat,
-            required: required,
-            nullable: nullable,
-            permissions: newPermissions,
-            deprecated: deprecated,
-            title: title,
-            description: description,
-            discriminator: discriminator,
-            externalDocs: externalDocs,
-            allowedValues: allowedValues,
-            example: example
-        )
-    }
-}
-
 // MARK: - Fragment Context -> Full Context
 
 extension JSONSchema.CoreContext {

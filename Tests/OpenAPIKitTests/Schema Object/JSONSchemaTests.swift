@@ -1,5 +1,5 @@
 //
-//  SchemaObjectTests.swift
+//  JSONSchemaTests.swift
 //  
 //
 //  Created by Mathew Polzin on 6/23/19.
@@ -31,7 +31,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         // JSONTypeFormat
         XCTAssertEqual(boolean.jsonTypeFormat, .boolean(.unspecified))
@@ -54,7 +54,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.jsonTypeFormat)
         XCTAssertNil(not.jsonTypeFormat)
         XCTAssertNil(reference.jsonTypeFormat)
-        XCTAssertNil(undefined.jsonTypeFormat)
+        XCTAssertNil(fragment.jsonTypeFormat)
 
         // JSONType
         XCTAssertEqual(boolean.jsonTypeFormat?.jsonType, .boolean)
@@ -88,6 +88,32 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(dateTimeString.jsonType, .string)
         XCTAssertEqual(passwordString.jsonType, .string)
 
+        XCTAssertNil(fragment.jsonType)
+        // kind of arbitrary, but if you try really hard you can
+        // dig into a fragment's format's jsonType and it will say
+        // it is an object -- seems just as likely as anything else.
+        XCTAssertEqual(
+            (fragment.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>)?.format.jsonType,
+            .object
+        )
+
+        // Format String
+        XCTAssertEqual(boolean.formatString, "")
+        XCTAssertEqual(object.formatString, "")
+        XCTAssertEqual(array.formatString, "")
+        XCTAssertEqual(number.formatString, "")
+        XCTAssertEqual(floatNumber.formatString, "float")
+        XCTAssertEqual(doubleNumber.formatString, "double")
+        XCTAssertEqual(integer.formatString, "")
+        XCTAssertEqual(integer32.formatString, "int32")
+        XCTAssertEqual(integer64.formatString, "int64")
+        XCTAssertEqual(string.formatString, "")
+        XCTAssertEqual(byteString.formatString, "byte")
+        XCTAssertEqual(binaryString.formatString, "binary")
+        XCTAssertEqual(dateString.formatString, "date")
+        XCTAssertEqual(dateTimeString.formatString, "date-time")
+        XCTAssertEqual(passwordString.formatString, "password")
+
         // SwiftType
         XCTAssert(boolean.jsonTypeFormat?.swiftType == Bool.self)
         XCTAssert(object.jsonTypeFormat?.swiftType == AnyCodable.self)
@@ -106,6 +132,45 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssert(passwordString.jsonTypeFormat?.swiftType == String.self)
     }
 
+    func test_isFragmentAndIsEmpty() {
+        let empty = JSONSchema.fragment(.init())
+        let fragment = JSONSchema.fragment(.init(nullable: true))
+
+        XCTAssertTrue(empty.isFragment)
+        XCTAssertTrue(empty.isEmpty)
+
+        XCTAssertTrue(fragment.isFragment)
+        XCTAssertFalse(fragment.isEmpty)
+
+        let others: [JSONSchema] = [
+            .boolean(.init(format: .unspecified, required: true)),
+            .object(.init(format: .unspecified, required: true), .init(properties: [:])),
+            .array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true)))),
+            .number(.init(format: .unspecified, required: true), .init()),
+            .number(.init(format: .float, required: true), .init()),
+            .number(.init(format: .double, required: true), .init()),
+            .integer(.init(format: .unspecified, required: true), .init()),
+            .integer(.init(format: .int32, required: true), .init()),
+            .integer(.init(format: .int64, required: true), .init()),
+            .string(.init(format: .unspecified, required: true), .init()),
+            .string(.init(format: .byte, required: true), .init()),
+            .string(.init(format: .binary, required: true), .init()),
+            .string(.init(format: .date, required: true), .init()),
+            .string(.init(format: .dateTime, required: true), .init()),
+            .string(.init(format: .password, required: true), .init()),
+            .all(of: [.string(.init(), .init())]),
+            .any(of: [.boolean]),
+            .one(of: [.boolean]),
+            .not(.boolean),
+            .reference(.external(URL(string: "hello/world.json#/hello")!))
+        ]
+
+        for other in others {
+            XCTAssertFalse(other.isFragment)
+            XCTAssertFalse(other.isEmpty)
+        }
+    }
+
     func test_required() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
@@ -119,7 +184,6 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-
 
         XCTAssertTrue(boolean.required)
         XCTAssertTrue(object.required)
@@ -560,7 +624,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.objectContext)
         XCTAssertEqual(object.objectContext, .init(properties: ["hello": .string]))
@@ -574,7 +638,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.objectContext)
         XCTAssertNil(not.objectContext)
         XCTAssertNil(reference.objectContext)
-        XCTAssertNil(undefined.objectContext)
+        XCTAssertNil(fragment.objectContext)
     }
 
     func test_arrayContextAccessor() {
@@ -590,7 +654,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.arrayContext)
         XCTAssertNil(object.arrayContext)
@@ -604,7 +668,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.arrayContext)
         XCTAssertNil(not.arrayContext)
         XCTAssertNil(reference.arrayContext)
-        XCTAssertNil(undefined.arrayContext)
+        XCTAssertNil(fragment.arrayContext)
     }
 
     func test_numberContextAccessor() {
@@ -620,7 +684,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.numberContext)
         XCTAssertNil(object.numberContext)
@@ -634,7 +698,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.numberContext)
         XCTAssertNil(not.numberContext)
         XCTAssertNil(reference.numberContext)
-        XCTAssertNil(undefined.numberContext)
+        XCTAssertNil(fragment.numberContext)
     }
 
     func test_integerContextAccessor() {
@@ -650,7 +714,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.integerContext)
         XCTAssertNil(object.integerContext)
@@ -664,7 +728,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.integerContext)
         XCTAssertNil(not.integerContext)
         XCTAssertNil(reference.integerContext)
-        XCTAssertNil(undefined.integerContext)
+        XCTAssertNil(fragment.integerContext)
     }
 
     func test_stringContextAccessor() {
@@ -680,7 +744,7 @@ final class SchemaObjectTests: XCTestCase {
         let oneOf = JSONSchema.one(of: [boolean])
         let not = JSONSchema.not(boolean)
         let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
-        let undefined = JSONSchema.fragment(.init(description: "hello world"))
+        let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.stringContext)
         XCTAssertNil(object.stringContext)
@@ -694,7 +758,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(oneOf.stringContext)
         XCTAssertNil(not.stringContext)
         XCTAssertNil(reference.stringContext)
-        XCTAssertNil(undefined.stringContext)
+        XCTAssertNil(fragment.stringContext)
     }
 
     func test_numericContextFromIntegerContext() {
@@ -2856,35 +2920,43 @@ extension SchemaObjectTests {
         let allowedValueArray = JSONSchema.array(.init(format: .unspecified, required: true), .init(uniqueItems: true))
             .with(allowedValues: [[10]])
 
-        testEncodingPropertyLines(entity: requiredArray,
-                                  propertyLines: [
-                                    "\"type\" : \"array\",",
-                                    "\"uniqueItems\" : true"
-        ])
+        testEncodingPropertyLines(
+            entity: requiredArray,
+            propertyLines: [
+                "\"type\" : \"array\",",
+                "\"uniqueItems\" : true"
+            ]
+        )
 
-        testEncodingPropertyLines(entity: optionalArray,
-                                  propertyLines: [
-                                    "\"type\" : \"array\",",
-                                    "\"uniqueItems\" : true"
-        ])
+        testEncodingPropertyLines(
+            entity: optionalArray,
+            propertyLines: [
+                "\"type\" : \"array\",",
+                "\"uniqueItems\" : true"
+            ]
+        )
 
-        testEncodingPropertyLines(entity: nullableArray,
-                                  propertyLines: [
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"array\",",
-                                    "\"uniqueItems\" : true"
-        ])
+        testEncodingPropertyLines(
+            entity: nullableArray,
+            propertyLines: [
+                "\"nullable\" : true,",
+                "\"type\" : \"array\",",
+                "\"uniqueItems\" : true"
+            ]
+        )
 
-        testEncodingPropertyLines(entity: allowedValueArray,
-                                  propertyLines: [
-                                    "\"enum\" : [",
-                                    "  [",
-                                    "    10",
-                                    "  ]",
-                                    "],",
-                                    "\"type\" : \"array\",",
-                                    "\"uniqueItems\" : true"
-        ])
+        testEncodingPropertyLines(
+            entity: allowedValueArray,
+            propertyLines: [
+                "\"enum\" : [",
+                "  [",
+                "    10",
+                "  ]",
+                "],",
+                "\"type\" : \"array\",",
+                "\"uniqueItems\" : true"
+            ]
+        )
     }
 
     func test_decodeArrayWithUniqueItems() {
@@ -2899,6 +2971,10 @@ extension SchemaObjectTests {
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init(uniqueItems: true)))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(uniqueItems: true)))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+
+        XCTAssertEqual(array.arrayContext?.uniqueItems, true)
+        XCTAssertEqual(nullableArray.arrayContext?.uniqueItems, true)
+        XCTAssertEqual(allowedValueArray.arrayContext?.uniqueItems, true)
 
         guard case let .array(_, contextB) = allowedValueArray else {
             XCTFail("expected array")
@@ -5113,7 +5189,7 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
     )
 }
 
-// MARK: - Building
+// MARK: - Building (Convenience constructors)
 
 extension SchemaObjectTests {
     func test_boolean() {
@@ -5136,6 +5212,28 @@ extension SchemaObjectTests {
 
         let t2 = JSONSchema.boolean(format: .other("integer"))
         XCTAssertEqual(t2, JSONSchema.boolean(format: .init(rawValue: "integer")))
+    }
+
+    func test_fragment() {
+        let _: JSONSchema = .fragment
+        let _ = JSONSchema.fragment(
+            required: true,
+            nullable: true
+        )
+        let _ = JSONSchema.fragment(
+            required: false,
+            nullable: false,
+            allowedValues: [
+                true,
+                false
+            ]
+        )
+
+        let t1 = JSONSchema.fragment(format: .generic)
+        XCTAssertEqual(t1, JSONSchema.fragment(format: .init(rawValue: "")))
+
+        let t2 = JSONSchema.fragment(format: .other("widget"))
+        XCTAssertEqual(t2, JSONSchema.fragment(format: .init(rawValue: "widget")))
     }
 
     func test_number() {
