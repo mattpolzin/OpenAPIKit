@@ -281,6 +281,27 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             t1,
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
         )
+
+        let t2 = JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced()
+        XCTAssertEqual(
+            t2?.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
+
+        let t3 = JSONSchema.object(
+            properties: [
+                "required": .string,
+                "optional": .string(required: false)
+            ]
+        ).dereferenced()
+        XCTAssertEqual(
+            t3?.objectContext?.requiredProperties,
+            ["required"]
+        )
+        XCTAssertEqual(
+            t3?.objectContext?.optionalProperties,
+            ["optional"]
+        )
     }
 
     func test_throwingObjectWithoutReferences() throws {
@@ -291,6 +312,27 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
         )
         XCTAssertEqual(t1.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
+
+        let t2 = try JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced(in: components)
+        XCTAssertEqual(
+            t2.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
+
+        let t3 = try JSONSchema.object(
+            properties: [
+                "required": .string,
+                "optional": .string(required: false)
+            ]
+        ).dereferenced(in: .noComponents)
+        XCTAssertEqual(
+            t3.objectContext?.requiredProperties,
+            ["required"]
+        )
+        XCTAssertEqual(
+            t3.objectContext?.optionalProperties,
+            ["optional"]
+        )
     }
 
     func test_optionalObjectWithReferences() {

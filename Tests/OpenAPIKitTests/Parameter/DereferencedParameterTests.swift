@@ -18,7 +18,31 @@ final class DereferencedParameterTests: XCTestCase {
 
         XCTAssertEqual(t1.name, "test")
         XCTAssertEqual(t1.context, .header)
+        XCTAssertEqual(
+            t1.schemaOrContent.schemaContextValue,
+            try OpenAPI.Parameter.SchemaContext.header(.string).dereferenced(in: .noComponents)
+        )
         XCTAssertEqual(t1.schemaOrContent.schemaValue?.jsonSchema, .string)
+        XCTAssertNil(t1.schemaOrContent.contentValue)
+
+        let t2 = try OpenAPI.Parameter(
+            name: "test2",
+            context: .path,
+            content: [
+                .anyText: .init(schema: .string)
+            ]
+        ).dereferenced(in: .noComponents)
+
+        XCTAssertEqual(t2.name, "test2")
+        XCTAssertEqual(t2.context, .path)
+        XCTAssertEqual(
+            t2.schemaOrContent.contentValue,
+            [
+                .anyText: try OpenAPI.Content(schema: .string).dereferenced(in: .noComponents)
+            ]
+        )
+        XCTAssertNil(t2.schemaOrContent.schemaValue)
+        XCTAssertNil(t2.schemaOrContent.schemaContextValue)
     }
 
     func test_inlineContentParameter() throws {

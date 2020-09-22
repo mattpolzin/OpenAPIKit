@@ -419,6 +419,36 @@ extension HeaderTests {
             }
             """
         )
+
+        let header2 = OpenAPI.Header(
+            schema: .init(
+                .array(items: .string),
+                style: .pipeDelimited,
+                allowReserved: true,
+                example: "this|or|that"
+            ),
+            required: true
+        )
+
+        let encodedHeader2 = try orderUnstableTestStringFromEncoding(of: header2)
+
+        assertJSONEquivalent(
+            encodedHeader2,
+            """
+            {
+              "allowReserved" : true,
+              "example" : "this|or|that",
+              "required" : true,
+              "schema" : {
+                "items" : {
+                  "type" : "string"
+                },
+                "type" : "array"
+              },
+              "style" : "pipeDelimited"
+            }
+            """
+        )
     }
 
     func test_header_withStyle_decode() throws {
@@ -444,6 +474,37 @@ extension HeaderTests {
                 schema: .init(
                     .array(items: .string),
                     style: .pipeDelimited
+                ),
+                required: true
+            )
+        )
+
+        let headerData2 =
+        """
+        {
+          "allowReserved" : true,
+          "example" : "this|or|that",
+          "required" : true,
+          "schema" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "style" : "pipeDelimited"
+        }
+        """.data(using: .utf8)!
+
+        let header2 = try orderUnstableDecode(OpenAPI.Header.self, from: headerData2)
+
+        XCTAssertEqual(
+            header2,
+            OpenAPI.Header(
+                schema: .init(
+                    .array(items: .string),
+                    style: .pipeDelimited,
+                    allowReserved: true,
+                    example: "this|or|that"
                 ),
                 required: true
             )

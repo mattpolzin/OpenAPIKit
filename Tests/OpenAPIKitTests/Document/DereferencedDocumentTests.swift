@@ -40,6 +40,17 @@ final class DereferencedDocumentTests: XCTestCase {
 
         XCTAssertEqual(t1.paths.count, 1)
         XCTAssertEqual(t1.paths["/hello/world"]?.get?.responses[status: 200]?.description, "success")
+
+        // just check that you can snag the expected resolved endpoints
+        XCTAssertEqual(
+            t1.resolvedEndpoints().map { $0.path },
+            ["/hello/world"]
+        )
+
+        XCTAssertEqual(
+            t1.resolvedEndpointsByPath().keys,
+            ["/hello/world"]
+        )
     }
 
     func test_noSecurityReferencedResponseInPath() throws {

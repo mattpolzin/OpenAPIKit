@@ -33,14 +33,16 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        public init(schemas: ComponentDictionary<JSONSchema> = [:],
-                    responses: ComponentDictionary<Response> = [:],
-                    parameters: ComponentDictionary<Parameter> = [:],
-                    examples: ComponentDictionary<Example> = [:],
-                    requestBodies: ComponentDictionary<Request> = [:],
-                    headers: ComponentDictionary<Header> = [:],
-                    securitySchemes: ComponentDictionary<SecurityScheme> = [:],
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        public init(
+            schemas: ComponentDictionary<JSONSchema> = [:],
+            responses: ComponentDictionary<Response> = [:],
+            parameters: ComponentDictionary<Parameter> = [:],
+            examples: ComponentDictionary<Example> = [:],
+            requestBodies: ComponentDictionary<Request> = [:],
+            headers: ComponentDictionary<Header> = [:],
+            securitySchemes: ComponentDictionary<SecurityScheme> = [:],
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.schemas = schemas
             self.responses = responses
             self.parameters = parameters
@@ -51,6 +53,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
+        /// An empty OpenAPI Components Object.
         public static let noComponents: Components = .init()
 
         public var isEmpty: Bool {

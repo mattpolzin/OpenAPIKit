@@ -358,6 +358,48 @@ extension ResponseTests {
         XCTAssertEqual(try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData), StatusCodeWrapper(status: 123))
     }
 
+    func test_rangeStatusCode_encode() throws {
+        let status = StatusCodeWrapper(status: .range(.redirect))
+        let encodedStatus = try orderUnstableTestStringFromEncoding(of: status)
+
+        assertJSONEquivalent(
+            encodedStatus,
+            """
+            {
+              "status" : "3XX"
+            }
+            """
+        )
+    }
+
+    func test_rangeStatusCode_decode() throws {
+        let statusCodeData =
+        """
+        {
+            "status": "3XX"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData),
+            StatusCodeWrapper(status: .range(.redirect))
+        )
+    }
+
+    func test_bestGuessStatusCode_decode() throws {
+        let statusCodeData =
+        """
+        {
+            "status": "400/500"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(StatusCodeWrapper.self, from: statusCodeData),
+            StatusCodeWrapper(status: 400)
+        )
+    }
+
     func test_nonesenseStatusCode_decode_throws() {
         let statusCodeData =
         """

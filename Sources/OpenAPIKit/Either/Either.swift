@@ -5,6 +5,15 @@
 //  Created by Mathew Polzin on 11/22/18.
 //
 
+/// Can contain a value of either type `A` or type `B`.
+///
+/// If it contains a value of type `A`, then the value can
+/// be accessed with the `.a` property and similarly for
+/// type `B` and the `.b` property.
+///
+/// A type-erased value can be retrieved with the `.value`
+/// property.
+///
 public enum Either<A, B> {
 	case a(A)
 	case b(B)
