@@ -54,6 +54,48 @@ let buildOut = stringSchema
   .with(allowedValues: "red", "green", "blue")
 ```
 
+### Simplifying Schemas
+The support for this feature is in its early stages with some gaps in what can be successfully simplified and a lot of room for additional heuristics.
+
+You can take any `JSONSchema` and dereference it with `.dereferenced()` or `.derefererenced(in:)`. You can then take the `DereferencedJSONSchema` and simplify it with `.simplified()`. Simplification will try to take a schema and make it into the simplest alternative schema that still has the same meaning. Many schemas are already in their simplest form, but when you start using schema components like `any`, `all`, `one`, etc. you open the door to schemas that are more complicated than other equivalent schemas.
+
+For example, the following schema with `.all(of:)` the given fragments add up to a simpler `.object` schema with the same rules:
+```json
+{
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "hello": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    }
+  ]
+}
+```
+
+The above schema gets simplified to the below schema.
+```json
+{
+  "type": "object",
+  "properties": {
+    "hello": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": {
+    "type": "integer"
+  }
+}
+```
+
 ### Generating Schemas from Swift Types
 
 Some schemas can be easily generated from Swift types. Many of the fundamental Swift types support schema representations out-of-box.
