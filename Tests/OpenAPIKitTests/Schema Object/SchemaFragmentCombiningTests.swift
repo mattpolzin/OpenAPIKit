@@ -478,6 +478,39 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         )
     }
 
+    // MARK: - Compound Nestings
+    func test_allOfInAllOf() throws {
+        let t1 = JSONSchema.all(
+            of: [
+                .object(title: "hello world"),
+                .object(description: "hi"),
+                .all(
+                    of: [
+                        .object(
+                            properties: [
+                                "string": .string
+                            ]
+                        ),
+                        .object(minProperties: 1)
+                    ]
+                )
+            ]
+        )
+
+        let expectedSimplification = JSONSchema.object(
+            title: "hello world",
+            description: "hi",
+            minProperties: 1,
+            properties: [
+                "string": .string
+            ]
+        ).dereferenced()
+
+        let schema = try t1.simplified(given: .noComponents)
+
+        XCTAssertEqual(schema, expectedSimplification)
+    }
+
     // MARK: - Conflict Failures
     func test_typeConflicts() {
         let booleanFragment = JSONSchema.boolean(.init())

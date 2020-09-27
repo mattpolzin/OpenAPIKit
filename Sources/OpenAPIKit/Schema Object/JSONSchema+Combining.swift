@@ -222,8 +222,12 @@ internal struct FragmentCombiner {
             jsonSchema = .object(try coreContext.validatedContext(), try objectContext.validatedContext())
         case .all(of: let schemas, core: let coreContext):
             jsonSchema = try .all(of: schemas, core: coreContext.validatedContext())
-        case .any, .not, .one:
-            throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), all(of:), and one(of:) are not yet supported for schema resolution"))
+        case .any(of: let schemas, core: let coreContext):
+            jsonSchema = try .any(of: schemas, core: coreContext.validatedContext())
+        case .one(of: let schemas, core: let coreContext):
+            jsonSchema = try .one(of: schemas, core: coreContext.validatedContext())
+        case .not:
+            throw JSONSchemaResolutionError(.unsupported(because: "`.not` is not yet supported for schema simplification"))
         }
         return try jsonSchema.simplified(given: components)
     }
