@@ -74,7 +74,7 @@ try openAPIDoc.validate()
 You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [Validation Documentation](./documentation/validation.md).
 
 ### A note on dictionary ordering
-The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a totally different order.
+The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
 
 If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
 
