@@ -8,27 +8,28 @@ A `JSONSchema` can be:
 3. A `reference` to a schema in the Components Object or elsewhere.
 4. `all(of:)`, `one(of:)`, or `any(of:)` a list of other schemas.
 5. `not` another schema.
-6. `undefined` (which means not even the type of schema is being specified).
+6. `fragment` (which means the type of schema is not specified).
 
-The fundamental schema types and arrays and objects all share a common set of properties (accessible from their `generalContext`) and each (except for boolean) also has some properties that only apply to that one type (accessible from properties named after the type like `objectContext`, `arrayContext`, `integerContext`, etc.).
+The fundamental schema types and arrays and objects all share a common set of properties (accessible from their `coreContext`) and each (except for boolean) also has some properties that only apply to that one type (accessible from properties named after the type like `objectContext`, `arrayContext`, `integerContext`, etc.).
 
 You can also extract these properties with pattern matching on a `JSONSchema`.
 
 ```swift
 let schema: JSONSchema = ...
 switch schema {
-  case .boolean(let generalContext):
+  case .boolean(let coreContext):
     break
-  case .object(let generalContext, let objectContext):
+  case .object(let coreContext, let objectContext):
     break
-  case .array(let generalContext, let arrayContext):
+  case .array(let coreContext, let arrayContext):
     break
-  case .number(let generalContext, let numberContext):
+  case .number(let coreContext, let numberContext):
     break
-  case .integer(let generalContext, let integerContext):
+  case .integer(let coreContext, let integerContext):
     break
-  case .string(let generalContext, let stringContext):
+  case .string(let coreContext, let stringContext):
     break
+  ...
 }
 ```
 
@@ -51,6 +52,48 @@ let buildOut = stringSchema
   .optionalSchemaObject()
   .nullableSchemaObject()
   .with(allowedValues: "red", "green", "blue")
+```
+
+### Simplifying Schemas
+The support for this feature is in its early stages with some gaps in what can be successfully simplified and a lot of room for additional heuristics.
+
+You can take any `JSONSchema` and dereference it with `.dereferenced()` or `.derefererenced(in:)`. You can then take the `DereferencedJSONSchema` and simplify it with `.simplified()`. Simplification will try to take a schema and make it into the simplest alternative schema that still has the same meaning. Many schemas are already in their simplest form, but when you start using schema components like `any`, `all`, `one`, etc. you open the door to schemas that are more complicated than other equivalent schemas.
+
+For example, the following schema with `.all(of:)` the given fragments add up to a simpler `.object` schema with the same rules:
+```json
+{
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "hello": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    }
+  ]
+}
+```
+
+The above schema gets simplified to the below schema.
+```json
+{
+  "type": "object",
+  "properties": {
+    "hello": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": {
+    "type": "integer"
+  }
+}
 ```
 
 ### Generating Schemas from Swift Types

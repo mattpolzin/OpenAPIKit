@@ -137,25 +137,25 @@ extension JSONReferenceTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "reference" : {
-    "$ref" : "hello.json"
-  }
-}
-"""
+            """
+            {
+              "reference" : {
+                "$ref" : "hello.json"
+              }
+            }
+            """
         )
     }
 
     func test_externalFileOnly_decode() throws {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "hello.json"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "hello.json"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
@@ -172,25 +172,25 @@ extension JSONReferenceTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "reference" : {
-    "$ref" : "hello.json#\\/hello\\/world"
-  }
-}
-"""
+            """
+            {
+              "reference" : {
+                "$ref" : "hello.json#\\/hello\\/world"
+              }
+            }
+            """
         )
     }
 
     func test_external_decode() throws {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "hello.json#/schemas/hello"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "hello.json#/schemas/hello"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
@@ -207,25 +207,25 @@ extension JSONReferenceTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "reference" : {
-    "$ref" : "#\\/components\\/schemas\\/hello"
-  }
-}
-"""
+            """
+            {
+              "reference" : {
+                "$ref" : "#\\/components\\/schemas\\/hello"
+              }
+            }
+            """
         )
     }
 
     func test_validComponent_decode() throws {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "#/components/schemas/hello"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "#/components/schemas/hello"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
@@ -242,25 +242,25 @@ extension JSONReferenceTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "reference" : {
-    "$ref" : "#\\/hello\\/world"
-  }
-}
-"""
+            """
+            {
+              "reference" : {
+                "$ref" : "#\\/hello\\/world"
+              }
+            }
+            """
         )
     }
 
     func test_nonComponentLocal_decode() throws {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "#/hello/world"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "#/hello/world"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
@@ -277,25 +277,25 @@ extension JSONReferenceTests {
 
         assertJSONEquivalent(
             encoded,
-"""
-{
-  "reference" : {
-    "$ref" : "#\\/hello~1to\\/the~0~1world"
-  }
-}
-"""
+            """
+            {
+              "reference" : {
+                "$ref" : "#\\/hello~1to\\/the~0~1world"
+              }
+            }
+            """
         )
     }
 
     func test_nonComponentSpecialCharacterLocal_decode() throws {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "#/hello~1to/the~0~1world"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "#/hello~1to/the~0~1world"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(ReferenceWrapper.self, from: test)
 
@@ -308,26 +308,26 @@ extension JSONReferenceTests {
 
     func test_invalidComponentFailure_decode() {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": "#/components/wrongType/hello"
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": "#/components/wrongType/hello"
+            }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(ReferenceWrapper.self, from: test))
     }
 
     func test_emptyStringFailure_decode() {
         let test =
-"""
-{
-    "reference" : {
-        "$ref": ""
-    }
-}
-""".data(using: .utf8)!
+        """
+        {
+            "reference" : {
+                "$ref": ""
+            }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(ReferenceWrapper.self, from: test))
     }

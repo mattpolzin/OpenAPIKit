@@ -11,17 +11,17 @@ import XCTest
 final class VendorExtendableTests: XCTestCase {
     func test_decode() throws {
         let data =
-"""
-{
-    "x-tension": "hello",
-    "x-two": [ "cool", "beans" ],
-    "x-three": {
-        "nested": 10
-    },
-    "one": "world",
-    "two": "!"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "x-tension": "hello",
+            "x-two": [ "cool", "beans" ],
+            "x-three": {
+                "nested": 10
+            },
+            "one": "world",
+            "two": "!"
+        }
+        """.data(using: .utf8)!
 
         let test = try orderUnstableDecode(TestStruct.self, from: data)
         XCTAssertEqual(test.vendorExtensions.count, 3)
@@ -53,12 +53,12 @@ final class VendorExtendableTests: XCTestCase {
 
     func test_arrayDecodeFailure() {
         let data =
-"""
-[
-    "cool",
-    "beans"
-]
-""".data(using: .utf8)!
+        """
+        [
+            "cool",
+            "beans"
+        ]
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(TestStruct.self, from: data)) { error in
             XCTAssertEqual(error as? VendorExtensionDecodingError, VendorExtensionDecodingError.selfIsArrayNotDict)
@@ -68,12 +68,12 @@ final class VendorExtendableTests: XCTestCase {
 
     func test_nonXPrefixDecodeFailure() {
         let data =
-"""
-{
-    "x-tension": "hello",
-    "invalid": "world"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "x-tension": "hello",
+            "invalid": "world"
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(TestStruct.self, from: data)) { error in
             XCTAssertNotNil(error as? InconsistencyError)
@@ -96,21 +96,22 @@ extension VendorExtendableTests {
 
         let encoded = try orderUnstableTestStringFromEncoding(of: test)
 
-        assertJSONEquivalent(encoded,
-"""
-{
-  "one" : "world",
-  "two" : "!",
-  "x-tension" : "hello",
-  "x-three" : {
-    "nested" : 10
-  },
-  "x-two" : [
-    "cool",
-    "beans"
-  ]
-}
-"""
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "one" : "world",
+              "two" : "!",
+              "x-tension" : "hello",
+              "x-three" : {
+                "nested" : 10
+              },
+              "x-two" : [
+                "cool",
+                "beans"
+              ]
+            }
+            """
         )
     }
 }

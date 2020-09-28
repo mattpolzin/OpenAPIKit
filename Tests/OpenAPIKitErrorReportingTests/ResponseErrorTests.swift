@@ -13,27 +13,27 @@ import Yams
 final class ResponseErrorTests: XCTestCase {
     func test_headerWithContentAndSchema() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            responses:
-                '200':
-                    description: hello
-                    content: {}
-                    headers:
-                        hi:
-                            schema:
-                                type: string
-                            content:
-                                application/json:
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    responses:
+                        '200':
+                            description: hello
+                            content: {}
+                            headers:
+                                hi:
                                     schema:
                                         type: string
-"""
+                                    content:
+                                        application/json:
+                                            schema:
+                                                type: string
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

@@ -41,29 +41,20 @@ public struct DereferencedOperation: Equatable {
     /// operation can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ operation: OpenAPI.Operation, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ operation: OpenAPI.Operation, resolvingIn components: OpenAPI.Components) throws {
         self.parameters = try operation.parameters.map { parameter in
-            try DereferencedParameter(
-                try components.forceDereference(parameter),
-                resolvingIn: components
-            )
+            try parameter.dereferenced(in: components)
         }
 
         self.requestBody = try operation.requestBody.map { request in
-            try DereferencedRequest(
-                try components.forceDereference(request),
-                resolvingIn: components
-            )
+            try request.dereferenced(in: components)
         }
 
         self.responses = try operation.responses.mapValues { response in
-            try DereferencedResponse(
-                try components.forceDereference(response),
-                resolvingIn: components
-            )
+            try response.dereferenced(in: components)
         }
 
         self.security = try operation.security?.map {
@@ -99,5 +90,18 @@ extension DereferencedOperation {
     ///     and the response for the status.
     public var responseOutcomes: [ResponseOutcome] {
         return responses.map { (status, response) in .init(status: status, response: response) }
+    }
+}
+
+extension OpenAPI.Operation: LocallyDereferenceable {
+    /// Create a `DereferencedOperation` if all references in the
+    /// operation can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedOperation {
+        return try DereferencedOperation(self, resolvingIn: components)
     }
 }

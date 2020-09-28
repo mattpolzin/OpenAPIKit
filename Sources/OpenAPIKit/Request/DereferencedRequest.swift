@@ -22,14 +22,27 @@ public struct DereferencedRequest: Equatable {
     /// request can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ request: OpenAPI.Request, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ request: OpenAPI.Request, resolvingIn components: OpenAPI.Components) throws {
         self.content = try request.content.mapValues { content in
             try DereferencedContent(content, resolvingIn: components)
         }
 
         self.underlyingRequest = request
+    }
+}
+
+extension OpenAPI.Request: LocallyDereferenceable {
+    /// Create a `DereferencedRequest` if all references in the
+    /// request can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedRequest {
+        return try DereferencedRequest(self, resolvingIn: components)
     }
 }

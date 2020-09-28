@@ -51,54 +51,21 @@ final class RequestContentMapErrorTests: XCTestCase {
 //        }
 //    }
 
-    func test_missingSchemaContent() {
-        let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json: {}
-            responses: {}
-"""
-
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
-
-            let openAPIError = OpenAPI.Error(from: error)
-
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `schema` key in .content['application/json'] for the request body of the **GET** endpoint under `/hello/world` but it is missing.")
-            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
-                "paths",
-                "/hello/world",
-                "get",
-                "requestBody",
-                "content",
-                "application/json"
-            ])
-            XCTAssertEqual(openAPIError.codingPathString, ".paths['/hello/world'].get.requestBody.content['application/json']")
-        }
-    }
-
     func test_wrongTypeContentValue() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json: hello
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    requestBody:
+                        content:
+                            application/json: hello
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -118,23 +85,23 @@ paths:
 
     func test_incorrectVendorExtension() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            type: string
-                        x-hello: world
-                        invalid: extension
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    type: string
+                                x-hello: world
+                                invalid: extension
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

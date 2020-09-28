@@ -10,27 +10,21 @@ import OpenAPIKit
 
 final class DereferencedRequestTests: XCTestCase {
     func test_noReferencedComponents() throws {
-        let t1 = try DereferencedRequest(
-            OpenAPI.Request(
-                description: "test",
-                content: [:]
-            ),
-            resolvingIn: .noComponents
-        )
+        let t1 = try OpenAPI.Request(
+            description: "test",
+            content: [:]
+        ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.content.count, 0)
         // test dynamic member lookup
         XCTAssertEqual(t1.description, "test")
     }
 
     func test_allInlinedComponents() throws {
-        let t1 = try DereferencedRequest(
-            OpenAPI.Request(
-                description: "test",
-                content: [.json: .init(schema: .string)]
-            ),
-            resolvingIn: .noComponents
-        )
-        XCTAssertEqual(t1.content[.json]?.schema.underlyingJSONSchema, .string)
+        let t1 = try OpenAPI.Request(
+            description: "test",
+            content: [.json: .init(schema: .string)]
+        ).dereferenced(in: .noComponents)
+        XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
         // test dynamic member lookup
         XCTAssertEqual(t1.description, "test")
     }
@@ -41,29 +35,23 @@ final class DereferencedRequestTests: XCTestCase {
                 "test": .string
             ]
         )
-        let t1 = try DereferencedRequest(
-            OpenAPI.Request(
-                description: "test",
-                content: [
-                    .json: .init(schemaReference: .component(named: "test"))
-                ]
-            ),
-            resolvingIn: components
-        )
-        XCTAssertEqual(t1.content[.json]?.schema.underlyingJSONSchema, .string)
+        let t1 = try OpenAPI.Request(
+            description: "test",
+            content: [
+                .json: .init(schemaReference: .component(named: "test"))
+            ]
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
     }
 
     func test_referencedContentMissing() {
         XCTAssertThrowsError(
-            try DereferencedRequest(
-                OpenAPI.Request(
-                    description: "test",
-                    content: [
-                        .json: .init(schemaReference: .component(named: "test"))
-                    ]
-                ),
-                resolvingIn: .noComponents
-            )
+            try OpenAPI.Request(
+                description: "test",
+                content: [
+                    .json: .init(schemaReference: .component(named: "test"))
+                ]
+            ).dereferenced(in: .noComponents)
         )
     }
 }

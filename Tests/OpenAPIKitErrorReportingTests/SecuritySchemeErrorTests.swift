@@ -14,16 +14,16 @@ final class SecuritySchemeErrorTests: XCTestCase {
     func test_missingSecuritySchemeError() {
         // missing as-in not found in the Components Object
         let documentYML =
-"""
-openapi: 3.0.0
-info:
-    title: test
-    version: 1.0
-paths: {}
-components: {}
-security:
-    - missing: []
-"""
+        """
+        openapi: 3.0.0
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        components: {}
+        security:
+            - missing: []
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 
@@ -39,23 +39,23 @@ security:
     func test_missingSecuritySchemeInPathsError() {
         // missing as-in not found in the Components Object
         let documentYML =
-"""
-openapi: 3.0.0
-info:
-    title: test
-    version: 1.0
-paths: {
-    "/hello/world": {
-        "get": {
-            "responses": {},
-            "security": [
-                "hello": []
-            ]
+        """
+        openapi: 3.0.0
+        info:
+            title: test
+            version: 1.0
+        paths: {
+            "/hello/world": {
+                "get": {
+                    "responses": {},
+                    "security": [
+                        "hello": []
+                    ]
+                }
+            }
         }
-    }
-}
-components: {}
-"""
+        components: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

@@ -34,7 +34,7 @@ extension OpenAPI.Document {
         try container.encode(self)
 
         if !validator.errors.isEmpty {
-            throw ValidationErrors(values: validator.errors)
+            throw ValidationErrorCollection(values: validator.errors)
         }
     }
 }

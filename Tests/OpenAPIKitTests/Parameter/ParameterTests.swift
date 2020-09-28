@@ -137,39 +137,39 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "in" : "path",
-  "name" : "hello",
-  "required" : true
-}
-"""
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "in" : "path",
+              "name" : "hello",
+              "required" : true
+            }
+            """
         )
     }
 
     func test_minimalContent_decode() throws {
         let parameterData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "in" : "path",
-  "name" : "hello",
-  "required" : true
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "in" : "path",
+          "name" : "hello",
+          "required" : true
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -178,10 +178,10 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                content: [ .json: .init(schema: .string(required: false))]
+                content: [ .json: .init(schema: .string)]
             )
         )
-        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string(required: false)) ])
+        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string) ])
     }
 
     func test_minimalSchema_encode() throws {
@@ -195,31 +195,31 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "path",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_minamalScheam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "path",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -228,7 +228,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -244,29 +244,29 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "query",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "query",
+              "name" : "hello",
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_queryParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "query",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "query",
+          "name" : "hello",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -276,12 +276,12 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query,
-                schema: .string(required: false)
+                schema: .string
             )
         )
         XCTAssertEqual(
             parameter.schemaOrContent.schemaContextValue,
-            OpenAPI.Parameter.SchemaContext(.string(required: false), style: .default(for: .query))
+            OpenAPI.Parameter.SchemaContext(.string, style: .default(for: .query))
         )
         XCTAssertEqual(parameter.schemaOrContent.schemaValue, parameter.schemaOrContent.schemaContextValue?.schema.schemaValue)
     }
@@ -297,31 +297,31 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "allowEmptyValue" : true,
-  "in" : "query",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "allowEmptyValue" : true,
+              "in" : "query",
+              "name" : "hello",
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_queryParamAllowEmpty_decode() throws {
         let parameterData =
-"""
-{
-  "allowEmptyValue" : true,
-  "in" : "query",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "allowEmptyValue" : true,
+          "in" : "query",
+          "name" : "hello",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -330,7 +330,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query(allowEmptyValue: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -346,31 +346,31 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "query",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "query",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_requiredQueryParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "query",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "query",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -379,7 +379,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .query(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -395,29 +395,29 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "header",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "header",
+              "name" : "hello",
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_headerParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "header",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "header",
+          "name" : "hello",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -427,7 +427,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .header,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -443,31 +443,31 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "header",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "header",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_requiredHeaderParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "header",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "header",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -476,7 +476,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .header(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -492,29 +492,29 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "cookie",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "cookie",
+              "name" : "hello",
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_cookieParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "cookie",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "cookie",
+          "name" : "hello",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -524,7 +524,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .cookie,
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -540,31 +540,31 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "in" : "cookie",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "in" : "cookie",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_requiredCookieParam_decode() throws {
         let parameterData =
-"""
-{
-  "in" : "cookie",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "cookie",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -573,7 +573,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .cookie(required: true),
-                schema: .string(required: false)
+                schema: .string
             )
         )
     }
@@ -590,33 +590,33 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "deprecated" : true,
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "deprecated" : true,
+              "in" : "path",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_deprecated_decode() throws {
         let parameterData =
-"""
-{
-  "deprecated" : true,
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "deprecated" : true,
+          "in" : "path",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -625,7 +625,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 deprecated: true
             )
         )
@@ -643,33 +643,33 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "description" : "world",
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "description" : "world",
+              "in" : "path",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_description_decode() throws {
         let parameterData =
-"""
-{
-  "description" : "world",
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "description" : "world",
+          "in" : "path",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -679,7 +679,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 description: "world"
             )
         )
@@ -700,33 +700,33 @@ extension ParameterTests {
 
         assertJSONEquivalent(
             encodedParameter,
-"""
-{
-  "example" : "hello string",
-  "in" : "header",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "example" : "hello string",
+              "in" : "header",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_example_decode() throws {
         let parameterData =
-            """
-{
-  "example" : "hello string",
-  "in" : "header",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "example" : "hello string",
+          "in" : "header",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -737,9 +737,85 @@ extension ParameterTests {
                 name: "hello",
                 context: .header(required: true),
                 schema: .init(
-                    .string(required: false),
+                    .string,
                     style: .default(for: .header),
                     example: "hello string"
+                )
+            )
+        )
+    }
+
+    func test_examples_encode() throws {
+        let parameter = OpenAPI.Parameter(
+            name: "hello",
+            context: .header(required: true),
+            schema: .init(
+                .string,
+                style: .default(for: .header),
+                allowReserved: true,
+                examples: [
+                    "test": .example(value: .init(URL(string: "http://website.com")!))
+                ]
+            )
+        )
+
+        let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
+
+        assertJSONEquivalent(
+            encodedParameter,
+            """
+            {
+              "allowReserved" : true,
+              "examples" : {
+                "test" : {
+                  "externalValue" : "http:\\/\\/website.com"
+                }
+              },
+              "in" : "header",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
+        )
+    }
+
+    func test_examples_decode() throws {
+        let parameterData =
+        """
+        {
+          "allowReserved" : true,
+          "examples" : {
+            "test" : {
+              "externalValue" : "http://website.com"
+            }
+          },
+          "in" : "header",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
+
+        let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
+
+        XCTAssertEqual(parameter.location, .header)
+        XCTAssertEqual(
+            parameter,
+            OpenAPI.Parameter(
+                name: "hello",
+                context: .header(required: true),
+                schema: .init(
+                    .string,
+                    style: .default(for: .header),
+                    allowReserved: true,
+                    examples: [
+                        "test": .example(value: .init(URL(string: "http://website.com")!))
+                    ]
                 )
             )
         )
@@ -759,40 +835,40 @@ extension ParameterTests {
         assertJSONEquivalent(
             encodedParameter,
             """
-{
-  "description" : "world",
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+            {
+              "description" : "world",
+              "in" : "path",
+              "name" : "hello",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              },
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 
     func test_vendorExtension_decode() throws {
         let parameterData =
-            """
-{
-  "description" : "world",
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-""".data(using: .utf8)!
+        """
+        {
+          "description" : "world",
+          "in" : "path",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          },
+          "x-specialFeature" : [
+            "hello",
+            "world"
+          ]
+        }
+        """.data(using: .utf8)!
 
         let parameter = try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData)
 
@@ -802,7 +878,7 @@ extension ParameterTests {
             OpenAPI.Parameter(
                 name: "hello",
                 context: .path,
-                schema: .string(required: false),
+                schema: .string,
                 description: "world",
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
@@ -811,52 +887,52 @@ extension ParameterTests {
 
     func test_decodeBothSchemaAndContent_throws() {
         let parameterData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "in" : "path",
-  "name" : "hello",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "in" : "path",
+          "name" : "hello",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData))
     }
 
     func test_decodeNonRequiredPathParam_throws() {
         let parameterData =
-"""
-{
-  "in" : "path",
-  "name" : "hello",
-  "required" : false,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "path",
+          "name" : "hello",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData))
 
         let parameterData2 =
-"""
-{
-  "in" : "path",
-  "name" : "hello",
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "in" : "path",
+          "name" : "hello",
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Parameter.self, from: parameterData2))
     }

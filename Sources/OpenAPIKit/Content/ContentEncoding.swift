@@ -18,10 +18,12 @@ extension OpenAPI.Content {
         public let explode: Bool
         public let allowReserved: Bool
 
-        public init(contentType: OpenAPI.ContentType? = nil,
-                    headers: OpenAPI.Header.Map? = nil,
-                    style: Style = Self.defaultStyle,
-                    allowReserved: Bool = false) {
+        public init(
+            contentType: OpenAPI.ContentType? = nil,
+            headers: OpenAPI.Header.Map? = nil,
+            style: Style = Self.defaultStyle,
+            allowReserved: Bool = false
+        ) {
             self.contentType = contentType
             self.headers = headers
             self.style = style
@@ -29,11 +31,13 @@ extension OpenAPI.Content {
             self.allowReserved = allowReserved
         }
 
-        public init(contentType: OpenAPI.ContentType? = nil,
-                    headers: OpenAPI.Header.Map? = nil,
-                    style: Style = Self.defaultStyle,
-                    explode: Bool,
-                    allowReserved: Bool = false) {
+        public init(
+            contentType: OpenAPI.ContentType? = nil,
+            headers: OpenAPI.Header.Map? = nil,
+            style: Style = Self.defaultStyle,
+            explode: Bool,
+            allowReserved: Bool = false
+        ) {
             self.contentType = contentType
             self.headers = headers
             self.style = style
@@ -93,3 +97,5 @@ extension OpenAPI.Content.Encoding {
         case allowReserved
     }
 }
+
+extension OpenAPI.Content.Encoding: Validatable {}

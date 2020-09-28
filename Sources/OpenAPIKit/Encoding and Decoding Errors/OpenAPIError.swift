@@ -20,7 +20,7 @@ extension OpenAPI {
     ///         print(prettyError.codingPathString)
     ///     }
     ///
-    public struct Error: Swift.Error {
+    public struct Error: Swift.Error, CustomStringConvertible {
 
         public let localizedDescription: String
         public let codingPath: [CodingKey]
@@ -50,5 +50,7 @@ extension OpenAPI {
                 codingPath = []
             }
         }
+
+        public var description: String { localizedDescription }
     }
 }

@@ -29,21 +29,21 @@ extension XMLTests {
 
         assertJSONEquivalent(
             encodedXML,
-"""
-{
+            """
+            {
 
-}
-"""
-            )
+            }
+            """
+        )
     }
 
     func test_empty_decode() throws {
         let xmlData =
-"""
-{
+        """
+        {
 
-}
-""".data(using: .utf8)!
+        }
+        """.data(using: .utf8)!
 
         let xml = try orderUnstableDecode(OpenAPI.XML.self, from: xmlData)
 
@@ -65,29 +65,29 @@ extension XMLTests {
 
         assertJSONEquivalent(
             encodedXML,
-"""
-{
-  "attribute" : true,
-  "name" : "hello",
-  "namespace" : "http:\\/\\/hello.world.com",
-  "prefix" : "there",
-  "wrapped" : true
-}
-"""
+            """
+            {
+              "attribute" : true,
+              "name" : "hello",
+              "namespace" : "http:\\/\\/hello.world.com",
+              "prefix" : "there",
+              "wrapped" : true
+            }
+            """
         )
     }
 
     func test_complete_decode() throws {
         let xmlData =
-"""
-{
-  "attribute" : true,
-  "name" : "hello",
-  "namespace" : "http:\\/\\/hello.world.com",
-  "prefix" : "there",
-  "wrapped" : true
-}
-""".data(using: .utf8)!
+        """
+        {
+          "attribute" : true,
+          "name" : "hello",
+          "namespace" : "http:\\/\\/hello.world.com",
+          "prefix" : "there",
+          "wrapped" : true
+        }
+        """.data(using: .utf8)!
 
         let xml = try orderUnstableDecode(OpenAPI.XML.self, from: xmlData)
 

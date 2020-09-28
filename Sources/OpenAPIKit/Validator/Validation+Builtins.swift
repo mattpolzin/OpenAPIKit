@@ -1,5 +1,5 @@
 //
-//  Validation+Defaults.swift
+//  Validation+Builtins.swift
 //  
 //
 //  Created by Mathew Polzin on 6/3/20.
@@ -40,6 +40,30 @@ extension Validation {
         )
     }
 
+    /// Validate the OpenAPI Document's `JSONSchemas` all have at least
+    /// one defining characteristic.
+    ///
+    /// The JSON Schema Specifcation does not require that components
+    /// have any defining characteristics. An "empty" schema component can
+    /// be written as follows:
+    ///
+    ///     {
+    ///     }
+    ///
+    /// It is reasonable, however, to want to validate that all schema components
+    /// are non-empty and therefore offer some value to the consumer/reader of
+    /// the OpenAPI documentation beyond just "this property exists."
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var schemaComponentsAreDefined: Validation<JSONSchema> {
+        .init(
+            description: "JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`)",
+            check: \.subject.isEmpty == false
+        )
+    }
+
+    // MARK: - Included with `Validator()` by default
+
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
@@ -55,8 +79,6 @@ extension Validation {
             check: \.count > 0
         )
     }
-
-    // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
     // by calling `Validator.blank`.
@@ -265,9 +287,9 @@ extension Validation {
 /// Used by both the Path Item parameter check and the
 /// Operation parameter check in the default validations.
 fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> Bool {
-    let parameters = parameters.compactMap(components.dereference)
+    let foundParameters = parameters.compactMap { try? components.lookup($0) }
 
-    let identities = parameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
+    let identities = foundParameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
 
-    return Set(identities).count == parameters.count
+    return Set(identities).count == foundParameters.count
 }

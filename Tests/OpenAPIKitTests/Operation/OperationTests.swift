@@ -69,23 +69,23 @@ extension OperationTests {
 
         assertJSONEquivalent(
             encodedOperation,
-"""
-{
-  "responses" : {
+            """
+            {
+              "responses" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_minimal_decode() throws {
         let operationData =
-"""
-{
-  "responses" : {}
-}
-""".data(using: .utf8)!
+        """
+        {
+          "responses" : {}
+        }
+        """.data(using: .utf8)!
 
         let operation = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData)
 
@@ -117,111 +117,111 @@ extension OperationTests {
 
         assertJSONEquivalent(
             encodedOperation,
-"""
-{
-  "deprecated" : true,
-  "description" : "description",
-  "externalDocs" : {
-    "url" : "https:\\/\\/google.com"
-  },
-  "operationId" : "123",
-  "parameters" : [
-    {
-      "$ref" : "#\\/components\\/parameters\\/hello"
-    }
-  ],
-  "requestBody" : {
-    "content" : {
-      "application\\/json" : {
-        "schema" : {
-          "type" : "string"
-        }
-      }
-    }
-  },
-  "responses" : {
-    "200" : {
-      "$ref" : "#\\/components\\/responses\\/test"
-    }
-  },
-  "security" : [
-    {
-      "security" : [
+            """
+            {
+              "deprecated" : true,
+              "description" : "description",
+              "externalDocs" : {
+                "url" : "https:\\/\\/google.com"
+              },
+              "operationId" : "123",
+              "parameters" : [
+                {
+                  "$ref" : "#\\/components\\/parameters\\/hello"
+                }
+              ],
+              "requestBody" : {
+                "content" : {
+                  "application\\/json" : {
+                    "schema" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              },
+              "responses" : {
+                "200" : {
+                  "$ref" : "#\\/components\\/responses\\/test"
+                }
+              },
+              "security" : [
+                {
+                  "security" : [
 
-      ]
-    }
-  ],
-  "servers" : [
-    {
-      "url" : "https:\\/\\/google.com"
-    }
-  ],
-  "summary" : "summary",
-  "tags" : [
-    "hi",
-    "hello"
-  ],
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+                  ]
+                }
+              ],
+              "servers" : [
+                {
+                  "url" : "https:\\/\\/google.com"
+                }
+              ],
+              "summary" : "summary",
+              "tags" : [
+                "hi",
+                "hello"
+              ],
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 
     func test_maximal_decode() throws {
         let operationData =
-"""
-{
-  "deprecated" : true,
-  "description" : "description",
-  "externalDocs" : {
-    "url" : "https://google.com"
-  },
-  "operationId" : "123",
-  "parameters" : [
-    {
-      "$ref" : "#/components/parameters/hello"
-    }
-  ],
-  "requestBody" : {
-    "content" : {
-      "application\\/json" : {
-        "schema" : {
-          "type" : "string"
-        }
-      }
-    }
-  },
-  "responses" : {
-    "200" : {
-      "$ref" : "#/components/responses/test"
-    }
-  },
-  "security" : [
-    {
-      "security" : [
+        """
+        {
+          "deprecated" : true,
+          "description" : "description",
+          "externalDocs" : {
+            "url" : "https://google.com"
+          },
+          "operationId" : "123",
+          "parameters" : [
+            {
+              "$ref" : "#/components/parameters/hello"
+            }
+          ],
+          "requestBody" : {
+            "content" : {
+              "application\\/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "$ref" : "#/components/responses/test"
+            }
+          },
+          "security" : [
+            {
+              "security" : [
 
-      ]
-    }
-  ],
-  "servers" : [
-    {
-      "url" : "https://google.com"
-    }
-  ],
-  "summary" : "summary",
-  "tags" : [
-    "hi",
-    "hello"
-  ],
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-""".data(using: .utf8)!
+              ]
+            }
+          ],
+          "servers" : [
+            {
+              "url" : "https://google.com"
+            }
+          ],
+          "summary" : "summary",
+          "tags" : [
+            "hi",
+            "hello"
+          ],
+          "x-specialFeature" : [
+            "hello",
+            "world"
+          ]
+        }
+        """.data(using: .utf8)!
 
         let operation = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData)
 
@@ -236,7 +236,7 @@ extension OperationTests {
                 parameters: [
                     .reference(.component(named: "hello"))
                 ],
-                requestBody: .init(content: [.json: .init(schema: .init(.string(required:false)))]),
+                requestBody: .init(content: [.json: .init(schema: .init(.string))]),
                 responses: [200: .reference(.component(named: "test"))],
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
@@ -245,31 +245,35 @@ extension OperationTests {
             )
         )
 
-        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string(required:false)))]))
+        // compare request to construction of Either
+        XCTAssertEqual(operation.requestBody, .request(.init(content: [.json: .init(schema: .init(.string))])))
+        // compare request having extracted from Either
+        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string))]))
+
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
     }
 
     func test_doesNotFailDecodingCallbacks() {
         let operationData =
-"""
-{
-  "responses" : {},
-  "callbacks" : {
-    "callback" : {
-      "{$request.query.queryUrl}" : {
-        "post" : {
-          "responses" : {
-            "200" : {
-              "description" : "callback successfully processed"
+        """
+        {
+          "responses" : {},
+          "callbacks" : {
+            "callback" : {
+              "{$request.query.queryUrl}" : {
+                "post" : {
+                  "responses" : {
+                    "200" : {
+                      "description" : "callback successfully processed"
+                    }
+                  }
+                }
+              }
             }
           }
         }
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Operation.self, from: operationData))
     }
@@ -290,18 +294,18 @@ extension OperationTests {
 
         XCTAssertEqual(
             encodedOperation,
-"""
-{
-  "responses": {
-    "404": {
-      "$ref": "#/components/responses/404"
-    },
-    "200": {
-      "$ref": "#/components/responses/200"
-    }
-  }
-}
-"""
+            """
+            {
+              "responses": {
+                "404": {
+                  "$ref": "#/components/responses/404"
+                },
+                "200": {
+                  "$ref": "#/components/responses/200"
+                }
+              }
+            }
+            """
         )
 
         let operation2 = OpenAPI.Operation(
@@ -319,30 +323,30 @@ extension OperationTests {
         XCTAssertEqual(
             encodedOperation2,
             """
-{
-  "responses": {
-    "200": {
-      "$ref": "#/components/responses/200"
-    },
-    "404": {
-      "$ref": "#/components/responses/404"
-    }
-  }
-}
-"""
+            {
+              "responses": {
+                "200": {
+                  "$ref": "#/components/responses/200"
+                },
+                "404": {
+                  "$ref": "#/components/responses/404"
+                }
+              }
+            }
+            """
         )
     }
 
     // Note that JSONDecoder does not respect order
     func test_responseOrder_decode() throws {
         let operationString =
-"""
-responses:
-  404:
-    $ref: '#/components/responses/404'
-  200:
-    $ref: '#/components/responses/200'
-"""
+        """
+        responses:
+          404:
+            $ref: '#/components/responses/404'
+          200:
+            $ref: '#/components/responses/200'
+        """
 
         let operation = try YAMLDecoder().decode(OpenAPI.Operation.self, from: operationString)
 
@@ -357,13 +361,13 @@ responses:
         )
 
         let operationString2 =
-"""
-responses:
-  200:
-    $ref: '#/components/responses/200'
-  404:
-    $ref: '#/components/responses/404'
-"""
+        """
+        responses:
+          200:
+            $ref: '#/components/responses/200'
+          404:
+            $ref: '#/components/responses/404'
+        """
 
         let operation2 = try YAMLDecoder().decode(OpenAPI.Operation.self, from: operationString2)
 

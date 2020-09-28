@@ -91,3 +91,5 @@ extension OpenAPI.Parameter.Context {
         }
     }
 }
+
+extension OpenAPI.Parameter.Context.Location: Validatable {}

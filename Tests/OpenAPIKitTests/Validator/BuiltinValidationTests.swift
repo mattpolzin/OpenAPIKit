@@ -1,5 +1,5 @@
 //
-//  DefaultValidatorTests.swift
+//  BuiltinValidationTests.swift
 //  
 //
 //  Created by Mathew Polzin on 6/3/20.
@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 import OpenAPIKit
 
-final class DefaultValidatorTests: XCTestCase {
+final class BuiltinValidationTests: XCTestCase {
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -21,7 +21,7 @@ final class DefaultValidatorTests: XCTestCase {
         let validator = Validator.blank.validating(.documentContainsPaths)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
         }
@@ -54,7 +54,7 @@ final class DefaultValidatorTests: XCTestCase {
         let validator = Validator.blank.validating(.pathsContainOperations)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Paths contain at least one operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }
@@ -76,6 +76,99 @@ final class DefaultValidatorTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    func test_emptySchemaFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .fragment(.init())
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator))
+    }
+
+    func test_nestedEmptySchemaFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .object(
+                                            properties: [
+                                                "nested": .fragment(.init())
+                                            ]
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(
+                (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
+                [#"Failed to satisfy: JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema.properties.nested"#]
+            )
+        }
+    }
+
+    func test_noEmptySchemasSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        // following is _not_ an empty schema component
+                                        // because it is actually a `{ "type": "object" }`
+                                        // instead of a `{ }`
+                                        schema: .object
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        try document.validate(using: validator)
+    }
+
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -87,7 +180,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Tags in the Document are unique")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
         }
@@ -120,7 +213,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
         }
@@ -165,7 +258,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unqiue (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello", "get"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello'].get")
@@ -243,7 +336,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All Operation Ids in Document are unique")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
         }
@@ -316,7 +409,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unqiue (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello']")
@@ -411,7 +504,7 @@ final class DefaultValidatorTests: XCTestCase {
 
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrors
+            let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 6)
             XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
             XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")

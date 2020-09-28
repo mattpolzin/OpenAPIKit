@@ -141,3 +141,5 @@ extension OpenAPI.ContentType: RawRepresentable {
         }
     }
 }
+
+extension OpenAPI.ContentType: Validatable {}

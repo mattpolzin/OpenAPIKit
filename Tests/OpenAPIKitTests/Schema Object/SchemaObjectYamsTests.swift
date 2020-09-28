@@ -18,36 +18,36 @@ import Yams
 final class SchemaObjectYamsTests: XCTestCase {
     func test_floatingPointWholeNumberIntegerDecode() throws {
         let integerString =
-"""
-type: integer
-minimum: 1.0
-maximum: 10.0
-"""
+        """
+        type: integer
+        minimum: 1.0
+        maximum: 10.0
+        """
 
         let integer = try YAMLDecoder().decode(JSONSchema.self, from: integerString)
 
         XCTAssertEqual(
             integer,
-            JSONSchema.integer(required: false, maximum: (10, exclusive: false), minimum: (1, exclusive: false))
+            JSONSchema.integer(maximum: (10, exclusive: false), minimum: (1, exclusive: false))
         )
     }
 
     func test_floatingPointIntegerDecodeFails() {
         let integerString =
-"""
-type: integer
-maximum: 10.2
-"""
+        """
+        type: integer
+        maximum: 10.2
+        """
 
         XCTAssertThrowsError(try YAMLDecoder().decode(JSONSchema.self, from: integerString)) { error in
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `maximum`: Expected an Integer literal but found a floating point value.")
         }
 
         let integerString2 =
-"""
-type: integer
-minimum: 1.1
-"""
+        """
+        type: integer
+        minimum: 1.1
+        """
 
         XCTAssertThrowsError(try YAMLDecoder().decode(JSONSchema.self, from: integerString2)) { error in
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `minimum`: Expected an Integer literal but found a floating point value.")

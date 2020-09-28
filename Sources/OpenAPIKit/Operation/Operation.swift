@@ -17,6 +17,7 @@ extension OpenAPI {
         public var operationId: String?
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
+
         /// The possible responses for this operation, keyed by status code.
         ///
         /// The status code keys can be integer values, ranges, or even the
@@ -55,7 +56,7 @@ extension OpenAPI {
         /// **Example:**
         ///
         ///     let foundResponse: OpenAPI.Response
-        ///     foundResponse = document.components.dereference(successResponse)!
+        ///     foundResponse = document.components.lookup(successResponse)!
         ///
         public var responses: OpenAPI.Response.Map
 //      public let callbacks:
@@ -390,3 +391,5 @@ extension OpenAPI.Operation {
         }
     }
 }
+
+extension OpenAPI.Operation: Validatable {}

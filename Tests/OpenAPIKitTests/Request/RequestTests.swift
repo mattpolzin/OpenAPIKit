@@ -65,18 +65,19 @@ extension RequestTests {
             ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "$ref" : "hello.json#\\/world"
-      }
-    }
-  }
-}
-"""
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "$ref" : "hello.json#\\/world"
+                  }
+                }
+              }
+            }
+            """
         )
     }
 
@@ -100,53 +101,62 @@ extension RequestTests {
         ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "properties" : {
-          "hello" : {
-            "type" : "string"
-          }
-        },
-        "required" : [
-          "hello"
-        ],
-        "type" : "object"
-      }
-    }
-  }
-}
-"""
-                       )
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "properties" : {
+                      "hello" : {
+                        "type" : "string"
+                      }
+                    },
+                    "required" : [
+                      "hello"
+                    ],
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+            """
+        )
     }
 
     func test_onlySchemaContent_decode() {
         let requestData = """
-{
-  "content": {
-    "application/json": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "hello": { "type": "string" }
+        {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hello": { "type": "string" }
+                }
+              }
+            }
+          }
         }
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .json : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .json : .init(
+                        schema: .init(
+                            .object(
+                                properties: ["hello": .string(required: false)]
+                            )
+                        )
+                    )
+                ]
+            )
+        )
     }
 
     func test_withDescription_encode() {
@@ -154,31 +164,37 @@ extension RequestTests {
                                       content: [:])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-"""
-{
-  "content" : {
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
 
-  },
-  "description" : "A request"
-}
-"""
-                       )
+              },
+              "description" : "A request"
+            }
+            """
+        )
     }
 
     func test_withDescription_decode() {
         let requestData =
-"""
-{
-  "content" : {},
-  "description" : "A request"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {},
+          "description" : "A request"
+        }
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(description: "A request",
-                                                content: [:]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                description: "A request",
+                content: [:]
+            )
+        )
     }
 
     func test_withDescription_withExtension_encode() {
@@ -189,28 +205,29 @@ extension RequestTests {
         )
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-"""
-{
-  "content" : {
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
 
-  },
-  "description" : "A request",
-  "x-specialFeature" : "ok"
-}
-"""
+              },
+              "description" : "A request",
+              "x-specialFeature" : "ok"
+            }
+            """
         )
     }
 
     func test_withDescription_withExtension_decode() {
         let requestData =
-"""
-{
-  "content" : {},
-  "description" : "A request",
-  "x-specialFeature" : "ok"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {},
+          "description" : "A request",
+          "x-specialFeature" : "ok"
+        }
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
@@ -229,31 +246,37 @@ extension RequestTests {
                                       required: true)
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-"""
-{
-  "content" : {
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
 
-  },
-  "required" : true
-}
-"""
-                       )
+              },
+              "required" : true
+            }
+            """
+        )
     }
 
     func test_withRequired_decode() {
         let requestData =
-"""
-{
-  "content" : {},
-  "required" : true
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {},
+          "required" : true
+        }
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [:],
-                                                required: true))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [:],
+                required: true
+            )
+        )
     }
 }
 
@@ -270,53 +293,60 @@ extension RequestTests {
             ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-                       """
-{
-  "content" : {
-    "application\\/xml" : {
-      "schema" : {
-        "properties" : {
-          "hello" : {
-            "type" : "string"
-          }
-        },
-        "required" : [
-          "hello"
-        ],
-        "type" : "object"
-      }
-    }
-  }
-}
-"""
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
+                "application\\/xml" : {
+                  "schema" : {
+                    "properties" : {
+                      "hello" : {
+                        "type" : "string"
+                      }
+                    },
+                    "required" : [
+                      "hello"
+                    ],
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+            """
         )
     }
 
     func test_xml_onlySchemaContent_decode() {
         let requestData = """
-{
-  "content": {
-    "application/xml": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "hello": { "type": "string" }
+        {
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hello": { "type": "string" }
+                }
+              }
+            }
+          }
         }
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .xml : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .xml : .init(
+                        schema: .init(
+                            .object(properties: ["hello": .string(required: false)])
+                        )
+                    )
+                ]
+            )
+        )
     }
 
     func test_form_onlySchemaContent_encode() {
@@ -330,52 +360,59 @@ extension RequestTests {
             ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
-        assertJSONEquivalent(encodedString,
-                       """
-{
-  "content" : {
-    "application\\/x-www-form-urlencoded" : {
-      "schema" : {
-        "properties" : {
-          "hello" : {
-            "type" : "string"
-          }
-        },
-        "required" : [
-          "hello"
-        ],
-        "type" : "object"
-      }
-    }
-  }
-}
-"""
+        assertJSONEquivalent(
+            encodedString,
+            """
+            {
+              "content" : {
+                "application\\/x-www-form-urlencoded" : {
+                  "schema" : {
+                    "properties" : {
+                      "hello" : {
+                        "type" : "string"
+                      }
+                    },
+                    "required" : [
+                      "hello"
+                    ],
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+            """
         )
     }
 
     func test_form_onlySchemaContent_decode() {
         let requestData = """
-{
-  "content": {
-    "application/x-www-form-urlencoded": {
-      "schema": {
-        "type": "object",
-        "properties": {
-          "hello": { "type": "string" }
+        {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hello": { "type": "string" }
+                }
+              }
+            }
+          }
         }
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .form : .init(schema: .init(
-                .object(required: false,
-                        properties: ["hello": .string(required: false)])
-                ))
-            ]))
+        XCTAssertEqual(
+            request,
+            OpenAPI.Request(
+                content: [
+                    .form : .init(
+                        schema: .init(
+                            .object(properties: ["hello": .string(required: false)])
+                        )
+                    )
+                ]
+            )
+        )
     }
 }

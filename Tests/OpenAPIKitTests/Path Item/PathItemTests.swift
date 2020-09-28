@@ -143,21 +143,21 @@ extension PathItemTests {
 
         assertJSONEquivalent(
             encodedPathItem,
-"""
-{
+            """
+            {
 
-}
-"""
+            }
+            """
         )
     }
 
     func test_minimal_decode() throws {
         let pathItemData =
-"""
-{
+        """
+        {
 
-}
-""".data(using: .utf8)!
+        }
+        """.data(using: .utf8)!
 
         let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
@@ -177,59 +177,59 @@ extension PathItemTests {
 
         assertJSONEquivalent(
             encodedPathItem,
-"""
-{
-  "description" : "description",
-  "parameters" : [
-    {
-      "in" : "query",
-      "name" : "hello",
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  ],
-  "servers" : [
-    {
-      "url" : "http:\\/\\/google.com"
-    }
-  ],
-  "summary" : "summary",
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+            """
+            {
+              "description" : "description",
+              "parameters" : [
+                {
+                  "in" : "query",
+                  "name" : "hello",
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              ],
+              "servers" : [
+                {
+                  "url" : "http:\\/\\/google.com"
+                }
+              ],
+              "summary" : "summary",
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 
     func test_meta_decode() throws {
         let pathItemData =
-"""
-{
-  "description" : "description",
-  "parameters" : [
-    {
-      "in" : "query",
-      "name" : "hello",
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  ],
-  "servers" : [
-    {
-      "url" : "http:\\/\\/google.com"
-    }
-  ],
-  "summary" : "summary",
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-""".data(using: .utf8)!
+        """
+        {
+          "description" : "description",
+          "parameters" : [
+            {
+              "in" : "query",
+              "name" : "hello",
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "servers" : [
+            {
+              "url" : "http:\\/\\/google.com"
+            }
+          ],
+          "summary" : "summary",
+          "x-specialFeature" : [
+            "hello",
+            "world"
+          ]
+        }
+        """.data(using: .utf8)!
 
         let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
@@ -239,7 +239,7 @@ extension PathItemTests {
                 summary: "summary",
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-                parameters: [.parameter(name: "hello", context: .query, schema: .string(required: false))],
+                parameters: [.parameter(name: "hello", context: .query, schema: .string)],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )
@@ -263,99 +263,99 @@ extension PathItemTests {
 
         assertJSONEquivalent(
             encodedPathItem,
-"""
-{
-  "delete" : {
-    "responses" : {
+            """
+            {
+              "delete" : {
+                "responses" : {
 
-    }
-  },
-  "get" : {
-    "responses" : {
+                }
+              },
+              "get" : {
+                "responses" : {
 
-    }
-  },
-  "head" : {
-    "responses" : {
+                }
+              },
+              "head" : {
+                "responses" : {
 
-    }
-  },
-  "options" : {
-    "responses" : {
+                }
+              },
+              "options" : {
+                "responses" : {
 
-    }
-  },
-  "patch" : {
-    "responses" : {
+                }
+              },
+              "patch" : {
+                "responses" : {
 
-    }
-  },
-  "post" : {
-    "responses" : {
+                }
+              },
+              "post" : {
+                "responses" : {
 
-    }
-  },
-  "put" : {
-    "responses" : {
+                }
+              },
+              "put" : {
+                "responses" : {
 
-    }
-  },
-  "trace" : {
-    "responses" : {
+                }
+              },
+              "trace" : {
+                "responses" : {
 
-    }
-  }
-}
-"""
+                }
+              }
+            }
+            """
         )
     }
 
     func test_operations_decode() throws {
         let pathItemData =
-"""
-{
-  "delete" : {
-    "responses" : {
+        """
+        {
+          "delete" : {
+            "responses" : {
 
-    }
-  },
-  "get" : {
-    "responses" : {
+            }
+          },
+          "get" : {
+            "responses" : {
 
-    }
-  },
-  "head" : {
-    "responses" : {
+            }
+          },
+          "head" : {
+            "responses" : {
 
-    }
-  },
-  "options" : {
-    "responses" : {
+            }
+          },
+          "options" : {
+            "responses" : {
 
-    }
-  },
-  "patch" : {
-    "responses" : {
+            }
+          },
+          "patch" : {
+            "responses" : {
 
-    }
-  },
-  "post" : {
-    "responses" : {
+            }
+          },
+          "post" : {
+            "responses" : {
 
-    }
-  },
-  "put" : {
-    "responses" : {
+            }
+          },
+          "put" : {
+            "responses" : {
 
-    }
-  },
-  "trace" : {
-    "responses" : {
+            }
+          },
+          "trace" : {
+            "responses" : {
 
-    }
-  }
-}
-""".data(using: .utf8)!
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
@@ -383,23 +383,23 @@ extension PathItemTests {
 
         assertJSONEquivalent(
             encodedTest,
-"""
-[
-  "\\/hello\\/world",
-  "\\/hi\\/there"
-]
-"""
+            """
+            [
+              "\\/hello\\/world",
+              "\\/hi\\/there"
+            ]
+            """
         )
     }
 
     func test_pathComponents_decode() throws {
         let testData =
-"""
-[
-  "\\/hello\\/world",
-  "\\/hi\\/there"
-]
-""".data(using: .utf8)!
+        """
+        [
+          "\\/hello\\/world",
+          "\\/hi\\/there"
+        ]
+        """.data(using: .utf8)!
 
         let test = try orderUnstableDecode([OpenAPI.Path].self, from: testData)
 
@@ -422,31 +422,31 @@ extension PathItemTests {
 
         assertJSONEquivalent(
             encodedMap,
-"""
-{
-  "\\/hello\\/world" : {
+            """
+            {
+              "\\/hello\\/world" : {
 
-  },
-  "\\/hi\\/there" : {
+              },
+              "\\/hi\\/there" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_pathItemMap_decode() throws {
         let mapData =
-"""
-{
-  "\\/hello\\/world" : {
+        """
+        {
+          "\\/hello\\/world" : {
 
-  },
-  "\\/hi\\/there" : {
+          },
+          "\\/hi\\/there" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
 
         let map = try orderStableDecode(OpenAPI.PathItem.Map.self, from: mapData)
 

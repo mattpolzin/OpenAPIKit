@@ -46,12 +46,9 @@ final class ResolvedDocumentTests: XCTestCase {
         .locallyDereferenced()
         .resolved()
 
-        XCTAssertEqual(
-            t1.security,
-            [
-                try .init([.component(named: "test"): []], resolvingIn: components)
-            ]
-        )
+        XCTAssertEqual(t1.security.count, 1)
+        XCTAssertEqual(t1.security[0].schemes["test"]?.name, "test")
+        XCTAssertEqual(t1.security[0].schemes["test"]?.securityScheme, .apiKey(name: "api-key", location: .cookie))
     }
 
     func test_documentWithOneRouteWithMultipleEndpoints() throws {

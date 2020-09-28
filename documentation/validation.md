@@ -66,7 +66,7 @@ try document.validate(using: Validator()
 )
 ```
 
-You can find all such built-in validations in `Validation+Defaults.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
+You can find all such built-in validations in `Validation+Builtins.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
 
 ### Creating New Validations
 
@@ -77,9 +77,11 @@ There are two ways to define validations:
 The first approach is usually more concise for light-weight validations. The second approach is more verbose but it offers cleaner support for single validations producing more than one error and provides opportunities to compose validations together. In either case, the context of a validation is (a) the entire `OpenAPI.Document`, (b) the value being validated (we'll call this the "**subject**"), and (c) the coding path of the value being validated.
 
 **Important:**
-Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not.
+Validation is based on the same crawling of the `OpenAPI.Document` structure as is performed when encoding the document (for example, to JSON or YAML). Because of this, the Swift types that can be used as a basis for validation must be types that are asked to encode themselves in the normal course of encoding a document. For the most part, you can assume that types in the `OpenAPI` namespace fit this description whereas types not in the `OpenAPI` namespace do not. All types that can be validated are marked with the `Validatable` protocol, so you can't actually write validations against types that won't be hit.
 
-For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not.
+For example, `OpenAPI.PathItem` _is_ a type that can be validated against whereas `DereferencedPathItem` is not. There are a small number of surprising side-effects of this setup:
+1. `URLs` are explicitly encoded as `String` and therefore you cannot write a validation that operates on all `URLs`; You can validate all `Strings` and that validation will be called against urls, or more likely you will write your validation against the type containing a `URL` (like an `OpenAPI.Server`).
+2. Dictionary keys are not technically encoded directly (they are used as the `String`-typed keys of keyed-containers during encoding) so types like `OpenAPI.Path` and `OpenAPI.Response.StatusCode` cannot be the subjects of validations -- again, you can still operate on these values during validation by creating validations against the types containing those dictionaries.
 
 #### `Validator.validating()`
 
@@ -125,7 +127,7 @@ If we want to stay more light-weight than the full `(ValidationContext<T>) -> Bo
 ```swift
 Validator().validating(
     "All servers have URLs containing the word 'prod'",
-    check: take(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+    check: take(\OpenAPI.Server.urlTemplate.absoluteString) { $0.contains("prod") }
 )
 ```
 
@@ -139,7 +141,7 @@ Validator().validating(
     "At least two servers are specified if one of them is the test server.",
     check: \[OpenAPI.Server].count >= 2,
     when: { context in
-        context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
+        context.subject.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
     }
 )
 ```
@@ -470,17 +472,17 @@ let responseResourceContainsId = Validation<JSONSchema>(
 // clause to skip over any requests that do not have such schemas
 // without error.
 let requestBodyContainsName = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName),
 
-   when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
 )
 
 // Similarly, we check JSON response schemas. This time we check
 // for both a 'name' and an 'id'.
 let responseBodyContainsNameAndId = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName, responseResourceContainsId),
 
-   when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
 )
 
 // We are specifically looking only at 201 ("created") status code

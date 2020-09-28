@@ -97,13 +97,49 @@ public enum JSONTypeFormat: Equatable {
 ///
 /// See "formats" under the OpenAPI [data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types)
 /// documentation.
-public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable {
+public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable where RawValue == String {
     static var unspecified: Self { get }
 
     var jsonType: JSONType { get }
 }
 
 extension JSONTypeFormat {
+    /// A format used when no type is known or any type is allowed.
+    ///
+    /// There are no built-in formats that do not have an associated
+    /// type, but it is still important to be able to specify a format without
+    /// a type. This can come into play when writing fragments of schemas
+    /// to be combined later.
+    public enum AnyFormat: RawRepresentable, Equatable, OpenAPIFormat {
+        case generic
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            default: self = .other(rawValue)
+            }
+        }
+
+        public typealias SwiftType = AnyCodable
+
+        public static var unspecified: AnyFormat {
+            return .generic
+        }
+
+        public var jsonType: JSONType {
+            return .object
+        }
+    }
+
     /// The allowed "format" properties for `.boolean` schemas.
     public enum BooleanFormat: RawRepresentable, Equatable, OpenAPIFormat {
         case generic
@@ -359,3 +395,5 @@ extension JSONTypeFormat.IntegerFormat {
         return .other(format.rawValue)
     }
 }
+
+extension JSONType: Validatable {}

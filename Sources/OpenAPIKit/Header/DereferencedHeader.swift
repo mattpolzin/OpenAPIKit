@@ -24,10 +24,10 @@ public struct DereferencedHeader: Equatable {
     /// header can be found in the given Components Object.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public init(_ header: OpenAPI.Header, resolvingIn components: OpenAPI.Components) throws {
+    internal init(_ header: OpenAPI.Header, resolvingIn components: OpenAPI.Components) throws {
         switch header.schemaOrContent {
         case .a(let schemaContext):
             self.schemaOrContent = .a(
@@ -51,4 +51,17 @@ public struct DereferencedHeader: Equatable {
     }
 
     public typealias Map = OrderedDictionary<String, DereferencedHeader>
+}
+
+extension OpenAPI.Header: LocallyDereferenceable {
+    /// Create a `DereferencedHeader` if all references in the
+    /// header can be found in the given Components Object.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:key:)` depending
+    ///     on whether an unresolvable reference points to another file or just points to a
+    ///     component in the same file that cannot be found in the Components Object.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedHeader {
+        return try DereferencedHeader(self, resolvingIn: components)
+    }
 }

@@ -14,17 +14,17 @@ final class ComponentErrorTests: XCTestCase {
 
     func test_badComponentKeyNames() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths: {}
-components:
-    schemas:
-        'h#llo':
-            type: string
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        components:
+            schemas:
+                'h#llo':
+                    type: string
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

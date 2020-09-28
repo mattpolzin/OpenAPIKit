@@ -114,7 +114,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
 
         let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
 
-        let addBooksParameters = addBooksPath?.parameters.compactMap(apiDoc.components.dereference)
+        let addBooksParameters = addBooksPath?.parameters.compactMap { apiDoc.components[$0] }
 
         XCTAssertNotNil(addBooksParameters)
         XCTAssertEqual(addBooksParameters?.count, 11)

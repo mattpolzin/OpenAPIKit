@@ -458,7 +458,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let responseSchemaReference = response?.content[.json]?.schema
         // this response schema is a reference found in the Components Object. We dereference
         // it to get at the schema.
-        let responseSchema = responseSchemaReference.flatMap(document.components.dereference)
+        let responseSchema = responseSchemaReference.flatMap { document.components[$0] }
 
         XCTAssertEqual(responseSchema, .object(properties: [ "partNumber": .integer, "description": .string ]))
     }
@@ -471,7 +471,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let requestSchemaReference = request?.content[.json]?.schema
         // this request schema is defined inline but dereferencing still produces the schema
         // (dereferencing is just a no-op in this case).
-        let requestSchema = requestSchemaReference.flatMap(document.components.dereference)
+        let requestSchema = requestSchemaReference.flatMap { document.components[$0] }
 
         XCTAssertEqual(requestSchema, .object(properties: [ "description": .string ]))
     }

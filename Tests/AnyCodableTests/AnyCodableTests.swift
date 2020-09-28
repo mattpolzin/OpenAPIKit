@@ -89,23 +89,23 @@ class AnyCodableTests: XCTestCase {
 
         assertJSONEquivalent(
             result,
-"""
-{
-  "array" : [
-    1,
-    2,
-    3
-  ],
-  "boolean" : true,
-  "integer" : 1,
-  "nested" : {
-    "a" : "alpha",
-    "b" : "bravo",
-    "c" : "charlie"
-  },
-  "string" : "string"
-}
-"""
+            """
+            {
+              "array" : [
+                1,
+                2,
+                3
+              ],
+              "boolean" : true,
+              "integer" : 1,
+              "nested" : {
+                "a" : "alpha",
+                "b" : "bravo",
+                "c" : "charlie"
+              },
+              "string" : "string"
+            }
+            """
         )
     }
 
@@ -120,12 +120,12 @@ class AnyCodableTests: XCTestCase {
 
         assertJSONEquivalent(
             result,
-"""
-{
-  "boolean" : true,
-  "integer" : 1
-}
-"""
+            """
+            {
+              "boolean" : true,
+              "integer" : 1
+            }
+            """
         )
         #endif
     }
