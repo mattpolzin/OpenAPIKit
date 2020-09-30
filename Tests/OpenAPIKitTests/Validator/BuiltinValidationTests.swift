@@ -134,7 +134,7 @@ final class BuiltinValidationTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             XCTAssertEqual(
                 (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
-                [#"Failed to satisfy: JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema.properties.nested"#]
+                [#"Failed to satisfy: JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) [Note that one way to end up with empty schema components is by having property names in an object's `required` array that are not defined in that object's `properties` map] at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema.properties.nested"#]
             )
         }
     }
