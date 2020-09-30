@@ -54,6 +54,10 @@ extension Validation {
     /// are non-empty and therefore offer some value to the consumer/reader of
     /// the OpenAPI documentation beyond just "this property exists."
     ///
+    /// - Note: A sneaky way for the empty object to get into documentation is
+    ///     by putting a property name in a parent object's `required` array
+    ///     without adding that property to the `properties` map.
+    ///
     /// - Important: This is not an included validation by default.
     public static var schemaComponentsAreDefined: Validation<JSONSchema> {
         .init(
