@@ -54,10 +54,14 @@ extension Validation {
     /// are non-empty and therefore offer some value to the consumer/reader of
     /// the OpenAPI documentation beyond just "this property exists."
     ///
+    /// - Note: A sneaky way for the empty object to get into documentation is
+    ///     by putting a property name in a parent object's `required` array
+    ///     without adding that property to the `properties` map.
+    ///
     /// - Important: This is not an included validation by default.
     public static var schemaComponentsAreDefined: Validation<JSONSchema> {
         .init(
-            description: "JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`)",
+            description: "JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) [Note that one way to end up with empty schema components is by having property names in an object's `required` array that are not defined in that object's `properties` map]",
             check: \.subject.isEmpty == false
         )
     }
