@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Generate Documentation
-        uses: mattpolzin/swift-doc@bugfix/relative-links
+        uses: SwiftDocOrg/swift-doc@master
         with:
           inputs: Sources
           module-name: OpenAPIKit
