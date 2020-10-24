@@ -39,7 +39,7 @@ final class ResponseErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Header in .headers.hi for the status code '200' response of the **GET** endpoint under `/hello/world`. \n\nHeader could not be decoded because:\nInconsistency encountered when parsing `Header`: A single path parameter must specify one but not both `content` and `schema`..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Header in .headers.hi for the status code '200' response of the **GET** endpoint under `/hello/world`. \n\nHeader could not be decoded because:\nInconsistency encountered when parsing `Header`: A header must specify one but not both `content` and `schema`..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

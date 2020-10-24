@@ -137,7 +137,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A single path parameter must specify one but not both `content` and `schema`.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A parameter must specify either `content` or `schema`.."
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
@@ -176,7 +176,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A single path parameter must specify one but not both `content` and `schema`.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A parameter must specify one but not both `content` and `schema`.."
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
