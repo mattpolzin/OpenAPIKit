@@ -31,7 +31,7 @@ extension OpenAPI.Error.Decoding.Response {
         }
     }
 
-    public var contextString: String { statusCode.rawValue }
+    public var contextString: String { "" }
 
     public var errorCategory: ErrorCategory {
         switch context {
@@ -70,8 +70,10 @@ extension OpenAPI.Error.Decoding.Response {
         var codingPath = Self.relativePath(from: error.codingPath)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
-        // this part of the coding path is structurally guaranteed to be a status code.
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
+        // this part of the coding path is structurally guaranteed to be a status code
+        // unless we are in the components in which case the status code is not
+        // relevant.
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code) ?? .default
         context = .inconsistency(error)
         relativeCodingPath = Array(codingPath)
     }
@@ -80,8 +82,10 @@ extension OpenAPI.Error.Decoding.Response {
         var codingPath = Self.relativePath(from: error.codingPathWithoutSubject)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
-        // this part of the coding path is structurally guaranteed to be a status code.
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
+        // this part of the coding path is structurally guaranteed to be a status code
+        // unless we are in the components in which case the status code is not
+        // relevant.
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code) ?? .default
         context = .other(error)
         relativeCodingPath = Array(codingPath)
     }
@@ -95,8 +99,10 @@ extension OpenAPI.Error.Decoding.Response {
         var codingPath = Self.relativePath(from: eitherError.codingPath)
         let code = codingPath.removeFirst().stringValue.lowercased()
 
-        // this part of the coding path is structurally guaranteed to be a status code.
-        statusCode = OpenAPI.Response.StatusCode(rawValue: code)!
+        // this part of the coding path is structurally guaranteed to be a status code
+        // unless we are in the components in which case the status code is not
+        // relevant.
+        statusCode = OpenAPI.Response.StatusCode(rawValue: code) ?? .default
         context = .neither(eitherError)
         relativeCodingPath = Array(codingPath)
     }

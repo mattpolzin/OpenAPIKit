@@ -34,4 +34,31 @@ final class ComponentErrorTests: XCTestCase {
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "schemas", "h#llo"])
         }
     }
+
+    func test_badResponseBecauseOfHeaderInsideComponents() {
+        let documentYML =
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths: {}
+        components:
+            responses:
+                IllFormed:
+                    description: hello world
+                    headers:
+                        MissingSchemaKey:
+                            type: string # should be nested within a `schema` object
+                    content: {}
+        """
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Header. \n\nHeader could not be decoded because:\nInconsistency encountered when parsing `Header`: A header parameter must specify either `content` or `schema`..")
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "responses", "IllFormed", "headers", "MissingSchemaKey"])
+        }
+    }
 }

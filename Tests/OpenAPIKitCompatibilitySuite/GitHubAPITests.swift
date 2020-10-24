@@ -33,7 +33,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
             githubAPI = Result {
                 try YAMLDecoder().decode(
                     OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/ghes-2.21/ghes-2.21.yaml")!)
+                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/v1.0.0-rc.1/descriptions/ghes-2.21/ghes-2.21.yaml")!)
                 )
             }
         }

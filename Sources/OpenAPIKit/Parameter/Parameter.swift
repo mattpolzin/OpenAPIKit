@@ -260,10 +260,16 @@ extension OpenAPI.Parameter: Decodable {
             schemaOrContent = .init(content)
         case (nil, let schema?):
             schemaOrContent = .init(schema)
-        default:
+        case (nil, nil):
             throw InconsistencyError(
                 subjectName: name,
-                details: "A single path parameter must specify one but not both `content` and `schema`",
+                details: "A parameter must specify either `content` or `schema`",
+                codingPath: decoder.codingPath
+            )
+        case (_, _):
+            throw InconsistencyError(
+                subjectName: name,
+                details: "A parameter must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath
             )
         }
