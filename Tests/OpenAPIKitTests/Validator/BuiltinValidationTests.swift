@@ -169,6 +169,72 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    func test_missingPathParamFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    get: .init(
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(
+                error?.values.map(String.init(describing:)),
+                [#"The following path parameters were not defined in the Path Item or Operation `parameters`: ["idx"] at path: .paths['/hello/world/{idx}'].GET"#]
+            )
+        }
+    }
+
+    func test_pathParamInPathItemSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    parameters: [
+                        .parameter(name: "idx", context: .path, schema: .string)
+                    ],
+                    get: .init(
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
+        try document.validate(using: validator)
+    }
+
+    func test_pathParamInOperationSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "idx", context: .path, schema: .string)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
+        try document.validate(using: validator)
+    }
+
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
