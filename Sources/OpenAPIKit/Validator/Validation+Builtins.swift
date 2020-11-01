@@ -77,53 +77,55 @@ extension Validation {
     ///
     /// - Important: This is not an included validation by default.
     public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
-        .init { context in
-            var errors = [ValidationError]()
+        .init(
+            check: { context in
+                var errors = [ValidationError]()
 
-            for (path, item) in context.subject {
-                let variablesInPath = path.components
-                    .lazy
-                    .filter { $0.first == "{" && $0.last == "}" }
-                    .map { String($0.dropFirst().dropLast()) }
-
-                let paramsInPathItem = Array(
-                    item.parameters
-                    .lazy
-                    .compactMap { context.document.components[$0] }
-                    .map { $0.name }
-                )
-
-                for endpoint in item.endpoints {
-                    let paramsInOperation = Array(
-                        endpoint.operation.parameters
+                for (path, item) in context.subject {
+                    let variablesInPath = path.components
                         .lazy
-                        .compactMap { context.document.components[$0]}
+                        .filter { $0.first == "{" && $0.last == "}" }
+                        .map { String($0.dropFirst().dropLast()) }
+
+                    let paramsInPathItem = Array(
+                        item.parameters
+                        .lazy
+                        .compactMap { context.document.components[$0] }
                         .map { $0.name }
                     )
 
-                    let missingParamDefs = Array(
-                        variablesInPath
-                        .filter { !((paramsInPathItem + paramsInOperation).contains($0)) }
-                    )
-
-                    if !missingParamDefs.isEmpty {
-                        let codingPath = context.codingPath + [
-                            path.rawValue,
-                            endpoint.method.rawValue
-                        ].map(Validator.CodingKey.init(stringValue:))
-
-                        errors.append(
-                            .init(
-                                reason: "The following path parameters were not defined in the Path Item or Operation `parameters`: \(missingParamDefs)",
-                                at: codingPath
-                            )
+                    for endpoint in item.endpoints {
+                        let paramsInOperation = Array(
+                            endpoint.operation.parameters
+                            .lazy
+                            .compactMap { context.document.components[$0]}
+                            .map { $0.name }
                         )
+
+                        let missingParamDefs = Array(
+                            variablesInPath
+                            .filter { !((paramsInPathItem + paramsInOperation).contains($0)) }
+                        )
+
+                        if !missingParamDefs.isEmpty {
+                            let codingPath = context.codingPath + [
+                                path.rawValue,
+                                endpoint.method.rawValue
+                            ].map(Validator.CodingKey.init(stringValue:))
+
+                            errors.append(
+                                .init(
+                                    reason: "The following path parameters were not defined in the Path Item or Operation `parameters`: \(missingParamDefs)",
+                                    at: codingPath
+                                )
+                            )
+                        }
                     }
                 }
-            }
 
-            return errors
-        }
+                return errors
+            }
+        )
     }
 
     // MARK: - Included with `Validator()` by default
