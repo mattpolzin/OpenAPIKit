@@ -59,7 +59,13 @@ extension OpenAPI {
         ///     foundResponse = document.components.lookup(successResponse)!
         ///
         public var responses: OpenAPI.Response.Map
-//      public let callbacks:
+
+        /// A map of possible out-of band callbacks related to the parent operation.
+        ///
+        /// The key is a unique identifier for the Callback Object. Each value in the
+        /// map is a Callback Object that describes a request that may be initiated
+        /// by the API provider and the expected responses.
+        public let callbacks: OpenAPI.CallbackMap
 
         /// Indicates that the operation is deprecated or not.
         ///
@@ -103,6 +109,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>,
             responses: OpenAPI.Response.Map,
+            callbacks: OpenAPI.CallbackMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -116,6 +123,7 @@ extension OpenAPI {
             self.parameters = parameters
             self.requestBody = requestBody
             self.responses = responses
+            self.callbacks = callbacks
             self.deprecated = deprecated
             self.security = security
             self.servers = servers
@@ -132,6 +140,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: OpenAPI.Request? = nil,
             responses: OpenAPI.Response.Map,
+            callbacks: OpenAPI.CallbackMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -145,6 +154,7 @@ extension OpenAPI {
             self.parameters = parameters
             self.requestBody = requestBody.map(Either.init)
             self.responses = responses
+            self.callbacks = callbacks
             self.deprecated = deprecated
             self.security = security
             self.servers = servers
@@ -161,6 +171,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: OpenAPI.Request? = nil,
             responses: OpenAPI.Response.Map,
+            callbacks: OpenAPI.CallbackMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -175,6 +186,7 @@ extension OpenAPI {
                 parameters: parameters,
                 requestBody: requestBody,
                 responses: responses,
+                callbacks: callbacks,
                 deprecated: deprecated,
                 security: security,
                 servers: servers,
@@ -229,6 +241,10 @@ extension OpenAPI.Operation: Encodable {
 
         try container.encode(responses, forKey: .responses)
 
+        if !callbacks.isEmpty {
+            try container.encode(callbacks, forKey: .callbacks)
+        }
+
         if deprecated {
             try container.encode(deprecated, forKey: .deprecated)
         }
@@ -263,6 +279,8 @@ extension OpenAPI.Operation: Decodable {
             requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
             responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
+
+            callbacks = try container.decodeIfPresent(OpenAPI.CallbackMap.self, forKey: .callbacks) ?? [:]
 
             deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 

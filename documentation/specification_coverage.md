@@ -88,7 +88,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] headers
 - [x] securitySchemes
 - [ ] links
-- [ ] callbacks
+- [x] callbacks
 - [x] specification extensions (`vendorExtensions`)
 
 ### Paths Object (`OpenAPI.PathItem.Map`)
@@ -119,7 +119,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] parameters
 - [x] requestBody
 - [x] responses
-- [ ] callbacks
+- [x] callbacks
 - [x] deprecated
 - [x] security
 - [x] servers
@@ -179,7 +179,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] specification extensions (`vendorExtensions`)
 
 ### Callback Object
-- [ ] *{expression}*
+- [x] *{expression}*
 - [ ] specification extensions
 
 ### Example Object (`OpenAPI.Example`)
