@@ -113,6 +113,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     /// By contrast, an "external" reference is represented by a `URL` that
     /// is expected to be resolved to a different file than one containing the
     /// `JSONReference`.
+    ///
+    /// This reference must start with "#".
     public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
@@ -188,6 +190,9 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     /// As described by the [JSON pointer specification](https://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-04)
     /// and following the URI specification for a "fragment" found in
     /// [RFC 3986](https://tools.ietf.org/html/rfc3986).
+    ///
+    /// This path does _not_ start with "#". It starts with a forward slash. By contrast, an
+    /// `InternalReference` starts with "#" and is followed by the start of a `Path`.
     public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
 
         /// The Path's components. In the `rawValue`, these components are joined
