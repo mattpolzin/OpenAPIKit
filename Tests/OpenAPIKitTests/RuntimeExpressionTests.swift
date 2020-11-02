@@ -399,6 +399,38 @@ final class RuntimeExpressionTests: XCTestCase {
         )
     }
 
+    // MARK: - Failures
+
+    func test_urlTypo() throws {
+        let t = """
+        {
+            "expression": "$urll"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(Wrapper.self, from: t))
+    }
+
+    func test_noRequestSource() throws {
+        let t = """
+        {
+            "expression": "$request."
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(Wrapper.self, from: t))
+    }
+
+    func test_noResponseSource() throws {
+        let t = """
+        {
+            "expression": "$response."
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(Wrapper.self, from: t))
+    }
+
     struct Wrapper: Codable {
         public let expression: OpenAPI.RuntimeExpression
     }
