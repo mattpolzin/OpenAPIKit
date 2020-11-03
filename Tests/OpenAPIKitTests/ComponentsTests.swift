@@ -96,6 +96,11 @@ final class ComponentsTests: XCTestCase {
             ],
             securitySchemes: [
                 "seven": .apiKey(name: "hello", location: .cookie)
+            ],
+            callbacks: [
+                "eight": [
+                    OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                ]
             ]
         )
 
@@ -106,6 +111,7 @@ final class ComponentsTests: XCTestCase {
         let ref5 = try components.reference(named: "five", ofType: OpenAPI.Request.self)
         let ref6 = try components.reference(named: "six", ofType: OpenAPI.Header.self)
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
+        let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Callbacks.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
@@ -114,6 +120,12 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(components[ref5], .init(content: [:]))
         XCTAssertEqual(components[ref6], .init(schema: .string))
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
+        XCTAssertEqual(
+            components[ref8],
+            [
+                OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+            ]
+        )
     }
 
     func test_subscriptLookup() throws {
