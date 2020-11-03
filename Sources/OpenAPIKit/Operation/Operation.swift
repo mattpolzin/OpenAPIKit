@@ -65,7 +65,7 @@ extension OpenAPI {
         /// The key is a unique identifier for the Callback Object. Each value in the
         /// map is a Callback Object that describes a request that may be initiated
         /// by the API provider and the expected responses.
-        public let callbacks: OpenAPI.CallbackMap
+        public let callbacks: OpenAPI.CallbacksMap
 
         /// Indicates that the operation is deprecated or not.
         ///
@@ -109,7 +109,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>,
             responses: OpenAPI.Response.Map,
-            callbacks: OpenAPI.CallbackMap = [:],
+            callbacks: OpenAPI.CallbacksMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -140,7 +140,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: OpenAPI.Request? = nil,
             responses: OpenAPI.Response.Map,
-            callbacks: OpenAPI.CallbackMap = [:],
+            callbacks: OpenAPI.CallbacksMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -171,7 +171,7 @@ extension OpenAPI {
             parameters: Parameter.Array = [],
             requestBody: OpenAPI.Request? = nil,
             responses: OpenAPI.Response.Map,
-            callbacks: OpenAPI.CallbackMap = [:],
+            callbacks: OpenAPI.CallbacksMap = [:],
             deprecated: Bool = false,
             security: [OpenAPI.SecurityRequirement]? = nil,
             servers: [OpenAPI.Server]? = nil,
@@ -280,7 +280,7 @@ extension OpenAPI.Operation: Decodable {
 
             responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
 
-            callbacks = try container.decodeIfPresent(OpenAPI.CallbackMap.self, forKey: .callbacks) ?? [:]
+            callbacks = try container.decodeIfPresent(OpenAPI.CallbacksMap.self, forKey: .callbacks) ?? [:]
 
             deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 

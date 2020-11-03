@@ -26,7 +26,7 @@ extension OpenAPI.Response: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.responses }
 }
 
-extension OpenAPI.Callback: ComponentDictionaryLocatable {
+extension OpenAPI.Callbacks: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "callbacks" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.callbacks }
 }

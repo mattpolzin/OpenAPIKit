@@ -23,7 +23,7 @@ extension OpenAPI {
         public var requestBodies: ComponentDictionary<Request>
         public var headers: ComponentDictionary<Header>
         public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var callbacks: ComponentDictionary<Callback>
+        public var callbacks: ComponentDictionary<Callbacks>
         //    public var links:
 
         /// Dictionary of vendor extensions.
@@ -41,7 +41,7 @@ extension OpenAPI {
             requestBodies: ComponentDictionary<Request> = [:],
             headers: ComponentDictionary<Header> = [:],
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
-            callbacks: ComponentDictionary<Callback> = [:],
+            callbacks: ComponentDictionary<Callbacks> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.schemas = schemas
@@ -193,7 +193,7 @@ extension OpenAPI.Components: Decodable {
 
             securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
 
-            callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callback>.self, forKey: .callbacks) ?? [:]
+            callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
