@@ -51,7 +51,7 @@ public struct URLTemplate: Hashable, RawRepresentable {
 
     /// Get a URL from this templated URL if it is a valid URL already.
     ///
-    /// Templated URLS with variables in them will not be valid URLs
+    /// Templated URLs with variables in them will not be valid URLs
     /// and are therefore guaranteed to return `nil`.
     public var url: URL? {
         return URL(string: rawValue)

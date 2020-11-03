@@ -96,6 +96,11 @@ final class ComponentsTests: XCTestCase {
             ],
             securitySchemes: [
                 "seven": .apiKey(name: "hello", location: .cookie)
+            ],
+            callbacks: [
+                "eight": [
+                    OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                ]
             ]
         )
 
@@ -106,6 +111,7 @@ final class ComponentsTests: XCTestCase {
         let ref5 = try components.reference(named: "five", ofType: OpenAPI.Request.self)
         let ref6 = try components.reference(named: "six", ofType: OpenAPI.Header.self)
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
+        let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Callbacks.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
@@ -114,6 +120,12 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(components[ref5], .init(content: [:]))
         XCTAssertEqual(components[ref6], .init(schema: .string))
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
+        XCTAssertEqual(
+            components[ref8],
+            [
+                OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+            ]
+        )
     }
 
     func test_subscriptLookup() throws {
@@ -250,6 +262,19 @@ extension ComponentsTests {
             securitySchemes: [
                 "seven": .http(scheme: "cool")
             ],
+            callbacks: [
+                "eight": [
+                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
+                        post: .init(
+                            responses: [
+                                200: .response(
+                                    description: "callback successfully processed"
+                                )
+                            ]
+                        )
+                    )
+                ]
+            ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
@@ -259,6 +284,19 @@ extension ComponentsTests {
             encoded,
             """
             {
+              "callbacks" : {
+                "eight" : {
+                  "{$request.query.queryUrl}" : {
+                    "post" : {
+                      "responses" : {
+                        "200" : {
+                          "description" : "callback successfully processed"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
               "examples" : {
                 "four" : {
                   "externalValue" : "http:\\/\\/address.com"
@@ -316,6 +354,19 @@ extension ComponentsTests {
         let t1 =
         """
         {
+          "callbacks" : {
+            "eight" : {
+              "{$request.query.queryUrl}" : {
+                "post" : {
+                  "responses" : {
+                    "200" : {
+                      "description" : "callback successfully processed"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "examples" : {
             "four" : {
               "externalValue" : "http:\\/\\/address.com"
@@ -393,6 +444,19 @@ extension ComponentsTests {
                 securitySchemes: [
                     "seven": .http(scheme: "cool")
                 ],
+                callbacks: [
+                    "eight": [
+                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                ],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )
@@ -407,28 +471,6 @@ extension ComponentsTests {
               "parameters" : {
                 "userId" : "$response.body#/id",
                 "description" : "A link test"
-              }
-            }
-          }
-        }
-        """.data(using: .utf8)!
-
-        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
-    }
-
-    func test_doesNotFailDecodingCallbacks() {
-        let t1 = """
-        {
-          "callbacks" : {
-            "callback" : {
-              "{$request.query.queryUrl}" : {
-                "post" : {
-                  "responses" : {
-                    "200" : {
-                      "description" : "callback successfully processed"
-                    }
-                  }
-                }
               }
             }
           }
