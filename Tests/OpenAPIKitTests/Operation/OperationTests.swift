@@ -26,6 +26,7 @@ final class OperationTests: XCTestCase {
             parameters: [.parameter(name: "hi", context: .query, schema: .string)],
             requestBody: .init(content: [:]),
             responses: [:],
+            callbacks: [:],
             deprecated: false,
             security: [],
             servers: []
@@ -107,6 +108,21 @@ extension OperationTests {
             ],
             requestBody: .init(content: [.json: .init(schema: .init(.string))]),
             responses: [200: .reference(.component(named: "test"))],
+            callbacks: [
+                "callback": .init(
+                    [
+                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ],
             deprecated: true,
             security: [[.component(named: "security"): []]],
             servers: [.init(url: URL(string: "https://google.com")!)],
@@ -119,6 +135,19 @@ extension OperationTests {
             encodedOperation,
             """
             {
+              "callbacks" : {
+                "callback" : {
+                  "{$request.query.queryUrl}" : {
+                    "post" : {
+                      "responses" : {
+                        "200" : {
+                          "description" : "callback successfully processed"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
               "deprecated" : true,
               "description" : "description",
               "externalDocs" : {
@@ -174,6 +203,19 @@ extension OperationTests {
         let operationData =
         """
         {
+          "callbacks" : {
+            "callback" : {
+              "{$request.query.queryUrl}" : {
+                "post" : {
+                  "responses" : {
+                    "200" : {
+                      "description" : "callback successfully processed"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "deprecated" : true,
           "description" : "description",
           "externalDocs" : {
@@ -238,6 +280,21 @@ extension OperationTests {
                 ],
                 requestBody: .init(content: [.json: .init(schema: .init(.string))]),
                 responses: [200: .reference(.component(named: "test"))],
+                callbacks: [
+                    "callback": .init(
+                        [
+                            OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
+                                post: .init(
+                                    responses: [
+                                        200: .response(
+                                            description: "callback successfully processed"
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ],
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
                 servers: [.init(url: URL(string: "https://google.com")!)],
@@ -252,30 +309,6 @@ extension OperationTests {
 
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
-    }
-
-    func test_doesNotFailDecodingCallbacks() {
-        let operationData =
-        """
-        {
-          "responses" : {},
-          "callbacks" : {
-            "callback" : {
-              "{$request.query.queryUrl}" : {
-                "post" : {
-                  "responses" : {
-                    "200" : {
-                      "description" : "callback successfully processed"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        """.data(using: .utf8)!
-
-        XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Operation.self, from: operationData))
     }
 
     // Note that JSONEncoder for Linux Foundation does not respect order
