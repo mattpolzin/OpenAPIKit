@@ -180,6 +180,11 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     }
 
     // See `JSONSchemaContext`
+    public var defaultValue: AnyCodable? {
+        return coreContext?.defaultValue
+    }
+
+    // See `JSONSchemaContext`
     public var example: AnyCodable? {
         return coreContext?.example
     }
@@ -423,6 +428,36 @@ extension JSONSchema {
         }
     }
 
+    /// Return a version of this `JSONSchema` that has the given default value.
+    public func with(defaultValue: AnyCodable) -> JSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(defaultValue: defaultValue))
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(defaultValue: defaultValue), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(defaultValue: defaultValue), contextB)
+        case .number(let context, let contextB):
+            return .number(context.with(defaultValue: defaultValue), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.with(defaultValue: defaultValue), contextB)
+        case .string(let context, let contextB):
+            return .string(context.with(defaultValue: defaultValue), contextB)
+        case .fragment(let context):
+            return .fragment(context.with(defaultValue: defaultValue))
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(defaultValue: defaultValue))
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.with(defaultValue: defaultValue))
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.with(defaultValue: defaultValue))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(defaultValue: defaultValue))
+        case .reference:
+            return self
+        }
+    }
+
     /// Returns a version of this `JSONSchema` that has the given example
     /// attached.
     public func with(example: AnyCodable) throws -> JSONSchema {
@@ -536,6 +571,7 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>(
@@ -549,6 +585,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         return .boolean(context)
@@ -567,6 +604,7 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .boolean(
@@ -580,6 +618,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -602,6 +641,7 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
@@ -615,6 +655,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         return .fragment(context)
@@ -633,6 +674,7 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .fragment(
@@ -646,6 +688,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -674,6 +717,7 @@ extension JSONSchema {
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(
@@ -687,6 +731,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let stringContext = JSONSchema.StringContext(
@@ -713,6 +758,7 @@ extension JSONSchema {
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .string(
@@ -729,6 +775,7 @@ extension JSONSchema {
             maxLength: maxLength,
             pattern: pattern,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -754,6 +801,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(
@@ -767,6 +815,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let numbericContext = JSONSchema.NumericContext(
@@ -793,6 +842,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .number(
@@ -809,6 +859,7 @@ extension JSONSchema {
             maximum: maximum,
             minimum: minimum,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -834,6 +885,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(
@@ -847,6 +899,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let integerContext = JSONSchema.IntegerContext(
@@ -873,6 +926,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .integer(
@@ -889,6 +943,7 @@ extension JSONSchema {
             maximum: maximum,
             minimum: minimum,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -915,6 +970,7 @@ extension JSONSchema {
         properties: [String: JSONSchema] = [:],
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
@@ -928,6 +984,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let objectContext = JSONSchema.ObjectContext(
@@ -961,6 +1018,7 @@ extension JSONSchema {
         uniqueItems: Bool? = nil,
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(
@@ -974,6 +1032,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
 
