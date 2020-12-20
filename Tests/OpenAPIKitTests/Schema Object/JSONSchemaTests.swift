@@ -171,6 +171,89 @@ final class SchemaObjectTests: XCTestCase {
         }
     }
 
+    func test_booleanTypeChecks() {
+        let fragment: JSONSchema = .fragment
+        let boolean: JSONSchema = .boolean
+        let number: JSONSchema = .number
+        let integer: JSONSchema = .integer
+        let string: JSONSchema = .string
+        let object: JSONSchema = .object
+        let array: JSONSchema = .array
+        let reference: JSONSchema = .reference(.external(URL(string: "https://website.com")!))
+
+        XCTAssertTrue(fragment.isFragment)
+        XCTAssertFalse(fragment.isBoolean)
+        XCTAssertFalse(fragment.isNumber)
+        XCTAssertFalse(fragment.isInteger)
+        XCTAssertFalse(fragment.isString)
+        XCTAssertFalse(fragment.isObject)
+        XCTAssertFalse(fragment.isArray)
+        XCTAssertFalse(fragment.isReference)
+
+        XCTAssertFalse(boolean.isFragment)
+        XCTAssertTrue(boolean.isBoolean)
+        XCTAssertFalse(boolean.isNumber)
+        XCTAssertFalse(boolean.isInteger)
+        XCTAssertFalse(boolean.isString)
+        XCTAssertFalse(boolean.isObject)
+        XCTAssertFalse(boolean.isArray)
+        XCTAssertFalse(boolean.isReference)
+
+        XCTAssertFalse(number.isFragment)
+        XCTAssertFalse(number.isBoolean)
+        XCTAssertTrue(number.isNumber)
+        XCTAssertFalse(number.isInteger)
+        XCTAssertFalse(number.isString)
+        XCTAssertFalse(number.isObject)
+        XCTAssertFalse(number.isArray)
+        XCTAssertFalse(number.isReference)
+
+        XCTAssertFalse(integer.isFragment)
+        XCTAssertFalse(integer.isBoolean)
+        XCTAssertFalse(integer.isNumber)
+        XCTAssertTrue(integer.isInteger)
+        XCTAssertFalse(integer.isString)
+        XCTAssertFalse(integer.isObject)
+        XCTAssertFalse(integer.isArray)
+        XCTAssertFalse(integer.isReference)
+
+        XCTAssertFalse(string.isFragment)
+        XCTAssertFalse(string.isBoolean)
+        XCTAssertFalse(string.isNumber)
+        XCTAssertFalse(string.isInteger)
+        XCTAssertTrue(string.isString)
+        XCTAssertFalse(string.isObject)
+        XCTAssertFalse(string.isArray)
+        XCTAssertFalse(string.isReference)
+
+        XCTAssertFalse(object.isFragment)
+        XCTAssertFalse(object.isBoolean)
+        XCTAssertFalse(object.isNumber)
+        XCTAssertFalse(object.isInteger)
+        XCTAssertFalse(object.isString)
+        XCTAssertTrue(object.isObject)
+        XCTAssertFalse(object.isArray)
+        XCTAssertFalse(object.isReference)
+
+        XCTAssertFalse(array.isFragment)
+        XCTAssertFalse(array.isBoolean)
+        XCTAssertFalse(array.isNumber)
+        XCTAssertFalse(array.isInteger)
+        XCTAssertFalse(array.isString)
+        XCTAssertFalse(array.isObject)
+        XCTAssertTrue(array.isArray)
+        XCTAssertFalse(array.isReference)
+
+        XCTAssertFalse(reference.isFragment)
+        XCTAssertFalse(reference.isBoolean)
+        XCTAssertFalse(reference.isNumber)
+        XCTAssertFalse(reference.isInteger)
+        XCTAssertFalse(reference.isString)
+        XCTAssertFalse(reference.isObject)
+        XCTAssertFalse(reference.isArray)
+        XCTAssertTrue(reference.isReference)
+    }
+
     func test_required() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
