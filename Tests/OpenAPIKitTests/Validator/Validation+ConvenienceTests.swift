@@ -275,6 +275,27 @@ final class ValidationConvenienceTests: XCTestCase {
             unwrap(\.first?.wholeNumberValue, into: v, description: "test")(dummyContext(for: "")).isEmpty
         )
     }
+
+    func test_allCombinator() {
+        let v1 = Validation<String>(
+            description: "String is more than 5 characters",
+            check: \.count > 5
+        )
+        let v2 = Validation<String>(
+            description: "String starts with 'H'",
+            check: \.first == "H"
+        )
+
+        XCTAssertTrue(
+            all(v1, v2)(dummyContext(for: "Halloween")).isEmpty
+        )
+        XCTAssertFalse(
+            all(v1, v2)(dummyContext(for: "Hello")).isEmpty
+        )
+        XCTAssertFalse(
+            all(v1, v2)(dummyContext(for: "Nanoparticle")).isEmpty
+        )
+    }
 }
 
 fileprivate func dummyContext(for string: String) -> ValidationContext<String> {

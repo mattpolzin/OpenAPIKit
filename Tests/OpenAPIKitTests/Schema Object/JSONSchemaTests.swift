@@ -742,6 +742,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(boolean.arrayContext)
         XCTAssertNil(object.arrayContext)
         XCTAssertEqual(array.arrayContext, .init(items: .boolean))
+        XCTAssertEqual(array.arrayContext?.uniqueItems, false) // should default to false
         XCTAssertNil(number.arrayContext)
         XCTAssertNil(integer.arrayContext)
         XCTAssertNil(string.arrayContext)

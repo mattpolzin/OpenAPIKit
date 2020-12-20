@@ -326,6 +326,16 @@ let contentMapValidator = Validation(
 )
 ```
 
+Lastly, OpenAPIKit offers the `all()` function that will combine any number of `Validations` in the current context (as opposed to `lift()` and `unwrap()` which take you from one context to another).
+```swift
+let passwordValid1 = Validation<String>(...)
+let passwordValid2 = Validation<String>(...)
+
+let passwordValid = Validation<String>(
+    check: all(passwordValid1, passwordValid2)
+)
+```
+
 #### A "Real" Example
 
 Let's put this all together to form a slightly more realistic example of fully operational code (could be copy/pasted into a Swift project or playground with access to OpenAPIKit).
