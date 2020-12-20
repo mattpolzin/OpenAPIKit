@@ -37,7 +37,7 @@ If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [migra
 You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
 ```swift
 let decoder = ... // JSONDecoder() or YAMLDecoder()
-let openAPIDoc = try decoder.decode(OpenAPI.Document, from: ...)
+let openAPIDoc = try decoder.decode(OpenAPI.Document.self, from: ...)
 ```
 
 #### Decoding Errors
@@ -45,7 +45,7 @@ You can wrap any error you get back from a decoder in `OpenAPI.Error` to get a f
 
 ```swift
 do {
-  try decoder.decode(OpenAPI.Document, from: ...)
+  try decoder.decode(OpenAPI.Document.self, from: ...)
 } catch let error {
   print(OpenAPI.Error(from: error).localizedDescription)  
 }
@@ -71,7 +71,7 @@ let openAPIDoc = ...
 try openAPIDoc.validate()
 ```
 
-You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [Validation Documentation](./documentation/validation.md).
+You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [OpenAPIKit Validation Documentation](./documentation/validation.md).
 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
@@ -79,7 +79,7 @@ The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any gua
 If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
 
 ### OpenAPI Document structure
-The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)  version 3.0.2. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
+The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) version 3.0.3. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
 
 #### Document Root
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
@@ -96,7 +96,7 @@ Request and response bodies can be defined in great detail using OpenAPI's deriv
 #### Schemas
 **Fundamental types** are specified as `JSONSchema.integer`, `JSONSchema.string`, `JSONSchema.boolean`, etc.
 
-**Schema properties** are given as arguments to static constructors. By default, schemas are **non-nullable**, **required**, and **generic**.
+**Schema attributes** are given as arguments to static constructors. By default, schemas are **non-nullable**, **required**, and **generic**. The below examples are not comprehensive and you can pass any number of the optional attributes to the static constructors as arguments.
 
 A schema can be made **optional** (i.e. it can be omitted) with `JSONSchema.integer(required: false)` or an existing schema can be asked for an `optionalSchemaObject()`. 
 
@@ -123,7 +123,7 @@ JSONSchema.object(
 )
 ```
 
-Take a look at the [Schema Object](./documentation/schema_object.md) documentation for more information.
+Take a look at the [OpenAPIKit Schema Object](./documentation/schema_object.md) documentation for more information.
 
 #### JSON References
 The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
