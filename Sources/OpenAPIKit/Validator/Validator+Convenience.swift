@@ -241,3 +241,26 @@ public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>
         return validations.flatMap { $0.apply(to: subject, at: context.codingPath, in: context.document) }
     }
 }
+
+/// Apply all of the given validations to the current context.
+///
+/// This is equivalent to calling `lift` with the keypath `\.self`
+/// or inlining each of the individual validations with the `&&`
+/// operator to apply them all. The benefit to this approach is
+/// being able to create reusable separate components that
+/// add up to the validation being written.
+///
+/// **Example**
+///
+///     let isLongerThanThreeChars = Validator<String>(...)
+///     let hasSpecialChars = Validator<String>(...)
+///
+///     let validator = Validator<String>(
+///         check: all(isLongerThanThreeChars, hasSpecialChars)
+///     )
+///
+public func all<T>(_ validations: Validation<T>...) -> (ValidationContext<T>) -> [ValidationError] {
+    return { context in
+        return validations.flatMap { $0.apply(to: context.subject, at: context.codingPath, in: context.document) }
+    }
+}
