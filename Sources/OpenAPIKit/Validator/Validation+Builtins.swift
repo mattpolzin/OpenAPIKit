@@ -1,5 +1,5 @@
 //
-//  Validation+Defaults.swift
+//  Validation+Builtins.swift
 //  
 //
 //  Created by Mathew Polzin on 6/3/20.
@@ -40,6 +40,96 @@ extension Validation {
         )
     }
 
+    /// Validate the OpenAPI Document's `JSONSchemas` all have at least
+    /// one defining characteristic.
+    ///
+    /// The JSON Schema Specifcation does not require that components
+    /// have any defining characteristics. An "empty" schema component can
+    /// be written as follows:
+    ///
+    ///     {
+    ///     }
+    ///
+    /// It is reasonable, however, to want to validate that all schema components
+    /// are non-empty and therefore offer some value to the consumer/reader of
+    /// the OpenAPI documentation beyond just "this property exists."
+    ///
+    /// - Note: A sneaky way for the empty object to get into documentation is
+    ///     by putting a property name in a parent object's `required` array
+    ///     without adding that property to the `properties` map.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var schemaComponentsAreDefined: Validation<JSONSchema> {
+        .init(
+            description: "JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) [Note that one way to end up with empty schema components is by having property names in an object's `required` array that are not defined in that object's `properties` map]",
+            check: \.subject.isEmpty == false
+        )
+    }
+
+    /// Validate that any `Parameters` in the path of any endpoint are documented.
+    /// In other words, if a path contains variables (i.e. `"{variable}"`) then there are
+    /// corresponding `parameters` entries in the `PathItem` or `Operation` for
+    /// each endpoint.
+    ///
+    /// In order to gain easy access to both the path (where the variable placeholders live)
+    /// and the parameter definitions, this validation runs once per document and performs a
+    /// loop over each endpoint in the document.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
+        .init(
+            check: { context in
+                var errors = [ValidationError]()
+
+                for (path, item) in context.subject {
+                    let variablesInPath = path.components
+                        .lazy
+                        .filter { $0.first == "{" && $0.last == "}" }
+                        .map { String($0.dropFirst().dropLast()) }
+
+                    let paramsInPathItem = Array(
+                        item.parameters
+                        .lazy
+                        .compactMap { context.document.components[$0] }
+                        .map { $0.name }
+                    )
+
+                    for endpoint in item.endpoints {
+                        let paramsInOperation = Array(
+                            endpoint.operation.parameters
+                            .lazy
+                            .compactMap { context.document.components[$0]}
+                            .map { $0.name }
+                        )
+
+                        let missingParamDefs = Array(
+                            variablesInPath
+                            .filter { !((paramsInPathItem + paramsInOperation).contains($0)) }
+                        )
+
+                        if !missingParamDefs.isEmpty {
+                            let codingPath = context.codingPath + [
+                                path.rawValue,
+                                endpoint.method.rawValue
+                            ].map(Validator.CodingKey.init(stringValue:))
+
+                            errors.append(
+                                .init(
+                                    reason: "The following path parameters were not defined in the Path Item or Operation `parameters`: \(missingParamDefs)",
+                                    at: codingPath
+                                )
+                            )
+                        }
+                    }
+                }
+
+                return errors
+            }
+        )
+    }
+
+    // MARK: - Included with `Validator()` by default
+
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
@@ -55,8 +145,6 @@ extension Validation {
             check: \.count > 0
         )
     }
-
-    // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
     // by calling `Validator.blank`.

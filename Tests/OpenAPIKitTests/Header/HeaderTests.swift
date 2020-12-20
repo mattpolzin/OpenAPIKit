@@ -69,34 +69,35 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  }
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+            """
         )
     }
 
     func test_header_contentMap_decode() throws {
         let headerData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -112,26 +113,27 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_header_schema_decode() throws {
         let headerData =
-"""
-{
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -145,28 +147,29 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "schema" : {
-    "type" : "string"
-  },
-  "x-hello" : "hi"
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "schema" : {
+                "type" : "string"
+              },
+              "x-hello" : "hi"
+            }
+            """
         )
     }
 
     func test_header_schema_withExtension_decode() throws {
         let headerData =
-"""
-{
-  "schema" : {
-    "type" : "string"
-  },
-  "x-hello" : "hi"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "schema" : {
+            "type" : "string"
+          },
+          "x-hello" : "hi"
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -185,36 +188,37 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "required" : true
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "required" : true
+            }
+            """
         )
     }
 
     func test_header_required_decode() throws {
         let headerData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "required" : true
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -238,36 +242,37 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "description" : "hello"
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "description" : "hello"
+            }
+            """
         )
     }
 
     func test_header_withDescription_decode() throws {
         let headerData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "description" : "hello"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "hello"
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -291,36 +296,37 @@ extension HeaderTests {
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
 
-        assertJSONEquivalent(headerEncoding,
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "deprecated" : true
-}
-"""
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "content" : {
+                "application\\/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "deprecated" : true
+            }
+            """
         )
     }
 
     func test_header_deprecated_decode() throws {
         let headerData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "deprecated" : true
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "deprecated" : true
+        }
+        """.data(using: .utf8)!
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
         XCTAssertEqual(
@@ -348,29 +354,29 @@ extension HeaderTests {
 
         assertJSONEquivalent(
             encodedHeader,
-"""
-{
-  "example" : "hello string",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-"""
+            """
+            {
+              "example" : "hello string",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
         )
     }
 
     func test_header_withExample_decode() throws {
         let headerData =
-"""
-{
-  "example" : "hello string",
-  "required" : true,
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "example" : "hello string",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
@@ -400,35 +406,65 @@ extension HeaderTests {
 
         assertJSONEquivalent(
             encodedHeader,
-"""
-{
-  "required" : true,
-  "schema" : {
-    "items" : {
-      "type" : "string"
-    },
-    "type" : "array"
-  },
-  "style" : "pipeDelimited"
-}
-"""
+            """
+            {
+              "required" : true,
+              "schema" : {
+                "items" : {
+                  "type" : "string"
+                },
+                "type" : "array"
+              },
+              "style" : "pipeDelimited"
+            }
+            """
+        )
+
+        let header2 = OpenAPI.Header(
+            schema: .init(
+                .array(items: .string),
+                style: .pipeDelimited,
+                allowReserved: true,
+                example: "this|or|that"
+            ),
+            required: true
+        )
+
+        let encodedHeader2 = try orderUnstableTestStringFromEncoding(of: header2)
+
+        assertJSONEquivalent(
+            encodedHeader2,
+            """
+            {
+              "allowReserved" : true,
+              "example" : "this|or|that",
+              "required" : true,
+              "schema" : {
+                "items" : {
+                  "type" : "string"
+                },
+                "type" : "array"
+              },
+              "style" : "pipeDelimited"
+            }
+            """
         )
     }
 
     func test_header_withStyle_decode() throws {
         let headerData =
-"""
-{
-  "required" : true,
-  "schema" : {
-    "items" : {
-      "type" : "string"
-    },
-    "type" : "array"
-  },
-  "style" : "pipeDelimited"
-}
-""".data(using: .utf8)!
+        """
+        {
+          "required" : true,
+          "schema" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "style" : "pipeDelimited"
+        }
+        """.data(using: .utf8)!
 
         let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
 
@@ -442,24 +478,55 @@ extension HeaderTests {
                 required: true
             )
         )
+
+        let headerData2 =
+        """
+        {
+          "allowReserved" : true,
+          "example" : "this|or|that",
+          "required" : true,
+          "schema" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "style" : "pipeDelimited"
+        }
+        """.data(using: .utf8)!
+
+        let header2 = try orderUnstableDecode(OpenAPI.Header.self, from: headerData2)
+
+        XCTAssertEqual(
+            header2,
+            OpenAPI.Header(
+                schema: .init(
+                    .array(items: .string),
+                    style: .pipeDelimited,
+                    allowReserved: true,
+                    example: "this|or|that"
+                ),
+                required: true
+            )
+        )
     }
 
     func test_header_errorForBothContentAndSchema_decode() {
         let headerData =
-"""
-{
-  "content" : {
-    "application\\/json" : {
-      "schema" : {
-        "type" : "string"
-      }
-    }
-  },
-  "schema" : {
-    "type" : "string"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "content" : {
+            "application\\/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Header.self, from: headerData))
     }

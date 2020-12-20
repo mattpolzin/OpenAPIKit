@@ -13,7 +13,7 @@ extension OpenAPI {
     /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
     ///
     public struct Server: Equatable, CodableVendorExtendable {
-        public let url: URL
+        public let urlTemplate: URLTemplate
         public let description: String?
         public let variables: OrderedDictionary<String, Variable>
 
@@ -30,7 +30,7 @@ extension OpenAPI {
             variables: OrderedDictionary<String, Variable> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.url = url
+            self.urlTemplate = URLTemplate(url: url)
             self.description = description
             self.variables = variables
             self.vendorExtensions = vendorExtensions
@@ -74,7 +74,7 @@ extension OpenAPI.Server: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(url.absoluteString, forKey: .url)
+        try container.encode(urlTemplate, forKey: .url)
 
         try container.encodeIfPresent(description, forKey: .description)
 
@@ -90,7 +90,7 @@ extension OpenAPI.Server: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        url = try container.decodeURLAsString(forKey: .url)
+        urlTemplate = try container.decode(URLTemplate.self, forKey: .url)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
 
@@ -150,7 +150,9 @@ extension OpenAPI.Server.Variable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(`enum`, forKey: .enum)
+        if !`enum`.isEmpty {
+            try container.encode(`enum`, forKey: .enum)
+        }
 
         try container.encode(`default`, forKey: .default)
 
@@ -164,7 +166,7 @@ extension OpenAPI.Server.Variable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        `enum` = try container.decode([String].self, forKey: .enum)
+        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) ?? []
 
         `default` = try container.decode(String.self, forKey: .default)
 

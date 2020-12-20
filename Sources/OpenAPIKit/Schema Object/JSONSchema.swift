@@ -15,16 +15,13 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
     indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
     indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
-    indirect case all(of: [JSONSchemaFragment], discriminator: OpenAPI.Discriminator?)
-    indirect case one(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
-    indirect case any(of: [JSONSchema], discriminator: OpenAPI.Discriminator?)
-    indirect case not(JSONSchema)
+    indirect case all(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+    indirect case one(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+    indirect case any(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+    indirect case not(JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
     case reference(JSONReference<JSONSchema>)
-    /// This schema does not have a `type` specified. This is allowed
-    /// but does not offer much in the way of documenting the schema
-    /// so it is represented here as "undefined" with an optional
-    /// description.
-    case undefined(description: String?) // This is the "{}" case where not even a type constraint is given. If a 'description' property is found, it is used as the associated value.
+    /// Schemas without a `type`.
+    case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
 
     /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
@@ -41,7 +38,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
             return .integer(context.format)
         case .string(let context, _):
             return .string(context.format)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .all, .one, .any, .not, .reference, .fragment:
             return nil
         }
     }
@@ -56,6 +53,37 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
         return jsonTypeFormat?.jsonType
     }
 
+    /// The format of the schema as a string value.
+    ///
+    /// This can be set even when a schema type has
+    /// not be specified. If a type has been specified,
+    /// a type-safe format can be used and retrieved
+    /// via the `jsonTypeFormat` property.
+    public var formatString: String? {
+        switch self {
+        case .boolean(let context):
+            return context.format.rawValue
+        case .object(let context, _):
+            return context.format.rawValue
+        case .array(let context, _):
+            return context.format.rawValue
+        case .number(let context, _):
+            return context.format.rawValue
+        case .integer(let context, _):
+            return context.format.rawValue
+        case .string(let context, _):
+            return context.format.rawValue
+        case .fragment(let context),
+             .all(of: _, core: let context),
+             .one(of: _, core: let context),
+             .any(of: _, core: let context),
+             .not(_, core: let context):
+            return context.format.rawValue
+        case .reference:
+            return nil
+        }
+    }
+
     // See `JSONSchemaContext`
     public var required: Bool {
         switch self {
@@ -64,11 +92,14 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext),
+             .all(of: _, core: let context as JSONSchemaContext),
+             .one(of: _, core: let context as JSONSchemaContext),
+             .any(of: _, core: let context as JSONSchemaContext),
+             .not(_, core: let context as JSONSchemaContext):
             return context.required
-        case .undefined:
-            return false
-        case .all, .one, .any, .not, .reference:
+        case .reference:
             return true
         }
     }
@@ -81,11 +112,14 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext),
+             .all(of: _, core: let context as JSONSchemaContext),
+             .one(of: _, core: let context as JSONSchemaContext),
+             .any(of: _, core: let context as JSONSchemaContext),
+             .not(_, core: let context as JSONSchemaContext):
             return context.description
-        case .undefined(description: let description):
-            return description
-        case .all, .one, .any, .not, .reference:
+        case .reference:
             return nil
         }
     }
@@ -98,13 +132,14 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext),
+             .all(of: _, core: let context as JSONSchemaContext),
+             .one(of: _, core: let context as JSONSchemaContext),
+             .any(of: _, core: let context as JSONSchemaContext),
+             .not(_, core: let context as JSONSchemaContext):
             return context.discriminator
-        case .all(_, let discriminator),
-             .one(_, let discriminator),
-             .any(_, let discriminator):
-            return discriminator
-        case .undefined, .not, .reference:
+        case .reference:
             return nil
         }
     }
@@ -145,24 +180,56 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     }
 
     // See `JSONSchemaContext`
+    public var defaultValue: AnyCodable? {
+        return coreContext?.defaultValue
+    }
+
+    // See `JSONSchemaContext`
     public var example: AnyCodable? {
         return coreContext?.example
     }
 }
 
+// MARK: - Case Checks
+extension JSONSchema {
+    /// Check if this schema is an _empty_ `.fragment`.
+    ///
+    /// A special case of the `.fragment` schema is the "empty"
+    /// schema where no information about the schema component
+    /// is available.
+    ///
+    /// This is equivalent to the following JSON Schema:
+    ///
+    ///     {
+    ///     }
+    ///
+    public var isEmpty: Bool {
+        guard case .fragment(let context) = self, context.isEmpty else {
+            return false
+        }
+        return true
+    }
+
+    /// Check if this schema is a `.fragment`.
+    public var isFragment: Bool {
+        guard case .fragment = self else { return false }
+        return true
+    }
+
+    // bool
+
+    // array
+
+    // ...
+}
+
 // MARK: - Context Accessors
 extension JSONSchema {
-    /// Get the general context most JSONSchemas have.
+    /// Get the core context most JSONSchemas have.
     ///
     /// This is the information shared by most schemas.
     ///
-    /// Notably missing this general context are:
-    /// - `all`
-    /// - `one`
-    /// - `any`
-    /// - `not`
-    /// - `reference`
-    /// - `undefined`
+    /// Notably, `reference` schemas do not have this core context.
     ///
     public var coreContext: JSONSchemaContext? {
         switch self {
@@ -171,9 +238,14 @@ extension JSONSchema {
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
              .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _):
+             .string(let context as JSONSchemaContext, _),
+             .fragment(let context as JSONSchemaContext),
+             .all(of: _, core: let context as JSONSchemaContext),
+             .one(of: _, core: let context as JSONSchemaContext),
+             .any(of: _, core: let context as JSONSchemaContext),
+             .not(_, core: let context as JSONSchemaContext):
             return context
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .reference:
             return nil
         }
     }
@@ -250,7 +322,17 @@ extension JSONSchema {
             return .integer(context.optionalContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.optionalContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.optionalContext())
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.optionalContext())
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.optionalContext())
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.optionalContext())
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.optionalContext())
+        case .reference:
             return self
         }
     }
@@ -270,7 +352,17 @@ extension JSONSchema {
             return .integer(context.requiredContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.requiredContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.requiredContext())
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.requiredContext())
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.requiredContext())
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.requiredContext())
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.requiredContext())
+        case .reference:
             return self
         }
     }
@@ -290,7 +382,17 @@ extension JSONSchema {
             return .integer(context.nullableContext(), contextB)
         case .string(let context, let contextB):
             return .string(context.nullableContext(), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.nullableContext())
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.nullableContext())
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.nullableContext())
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.nullableContext())
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.nullableContext())
+        case .reference:
             return self
         }
     }
@@ -311,7 +413,47 @@ extension JSONSchema {
             return .integer(context.with(allowedValues: allowedValues), contextB)
         case .string(let context, let contextB):
             return .string(context.with(allowedValues: allowedValues), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.with(allowedValues: allowedValues))
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(allowedValues: allowedValues))
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.with(allowedValues: allowedValues))
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.with(allowedValues: allowedValues))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(allowedValues: allowedValues))
+        case .reference:
+            return self
+        }
+    }
+
+    /// Return a version of this `JSONSchema` that has the given default value.
+    public func with(defaultValue: AnyCodable) -> JSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(defaultValue: defaultValue))
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(defaultValue: defaultValue), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(defaultValue: defaultValue), contextB)
+        case .number(let context, let contextB):
+            return .number(context.with(defaultValue: defaultValue), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.with(defaultValue: defaultValue), contextB)
+        case .string(let context, let contextB):
+            return .string(context.with(defaultValue: defaultValue), contextB)
+        case .fragment(let context):
+            return .fragment(context.with(defaultValue: defaultValue))
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(defaultValue: defaultValue))
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.with(defaultValue: defaultValue))
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.with(defaultValue: defaultValue))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(defaultValue: defaultValue))
+        case .reference:
             return self
         }
     }
@@ -332,7 +474,17 @@ extension JSONSchema {
             return .integer(context.with(example: example), contextB)
         case .string(let context, let contextB):
             return .string(context.with(example: example), contextB)
-        case .all, .one, .any, .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.with(example: example))
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(example: example))
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.with(example: example))
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.with(example: example))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(example: example))
+        case .reference:
             throw Self.Error.exampleNotSupported
         }
     }
@@ -352,13 +504,17 @@ extension JSONSchema {
             return .integer(context.with(discriminator: discriminator), contextB)
         case .string(let context, let contextB):
             return .string(context.with(discriminator: discriminator), contextB)
-        case .all(of: let fragments, discriminator: _):
-            return .all(of: fragments, discriminator: discriminator)
-        case .one(of: let schemas, discriminator: _):
-            return .one(of: schemas, discriminator: discriminator)
-        case .any(of: let schemas, discriminator: _):
-            return .any(of: schemas, discriminator: discriminator)
-        case .not, .reference, .undefined:
+        case .fragment(let context):
+            return .fragment(context.with(discriminator: discriminator))
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(discriminator: discriminator))
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.with(discriminator: discriminator))
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.with(discriminator: discriminator))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(discriminator: discriminator))
+        case .reference:
             return self
         }
     }
@@ -407,14 +563,15 @@ extension JSONSchema {
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>(
@@ -428,6 +585,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         return .boolean(context)
@@ -438,14 +596,15 @@ extension JSONSchema {
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .boolean(
@@ -459,6 +618,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -469,21 +629,95 @@ extension JSONSchema {
     }
 
     // array allowedValues
-    /// Construct a string schema.
-    public static func string(
-        format: JSONTypeFormat.StringFormat = .unspecified,
+    /// Construct a fragment of a schema.
+    public static func fragment(
+        format: JSONTypeFormat.AnyFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
-        minLength: Int = 0,
+        allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
+        example: AnyCodable? = nil
+    ) -> JSONSchema {
+        let context = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            example: example
+        )
+        return .fragment(context)
+    }
+
+    // variadic allowedValues
+    /// Construct a fragment of a schema passing a variadic list of allowed values.
+    public static func fragment(
+        format: JSONTypeFormat.AnyFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
+        title: String? = nil,
+        description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
+        allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
+        example: AnyCodable? = nil
+    ) -> JSONSchema {
+        return .fragment(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            example: example
+        )
+    }
+
+    /// A required, non-nullable fragment of a schema.
+    ///
+    /// This is also known as the "empty" schema because
+    /// its representation in JSON is just an empty object `{ }`.
+    public static var fragment: JSONSchema {
+        return .fragment()
+    }
+
+    // array allowedValues
+    /// Construct a string schema.
+    public static func string(
+        format: JSONTypeFormat.StringFormat = .unspecified,
+        required: Bool = true,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
+        title: String? = nil,
+        description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil,
+        externalDocs: OpenAPI.ExternalDocumentation? = nil,
+        minLength: Int? = nil,
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(
@@ -497,6 +731,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let stringContext = JSONSchema.StringContext(
@@ -512,17 +747,18 @@ extension JSONSchema {
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
-        minLength: Int = 0,
+        minLength: Int? = nil,
         maxLength: Int? = nil,
         pattern: String? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .string(
@@ -539,6 +775,7 @@ extension JSONSchema {
             maxLength: maxLength,
             pattern: pattern,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -553,9 +790,9 @@ extension JSONSchema {
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
@@ -564,6 +801,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(
@@ -577,6 +815,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let numbericContext = JSONSchema.NumericContext(
@@ -592,9 +831,9 @@ extension JSONSchema {
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
@@ -603,6 +842,7 @@ extension JSONSchema {
         maximum: (Double, exclusive: Bool)? = nil,
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .number(
@@ -619,6 +859,7 @@ extension JSONSchema {
             maximum: maximum,
             minimum: minimum,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -633,9 +874,9 @@ extension JSONSchema {
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
@@ -644,6 +885,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(
@@ -657,6 +899,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let integerContext = JSONSchema.IntegerContext(
@@ -672,9 +915,9 @@ extension JSONSchema {
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
@@ -683,6 +926,7 @@ extension JSONSchema {
         maximum: (Int, exclusive: Bool)? = nil,
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         return .integer(
@@ -699,6 +943,7 @@ extension JSONSchema {
             maximum: maximum,
             minimum: minimum,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -713,18 +958,19 @@ extension JSONSchema {
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
-        minProperties: Int = 0,
+        minProperties: Int? = nil,
         maxProperties: Int? = nil,
         properties: [String: JSONSchema] = [:],
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
@@ -738,6 +984,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         let objectContext = JSONSchema.ObjectContext(
@@ -759,18 +1006,19 @@ extension JSONSchema {
     public static func array(
         format: JSONTypeFormat.ArrayFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool = false,
-        permissions: JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>.Permissions = .readWrite,
-        deprecated: Bool = false,
+        nullable: Bool? = nil,
+        permissions: JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>.Permissions? = nil,
+        deprecated: Bool? = nil,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil,
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
-        minItems: Int = 0,
+        minItems: Int? = nil,
         maxItems: Int? = nil,
-        uniqueItems: Bool = false,
+        uniqueItems: Bool? = nil,
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
+        defaultValue: AnyCodable? = nil,
         example: AnyCodable? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(
@@ -784,6 +1032,7 @@ extension JSONSchema {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
 
@@ -804,18 +1053,29 @@ extension JSONSchema {
     /// Construct a schema stating all of the given fragment
     /// requirements are met.
     public static func all(
-        of schemas: [JSONSchemaFragment]
+        of schemas: [JSONSchema]
     ) -> JSONSchema {
-        return .all(of: schemas, discriminator: nil)
+        return .all(of: schemas, core: .init())
     }
 
     /// Construct a schema stating all of the given fragment
     /// requirements are met given a discriminator.
     public static func all(
-        of schemas: JSONSchemaFragment...,
+        of schemas: JSONSchema...,
+        required: Bool = true,
+        title: String? = nil,
+        description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
     ) -> JSONSchema {
-        return .all(of: schemas, discriminator: discriminator)
+        return .all(
+            of: schemas,
+            core: .init(
+                required: required,
+                title: title,
+                description: description,
+                discriminator: discriminator
+            )
+        )
     }
 
     /// Construct a schema stating one of the given schema's
@@ -823,16 +1083,27 @@ extension JSONSchema {
     public static func one(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
-        return .one(of: schemas, discriminator: nil)
+        return .one(of: schemas, core: .init())
     }
 
     /// Construct a schema stating one of the given schema's
     /// requirements are met given a discriminator.
     public static func one(
         of schemas: JSONSchema...,
+        required: Bool = true,
+        title: String? = nil,
+        description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
     ) -> JSONSchema {
-        return .one(of: schemas, discriminator: discriminator)
+        return .one(
+            of: schemas,
+            core: .init(
+                required: required,
+                title: title,
+                description: description,
+                discriminator: discriminator
+            )
+        )
     }
 
     /// Construct a schema stating any of the given schema's
@@ -840,16 +1111,52 @@ extension JSONSchema {
     public static func any(
         of schemas: [JSONSchema]
     ) -> JSONSchema {
-        return .any(of: schemas, discriminator: nil)
+        return .any(of: schemas, core: .init())
     }
 
     /// Construct a schema stating any of the given schema's
     /// requirements are met given a discriminator.
     public static func any(
         of schemas: JSONSchema...,
+        required: Bool = true,
+        title: String? = nil,
+        description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
     ) -> JSONSchema {
-        return .any(of: schemas, discriminator: discriminator)
+        return .any(
+            of: schemas,
+            core: .init(
+                required: required,
+                title: title,
+                description: description,
+                discriminator: discriminator
+            )
+        )
+    }
+
+    /// Construct a schema stating the given schema's
+    /// requirements are _not_ met.
+    ///
+    /// Only the schema taken as the first
+    /// argument is inverted by the **not** logic. Any
+    /// other arguments are here to directly describe what
+    /// this schema _is_ as opposed to what it _is not_.
+    public static func not(
+        _ schema: JSONSchema,
+        required: Bool = true,
+        title: String? = nil,
+        description: String? = nil,
+        discriminator: OpenAPI.Discriminator? = nil
+    ) -> JSONSchema {
+        return .not(
+            schema,
+            core: .init(
+                required: required,
+                title: title,
+                description: description,
+                discriminator: discriminator
+            )
+        )
     }
 }
 
@@ -857,7 +1164,6 @@ extension JSONSchema {
 
 extension JSONSchema {
     private enum SubschemaCodingKeys: String, CodingKey {
-        case discriminator
         case allOf
         case oneOf
         case anyOf
@@ -880,44 +1186,39 @@ extension JSONSchema: Encodable {
             try contextA.encode(to: encoder)
             try contextB.encode(to: encoder)
 
-        case .all(of: let nodes, let discriminator):
+        case .all(of: let nodes, core: let core):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .allOf)
-            try container.encodeIfPresent(discriminator, forKey: .discriminator)
+            try core.encode(to: encoder)
 
-        case .one(of: let nodes, let discriminator):
+        case .one(of: let nodes, core: let core):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .oneOf)
-            try container.encodeIfPresent(discriminator, forKey: .discriminator)
+            try core.encode(to: encoder)
 
-        case .any(of: let nodes, let discriminator):
+        case .any(of: let nodes, core: let core):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(nodes, forKey: .anyOf)
-            try container.encodeIfPresent(discriminator, forKey: .discriminator)
+            try core.encode(to: encoder)
 
-        case .not(let node):
+        case .not(let node, core: let core):
             var container = encoder.container(keyedBy: SubschemaCodingKeys.self)
 
             try container.encode(node, forKey: .not)
+            try core.encode(to: encoder)
 
         case .reference(let reference):
             var container = encoder.singleValueContainer()
 
             try container.encode(reference)
 
-        case .undefined(description: let description):
+        case .fragment(let context):
             var container = encoder.singleValueContainer()
 
-            let dict = Dictionary(
-                uniqueKeysWithValues: [
-                    description.map { ("description", $0) }
-                ].compactMap { $0 }
-            )
-
-            try container.encode(dict)
+            try container.encode(context)
         }
     }
 }
@@ -926,11 +1227,10 @@ extension JSONSchema: Decodable {
 
     private enum HintCodingKeys: String, CodingKey {
         case type
-        case description
-        case unknown
+        case other
 
         init(stringValue: String) {
-            self = Self(rawValue: stringValue) ?? .unknown
+            self = Self(rawValue: stringValue) ?? .other
         }
     }
 
@@ -946,25 +1246,34 @@ extension JSONSchema: Decodable {
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-            self = .all(of: try container.decode([JSONSchemaFragment].self, forKey: .allOf), discriminator: discriminator)
+            self = .all(
+                of: try container.decode([JSONSchema].self, forKey: .allOf),
+                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            )
             return
         }
 
         if container.contains(.anyOf) {
-            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-            self = .any(of: try container.decode([JSONSchema].self, forKey: .anyOf), discriminator: discriminator)
+            self = .any(
+                of: try container.decode([JSONSchema].self, forKey: .anyOf),
+                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            )
             return
         }
 
         if container.contains(.oneOf) {
-            let discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
-            self = .one(of: try container.decode([JSONSchema].self, forKey: .oneOf), discriminator: discriminator)
+            self = .one(
+                of: try container.decode([JSONSchema].self, forKey: .oneOf),
+                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            )
             return
         }
 
         if container.contains(.not) {
-            self = .not(try container.decode(JSONSchema.self, forKey: .not))
+            self = .not(
+                try container.decode(JSONSchema.self, forKey: .not),
+                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            )
             return
         }
 
@@ -976,6 +1285,21 @@ extension JSONSchema: Decodable {
         let stringContainer = try decoder.container(keyedBy: JSONSchema.StringContext.CodingKeys.self)
         let arrayContainer = try decoder.container(keyedBy: JSONSchema.ArrayContext.CodingKeys.self)
         let objectContainer = try decoder.container(keyedBy: JSONSchema.ObjectContext.CodingKeys.self)
+
+        let keysFrom = [
+            numericOrIntegerContainer.allKeys.isEmpty ? nil : "number/integer",
+            stringContainer.allKeys.isEmpty ? nil : "string",
+            arrayContainer.allKeys.isEmpty ? nil : "array",
+            objectContainer.allKeys.isEmpty ? nil : "object"
+        ].compactMap { $0 }
+
+        if keysFrom.count > 1 {
+            throw InconsistencyError(
+                subjectName: "Schema",
+                details: "A schema contains properties for multiple types of schemas, namely: \(keysFrom).",
+                codingPath: decoder.codingPath
+            )
+        }
 
         func assertNoTypeConflict(with type: JSONType) throws {
             guard let typeHint = typeHint else { return }
@@ -1015,15 +1339,16 @@ extension JSONSchema: Decodable {
         } else if typeHint == .boolean {
             self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
-        } else if hintContainerCount == 0 || (hintContainerCount == 1 && hintContainer.contains(.description)) {
-            let description = try hintContainer.decodeIfPresent(String.self, forKey: .description)
-            self = .undefined(description: description)
         } else {
-            throw InconsistencyError(
-                subjectName: "OpenAPI Schema",
-                details: "No `type` or other identifying properties were found in the schema.",
-                codingPath: decoder.codingPath
-            )
+            let fragmentContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            if fragmentContext.isEmpty && hintContainerCount > 0 {
+                throw InconsistencyError(
+                    subjectName: "OpenAPI Schema",
+                    details: "Found nothing but unsupported attributes.",
+                    codingPath: decoder.codingPath
+                )
+            }
+            self = .fragment(fragmentContext)
         }
     }
 }

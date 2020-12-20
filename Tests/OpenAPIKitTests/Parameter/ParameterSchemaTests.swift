@@ -224,31 +224,31 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_allDefaultsNoExamples_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
@@ -272,33 +272,33 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "example" : "hello",
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "example" : "hello",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_allDefaultsOneExample_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "example" : "hello",
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "example" : "hello",
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
@@ -325,41 +325,41 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "examples" : {
-      "one" : {
-        "value" : "hello"
-      }
-    },
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "examples" : {
+                  "one" : {
+                    "value" : "hello"
+                  }
+                },
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_allDefaultsExamples_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "examples" : {
-      "one" : {
-        "value" : "hello"
-      }
-    },
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "examples" : {
+              "one" : {
+                "value" : "hello"
+              }
+            },
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
@@ -385,33 +385,33 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "schema" : {
-      "type" : "string"
-    },
-    "style" : "form"
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "schema" : {
+                  "type" : "string"
+                },
+                "style" : "form"
+              }
+            }
+            """
         )
     }
 
     func test_styleOverride_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "schema" : {
-      "type" : "string"
-    },
-    "style" : "form"
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "schema" : {
+              "type" : "string"
+            },
+            "style" : "form"
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
@@ -435,33 +435,33 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "explode" : true,
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "explode" : true,
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_explodeOverride_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "explode" : true,
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "explode" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 
@@ -486,33 +486,33 @@ extension ParameterSchemaTests {
 
         assertJSONEquivalent(
             encodedSchema,
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "allowReserved" : true,
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-"""
+            """
+            {
+              "location" : "path",
+              "schema" : {
+                "allowReserved" : true,
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_allowReservedOverride_decode() throws {
         let schemaData =
-"""
-{
-  "location" : "path",
-  "schema" : {
-    "allowReserved" : true,
-    "schema" : {
-      "type" : "string"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "location" : "path",
+          "schema" : {
+            "allowReserved" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+        """.data(using: .utf8)!
 
         let schema = try orderUnstableDecode(SchemaWrapper.self, from: schemaData).schema
 

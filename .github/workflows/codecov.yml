@@ -5,12 +5,12 @@ on: [pull_request]
 jobs:
   codecov:
     container: 
-      image: swift:5.2
+      image: swift:5.3
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - run: swift test --enable-test-discovery --enable-code-coverage
     - id: analysis
-      uses: mattpolzin/swift-codecov-action@0.4.0
+      uses: mattpolzin/swift-codecov-action@0.5.0
       with:
         MINIMUM_COVERAGE: 98

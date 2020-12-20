@@ -19,9 +19,11 @@ class ServerTests: XCTestCase {
         XCTAssertEqual(v1.enum, [])
         XCTAssertNil(v1.description)
 
-        let v2 = Server.Variable(enum: ["hello"],
-                                 default: "hello",
-                                 description: "hello world")
+        let v2 = Server.Variable(
+            enum: ["hello"],
+            default: "hello",
+            description: "hello world"
+        )
         XCTAssertEqual(v2.enum, ["hello"])
         XCTAssertEqual(v2.default, "hello")
         XCTAssertEqual(v2.description, "hello world")
@@ -30,18 +32,20 @@ class ServerTests: XCTestCase {
     func test_serverInitialization() {
         let s1 = Server(url: URL(string: "https://hello.com")!)
 
-        XCTAssertEqual(s1.url, URL(string: "https://hello.com")!)
+        XCTAssertEqual(s1.urlTemplate, URLTemplate(rawValue: "https://hello.com")!)
         XCTAssertNil(s1.description)
         XCTAssertEqual(s1.variables, [:])
 
         let variable = Server.Variable(default: "world")
-        let s2 = Server(url: URL(string: "https://hello.com")!,
-                        description: "hello world",
-                        variables: [
-                            "hello": variable
-            ])
+        let s2 = Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": variable
+            ]
+        )
 
-        XCTAssertEqual(s2.url, URL(string: "https://hello.com")!)
+        XCTAssertEqual(s2.urlTemplate, URLTemplate(rawValue: "https://hello.com")!)
         XCTAssertEqual(s2.description, "hello world")
         XCTAssertEqual(s2.variables, ["hello": variable])
     }
@@ -49,54 +53,109 @@ class ServerTests: XCTestCase {
 
 // MARK: - Codable
 extension ServerTests {
-    func test_minimalServer_decode() {
+    func test_minimalServer_decode() throws {
         let serverData =
-"""
-{
-    "url": "https://hello.com"
-}
-""".data(using: .utf8)!
+        """
+        {
+            "url": "https://hello.com"
+        }
+        """.data(using: .utf8)!
 
-        let serverDecoded = try! orderUnstableDecode(Server.self, from: serverData)
+        let serverDecoded = try orderUnstableDecode(Server.self, from: serverData)
 
         XCTAssertEqual(serverDecoded, Server(url: URL(string: "https://hello.com")!))
     }
 
-    func test_minimalServer_encode() {
+    func test_minimalServer_encode() throws {
         let server = Server(url: URL(string: "https://hello.com")!)
-        let encodedServer = try! orderUnstableTestStringFromEncoding(of: server)
+        let encodedServer = try orderUnstableTestStringFromEncoding(of: server)
 
-        assertJSONEquivalent(encodedServer,
-"""
-{
-  "url" : "https:\\/\\/hello.com"
-}
-"""
-                       )
+        assertJSONEquivalent(
+            encodedServer,
+            """
+            {
+              "url" : "https:\\/\\/hello.com"
+            }
+            """
+        )
     }
 
-    func test_maximalServer_decode() {
+    func test_minimalServerVariable_decode() throws {
         let serverData =
-"""
-{
-    "url": "https://hello.com",
-    "description": "hello world",
-    "variables": {
-        "hello": {
-            "enum": ["hello"],
-            "default": "hello",
-            "description": "hello again",
-            "x-otherThing": 1234
+        """
+        {
+            "url": "https://hello.com",
+            "variables": {
+                "world": {
+                    "default": "cool"
+                }
+            }
         }
-    },
-    "x-specialFeature": [
-        "hello",
-        "world"
-    ]
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
-        let serverDecoded = try! orderUnstableDecode(Server.self, from: serverData)
+        let serverDecoded = try orderUnstableDecode(Server.self, from: serverData)
+
+        XCTAssertEqual(
+            serverDecoded,
+            Server(
+                url: URL(string: "https://hello.com")!,
+                variables: [
+                    "world": .init(
+                        default: "cool"
+                    )
+                ]
+            )
+        )
+    }
+
+    func test_minimalServerVariable_encode() throws {
+        let server = Server(
+            url: URL(string: "https://hello.com")!,
+            variables: [
+                "world": .init(
+                    default: "cool"
+                )
+            ]
+        )
+        let encodedServer = try orderUnstableTestStringFromEncoding(of: server)
+
+        assertJSONEquivalent(
+            encodedServer,
+            """
+            {
+              "url" : "https:\\/\\/hello.com",
+              "variables" : {
+                "world" : {
+                  "default" : "cool"
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_maximalServer_decode() throws {
+        let serverData =
+        """
+        {
+            "url": "https://hello.com",
+            "description": "hello world",
+            "variables": {
+                "hello": {
+                    "enum": ["hello"],
+                    "default": "hello",
+                    "description": "hello again",
+                    "x-otherThing": 1234
+                }
+            },
+            "x-specialFeature": [
+                "hello",
+                "world"
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let serverDecoded = try orderUnstableDecode(Server.self, from: serverData)
 
         XCTAssertEqual(
             serverDecoded,
@@ -116,7 +175,7 @@ extension ServerTests {
         )
     }
 
-    func test_maximalServer_encode() {
+    func test_maximalServer_encode() throws {
         let server = Server(
             url: URL(string: "https://hello.com")!,
             description: "hello world",
@@ -130,29 +189,30 @@ extension ServerTests {
             ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
-        let encodedServer = try! orderUnstableTestStringFromEncoding(of: server)
+        let encodedServer = try orderUnstableTestStringFromEncoding(of: server)
 
-        assertJSONEquivalent(encodedServer,
-"""
-{
-  "description" : "hello world",
-  "url" : "https:\\/\\/hello.com",
-  "variables" : {
-    "hello" : {
-      "default" : "hello",
-      "description" : "hello again",
-      "enum" : [
-        "hello"
-      ],
-      "x-otherThing" : 1234
-    }
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+        assertJSONEquivalent(
+            encodedServer,
+            """
+            {
+              "description" : "hello world",
+              "url" : "https:\\/\\/hello.com",
+              "variables" : {
+                "hello" : {
+                  "default" : "hello",
+                  "description" : "hello again",
+                  "enum" : [
+                    "hello"
+                  ],
+                  "x-otherThing" : 1234
+                }
+              },
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 }

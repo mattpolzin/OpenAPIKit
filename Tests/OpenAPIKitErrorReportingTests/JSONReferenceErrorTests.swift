@@ -13,18 +13,18 @@ import Yams
 final class JSONReferenceErrorTests: XCTestCase {
     func test_referenceFailedToParse() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            responses: {}
-            parameters:
-                - $ref: 'not a reference'
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    responses: {}
+                    parameters:
+                        - $ref: 'not a reference'
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

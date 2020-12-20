@@ -344,29 +344,29 @@ final class DocumentTests: XCTestCase {
 
     func test_existingSecuritySchemeSuccess() {
         let docData =
-"""
-{
-    "openapi": "3.0.0",
-    "info": {
-        "title": "test",
-        "version": "1.0"
-    },
-    "paths": {},
-    "components": {
-        "securitySchemes": {
-            "found": {
-                "type": "http",
-                "scheme": "basic"
-            }
-        }
-    },
-    "security": [
+        """
         {
-            "found": []
+            "openapi": "3.0.0",
+            "info": {
+                "title": "test",
+                "version": "1.0"
+            },
+            "paths": {},
+            "components": {
+                "securitySchemes": {
+                    "found": {
+                        "type": "http",
+                        "scheme": "basic"
+                    }
+                }
+            },
+            "security": [
+                {
+                    "found": []
+                }
+            ]
         }
-    ]
-}
-""".data(using: .utf8)!
+        """.data(using: .utf8)!
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Document.self, from: docData))
     }
@@ -385,35 +385,35 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_minimal_decode() throws {
         let documentData =
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -439,35 +439,35 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.2",
-  "paths" : {
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.2",
+              "paths" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_specifyOpenAPIVersion_decode() throws {
         let documentData =
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.2",
-  "paths" : {
+        """
+        {
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.2",
+          "paths" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -493,45 +493,45 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  },
-  "servers" : [
-    {
-      "url" : "http:\\/\\/google.com"
-    }
-  ]
-}
-"""
+              },
+              "servers" : [
+                {
+                  "url" : "http:\\/\\/google.com"
+                }
+              ]
+            }
+            """
         )
     }
 
     func test_specifyServers_decode() throws {
         let documentData =
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  },
-  "servers" : [
-    {
-      "url" : "http:\\/\\/google.com"
-    }
-  ]
-}
-""".data(using: .utf8)!
+          },
+          "servers" : [
+            {
+              "url" : "http:\\/\\/google.com"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -556,39 +556,39 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
-    "\\/test" : {
-      "summary" : "hi"
-    }
-  }
-}
-"""
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
+                "\\/test" : {
+                  "summary" : "hi"
+                }
+              }
+            }
+            """
         )
     }
 
     func test_specifyPaths_decode() throws {
         let documentData =
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
-    "\\/test" : {
-      "summary" : "hi"
-    }
-  }
-}
-""".data(using: .utf8)!
+        """
+        {
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
+            "\\/test" : {
+              "summary" : "hi"
+            }
+          }
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -607,80 +607,76 @@ extension DocumentTests {
             info: .init(title: "API", version: "1.0"),
             servers: [],
             paths: [:],
-            components: .init(schemas: [:],
-                              responses: [:],
-                              parameters: [:],
-                              examples: [:],
-                              requestBodies: [:],
-                              headers: [:],
-                              securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]),
+            components: .init(
+                securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
+            ),
             security: [[.component( named: "security"):[]]]
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "components" : {
-    "securitySchemes" : {
-      "security" : {
-        "in" : "header",
-        "name" : "key",
-        "type" : "apiKey"
-      }
-    }
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "components" : {
+                "securitySchemes" : {
+                  "security" : {
+                    "in" : "header",
+                    "name" : "key",
+                    "type" : "apiKey"
+                  }
+                }
+              },
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  },
-  "security" : [
-    {
-      "security" : [
+              },
+              "security" : [
+                {
+                  "security" : [
 
-      ]
-    }
-  ]
-}
-"""
+                  ]
+                }
+              ]
+            }
+            """
         )
     }
 
     func test_specifySecurity_decode() throws {
         let documentData =
-"""
-{
-  "components" : {
-    "securitySchemes" : {
-      "security" : {
-        "in" : "header",
-        "name" : "key",
-        "type" : "apiKey"
-      }
-    }
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "components" : {
+            "securitySchemes" : {
+              "security" : {
+                "in" : "header",
+                "name" : "key",
+                "type" : "apiKey"
+              }
+            }
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  },
-  "security" : [
-    {
-      "security" : [
+          },
+          "security" : [
+            {
+              "security" : [
 
-      ]
-    }
-  ]
-}
-""".data(using: .utf8)!
+              ]
+            }
+          ]
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -689,13 +685,9 @@ extension DocumentTests {
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],
-                components: .init(schemas: [:],
-                                  responses: [:],
-                                  parameters: [:],
-                                  examples: [:],
-                                  requestBodies: [:],
-                                  headers: [:],
-                                  securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]),
+                components: .init(
+                    securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
+                ),
                 security: [[.component( named: "security"):[]]]
             )
         )
@@ -713,45 +705,45 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  },
-  "tags" : [
-    {
-      "name" : "hi"
-    }
-  ]
-}
-"""
+              },
+              "tags" : [
+                {
+                  "name" : "hi"
+                }
+              ]
+            }
+            """
         )
     }
 
     func test_specifyTags_decode() throws {
         let documentData =
-"""
-{
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  },
-  "tags" : [
-    {
-      "name" : "hi"
-    }
-  ]
-}
-""".data(using: .utf8)!
+          },
+          "tags" : [
+            {
+              "name" : "hi"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -778,41 +770,41 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "externalDocs" : {
-    "url" : "http:\\/\\/google.com"
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "externalDocs" : {
+                "url" : "http:\\/\\/google.com"
+              },
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  }
-}
-"""
+              }
+            }
+            """
         )
     }
 
     func test_specifyExternalDocs_decode() throws {
         let documentData =
-"""
-{
-  "externalDocs" : {
-    "url" : "http:\\/\\/google.com"
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  }
-}
-""".data(using: .utf8)!
+          }
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(
@@ -840,49 +832,49 @@ extension DocumentTests {
 
         assertJSONEquivalent(
             encodedDocument,
-"""
-{
-  "externalDocs" : {
-    "url" : "http:\\/\\/google.com"
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+            """
+            {
+              "externalDocs" : {
+                "url" : "http:\\/\\/google.com"
+              },
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.0",
+              "paths" : {
 
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-"""
+              },
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
         )
     }
 
     func test_vendorExtensions_decode() throws {
         let documentData =
-"""
-{
-  "externalDocs" : {
-    "url" : "http:\\/\\/google.com"
-  },
-  "info" : {
-    "title" : "API",
-    "version" : "1.0"
-  },
-  "openapi" : "3.0.0",
-  "paths" : {
+        """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
 
-  },
-  "x-specialFeature" : [
-    "hello",
-    "world"
-  ]
-}
-""".data(using: .utf8)!
+          },
+          "x-specialFeature" : [
+            "hello",
+            "world"
+          ]
+        }
+        """.data(using: .utf8)!
         let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
 
         XCTAssertEqual(

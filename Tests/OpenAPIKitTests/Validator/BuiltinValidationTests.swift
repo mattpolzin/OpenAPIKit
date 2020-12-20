@@ -1,5 +1,5 @@
 //
-//  DefaultValidatorTests.swift
+//  BuiltinValidationTests.swift
 //  
 //
 //  Created by Mathew Polzin on 6/3/20.
@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 import OpenAPIKit
 
-final class DefaultValidatorTests: XCTestCase {
+final class BuiltinValidationTests: XCTestCase {
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -73,6 +73,165 @@ final class DefaultValidatorTests: XCTestCase {
         )
 
         let validator = Validator.blank.validating(.pathsContainOperations)
+        try document.validate(using: validator)
+    }
+
+    func test_emptySchemaFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .fragment(.init())
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator))
+    }
+
+    func test_nestedEmptySchemaFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .object(
+                                            properties: [
+                                                "nested": .fragment(.init())
+                                            ]
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(
+                (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
+                [#"Failed to satisfy: JSON Schema components have defining characteristics (i.e. they are not just the empty schema component: `{}`) [Note that one way to end up with empty schema components is by having property names in an object's `required` array that are not defined in that object's `properties` map] at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema.properties.nested"#]
+            )
+        }
+    }
+
+    func test_noEmptySchemasSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        // following is _not_ an empty schema component
+                                        // because it is actually a `{ "type": "object" }`
+                                        // instead of a `{ }`
+                                        schema: .object
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.schemaComponentsAreDefined)
+        try document.validate(using: validator)
+    }
+
+    func test_missingPathParamFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    get: .init(
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(
+                error?.values.map(String.init(describing:)),
+                [#"The following path parameters were not defined in the Path Item or Operation `parameters`: ["idx"] at path: .paths['/hello/world/{idx}'].GET"#]
+            )
+        }
+    }
+
+    func test_pathParamInPathItemSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    parameters: [
+                        .parameter(name: "idx", context: .path, schema: .string)
+                    ],
+                    get: .init(
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
+        try document.validate(using: validator)
+    }
+
+    func test_pathParamInOperationSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world/{idx}": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "idx", context: .path, schema: .string)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.pathParametersAreDefined)
         try document.validate(using: validator)
     }
 

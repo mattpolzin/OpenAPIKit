@@ -66,7 +66,7 @@ try document.validate(using: Validator()
 )
 ```
 
-You can find all such built-in validations in `Validation+Defaults.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
+You can find all such built-in validations in `Validation+Builtins.swift` -- just keep in mind that some of the validations indicate that they are already included by default; adding these again will run them twice!
 
 ### Creating New Validations
 
@@ -127,7 +127,7 @@ If we want to stay more light-weight than the full `(ValidationContext<T>) -> Bo
 ```swift
 Validator().validating(
     "All servers have URLs containing the word 'prod'",
-    check: take(\OpenAPI.Server.url.absoluteString) { $0.contains("prod") }
+    check: take(\OpenAPI.Server.urlTemplate.absoluteString) { $0.contains("prod") }
 )
 ```
 
@@ -141,7 +141,7 @@ Validator().validating(
     "At least two servers are specified if one of them is the test server.",
     check: \[OpenAPI.Server].count >= 2,
     when: { context in
-        context.subject.map { $0.url.absoluteString }.contains("https://test.server.com")
+        context.subject.map { $0.urlTemplate.absoluteString }.contains("https://test.server.com")
     }
 )
 ```
@@ -326,6 +326,16 @@ let contentMapValidator = Validation(
 )
 ```
 
+Lastly, OpenAPIKit offers the `all()` function that will combine any number of `Validations` in the current context (as opposed to `lift()` and `unwrap()` which take you from one context to another).
+```swift
+let passwordValid1 = Validation<String>(...)
+let passwordValid2 = Validation<String>(...)
+
+let passwordValid = Validation<String>(
+    check: all(passwordValid1, passwordValid2)
+)
+```
+
 #### A "Real" Example
 
 Let's put this all together to form a slightly more realistic example of fully operational code (could be copy/pasted into a Swift project or playground with access to OpenAPIKit).
@@ -472,17 +482,17 @@ let responseResourceContainsId = Validation<JSONSchema>(
 // clause to skip over any requests that do not have such schemas
 // without error.
 let requestBodyContainsName = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName),
 
-   when: \OpenAPI.Request.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
 )
 
 // Similarly, we check JSON response schemas. This time we check
 // for both a 'name' and an 'id'.
 let responseBodyContainsNameAndId = Validation(
-   check: unwrap(\.content[.json]?.schema.schemaValue, into: resourceContainsName, responseResourceContainsId),
+   check: unwrap(\.content[.json]?.schema?.schemaValue, into: resourceContainsName, responseResourceContainsId),
 
-   when: \OpenAPI.Response.content[.json]?.schema.schemaValue != nil
+   when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
 )
 
 // We are specifically looking only at 201 ("created") status code

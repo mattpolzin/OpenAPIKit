@@ -13,22 +13,22 @@ import Yams
 final class RequestContentSchemaErrorTests: XCTestCase {
     func test_wrongTypeContentSchemaTypeProperty() {
         let documentYML =
-"""
-openapi: "3.0.0"
-info:
-    title: test
-    version: 1.0
-paths:
-    /hello/world:
-        get:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            type:
-                                hi: there
-            responses: {}
-"""
+        """
+        openapi: "3.0.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    type:
+                                        hi: there
+                    responses: {}
+        """
 
         XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
 

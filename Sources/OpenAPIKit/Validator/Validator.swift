@@ -358,7 +358,7 @@ class _ReferencingValidator: _Validator {
             document: encoder.document,
             validations: encoder.validations,
             userInfo: encoder.userInfo,
-            codingPath: encoder.codingPath + [_CodingKey(index: index)]
+            codingPath: encoder.codingPath + [Validator.CodingKey(index: index)]
         )
     }
 
@@ -605,7 +605,7 @@ struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
     }
 
     func superEncoder() -> Encoder {
-        encoder(for: _CodingKey.super)
+        encoder(for: Validator.CodingKey.super)
     }
 
     func superEncoder(forKey key: Key) -> Encoder {
@@ -615,24 +615,26 @@ struct _KeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
     private func encoder(for key: CodingKey) -> _ReferencingValidator { return encoder.encoder(for: key) }
 }
 
-struct _CodingKey: CodingKey {
-    var stringValue: String
-    var intValue: Int?
+extension Validator {
+    public struct CodingKey: Swift.CodingKey {
+        public var stringValue: String
+        public var intValue: Int?
 
-    init(stringValue: String) {
-        self.stringValue = stringValue
-        self.intValue = nil
+        public init(stringValue: String) {
+            self.stringValue = stringValue
+            self.intValue = nil
+        }
+
+        public init(intValue: Int) {
+            self.stringValue = "\(intValue)"
+            self.intValue = intValue
+        }
+
+        init(index: Int) {
+            self.stringValue = "Index \(index)"
+            self.intValue = index
+        }
+
+        static let `super` = CodingKey(stringValue: "super")
     }
-
-    init(intValue: Int) {
-        self.stringValue = "\(intValue)"
-        self.intValue = intValue
-    }
-
-    init(index: Int) {
-        self.stringValue = "Index \(index)"
-        self.intValue = index
-    }
-
-    static let `super` = _CodingKey(stringValue: "super")
 }

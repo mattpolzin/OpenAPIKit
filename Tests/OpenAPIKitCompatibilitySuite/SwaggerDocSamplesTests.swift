@@ -13,52 +13,52 @@ import Yams
 final class SwaggerDocSamplesTests: XCTestCase {
     func test_allOfExample() throws {
         let docString = commonBaseDocument + """
-paths:
-    /pets:
-        patch:
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            oneOf:
-                                - $ref: '#/components/schemas/Cat'
-                                - $ref: '#/components/schemas/Dog'
-                            discriminator:
-                                propertyName: pet_type
-            responses:
-                '200':
-                    description: Updated
-components:
-    schemas:
-        Pet:
-            type: object
-            required:
-                - pet_type
-            properties: #3
-                pet_type:
-                    type: string
-            discriminator:
-                propertyName: pet_type
-        Dog:
-            allOf:
-                - $ref: '#/components/schemas/Pet'
-                - type: object
-                  properties:
-                        bark:
-                            type: boolean
-                        breed:
+        paths:
+            /pets:
+                patch:
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    oneOf:
+                                        - $ref: '#/components/schemas/Cat'
+                                        - $ref: '#/components/schemas/Dog'
+                                    discriminator:
+                                        propertyName: pet_type
+                    responses:
+                        '200':
+                            description: Updated
+        components:
+            schemas:
+                Pet:
+                    type: object
+                    required:
+                        - pet_type
+                    properties: #3
+                        pet_type:
                             type: string
-                            enum: [Dingo, Husky, Retriever, Shepherd]
-        Cat:
-            allOf:
-                - $ref: '#/components/schemas/Pet'
-                - type: object
-                  properties:
-                        hunts:
-                            type: boolean
-                        age:
-                            type: integer
-"""
+                    discriminator:
+                        propertyName: pet_type
+                Dog:
+                    allOf:
+                        - $ref: '#/components/schemas/Pet'
+                        - type: object
+                          properties:
+                                bark:
+                                    type: boolean
+                                breed:
+                                    type: string
+                                    enum: [Dingo, Husky, Retriever, Shepherd]
+                Cat:
+                    allOf:
+                        - $ref: '#/components/schemas/Pet'
+                        - type: object
+                          properties:
+                                hunts:
+                                    type: boolean
+                                age:
+                                    type: integer
+        """
 
         // test decoding
         do {
@@ -69,7 +69,7 @@ components:
 
             XCTAssertEqual(
                 doc.paths["/pets"]?.patch?.requestBody?.requestValue?
-                    .content[.json]?.schema.schemaValue,
+                    .content[.json]?.schema?.schemaValue,
                 JSONSchema.one(
                     of: .reference(.component(named: "Cat")),
                         .reference(.component(named: "Dog")),
@@ -101,14 +101,13 @@ components:
             )
 
             XCTAssertEqual(
-                resolvedDoc.endpoints[0].requestBody?
-                    .content[.json]?.schema.jsonSchema,
+                try resolvedDoc.endpoints[0].requestBody?.content[.json]?.schema?.simplified().jsonSchema,
                 JSONSchema.one(
                     of: [
                         catSchema,
                         dogSchema
                     ],
-                    discriminator: .init(propertyName: "pet_type")
+                    core: .init(discriminator: .init(propertyName: "pet_type"))
                 )
             )
         } catch let error {
@@ -119,37 +118,37 @@ components:
 
     func test_oneOfExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /pets:
-    patch:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/Cat'
-                - $ref: '#/components/schemas/Dog'
-      responses:
-        '200':
-          description: Updated
-components:
-  schemas:
-    Dog:
-      type: object
-      properties:
-        bark:
-          type: boolean
-        breed:
-          type: string
-          enum: [Dingo, Husky, Retriever, Shepherd]
-    Cat:
-      type: object
-      properties:
-        hunts:
-          type: boolean
-        age:
-          type: integer
-"""
+        paths:
+          /pets:
+            patch:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      oneOf:
+                        - $ref: '#/components/schemas/Cat'
+                        - $ref: '#/components/schemas/Dog'
+              responses:
+                '200':
+                  description: Updated
+        components:
+          schemas:
+            Dog:
+              type: object
+              properties:
+                bark:
+                  type: boolean
+                breed:
+                  type: string
+                  enum: [Dingo, Husky, Retriever, Shepherd]
+            Cat:
+              type: object
+              properties:
+                hunts:
+                  type: boolean
+                age:
+                  type: integer
+        """
 
         // test decoding
         do {
@@ -168,42 +167,42 @@ components:
 
     func test_anyOfExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /pets:
-    patch:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              anyOf:
-                - $ref: '#/components/schemas/PetByAge'
-                - $ref: '#/components/schemas/PetByType'
-      responses:
-        '200':
-          description: Updated
-components:
-  schemas:
-    PetByAge:
-      type: object
-      properties:
-        age:
-          type: integer
-        nickname:
-          type: string
-      required:
-        - age
+        paths:
+          /pets:
+            patch:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      anyOf:
+                        - $ref: '#/components/schemas/PetByAge'
+                        - $ref: '#/components/schemas/PetByType'
+              responses:
+                '200':
+                  description: Updated
+        components:
+          schemas:
+            PetByAge:
+              type: object
+              properties:
+                age:
+                  type: integer
+                nickname:
+                  type: string
+              required:
+                - age
 
-    PetByType:
-      type: object
-      properties:
-        pet_type:
-          type: string
-          enum: [Cat, Dog]
-        hunts:
-          type: boolean
-      required:
-        - pet_type
-"""
+            PetByType:
+              type: object
+              properties:
+                pet_type:
+                  type: string
+                  enum: [Cat, Dog]
+                hunts:
+                  type: boolean
+              required:
+                - pet_type
+        """
 
         // test decoding
         do {
@@ -222,28 +221,28 @@ components:
 
     func test_notExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /pets:
-    patch:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PetByType'
-      responses:
-        '200':
-          description: Updated
-components:
-  schemas:
-    PetByType:
-      type: object
-      properties:
-        pet_type:
-          not:
-            type: integer
-      required:
-        - pet_type
-"""
+        paths:
+          /pets:
+            patch:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/PetByType'
+              responses:
+                '200':
+                  description: Updated
+        components:
+          schemas:
+            PetByType:
+              type: object
+              properties:
+                pet_type:
+                  not:
+                    type: integer
+              required:
+                - pet_type
+        """
 
         // test decoding
         do {
@@ -262,20 +261,20 @@ components:
 
     func test_enumsExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /items:
-    get:
-      parameters:
-        - in: query
-          name: sort
-          description: Sort order
-          schema:
-            type: string
-            enum: [asc, desc]
-      responses:
-        '200':
-          description: OK
-"""
+        paths:
+          /items:
+            get:
+              parameters:
+                - in: query
+                  name: sort
+                  description: Sort order
+                  schema:
+                    type: string
+                    enum: [asc, desc]
+              responses:
+                '200':
+                  description: OK
+        """
 
         // test decoding
         do {
@@ -294,29 +293,29 @@ paths:
 
     func test_reusableEnumsExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /products:
-    get:
-      parameters:
-      - in: query
-        name: color
-        required: true
-        schema:
-          $ref: '#/components/schemas/Color'
-      responses:
-        '200':
-          description: OK
-components:
-  schemas:
-    Color:
-      type: string
-      enum:
-        - black
-        - white
-        - red
-        - green
-        - blue
-"""
+        paths:
+          /products:
+            get:
+              parameters:
+              - in: query
+                name: color
+                required: true
+                schema:
+                  $ref: '#/components/schemas/Color'
+              responses:
+                '200':
+                  description: OK
+        components:
+          schemas:
+            Color:
+              type: string
+              enum:
+                - black
+                - white
+                - red
+                - green
+                - blue
+        """
 
         // test decoding
         do {
@@ -335,64 +334,64 @@ components:
 
     func test_callbackExample() throws {
         let docString = commonBaseDocument + """
-paths:
-  /streams:
-    post:
-      description: subscribes a client to receive out-of-band data
-      parameters:
-        - name: callbackUrl
-          in: query
-          required: true
-          description: |
-            the location where data will be sent.  Must be network accessible
-            by the source server
-          schema:
-            type: string
-            format: uri
-            example: https://tonys-server.com
-      responses:
-        '201':
-          description: subscription successfully created
-          content:
-            application/json:
-              schema:
-                description: subscription information
-                required:
-                  - subscriptionId
-                properties:
-                  subscriptionId:
-                    description: this unique identifier allows management of the subscription
-                    type: string
-                    example: 2531329f-fb09-4ef7-887e-84e648214436
-      callbacks:
-        # the name `onData` is a convenience locator
-        onData:
-          # when data is sent, it will be sent to the `callbackUrl` provided
-          # when making the subscription PLUS the suffix `/data`
-          '{$request.query.callbackUrl}/data':
+        paths:
+          /streams:
             post:
-              requestBody:
-                description: subscription payload
-                content:
-                  application/json:
-                    schema:
-                      type: object
-                      properties:
-                        timestamp:
-                          type: string
-                          format: date-time
-                        userData:
-                          type: string
+              description: subscribes a client to receive out-of-band data
+              parameters:
+                - name: callbackUrl
+                  in: query
+                  required: true
+                  description: |
+                    the location where data will be sent.  Must be network accessible
+                    by the source server
+                  schema:
+                    type: string
+                    format: uri
+                    example: https://tonys-server.com
               responses:
-                '202':
-                  description: |
-                    Your server implementation should return this HTTP status code
-                    if the data was received successfully
-                '204':
-                  description: |
-                    Your server should return this HTTP status code if no longer interested
-                    in further updates
-"""
+                '201':
+                  description: subscription successfully created
+                  content:
+                    application/json:
+                      schema:
+                        description: subscription information
+                        required:
+                          - subscriptionId
+                        properties:
+                          subscriptionId:
+                            description: this unique identifier allows management of the subscription
+                            type: string
+                            example: 2531329f-fb09-4ef7-887e-84e648214436
+              callbacks:
+                # the name `onData` is a convenience locator
+                onData:
+                  # when data is sent, it will be sent to the `callbackUrl` provided
+                  # when making the subscription PLUS the suffix `/data`
+                  '{$request.query.callbackUrl}/data':
+                    post:
+                      requestBody:
+                        description: subscription payload
+                        content:
+                          application/json:
+                            schema:
+                              type: object
+                              properties:
+                                timestamp:
+                                  type: string
+                                  format: date-time
+                                userData:
+                                  type: string
+                      responses:
+                        '202':
+                          description: |
+                            Your server implementation should return this HTTP status code
+                            if the data was received successfully
+                        '204':
+                          description: |
+                            Your server should return this HTTP status code if no longer interested
+                            in further updates
+        """
 
         // test decoding
         do {
