@@ -261,6 +261,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
         return try transformedContext.combined(with: other)
@@ -331,6 +332,7 @@ extension JSONSchema.CoreContext {
             )
         }
         let newAllowedValues = allowedValues ?? other.allowedValues
+        let newDefaultValue = defaultValue ?? other.defaultValue
 
         if let conflict = conflicting(example, other.example) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "example", original: String(describing: conflict.0), new: String(describing: conflict.1)))
@@ -349,6 +351,7 @@ extension JSONSchema.CoreContext {
             discriminator: newDiscriminator,
             externalDocs: newExternalDocs,
             allowedValues: newAllowedValues,
+            defaultValue: newDefaultValue,
             example: newExample
         )
     }
@@ -557,6 +560,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }

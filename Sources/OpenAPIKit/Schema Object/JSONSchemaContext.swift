@@ -77,6 +77,19 @@ public protocol JSONSchemaContext {
     /// into an allowed value.
     var allowedValues: [AnyCodable]? { get }
 
+    /// The OpenAPI spec calls this "default"
+    ///
+    /// If specified, this value indicates the value the
+    /// property will take on if no value is explicitly given
+    /// by the client.
+    /// NOTE: I would like the default value to have
+    /// the type `Format.SwiftType` but this is not
+    /// tractable because I also want to be able to
+    /// automatically turn any Swift type that will get
+    /// _encoded as something compatible with_
+    /// `Format.SwiftType` into a default.
+    var defaultValue: AnyCodable? { get }
+
     /// Get an example, if specified. If unspecified, returns `nil`.
     var example: AnyCodable? { get }
 
@@ -113,6 +126,7 @@ extension JSONSchema {
 //        public let constantValue: Format.SwiftType?
 
         public let allowedValues: [AnyCodable]?
+        public let defaultValue: AnyCodable?
 
         public let example: AnyCodable?
 
@@ -134,6 +148,7 @@ extension JSONSchema {
                 && _deprecated == nil
                 && externalDocs == nil
                 && allowedValues == nil
+                && defaultValue == nil
                 && example == nil
                 && _permissions == nil
         }
@@ -149,6 +164,7 @@ extension JSONSchema {
             discriminator: OpenAPI.Discriminator? = nil,
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
+            defaultValue: AnyCodable? = nil,
             example: AnyCodable? = nil
         ) {
             self.format = format
@@ -161,6 +177,7 @@ extension JSONSchema {
             self.discriminator = discriminator
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
+            self.defaultValue = defaultValue
             self.example = example
         }
 
@@ -175,6 +192,7 @@ extension JSONSchema {
             discriminator: OpenAPI.Discriminator? = nil,
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
+            defaultValue: AnyCodable? = nil,
             example: String
         ) {
             self.format = format
@@ -187,6 +205,7 @@ extension JSONSchema {
             self.discriminator = discriminator
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
+            self.defaultValue = defaultValue
             self.example = AnyCodable(example)
         }
 
@@ -227,6 +246,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -244,6 +264,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -261,6 +282,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -278,6 +300,25 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            example: example
+        )
+    }
+
+    /// Return this context with the given default value.
+    public func with(defaultValue: AnyCodable) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: _nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -295,6 +336,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -312,6 +354,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
+            defaultValue: defaultValue,
             example: example
         )
     }
@@ -588,6 +631,7 @@ extension JSONSchema {
         case discriminator
         case externalDocs
         case allowedValues = "enum"
+        case defaultValue = "default"
         case nullable
         case example
         case readOnly
@@ -610,6 +654,7 @@ extension JSONSchema.CoreContext: Encodable {
         }
 
         try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        try container.encodeIfPresent(defaultValue, forKey: .defaultValue)
         try container.encodeIfPresent(title, forKey: .title)
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(discriminator, forKey: .discriminator)
@@ -655,6 +700,7 @@ extension JSONSchema.CoreContext: Decodable {
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+        defaultValue = try container.decodeIfPresent(AnyCodable.self, forKey: .defaultValue)
         _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
 
         let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)

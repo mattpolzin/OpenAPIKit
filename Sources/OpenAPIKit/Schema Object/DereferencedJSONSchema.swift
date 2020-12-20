@@ -95,6 +95,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var allowedValues: [AnyCodable]? { jsonSchema.allowedValues }
 
     // See `JSONSchemaContext`
+    public var defaultValue: AnyCodable? { jsonSchema.defaultValue }
+
+    // See `JSONSchemaContext`
     public var example: AnyCodable? { jsonSchema.example }
 
     // See `JSONSchemaContext`
