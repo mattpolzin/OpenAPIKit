@@ -216,11 +216,51 @@ extension JSONSchema {
         return true
     }
 
-    // bool
+    /// Check if a schema is a `.boolean`.
+    public var isBoolean: Bool {
+        guard case .boolean = self else { return false }
+        return true
+    }
 
-    // array
+    /// Check if a schema is a `.number`.
+    ///
+    /// This returns `false` if the schema is an
+    /// `.integer` even though Integer schemas
+    /// can be easily transformed into Number schemas.
+    public var isNumber: Bool {
+        guard case .number = self else { return false }
+        return true
+    }
 
-    // ...
+    /// Check if a schema is an `.integer`.
+    public var isInteger: Bool {
+        guard case .integer = self else { return false }
+        return true
+    }
+
+    /// Check if a schema is a `.string`.
+    public var isString: Bool {
+        guard case .string = self else { return false }
+        return true
+    }
+
+    /// Check if a schema is an `.object`.
+    public var isObject: Bool {
+        guard case .object = self else { return false }
+        return true
+    }
+
+    /// Check if a schema is an `.array`.
+    public var isArray: Bool {
+        guard case .array = self else { return false }
+        return true
+    }
+
+    /// Check if a schema is a `.reference`.
+    public var isReference: Bool {
+        guard case .reference = self else { return false }
+        return true
+    }
 }
 
 // MARK: - Context Accessors
