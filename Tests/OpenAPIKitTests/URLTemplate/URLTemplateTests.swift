@@ -48,6 +48,15 @@ final class URLTemplateTests: XCTestCase {
             )
         }
 
+        // unclosed variable brace (at end)
+        XCTAssertNil(URLTemplate(rawValue: "https://website.com/{"))
+        XCTAssertThrowsError(try URLTemplate(templateString: "https://website.com/{")) { error in
+            XCTAssertEqual(
+                String(describing: error),
+                "An opening brace with no closing brace was found. The portion of the URL following the opening brace was ''"
+            )
+        }
+
         // unopened variable brace
         XCTAssertNil(URLTemplate(rawValue: "scheme}://website.com"))
         XCTAssertThrowsError(try URLTemplate(templateString: "scheme}://website.com")) { error in
