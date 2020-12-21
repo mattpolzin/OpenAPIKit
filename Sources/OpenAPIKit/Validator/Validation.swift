@@ -132,8 +132,12 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
 ///
 /// This type is responsible for making it possible to collect validation
 /// errors and throw one value (this collection) at the end of validation.
-public struct ValidationErrorCollection: Swift.Error {
+public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible {
     public let values: [ValidationError]
+
+    public var description: String {
+        return values.map(String.init(describing:)).joined(separator: "\n")
+    }
 }
 
 /// Erases the type on which a `Validator` is specialized and combines
