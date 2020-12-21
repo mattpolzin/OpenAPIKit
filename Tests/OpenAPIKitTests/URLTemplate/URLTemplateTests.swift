@@ -78,6 +78,16 @@ final class URLTemplateTests: XCTestCase {
 
     func test_componentSuccesses() {
         XCTAssertEqual(
+            URLTemplate(rawValue: "{url}")?.components,
+            [.variable(name: "url")]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{front}{back}")?.components,
+            [.variable(name: "front"), .variable(name: "back")]
+        )
+
+        XCTAssertEqual(
             URLTemplate(rawValue: "{scheme}://website.com")?.components,
             [.variable(name: "scheme"), .constant("://website.com")]
         )
@@ -94,6 +104,131 @@ final class URLTemplateTests: XCTestCase {
 
         XCTAssertEqual(
             URLTemplate(rawValue: "{scheme}://website.com/{path}?search={query}&page={page}")?.components,
+            [
+                .variable(name: "scheme"),
+                .constant("://website.com/"),
+                .variable(name: "path"),
+                .constant("?search="),
+                .variable(name: "query"),
+                .constant("&page="),
+                .variable(name: "page")
+            ]
+        )
+    }
+
+    func test_componentRawValues() {
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{url}")?.components.map { $0.rawValue },
+            ["{url}"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{front}{back}")?.components.map { $0.rawValue },
+            ["{front}", "{back}"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com")?.components.map { $0.rawValue },
+            ["{scheme}", "://website.com"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}")?.components.map { $0.rawValue },
+            ["{scheme}", "://website.com/", "{path}"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "https://website.com/{path}?search=hello&page=2")?.components.map { $0.rawValue },
+            ["https://website.com/", "{path}", "?search=hello&page=2"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}?search={query}&page={page}")?.components.map { $0.rawValue },
+            [
+                "{scheme}",
+                "://website.com/",
+                "{path}",
+                "?search=",
+                "{query}",
+                "&page=",
+                "{page}"
+            ]
+        )
+    }
+
+    func test_variableAccessor() {
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{url}")?.variables,
+            ["url"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{front}{back}")?.variables,
+            ["front", "back"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com")?.variables,
+            ["scheme"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}")?.variables,
+            ["scheme", "path"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "https://website.com/{path}?search=hello&page=2")?.variables,
+            ["path"]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}?search={query}&page={page}")?.variables,
+            [
+                "scheme",
+                "path",
+                "query",
+                "page"
+            ]
+        )
+    }
+
+    func test_componentsFromRawValues() {
+        XCTAssertEqual(
+            [URLTemplate.Component(rawValue: "{url}")],
+            [.variable(name: "url")]
+        )
+
+        XCTAssertEqual(
+            [URLTemplate.Component(rawValue: "{front}"), URLTemplate.Component(rawValue: "{back}")],
+            [.variable(name: "front"), .variable(name: "back")]
+        )
+
+        XCTAssertEqual(
+            [URLTemplate.Component(rawValue: "{scheme}"), URLTemplate.Component(rawValue: "://website.com")],
+            [.variable(name: "scheme"), .constant("://website.com")]
+        )
+
+        XCTAssertEqual(
+            [URLTemplate.Component(rawValue: "{scheme}"), URLTemplate.Component(rawValue: "://website.com/"), URLTemplate.Component(rawValue: "{path}")],
+            [.variable(name: "scheme"), .constant("://website.com/"), .variable(name: "path")]
+        )
+
+        XCTAssertEqual(
+            [URLTemplate.Component(rawValue: "https://website.com/"), URLTemplate.Component(rawValue: "{path}"), URLTemplate.Component(rawValue: "?search=hello&page=2")],
+            [.constant("https://website.com/"), .variable(name: "path"), .constant("?search=hello&page=2")]
+        )
+
+        XCTAssertEqual(
+            [
+                URLTemplate.Component(rawValue: "{scheme}"),
+                URLTemplate.Component(rawValue: "://website.com/"),
+                URLTemplate.Component(rawValue: "{path}"),
+                URLTemplate.Component(rawValue: "?search="),
+                URLTemplate.Component(rawValue: "{query}"),
+                URLTemplate.Component(rawValue: "&page="),
+                URLTemplate.Component(rawValue: "{page}")
+            ],
             [
                 .variable(name: "scheme"),
                 .constant("://website.com/"),

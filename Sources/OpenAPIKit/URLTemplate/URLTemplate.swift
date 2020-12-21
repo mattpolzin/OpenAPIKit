@@ -67,6 +67,11 @@ public struct URLTemplate: Hashable, RawRepresentable {
         return URL(string: rawValue)
     }
 
+    /// Get the names of all variables in the URL Template.
+    public var variables: [String] {
+        return components.compactMap { $0.variableName }
+    }
+
     /// Create a URLTemplate from the string if possible.
     ///
     /// A non-throwing version of `init(templateString:)`.
@@ -99,10 +104,19 @@ public struct URLTemplate: Hashable, RawRepresentable {
 }
 
 extension URLTemplate {
+    /// URL Template components are either variables that can take on
+    /// different values depending on the context or they are constant
+    /// unchanging parts of the URL.
     public enum Component: Hashable, RawRepresentable {
         case variable(name: String)
         case constant(String)
 
+        /// Get a component's raw value.
+        ///
+        /// A constant's raw value is just the constant part of the URL.
+        ///
+        /// A variable's raw value is the name of the variable enclosed in
+        /// curly braces.
         public var rawValue: String {
             switch self {
             case .variable(name: let name):
@@ -112,6 +126,21 @@ extension URLTemplate {
             }
         }
 
+        /// Always `nil` for constants, but for variables, this will
+        /// return the variable name without the surrounding curly
+        /// braces that are just OpenAPI syntax. By contrast, the
+        /// `rawValue` of a variable _will_ contain the curly braces.
+        public var variableName: String? {
+            guard case .variable(name: let name) = self else { return nil }
+            return name
+        }
+
+        /// Create a component from its raw value.
+        ///
+        /// A constant's raw value is just the constant part of the URL.
+        ///
+        /// A variable's raw value is the name of the variable enclosed in
+        /// curly braces.
         public init?(rawValue: String) {
             let first = rawValue.first
             let last = rawValue.last
