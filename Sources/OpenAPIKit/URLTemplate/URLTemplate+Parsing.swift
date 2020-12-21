@@ -26,11 +26,12 @@ extension URLTemplate {
             guard let newFirstIndex = nextFirstIndex else {
                 throw ParsingError.unterminatedVariable(name: "")
             }
+            let newTokens = tokens + tokenArray(from: partialToken)
             return try scan(
                 string,
                 partialToken: .init(type: .variable, string: remainder[newFirstIndex..<newFirstIndex]),
                 from: remainder.dropFirst(),
-                addingTo: tokens
+                addingTo: newTokens
             )
 
         case (.variable, "}"):

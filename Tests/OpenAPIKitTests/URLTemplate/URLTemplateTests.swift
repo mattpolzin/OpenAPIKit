@@ -51,18 +51,59 @@ final class URLTemplateTests: XCTestCase {
         // unopened variable brace
         XCTAssertNil(URLTemplate(rawValue: "scheme}://website.com"))
         XCTAssertThrowsError(try URLTemplate(templateString: "scheme}://website.com")) { error in
-            XCTAssertEqual(String(describing: error), "A closing brace with no opening brace was found. The portion of the URL preceeding the closing brace was 'scheme'")
+            XCTAssertEqual(
+                String(describing: error),
+                "A closing brace with no opening brace was found. The portion of the URL preceeding the closing brace was 'scheme'"
+            )
         }
 
         // nested variable brace
         XCTAssertNil(URLTemplate(rawValue: "{scheme}://website.com/{path{var}}"))
         XCTAssertThrowsError(try URLTemplate(templateString: "{scheme}://website.com/{path{var}}")) { error in
-            XCTAssertEqual(String(describing: error), "An opening brace within another variable was found. The portion of the URL following the first opening brace up until the second opening brace was 'path'")
+            XCTAssertEqual(
+                String(describing: error),
+                "An opening brace within another variable was found. The portion of the URL following the first opening brace up until the second opening brace was 'path'"
+            )
+        }
+
+        // nested variable brace (doubled-up)
+        XCTAssertNil(URLTemplate(rawValue: "{{scheme}}://website.com/{path}"))
+        XCTAssertThrowsError(try URLTemplate(templateString: "{{scheme}}://website.com/{path}")) { error in
+            XCTAssertEqual(
+                String(describing: error),
+                "An opening brace within another variable was found. The portion of the URL following the first opening brace up until the second opening brace was ''"
+            )
         }
     }
 
     func test_componentSuccesses() {
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com")?.components,
+            [.variable(name: "scheme"), .constant("://website.com")]
+        )
 
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}")?.components,
+            [.variable(name: "scheme"), .constant("://website.com/"), .variable(name: "path")]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "https://website.com/{path}?search=hello&page=2")?.components,
+            [.constant("https://website.com/"), .variable(name: "path"), .constant("?search=hello&page=2")]
+        )
+
+        XCTAssertEqual(
+            URLTemplate(rawValue: "{scheme}://website.com/{path}?search={query}&page={page}")?.components,
+            [
+                .variable(name: "scheme"),
+                .constant("://website.com/"),
+                .variable(name: "path"),
+                .constant("?search="),
+                .variable(name: "query"),
+                .constant("&page="),
+                .variable(name: "page")
+            ]
+        )
     }
 }
 
