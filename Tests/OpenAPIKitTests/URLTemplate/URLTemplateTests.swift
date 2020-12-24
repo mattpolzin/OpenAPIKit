@@ -251,6 +251,64 @@ final class URLTemplateTests: XCTestCase {
     }
 }
 
+// MARK: - Replacing Variables
+extension URLTemplateTests {
+    func test_noVariables() {
+        let t = URLTemplate(rawValue: "https://website.com")
+        let replaced1 = t?.replacing([:])
+        let replaced2 = t?.replacing(["not in there": "value"])
+
+        XCTAssertNotNil(t)
+        XCTAssertEqual(t, replaced1)
+        XCTAssertEqual(t, replaced2)
+    }
+
+    func test_replacingNothing() {
+        let t = URLTemplate(rawValue: "{scheme}://{website}.com/{path}")
+        let replaced = t?.replacing([:])
+
+        XCTAssertNotNil(t)
+        XCTAssertEqual(replaced?.components, [
+                        .variable(name: "scheme"),
+                        .constant("://"),
+                        .variable(name: "website"),
+                        .constant(".com/"),
+                        .variable(name: "path")
+        ])
+    }
+
+    func test_variedVariablePlacement() {
+        let t1 = URLTemplate(rawValue: "{scheme}://website.com")
+        let replaced1 = t1?.replacing(["scheme": "https"])
+        let t2 = URLTemplate(rawValue: "https://{website}.com")
+        let replaced2 = t2?.replacing(["website": "mysite"])
+        let t3 = URLTemplate(rawValue: "https://website.{domain_space}")
+        let replaced3 = t3?.replacing(["domain_space": "org"])
+
+        XCTAssertNotNil(t1)
+        XCTAssertNotNil(t2)
+        XCTAssertNotNil(t3)
+
+        XCTAssertEqual(replaced1?.components, [.constant("https://website.com")])
+        XCTAssertEqual(replaced2?.components, [.constant("https://mysite.com")])
+        XCTAssertEqual(replaced3?.components, [.constant("https://website.org")])
+    }
+
+    func test_replacingMany() {
+        let t = URLTemplate(rawValue: "{scheme}://{website}.com/{path}")
+        let replaced = t?.replacing(["scheme": "https", "website": "mysite", "path": "welcome"])
+
+        XCTAssertEqual(replaced?.components, [.constant("https://mysite.com/welcome")])
+    }
+
+    func test_partialReplacement() {
+        let t = URLTemplate(rawValue: "{scheme}://{website}.com/{path}")
+        let replaced = t?.replacing(["website": "mysite"])
+
+        XCTAssertEqual(replaced?.components, [.variable(name: "scheme"), .constant("://mysite.com/"), .variable(name: "path")])
+    }
+}
+
 // MARK: - Codable
 extension URLTemplateTests {
     func test_encode() throws {
