@@ -181,11 +181,15 @@ extension URLTemplate {
     /// For all variables in this template that have keys in the given dictionary,
     /// replace the variable with the value under the given key.
     ///
-    /// This results in a new URLTemplate with a constant value in place of all
-    /// variables that were replaced. The URLTemplate gets reformed, so any
+    /// This results in a new `URLTemplate` with a constant value in place of all
+    /// variables that were replaced. The `URLTemplate` gets reformed, so any
     /// constants formed by such a replacement that neighbor other constants
     /// become one constant (there will never be two constants next to each other,
     /// even after variable replacement occurs).
+    ///
+    /// If you have replaced all variables in the template, you can attempt to create a
+    /// well-formed Foundation `URL` by accessing the `url` property of the resulting
+    /// `URLTemplate`.
     ///
     /// **Example**
     ///

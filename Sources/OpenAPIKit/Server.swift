@@ -13,8 +13,13 @@ extension OpenAPI {
     /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
     ///
     public struct Server: Equatable, CodableVendorExtendable {
+        /// OpenAPI Server URLs can have variable placeholders in them.
+        /// The `urlTemplate` can be asked for a well-formed Foundation
+        /// `URL` if all variables in it have been replaced by constant values.
         public let urlTemplate: URLTemplate
         public let description: String?
+        /// A map from the names of variables found in the `urlTemplate` to
+        /// descriptions, allowed values, and defaults.
         public let variables: OrderedDictionary<String, Variable>
 
         /// Dictionary of vendor extensions.
@@ -24,6 +29,7 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Create an OpenAPI Server Object.
         public init(
             url: URL,
             description: String? = nil,
