@@ -128,6 +128,29 @@ extension Validation {
         )
     }
 
+    /// Validate that all Server Objects define all of the variables found in their URL Templates.
+    ///
+    /// For example, a server URL Template of `{scheme}://website.com/{path}` would
+    /// fail this validation if either "scheme" or "path" were not found in the Server Object's
+    /// `variables` dictionary.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var serverVariablesAreDefined: Validation<OpenAPI.Server> {
+        .init(
+            check: { context in
+                let missingVariables = context.subject.urlTemplate.variables
+                    .filter { !context.subject.variables.contains(key: $0) }
+
+                return missingVariables.map { variableName in
+                    ValidationError(
+                        reason: "Server Object does not define the variable '\(variableName)' that is found in the `urlTemplate` '\(context.subject.urlTemplate.rawValue)'",
+                        at: context.codingPath
+                    )
+                }
+            }
+        )
+    }
+
     // MARK: - Included with `Validator()` by default
 
     /// Validate the OpenAPI Document's `Operations` all have at least

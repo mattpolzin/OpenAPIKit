@@ -41,6 +41,21 @@ extension OpenAPI {
             self.variables = variables
             self.vendorExtensions = vendorExtensions
         }
+
+        /// Create an OpenAPI Server Object with a URL containing
+        /// variables that can change depending on the context in
+        /// which the API is invoked,
+        public init(
+            urlTemplate: URLTemplate,
+            description: String? = nil,
+            variables: OrderedDictionary<String, Variable> = [:],
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
+            self.urlTemplate = urlTemplate
+            self.description = description
+            self.variables = variables
+            self.vendorExtensions = vendorExtensions
+        }
     }
 }
 

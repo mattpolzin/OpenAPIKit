@@ -235,6 +235,82 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    func test_missingServerVariableFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(urlTemplate: URLTemplate(rawValue: "https://website.com/{path}")!)
+            ],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(
+                (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
+                [
+                    "Server Object does not define the variable 'path' that is found in the `urlTemplate` 'https://website.com/{path}' at path: .servers[0]"
+                ]
+            )
+        }
+    }
+
+    func test_partialMissingServerVariablesFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(
+                    urlTemplate: URLTemplate(rawValue: "{scheme}://website.com/{path}")!,
+                    variables: ["scheme": .init(default: "scheme")]
+                )
+            ],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(
+                (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),
+                [
+                    "Server Object does not define the variable 'path' that is found in the `urlTemplate` '{scheme}://website.com/{path}' at path: .servers[0]"
+                ]
+            )
+        }
+    }
+
+    func test_noSevrerVariablesSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(urlTemplate: URLTemplate(rawValue: "https://website.com")!)
+            ],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        try document.validate(using: validator)
+    }
+
+    func test_allServerVariablesDefinedSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(
+                    urlTemplate: URLTemplate(rawValue: "https://website.com/{path}")!,
+                    variables: ["path": .init(default: "welcome")]
+                )
+            ],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        try document.validate(using: validator)
+    }
+
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
