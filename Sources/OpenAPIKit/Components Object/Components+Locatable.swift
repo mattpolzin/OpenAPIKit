@@ -69,5 +69,22 @@ public protocol LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
+    ///
+    ///     Can also throw `ReferenceCycleError` if a reference
+    ///     cycle is encountered while dereferencing this component.
     func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSelf
+
+    /// An internal-use method that facilitates reference cycle detection by tracking past references followed
+    /// in the course of dereferencing.
+    ///
+    /// For all external-use, see `dereferenced(in:)`.
+    func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSelf
+}
+
+extension LocallyDereferenceable {
+    // default implementation of public `dereferenced(in:)` based on internal
+    // method that tracks reference cycles.
+    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSelf {
+        try _dereferenced(in: components, following: [])
+    }
 }

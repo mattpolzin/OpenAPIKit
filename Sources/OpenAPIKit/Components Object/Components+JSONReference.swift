@@ -148,4 +148,16 @@ extension OpenAPI.Components {
             }
         }
     }
+
+    public struct ReferenceCycleError: Swift.Error, Equatable, CustomStringConvertible {
+        public let ref: String
+
+        public var description: String {
+            return "Encountered a JSON Schema $ref cycle that prevents fully dereferencing document at '\(ref)'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy."
+        }
+
+        public var localizedDescription: String {
+            description
+        }
+    }
 }

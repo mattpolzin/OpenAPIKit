@@ -28,13 +28,17 @@ public struct DereferencedResponse: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ response: OpenAPI.Response, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ response: OpenAPI.Response,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         self.headers = try response.headers?.mapValues { header in
-            try header.dereferenced(in: components)
+            try header._dereferenced(in: components, following: references)
         }
 
         self.content = try response.content.mapValues { content in
-            try content.dereferenced(in: components)
+            try content._dereferenced(in: components, following: references)
         }
 
         self.underlyingResponse = response
@@ -51,7 +55,7 @@ extension OpenAPI.Response: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedResponse {
-        return try DereferencedResponse(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedResponse {
+        return try DereferencedResponse(self, resolvingIn: components, following: references)
     }
 }

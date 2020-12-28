@@ -44,23 +44,28 @@ public struct DereferencedOperation: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ operation: OpenAPI.Operation, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ operation: OpenAPI.Operation,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         self.parameters = try operation.parameters.map { parameter in
-            try parameter.dereferenced(in: components)
+            try parameter._dereferenced(in: components, following: references)
         }
 
         self.requestBody = try operation.requestBody.map { request in
-            try request.dereferenced(in: components)
+            try request._dereferenced(in: components, following: references)
         }
 
         self.responses = try operation.responses.mapValues { response in
-            try response.dereferenced(in: components)
+            try response._dereferenced(in: components, following: references)
         }
 
         self.security = try operation.security?.map {
             try DereferencedSecurityRequirement(
                 $0,
-                resolvingIn: components
+                resolvingIn: components,
+                following: references
             )
         }
 
@@ -101,7 +106,7 @@ extension OpenAPI.Operation: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedOperation {
-        return try DereferencedOperation(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedOperation {
+        return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
 }

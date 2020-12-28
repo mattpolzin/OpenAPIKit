@@ -25,9 +25,13 @@ public struct DereferencedRequest: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ request: OpenAPI.Request, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ request: OpenAPI.Request,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         self.content = try request.content.mapValues { content in
-            try DereferencedContent(content, resolvingIn: components)
+            try DereferencedContent(content, resolvingIn: components, following: references)
         }
 
         self.underlyingRequest = request
@@ -42,7 +46,7 @@ extension OpenAPI.Request: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedRequest {
-        return try DereferencedRequest(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedRequest {
+        return try DereferencedRequest(self, resolvingIn: components, following: references)
     }
 }

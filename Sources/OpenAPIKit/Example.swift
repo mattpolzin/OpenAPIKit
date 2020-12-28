@@ -158,7 +158,7 @@ extension OpenAPI.Example: LocallyDereferenceable {
 
     /// Examples do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
-    public func dereferenced(in components: OpenAPI.Components) throws -> OpenAPI.Example {
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.Example {
         return self
     }
 }

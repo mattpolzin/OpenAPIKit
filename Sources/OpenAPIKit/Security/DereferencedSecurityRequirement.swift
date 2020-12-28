@@ -25,7 +25,11 @@ public struct DereferencedSecurityRequirement: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ securityRequirement: OpenAPI.SecurityRequirement, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ securityRequirement: OpenAPI.SecurityRequirement,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
 
         let scopedSchemes = try securityRequirement.map { reference, scopes -> (String, ScopedScheme) in
             let scheme = try components.lookup(reference)

@@ -43,19 +43,23 @@ public struct DereferencedPathItem: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ pathItem: OpenAPI.PathItem, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ pathItem: OpenAPI.PathItem,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         self.parameters = try pathItem.parameters.map { parameter in
-            try parameter.dereferenced(in: components)
+            try parameter._dereferenced(in: components, following: references)
         }
 
-        self.get = try pathItem.get.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.put = try pathItem.put.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.post = try pathItem.post.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.delete = try pathItem.delete.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.options = try pathItem.options.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components) }
-        self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components) }
+        self.get = try pathItem.get.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.put = try pathItem.put.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.post = try pathItem.post.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.delete = try pathItem.delete.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.options = try pathItem.options.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
 
         self.underlyingPathItem = pathItem
     }
@@ -118,7 +122,7 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedPathItem {
-        return try DereferencedPathItem(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedPathItem {
+        return try DereferencedPathItem(self, resolvingIn: components, following: references)
     }
 }

@@ -27,13 +27,18 @@ public struct DereferencedHeader: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ header: OpenAPI.Header, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ header: OpenAPI.Header,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         switch header.schemaOrContent {
         case .a(let schemaContext):
             self.schemaOrContent = .a(
                 try DereferencedSchemaContext(
                     schemaContext,
-                    resolvingIn: components
+                    resolvingIn: components,
+                    following: references
                 )
             )
         case .b(let contentMap):
@@ -41,7 +46,8 @@ public struct DereferencedHeader: Equatable {
                 try contentMap.mapValues {
                     try DereferencedContent(
                         $0,
-                        resolvingIn: components
+                        resolvingIn: components,
+                        following: references
                     )
                 }
             )
@@ -61,7 +67,7 @@ extension OpenAPI.Header: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedHeader {
-        return try DereferencedHeader(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedHeader {
+        return try DereferencedHeader(self, resolvingIn: components, following: references)
     }
 }
