@@ -35,8 +35,12 @@ public struct DereferencedSchemaContext: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ schemaContext: OpenAPI.Parameter.SchemaContext, resolvingIn components: OpenAPI.Components) throws {
-        self.schema = try schemaContext.schema.dereferenced(in: components)
+    internal init(
+        _ schemaContext: OpenAPI.Parameter.SchemaContext,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
+        self.schema = try schemaContext.schema._dereferenced(in: components, following: references)
         let examples = try schemaContext.examples?.mapValues { try components.lookup($0) }
         self.examples = examples
 
@@ -55,7 +59,7 @@ extension OpenAPI.Parameter.SchemaContext: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSchemaContext {
-        return try DereferencedSchemaContext(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSchemaContext {
+        return try DereferencedSchemaContext(self, resolvingIn: components, following: references)
     }
 }

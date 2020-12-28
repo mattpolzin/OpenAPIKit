@@ -355,8 +355,17 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     ///
     /// If you just want to look the reference up, use the `subscript` or the
     /// `lookup()` method on `Components`.
-    public func dereferenced(in components: OpenAPI.Components) throws -> ReferenceType.DereferencedSelf {
-        return try components.lookup(self).dereferenced(in: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> ReferenceType.DereferencedSelf {
+
+        var newReferences = references
+        let (inserted, _) = newReferences.insert(self)
+        guard inserted else {
+            throw OpenAPI.Components.ReferenceCycleError(ref: self.absoluteString)
+        }
+
+        return try components
+            .lookup(self)
+            ._dereferenced(in: components, following: newReferences)
     }
 }
 

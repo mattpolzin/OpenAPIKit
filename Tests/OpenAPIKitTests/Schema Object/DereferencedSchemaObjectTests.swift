@@ -480,4 +480,22 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t1.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertThrowsError(try JSONSchema.not(.reference(.component(named: "missing"))).dereferenced(in: components))
     }
+
+    func test_throwingReferenceCycleFound() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "test": .object(
+                    properties: [
+                        "cyclic": .reference(.component(named: "test"))
+                    ]
+                )
+            ]
+        )
+        XCTAssertThrowsError(try JSONSchema.reference(.component(named: "test")).dereferenced(in: components)) { error in
+            XCTAssertEqual(
+                String(describing: error),
+                "Encountered a JSON Schema $ref cycle that prevents fully dereferencing document at '#/components/schemas/test'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy."
+            )
+        }
+    }
 }

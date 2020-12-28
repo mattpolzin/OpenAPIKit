@@ -49,13 +49,15 @@ public struct DereferencedDocument: Equatable {
         self.paths = try document.paths.mapValues {
             try DereferencedPathItem(
                 $0,
-                resolvingIn: document.components
+                resolvingIn: document.components,
+                following: []
             )
         }
         self.security = try document.security.map {
             try DereferencedSecurityRequirement(
                 $0,
-                resolvingIn: document.components
+                resolvingIn: document.components,
+                following: []
             )
         }
 

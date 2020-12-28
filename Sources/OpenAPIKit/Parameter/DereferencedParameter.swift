@@ -29,13 +29,18 @@ public struct DereferencedParameter: Equatable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    internal init(_ parameter: OpenAPI.Parameter, resolvingIn components: OpenAPI.Components) throws {
+    internal init(
+        _ parameter: OpenAPI.Parameter,
+        resolvingIn components: OpenAPI.Components,
+        following references: Set<AnyHashable>
+    ) throws {
         switch parameter.schemaOrContent {
         case .a(let schemaContext):
             self.schemaOrContent = .a(
                 try DereferencedSchemaContext(
                     schemaContext,
-                    resolvingIn: components
+                    resolvingIn: components,
+                    following: references
                 )
             )
         case .b(let contentMap):
@@ -43,7 +48,8 @@ public struct DereferencedParameter: Equatable {
                 try contentMap.mapValues {
                     try DereferencedContent(
                         $0,
-                        resolvingIn: components
+                        resolvingIn: components,
+                        following: references
                     )
                 }
             )
@@ -61,7 +67,7 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedParameter {
-        return try DereferencedParameter(self, resolvingIn: components)
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedParameter {
+        return try DereferencedParameter(self, resolvingIn: components, following: references)
     }
 }
