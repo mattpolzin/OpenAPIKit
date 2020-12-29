@@ -40,6 +40,16 @@ extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
     /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    ///
+    /// In addition to parameters that apply to all endpoints under the current path,
+    /// this type offers access to each possible endpoint operation under properties
+    /// named after the operation.
+    ///
+    /// The `GET` operation, for example, is accessed via the `.get` property. You can
+    /// also use the subscript operator, passing it the `HTTPMethod` you want to access.
+    ///
+    /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
+    /// `endpoints` property.
     public struct PathItem: Equatable, CodableVendorExtendable {
         public var summary: String?
         public var description: String?

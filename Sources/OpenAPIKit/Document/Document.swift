@@ -74,6 +74,9 @@ extension OpenAPI {
         /// All paths defined by this API. This property maps the path of each
         /// route (`OpenAPI.Path`) to the documentation for that route
         /// (`OpenAPI.PathItem`).
+        ///
+        /// See the `routes` property for an array of equatable `Path`/`PathItem`
+        /// pairs.
         public var paths: PathItem.Map
 
         /// Storage for components that need to be referenced elsewhere in the
