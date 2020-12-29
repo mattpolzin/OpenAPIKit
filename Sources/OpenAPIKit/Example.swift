@@ -15,7 +15,7 @@ extension OpenAPI {
         public let summary: String?
         public let description: String?
         /// Represents the OpenAPI `externalValue` as a URL _or_
-        /// the OpenAPI `value` as `AnyCodable`
+        /// the OpenAPI `value` as `AnyCodable`.
         public let value: Either<URL, AnyCodable>
 
         /// Dictionary of vendor extensions.
@@ -45,6 +45,7 @@ extension OpenAPI.Example {
 
 // MARK: - Either Convenience
 extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example {
+    /// Construct an `Example`.
     public static func example(
         summary: String? = nil,
         description: String? = nil,
@@ -155,7 +156,6 @@ extension OpenAPI.Example {
 
 // MARK: - LocallyDereferenceable
 extension OpenAPI.Example: LocallyDereferenceable {
-
     /// Examples do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.Example {

@@ -13,11 +13,28 @@ extension OpenAPI {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.
+        ///
+        /// This context stores the location (e.g. "query" or "header") of
+        /// the parameter and any additional information relevant to
+        /// parameters in the given location.
         public var context: Context
         public var description: String?
         public var deprecated: Bool // default is false
 
         /// OpenAPI Spec "content" or "schema" properties.
+        ///
+        /// You can access the schema context (if it is in use for
+        /// this parameter) with `schemaOrContent.schemaContextValue`.
+        /// The schema context contains lots of information detailed in the
+        /// OpenAPI specification under the **Parameter Object** section.
+        ///
+        /// You can directly access the underlying `JSONSchema` with
+        /// `schemaOrContent.schemaValue`. If the schema is a reference
+        /// instead of an inline value, `schemaOrContent.schemaReference`
+        /// will get you the reference.
+        ///
+        /// You can access the content map (if it is in use for
+        /// this parameter) with `schemaOrContent.contentValue`.
         public var schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
 
         /// Dictionary of vendor extensions.
@@ -28,14 +45,21 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public var required: Bool { context.required }
+        /// The location (e.g. "query") of the parameter.
+        ///
+        /// See the `context` property for more details on the
+        /// parameter.
         public var location: Context.Location { return context.location }
 
-        public init(name: String,
-                    context: Context,
-                    schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
-                    description: String? = nil,
-                    deprecated: Bool = false,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        /// Create a parameter with an `Either<SchemaContext, OpenAPI.Content.Map>`.
+        public init(
+            name: String,
+            context: Context,
+            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
+            description: String? = nil,
+            deprecated: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.name = name
             self.context = context
             self.schemaOrContent = schemaOrContent
@@ -44,12 +68,15 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(name: String,
-                    context: Context,
-                    schema: SchemaContext,
-                    description: String? = nil,
-                    deprecated: Bool = false,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        /// Create a parameter with a `SchemaContext`.
+        public init(
+            name: String,
+            context: Context,
+            schema: SchemaContext,
+            description: String? = nil,
+            deprecated: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(schema)
@@ -58,12 +85,16 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(name: String,
-                    context: Context,
-                    schema: JSONSchema,
-                    description: String? = nil,
-                    deprecated: Bool = false,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        /// Create a parameter with a `JSONSchema` and the default
+        /// `style` for the given `Context`.
+        public init(
+            name: String,
+            context: Context,
+            schema: JSONSchema,
+            description: String? = nil,
+            deprecated: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(SchemaContext(schema, style: .default(for: context)))
@@ -72,12 +103,16 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(name: String,
-                    context: Context,
-                    schemaReference: JSONReference<JSONSchema>,
-                    description: String? = nil,
-                    deprecated: Bool = false,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        /// Create a parameter with a reference to a `JSONSchema`
+        /// and the default `style` for the given `Context`.
+        public init(
+            name: String,
+            context: Context,
+            schemaReference: JSONReference<JSONSchema>,
+            description: String? = nil,
+            deprecated: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(SchemaContext(schemaReference: schemaReference, style: .default(for: context)))
@@ -86,12 +121,15 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
-        public init(name: String,
-                    context: Context,
-                    content: OpenAPI.Content.Map,
-                    description: String? = nil,
-                    deprecated: Bool = false,
-                    vendorExtensions: [String: AnyCodable] = [:]) {
+        /// Create a parameter with a `Content.Map`.
+        public init(
+            name: String,
+            context: Context,
+            content: OpenAPI.Content.Map,
+            description: String? = nil,
+            deprecated: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
             self.name = name
             self.context = context
             self.schemaOrContent = .init(content)
@@ -104,6 +142,11 @@ extension OpenAPI {
 
 extension OpenAPI.Parameter {
     /// An array of parameters that are `Either` `Parameters` or references to parameters.
+    ///
+    /// You can use the `lookup(_:)` or subscript
+    /// methods on the `OpenAPI.Components` found at
+    /// `document.components` to resolve an `Either` to
+    /// an `OpenAPI.Parameter`.
     public typealias Array = [Either<JSONReference<OpenAPI.Parameter>, OpenAPI.Parameter>]
 }
 
@@ -123,7 +166,7 @@ extension OpenAPI.Parameter {
 // OpenAPI.PathItem.Array.Element =>
 extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
-    /// Construct a parameter.
+    /// Construct a parameter using a `JSONSchema`.
     public static func parameter(
         name: String,
         context: OpenAPI.Parameter.Context,
@@ -144,7 +187,7 @@ extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Param
         )
     }
 
-    /// Construct a parameter.
+    /// Construct a parameter using a `Content.Map`.
     public static func parameter(
         name: String,
         context: OpenAPI.Parameter.Context,

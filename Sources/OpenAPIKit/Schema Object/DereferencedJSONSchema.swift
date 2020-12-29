@@ -310,6 +310,11 @@ extension JSONSchema: LocallyDereferenceable {
     /// Returns a dereferenced schema object if all references in
     /// this schema object can be found in the Components Object.
     ///
+    /// `_dereferenced(in:following:)` is meant for internal use
+    /// but this type gets a public-facing `dereferenced(in:)` function
+    /// for free from the `LocallyDereferenceable` protocol. For all
+    /// external uses, call `dereferenced(in:)`.
+    ///
     /// - Important: Local dereferencing will `throw` if any
     ///     `JSONReferences` point to other files or to
     ///     locations within the same file other than the

@@ -15,6 +15,15 @@ extension OpenAPI {
         public var description: String?
         public var externalDocs: OpenAPI.ExternalDocumentation?
         public var operationId: String?
+        /// Parameters that apply to this endpoint. See the parameters
+        /// on the `PathItem` containing this endpoint as well for a
+        /// complete picture of the parameters this endpoint supports.
+        ///
+        /// A `Parameter.Array` is an array of "either parameter or
+        /// reference to parameter" entries. You can use the `lookup(_:)`
+        /// method on the `OpenAPI.Components` found at
+        /// `document.components` to resolve one of these entries to
+        /// an `OpenAPI.Parameter`.
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
 
@@ -100,6 +109,8 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         // allowing Request Body reference
+        /// Create an Operation with a request body specified by an
+        /// `Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>`.
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
@@ -131,6 +142,7 @@ extension OpenAPI {
         }
 
         // assuming inline request body
+        /// Create an Operation that optionally specifies a request body.
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
@@ -162,6 +174,8 @@ extension OpenAPI {
         }
 
         // variadic tags
+        /// Create an Operation with a variadic list of tags as the first
+        /// argument.
         public init(
             tags: String...,
             summary: String? = nil,

@@ -40,19 +40,46 @@ extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
     /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    ///
+    /// In addition to parameters that apply to all endpoints under the current path,
+    /// this type offers access to each possible endpoint operation under properties
+    /// named after the operation.
+    ///
+    /// The `GET` operation, for example, is accessed via the `.get` property. You can
+    /// also use the subscript operator, passing it the `HTTPMethod` you want to access.
+    ///
+    /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
+    /// `endpoints` property.
     public struct PathItem: Equatable, CodableVendorExtendable {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?
+        /// Parameters that apply to all operations at this path. See the parameters
+        /// on each `Operation` for a complete picture of a given endpoint's
+        /// parameters.
+        ///
+        /// A `Parameter.Array` is an array of "either parameter or
+        /// reference to parameter" entries. You can use the `lookup(_:)`
+        /// method on the `OpenAPI.Components` found at
+        /// `document.components` to resolve one of these entries to
+        /// an `OpenAPI.Parameter`.
         public var parameters: Parameter.Array
 
+        /// The `GET` endpoint at this path, if one exists.
         public var get: Operation?
+        /// The `PUT` endpoint at this path, if one exists.
         public var put: Operation?
+        /// The `POST` endpoint at this path, if one exists.
         public var post: Operation?
+        /// The `DELETE` endpoint at this path, if one exists.
         public var delete: Operation?
+        /// The `OPTIONS` endpoint at this path, if one exists.
         public var options: Operation?
+        /// The `HEAD` endpoint at this path, if one exists.
         public var head: Operation?
+        /// The `PATCH` endpoint at this path, if one exists.
         public var patch: Operation?
+        /// The `TRACE` endpoint at this path, if one exists.
         public var trace: Operation?
 
         /// Dictionary of vendor extensions.

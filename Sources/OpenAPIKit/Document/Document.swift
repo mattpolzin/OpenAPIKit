@@ -16,6 +16,33 @@ extension OpenAPI {
     /// layed out by the Specification -- it goes without saying that the encoded
     /// JSON or YAML produced by OpenAPIKit conforms to the specification
     /// exactly.
+    ///
+    /// A document is decoded in the normal fashion for `Codable` types:
+    ///
+    ///     let data: Data = ...
+    ///     let document = try JSONDecoder().decode(OpenAPI.Document.self, data)
+    ///
+    /// At this point, all of the information exposed by the decoded documentation is available via
+    /// OpenAPIKit types that largely follow the structure and naming conventions of the specification.
+    ///
+    /// If the documentation exists within a single file (no JSON references to other files) and there are
+    /// no cyclic JSON references, you can dereference the documentation to remove the need to follow
+    /// JSON references while traversing the documentation.
+    ///
+    ///     let dereferencedDocument = try document.locallyDereferenced()
+    ///
+    /// See the documentation on `OpenAPI.Document.locallyDereferenced()` for more.
+    ///
+    /// At this point all references have been removed and replaced with inline documentation
+    /// components. You can "resolve" the documentation to get an even more concise
+    /// representation; this is no longer an OpenAPI representation, but rather an alternative
+    /// view OpenAPIKit provides that can make analyzing and traversing documentation
+    /// substantially easier for certain use-cases.
+    ///
+    ///     let resolvedDocument = dereferencedDocument.resolved()
+    ///
+    /// See the documentation on `DereferencedDocument.resolved()` for more.
+    ///
     public struct Document: Equatable, CodableVendorExtendable {
         /// OpenAPI Spec "openapi" field.
         ///
@@ -47,6 +74,9 @@ extension OpenAPI {
         /// All paths defined by this API. This property maps the path of each
         /// route (`OpenAPI.Path`) to the documentation for that route
         /// (`OpenAPI.PathItem`).
+        ///
+        /// See the `routes` property for an array of equatable `Path`/`PathItem`
+        /// pairs.
         public var paths: PathItem.Map
 
         /// Storage for components that need to be referenced elsewhere in the
