@@ -77,7 +77,9 @@ public protocol LocallyDereferenceable {
     /// An internal-use method that facilitates reference cycle detection by tracking past references followed
     /// in the course of dereferencing.
     ///
-    /// For all external-use, see `dereferenced(in:)`.
+    /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
+    /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
+    /// implementation for free.
     func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSelf
 }
 

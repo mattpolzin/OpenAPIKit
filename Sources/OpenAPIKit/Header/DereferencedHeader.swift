@@ -60,13 +60,12 @@ public struct DereferencedHeader: Equatable {
 }
 
 extension OpenAPI.Header: LocallyDereferenceable {
-    /// Create a `DereferencedHeader` if all references in the
-    /// header can be found in the given Components Object.
+    /// An internal-use method that facilitates reference cycle detection by tracking past references followed
+    /// in the course of dereferencing.
     ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `ReferenceError.missingOnLookup(name:key:)` depending
-    ///     on whether an unresolvable reference points to another file or just points to a
-    ///     component in the same file that cannot be found in the Components Object.
+    /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
+    /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
+    /// implementation for free.
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedHeader {
         return try DereferencedHeader(self, resolvingIn: components, following: references)
     }
