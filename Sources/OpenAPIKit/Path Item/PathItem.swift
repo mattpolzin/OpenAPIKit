@@ -44,15 +44,32 @@ extension OpenAPI {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?
+        /// Parameters that apply to all operations at this path. See the parameters
+        /// on each `Operation` for a complete picture of a given endpoint's
+        /// parameters.
+        ///
+        /// A `Parameter.Array` is an array of "either parameter or
+        /// reference to parameter" entries. You can use the `lookup(_:)`
+        /// method on the `OpenAPI.Components` found at
+        /// `document.components` to resolve one of these entries to
+        /// an `OpenAPI.Parameter`.
         public var parameters: Parameter.Array
 
+        /// The `GET` endpoint at this path, if one exists.
         public var get: Operation?
+        /// The `PUT` endpoint at this path, if one exists.
         public var put: Operation?
+        /// The `POST` endpoint at this path, if one exists.
         public var post: Operation?
+        /// The `DELETE` endpoint at this path, if one exists.
         public var delete: Operation?
+        /// The `OPTIONS` endpoint at this path, if one exists.
         public var options: Operation?
+        /// The `HEAD` endpoint at this path, if one exists.
         public var head: Operation?
+        /// The `PATCH` endpoint at this path, if one exists.
         public var patch: Operation?
+        /// The `TRACE` endpoint at this path, if one exists.
         public var trace: Operation?
 
         /// Dictionary of vendor extensions.

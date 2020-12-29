@@ -15,6 +15,15 @@ extension OpenAPI {
         public var description: String?
         public var externalDocs: OpenAPI.ExternalDocumentation?
         public var operationId: String?
+        /// Parameters that apply to this endpoint. See the parameters
+        /// on the `PathItem` containing this endpoint as well for a
+        /// complete picture of the parameters this endpoint supports.
+        ///
+        /// A `Parameter.Array` is an array of "either parameter or
+        /// reference to parameter" entries. You can use the `lookup(_:)`
+        /// method on the `OpenAPI.Components` found at
+        /// `document.components` to resolve one of these entries to
+        /// an `OpenAPI.Parameter`.
         public var parameters: Parameter.Array
         public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
 
