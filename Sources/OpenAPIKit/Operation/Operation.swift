@@ -109,6 +109,8 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         // allowing Request Body reference
+        /// Create an Operation with a request body specified by an
+        /// `Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>`.
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
@@ -140,6 +142,7 @@ extension OpenAPI {
         }
 
         // assuming inline request body
+        /// Create an Operation that optionally specifies a request body.
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
@@ -171,6 +174,8 @@ extension OpenAPI {
         }
 
         // variadic tags
+        /// Create an Operation with a variadic list of tags as the first
+        /// argument.
         public init(
             tags: String...,
             summary: String? = nil,
