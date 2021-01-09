@@ -242,6 +242,75 @@ public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>
     }
 }
 
+/// Look up the value pointed to by the KeyPath. Fail
+/// with a `ValidationError` if the value is not
+/// found in the `Components` for the current document.
+///
+/// - Parameters:
+///         - path: The path to lookup.
+///         - validations: One or more validations to perform on the value
+///             the KeyPath points to.
+///
+public func lookup<T, U>(_ path: KeyPath<T, Either<JSONReference<U>, U>>, thenApply validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+    return { context in
+        return validations.flatMap { validation -> [ValidationError] in
+            let subject = context.subject[keyPath: path]
+            do {
+                return validation.apply(
+                    to: try context.document.components.lookup(subject),
+                    at: context.codingPath,
+                    in: context.document
+                )
+            } catch {
+                return [
+                    ValidationError(
+                        reason: "Could not find component being validated: \(String(describing: subject.reference?.absoluteString))",
+                        at: context.codingPath
+                    )
+                ]
+            }
+        }
+    }
+}
+
+/// Unwrap and look up the value pointed to by the KeyPath.
+/// Fail with a `ValidationError` if the value is `nil` or
+/// not found in the `Components` for the current document.
+///
+/// - Parameters:
+///         - path: The path to lookup.
+///         - validations: One or more validations to perform on the value
+///             the KeyPath points to.
+///
+public func unwrapAndLookup<T, U>(_ path: KeyPath<T, Either<JSONReference<U>, U>?>, thenApply validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+    return { context in
+        return validations.flatMap { validation -> [ValidationError] in
+            guard let subject = context.subject[keyPath: path] else {
+                return [
+                    ValidationError(
+                        reason: "Tried to unwrap an optional for path \(String(describing: path)) and found `nil`",
+                        at: context.codingPath
+                    )
+                ]
+            }
+            do {
+                return validation.apply(
+                    to: try context.document.components.lookup(subject),
+                    at: context.codingPath,
+                    in: context.document
+                )
+            } catch {
+                return [
+                    ValidationError(
+                        reason: "Could not find component being validated: \(String(describing: subject.reference?.absoluteString))",
+                        at: context.codingPath
+                    )
+                ]
+            }
+        }
+    }
+}
+
 /// Apply all of the given validations to the current context.
 ///
 /// This is equivalent to calling `lift` with the keypath `\.self`
