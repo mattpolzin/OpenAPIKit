@@ -26,7 +26,10 @@ public struct OrderedDictionary<Key, Value> where Key: Hashable {
         unorderedHash = [:]
     }
 
-    public init<S>(grouping values: S, by keyForValue: (S.Element) throws -> Key) rethrows where Value == [S.Element], S : Sequence {
+    public init<S>(
+        grouping values: S,
+        by keyForValue: (S.Element) throws -> Key
+    ) rethrows where Value == [S.Element], S : Sequence {
         var temporaryDictionary = Self()
 
         for value in values {
@@ -35,7 +38,10 @@ public struct OrderedDictionary<Key, Value> where Key: Hashable {
         self = temporaryDictionary
     }
 
-    public init<S>(_ keysAndValues: S, uniquingKeysWith combine: (Value, Value) throws -> Value) rethrows where S : Sequence, S.Element == (Key, Value) {
+    public init<S>(
+        _ keysAndValues: S,
+        uniquingKeysWith combine: (Value, Value) throws -> Value
+    ) rethrows where S : Sequence, S.Element == (Key, Value) {
         var temporaryDictionary = Self()
 
         for (key, value) in keysAndValues {

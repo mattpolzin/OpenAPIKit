@@ -18,6 +18,14 @@ public enum Either<A, B> {
 	case a(A)
 	case b(B)
 
+    /// Get the first of the possible values of the `Either` (if it is
+    /// set).
+    ///
+    /// This is sometimes known as the `Left` or error case of some
+    /// `Either` types, but `OpenAPIKit` makes regular use of
+    /// this type in situations where neither of the possible values could
+    /// be considered an error. In fact, `OpenAPIKit` sticks to using
+    /// the Swift `Result` type where such semantics are needed.
 	public var a: A? {
 		guard case let .a(ret) = self else { return nil }
 		return ret
@@ -27,6 +35,8 @@ public enum Either<A, B> {
 		self = .a(a)
 	}
 
+    /// Get the second of the possible values of the `Either` (if
+    /// it is set).
 	public var b: B? {
 		guard case let .b(ret) = self else { return nil }
 		return ret
