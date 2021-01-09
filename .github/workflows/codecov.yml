@@ -13,4 +13,4 @@ jobs:
     - id: analysis
       uses: mattpolzin/swift-codecov-action@0.6.0
       with:
-        MINIMUM_COVERAGE: 99
+        MINIMUM_COVERAGE: 98
