@@ -155,7 +155,10 @@ public func take<T, U>(_ path: KeyPath<ValidationContext<T>, U>, check: @escapin
 ///         when: \.a == "hello"
 ///     )
 ///
-public func lift<T, U>(_ path: KeyPath<ValidationContext<T>, U>, into validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func lift<T, U>(
+    _ path: KeyPath<ValidationContext<T>, U>,
+    into validations: Validation<U>...
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         return validations.flatMap { $0.apply(to: context[keyPath: path], at: context.codingPath, in: context.document) }
     }
@@ -184,7 +187,10 @@ public func lift<T, U>(_ path: KeyPath<ValidationContext<T>, U>, into validation
 ///         when: \.a == "hello"
 ///     )
 ///
-public func lift<T, U>(_ path: KeyPath<T, U>, into validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func lift<T, U>(
+    _ path: KeyPath<T, U>,
+    into validations: Validation<U>...
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         return validations.flatMap { $0.apply(to: context.subject[keyPath: path], at: context.codingPath, in: context.document) }
     }
@@ -205,7 +211,11 @@ public func lift<T, U>(_ path: KeyPath<T, U>, into validations: Validation<U>...
 /// on what this function does when the value pointed to
 /// is non-nil.
 ///
-public func unwrap<T, U>(_ path: KeyPath<ValidationContext<T>, U?>, into validations: Validation<U>..., description: String? = nil) -> (ValidationContext<T>) -> [ValidationError] {
+public func unwrap<T, U>(
+    _ path: KeyPath<ValidationContext<T>, U?>,
+    into validations: Validation<U>...,
+    description: String? = nil
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         guard let subject = context[keyPath: path] else {
             let error = description.map { "Tried to unwrap but found nil: \($0)" }
@@ -231,7 +241,11 @@ public func unwrap<T, U>(_ path: KeyPath<ValidationContext<T>, U?>, into validat
 /// on what this function does when the value pointed to
 /// is non-nil.
 ///
-public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>..., description: String? = nil) -> (ValidationContext<T>) -> [ValidationError] {
+public func unwrap<T, U>(
+    _ path: KeyPath<T, U?>,
+    into validations: Validation<U>...,
+    description: String? = nil
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         guard let subject = context.subject[keyPath: path] else {
             let error = description.map { "Tried to unwrap but found nil: \($0)" }
@@ -251,7 +265,10 @@ public func unwrap<T, U>(_ path: KeyPath<T, U?>, into validations: Validation<U>
 ///         - validations: One or more validations to perform on the value
 ///             the KeyPath points to.
 ///
-public func lookup<T, U>(_ path: KeyPath<T, Either<JSONReference<U>, U>>, thenApply validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func lookup<T, U>(
+    _ path: KeyPath<T, Either<JSONReference<U>, U>>,
+    thenApply validations: Validation<U>...
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         return validations.flatMap { validation -> [ValidationError] in
             let subject = context.subject[keyPath: path]
@@ -282,7 +299,10 @@ public func lookup<T, U>(_ path: KeyPath<T, Either<JSONReference<U>, U>>, thenAp
 ///         - validations: One or more validations to perform on the value
 ///             the KeyPath points to.
 ///
-public func unwrapAndLookup<T, U>(_ path: KeyPath<T, Either<JSONReference<U>, U>?>, thenApply validations: Validation<U>...) -> (ValidationContext<T>) -> [ValidationError] {
+public func unwrapAndLookup<T, U>(
+    _ path: KeyPath<T, Either<JSONReference<U>, U>?>,
+    thenApply validations: Validation<U>...
+) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
         return validations.flatMap { validation -> [ValidationError] in
             guard let subject = context.subject[keyPath: path] else {
