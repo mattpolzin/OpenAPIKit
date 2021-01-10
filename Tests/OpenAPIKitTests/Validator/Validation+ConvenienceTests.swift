@@ -276,6 +276,94 @@ final class ValidationConvenienceTests: XCTestCase {
         )
     }
 
+    func test_subject_lookup() {
+        let v = Validation<OpenAPI.Parameter>(
+            description: "parameter is named test",
+            check: \.name == "test"
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/test": .init(
+                    parameters: [
+                        .reference(.component(named: "test1")), // passes  validation
+                        .reference(.component(named: "test2")), // wrong name
+                        .reference(.component(named: "test3")) // not found
+                    ]
+                )
+            ],
+            components: .init(
+                parameters: [
+                    "test1": .init(name: "test", context: .header, content: [:]),
+                    "test2": .init(name: "test2", context: .query, content: [:])
+                ]
+            )
+        )
+
+        let context = ValidationContext<OpenAPI.PathItem>(document: document, subject: document.paths["/test"]!, codingPath: [])
+
+        // passses
+        XCTAssertTrue(
+            lookup(\OpenAPI.PathItem.parameters[0], thenApply: v)(context).isEmpty
+        )
+        // wrong name
+        XCTAssertFalse(
+            lookup(\OpenAPI.PathItem.parameters[1], thenApply: v)(context).isEmpty
+        )
+        // not found reference
+        XCTAssertFalse(
+            lookup(\OpenAPI.PathItem.parameters[2], thenApply: v)(context).isEmpty
+        )
+    }
+
+    func test_subject_unwrapAndlookup() {
+        let v = Validation<OpenAPI.Parameter>(
+            description: "parameter is named test",
+            check: \.name == "test"
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/test": .init(
+                    parameters: [
+                        .reference(.component(named: "test1")), // passes  validation
+                        .reference(.component(named: "test2")), // wrong name
+                        .reference(.component(named: "test3")) // not found
+                    ]
+                )
+            ],
+            components: .init(
+                parameters: [
+                    "test1": .init(name: "test", context: .header, content: [:]),
+                    "test2": .init(name: "test2", context: .query, content: [:])
+                ]
+            )
+        )
+
+        let context = ValidationContext<OpenAPI.Document>(document: document, subject: document, codingPath: [])
+
+        // passes
+        XCTAssertTrue(
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[0], thenApply: v)(context).isEmpty
+        )
+        // wrong name
+        XCTAssertFalse(
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[1], thenApply: v)(context).isEmpty
+        )
+        // not found reference
+        XCTAssertFalse(
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[2], thenApply: v)(context).isEmpty
+        )
+        // nil keypath
+        XCTAssertFalse(
+            unwrapAndLookup(\OpenAPI.Document.paths["/test2"]?.parameters.first, thenApply: v)(context).isEmpty
+        )
+    }
+
     func test_allCombinator() {
         let v1 = Validation<String>(
             description: "String is more than 5 characters",

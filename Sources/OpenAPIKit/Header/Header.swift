@@ -103,9 +103,11 @@ extension OpenAPI.Header {
 
 // MARK: - Header Convenience
 extension OpenAPI.Parameter.SchemaContext {
-    public static func header(_ schema: JSONSchema,
-                              allowReserved: Bool = false,
-                              example: AnyCodable? = nil) -> Self {
+    public static func header(
+        _ schema: JSONSchema,
+        allowReserved: Bool = false,
+        example: AnyCodable? = nil
+    ) -> Self {
         return .init(
             schema,
             style: .default(for: .header),
@@ -114,9 +116,11 @@ extension OpenAPI.Parameter.SchemaContext {
         )
     }
 
-    public static func header(schemaReference: JSONReference<JSONSchema>,
-                              allowReserved: Bool = false,
-                              example: AnyCodable? = nil) -> Self {
+    public static func header(
+        schemaReference: JSONReference<JSONSchema>,
+        allowReserved: Bool = false,
+        example: AnyCodable? = nil
+    ) -> Self {
         return .init(
             schemaReference: schemaReference,
             style: .default(for: .header),
@@ -125,9 +129,11 @@ extension OpenAPI.Parameter.SchemaContext {
         )
     }
 
-    public static func header(_ schema: JSONSchema,
-                              allowReserved: Bool = false,
-                              examples: OpenAPI.Example.Map?) -> Self {
+    public static func header(
+        _ schema: JSONSchema,
+        allowReserved: Bool = false,
+        examples: OpenAPI.Example.Map?
+    ) -> Self {
         return .init(
             schema,
             style: .default(for: .header),
@@ -136,9 +142,11 @@ extension OpenAPI.Parameter.SchemaContext {
         )
     }
 
-    public static func header(schemaReference: JSONReference<JSONSchema>,
-                              allowReserved: Bool = false,
-                              examples: OpenAPI.Example.Map?) -> Self {
+    public static func header(
+        schemaReference: JSONReference<JSONSchema>,
+        allowReserved: Bool = false,
+        examples: OpenAPI.Example.Map?
+    ) -> Self {
         return .init(
             schemaReference: schemaReference,
             style: .default(for: .header),

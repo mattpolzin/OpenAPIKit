@@ -157,6 +157,26 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Document {
+    /// Create a new OpenAPI Document with
+    /// all paths not passign the given predicate
+    /// removed.
+    public func filteringPaths(with predicate: (OpenAPI.Path) -> Bool) -> OpenAPI.Document {
+        let filteredPaths = paths.filteringPaths(with: predicate)
+        return OpenAPI.Document(
+            openAPIVersion: openAPIVersion,
+            info: info,
+            servers: servers,
+            paths: filteredPaths,
+            components: components,
+            security: security,
+            tags: tags,
+            externalDocs: externalDocs,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
+extension OpenAPI.Document {
     /// A `Route` is the combination of a path (where the route lives)
     /// and a path item (the definition of the route).
     public struct Route: Equatable {

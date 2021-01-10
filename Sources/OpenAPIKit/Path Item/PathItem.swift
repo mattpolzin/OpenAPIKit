@@ -166,6 +166,13 @@ extension OpenAPI.PathItem {
     public typealias Map = OrderedDictionary<OpenAPI.Path, OpenAPI.PathItem>
 }
 
+extension OrderedDictionary where Key == OpenAPI.Path {
+    public func filteringPaths(with predicate: (OpenAPI.Path) -> Bool) -> OrderedDictionary {
+        let filteredPaths = filter { (path, _) in predicate(path) }
+        return OrderedDictionary(filteredPaths, uniquingKeysWith: { fst, _ in fst })
+    }
+}
+
 extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
     public func `for`(_ verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
