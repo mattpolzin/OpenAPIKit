@@ -342,6 +342,24 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(t.allServers, [s1, s2])
     }
 
+    func test_pathFiltering() {
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/test1": .init(),
+                "/test2": .init()
+            ],
+            components: .noComponents
+        )
+
+        let t2 = t.filteringPaths(with: { $0 == "/test1" })
+
+        XCTAssertEqual(t.paths.count, 2)
+        XCTAssertEqual(t2.paths.count, 1)
+        XCTAssertNotNil(t2.paths["/test1"])
+    }
+
     func test_existingSecuritySchemeSuccess() {
         let docData =
         """
