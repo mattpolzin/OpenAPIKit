@@ -326,7 +326,9 @@ let contentMapValidator = Validation(
 )
 ```
 
-Lastly, OpenAPIKit offers the `all()` function that will combine any number of `Validations` in the current context (as opposed to `lift()` and `unwrap()` which take you from one context to another).
+If you want to use a keypath to get from one context to another where there is potentially a JSON Reference between, it can be handy to use the `lookup()` function. The `lookup()` function takes a keypath that ends in an `Either<JSONReference<T>, T>` and lifts a validation context with a subject of `T` into any other validations you want to run. There is also an `unwrapAndLookup()` helper for keypaths that produce optional either references (`Either<JSONReference<T>, T>?`).
+
+Lastly, OpenAPIKit offers the `all()` function that will combine any number of `Validations` in the current context (as opposed to `lift()`, `unwrap()`, and others which take you from one context to another).
 ```swift
 let passwordValid1 = Validation<String>(...)
 let passwordValid2 = Validation<String>(...)
