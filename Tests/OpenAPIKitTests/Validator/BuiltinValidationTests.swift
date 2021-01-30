@@ -401,7 +401,7 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unqiue (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unique (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello", "get"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello'].get")
         }
@@ -552,7 +552,7 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unqiue (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unique (identity is defined by the 'name' and 'location')")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello"])
             XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello']")
         }

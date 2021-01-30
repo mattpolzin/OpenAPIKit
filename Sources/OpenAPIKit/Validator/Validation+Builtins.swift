@@ -201,7 +201,7 @@ extension Validation {
     ///
     public static var pathItemParametersAreUnique: Validation<OpenAPI.PathItem> {
         .init(
-            description: "Path Item parameters are unqiue (identity is defined by the 'name' and 'location')",
+            description: "Path Item parameters are unique (identity is defined by the 'name' and 'location')",
             check: { parametersAreUnique($0.subject.parameters, components: $0.document.components) },
             when: \.parameters.count > 0
         )
@@ -219,7 +219,7 @@ extension Validation {
     ///
     public static var operationParametersAreUnique: Validation<OpenAPI.Operation> {
         .init(
-            description: "Operation parameters are unqiue (identity is defined by the 'name' and 'location')",
+            description: "Operation parameters are unique (identity is defined by the 'name' and 'location')",
             check: { parametersAreUnique($0.subject.parameters, components: $0.document.components) },
             when: \.parameters.count > 0
         )
