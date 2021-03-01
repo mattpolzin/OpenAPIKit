@@ -10,8 +10,8 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "OpenAPIKit_3_0",
-            targets: ["OpenAPIKit_3_0"]),
+            name: "OpenAPIKit30",
+            targets: ["OpenAPIKit30"]),
         .library(
             name: "OpenAPIKit",
             targets: ["OpenAPIKit"]),
@@ -26,26 +26,26 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "EitherTests",
-            dependencies: ["OpenAPIKit_3_0"]),
-        .testTarget(
-            name: "OrderedDictionaryTests",
-            dependencies: ["OpenAPIKit_3_0", "Yams", "FineJSON"]),
-        .testTarget(
-            name: "AnyCodableTests",
-            dependencies: ["OpenAPIKit_3_0"]),
-
-        .target(
-            name: "OpenAPIKit_3_0",
             dependencies: ["OpenAPIKitCore"]),
         .testTarget(
-            name: "OpenAPIKit_3_0Tests",
-            dependencies: ["OpenAPIKit_3_0", "Yams", "FineJSON"]),
+            name: "OrderedDictionaryTests",
+            dependencies: ["OpenAPIKitCore", "Yams", "FineJSON"]),
         .testTarget(
-            name: "OpenAPIKit_3_0CompatibilitySuite",
-            dependencies: ["OpenAPIKit_3_0", "Yams"]),
+            name: "AnyCodableTests",
+            dependencies: ["OpenAPIKitCore"]),
+
+        .target(
+            name: "OpenAPIKit30",
+            dependencies: ["OpenAPIKitCore"]),
         .testTarget(
-            name: "OpenAPIKit_3_0ErrorReportingTests",
-            dependencies: ["OpenAPIKit_3_0", "Yams"]),
+            name: "OpenAPIKit30Tests",
+            dependencies: ["OpenAPIKit30", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "OpenAPIKit30CompatibilitySuite",
+            dependencies: ["OpenAPIKit30", "Yams"]),
+        .testTarget(
+            name: "OpenAPIKit30ErrorReportingTests",
+            dependencies: ["OpenAPIKit30", "Yams"]),
 
         .target(
             name: "OpenAPIKit",
