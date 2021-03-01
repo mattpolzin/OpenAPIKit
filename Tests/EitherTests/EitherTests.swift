@@ -7,7 +7,7 @@
 
 import XCTest
 import Foundation
-@testable import OpenAPIKit
+@testable import OpenAPIKitCore
 
 // MARK: - init
 class EitherTests: XCTestCase {

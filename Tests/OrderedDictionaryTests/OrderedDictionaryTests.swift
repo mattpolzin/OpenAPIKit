@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 1/17/20.
 //
 
-import OpenAPIKit
+import OpenAPIKitCore
 import XCTest
 import Yams
 import FineJSON

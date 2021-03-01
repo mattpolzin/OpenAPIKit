@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 7/2/20.
 //
 
-@testable import OpenAPIKit
+@testable import OpenAPIKitCore
 import XCTest
 
 final class InconsistencyErrorTests: XCTestCase {

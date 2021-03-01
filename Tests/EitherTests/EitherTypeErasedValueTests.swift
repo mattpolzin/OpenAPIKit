@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import OpenAPIKit
+import OpenAPIKitCore
 
 final class EitherTypeErasedValueTests: XCTestCase {
 

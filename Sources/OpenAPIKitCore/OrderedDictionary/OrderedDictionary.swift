@@ -410,7 +410,7 @@ private protocol LosslessStringKeyDecodable {
 }
 
 public struct KeyDecodingError: Swift.Error {
-    let localizedDescription: String
+    public let localizedDescription: String
 }
 
 extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStringConvertible, Value: Decodable {
