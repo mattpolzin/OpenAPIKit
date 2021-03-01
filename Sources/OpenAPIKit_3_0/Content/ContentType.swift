@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     public enum ContentType: Codable, Equatable, Hashable {
         /// Bitmap image

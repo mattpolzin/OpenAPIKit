@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Document` type that guarantees
 /// its `paths` and `security` are inlined instead of
 /// referenced. You create a `DereferencedDocument`

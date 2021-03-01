@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// A resolved document is a fully dereferenced
 /// OpenAPI document that has been further distilled
 /// to canonical representations of each component. You

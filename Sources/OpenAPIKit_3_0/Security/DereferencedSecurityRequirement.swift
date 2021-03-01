@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.SecurityRequirement` type that
 /// contains the actual security schemas it would otherwise
 /// just be referencing with the keys of the Security Requirement

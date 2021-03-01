@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/2/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Document {
     /// Validate this `OpenAPI.Document`.
     ///

@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Request` type that guarantees
 /// its `content` is inlined instead of referenced.
 @dynamicMemberLookup

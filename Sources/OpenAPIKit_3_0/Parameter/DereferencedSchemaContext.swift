@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// A `SchemaContext` type that guarantees its
 /// `schema` and `examples` are inlined instead
 /// of referenced.

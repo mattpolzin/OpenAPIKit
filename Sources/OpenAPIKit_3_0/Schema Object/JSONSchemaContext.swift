@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
+import OpenAPIKitCore
+
 // MARK: - Core Context
 
 /// A schema context stores information about a schema.

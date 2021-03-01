@@ -5,6 +5,7 @@
 //  Created by Mathew Polzin on 9/4/20.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension JSONSchema {

@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 1/26/20.
 //
 
+import OpenAPIKitCore
+
 /// The context in which a validation can be applied.
 ///
 /// It may or may not be important for a particular validation

@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 3/30/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Components {
     /// Check if the `Components` contains the given reference or not.
     ///

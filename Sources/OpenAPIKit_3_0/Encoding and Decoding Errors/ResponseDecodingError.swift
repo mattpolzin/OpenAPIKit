@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 2/28/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Error.Decoding {
     public struct Response: OpenAPIError {
         public let statusCode: OpenAPI.Response.StatusCode
@@ -109,7 +111,7 @@ extension OpenAPI.Error.Decoding.Response {
 }
 
 extension OpenAPI.Error.Decoding.Response: DiggingError {
-    internal init(unwrapping error: Swift.DecodingError) {
+    public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {

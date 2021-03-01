@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/17/20.
 //
 
+import OpenAPIKitCore
+
 /// A `JSONSchema` type that guarantees none of its
 /// nodes are references.
 @dynamicMemberLookup

@@ -5,4 +5,6 @@
 //  Created by Mathew Polzin on 2/28/21.
 //
 
+import OpenAPIKitCore
+
 extension OrderedDictionary: Validatable where Value: Validatable {}

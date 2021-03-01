@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Error.Decoding {
     public struct Path: OpenAPIError {
         public let path: OpenAPI.Path
@@ -143,7 +145,7 @@ extension OpenAPI.Error.Decoding.Path {
 }
 
 extension OpenAPI.Error.Decoding.Path: DiggingError {
-    internal init(unwrapping error: Swift.DecodingError) {
+    public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {

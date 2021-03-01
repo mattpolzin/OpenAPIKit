@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Content.Encoding` type that
 /// guarantees its `headers` are inlined instead
 /// of referenced

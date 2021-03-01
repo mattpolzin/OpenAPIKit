@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Error.Decoding {
     public struct Document: OpenAPIError {
         public let context: Context

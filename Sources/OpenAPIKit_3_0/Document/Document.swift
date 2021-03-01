@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 1/13/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
