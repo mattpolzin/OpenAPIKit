@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Disciminator Object"
     /// 

@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 8/1/20.
 //
 
+import OpenAPIKitCore
+
 extension Array where Element == JSONSchema {
     /// An array of schema fragments can be combined into a
     /// single `DereferencedJSONSchema` if all references can

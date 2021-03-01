@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// The canonical definition of a route. All information
 /// from throughout the OpenAPI document that is relevant
 /// to a particular route is collected and exposed in this

@@ -119,7 +119,7 @@ public extension OpenAPIError {
     var description: String { localizedDescription }
 }
 
-internal extension Swift.Array where Element == CodingKey {
+public extension Swift.Array where Element == CodingKey {
     var stringValue: String {
         return self.map { key in
             if let intValue = key.intValue {

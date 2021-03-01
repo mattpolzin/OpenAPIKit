@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 1/23/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     // TODO: requires runtime expression to be built first.
 

@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Response` type that guarantees
 /// its `headers` and `content` are inlined instead of
 /// referenced.

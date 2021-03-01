@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Operation` type that guarantees
 /// its `parameters`, `requestBody`, `responses`,
 /// and `security` are inlined instead of referenced.

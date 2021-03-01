@@ -12,7 +12,7 @@
 /// This is a relevant concept with respect to `DecodingError`s in particular
 /// because they often have underlying causes.
 ///
-internal protocol DiggingError {
+public protocol DiggingError {
     /// Initialize this error with a `DecodingError` and
     /// unwrap it if possible to instead a expose a more
     /// granular underlying error.
@@ -34,7 +34,7 @@ extension DiggingError {
     /// more useful to dig into the less trivial branch and display a more granular error to the user
     /// from deeper in that brach. When this occurs, this function retruns the udnerlying error on
     /// that branch.
-    internal static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
+    public static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
         // Just a guard against this being an error with more than 2 branches.
         guard eitherError.individualTypeFailures.count == 2 else { return nil }
 

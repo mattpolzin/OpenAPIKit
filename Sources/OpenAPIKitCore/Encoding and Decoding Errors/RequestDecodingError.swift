@@ -15,6 +15,11 @@ extension OpenAPI.Error.Decoding {
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)
         }
+
+        public init(context: Context, relativeCodingPath: [CodingKey]) {
+            self.context = context
+            self.relativeCodingPath = relativeCodingPath
+        }
     }
 }
 
@@ -54,28 +59,28 @@ extension OpenAPI.Error.Decoding.Request {
         }
     }
 
-    internal var relativeCodingPathString: String {
+    public var relativeCodingPathString: String {
         relativeCodingPath.stringValue
     }
 
-    internal static func relativePath(from path: [CodingKey]) -> [CodingKey] {
+    public static func relativePath(from path: [CodingKey]) -> [CodingKey] {
         guard let responsesIndex = path.firstIndex(where: { $0.stringValue == "requestBody" }) else {
             return path
         }
         return Array(path.dropFirst(responsesIndex.advanced(by: 1)))
     }
 
-    internal init(_ error: InconsistencyError) {
+    public init(_ error: InconsistencyError) {
         context = .inconsistency(error)
         relativeCodingPath = Self.relativePath(from: error.codingPath)
     }
 
-    internal init(_ error: Swift.DecodingError) {
+    public init(_ error: Swift.DecodingError) {
         context = .other(error)
         relativeCodingPath = Self.relativePath(from: error.codingPathWithoutSubject)
     }
 
-    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+    public init(_ eitherError: EitherDecodeNoTypesMatchedError) {
         if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
             self = Self(unwrapping: eitherBranchToDigInto)
             return
@@ -87,7 +92,7 @@ extension OpenAPI.Error.Decoding.Request {
 }
 
 extension OpenAPI.Error.Decoding.Request: DiggingError {
-    internal init(unwrapping error: Swift.DecodingError) {
+    public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
         } else if let inconsistencyError = error.underlyingError as? InconsistencyError {

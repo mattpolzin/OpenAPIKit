@@ -5,6 +5,7 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {

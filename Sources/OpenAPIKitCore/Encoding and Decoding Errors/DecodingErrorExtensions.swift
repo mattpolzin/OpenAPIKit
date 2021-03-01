@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 2/26/20.
 //
 
-internal extension Swift.DecodingError {
+public extension Swift.DecodingError {
     var subjectName: String {
         let name: String? = {
             switch self {
@@ -85,7 +85,7 @@ internal extension Swift.DecodingError {
     }
 }
 
-internal extension Swift.DecodingError.Context {
+public extension Swift.DecodingError.Context {
     func replacingPath(with codingPath: [CodingKey]) -> Self {
         return Swift.DecodingError.Context(
             codingPath: codingPath,

@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 3/29/20.
 //
 
-internal protocol StringConvertibleHintProvider {
+public protocol StringConvertibleHintProvider {
     /// Get a `String` describing why the given value cannot
     /// be used to create this type. Returns `nil` if there are no
     /// problems with the provided value.

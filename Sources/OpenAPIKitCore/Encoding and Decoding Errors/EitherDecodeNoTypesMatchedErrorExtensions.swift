@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 2/26/20.
 //
 
-internal extension EitherDecodeNoTypesMatchedError {
+public extension EitherDecodeNoTypesMatchedError {
     var subjectName: String {
         return codingPath.last?.stringValue ?? "[unknown object]"
     }

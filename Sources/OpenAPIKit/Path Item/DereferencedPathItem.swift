@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.PathItem` type that guarantees
 /// its `parameters` and operations are inlined instead of
 /// referenced.

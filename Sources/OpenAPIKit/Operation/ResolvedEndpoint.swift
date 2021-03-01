@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// The canonical definition of an endpoint. All information
 /// from throughout the OpenAPI document that is relevant
 /// to a particular endpoint is collected and exposed in this

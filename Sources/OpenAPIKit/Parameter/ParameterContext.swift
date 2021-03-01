@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 

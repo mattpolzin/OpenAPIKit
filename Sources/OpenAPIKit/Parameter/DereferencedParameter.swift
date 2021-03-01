@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Parameter` type that guarantees
 /// its `schemaOrContent` is inlined instead of
 /// referenced.

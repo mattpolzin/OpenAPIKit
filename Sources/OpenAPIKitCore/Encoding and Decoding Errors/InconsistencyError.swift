@@ -19,4 +19,10 @@ public struct InconsistencyError: Swift.Error, CustomStringConvertible, OpenAPIE
     public var localizedDescription: String { details }
 
     public var description: String { localizedDescription }
+
+    public init(subjectName: String, details: String, codingPath: [CodingKey]) {
+        self.subjectName = subjectName
+        self.details = details
+        self.codingPath = codingPath
+    }
 }

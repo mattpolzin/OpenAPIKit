@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 11/1/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Runtime Expression"
     ///

@@ -5,10 +5,11 @@
 //  Created by Mathew Polzin on 3/29/20.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 // MARK: - Convenience accessors
-extension Either where A: OpenAPIKit._OpenAPIReference {
+extension Either where A: OpenAPIKitCore._OpenAPIReference {
     /// Retrieve the JSON Reference if that is what this property contains.
     public var reference: A? { a }
 }

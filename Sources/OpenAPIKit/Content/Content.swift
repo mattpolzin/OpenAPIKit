@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 

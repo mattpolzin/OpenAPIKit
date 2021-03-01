@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 8/25/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///

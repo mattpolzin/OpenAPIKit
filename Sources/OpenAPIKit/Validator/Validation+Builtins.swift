@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/3/20.
 //
 
+import OpenAPIKitCore
+
 extension Validation {
     // MARK: - Optionally added with `Validator.validating()`
 

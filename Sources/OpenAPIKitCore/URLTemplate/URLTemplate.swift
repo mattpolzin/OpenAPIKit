@@ -256,5 +256,3 @@ extension URLTemplate: Decodable {
         self = template
     }
 }
-
-extension URLTemplate: Validatable {}

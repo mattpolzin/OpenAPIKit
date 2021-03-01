@@ -227,17 +227,17 @@ extension OrderedDictionary: Equatable where Value: Equatable {}
 
 // MARK: - Codable
 
-internal struct AnyCodingKey: CodingKey {
+public struct AnyCodingKey: CodingKey {
 
-    let stringValue: String
+    public let stringValue: String
 
-    init(stringValue: String) {
+    public init(stringValue: String) {
         self.stringValue = stringValue
     }
 
-    let intValue: Int? = nil
+    public let intValue: Int? = nil
 
-    init?(intValue: Int) {
+    public init?(intValue: Int) {
         return nil
     }
 }
@@ -409,7 +409,7 @@ private protocol LosslessStringKeyDecodable {
     ) throws -> Any
 }
 
-internal struct KeyDecodingError: Swift.Error {
+public struct KeyDecodingError: Swift.Error {
     let localizedDescription: String
 }
 

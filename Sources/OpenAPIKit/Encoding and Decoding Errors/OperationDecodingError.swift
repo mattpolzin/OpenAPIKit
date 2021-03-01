@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Error.Decoding {
     public struct Operation: OpenAPIError {
         public let endpoint: OpenAPI.HttpMethod
@@ -130,7 +132,7 @@ extension OpenAPI.Error.Decoding.Operation {
 }
 
 extension OpenAPI.Error.Decoding.Operation: DiggingError {
-    internal init(unwrapping error: Swift.DecodingError) {
+    public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
         } else if let responseError = error.underlyingError as? OpenAPI.Error.Decoding.Request {
