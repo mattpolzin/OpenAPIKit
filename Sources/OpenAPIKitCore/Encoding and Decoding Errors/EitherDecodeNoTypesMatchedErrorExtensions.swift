@@ -69,7 +69,7 @@ internal extension EitherDecodeNoTypesMatchedError.IndividualFailure {
     }
 
     var typeString: String {
-        if (type as? OpenAPIKit._OpenAPIReference.Type) != nil {
+        if (type as? OpenAPIKitCore._OpenAPIReference.Type) != nil {
             return "$ref"
         }
         return String(describing: type)

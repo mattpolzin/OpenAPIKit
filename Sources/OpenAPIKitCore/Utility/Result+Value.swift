@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 6/28/19.
 //
 
-internal extension Result {
+public extension Result {
     var value: Success? {
         switch self {
         case .success(let value):

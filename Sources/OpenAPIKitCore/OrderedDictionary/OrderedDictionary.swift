@@ -480,5 +480,3 @@ extension OrderedDictionary: StringRawKeyDecodable where Key: RawRepresentable, 
         return dictionary
     }
 }
-
-extension OrderedDictionary: Validatable where Value: Validatable {}

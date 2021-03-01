@@ -273,5 +273,3 @@ extension AnyCodable {
         self.init([AnyHashable: Any](elements, uniquingKeysWith: { first, _ in first }))
     }
 }
-
-extension AnyCodable: Validatable {}

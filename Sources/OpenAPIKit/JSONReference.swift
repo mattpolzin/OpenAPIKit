@@ -7,10 +7,6 @@
 
 import Foundation
 
-/// Used as a quick check internally in this library to determine if a type is
-/// a reference (which only `JSONReference` should be).
-public protocol _OpenAPIReference {}
-
 /// A reference following the JSON Reference specification.
 ///
 /// These references are formatted like
