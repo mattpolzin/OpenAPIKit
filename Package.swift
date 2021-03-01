@@ -10,6 +10,9 @@ let package = Package(
     ],
     products: [
         .library(
+            name: "OpenAPIKit_3_0",
+            targets: ["OpenAPIKit_3_0"]),
+        .library(
             name: "OpenAPIKit",
             targets: ["OpenAPIKit"]),
     ],
@@ -19,8 +22,34 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenAPIKit",
+            name: "OpenAPIKitCore",
             dependencies: []),
+        .testTarget(
+            name: "EitherTests",
+            dependencies: ["OpenAPIKit_3_0"]),
+        .testTarget(
+            name: "OrderedDictionaryTests",
+            dependencies: ["OpenAPIKit_3_0", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "AnyCodableTests",
+            dependencies: ["OpenAPIKit_3_0"]),
+
+        .target(
+            name: "OpenAPIKit_3_0",
+            dependencies: ["OpenAPIKitCore"]),
+        .testTarget(
+            name: "OpenAPIKit_3_0Tests",
+            dependencies: ["OpenAPIKit_3_0", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "OpenAPIKit_3_0CompatibilitySuite",
+            dependencies: ["OpenAPIKit_3_0", "Yams"]),
+        .testTarget(
+            name: "OpenAPIKit_3_0ErrorReportingTests",
+            dependencies: ["OpenAPIKit_3_0", "Yams"]),
+
+        .target(
+            name: "OpenAPIKit",
+            dependencies: ["OpenAPIKitCore"]),
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
@@ -29,16 +58,7 @@ let package = Package(
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "OpenAPIKitErrorReportingTests",
-            dependencies: ["OpenAPIKit", "Yams"]),
-        .testTarget(
-            name: "EitherTests",
-            dependencies: ["OpenAPIKit"]),
-        .testTarget(
-            name: "OrderedDictionaryTests",
-            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
-        .testTarget(
-            name: "AnyCodableTests",
-            dependencies: ["OpenAPIKit"])
+            dependencies: ["OpenAPIKit", "Yams"])
     ],
     swiftLanguageVersions: [ .v5 ]
 )
