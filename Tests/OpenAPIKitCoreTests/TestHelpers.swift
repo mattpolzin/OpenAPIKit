@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import FineJSON
 import XCTest
 
 fileprivate let foundationTestEncoder = { () -> JSONEncoder in
