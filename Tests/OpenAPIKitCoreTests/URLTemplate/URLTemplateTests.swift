@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import OpenAPIKit
+import OpenAPIKitCore
 import XCTest
 
 final class URLTemplateTests: XCTestCase {

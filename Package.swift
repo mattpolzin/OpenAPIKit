@@ -25,6 +25,9 @@ let package = Package(
             name: "OpenAPIKitCore",
             dependencies: []),
         .testTarget(
+            name: "OpenAPIKitCoreTests",
+            dependencies: ["OpenAPIKitCore"]),
+        .testTarget(
             name: "EitherTests",
             dependencies: ["OpenAPIKitCore"]),
         .testTarget(
