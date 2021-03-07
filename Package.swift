@@ -10,6 +10,9 @@ let package = Package(
     ],
     products: [
         .library(
+            name: "OpenAPIKit30",
+            targets: ["OpenAPIKit30"]),
+        .library(
             name: "OpenAPIKit",
             targets: ["OpenAPIKit"]),
     ],
@@ -19,8 +22,37 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenAPIKit",
+            name: "OpenAPIKitCore",
             dependencies: []),
+        .testTarget(
+            name: "OpenAPIKitCoreTests",
+            dependencies: ["OpenAPIKitCore"]),
+        .testTarget(
+            name: "EitherTests",
+            dependencies: ["OpenAPIKitCore"]),
+        .testTarget(
+            name: "OrderedDictionaryTests",
+            dependencies: ["OpenAPIKitCore", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "AnyCodableTests",
+            dependencies: ["OpenAPIKitCore"]),
+
+        .target(
+            name: "OpenAPIKit30",
+            dependencies: ["OpenAPIKitCore"]),
+        .testTarget(
+            name: "OpenAPIKit30Tests",
+            dependencies: ["OpenAPIKit30", "Yams", "FineJSON"]),
+        .testTarget(
+            name: "OpenAPIKit30CompatibilitySuite",
+            dependencies: ["OpenAPIKit30", "Yams"]),
+        .testTarget(
+            name: "OpenAPIKit30ErrorReportingTests",
+            dependencies: ["OpenAPIKit30", "Yams"]),
+
+        .target(
+            name: "OpenAPIKit",
+            dependencies: ["OpenAPIKitCore"]),
         .testTarget(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
@@ -29,16 +61,7 @@ let package = Package(
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "OpenAPIKitErrorReportingTests",
-            dependencies: ["OpenAPIKit", "Yams"]),
-        .testTarget(
-            name: "EitherTests",
-            dependencies: ["OpenAPIKit"]),
-        .testTarget(
-            name: "OrderedDictionaryTests",
-            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
-        .testTarget(
-            name: "AnyCodableTests",
-            dependencies: ["OpenAPIKit"])
+            dependencies: ["OpenAPIKit", "Yams"])
     ],
     swiftLanguageVersions: [ .v5 ]
 )

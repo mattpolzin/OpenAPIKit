@@ -76,7 +76,7 @@ final class VendorExtendableTests: XCTestCase {
         """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(TestStruct.self, from: data)) { error in
-            XCTAssertNotNil(error as? InconsistencyError)
+            XCTAssertEqual(String(describing: error), "Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: [ invalid ]")
         }
     }
 }
