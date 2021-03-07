@@ -320,24 +320,17 @@ extension OperationTests {
             ]
         )
 
-        let encodedOperation = String(
-            data: try orderStableEncode(operation),
-            encoding: .utf8
-        )!
+        let encodedOperation = try orderStableYAMLEncode(operation)
 
         XCTAssertEqual(
             encodedOperation,
             """
-            {
-              "responses": {
-                "404": {
-                  "$ref": "#/components/responses/404"
-                },
-                "200": {
-                  "$ref": "#/components/responses/200"
-                }
-              }
-            }
+            responses:
+              404:
+                $ref: '#/components/responses/404'
+              200:
+                $ref: '#/components/responses/200'
+
             """
         )
 
@@ -348,24 +341,17 @@ extension OperationTests {
             ]
         )
 
-        let encodedOperation2 = String(
-            data: try orderStableEncode(operation2),
-            encoding: .utf8
-            )!
+        let encodedOperation2 = try orderStableYAMLEncode(operation2)
 
         XCTAssertEqual(
             encodedOperation2,
             """
-            {
-              "responses": {
-                "200": {
-                  "$ref": "#/components/responses/200"
-                },
-                "404": {
-                  "$ref": "#/components/responses/404"
-                }
-              }
-            }
+            responses:
+              200:
+                $ref: '#/components/responses/200'
+              404:
+                $ref: '#/components/responses/404'
+
             """
         )
     }

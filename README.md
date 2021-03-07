@@ -76,7 +76,9 @@ You can use this same validation system to dig arbitrarily deep into an OpenAPI 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
 
-If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
+If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively. Also keep in mind that JSON is entirely valid YAML and therefore you will likely get good results from Yams decoding of JSON as well (it just won't _encode_ as valid JSON). 
+
+The Foundation JSON encoding and decoding will be the most stable and battle-tested option with Yams as a pretty well established and stable option as well. FineJSON is lesser used (to my knowledge) but I have had success with it in the past.
 
 ### OpenAPI Document structure
 The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) version 3.0.3. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
