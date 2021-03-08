@@ -35,6 +35,7 @@ final class SchemaObjectTests: XCTestCase {
         let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         // JSONTypeFormat
+        XCTAssertEqual(null.jsonTypeFormat, .null)
         XCTAssertEqual(boolean.jsonTypeFormat, .boolean(.unspecified))
         XCTAssertEqual(object.jsonTypeFormat, .object(.unspecified))
         XCTAssertEqual(array.jsonTypeFormat, .array(.unspecified))
@@ -56,7 +57,6 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertNil(not.jsonTypeFormat)
         XCTAssertNil(reference.jsonTypeFormat)
         XCTAssertNil(fragment.jsonTypeFormat)
-        XCTAssertNil(null.jsonTypeFormat)
 
         // JSONType
         XCTAssertEqual(null.jsonType, .null)
