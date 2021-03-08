@@ -156,6 +156,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
+        guard self != .null else { return true }
         return coreContext?.nullable ?? false
     }
 
