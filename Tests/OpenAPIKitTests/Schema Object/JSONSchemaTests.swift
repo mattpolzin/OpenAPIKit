@@ -101,7 +101,7 @@ final class SchemaObjectTests: XCTestCase {
         )
 
         // Format String
-        XCTAssertEqual(null.formatString, "")
+        XCTAssertNil(null.formatString)
         XCTAssertEqual(boolean.formatString, "")
         XCTAssertEqual(object.formatString, "")
         XCTAssertEqual(array.formatString, "")

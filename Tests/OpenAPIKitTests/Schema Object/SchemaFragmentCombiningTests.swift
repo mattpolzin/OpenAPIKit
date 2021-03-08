@@ -256,7 +256,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .boolean(nullable: false)
+                .boolean()
             ],
             .boolean(.init(nullable: true))
         )
@@ -266,7 +266,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .integer(nullable: false)
+                .integer()
             ],
             .integer(.init(nullable: true), .init())
         )
@@ -276,7 +276,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .number(nullable: false)
+                .number()
             ],
             .number(.init(nullable: true), .init())
         )
@@ -286,7 +286,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .string(nullable: false)
+                .string()
             ],
             .string(.init(nullable: true), .init())
         )
@@ -296,7 +296,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .array(nullable: false)
+                .array()
             ],
             .array(.init(nullable: true), DereferencedJSONSchema.ArrayContext.init(.init())!)
         )
@@ -306,7 +306,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .null,
-                .object(nullable: false)
+                .object()
             ],
             .object(.init(nullable: true), DereferencedJSONSchema.ObjectContext.init(.init(properties: [:]))!)
         )

@@ -118,6 +118,12 @@ internal struct FragmentCombiner {
         if let currentFragment = self.combinedFragment {
             combinedFragment = currentFragment
         } else {
+            // the only case where starting with a fragment breaks down is when you actually
+            // should end up with plain old `.null`
+            guard fragment != .null else {
+                self.combinedFragment = .null
+                return
+            }
             // combination can turn `required: false` into `required: true`
             // but not the other way around. We start optional and the first
             // time we combine with something required we become required.
