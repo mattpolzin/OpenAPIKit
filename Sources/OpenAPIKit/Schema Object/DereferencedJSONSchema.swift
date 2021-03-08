@@ -16,6 +16,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public typealias IntegerContext = JSONSchema.IntegerContext
     public typealias StringContext = JSONSchema.StringContext
 
+    case null
     case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
     case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -42,6 +43,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// not true.
     public var jsonSchema: JSONSchema {
         switch self {
+        case .null:
+            return .null
         case .boolean(let context):
             return .boolean(context)
         case .object(let coreContext, let objectContext):
@@ -329,6 +332,8 @@ extension JSONSchema: LocallyDereferenceable {
     ///     component in the same file that cannot be found in the Components Object.
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedJSONSchema {
         switch self {
+        case .null:
+            return .null
         case .reference(let reference):
             return try reference._dereferenced(in: components, following: references)
         case .boolean(let context):

@@ -28,6 +28,7 @@ public protocol SwiftTyped {
 /// - integer
 /// - string
 public enum JSONType: String, Codable {
+    case null = "null"
     case boolean = "boolean"
     case object = "object"
     case array = "array"
@@ -45,6 +46,7 @@ public enum JSONType: String, Codable {
 /// formats in the OpenAPI Specification's
 /// section on [data types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#data-types).
 public enum JSONTypeFormat: Equatable {
+    case null
     case boolean(BooleanFormat)
     case object(ObjectFormat)
     case array(ArrayFormat)
@@ -54,6 +56,8 @@ public enum JSONTypeFormat: Equatable {
 
     public var jsonType: JSONType {
         switch self {
+        case .null:
+            return .null
         case .boolean:
             return .boolean
         case .object:
@@ -71,6 +75,8 @@ public enum JSONTypeFormat: Equatable {
 
     public var swiftType: Any.Type {
         switch self {
+        case .null:
+            return Any?.self
         case .boolean(let format):
             return type(of: format).SwiftType.self
         case .object(let format):
