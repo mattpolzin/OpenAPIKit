@@ -118,6 +118,12 @@ internal struct FragmentCombiner {
         if let currentFragment = self.combinedFragment {
             combinedFragment = currentFragment
         } else {
+            // the only case where starting with a fragment breaks down is when you actually
+            // should end up with plain old `.null`
+            guard fragment != .null else {
+                self.combinedFragment = .null
+                return
+            }
             // combination can turn `required: false` into `required: true`
             // but not the other way around. We start optional and the first
             // time we combine with something required we become required.
@@ -144,8 +150,13 @@ internal struct FragmentCombiner {
         case (_, .reference(let reference)), (.reference(let reference), _):
             try combine(components.lookup(reference))
 
+        case (.null, .null):
+            self.combinedFragment = .null
+
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
             self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))
+        case (.fragment(let leftCoreContext), .null):
+            self.combinedFragment = .fragment(leftCoreContext.nullableContext())
         case (.fragment(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.fragment(let leftCoreContext), .integer(let rightCoreContext, let integerContext)):
@@ -158,6 +169,7 @@ internal struct FragmentCombiner {
             self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
         case (.fragment(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+
         case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.integer(let leftCoreContext, let leftIntegerContext), .integer(let rightCoreContext, let rightIntegerContext)):
@@ -171,6 +183,19 @@ internal struct FragmentCombiner {
         case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
 
+        case (.boolean(let coreContext), .null), (.null, .boolean(let coreContext)):
+            self.combinedFragment = .boolean(coreContext.nullableContext())
+        case (.integer(let coreContext, let specContext), .null), (.null, .integer(let coreContext, let specContext)):
+            self.combinedFragment = .integer(coreContext.nullableContext(), specContext)
+        case (.number(let coreContext, let specContext), .null), (.null, .number(let coreContext, let specContext)):
+            self.combinedFragment = .number(coreContext.nullableContext(), specContext)
+        case (.string(let coreContext, let specContext), .null), (.null, .string(let coreContext, let specContext)):
+            self.combinedFragment = .string(coreContext.nullableContext(), specContext)
+        case (.array(let coreContext, let specContext), .null), (.null, .array(let coreContext, let specContext)):
+            self.combinedFragment = .array(coreContext.nullableContext(), specContext)
+        case (.object(let coreContext, let specContext), .null), (.null, .object(let coreContext, let specContext)):
+            self.combinedFragment = .object(coreContext.nullableContext(), specContext)
+
         case (_, .any), (.any, _), (_, .not), (.not, _), (_, .one), (.one, _):
             throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), and one(of:) are not yet supported for schema resolution"))
         case (.boolean, _),
@@ -178,7 +203,8 @@ internal struct FragmentCombiner {
              (.number, _),
              (.string, _),
              (.array, _),
-             (.object, _):
+             (.object, _),
+             (.null, _):
             throw (
                 zip(combinedFragment.jsonType, fragment.jsonType).map {
                     JSONSchemaResolutionError(.typeConflict(original: $0, new: $1))
@@ -208,7 +234,7 @@ internal struct FragmentCombiner {
 
         let jsonSchema: JSONSchema
         switch combinedFragment {
-        case .fragment, .reference:
+        case .fragment, .reference, .null:
             jsonSchema = combinedFragment
         case .boolean(let coreContext):
             jsonSchema = .boolean(try coreContext.validatedContext())

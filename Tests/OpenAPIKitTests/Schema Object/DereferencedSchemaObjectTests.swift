@@ -139,6 +139,9 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t23 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced()?.simplified()
         XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
         XCTAssertEqual(t23?.discriminator, .init(propertyName: "test"))
+
+        let t24 = try JSONSchema.null.dereferenced()
+        XCTAssertEqual(t24, .null)
     }
 
     func test_throwingBasicConstructionsFromSchemaObject() throws {
@@ -255,6 +258,9 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t23 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced(in: components).simplified()
         XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
         XCTAssertEqual(t23.discriminator, .init(propertyName: "test"))
+
+        let t24 = try JSONSchema.null.dereferenced(in: components)
+        XCTAssertEqual(t24, .null)
     }
 
     func test_optionalReferenceMissing() {

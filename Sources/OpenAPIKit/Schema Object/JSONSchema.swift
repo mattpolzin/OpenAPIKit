@@ -11,6 +11,9 @@ import OpenAPIKitCore
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
 public enum JSONSchema: Equatable, JSONSchemaContext {
+    /// The null type, which replaces the functionality of the `nullable` property from
+    /// previous versions of the OpenAPI specification.
+    case null
     case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
     case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -28,6 +31,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
         switch self {
+        case .null:
+            return .null
         case .boolean(let context):
             return .boolean(context.format)
         case .object(let context, _):
@@ -81,7 +86,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .any(of: _, core: let context),
              .not(_, core: let context):
             return context.format.rawValue
-        case .reference:
+        case .reference, .null:
             return nil
         }
     }
@@ -89,6 +94,9 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     // See `JSONSchemaContext`
     public var required: Bool {
         switch self {
+        case .null:
+            #warning("TODO: not sure about this -- maybe null type should get a context still")
+            return false
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
@@ -121,7 +129,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.description
-        case .reference:
+        case .reference, .null:
             return nil
         }
     }
@@ -141,13 +149,14 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.discriminator
-        case .reference:
+        case .reference, .null:
             return nil
         }
     }
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
+        guard self != .null else { return true }
         return coreContext?.nullable ?? false
     }
 
@@ -215,6 +224,12 @@ extension JSONSchema {
     /// Check if this schema is a `.fragment`.
     public var isFragment: Bool {
         guard case .fragment = self else { return false }
+        return true
+    }
+
+    /// Check if schema is `.null`
+    public var isNull : Bool {
+        guard case .null = self else { return false }
         return true
     }
 
@@ -287,7 +302,7 @@ extension JSONSchema {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context
-        case .reference:
+        case .reference, .null:
             return nil
         }
     }
@@ -374,7 +389,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.optionalContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.optionalContext())
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -404,7 +419,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.requiredContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.requiredContext())
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -434,7 +449,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.nullableContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.nullableContext())
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -465,7 +480,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.with(allowedValues: allowedValues))
         case .not(let schema, core: let core):
             return .not(schema, core: core.with(allowedValues: allowedValues))
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -495,7 +510,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.with(defaultValue: defaultValue))
         case .not(let schema, core: let core):
             return .not(schema, core: core.with(defaultValue: defaultValue))
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -526,7 +541,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.with(example: example))
         case .not(let schema, core: let core):
             return .not(schema, core: core.with(example: example))
-        case .reference:
+        case .reference, .null:
             throw Self.Error.exampleNotSupported
         }
     }
@@ -556,7 +571,7 @@ extension JSONSchema {
             return .any(of: schemas, core: core.with(discriminator: discriminator))
         case .not(let schema, core: let core):
             return .not(schema, core: core.with(discriminator: discriminator))
-        case .reference:
+        case .reference, .null:
             return self
         }
     }
@@ -569,7 +584,7 @@ extension JSONSchema {
         public var description: String {
             switch self {
             case .exampleNotSupported:
-                return "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not` or for JSON references ($ref)."
+                return "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not`, `.null` or for JSON references ($ref)."
             }
         }
     }
@@ -1211,12 +1226,20 @@ extension JSONSchema {
         case anyOf
         case not
     }
+
+    private enum NullCodingKeys : String, CodingKey {
+        case type
+    }
 }
 
 extension JSONSchema: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         switch self {
+        case .null:
+            var container = encoder.container(keyedBy: NullCodingKeys.self)
+            try container.encode(JSONType.null.rawValue, forKey: .type)
+
         case .boolean(let context):
             try context.encode(to: encoder)
 
@@ -1354,7 +1377,10 @@ extension JSONSchema: Decodable {
             }
         }
 
-        if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
+        if typeHint == .null {
+            self = .null
+
+        } else if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
             if typeHint == .integer {
                 self = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
                                 try IntegerContext(from: decoder))

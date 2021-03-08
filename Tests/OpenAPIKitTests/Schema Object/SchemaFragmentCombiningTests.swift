@@ -30,6 +30,16 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         )
     }
 
+    func test_resolvingSingleNull() {
+        let fragments: [JSONSchema] = [
+            .null
+        ]
+        XCTAssertEqual(
+            try fragments.combined(resolvingAgainst: .noComponents),
+            .null
+        )
+    }
+
     func test_resolvingSingleBoolean() {
         let fragments: [JSONSchema] = [
             .boolean(.init())
@@ -239,6 +249,66 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                 .string(.init(description: "test"), .init())
             ],
             .string(.init(format: .byte, description: "test"), .init(maxLength: 5, minLength: 2))
+        )
+    }
+
+    func test_nullAndBoolean() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .boolean()
+            ],
+            .boolean(.init(nullable: true))
+        )
+    }
+
+    func test_nullAndInteger() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .integer()
+            ],
+            .integer(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndNumber() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .number()
+            ],
+            .number(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndString() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .string()
+            ],
+            .string(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndArray() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .array()
+            ],
+            .array(.init(nullable: true), DereferencedJSONSchema.ArrayContext.init(.init())!)
+        )
+    }
+
+    func test_nullAndObject() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null,
+                .object()
+            ],
+            .object(.init(nullable: true), DereferencedJSONSchema.ObjectContext.init(.init(properties: [:]))!)
         )
     }
 
