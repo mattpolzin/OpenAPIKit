@@ -23,6 +23,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
     - [Specification Extensions](#specification-extensions)
   - [Dereferencing & Resolving](#dereferencing--resolving)
 - [Curated Integrations](#curated-integrations)
+  - [Declarative OpenAPI Documents](#declarative-openapi-documents)
   - [Generating OpenAPI Documents](#generating-openapi-documents)
   - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
@@ -224,6 +225,10 @@ for endpoint in resolvedDocument.endpoints {
 Following is a short list of integrations that might be immediately useful or just serve as examples of ways that OpenAPIKit can be used to harness the power of the OpenAPI specification.
 
 If you have a library you would like to propose for this section, please create a pull request and explain a bit about your project.
+
+### Declarative OpenAPI Documents
+
+[**Swift Package Registry API Docs**](https://github.com/mattt/swift-package-registry-oas) define the OpenAPI documentation for the Swift Package Registry standard using declarative Swift code and OpenAPIKit. This project also provides a useful example of producing a user-friendly ReDoc web interface to the OpenAPI documentation after encoding it as YAML.
 
 ### Generating OpenAPI Documents
 
