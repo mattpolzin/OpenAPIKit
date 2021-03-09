@@ -228,7 +228,7 @@ If you have a library you would like to propose for this section, please create 
 
 ### Declarative OpenAPI Documents
 
-[**Swift Package Registry API Docs**](https://github.com/mattt/swift-package-registry-oas) define the OpenAPI documentation for the Swift Package Registry standard using declarative Swift code and OpenAPIKit. This project also provides a useful example of producing a user-friendly ReDoc web interface to the OpenAPI documentation after encoding it as YAML.
+The [**Swift Package Registry API Docs**](https://github.com/mattt/swift-package-registry-oas) define the OpenAPI documentation for the Swift Package Registry standard using declarative Swift code and OpenAPIKit. This project also provides a useful example of producing a user-friendly ReDoc web interface to the OpenAPI documentation after encoding it as YAML.
 
 ### Generating OpenAPI Documents
 
