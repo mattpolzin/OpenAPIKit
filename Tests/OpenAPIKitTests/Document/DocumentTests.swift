@@ -915,15 +915,15 @@ extension DocumentTests {
       let op = OpenAPI.Operation(responses: [:])
 
       let document = OpenAPI.Document(
-          info: .init(title: "API", version: "1.0"),
-          servers: [],
-          paths: [:],
-          webhooks:  [
-            "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
-          ],
-          components: .noComponents,
-          externalDocs: .init(url: URL(string: "http://google.com")!)
-          )
+        info: .init(title: "API", version: "1.0"),
+        servers: [],
+        paths: [:],
+        webhooks:  [
+          "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        ],
+        components: .noComponents,
+        externalDocs: .init(url: URL(string: "http://google.com")!)
+      )
     
       let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
