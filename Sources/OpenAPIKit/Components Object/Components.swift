@@ -45,7 +45,7 @@ extension OpenAPI {
             headers: ComponentDictionary<Header> = [:],
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
             callbacks: ComponentDictionary<Callbacks> = [:],
-            pathItems: ComponentDictionary<PathItem> = [:]
+            pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.schemas = schemas
