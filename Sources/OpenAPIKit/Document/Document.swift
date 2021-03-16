@@ -104,7 +104,6 @@ extension OpenAPI {
       
         public var webhooks: ComponentDictionary<PathItem>
       
-
         /// A declaration of which security mechanisms can be used across the API.
         ///
         /// The list of values includes alternative security requirement objects that can
@@ -418,6 +417,9 @@ extension OpenAPI.Document: Decodable {
 
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
+          
+            let webhooks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .webhooks) ?? [:]
+            self.webhooks = webhooks
 
             let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
             self.paths = paths
