@@ -14,6 +14,7 @@ extension OpenAPI.Document {
     /// See [OpenAPI Info Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object).
     public struct Info: Equatable, CodableVendorExtendable {
         public let title: String
+        public let summary: String?
         public let description: String?
         public let termsOfService: URL?
         public let contact: Contact?
@@ -29,6 +30,7 @@ extension OpenAPI.Document {
 
         public init(
             title: String,
+            summary: String? = nil,
             description: String? = nil,
             termsOfService: URL? = nil,
             contact: Contact? = nil,
@@ -37,6 +39,7 @@ extension OpenAPI.Document {
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.title = title
+            self.summary = summary
             self.description = description
             self.termsOfService = termsOfService
             self.contact = contact
@@ -263,6 +266,7 @@ extension OpenAPI.Document.Info: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(title, forKey: .title)
+        try container.encodeIfPresent(summary, forKey: .summary)
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(termsOfService?.absoluteString, forKey: .termsOfService)
         try container.encodeIfPresent(contact, forKey: .contact)
@@ -278,6 +282,7 @@ extension OpenAPI.Document.Info: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         title = try container.decode(String.self, forKey: .title)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         termsOfService = try container.decodeURLAsStringIfPresent(forKey: .termsOfService)
         contact = try container.decodeIfPresent(Contact.self, forKey: .contact)
@@ -291,6 +296,7 @@ extension OpenAPI.Document.Info: Decodable {
 extension OpenAPI.Document.Info {
     internal enum CodingKeys: ExtendableCodingKey {
         case title
+        case summary
         case description
         case termsOfService
         case contact
@@ -301,6 +307,7 @@ extension OpenAPI.Document.Info {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .title,
+                .summary,
                 .description,
                 .termsOfService,
                 .contact,
@@ -317,6 +324,10 @@ extension OpenAPI.Document.Info {
             switch stringValue {
             case "title":
                 self = .title
+            case .summary:
+                return "summary"
+            case "summary":
+                self = .summary
             case "description":
                 self = .description
             case "termsOfService":
@@ -336,6 +347,8 @@ extension OpenAPI.Document.Info {
             switch self {
             case .title:
                 return "title"
+            case .summary:
+                return "summary"
             case .description:
                 return "description"
             case .termsOfService:

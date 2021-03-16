@@ -355,48 +355,6 @@ extension DocumentInfoTests {
         )
     }
   
-    func test_info_withSummary_encode() throws {
-        let info = OpenAPI.Document.Info(
-            title: "title",
-            summary: "summary",
-            version: "1.0"
-        )
-
-        let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
-
-        assertJSONEquivalent(
-            encodedInfo,
-            """
-            {
-              "summary" : "summary",
-              "title" : "title",
-              "version" : "1.0"
-            }
-            """
-        )
-    }
-  
-    func test_info_withSummary_decode() throws {
-        let infoData =
-        """
-        {
-          "summary" : "summary",
-          "title" : "title",
-          "version" : "1.0"
-        }
-        """.data(using: .utf8)!
-        let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
-
-        XCTAssertEqual(
-            info,
-            .init(
-                title: "title",
-                summary: "summary",
-                version: "1.0"
-            )
-        )
-    }
-  
     func test_info_withTOS_encode() throws {
         let info = OpenAPI.Document.Info(
             title: "title",
