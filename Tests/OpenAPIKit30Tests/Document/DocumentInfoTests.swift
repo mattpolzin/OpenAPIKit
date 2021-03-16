@@ -354,7 +354,7 @@ extension DocumentInfoTests {
             )
         )
     }
-  
+
     func test_info_withTOS_encode() throws {
         let info = OpenAPI.Document.Info(
             title: "title",
