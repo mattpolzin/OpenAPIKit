@@ -324,8 +324,6 @@ extension OpenAPI.Document.Info {
             switch stringValue {
             case "title":
                 self = .title
-            case .summary:
-                return "summary"
             case "summary":
                 self = .summary
             case "description":
