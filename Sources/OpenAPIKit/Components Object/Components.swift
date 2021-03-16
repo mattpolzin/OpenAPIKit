@@ -26,6 +26,8 @@ extension OpenAPI {
         public var securitySchemes: ComponentDictionary<SecurityScheme>
         public var callbacks: ComponentDictionary<Callbacks>
         //    public var links:
+      
+        public var pathItems: ComponentDictionary<PathItem>
 
         /// Dictionary of vendor extensions.
         ///
@@ -43,6 +45,7 @@ extension OpenAPI {
             headers: ComponentDictionary<Header> = [:],
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
             callbacks: ComponentDictionary<Callbacks> = [:],
+            pathItems: ComponentDictionary<PathItem> = [:]
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.schemas = schemas
@@ -53,6 +56,7 @@ extension OpenAPI {
             self.headers = headers
             self.securitySchemes = securitySchemes
             self.callbacks = callbacks
+            self.pathItems = pathItems
             self.vendorExtensions = vendorExtensions
         }
 
@@ -164,6 +168,10 @@ extension OpenAPI.Components: Encodable {
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
         }
+      
+        if !pathItems.isEmpty {
+            try container.encode(pathItems, forKey: .pathItems)
+        }
 
         try encodeExtensions(to: &container)
     }
@@ -195,6 +203,8 @@ extension OpenAPI.Components: Decodable {
             securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+          
+            pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
@@ -221,6 +231,7 @@ extension OpenAPI.Components {
         case securitySchemes
         case links
         case callbacks
+        case pathItems
 
         case extended(String)
 
@@ -234,7 +245,8 @@ extension OpenAPI.Components {
                 .headers,
                 .securitySchemes,
                 .links,
-                .callbacks
+                .callbacks,
+                .pathItems
             ]
         }
 
@@ -262,6 +274,8 @@ extension OpenAPI.Components {
                 self = .links
             case "callbacks":
                 self = .callbacks
+            case "pathItems":
+                self = .pathItems
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -287,6 +301,8 @@ extension OpenAPI.Components {
                 return "links"
             case .callbacks:
                 return "callbacks"
+            case .pathItems:
+                return "pathItems"
             case .extended(let key):
                 return key
             }
