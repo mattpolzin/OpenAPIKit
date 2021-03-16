@@ -94,7 +94,16 @@ extension OpenAPI {
         /// share definitions than to just use the same Swift value multiple times, but
         /// you still might want to consider using the Components Object for its impact
         /// on the JSON/YAML structure of your document once encoded.
+      
         public var components: Components
+      
+        /// The incoming webhooks that MAY be received as part of this API and that the API consumer MAY choose to implement.
+        ///
+        /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
+        /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
+      
+        public var webhooks: ComponentDictionary<PathItem>
+      
 
         /// A declaration of which security mechanisms can be used across the API.
         ///
@@ -139,6 +148,7 @@ extension OpenAPI {
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
+            webhooks: ComponentDictionary<PathItem> = [:],
             components: Components,
             security: [SecurityRequirement] = [],
             tags: [Tag]? = nil,
@@ -149,6 +159,7 @@ extension OpenAPI {
             self.info = info
             self.servers = servers
             self.paths = paths
+            self.webhooks = webhooks
             self.components = components
             self.security = security
             self.tags = tags
@@ -169,6 +180,7 @@ extension OpenAPI.Document {
             info: info,
             servers: servers,
             paths: filteredPaths,
+            webhooks: webhooks,
             components: components,
             security: security,
             tags: tags,
@@ -388,6 +400,10 @@ extension OpenAPI.Document: Encodable {
         if !components.isEmpty {
             try container.encode(components, forKey: .components)
         }
+      
+        if !webhooks.isEmpty {
+          try container.encode(webhooks, forKey: .webhooks)
+        }
     }
 }
 
@@ -431,6 +447,7 @@ extension OpenAPI.Document {
         case info
         case servers
         case paths
+        case webhooks
         case components
         case security
         case tags
@@ -443,6 +460,7 @@ extension OpenAPI.Document {
                 .info,
                 .servers,
                 .paths,
+                .webhooks,
                 .components,
                 .security,
                 .tags,
@@ -464,6 +482,8 @@ extension OpenAPI.Document {
                 self = .servers
             case "paths":
                 self = .paths
+            case "webhooks":
+                self = .webhooks
             case "components":
                 self = .components
             case "security":
@@ -487,6 +507,8 @@ extension OpenAPI.Document {
                 return "servers"
             case .paths:
                 return "paths"
+            case .webhooks:
+                return "webhooks"
             case .components:
                 return "components"
             case .security:
