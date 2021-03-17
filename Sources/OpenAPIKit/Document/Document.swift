@@ -94,14 +94,12 @@ extension OpenAPI {
         /// share definitions than to just use the same Swift value multiple times, but
         /// you still might want to consider using the Components Object for its impact
         /// on the JSON/YAML structure of your document once encoded.
-      
         public var components: Components
       
         /// The incoming webhooks that MAY be received as part of this API and that the API consumer MAY choose to implement.
         ///
         /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
         /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
-      
         public var webhooks: ComponentDictionary<PathItem>
       
         /// A declaration of which security mechanisms can be used across the API.
