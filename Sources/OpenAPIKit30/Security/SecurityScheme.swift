@@ -48,12 +48,17 @@ extension OpenAPI {
         public static func openIdConnect(url: URL, description: String? = nil) -> SecurityScheme {
             return .init(type: .openIdConnect(openIdConnectUrl: url), description: description)
         }
+        
+        public static func mutualTLS(description: String? = nil) -> SecurityScheme {
+            return .init(type: .mutualTLS, description: description)
+        }
 
         public enum SecurityType: Equatable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
             case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
+            case mutualTLS
         }
 
         public enum Location: String, Codable, Equatable {
@@ -70,6 +75,7 @@ extension OpenAPI.SecurityScheme.SecurityType {
         case http
         case oauth2
         case openIdConnect
+        case mutualTLS
     }
 
     public var name: Name {
@@ -82,6 +88,8 @@ extension OpenAPI.SecurityScheme.SecurityType {
             return .oauth2
         case .openIdConnect:
             return .openIdConnect
+        case .mutualTLS:
+          return .mutualTLS
         }
     }
 }
@@ -108,6 +116,8 @@ extension OpenAPI.SecurityScheme: Encodable {
         case .oauth2(flows: let flows):
             try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
+        case .mutualTLS:
+            try container.encode(SecurityType.Name.mutualTLS, forKey: .type)
         }
 
         try encodeExtensions(to: &container)
@@ -143,6 +153,8 @@ extension OpenAPI.SecurityScheme: Decodable {
             type = .openIdConnect(
                 openIdConnectUrl: try container.decodeURLAsString(forKey: .openIdConnectUrl)
             )
+        case .mutualTLS:
+            type = .mutualTLS
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
