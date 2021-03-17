@@ -481,6 +481,157 @@ extension ComponentsTests {
     }
 }
 
+// MARK: PathItems
+
+extension ComponentsTests {
+  
+  func test_pathItems_encode() throws {
+      let op = OpenAPI.Operation(responses: [:])
+      let t1 = OpenAPI.Components(
+        pathItems: [
+          "path-test" : .init(
+            get: op,
+            put: op,
+            post: op,
+            delete: op,
+            options: op,
+            head: op,
+            patch: op,
+            trace: op
+          )
+        ]
+      )
+
+      let encoded = try orderUnstableTestStringFromEncoding(of: t1)
+
+      assertJSONEquivalent(
+          encoded,
+          """
+          {
+            "pathItems" : {
+              "path-test" : {
+                "delete" : {
+                  "responses" : {
+
+                  }
+                },
+                "get" : {
+                  "responses" : {
+
+                  }
+                },
+                "head" : {
+                  "responses" : {
+
+                  }
+                },
+                "options" : {
+                  "responses" : {
+
+                  }
+                },
+                "patch" : {
+                  "responses" : {
+
+                  }
+                },
+                "post" : {
+                  "responses" : {
+
+                  }
+                },
+                "put" : {
+                  "responses" : {
+
+                  }
+                },
+                "trace" : {
+                  "responses" : {
+
+                  }
+                }
+              }
+            }
+          }
+          """
+      )
+  }
+
+  func test_pathItems_decode() throws {
+      let t1 =
+      """
+          {
+            "pathItems" : {
+              "path-test" : {
+                "delete" : {
+                  "responses" : {
+
+                  }
+                },
+                "get" : {
+                  "responses" : {
+
+                  }
+                },
+                "head" : {
+                  "responses" : {
+
+                  }
+                },
+                "options" : {
+                  "responses" : {
+
+                  }
+                },
+                "patch" : {
+                  "responses" : {
+
+                  }
+                },
+                "post" : {
+                  "responses" : {
+
+                  }
+                },
+                "put" : {
+                  "responses" : {
+
+                  }
+                },
+                "trace" : {
+                  "responses" : {
+
+                  }
+                }
+              }
+            }
+          }
+      """.data(using: .utf8)!
+
+      let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
+      let op = OpenAPI.Operation(responses: [:])
+
+      XCTAssertEqual(
+          decoded,
+          OpenAPI.Components(
+                  pathItems: [
+                    "path-test" : .init(
+                      get: op,
+                      put: op,
+                      post: op,
+                      delete: op,
+                      options: op,
+                      head: op,
+                      patch: op,
+                      trace: op
+                    )
+                  ]
+                )
+      )
+  }
+  
+}
+
 // MARK: ComponentKey
 extension ComponentsTests {
     func test_acceptableKeys_encode() throws {
