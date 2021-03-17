@@ -432,4 +432,8 @@ extension OpenAPI.PathItem {
     }
 }
 
+extension OpenAPI {
+    public typealias OrderedStringDictionary<T> = OrderedDictionary<String, T>
+}
+
 extension OpenAPI.PathItem: Validatable {}

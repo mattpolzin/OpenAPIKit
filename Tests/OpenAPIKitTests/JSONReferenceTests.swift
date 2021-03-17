@@ -126,6 +126,7 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(JSONReference<OpenAPI.Header>.component(named: "hello").absoluteString, "#/components/headers/hello")
         XCTAssertEqual(JSONReference<OpenAPI.SecurityScheme>.component(named: "hello").absoluteString, "#/components/securitySchemes/hello")
         XCTAssertEqual(JSONReference<OpenAPI.Callbacks>.component(named: "hello").absoluteString, "#/components/callbacks/hello")
+        XCTAssertEqual(JSONReference<OpenAPI.PathItem>.component(named: "hello").absoluteString, "#/components/pathItems/hello")
     }
 }
 

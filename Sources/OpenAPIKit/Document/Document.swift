@@ -100,9 +100,7 @@ extension OpenAPI {
         ///
         /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
         /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
-        public var webhooks: ComponentDictionary<PathItem>
-      // TODO: - change into `OrderedDictionary` because we don't need the `ComponentKey` valiadation
-      // TODO: - make this support JSON references to path items in the components object
+        public var webhooks: OrderedStringDictionary<PathItem>
       
         /// A declaration of which security mechanisms can be used across the API.
         ///
@@ -147,7 +145,7 @@ extension OpenAPI {
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
-            webhooks: ComponentDictionary<PathItem> = [:],
+            webhooks: OrderedStringDictionary<PathItem> = [:],
             components: Components,
             security: [SecurityRequirement] = [],
             tags: [Tag]? = nil,
@@ -418,7 +416,7 @@ extension OpenAPI.Document: Decodable {
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
           
-            let webhooks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .webhooks) ?? [:]
+          let webhooks = try container.decodeIfPresent(OpenAPI.OrderedStringDictionary<OpenAPI.PathItem>.self, forKey: .webhooks) ?? [:]
             self.webhooks = webhooks
 
             let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
