@@ -121,6 +121,11 @@ extension Either where B == OpenAPI.Header {
     public var headerValue: B? { b }
 }
 
+extension Either where B == OpenAPI.PathItem {
+    /// Retrieve the path item if that is what this property contains.
+    public var pathItemValue: B? { b }
+}
+
 // MARK: - Convenience constructors
 extension Either where A == Bool {
     /// Construct a boolean value.
@@ -170,4 +175,9 @@ extension Either where B == OpenAPI.Response {
 extension Either where B == OpenAPI.Header {
     /// Construct a header value.
     public static func header(_ header: OpenAPI.Header) -> Self { .b(header) }
+}
+
+extension Either where B == OpenAPI.PathItem {
+    /// Construct a path item value.
+    public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self { .b(pathItem) }
 }
