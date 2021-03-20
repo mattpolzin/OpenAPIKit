@@ -103,7 +103,6 @@ extension OpenAPI {
         /// See [OpenAPI Webhook Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#fixed-fields)
         public var webhooks: OrderedDictionary<String, PathItem>
         
-      
         /// A declaration of which security mechanisms can be used across the API.
         ///
         /// The list of values includes alternative security requirement objects that can
