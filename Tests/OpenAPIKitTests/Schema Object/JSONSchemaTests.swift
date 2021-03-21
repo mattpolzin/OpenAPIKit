@@ -139,7 +139,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_isFragmentAndIsEmpty() {
         let empty = JSONSchema.fragment(.init())
-        let fragment = JSONSchema.fragment(.init(nullable: true))
+        let fragment = JSONSchema.fragment(.init(nullable: true, description: "hello"))
 
         XCTAssertTrue(empty.isFragment)
         XCTAssertTrue(empty.isEmpty)
@@ -5405,11 +5405,16 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
         propertyLines: ["\"type\" : \"\(typeName)\""]
     )
 
+    let typesForNullable = [typeName, "null"]
+        .map { "\"\($0)\"" }
+        .joined(separator: ",\n    ")
+
     testEncodingPropertyLines(
         entity: nullableEntity,
         propertyLines: [
-            "\"nullable\" : true,",
-            "\"type\" : \"\(typeName)\""
+            "\"type\" : [",
+            "  \(typesForNullable)",
+            "]"
         ]
     )
 

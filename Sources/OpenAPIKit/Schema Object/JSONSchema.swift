@@ -620,7 +620,7 @@ extension JSONSchema {
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -653,7 +653,7 @@ extension JSONSchema {
     public static func boolean(
         format: JSONTypeFormat.BooleanFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -690,7 +690,7 @@ extension JSONSchema {
     public static func fragment(
         format: JSONTypeFormat.AnyFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -723,7 +723,7 @@ extension JSONSchema {
     public static func fragment(
         format: JSONTypeFormat.AnyFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -763,7 +763,7 @@ extension JSONSchema {
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -804,7 +804,7 @@ extension JSONSchema {
     public static func string(
         format: JSONTypeFormat.StringFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.StringFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -847,7 +847,7 @@ extension JSONSchema {
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -888,7 +888,7 @@ extension JSONSchema {
     public static func number(
         format: JSONTypeFormat.NumberFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -931,7 +931,7 @@ extension JSONSchema {
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -972,7 +972,7 @@ extension JSONSchema {
     public static func integer(
         format: JSONTypeFormat.IntegerFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -1015,7 +1015,7 @@ extension JSONSchema {
     public static func object(
         format: JSONTypeFormat.ObjectFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -1063,7 +1063,7 @@ extension JSONSchema {
     public static func array(
         format: JSONTypeFormat.ArrayFormat = .unspecified,
         required: Bool = true,
-        nullable: Bool? = nil,
+        nullable: Bool = false,
         permissions: JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>.Permissions? = nil,
         deprecated: Bool? = nil,
         title: String? = nil,
@@ -1344,7 +1344,7 @@ extension JSONSchema: Decodable {
 
         let hintContainer = try decoder.container(keyedBy: HintCodingKeys.self)
         let hintContainerCount = hintContainer.allKeys.count
-        let typeHint = try hintContainer.decodeIfPresent(JSONType.self, forKey: .type)
+        let typeHints = try Self.decodeTypes(from: hintContainer)
 
         let numericOrIntegerContainer = try decoder.container(keyedBy: JSONSchema.NumericContext.CodingKeys.self)
         let stringContainer = try decoder.container(keyedBy: JSONSchema.StringContext.CodingKeys.self)
@@ -1358,6 +1358,8 @@ extension JSONSchema: Decodable {
             objectContainer.allKeys.isEmpty ? nil : "object"
         ].compactMap { $0 }
 
+        // TODO: probably support properties from multiple types by turning into
+        //       a oneOf for each type.
         if keysFrom.count > 1 {
             throw InconsistencyError(
                 subjectName: "Schema",
@@ -1365,6 +1367,9 @@ extension JSONSchema: Decodable {
                 codingPath: decoder.codingPath
             )
         }
+
+        // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
+        let typeHint = typeHints.first
 
         func assertNoTypeConflict(with type: JSONType) throws {
             guard let typeHint = typeHint else { return }
@@ -1417,6 +1422,20 @@ extension JSONSchema: Decodable {
                 )
             }
             self = .fragment(fragmentContext)
+        }
+    }
+
+    private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {
+        let typeHints = try container.decodeIfPresent(Either<JSONType, [JSONType]>.self, forKey: .type)
+        switch typeHints {
+        case nil:
+            return []
+        case .a(let type):
+            return [type]
+        case .b(let types):
+            // filter out null if there are multiple types specified; null is handled by
+            // the `nullable` decoding done by the CoreContext.
+            return types.filter { $0 != .null }
         }
     }
 }
