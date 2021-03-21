@@ -1631,13 +1631,15 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: nullableObject,
             propertyLines: [
-                "\"nullable\" : true,",
                 "\"properties\" : {",
                 "  \"hello\" : {",
                 "    \"type\" : \"boolean\"",
                 "  }",
                 "},",
-                "\"type\" : \"object\""
+                "\"type\" : [",
+                "  \"object\",",
+                "  \"null\"",
+                "]"
             ]
         )
 
@@ -1861,14 +1863,16 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
                                     "\"title\" : \"hello\",",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -1970,13 +1974,15 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
                                     "\"description\" : \"hello\",",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2084,13 +2090,15 @@ extension SchemaObjectTests {
                                     "\"externalDocs\" : {",
                                     "  \"url\" : \"http:\\/\\/google.com\"",
                                     "},",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2194,13 +2202,15 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
                                     "\"maxProperties\" : 2,",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2301,13 +2311,15 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
                                     "\"minProperties\" : 1,",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2408,13 +2420,15 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
                                     "\"additionalProperties\" : true,",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2522,13 +2536,15 @@ extension SchemaObjectTests {
                                     "\"additionalProperties\" : {",
                                     "  \"type\" : \"boolean\"",
                                     "},",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2654,13 +2670,15 @@ extension SchemaObjectTests {
                                     "\"example\" : {",
                                     "  \"hello\" : true",
                                     "},",
-                                    "\"nullable\" : true,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
                                     "  }",
                                     "},",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2766,8 +2784,10 @@ extension SchemaObjectTests {
                                     "\"additionalProperties\" : {",
                                     "  \"type\" : \"boolean\"",
                                     "},",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"object\""
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueObject,
@@ -2867,7 +2887,6 @@ extension SchemaObjectTests {
             entity: nullableObject,
             propertyLines: [
                 "\"minProperties\" : 1,",
-                "\"nullable\" : true,",
                 "\"properties\" : {",
                 "  \"hello\" : {",
                 "    \"type\" : \"boolean\"",
@@ -2876,7 +2895,10 @@ extension SchemaObjectTests {
                 "\"required\" : [",
                 "  \"hello\"",
                 "],",
-                "\"type\" : \"object\""
+                "\"type\" : [",
+                "  \"object\",",
+                "  \"null\"",
+                "]"
             ]
         )
 
@@ -3169,8 +3191,10 @@ extension SchemaObjectTests {
                                     "\"items\" : {",
                                     "  \"type\" : \"boolean\"",
                                     "},",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"array\""
+                                    "\"type\" : [",
+                                    "  \"array\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueArray,
@@ -3245,8 +3269,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: nullableArray,
             propertyLines: [
-                "\"nullable\" : true,",
-                "\"type\" : \"array\",",
+                "\"type\" : [",
+                "  \"array\",",
+                "  \"null\"",
+                "],",
                 "\"uniqueItems\" : true"
             ]
         )
@@ -3311,8 +3337,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableArray,
                                   propertyLines: [
                                     "\"maxItems\" : 2,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"array\""
+                                    "\"type\" : [",
+                                    "  \"array\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueArray,
@@ -3369,8 +3397,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableArray,
                                   propertyLines: [
                                     "\"minItems\" : 2,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"array\""
+                                    "\"type\" : [",
+                                    "  \"array\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueArray,
@@ -3496,16 +3526,18 @@ extension SchemaObjectTests {
         let allowedValueNumber = JSONSchema.number(.init(format: .float, required: true), .init())
             .with(allowedValues: [11.5])
 
-        testAllSharedFormattedContextEncoding(typeName: "number",
-                                              formatName: "float",
-                                              requiredEntity: requiredNumber,
-                                              optionalEntity: optionalNumber,
-                                              nullableEntity: nullableNumber,
-                                              readOnlyEntity: readOnlyNumber,
-                                              writeOnlyEntity: writeOnlyNumber,
-                                              deprecatedEntity: deprecatedNumber,
-                                              allowedValues: (entity: allowedValueNumber,
-                                                              value: "11.5"))
+        testAllSharedFormattedContextEncoding(
+            typeName: "number",
+            formatName: "float",
+            requiredEntity: requiredNumber,
+            optionalEntity: optionalNumber,
+            nullableEntity: nullableNumber,
+            readOnlyEntity: readOnlyNumber,
+            writeOnlyEntity: writeOnlyNumber,
+            deprecatedEntity: deprecatedNumber,
+            allowedValues: (entity: allowedValueNumber,
+                            value: "11.5")
+        )
     }
 
     func test_decodeFloatNumber() {
@@ -3532,16 +3564,18 @@ extension SchemaObjectTests {
         let allowedValueNumber = JSONSchema.number(.init(format: .double, required: true), .init())
             .with(allowedValues: [12.5])
 
-        testAllSharedFormattedContextEncoding(typeName: "number",
-                                              formatName: "double",
-                                              requiredEntity: requiredNumber,
-                                              optionalEntity: optionalNumber,
-                                              nullableEntity: nullableNumber,
-                                              readOnlyEntity: readOnlyNumber,
-                                              writeOnlyEntity: writeOnlyNumber,
-                                              deprecatedEntity: deprecatedNumber,
-                                              allowedValues: (entity: allowedValueNumber,
-                                                              value: "12.5"))
+        testAllSharedFormattedContextEncoding(
+            typeName: "number",
+            formatName: "double",
+            requiredEntity: requiredNumber,
+            optionalEntity: optionalNumber,
+            nullableEntity: nullableNumber,
+            readOnlyEntity: readOnlyNumber,
+            writeOnlyEntity: writeOnlyNumber,
+            deprecatedEntity: deprecatedNumber,
+            allowedValues: (entity: allowedValueNumber,
+                            value: "12.5")
+        )
     }
 
     func test_decodeDoubleNumber() {
@@ -3580,8 +3614,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"multipleOf\" : 11,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"number\""
+                                    "\"type\" : [",
+                                    "  \"number\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueNumber,
@@ -3630,8 +3666,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"maximum\" : 11.5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"number\""
+                                    "\"type\" : [",
+                                    "  \"number\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueNumber,
@@ -3683,8 +3721,10 @@ extension SchemaObjectTests {
                                   propertyLines: [
                                     "\"exclusiveMaximum\" : true,",
                                     "\"maximum\" : 11.5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"number\""
+                                    "\"type\" : [",
+                                    "  \"number\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueNumber,
@@ -3734,8 +3774,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
                                     "\"minimum\" : 0.5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"number\""
+                                    "\"type\" : [",
+                                    "  \"number\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueNumber,
@@ -3787,8 +3829,10 @@ extension SchemaObjectTests {
                                   propertyLines: [
                                     "\"exclusiveMinimum\" : true,",
                                     "\"minimum\" : 0.5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"number\""
+                                    "\"type\" : [",
+                                    "  \"number\",",
+                                    "  \"null\"",
+                                    "]"
         ])
 
         testEncodingPropertyLines(entity: allowedValueNumber,
@@ -3891,16 +3935,18 @@ extension SchemaObjectTests {
         let allowedValueInteger = JSONSchema.integer(.init(format: .int32, required: true), .init())
             .with(allowedValues: [11])
 
-        testAllSharedFormattedContextEncoding(typeName: "integer",
-                                              formatName: "int32",
-                                              requiredEntity: requiredInteger,
-                                              optionalEntity: optionalInteger,
-                                              nullableEntity: nullableInteger,
-                                              readOnlyEntity: readOnlyInteger,
-                                              writeOnlyEntity: writeOnlyInteger,
-                                              deprecatedEntity: deprecatedInteger,
-                                              allowedValues: (entity: allowedValueInteger,
-                                                              value: "11"))
+        testAllSharedFormattedContextEncoding(
+            typeName: "integer",
+            formatName: "int32",
+            requiredEntity: requiredInteger,
+            optionalEntity: optionalInteger,
+            nullableEntity: nullableInteger,
+            readOnlyEntity: readOnlyInteger,
+            writeOnlyEntity: writeOnlyInteger,
+            deprecatedEntity: deprecatedInteger,
+            allowedValues: (entity: allowedValueInteger,
+                            value: "11")
+        )
     }
 
     func test_decode32bitInteger() {
@@ -3927,16 +3973,18 @@ extension SchemaObjectTests {
         let allowedValueInteger = JSONSchema.integer(.init(format: .int64, required: true), .init())
             .with(allowedValues: [12])
 
-        testAllSharedFormattedContextEncoding(typeName: "integer",
-                                              formatName: "int64",
-                                              requiredEntity: requiredInteger,
-                                              optionalEntity: optionalInteger,
-                                              nullableEntity: nullableInteger,
-                                              readOnlyEntity: readOnlyInteger,
-                                              writeOnlyEntity: writeOnlyInteger,
-                                              deprecatedEntity: deprecatedInteger,
-                                              allowedValues: (entity: allowedValueInteger,
-                                                              value: "12"))
+        testAllSharedFormattedContextEncoding(
+            typeName: "integer",
+            formatName: "int64",
+            requiredEntity: requiredInteger,
+            optionalEntity: optionalInteger,
+            nullableEntity: nullableInteger,
+            readOnlyEntity: readOnlyInteger,
+            writeOnlyEntity: writeOnlyInteger,
+            deprecatedEntity: deprecatedInteger,
+            allowedValues: (entity: allowedValueInteger,
+                            value: "12")
+        )
     }
 
     func test_decode64bitInteger() {
@@ -3975,8 +4023,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableInteger,
                                   propertyLines: [
                                     "\"multipleOf\" : 11,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"integer\""
+                                    "\"type\" : [",
+                                    "  \"integer\",",
+                                    "  \"null\"",
+                                    "]"
             ])
 
         testEncodingPropertyLines(entity: allowedValueInteger,
@@ -4025,8 +4075,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableInteger,
                                   propertyLines: [
                                     "\"maximum\" : 11,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"integer\""
+                                    "\"type\" : [",
+                                    "  \"integer\",",
+                                    "  \"null\"",
+                                    "]"
             ])
 
         testEncodingPropertyLines(entity: allowedValueInteger,
@@ -4081,8 +4133,10 @@ extension SchemaObjectTests {
                                   propertyLines: [
                                     "\"exclusiveMaximum\" : true,",
                                     "\"maximum\" : 11,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"integer\""
+                                    "\"type\" : [",
+                                    "  \"integer\",",
+                                    "  \"null\"",
+                                    "]"
             ])
 
         testEncodingPropertyLines(entity: allowedValueInteger,
@@ -4132,8 +4186,10 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: nullableInteger,
                                   propertyLines: [
                                     "\"minimum\" : 5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"integer\""
+                                    "\"type\" : [",
+                                    "  \"integer\",",
+                                    "  \"null\"",
+                                    "]"
             ])
 
         testEncodingPropertyLines(entity: allowedValueInteger,
@@ -4188,8 +4244,10 @@ extension SchemaObjectTests {
                                   propertyLines: [
                                     "\"exclusiveMinimum\" : true,",
                                     "\"minimum\" : 5,",
-                                    "\"nullable\" : true,",
-                                    "\"type\" : \"integer\""
+                                    "\"type\" : [",
+                                    "  \"integer\",",
+                                    "  \"null\"",
+                                    "]"
             ])
 
         testEncodingPropertyLines(entity: allowedValueInteger,
@@ -4522,8 +4580,10 @@ extension SchemaObjectTests {
             entity: nullableString,
             propertyLines: [
                 "\"maxLength\" : 10,",
-                "\"nullable\" : true,",
-                "\"type\" : \"string\""
+                "\"type\" : [",
+                "  \"string\",",
+                "  \"null\"",
+                "]"
             ]
         )
 
@@ -4580,8 +4640,10 @@ extension SchemaObjectTests {
             entity: nullableString,
             propertyLines: [
                 "\"minLength\" : 5,",
-                "\"nullable\" : true,",
-                "\"type\" : \"string\""
+                "\"type\" : [",
+                "  \"string\",",
+                "  \"null\"",
+                "]"
             ]
         )
 
@@ -4638,9 +4700,11 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: nullableString,
             propertyLines: [
-                "\"nullable\" : true,",
                 "\"pattern\" : \".*hello [wW]orld\",",
-                "\"type\" : \"string\""
+                "\"type\" : [",
+                "  \"string\",",
+                "  \"null\"",
+                "]"
             ]
         )
 
@@ -5498,12 +5562,17 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
         ]
     )
 
+    let typesForNullable = [typeName, "null"]
+        .map { "\"\($0)\"" }
+        .joined(separator: ",\n    ")
+
     testEncodingPropertyLines(
         entity: nullableEntity,
         propertyLines: [
             "\"format\" : \"\(formatName)\",",
-            "\"nullable\" : true,",
-            "\"type\" : \"\(typeName)\""
+            "\"type\" : [",
+            "  \(typesForNullable)",
+            "]"
         ]
     )
 
