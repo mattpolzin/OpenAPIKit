@@ -125,23 +125,23 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t20, .all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))))
         XCTAssertEqual(t20?.discriminator, .init(propertyName: "test"))
 
+        let t21 = JSONSchema.null.dereferenced()
+        XCTAssertEqual(t21, .null)
+
         // bonus tests around simplifying:
-        let t21 = try JSONSchema.all(of: []).dereferenced()?.simplified()
-        XCTAssertEqual(t21, .fragment(.init(description: nil)))
-        XCTAssertNil(t21?.discriminator)
-        XCTAssertNotNil(t21?.coreContext)
-
-        let t22 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced()?.simplified()
-        XCTAssertEqual(t22, .string(.init(), .init()))
+        let t22 = try JSONSchema.all(of: []).dereferenced()?.simplified()
+        XCTAssertEqual(t22, .fragment(.init(description: nil)))
         XCTAssertNil(t22?.discriminator)
-        XCTAssertEqual(t22?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
+        XCTAssertNotNil(t22?.coreContext)
 
-        let t23 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced()?.simplified()
-        XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
-        XCTAssertEqual(t23?.discriminator, .init(propertyName: "test"))
+        let t23 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced()?.simplified()
+        XCTAssertEqual(t23, .string(.init(), .init()))
+        XCTAssertNil(t23?.discriminator)
+        XCTAssertEqual(t23?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
 
-        let t24 = try JSONSchema.null.dereferenced()
-        XCTAssertEqual(t24, .null)
+        let t24 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced()?.simplified()
+        XCTAssertEqual(t24, .string(.init(discriminator: .init(propertyName: "test")), .init()))
+        XCTAssertEqual(t24?.discriminator, .init(propertyName: "test"))
     }
 
     func test_throwingBasicConstructionsFromSchemaObject() throws {

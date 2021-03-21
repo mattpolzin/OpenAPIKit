@@ -281,7 +281,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
         let transformedContext = OtherContext(
             format: newFormat,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions.map(OtherContext.Permissions.init),
             deprecated: _deprecated,
             title: title,
@@ -334,10 +334,7 @@ extension JSONSchema.CoreContext {
         }
         let newTitle = title ?? other.title
 
-        if let conflict = conflicting(_nullable, other._nullable) {
-            throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "nullable", original: String(conflict.0), new: String(conflict.1)))
-        }
-        let newNullable = _nullable ?? other._nullable
+        let newNullable = nullable || other.nullable
 
         if let conflict = conflicting(_deprecated, other._deprecated) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "deprecated", original: String(conflict.0), new: String(conflict.1)))
@@ -580,7 +577,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: newFormat,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: newPermissions,
             deprecated: _deprecated,
             title: title,
