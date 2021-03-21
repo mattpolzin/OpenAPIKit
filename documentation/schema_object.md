@@ -3,7 +3,7 @@
 In OpenAPIKit, the Schema Object from the OpenAPI Specification is represented by the `JSONSchema` type. Indeed, OpenAPIKit borrows most of the details of its Schema Object from the JSON Schema specification.
 
 A `JSONSchema` can be:
-1. Any of the fundamental types (`boolean`, `number`, `integer`, or `string`).
+1. Any of the fundamental types (`boolean`, `number`, `integer`, `string`, and in OpenAPI v3.1 `null`).
 2. An `array` of other schemas or and `object` with properties that are other schemas.
 3. A `reference` to a schema in the Components Object or elsewhere.
 4. `all(of:)`, `one(of:)`, or `any(of:)` a list of other schemas.
@@ -52,6 +52,24 @@ let buildOut = stringSchema
   .optionalSchemaObject()
   .nullableSchemaObject()
   .with(allowedValues: "red", "green", "blue")
+```
+
+Most properties of schemas are encoded as properties of the respective JSON/YAML object. Once notable exception is the `nullable` property of OpenAPIKit `JSONSchema` when encoded for OpenAPI v3.1. See how the following Swift is encoded:
+```swift
+JSONSchema.string(nullable: true)
+```
+OpenAPI v3.0
+```json
+{
+  "type": "string",
+  "nullable": true
+}
+```
+OpenAPI v3.1
+```json
+{
+  "type": ["string", "null"]
+}
 ```
 
 ### Simplifying Schemas
