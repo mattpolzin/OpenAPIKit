@@ -1546,7 +1546,7 @@ extension SchemaObjectTests {
 
     func test_decodeBoolean() throws {
         let booleanData = #"{"type": "boolean"}"#.data(using: .utf8)!
-        let nullableBooleanData = #"{"type": "boolean", "nullable": true}"#.data(using: .utf8)!
+        let nullableBooleanData = #"{"type": ["boolean", "null"]}"#.data(using: .utf8)!
         let readOnlyBooleanData = #"{"type": "boolean", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyBooleanData = #"{"type": "boolean", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedBooleanData = #"{"type": "boolean", "deprecated": true}"#.data(using: .utf8)!
@@ -1733,8 +1733,7 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
         let nullableObjectData = """
         {
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let readOnlyObjectData = """
@@ -1902,8 +1901,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "title": "hello",
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2012,8 +2010,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "description": "hello",
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2130,8 +2127,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "externalDocs": { "url": "http://google.com" },
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2240,8 +2236,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "maxProperties": 1,
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2349,8 +2344,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "minProperties": 1,
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2458,8 +2452,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "additionalProperties": true,
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2576,8 +2569,7 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "additionalProperties": { "type": "string" },
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2720,8 +2712,7 @@ extension SchemaObjectTests {
             "example": {
                 "hello" : true
             },
-            "type": "object",
-            "nullable": true
+            "type": ["object", "null"]
         }
         """.data(using: .utf8)!
         let allowedValueObjectData = """
@@ -2936,9 +2927,8 @@ extension SchemaObjectTests {
         let nullableObjectData = """
         {
             "required": ["hello"],
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {"hello": { "type": "boolean"}},
-            "nullable": true
         }
         """.data(using: .utf8)!
 
@@ -3112,7 +3102,7 @@ extension SchemaObjectTests {
 
     func test_decodeArray() throws {
         let arrayData = #"{"type": "array"}"#.data(using: .utf8)!
-        let nullableArrayData = #"{"type": "array", "nullable": true}"#.data(using: .utf8)!
+        let nullableArrayData = #"{"type": ["array", "null"]}"#.data(using: .utf8)!
         let readOnlyArrayData = #"{"type": "array", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyArrayData = #"{"type": "array", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedArrayData = #"{"type": "array", "deprecated": true}"#.data(using: .utf8)!
@@ -3213,7 +3203,7 @@ extension SchemaObjectTests {
 
     func test_decodeArrayWithItemsDefinition() {
         let arrayData = #"{"type": "array", "items": { "type": "boolean" }}"#.data(using: .utf8)!
-        let nullableArrayData = #"{"type": "array", "items": { "type": "boolean" }, "nullable": true}"#.data(using: .utf8)!
+        let nullableArrayData = #"{"type": ["array", "null"], "items": { "type": "boolean" }}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
 
         let array = try! orderUnstableDecode(JSONSchema.self, from: arrayData)
@@ -3293,7 +3283,7 @@ extension SchemaObjectTests {
 
     func test_decodeArrayWithUniqueItems() {
         let arrayData = #"{"type": "array", "uniqueItems": true}"#.data(using: .utf8)!
-        let nullableArrayData = #"{"type": "array", "uniqueItems": true, "nullable": true}"#.data(using: .utf8)!
+        let nullableArrayData = #"{"type": ["array", "null"], "uniqueItems": true}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "uniqueItems": true, "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
 
         let array = try! orderUnstableDecode(JSONSchema.self, from: arrayData)
@@ -3357,7 +3347,7 @@ extension SchemaObjectTests {
 
     func test_decodeArrayWithMaxItems() {
         let arrayData = #"{"type": "array", "maxItems": 3}"#.data(using: .utf8)!
-        let nullableArrayData = #"{"type": "array", "maxItems": 3, "nullable": true}"#.data(using: .utf8)!
+        let nullableArrayData = #"{"type": ["array", "null"], "maxItems": 3}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "maxItems": 3, "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
 
         let array = try! orderUnstableDecode(JSONSchema.self, from: arrayData)
@@ -3417,7 +3407,7 @@ extension SchemaObjectTests {
 
     func test_decodeArrayWithMinItems() {
         let arrayData = #"{"type": "array", "minItems": 2}"#.data(using: .utf8)!
-        let nullableArrayData = #"{"type": "array", "minItems": 2, "nullable": true}"#.data(using: .utf8)!
+        let nullableArrayData = #"{"type": ["array", "null"], "minItems": 2}"#.data(using: .utf8)!
         let allowedValueArrayData = #"{"type": "array", "minItems": 2, "items": { "type": "boolean" }, "enum": [[false]]}"#.data(using: .utf8)!
 
         let array = try! orderUnstableDecode(JSONSchema.self, from: arrayData)
@@ -3473,7 +3463,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumber() throws {
         let numberData = #"{"type": "number"}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"]}"#.data(using: .utf8)!
         let readOnlyNumberData = #"{"type": "number", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyNumberData = #"{"type": "number", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedNumberData = #"{"type": "number", "deprecated": true}"#.data(using: .utf8)!
@@ -3542,7 +3532,7 @@ extension SchemaObjectTests {
 
     func test_decodeFloatNumber() {
         let numberData = #"{"type": "number", "format": "float"}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "format": "float", "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "format": "float"}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "format": "float", "enum": [1, 2.5]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3580,7 +3570,7 @@ extension SchemaObjectTests {
 
     func test_decodeDoubleNumber() {
         let numberData = #"{"type": "number", "format": "double"}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "format": "double", "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "format": "double"}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "format": "double", "enum": [1, 2]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3632,7 +3622,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumberWithMultipleOf() {
         let numberData = #"{"type": "number", "multipleOf": 2.2}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "multipleOf": 2.2, "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "multipleOf": 2.2}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "multipleOf": 2.2, "enum": [2.2, 4.4]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3684,7 +3674,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumberWithMaximum() {
         let numberData = #"{"type": "number", "maximum": 2.2}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "maximum": 2.2, "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "maximum": 2.2}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "maximum": 2.2, "enum": [2.2, 1.2]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3740,7 +3730,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumberWithExclusiveMaximum() {
         let numberData = #"{"type": "number", "maximum": 2.2, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "maximum": 2.2, "exclusiveMaximum": true, "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "maximum": 2.2, "exclusiveMaximum": true}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "maximum": 2.2, "exclusiveMaximum": true, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3792,7 +3782,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumberWithMinimum() {
         let numberData = #"{"type": "number", "minimum": 1.1}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "minimum": 1.1, "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "minimum": 1.1}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "minimum": 1.1, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3848,7 +3838,7 @@ extension SchemaObjectTests {
 
     func test_decodeNumberWithExclusiveMinimum() {
         let numberData = #"{"type": "number", "minimum": 1.1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": "number", "minimum": 1.1, "exclusiveMinimum": true, "nullable": true}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "minimum": 1.1, "exclusiveMinimum": true}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "minimum": 1.1, "exclusiveMinimum": true, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
 
         let number = try! orderUnstableDecode(JSONSchema.self, from: numberData)
@@ -3898,7 +3888,7 @@ extension SchemaObjectTests {
 
     func test_decodeInteger() throws {
         let integerData = #"{"type": "integer"}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"]}"#.data(using: .utf8)!
         let readOnlyIntegerData = #"{"type": "integer", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyIntegerData = #"{"type": "integer", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedIntegerData = #"{"type": "integer", "deprecated": true}"#.data(using: .utf8)!
@@ -3951,7 +3941,7 @@ extension SchemaObjectTests {
 
     func test_decode32bitInteger() {
         let integerData = #"{"type": "integer", "format": "int32"}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "format": "int32", "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "format": "int32"}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "format": "int32", "enum": [1, 2]}"#.data(using: .utf8)!
 
         let integer = try! orderUnstableDecode(JSONSchema.self, from: integerData)
@@ -3989,7 +3979,7 @@ extension SchemaObjectTests {
 
     func test_decode64bitInteger() {
         let integerData = #"{"type": "integer", "format": "int64"}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "format": "int64", "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "format": "int64"}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "format": "int64", "enum": [1, 2]}"#.data(using: .utf8)!
 
         let integer = try! orderUnstableDecode(JSONSchema.self, from: integerData)
@@ -4041,7 +4031,7 @@ extension SchemaObjectTests {
 
     func test_decodeIntegerWithMultipleOf() {
         let integerData = #"{"type": "integer", "multipleOf": 2}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "multipleOf": 2, "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "multipleOf": 2}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "multipleOf": 2, "enum": [4]}"#.data(using: .utf8)!
 
         let integer = try! orderUnstableDecode(JSONSchema.self, from: integerData)
@@ -4093,7 +4083,7 @@ extension SchemaObjectTests {
 
     func test_decodeIntegerWithMaximum() throws {
         let integerData = #"{"type": "integer", "maximum": 1}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "maximum": 1, "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "maximum": 1}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "maximum": 2, "enum": [1, 2]}"#.data(using: .utf8)!
         let integerWithWholeNumberFloatData = #"{"type": "integer", "maximum": 1.0}"#.data(using: .utf8)!
 
@@ -4152,7 +4142,7 @@ extension SchemaObjectTests {
 
     func test_decodeIntegerWithExclusiveMaximum() {
         let integerData = #"{"type": "integer", "maximum": 1, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "maximum": 1, "exclusiveMaximum": true, "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "maximum": 1, "exclusiveMaximum": true}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "maximum": 5, "exclusiveMaximum": true, "enum": [2, 3]}"#.data(using: .utf8)!
 
         let integer = try! orderUnstableDecode(JSONSchema.self, from: integerData)
@@ -4204,7 +4194,7 @@ extension SchemaObjectTests {
 
     func test_decodeIntegerWithMinimum() throws {
         let integerData = #"{"type": "integer", "minimum": 1}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "minimum": 1, "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "minimum": 1}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "minimum": 1, "enum": [1, 2]}"#.data(using: .utf8)!
         let integerWithWholeNumberFloatData = #"{"type": "integer", "minimum": 1.0}"#.data(using: .utf8)!
 
@@ -4263,7 +4253,7 @@ extension SchemaObjectTests {
 
     func test_decodeIntegerWithExclusiveMinimum() {
         let integerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true, "nullable": true}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "minimum": 1, "exclusiveMinimum": true}"#.data(using: .utf8)!
         let allowedValueIntegerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true, "enum": [2, 3]}"#.data(using: .utf8)!
 
         let integer = try! orderUnstableDecode(JSONSchema.self, from: integerData)
@@ -4313,7 +4303,7 @@ extension SchemaObjectTests {
 
     func test_decodeString() throws {
         let stringData = #"{"type": "string"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"]}"#.data(using: .utf8)!
         let readOnlyStringData = #"{"type": "string", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyStringData = #"{"type": "string", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedStringData = #"{"type": "string", "deprecated": true}"#.data(using: .utf8)!
@@ -4381,7 +4371,7 @@ extension SchemaObjectTests {
 
     func test_decodeByteString() {
         let stringData = #"{"type": "string", "format": "byte"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "format": "byte", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "format": "byte"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "format": "byte", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4421,7 +4411,7 @@ extension SchemaObjectTests {
 
     func test_decodeBinaryString() {
         let stringData = #"{"type": "string", "format": "binary"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "format": "binary", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "format": "binary"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "format": "binary", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4461,7 +4451,7 @@ extension SchemaObjectTests {
 
     func test_decodeDateString() {
         let stringData = #"{"type": "string", "format": "date"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "format": "date", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "format": "date"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "format": "date", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4501,7 +4491,7 @@ extension SchemaObjectTests {
 
     func test_decodeDateTimeString() {
         let stringData = #"{"type": "string", "format": "date-time"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "format": "date-time", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "format": "date-time"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "format": "date-time", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4541,7 +4531,7 @@ extension SchemaObjectTests {
 
     func test_decodePasswordString() {
         let stringData = #"{"type": "string", "format": "password"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "format": "password", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "format": "password"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "format": "password", "enum": ["hello"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4601,7 +4591,7 @@ extension SchemaObjectTests {
 
     func test_decodeStringWithMaxLength() {
         let stringData = #"{"type": "string", "maxLength": 5}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "maxLength": 5, "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "maxLength": 5}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "maxLength": 5, "enum": ["hello", "world"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4661,7 +4651,7 @@ extension SchemaObjectTests {
 
     func test_decodeStringWithMinLength() {
         let stringData = #"{"type": "string", "minLength": 3}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "minLength": 3, "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "minLength": 3}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "minLength": 3, "enum": ["hello", "world"]}"#.data(using: .utf8)!
 
         let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
@@ -4731,7 +4721,7 @@ extension SchemaObjectTests {
 
     func test_decodeStringWithPattern() throws {
         let stringData = #"{"type": "string", "pattern": ".*"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": "string", "pattern": ".*", "nullable": true}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "pattern": ".*"}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "pattern": ".*", "enum": ["hello", "world"]}"#.data(using: .utf8)!
         let defaultValueStringData = #"{"type": "string", "pattern": ".*", "default": "hello"}"#.data(using: .utf8)!
 

@@ -748,11 +748,11 @@ extension JSONSchema.CoreContext: Decodable {
 
     /// Decode whether or not this is a nullable JSONSchema.
     private static func decodeNullable(from container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> Bool {
-        if let types = try? container.decodeIfPresent([String].self, forKey: .type) {
-            return types.contains(JSONType.null.rawValue)
+        if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
+            return types.contains(JSONType.null)
         }
-        if let type = try? container.decodeIfPresent(String.self, forKey: .type) {
-            return type == JSONType.null.rawValue
+        if let type = try? container.decodeIfPresent(JSONType.self, forKey: .type) {
+            return type == JSONType.null
         }
         return false
     }
