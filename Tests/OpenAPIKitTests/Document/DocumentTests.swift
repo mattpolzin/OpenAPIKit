@@ -911,15 +911,97 @@ extension DocumentTests {
 
 // MARK: - Webhooks
 extension DocumentTests {
+    
+    func test_webhooks_encode() throws {
+        let op = OpenAPI.Operation(responses: [:])
+        let refToPathItem: JSONReference<OpenAPI.PathItem> = .reference()
+        let document = OpenAPI.Document(
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            webhooks:  [
+                "webhook-tes1": .init(<#JSONReference<OpenAPI.PathItem>#>),
+                "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+            ],
+            components: .noComponents,
+            externalDocs: .init(url: URL(string: "http://google.com")!)
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        let documentJSON: String? =
+            """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
+
+          },
+          "webhooks" : {
+            "webhook-test" : {
+              "delete" : {
+                "responses" : {
+
+                }
+              },
+              "get" : {
+                "responses" : {
+
+                }
+              },
+              "head" : {
+                "responses" : {
+
+                }
+              },
+              "options" : {
+                "responses" : {
+
+                }
+              },
+              "patch" : {
+                "responses" : {
+
+                }
+              },
+              "post" : {
+                "responses" : {
+
+                }
+              },
+              "put" : {
+                "responses" : {
+
+                }
+              },
+              "trace" : {
+                "responses" : {
+
+                }
+              }
+            }
+          }
+        }
+        """
+
+        assertJSONEquivalent(encodedDocument, documentJSON)
+    }
+    
   func test_webhooks_encode_decode() throws {
-      let op = OpenAPI.Operation(responses: [:])
+    let op = OpenAPI.Operation(responses: [:])
+    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op)
 
       let document = OpenAPI.Document(
         info: .init(title: "API", version: "1.0"),
         servers: [],
         paths: [:],
         webhooks:  [
-          "webhook-test": .init(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op)
+          "webhook-test": pathItem
         ],
         components: .noComponents,
         externalDocs: .init(url: URL(string: "http://google.com")!)
