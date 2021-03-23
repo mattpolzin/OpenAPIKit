@@ -1002,7 +1002,7 @@ extension DocumentTests {
         servers: [],
         paths: [:],
         webhooks:  [
-          "webhook-test": pathItem
+            "webhook-test": .pathItem(pathItem)
         ],
         components: .noComponents,
         externalDocs: .init(url: URL(string: "http://google.com")!)
