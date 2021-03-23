@@ -5,6 +5,16 @@
 //  Created by Mathew Polzin on 7/28/20.
 //
 
+
+/**
+ There are not currently any examples of OpenAPI 3.1 documents to use in this
+ compatibility test suite but this file exists as a template from which to build out the
+ first compat test we add.
+ */
+
+
+
+
 import XCTest
 import OpenAPIKit
 import Yams
@@ -13,36 +23,29 @@ import Foundation
 import FoundationNetworking
 #endif
 
-final class GitHubAPICampatibilityTests: XCTestCase {
-    var githubAPI: Result<OpenAPI.Document, Error>? = nil
+/*
+final class TemplateCampatibilityTests: XCTestCase {
+    var templateAPI: Result<OpenAPI.Document, Error>? = nil
     var apiDoc: OpenAPI.Document? {
-        guard case .success(let document) = githubAPI else { return nil }
+        guard case .success(let document) = templateAPI else { return nil }
         return document
     }
 
     override func setUp() {
-        /*
-         NOTE: As of GitHub's OpenAPI documentation v 2.22, they started to nest
-            their schema components in a bit of an unusual way. not clear to me that
-            the thing they are doing is disallowed by the spec, but definitely weird.
-
-            At any rate, it fails here for now so I will pin this to version 2.21 and
-            revisit later.
-         */
-        if githubAPI == nil {
-            githubAPI = Result {
+        if templateAPI == nil {
+            templateAPI = Result {
                 try YAMLDecoder().decode(
                     OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/v1.0.0-rc.1/descriptions/ghes-2.21/ghes-2.21.yaml")!)
+                    from: String(contentsOf: URL(string: "website.com/openapi.yml")!)
                 )
             }
         }
     }
 
     func test_successfullyParsedDocument() {
-        switch githubAPI {
+        switch templateAPI {
         case nil:
-            XCTFail("Did not attempt to pull GitHub API documentation like expected.")
+            XCTFail("Did not attempt to pull Template API documentation like expected.")
         case .failure(let error):
             let prettyError = OpenAPI.Error(from: error)
             XCTFail(prettyError.localizedDescription + "\n coding path: " + prettyError.codingPathString)
@@ -61,7 +64,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         guard let apiDoc = apiDoc else { return }
 
         // title is GitHub v3 REST API
-        XCTAssertEqual(apiDoc.info.title, "GitHub v3 REST API")
+        XCTAssertEqual(apiDoc.info.title, "title")
 
         // description is set
         XCTAssertFalse(apiDoc.info.description?.isEmpty ?? true)
@@ -70,7 +73,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(apiDoc.info.contact?.name, "Support")
 
         // contact URL was parsed as https://support.github.com
-        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://support.github.com")!)
+        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://support.template.com")!)
 
         // no contact email is provided
         XCTAssert(apiDoc.info.contact?.email?.isEmpty ?? true)
@@ -152,3 +155,4 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         XCTAssertEqual(resolvedDoc.endpoints.count, 550)
     }
 }
+*/

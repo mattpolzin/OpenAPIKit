@@ -103,6 +103,8 @@ A schema can be made **optional** (i.e. it can be omitted) with `JSONSchema.inte
 
 A schema can be made **nullable** with `JSONSchema.number(nullable: true)` or an existing schema can be asked for a `nullableSchemaObject()`.
 
+Nullability highlights an important decision OpenAPIKit makes. The JSON Schema specification that dictates how OpenAPI v3.1 documents _encode_ nullability states that a nullable property is encoded as having the `null` type in addition to whatever other type(s) it has. So in OpenAPIKit you set `nullability` as a property of a schema, but when encoded/decoded it will represent the inclusion of absence of `null` in the list of `type`s of the schema.
+
 Some types of schemas can be further specialized with a **format**. For example, `JSONSchema.number(format: .double)` or `JSONSchema.string(format: .dateTime)`.
 
 You can specify a schema's **allowed values** (e.g. for an enumerated type) with `JSONSchema.string(allowedValues: "hello", "world")`.

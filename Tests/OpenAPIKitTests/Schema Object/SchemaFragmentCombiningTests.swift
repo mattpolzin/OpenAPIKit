@@ -785,11 +785,6 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             AnyContext(title: "string2")
         ]
 
-        let differentNullable = [
-            AnyContext(nullable: true),
-            AnyContext(nullable: false)
-        ]
-
         let differentDeprecated = [
             AnyContext(deprecated: true),
             AnyContext(deprecated: false)
@@ -814,7 +809,6 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             differentDescription,
             differentDiscriminator,
             differentTitle,
-            differentNullable,
             differentDeprecated,
             differentExternalDocs,
             differentAllowedValues,

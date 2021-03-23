@@ -112,7 +112,7 @@ extension JSONSchema {
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
         public let format: Format
         public let required: Bool // default true
-        let _nullable: Bool? // default false
+        public let nullable: Bool // default false
 
         let _permissions: Permissions? // default `.readWrite`
         let _deprecated: Bool? // default false
@@ -132,7 +132,6 @@ extension JSONSchema {
 
         public let example: AnyCodable?
 
-        public var nullable: Bool { _nullable ?? false }
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
 
@@ -143,7 +142,6 @@ extension JSONSchema {
 
         public var isEmpty: Bool {
             return format == .unspecified
-                && _nullable == nil
                 && description == nil
                 && discriminator == nil
                 && title == nil
@@ -158,7 +156,7 @@ extension JSONSchema {
         public init(
             format: Format = .unspecified,
             required: Bool = true,
-            nullable: Bool? = nil,
+            nullable: Bool = false,
             permissions: Permissions? = nil,
             deprecated: Bool? = nil,
             title: String? = nil,
@@ -171,7 +169,7 @@ extension JSONSchema {
         ) {
             self.format = format
             self.required = required
-            self._nullable = nullable
+            self.nullable = nullable
             self._permissions = permissions
             self._deprecated = deprecated
             self.title = title
@@ -186,7 +184,7 @@ extension JSONSchema {
         public init(
             format: Format = .unspecified,
             required: Bool = true,
-            nullable: Bool? = nil,
+            nullable: Bool = false,
             permissions: Permissions? = nil,
             deprecated: Bool? = nil,
             title: String? = nil,
@@ -199,7 +197,7 @@ extension JSONSchema {
         ) {
             self.format = format
             self.required = required
-            self._nullable = nullable
+            self.nullable = nullable
             self._permissions = permissions
             self._deprecated = deprecated
             self.title = title
@@ -240,7 +238,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: false,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -258,7 +256,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: true,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -294,7 +292,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -312,7 +310,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -330,7 +328,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -348,7 +346,7 @@ extension JSONSchema.CoreContext {
         return .init(
             format: format,
             required: required,
-            nullable: _nullable,
+            nullable: nullable,
             permissions: _permissions,
             deprecated: _deprecated,
             title: title,
@@ -634,7 +632,6 @@ extension JSONSchema {
         case externalDocs
         case allowedValues = "enum"
         case defaultValue = "default"
-        case nullable
         case example
         case readOnly
         case writeOnly
@@ -647,9 +644,8 @@ extension JSONSchema.CoreContext: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
-        if Format.self != JSONTypeFormat.AnyFormat.self {
-            try container.encode(format.jsonType, forKey: .type)
-        }
+        // encode zero or more values to the 'type' field
+        try encodeTypes(to: &container)
 
         if format != Format.unspecified {
             try container.encode(format, forKey: .format)
@@ -662,11 +658,6 @@ extension JSONSchema.CoreContext: Encodable {
         try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
         try container.encodeIfPresent(example, forKey: .example)
-
-        // nullable is false if omitted
-        if nullable {
-            try container.encode(nullable, forKey: .nullable)
-        }
 
         // deprecated is false if omitted
         if deprecated {
@@ -683,6 +674,26 @@ extension JSONSchema.CoreContext: Encodable {
             break
         }
     }
+
+    /// Encode value(s) to the `type` field.
+    ///
+    /// If this JSONSchema represents any type of thing, no `type` property
+    /// is encoded. If this JSONSchema represents one type of thing, a single
+    /// string is encoded to the `type` property. If this JSONSchema represents
+    /// multiple types of things (like both `null` (i.e. it is nullable) and some other
+    /// type, an array of strings is encoded to the `type` property.
+    private func encodeTypes(to container: inout KeyedEncodingContainer<JSONSchema.ContextCodingKeys>) throws {
+        let types: [String] = [
+            Format.self == JSONTypeFormat.AnyFormat.self ? nil : format.jsonType.rawValue,
+            nullable ? JSONType.null.rawValue : nil
+        ].compactMap { $0 }
+
+        if types.count > 1 {
+            try container.encode(types, forKey: .type)
+        } else if let type = types.first {
+            try container.encode(type, forKey: .type)
+        }
+    }
 }
 
 extension JSONSchema.CoreContext: Decodable {
@@ -690,6 +701,8 @@ extension JSONSchema.CoreContext: Decodable {
         let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
+
+        nullable = try Self.decodeNullable(from: container)
 
         // default to `true` at decoding site.
         // It is the responsibility of decoders farther upstream
@@ -703,7 +716,6 @@ extension JSONSchema.CoreContext: Decodable {
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
         defaultValue = try container.decodeIfPresent(AnyCodable.self, forKey: .defaultValue)
-        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
 
         let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
         let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
@@ -732,6 +744,17 @@ extension JSONSchema.CoreContext: Decodable {
 
         _deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
+    }
+
+    /// Decode whether or not this is a nullable JSONSchema.
+    private static func decodeNullable(from container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> Bool {
+        if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
+            return types.contains(JSONType.null)
+        }
+        if let type = try? container.decodeIfPresent(JSONType.self, forKey: .type) {
+            return type == JSONType.null
+        }
+        return false
     }
 }
 
