@@ -188,7 +188,7 @@ extension OpenAPI.Server.Variable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) ?? []
+        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) 
 
         `default` = try container.decode(String.self, forKey: .default)
 
