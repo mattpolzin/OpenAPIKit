@@ -170,6 +170,8 @@ public final class Validator {
     /// - All Header references are found in the document's
     ///     components dictionary
     ///
+    // TODO: add validation where `Server.Variable.enum` is either `nil` or non-empty -
+    // TODO: add validation where, if there is an non-empty `enum`, `Server.Variable.default` contains a value that is an element of `enum` -
     public convenience init() {
         self.init(validations: [
             .init(.operationsContainResponses),
