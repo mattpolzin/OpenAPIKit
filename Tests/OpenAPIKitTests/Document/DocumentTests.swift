@@ -908,3 +908,180 @@ extension DocumentTests {
         )
     }
 }
+
+// MARK: - Webhooks
+extension DocumentTests {
+    
+    func test_webhooks_encode() throws {
+        let op = OpenAPI.Operation(responses: [:])
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItemTest: Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
+        
+        let document = OpenAPI.Document(
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            webhooks:  [
+                "webhook-test": pathItemTest
+            ],
+            components: .noComponents,
+            externalDocs: .init(url: URL(string: "http://google.com")!)
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        let documentJSON: String? =
+            """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.0.0",
+          "paths" : {
+
+          },
+          "webhooks" : {
+            "webhook-test" : {
+              "delete" : {
+                "responses" : {
+
+                }
+              },
+              "get" : {
+                "responses" : {
+
+                }
+              },
+              "head" : {
+                "responses" : {
+
+                }
+              },
+              "options" : {
+                "responses" : {
+
+                }
+              },
+              "patch" : {
+                "responses" : {
+
+                }
+              },
+              "post" : {
+                "responses" : {
+
+                }
+              },
+              "put" : {
+                "responses" : {
+
+                }
+              },
+              "trace" : {
+                "responses" : {
+
+                }
+              }
+            }
+          }
+        }
+        """
+
+        assertJSONEquivalent(encodedDocument, documentJSON)
+    }
+    
+  func test_webhooks_encode_decode() throws {
+    let op = OpenAPI.Operation(responses: [:])
+    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op)
+
+      let document = OpenAPI.Document(
+        info: .init(title: "API", version: "1.0"),
+        servers: [],
+        paths: [:],
+        webhooks:  [
+            "webhook-test": .pathItem(pathItem)
+        ],
+        components: .noComponents,
+        externalDocs: .init(url: URL(string: "http://google.com")!)
+      )
+    
+    // INFO: `assertJSONEquivalent` was returning `false` for equivalent documets, so encode-decode was used for comparison -
+      let encodedDocumentString = try orderUnstableTestStringFromEncoding(of: document)
+      let encodedDocumentData = (encodedDocumentString?.data(using: .utf8)!)!
+      let decodedDocument = try orderUnstableDecode(OpenAPI.Document.self, from: encodedDocumentData)
+      XCTAssertEqual(document, decodedDocument)
+  }
+  
+  func test_webhooks_decode() throws {
+      let documentData =
+      """
+      {
+        "externalDocs": {
+          "url": "http:\\/\\/google.com"
+        },
+        "info": {
+          "title": "API",
+          "version": "1.0"
+        },
+        "openapi": "3.0.0",
+        "paths": {
+        },
+        "webhooks": {
+          "webhook-test": {
+            "delete": {
+              "responses": {
+              }
+            },
+            "get": {
+              "responses": {
+              }
+            },
+            "head": {
+              "responses": {
+              }
+            },
+            "options": {
+              "responses": {
+              }
+            },
+            "patch": {
+              "responses": {
+              }
+            },
+            "post": {
+              "responses": {
+              }
+            },
+            "put": {
+              "responses": {
+              }
+            },
+            "trace": {
+              "responses": {
+              }
+            }
+          }
+        }
+      }
+      """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+        
+        let op = OpenAPI.Operation(responses: [:])
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                webhooks:  [
+                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
+                ],
+                components: .noComponents,
+                externalDocs: .init(url: URL(string: "http://google.com")!)
+            )
+        )
+    }
+}
