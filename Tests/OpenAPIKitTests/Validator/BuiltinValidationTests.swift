@@ -706,10 +706,81 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: exampleReferencesAreValid -
     func test_exampleReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    404: .response(
+                        description: "response2",
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1"))
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                examples: [
+                    "exampleRandom": .init(value: .b("hello"))
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.exampleReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Example reference can be found in components/examples")
+        }
     }
+    
     func test_exampleReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    301: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                    404: .response(
+                        description: "response2",
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1")),
+                                    "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                examples: [
+                    "example1": .init(value: .b("hello"))
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.exampleReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     // TODO: requestReferencesAreValid -
