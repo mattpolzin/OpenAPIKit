@@ -600,10 +600,53 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: responseReferencesAreValid -
     func test_responseReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1"))
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init()
+        )
+        let validator = Validator.blank.validating(.responseReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Response reference can be found in components/responses")
+        }
     }
+    
     func test_responseReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1"))
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                responses: [
+                    "response1": .init(description: "test")
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.responseReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     // TODO: parameterReferencesAreValid -
@@ -629,6 +672,8 @@ final class BuiltinValidationTests: XCTestCase {
     }
     func test_headerReferencesAreValidSucceeds() throws {
     }
+    
+    
     
     
     // TODO: serverVarialbeEnumIsValid -
