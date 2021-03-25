@@ -364,6 +364,34 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
+    func test_documentTagNamesAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            tags: ["hello", "hello"]
+        )
+        let validator = Validator.blank.validating(.documentTagNamesAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Tags in the Document are unique")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+    
+    func test_documentTagNamesAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            tags: ["hello", "again"]
+        )
+        let validator = Validator.blank.validating(.documentTagNamesAreUnique)
+        try document.validate(using: validator)
+    }
+    
     // MARK: Default validation -
 
     func test_duplicateTagOnDocumentFails() {
