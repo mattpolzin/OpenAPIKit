@@ -373,6 +373,50 @@ extension Validation {
             }
         )
     }
+    
+    /// Validate that `enum` now must not be empty in the document's
+    /// Server Variable.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVarialbeEnumsAreValid: Validation<JSONReference<OpenAPI.Header>> {
+        .init(
+            description: "Header reference can be found in components/headers",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+    
+    /// Validate that `default` now MUST exist in the enum values in the document's
+    /// Server Variable, if such values are defined.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVarialbeDefaultExistsInEnumapple : Validation<JSONReference<OpenAPI.Header>> {
+        .init(
+            description: "Header reference can be found in components/headers",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                    case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
 }
 
 /// Used by both the Path Item parameter check and the
