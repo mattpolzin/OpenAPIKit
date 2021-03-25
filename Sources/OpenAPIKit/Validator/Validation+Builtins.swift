@@ -396,7 +396,7 @@ extension Validation {
     ///
     public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
         .init(
-            description: "Server Variable's default must exist in enum, if enum is defined and non-empty.",
+            description: "Server Variable's default must exist in enum, if enum is defined.",
             check: { context in
                 guard let `enum` = context.subject.`enum` else { return true }
                 return `enum`.contains(context.subject.`default`)
