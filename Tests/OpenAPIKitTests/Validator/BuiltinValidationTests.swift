@@ -649,10 +649,61 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: parameterReferencesAreValid -
     func test_parameterReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                parameters: [
+                    "parameter22": .init(name: "test", context: .header, schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.parameterReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
+        }
     }
+    
     func test_parameterReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                parameters: [
+                    "parameter1": .init(name: "test", context: .header, schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.parameterReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     // TODO: exampleReferencesAreValid -
