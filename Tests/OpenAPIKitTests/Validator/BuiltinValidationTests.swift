@@ -392,22 +392,153 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: pathItemParametersAreUnique -
     func test_pathItemParametersAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(name: "item", context: .query, schema: .string),
+                        .parameter(name: "item", context: .query, schema: .string)
+                    ],
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.pathItemParametersAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unique (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello"])
+            XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello']")
+        }
     }
+    
     func test_pathItemParametersAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(name: "item", context: .query, schema: .string),
+                        .parameter(name: "item", context: .path, schema: .string), // changes parameter location but not name
+                        .parameter(name: "cool", context: .path, schema: .string) // changes parameter name but not location
+                    ],
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.pathItemParametersAreUnique)
+        try document.validate(using: validator)
     }
     
     // TODO: operationParametersAreUnique -
     func test_operationParametersAreUniqueFails() throws {
-    }
-    func test_operationParametersAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "hiya", context: .path, schema: .string),
+                            .parameter(name: "hiya", context: .path, schema: .string)
+                        ],
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationParametersAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unique (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello", "get"])
+            XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello'].get")
+        }
     }
     
-    // TODO: operationIdsAreUnique -
-    func test_operationIdsAreUniqueFails() throws {
+    func test_operationParametersAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "hiya", context: .query, schema: .string),
+                            .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
+                            .parameter(name: "cool", context: .path, schema: .string)  // changes parameter name but not location
+                        ],
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationParametersAreUnique)
+        try document.validate(using: validator)
     }
+    
+    func test_operationIdsAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [
+                        200: .response(description: "hi")
+                    ])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "test", responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationIdsAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All Operation Ids in Document are unique")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+    
     func test_operationIdsAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "one", responses: [
+                        200: .response(description: "hi")
+                    ])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "two", responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationIdsAreUnique)
+        try document.validate(using: validator)
     }
     
     // TODO: schemaReferencesAreValid -
