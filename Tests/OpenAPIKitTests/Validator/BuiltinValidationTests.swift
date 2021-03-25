@@ -919,13 +919,55 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    
-    
-    
-    // TODO: serverVarialbeEnumIsValid -
     func test_serverVarialbeEnumIsValidFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: [],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's enum is either not defined or is non-empty (if defined).")
+        }
     }
+    
     func test_serverVarialbeEnumIsValidSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        try document.validate(using: validator)
     }
     
     // TODO: serverVarialbeDefaultExistsInEnum -
