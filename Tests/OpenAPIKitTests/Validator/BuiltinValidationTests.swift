@@ -393,17 +393,71 @@ final class BuiltinValidationTests: XCTestCase {
     }
     
     // TODO: pathItemParametersAreUnique -
+    func test_pathItemParametersAreUniqueFails() throws {
+    }
+    func test_pathItemParametersAreUniqueSucceeds() throws {
+    }
+    
     // TODO: operationParametersAreUnique -
+    func test_operationParametersAreUniqueFails() throws {
+    }
+    func test_operationParametersAreUniqueSucceeds() throws {
+    }
+    
     // TODO: operationIdsAreUnique -
+    func test_operationIdsAreUniqueFails() throws {
+    }
+    func test_operationIdsAreUniqueSucceeds() throws {
+    }
+    
     // TODO: schemaReferencesAreValid -
+    func test_schemaReferencesAreValidFails() throws {
+    }
+    func test_schemaReferencesAreValidSucceeds() throws {
+    }
+    
     // TODO: responseReferencesAreValid -
+    func test_responseReferencesAreValidFails() throws {
+    }
+    func test_responseReferencesAreValidSucceeds() throws {
+    }
+    
     // TODO: parameterReferencesAreValid -
+    func test_parameterReferencesAreValidFails() throws {
+    }
+    func test_parameterReferencesAreValidSucceeds() throws {
+    }
+    
     // TODO: exampleReferencesAreValid -
+    func test_exampleReferencesAreValidFails() throws {
+    }
+    func test_exampleReferencesAreValidSucceeds() throws {
+    }
+    
     // TODO: requestReferencesAreValid -
+    func test_requestReferencesAreValidFails() throws {
+    }
+    func test_requestReferencesAreValidSucceeds() throws {
+    }
+    
     // TODO: headerReferencesAreValid -
+    func test_headerReferencesAreValidFails() throws {
+    }
+    func test_headerReferencesAreValidSucceeds() throws {
+    }
+    
     
     // TODO: serverVarialbeEnumIsValid -
+    func test_serverVarialbeEnumIsValidFails() throws {
+    }
+    func test_serverVarialbeEnumIsValidSucceeds() throws {
+    }
+    
     // TODO: serverVarialbeDefaultExistsInEnum -
+    func test_serverVarialbeDefaultExistsInEnumFails() throws {
+    }
+    func test_serverVarialbeDefaultExistsInEnumSucceeds() throws {
+    }
     
     
     // MARK: Default validation -
