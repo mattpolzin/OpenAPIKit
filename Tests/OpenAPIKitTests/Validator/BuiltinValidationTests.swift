@@ -838,10 +838,85 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: headerReferencesAreValid -
     func test_headerReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            put: .init(
+                requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                responses: [
+                    200: .response(description: "empty")
+                ]
+            ),
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    404: .response(
+                        description: "response2",
+                        headers: [
+                            "header1": .reference(.component(named: "header1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                headers: [
+                    "headerRandom": .init(schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.headerReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Header reference can be found in components/headers")
+        }
     }
+    
     func test_headerReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            put: .init(
+                requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                responses: [
+                    200: .response(description: "empty")
+                ]
+            ),
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    404: .response(
+                        description: "response2",
+                        headers: [
+                            "header1": .reference(.component(named: "header1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                headers: [
+                    "header1": .init(schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.headerReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     
