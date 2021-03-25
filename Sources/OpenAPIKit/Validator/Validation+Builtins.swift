@@ -374,46 +374,32 @@ extension Validation {
         )
     }
     
-    /// Validate that `enum` now must not be empty in the document's
+    /// Validate that `enum` must not be empty in the document's
     /// Server Variable.
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeEnumsAreValid: Validation<JSONReference<OpenAPI.Header>> {
+    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
         .init(
-            description: "Header reference can be found in components/headers",
+            description: "Server Variable's enum is either not defined or is non-empty (if defined).",
             check: { context in
-                guard case let .internal(internalReference) = context.subject,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
+                guard let `enum` = context.subject.`enum` else { return true }
+                return `enum`.isEmpty == false
             }
         )
     }
     
-    /// Validate that `default` now MUST exist in the enum values in the document's
-    /// Server Variable, if such values are defined.
+    /// Validate that `default` must exist in the enum values in the document's
+    /// Server Variable, if such values (enum) are defined.
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeDefaultExistsInEnumapple : Validation<JSONReference<OpenAPI.Header>> {
+    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
         .init(
-            description: "Header reference can be found in components/headers",
+            description: "Server Variable's default must exist in enum, if enum is defined and non-empty.",
             check: { context in
-                guard case let .internal(internalReference) = context.subject,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
+                guard let `enum` = context.subject.`enum` else { return true }
+                return `enum`.contains(context.subject.`default`)
             }
         )
     }
