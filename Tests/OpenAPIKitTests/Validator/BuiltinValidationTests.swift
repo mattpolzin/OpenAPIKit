@@ -541,10 +541,63 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: schemaReferencesAreValid -
     func test_schemaReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    404: .response(
+                        description: "response",
+                        content: [
+                            .xml: .init(schemaReference: .component(named: "schema1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init()
+        )
+        let validator = Validator.blank.validating(.schemaReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: JSONSchema reference can be found in components/schemas")
+        }
     }
+    
     func test_schemaReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    404: .response(
+                        description: "response",
+                        content: [
+                            .xml: .init(schemaReference: .component(named: "schema1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                schemas: [
+                    "schema1": .object
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.schemaReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     // TODO: responseReferencesAreValid -
