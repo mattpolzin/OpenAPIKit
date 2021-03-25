@@ -10,6 +10,9 @@ import XCTest
 import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
+    
+    // MARK: Builtin validators -
+    
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -310,6 +313,58 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.serverVariablesAreDefined)
         try document.validate(using: validator)
     }
+    
+    func test_operationsContainResponsesFails() throws {
+        let op = OpenAPI.Operation(responses: [:])
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: op
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
+        }
+    }
+    
+    func test_operationsContainResponsesSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .object(
+                                            properties: [
+                                                "nested": .fragment(.init())
+                                            ]
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        try document.validate(using: validator)
+    }
+    
+    // MARK: Default validation -
 
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
