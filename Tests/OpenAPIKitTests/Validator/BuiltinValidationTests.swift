@@ -392,6 +392,20 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
+    // TODO: pathItemParametersAreUnique -
+    // TODO: operationParametersAreUnique -
+    // TODO: operationIdsAreUnique -
+    // TODO: schemaReferencesAreValid -
+    // TODO: responseReferencesAreValid -
+    // TODO: parameterReferencesAreValid -
+    // TODO: exampleReferencesAreValid -
+    // TODO: requestReferencesAreValid -
+    // TODO: headerReferencesAreValid -
+    
+    // TODO: serverVarialbeEnumIsValid -
+    // TODO: serverVarialbeDefaultExistsInEnum -
+    
+    
     // MARK: Default validation -
 
     func test_duplicateTagOnDocumentFails() {
