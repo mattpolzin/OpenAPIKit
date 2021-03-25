@@ -783,10 +783,59 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    // TODO: requestReferencesAreValid -
     func test_requestReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                requestBodies: [
+                    "requestRandom": .init(content: [.json: .init(schema: .object)])
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.requestReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
+        }
     }
+    
     func test_requestReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                requestBodies: [
+                    "request1": .init(content: [.json: .init(schema: .object)])
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.requestReferencesAreValid)
+        try document.validate(using: validator)
     }
     
     // TODO: headerReferencesAreValid -
