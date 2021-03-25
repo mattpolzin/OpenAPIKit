@@ -169,9 +169,11 @@ public final class Validator {
     ///     components dictionary.
     /// - All Header references are found in the document's
     ///     components dictionary
+    /// - `Enum` must not be empty in the document's
+    ///   Server Variable.
+    /// - `Default` must exist in the enum values in the document's
+    ///    Server Variable.
     ///
-    // TODO: add validation where `Server.Variable.enum` is either `nil` or non-empty -
-    // TODO: add validation where, if there is an non-empty `enum`, `Server.Variable.default` contains a value that is an element of `enum` -
     public convenience init() {
         self.init(validations: [
             .init(.operationsContainResponses),
@@ -184,7 +186,9 @@ public final class Validator {
             .init(.parameterReferencesAreValid),
             .init(.exampleReferencesAreValid),
             .init(.requestReferencesAreValid),
-            .init(.headerReferencesAreValid)
+            .init(.headerReferencesAreValid),
+            .init(.serverVarialbeEnumIsValid),
+            .init(.serverVarialbeDefaultExistsInEnum)
         ])
     }
 
