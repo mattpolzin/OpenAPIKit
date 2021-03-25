@@ -170,9 +170,9 @@ public final class Validator {
     /// - All Header references are found in the document's
     ///     components dictionary
     /// - `Enum` must not be empty in the document's
-    ///   Server Variable.
+    ///     Server Variable.
     /// - `Default` must exist in the enum values in the document's
-    ///    Server Variable.
+    ///     Server Variable.
     ///
     public convenience init() {
         self.init(validations: [
