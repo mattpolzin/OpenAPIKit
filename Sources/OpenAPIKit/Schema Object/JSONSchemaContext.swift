@@ -775,16 +775,18 @@ extension JSONSchema.NumericContext: Encodable {
         try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
 
         if let max = maximum {
-            try container.encode(max.value, forKey: .maximum)
             if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
+                try container.encode(max.value, forKey: .exclusiveMaximum)
+            } else {
+                try container.encode(max.value, forKey: .maximum)
             }
         }
 
         if let min =  minimum {
-            try container.encode(min.value, forKey: .minimum)
             if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
+                try container.encode(min.value, forKey: .exclusiveMinimum)
+            } else {
+                try container.encode(min.value, forKey: .minimum)
             }
         }
     }
@@ -796,13 +798,19 @@ extension JSONSchema.NumericContext: Decodable {
 
         multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
 
-        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? Bound.defaultExclusion
-        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? Bound.defaultExclusion
+        if let exclusiveMaximum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum) {
+            maximum = Bound(value: exclusiveMaximum, exclusive: true)
+        } else {
+            maximum = try container.decodeIfPresent(Double.self, forKey: .maximum)
+                .map { Bound(value: $0, exclusive: false) }
+        }
 
-        maximum = (try container.decodeIfPresent(Double.self, forKey: .maximum))
-            .map { Bound(value: $0, exclusive: exclusiveMaximum) }
-        minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
-            .map { Bound(value: $0, exclusive: exclusiveMinimum) }
+        if let exclusiveMinimum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum) {
+            minimum = Bound(value: exclusiveMinimum, exclusive: true)
+        } else {
+            minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
+                .map { Bound(value: $0, exclusive: false) }
+        }
     }
 }
 
@@ -823,16 +831,18 @@ extension JSONSchema.IntegerContext: Encodable {
         try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
 
         if let max = maximum {
-            try container.encode(max.value, forKey: .maximum)
             if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
+                try container.encode(max.value, forKey: .exclusiveMaximum)
+            } else {
+                try container.encode(max.value, forKey: .maximum)
             }
         }
 
         if let min =  minimum {
-            try container.encode(min.value, forKey: .minimum)
             if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
+                try container.encode(min.value, forKey: .exclusiveMinimum)
+            } else {
+                try container.encode(min.value, forKey: .minimum)
             }
         }
     }
@@ -844,36 +854,33 @@ extension JSONSchema.IntegerContext: Decodable {
 
         multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
 
-        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
-        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
-
         // the following acrobatics thanks to some libraries (namely Yams) not
         // being willing to decode floating point representations of whole numbers
         // as integer values.
+        let exclusiveMaximumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
+        let exclusiveMinimumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
+
         let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
         let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
 
-        maximum = try maximumAttempt.map { floatMax in
-            guard let integer = Int(exactly: floatMax) else {
-                throw InconsistencyError(
-                    subjectName: "maximum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
-                )
+        func boundFromAttempt(_ attempt: Double?, max: Bool, exclusive: Bool) throws -> Bound? {
+            return try attempt.map { floatVal in
+                guard let integer = Int(exactly: floatVal) else {
+                    throw InconsistencyError(
+                        subjectName: max ? "maximum" : "minimum",
+                        details: "Expected an Integer literal but found a floating point value",
+                        codingPath: decoder.codingPath
+                    )
+                }
+                return Bound(value: integer, exclusive: exclusive)
             }
-            return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMaximum) }
+        }
 
-        minimum = try minimumAttempt.map { floatMin in
-            guard let integer = Int(exactly: floatMin) else {
-                throw InconsistencyError(
-                    subjectName: "minimum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
-                )
-            }
-            return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMinimum) }
+        maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
+            ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
+
+        minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
+            ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
     }
 }
 
