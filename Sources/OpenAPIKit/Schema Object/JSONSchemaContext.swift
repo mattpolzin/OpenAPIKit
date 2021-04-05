@@ -776,7 +776,7 @@ extension JSONSchema.NumericContext: Encodable {
 
         if let max = maximum {
             if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
+                try container.encode(max.value, forKey: .exclusiveMaximum)
             } else {
                 try container.encode(max.value, forKey: .maximum)
             }
@@ -784,7 +784,7 @@ extension JSONSchema.NumericContext: Encodable {
 
         if let min =  minimum {
             if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
+                try container.encode(min.value, forKey: .exclusiveMinimum)
             } else {
                 try container.encode(min.value, forKey: .minimum)
             }
@@ -832,7 +832,7 @@ extension JSONSchema.IntegerContext: Encodable {
 
         if let max = maximum {
             if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
+                try container.encode(max.value, forKey: .exclusiveMaximum)
             } else {
                 try container.encode(max.value, forKey: .maximum)
             }
@@ -840,7 +840,7 @@ extension JSONSchema.IntegerContext: Encodable {
 
         if let min =  minimum {
             if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
+                try container.encode(min.value, forKey: .exclusiveMinimum)
             } else {
                 try container.encode(min.value, forKey: .minimum)
             }
