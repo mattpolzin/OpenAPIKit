@@ -3695,22 +3695,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11.5,",
+                                    "\"exclusiveMaximum\" : 11.5,",
                                     "\"type\" : \"number\"",
         ])
 
         testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11.5,",
+                                    "\"exclusiveMaximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
 
         testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11.5,",
+                                    "\"exclusiveMaximum\" : 11.5,",
                                     "\"type\" : [",
                                     "  \"number\",",
                                     "  \"null\"",
@@ -3722,16 +3719,15 @@ extension SchemaObjectTests {
                                     "\"enum\" : [",
                                     "  10",
                                     "],",
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11.5,",
+                                    "\"exclusiveMaximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
     }
 
     func test_decodeNumberWithExclusiveMaximum() throws {
-        let numberData = #"{"type": "number", "maximum": 2.2, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": ["number", "null"], "maximum": 2.2, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let allowedValueNumberData = #"{"type": "number", "maximum": 2.2, "exclusiveMaximum": true, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
+        let numberData = #"{"type": "number", "exclusiveMaximum": 2.2}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "exclusiveMaximum": 2.2}"#.data(using: .utf8)!
+        let allowedValueNumberData = #"{"type": "number", "exclusiveMaximum": 2.2, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
 
         let number = try orderUnstableDecode(JSONSchema.self, from: numberData)
         let nullableNumber = try orderUnstableDecode(JSONSchema.self, from: nullableNumberData)
@@ -3803,22 +3799,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: requiredNumber,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 0.5,",
+                                    "\"exclusiveMinimum\" : 0.5,",
                                     "\"type\" : \"number\"",
         ])
 
         testEncodingPropertyLines(entity: optionalNumber,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 0.5,",
+                                    "\"exclusiveMinimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
 
         testEncodingPropertyLines(entity: nullableNumber,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 0.5,",
+                                    "\"exclusiveMinimum\" : 0.5,",
                                     "\"type\" : [",
                                     "  \"number\",",
                                     "  \"null\"",
@@ -3830,16 +3823,15 @@ extension SchemaObjectTests {
                                     "\"enum\" : [",
                                     "  10",
                                     "],",
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 0.5,",
+                                    "\"exclusiveMinimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
     }
 
     func test_decodeNumberWithExclusiveMinimum() throws {
-        let numberData = #"{"type": "number", "minimum": 1.1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let nullableNumberData = #"{"type": ["number", "null"], "minimum": 1.1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let allowedValueNumberData = #"{"type": "number", "minimum": 1.1, "exclusiveMinimum": true, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
+        let numberData = #"{"type": "number", "exclusiveMinimum": 1.1}"#.data(using: .utf8)!
+        let nullableNumberData = #"{"type": ["number", "null"], "exclusiveMinimum": 1.1}"#.data(using: .utf8)!
+        let allowedValueNumberData = #"{"type": "number", "exclusiveMinimum": 1.1, "enum": [2.1, 1.2]}"#.data(using: .utf8)!
 
         let number = try orderUnstableDecode(JSONSchema.self, from: numberData)
         let nullableNumber = try orderUnstableDecode(JSONSchema.self, from: nullableNumberData)
@@ -4107,22 +4099,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: requiredInteger,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11,",
+                                    "\"exclusiveMaximum\" : 11,",
                                     "\"type\" : \"integer\"",
             ])
 
         testEncodingPropertyLines(entity: optionalInteger,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11,",
+                                    "\"exclusiveMaximum\" : 11,",
                                     "\"type\" : \"integer\""
             ])
 
         testEncodingPropertyLines(entity: nullableInteger,
                                   propertyLines: [
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11,",
+                                    "\"exclusiveMaximum\" : 11,",
                                     "\"type\" : [",
                                     "  \"integer\",",
                                     "  \"null\"",
@@ -4134,16 +4123,15 @@ extension SchemaObjectTests {
                                     "\"enum\" : [",
                                     "  10",
                                     "],",
-                                    "\"exclusiveMaximum\" : true,",
-                                    "\"maximum\" : 11,",
+                                    "\"exclusiveMaximum\" : 11,",
                                     "\"type\" : \"integer\""
             ])
     }
 
     func test_decodeIntegerWithExclusiveMaximum() throws {
-        let integerData = #"{"type": "integer", "maximum": 1, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": ["integer", "null"], "maximum": 1, "exclusiveMaximum": true}"#.data(using: .utf8)!
-        let allowedValueIntegerData = #"{"type": "integer", "maximum": 5, "exclusiveMaximum": true, "enum": [2, 3]}"#.data(using: .utf8)!
+        let integerData = #"{"type": "integer", "exclusiveMaximum": 1}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "exclusiveMaximum": 1}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "exclusiveMaximum": 5, "enum": [2, 3]}"#.data(using: .utf8)!
 
         let integer = try orderUnstableDecode(JSONSchema.self, from: integerData)
         let nullableInteger = try orderUnstableDecode(JSONSchema.self, from: nullableIntegerData)
@@ -4218,22 +4206,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: requiredInteger,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 5,",
+                                    "\"exclusiveMinimum\" : 5,",
                                     "\"type\" : \"integer\"",
             ])
 
         testEncodingPropertyLines(entity: optionalInteger,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 5,",
+                                    "\"exclusiveMinimum\" : 5,",
                                     "\"type\" : \"integer\""
             ])
 
         testEncodingPropertyLines(entity: nullableInteger,
                                   propertyLines: [
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 5,",
+                                    "\"exclusiveMinimum\" : 5,",
                                     "\"type\" : [",
                                     "  \"integer\",",
                                     "  \"null\"",
@@ -4245,16 +4230,15 @@ extension SchemaObjectTests {
                                     "\"enum\" : [",
                                     "  10",
                                     "],",
-                                    "\"exclusiveMinimum\" : true,",
-                                    "\"minimum\" : 5,",
+                                    "\"exclusiveMinimum\" : 5,",
                                     "\"type\" : \"integer\""
             ])
     }
 
     func test_decodeIntegerWithExclusiveMinimum() throws {
-        let integerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let nullableIntegerData = #"{"type": ["integer", "null"], "minimum": 1, "exclusiveMinimum": true}"#.data(using: .utf8)!
-        let allowedValueIntegerData = #"{"type": "integer", "minimum": 1, "exclusiveMinimum": true, "enum": [2, 3]}"#.data(using: .utf8)!
+        let integerData = #"{"type": "integer", "exclusiveMinimum": 1}"#.data(using: .utf8)!
+        let nullableIntegerData = #"{"type": ["integer", "null"], "exclusiveMinimum": 1}"#.data(using: .utf8)!
+        let allowedValueIntegerData = #"{"type": "integer", "exclusiveMinimum": 1, "enum": [2, 3]}"#.data(using: .utf8)!
 
         let integer = try orderUnstableDecode(JSONSchema.self, from: integerData)
         let nullableInteger = try orderUnstableDecode(JSONSchema.self, from: nullableIntegerData)
