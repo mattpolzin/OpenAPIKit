@@ -910,8 +910,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(oneOf.required)
         XCTAssertFalse(not.required)
         XCTAssertFalse(fragment.required)
-
-        XCTAssertTrue(reference.required)
+        XCTAssertFalse(reference.required)
     }
 
     func test_optionalToRequired() {
