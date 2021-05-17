@@ -72,6 +72,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     func optionalSchemaObject() -> DereferencedJSONSchema {
         switch self {
+        case .null:
+            return .null
         case .boolean(let context):
             return .boolean(context.optionalContext())
         case .object(let contextA, let contextB):
