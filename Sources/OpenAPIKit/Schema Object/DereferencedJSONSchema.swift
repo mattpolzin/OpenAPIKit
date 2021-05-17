@@ -70,6 +70,33 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
         }
     }
 
+    func optionalSchemaObject() -> DereferencedJSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.optionalContext())
+        case .object(let contextA, let contextB):
+            return .object(contextA.optionalContext(), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.optionalContext(), contextB)
+        case .number(let context, let contextB):
+            return .number(context.optionalContext(), contextB)
+        case .integer(let context, let contextB):
+            return .integer(context.optionalContext(), contextB)
+        case .string(let context, let contextB):
+            return .string(context.optionalContext(), contextB)
+        case .fragment(let context):
+            return .fragment(context.optionalContext())
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.optionalContext())
+        case .one(of: let schemas, core: let core):
+            return .one(of: schemas, core: core.optionalContext())
+        case .any(of: let schemas, core: let core):
+            return .any(of: schemas, core: core.optionalContext())
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.optionalContext())
+        }
+    }
+
     // automatic forwarding where possible
     public subscript<T>(dynamicMember path: KeyPath<JSONSchema, T>) -> T {
         return jsonSchema[keyPath: path]
@@ -334,8 +361,12 @@ extension JSONSchema: LocallyDereferenceable {
         switch self {
         case .null:
             return .null
-        case .reference(let reference):
-            return try reference._dereferenced(in: components, following: references)
+        case .reference(let reference, let context):
+            var dereferenced = try reference._dereferenced(in: components, following: references)
+            if !context.required {
+                dereferenced = dereferenced.optionalSchemaObject()
+            }
+            return dereferenced
         case .boolean(let context):
             return .boolean(context)
         case .object(let coreContext, let objectContext):
