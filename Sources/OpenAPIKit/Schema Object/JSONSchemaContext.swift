@@ -618,7 +618,7 @@ extension JSONSchema {
         }
     }
 
-    /// The context that only applies to `.object` schemas.
+    /// The context that only applies to `.reference` schemas.
     public struct ReferenceContext: Equatable {
         public let required: Bool
 
