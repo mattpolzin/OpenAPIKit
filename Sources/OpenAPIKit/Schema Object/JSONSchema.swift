@@ -398,8 +398,8 @@ extension JSONSchema {
             return .any(of: schemas, core: core.optionalContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.optionalContext())
-        case .reference(let reference, _):
-            return .reference(reference, required: false)
+        case .reference(let reference, let context):
+            return .reference(reference, context.optionalContext())
         case .null:
             return self
         }
@@ -431,7 +431,7 @@ extension JSONSchema {
         case .not(let schema, core: let core):
             return .not(schema, core: core.requiredContext())
         case .reference(let reference, let context):
-            return .reference(reference, context.optionalContext())
+            return .reference(reference, context.requiredContext())
         case .null:
             return self
         }

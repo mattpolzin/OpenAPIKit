@@ -626,6 +626,10 @@ extension JSONSchema {
             self.required = required
         }
 
+        public func requiredContext() -> ReferenceContext {
+            return .init(required: true)
+        }
+
         public func optionalContext() -> ReferenceContext {
             return .init(required: false)
         }
