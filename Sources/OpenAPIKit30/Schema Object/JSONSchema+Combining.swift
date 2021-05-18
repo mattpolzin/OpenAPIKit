@@ -141,8 +141,12 @@ internal struct FragmentCombiner {
             // tease apart one allOf if there is one and continue from there.
             try self.combine(schemas + [.fragment(core), other])
 
-        case (_, .reference(let reference)), (.reference(let reference), _):
-            try combine(components.lookup(reference))
+        case (_, .reference(let reference, let context)), (.reference(let reference, let context), _):
+            var component = try components.lookup(reference)
+            if !context.required {
+                component = component.optionalSchemaObject()
+            }
+            try combine(component)
 
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
             self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))

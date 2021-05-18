@@ -21,7 +21,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     indirect case one(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
     indirect case any(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
     indirect case not(JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
-    case reference(JSONReference<JSONSchema>)
+    case reference(JSONReference<JSONSchema>, ReferenceContext)
     /// Schemas without a `type`.
     case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
 
@@ -101,8 +101,8 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.required
-        case .reference:
-            return true
+        case .reference(_, let context):
+            return context.required
         }
     }
 
@@ -345,6 +345,15 @@ extension JSONSchema {
         }
         return context
     }
+
+    /// Get the context specific to a `reference` schema. If not a
+    /// reference schema, returns `nil`.
+    public var referenceContext: ReferenceContext? {
+        guard case .reference(_, let context) = self else {
+            return nil
+        }
+        return context
+    }
 }
 
 // MARK: - Transformations
@@ -374,8 +383,8 @@ extension JSONSchema {
             return .any(of: schemas, core: core.optionalContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.optionalContext())
-        case .reference:
-            return self
+        case .reference(let reference, let context):
+            return .reference(reference, context.optionalContext())
         }
     }
 
@@ -404,8 +413,8 @@ extension JSONSchema {
             return .any(of: schemas, core: core.requiredContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.requiredContext())
-        case .reference:
-            return self
+        case .reference(let reference, let context):
+            return .reference(reference, context.requiredContext())
         }
     }
 
@@ -1200,6 +1209,14 @@ extension JSONSchema {
             )
         )
     }
+
+    /// Construct a reference schema
+    public static func reference(
+        _ reference: JSONReference<JSONSchema>,
+        required: Bool = true
+    ) -> JSONSchema {
+        return .reference(reference, .init(required: required))
+    }
 }
 
 // MARK: - Codable
@@ -1252,7 +1269,7 @@ extension JSONSchema: Encodable {
             try container.encode(node, forKey: .not)
             try core.encode(to: encoder)
 
-        case .reference(let reference):
+        case .reference(let reference, _):
             var container = encoder.singleValueContainer()
 
             try container.encode(reference)
@@ -1280,7 +1297,7 @@ extension JSONSchema: Decodable {
 
         if let singleValueContainer = try? decoder.singleValueContainer() {
             if let ref = try? singleValueContainer.decode(JSONReference<JSONSchema>.self) {
-                self = .reference(ref)
+                self = .reference(ref, .init(required: true))
                 return
             }
         }
