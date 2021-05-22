@@ -5840,4 +5840,16 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(t1, t2)
     }
+
+    func test_reference() {
+        let t1: JSONSchema = .reference(.internal(.component(name: "test")), .init(required: true))
+        let t2: JSONSchema = .reference(.internal(.component(name: "test")), required: true)
+
+        XCTAssertEqual(t1, t2)
+
+        let t3: JSONSchema = .reference(.internal(.component(name: "test")), .init(required: false))
+        let t4: JSONSchema = .reference(.internal(.component(name: "test")), required: false)
+
+        XCTAssertEqual(t3, t4)
+    }
 }

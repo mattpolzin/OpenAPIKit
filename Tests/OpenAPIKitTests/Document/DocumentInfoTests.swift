@@ -26,6 +26,8 @@ final class DocumentInfoTests: XCTestCase {
         let _ = OpenAPI.Document.Info.License(name: "license")
         let _ = OpenAPI.Document.Info.License(name: "license", url: URL(string: "http://google.com")!)
 
+        let _ = OpenAPI.Document.Info.License(name: "spdx license", spdxIdentifier: "spdx id")
+
         let _ = OpenAPI.Document.Info.License.MIT
         let _ = OpenAPI.Document.Info.License.MIT(url: URL(string: "http://google.com")!)
         let _ = OpenAPI.Document.Info.License.apache2
@@ -96,6 +98,38 @@ extension DocumentInfoTests {
         XCTAssertEqual(
             license,
             .MIT(url: URL(string: "http://google.com")!)
+        )
+    }
+
+    func test_license_withSPDX_encode() throws {
+        let license = OpenAPI.Document.Info.License(name: "license", spdxIdentifier: "SPDX id")
+
+        let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
+
+        assertJSONEquivalent(
+            encodedLicense,
+            """
+            {
+              "identifier" : "SPDX id",
+              "name" : "license"
+            }
+            """
+        )
+    }
+
+    func test_license_withSPDX_decode() throws {
+        let licenseData =
+        """
+        {
+          "identifier" : "SPDX id",
+          "name" : "license"
+        }
+        """.data(using: .utf8)!
+        let license = try orderUnstableDecode(OpenAPI.Document.Info.License.self, from: licenseData)
+
+        XCTAssertEqual(
+            license,
+            .init(name: "license", spdxIdentifier: "SPDX id")
         )
     }
 

@@ -81,7 +81,7 @@ extension OpenAPI.Document {
         /// See [OpenAPI License Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#license-object).
         public struct License: Equatable, CodableVendorExtendable {
             public let name: String
-            public let url: URL?
+            public let identifier: Identifier?
 
             /// Dictionary of vendor extensions.
             ///
@@ -90,14 +90,36 @@ extension OpenAPI.Document {
             /// where the values are anything codable.
             public var vendorExtensions: [String: AnyCodable]
 
+            /// Create a License that optionally points to a URL containing
+            /// detailed information.
             public init(
                 name: String,
                 url: URL? = nil,
                 vendorExtensions: [String: AnyCodable] = [:]
             ) {
                 self.name = name
-                self.url = url
+                self.identifier = url.map { .url($0) }
                 self.vendorExtensions = vendorExtensions
+            }
+
+            /// Create a License that contains an SPDX identifier.
+            public init(
+                name: String,
+                spdxIdentifier: String,
+                vendorExtensions: [String: AnyCodable] = [:]
+            ) {
+                self.name = name
+                self.identifier = .spdx(spdxIdentifier)
+                self.vendorExtensions = vendorExtensions
+            }
+
+            /// The `identifier`/`url` property of the OpenAPI Spec "License Object"
+            /// that can be either a URL or an SPDX identifier.
+            public enum Identifier: Equatable {
+                case url(URL)
+                /// See https://spdx.dev/spdx-specification-21-web-version/#h.jxpfx0ykyb60
+                /// for more on SPDX.
+                case spdx(String)
             }
         }
     }
@@ -129,7 +151,14 @@ extension OpenAPI.Document.Info.License: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(name, forKey: .name)
-        try container.encodeIfPresent(url?.absoluteString, forKey: .url)
+        if let identifier = self.identifier {
+            switch identifier {
+            case .spdx(let string):
+                try container.encodeIfPresent(string, forKey: .identifier)
+            case .url(let url):
+                try container.encodeIfPresent(url.absoluteString, forKey: .url)
+            }
+        }
 
         try encodeExtensions(to: &container)
     }
@@ -141,7 +170,13 @@ extension OpenAPI.Document.Info.License: Decodable {
 
         name = try container.decode(String.self, forKey: .name)
 
-        url = try container.decodeURLAsStringIfPresent(forKey: .url)
+        if let url = try container.decodeURLAsStringIfPresent(forKey: .url) {
+            identifier = .url(url)
+        } else if let string = try container.decodeIfPresent(String.self, forKey: .identifier) {
+            identifier = .spdx(string)
+        } else {
+            identifier = nil
+        }
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
@@ -151,13 +186,15 @@ extension OpenAPI.Document.Info.License {
     internal enum CodingKeys: ExtendableCodingKey {
         case name
         case url
+        case identifier
 
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .name,
-                .url
+                .url,
+                .identifier
             ]
         }
 
@@ -171,6 +208,8 @@ extension OpenAPI.Document.Info.License {
                 self = .name
             case "url":
                 self = .url
+            case "identifier":
+                self = .identifier
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -182,6 +221,8 @@ extension OpenAPI.Document.Info.License {
                 return "name"
             case .url:
                 return "url"
+            case .identifier:
+                return "identifier"
             case .extended(let key):
                 return key
             }
