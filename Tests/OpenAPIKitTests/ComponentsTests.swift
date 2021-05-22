@@ -99,7 +99,7 @@ final class ComponentsTests: XCTestCase {
             ],
             callbacks: [
                 "eight": [
-                    OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                    OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
                 ]
             ]
         )
@@ -123,7 +123,7 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(
             components[ref8],
             [
-                OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
             ]
         )
     }
@@ -264,13 +264,15 @@ extension ComponentsTests {
             ],
             callbacks: [
                 "eight": [
-                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                        post: .init(
-                            responses: [
-                                200: .response(
-                                    description: "callback successfully processed"
-                                )
-                            ]
+                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                        .init(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
                         )
                     )
                 ]
@@ -446,13 +448,15 @@ extension ComponentsTests {
                 ],
                 callbacks: [
                     "eight": [
-                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                            post: .init(
-                                responses: [
-                                    200: .response(
-                                        description: "callback successfully processed"
-                                    )
-                                ]
+                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                            .init(
+                                post: .init(
+                                    responses: [
+                                        200: .response(
+                                            description: "callback successfully processed"
+                                        )
+                                    ]
+                                )
                             )
                         )
                     ]

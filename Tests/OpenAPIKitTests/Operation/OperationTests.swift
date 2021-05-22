@@ -111,13 +111,15 @@ extension OperationTests {
             callbacks: [
                 "callback": .init(
                     [
-                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                            post: .init(
-                                responses: [
-                                    200: .response(
-                                        description: "callback successfully processed"
-                                    )
-                                ]
+                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                            .init(
+                                post: .init(
+                                    responses: [
+                                        200: .response(
+                                            description: "callback successfully processed"
+                                        )
+                                    ]
+                                )
                             )
                         )
                     ]
@@ -283,13 +285,15 @@ extension OperationTests {
                 callbacks: [
                     "callback": .init(
                         [
-                            OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                                post: .init(
-                                    responses: [
-                                        200: .response(
-                                            description: "callback successfully processed"
-                                        )
-                                    ]
+                            OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                                .init(
+                                    post: .init(
+                                        responses: [
+                                            200: .response(
+                                                description: "callback successfully processed"
+                                            )
+                                        ]
+                                    )
                                 )
                             )
                         ]
