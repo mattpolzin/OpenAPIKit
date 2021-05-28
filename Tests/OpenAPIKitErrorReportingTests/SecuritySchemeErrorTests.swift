@@ -15,7 +15,7 @@ final class SecuritySchemeErrorTests: XCTestCase {
         // missing as-in not found in the Components Object
         let documentYML =
         """
-        openapi: 3.0.0
+        openapi: 3.1.0
         info:
             title: test
             version: 1.0
@@ -40,7 +40,7 @@ final class SecuritySchemeErrorTests: XCTestCase {
         // missing as-in not found in the Components Object
         let documentYML =
         """
-        openapi: 3.0.0
+        openapi: 3.1.0
         info:
             title: test
             version: 1.0

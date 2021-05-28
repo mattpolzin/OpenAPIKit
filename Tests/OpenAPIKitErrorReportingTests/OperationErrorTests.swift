@@ -101,7 +101,7 @@ extension OperationErrorTests {
     func test_missingResponseFromSSWGPitchConversation() {
         let documentYML =
         """
-        openapi: 3.0.0
+        openapi: 3.1.0
         info:
           title: API
           version: 1.0.0

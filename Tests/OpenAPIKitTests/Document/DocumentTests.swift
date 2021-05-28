@@ -480,7 +480,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.2",
+          "openapi" : "3.1.0",
           "paths" : {
 
           }
@@ -517,7 +517,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               },
