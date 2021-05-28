@@ -31,7 +31,30 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 
 ## Usage
 
+### Migration
+#### 1.x to 2.x
 If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [migration guide](./documentation/v2_migration_guide.md).
+
+#### 2.x to 3.0.0
+There is not yet a migration guide for upgrading from OpenAPIKit 2.x to OpenAPIKit 3.0.0. You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
+
+In package manifests, dependencies will be one of:
+```
+// v3.0 of spec:
+dependencies: [.product(name: "OpenAPIKit30", package: "OpenAPIKit")]
+
+// v3.1 of spec:
+dependencies: [.product(name: "OpenAPIKit", package: "OpenAPIKit")]
+```
+
+Your imports need to be specific as well:
+```swift
+// v3.0 of spec:
+import OpenAPIKit30
+
+// v3.1 of spec:
+import OpenAPIKit
+```
 
 ### Decoding OpenAPI Documents
 
