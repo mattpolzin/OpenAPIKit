@@ -159,16 +159,6 @@ public final class Validator {
     /// - Operation Ids are unique across the whole Document.
     /// - All JSONReferences that refer to components in this
     ///     document can be found in the components dictionary.
-    /// - All Response references are found in the document's
-    ///     components dictionary.
-    /// - All Parameter references are found in the document's
-    ///     components dictionary
-    /// - All Example references are found in the document's
-    ///     components dictionary
-    /// - All Request references are found in the document's
-    ///     components dictionary.
-    /// - All Header references are found in the document's
-    ///     components dictionary
     /// - `Enum` must not be empty in the document's
     ///     Server Variable.
     /// - `Default` must exist in the enum values in the document's
