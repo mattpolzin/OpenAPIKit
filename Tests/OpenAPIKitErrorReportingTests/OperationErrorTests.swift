@@ -14,7 +14,7 @@ final class OperationErrorTests: XCTestCase {
     func test_missingResponses() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -39,7 +39,7 @@ final class OperationErrorTests: XCTestCase {
     func test_wrongTypeTags() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -67,7 +67,7 @@ final class OperationErrorTests: XCTestCase {
     func test_missingUrlInServer() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0

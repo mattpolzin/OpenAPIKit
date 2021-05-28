@@ -14,7 +14,7 @@ final class RequestErrorTests: XCTestCase {
     func test_wrongTypeRequest() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -42,7 +42,7 @@ final class RequestErrorTests: XCTestCase {
     func test_missingContentMap() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -71,7 +71,7 @@ final class RequestErrorTests: XCTestCase {
     func test_wrongTypeContentMap() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
