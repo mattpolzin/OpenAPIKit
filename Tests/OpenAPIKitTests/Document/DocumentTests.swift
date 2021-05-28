@@ -19,7 +19,7 @@ final class DocumentTests: XCTestCase {
         )
 
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_2,
+            openAPIVersion: .v3_1_0,
             info: .init(title: "hi", version: "1.0"),
             servers: [
                 .init(url: URL(string: "https://google.com")!)
@@ -447,7 +447,7 @@ extension DocumentTests {
 
     func test_specifyOpenAPIVersion_encode() throws {
         let document = OpenAPI.Document(
-            openAPIVersion: .v3_0_2,
+            openAPIVersion: .v3_1_0,
             info: .init(title: "API", version: "1.0"),
             servers: [],
             paths: [:],
@@ -491,7 +491,7 @@ extension DocumentTests {
         XCTAssertEqual(
             document,
             OpenAPI.Document(
-                openAPIVersion: .v3_0_2,
+                openAPIVersion: .v3_1_0,
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],

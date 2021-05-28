@@ -12,7 +12,7 @@ import XCTest
 final class DeclarativeEaseOfUseTests: XCTestCase {
     func test_wholeBoi() {
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_0,
+            openAPIVersion: .v3_1_0,
             info: .init(
                 title: "Test Documentation",
                 description: "Description of Test Documentation",
@@ -263,7 +263,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         )
 
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_0,
+            openAPIVersion: .v3_1_0,
             info: apiInfo,
             servers: [server],
             paths: [
@@ -505,7 +505,7 @@ fileprivate let testInfo = OpenAPI.Document.Info(title: "Test API", version: "1.
 fileprivate let testServer = OpenAPI.Server(url: URL(string: "http://website.com")!)
 
 fileprivate let testDocument =  OpenAPI.Document(
-    openAPIVersion: .v3_0_3,
+    openAPIVersion: .v3_1_0,
     info: testInfo,
     servers: [testServer],
     paths: [

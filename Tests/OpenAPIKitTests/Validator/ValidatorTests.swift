@@ -16,11 +16,11 @@ final class ValidatorTests: XCTestCase {
 
         _ = validator.validating(
             "",
-            check: \OpenAPI.Document.openAPIVersion == .v3_0_0
+            check: \OpenAPI.Document.openAPIVersion == .v3_1_0
         )
         _ = validator.validating(
             "",
-            check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_0_0 }
+            check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_1_0 }
         )
 
         _ = validator.validating(
