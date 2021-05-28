@@ -373,6 +373,36 @@ extension Validation {
             }
         )
     }
+    
+    /// Validate that `enum` must not be empty in the document's
+    /// Server Variable.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
+        .init(
+            description: "Server Variable's enum is either not defined or is non-empty (if defined).",
+            check: { context in
+                guard let `enum` = context.subject.`enum` else { return true }
+                return `enum`.isEmpty == false
+            }
+        )
+    }
+    
+    /// Validate that `default` must exist in the enum values in the document's
+    /// Server Variable, if such values (enum) are defined.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
+        .init(
+            description: "Server Variable's default must exist in enum, if enum is defined.",
+            check: { context in
+                guard let `enum` = context.subject.`enum` else { return true }
+                return `enum`.contains(context.subject.`default`)
+            }
+        )
+    }
 }
 
 /// Used by both the Path Item parameter check and the

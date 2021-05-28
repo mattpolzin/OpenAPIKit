@@ -66,7 +66,7 @@ extension OpenAPI.Server {
     /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
     ///
     public struct Variable: Equatable, CodableVendorExtendable {
-        public var `enum`: [String]
+        public var `enum`: [String]?
         public var `default`: String
         public var description: String?
 
@@ -78,7 +78,7 @@ extension OpenAPI.Server {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            enum: [String] = [],
+            enum: [String]? = nil,
             default: String,
             description: String? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -172,7 +172,7 @@ extension OpenAPI.Server.Variable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if !`enum`.isEmpty {
+        if let `enum` = `enum`, !`enum`.isEmpty {
             try container.encode(`enum`, forKey: .enum)
         }
 
@@ -188,7 +188,7 @@ extension OpenAPI.Server.Variable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) ?? []
+        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) 
 
         `default` = try container.decode(String.self, forKey: .default)
 

@@ -10,6 +10,7 @@ import XCTest
 import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
+
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -308,6 +309,108 @@ final class BuiltinValidationTests: XCTestCase {
         )
 
         let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        try document.validate(using: validator)
+    }
+    
+    func test_serverVariableEnumIsValidFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: [],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's enum is either not defined or is non-empty (if defined).")
+        }
+    }
+    
+    func test_serverVariableEnumIsValidSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_serverVariableDefaultExistsInEnumFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "random",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's default must exist in enum, if enum is defined.")
+        }
+    }
+    
+    func test_serverVariableDefaultExistsInEnumSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
         try document.validate(using: validator)
     }
 

@@ -16,7 +16,7 @@ class ServerTests: XCTestCase {
         let v1 = Server.Variable(default: "hello")
 
         XCTAssertEqual(v1.default, "hello")
-        XCTAssertEqual(v1.enum, [])
+        XCTAssertNil(v1.enum)
         XCTAssertNil(v1.description)
 
         let v2 = Server.Variable(
