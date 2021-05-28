@@ -10,6 +10,9 @@ import XCTest
 import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
+    
+    // MARK: Builtin validators -
+    
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -310,6 +313,716 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.serverVariablesAreDefined)
         try document.validate(using: validator)
     }
+    
+    func test_operationsContainResponsesFails() throws {
+        let op = OpenAPI.Operation(responses: [:])
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: op
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
+        }
+    }
+    
+    func test_operationsContainResponsesSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "Test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .init(
+                                        schema: .object(
+                                            properties: [
+                                                "nested": .fragment(.init())
+                                            ]
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        try document.validate(using: validator)
+    }
+    
+    func test_documentTagNamesAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            tags: ["hello", "hello"]
+        )
+        let validator = Validator.blank.validating(.documentTagNamesAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Tags in the Document are unique")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+    
+    func test_documentTagNamesAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            tags: ["hello", "again"]
+        )
+        let validator = Validator.blank.validating(.documentTagNamesAreUnique)
+        try document.validate(using: validator)
+    }
+    
+    func test_pathItemParametersAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(name: "item", context: .query, schema: .string),
+                        .parameter(name: "item", context: .query, schema: .string)
+                    ],
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.pathItemParametersAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Path Item parameters are unique (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello"])
+            XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello']")
+        }
+    }
+    
+    func test_pathItemParametersAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(name: "item", context: .query, schema: .string),
+                        .parameter(name: "item", context: .path, schema: .string), // changes parameter location but not name
+                        .parameter(name: "cool", context: .path, schema: .string) // changes parameter name but not location
+                    ],
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.pathItemParametersAreUnique)
+        try document.validate(using: validator)
+    }
+    
+    // TODO: operationParametersAreUnique -
+    func test_operationParametersAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "hiya", context: .path, schema: .string),
+                            .parameter(name: "hiya", context: .path, schema: .string)
+                        ],
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationParametersAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operation parameters are unique (identity is defined by the 'name' and 'location')")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello", "get"])
+            XCTAssertEqual(error?.values.first?.codingPathString, ".paths['/hello'].get")
+        }
+    }
+    
+    func test_operationParametersAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(name: "hiya", context: .query, schema: .string),
+                            .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
+                            .parameter(name: "cool", context: .path, schema: .string)  // changes parameter name but not location
+                        ],
+                        responses: [
+                            200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationParametersAreUnique)
+        try document.validate(using: validator)
+    }
+    
+    func test_operationIdsAreUniqueFails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [
+                        200: .response(description: "hi")
+                    ])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "test", responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationIdsAreUnique)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: All Operation Ids in Document are unique")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+    
+    func test_operationIdsAreUniqueSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(operationId: "one", responses: [
+                        200: .response(description: "hi")
+                    ])
+                ),
+                "/hello/world": .init(
+                    put: .init(operationId: "two", responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.operationIdsAreUnique)
+        try document.validate(using: validator)
+    }
+    
+    func test_schemaReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    404: .response(
+                        description: "response",
+                        content: [
+                            .xml: .init(schemaReference: .component(named: "schema1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init()
+        )
+        let validator = Validator.blank.validating(.schemaReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: JSONSchema reference can be found in components/schemas")
+        }
+    }
+    
+    func test_schemaReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    404: .response(
+                        description: "response",
+                        content: [
+                            .xml: .init(schemaReference: .component(named: "schema1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                schemas: [
+                    "schema1": .object
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.schemaReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_responseReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1"))
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init()
+        )
+        let validator = Validator.blank.validating(.responseReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Response reference can be found in components/responses")
+        }
+    }
+    
+    func test_responseReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1"))
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                responses: [
+                    "response1": .init(description: "test")
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.responseReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_parameterReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                parameters: [
+                    "parameter22": .init(name: "test", context: .header, schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.parameterReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
+        }
+    }
+    
+    func test_parameterReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                parameters: [
+                    "parameter1": .init(name: "test", context: .header, schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.parameterReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_exampleReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    404: .response(
+                        description: "response2",
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1"))
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                examples: [
+                    "exampleRandom": .init(value: .b("hello"))
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.exampleReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Example reference can be found in components/examples")
+        }
+    }
+    
+    func test_exampleReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                    301: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                    404: .response(
+                        description: "response2",
+                        content: [
+                            .json: .init(
+                                schema: .string,
+                                examples: [
+                                    "example1": .reference(.component(named: "example1")),
+                                    "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                examples: [
+                    "example1": .init(value: .b("hello"))
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.exampleReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_requestReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                requestBodies: [
+                    "requestRandom": .init(content: [.json: .init(schema: .object)])
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.requestReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
+        }
+    }
+    
+    func test_requestReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            post: .init(
+                parameters: [],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    200: .reference(.component(named: "response1")),
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                requestBodies: [
+                    "request1": .init(content: [.json: .init(schema: .object)])
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.requestReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_headerReferencesAreValidFails() throws {
+        let path = OpenAPI.PathItem(
+            put: .init(
+                requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                responses: [
+                    200: .response(description: "empty")
+                ]
+            ),
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    404: .response(
+                        description: "response2",
+                        headers: [
+                            "header1": .reference(.component(named: "header1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                headers: [
+                    "headerRandom": .init(schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.headerReferencesAreValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Header reference can be found in components/headers")
+        }
+    }
+    
+    func test_headerReferencesAreValidSucceeds() throws {
+        let path = OpenAPI.PathItem(
+            put: .init(
+                requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
+                responses: [
+                    200: .response(description: "empty")
+                ]
+            ),
+            post: .init(
+                parameters: [
+                    .reference(.component(named: "parameter1"))
+                ],
+                requestBody: .reference(.component(named: "request1")),
+                responses: [
+                    404: .response(
+                        description: "response2",
+                        headers: [
+                            "header1": .reference(.component(named: "header1"))
+                        ]
+                    )
+                ]
+            )
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": path
+            ],
+            components: .init(
+                headers: [
+                    "header1": .init(schema: .string)
+                ]
+            )
+        )
+        let validator = Validator.blank.validating(.headerReferencesAreValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_serverVarialbeEnumIsValidFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: [],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's enum is either not defined or is non-empty (if defined).")
+        }
+    }
+    
+    func test_serverVarialbeEnumIsValidSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_serverVarialbeDefaultExistsInEnumFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "random",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's default must exist in enum, if enum is defined.")
+        }
+    }
+    
+    func test_serverVarialbeDefaultExistsInEnumSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        try document.validate(using: validator)
+    }
+    
+    
+    // MARK: Default validation -
 
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
