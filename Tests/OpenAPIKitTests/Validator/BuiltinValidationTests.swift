@@ -919,7 +919,7 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    func test_serverVarialbeEnumIsValidFails() throws {
+    func test_serverVariableEnumIsValidFails() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://hello.com")!,
             description: "hello world",
@@ -946,7 +946,7 @@ final class BuiltinValidationTests: XCTestCase {
         }
     }
     
-    func test_serverVarialbeEnumIsValidSucceeds() throws {
+    func test_serverVariableEnumIsValidSucceeds() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://hello.com")!,
             description: "hello world",
@@ -970,7 +970,7 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
     
-    func test_serverVarialbeDefaultExistsInEnumFails() throws {
+    func test_serverVariableDefaultExistsInEnumFails() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://hello.com")!,
             description: "hello world",
@@ -997,7 +997,7 @@ final class BuiltinValidationTests: XCTestCase {
         }
     }
     
-    func test_serverVarialbeDefaultExistsInEnumSucceeds() throws {
+    func test_serverVariableDefaultExistsInEnumSucceeds() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://hello.com")!,
             description: "hello world",
@@ -1020,9 +1020,6 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
         try document.validate(using: validator)
     }
-    
-    
-    // MARK: Default validation -
 
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
