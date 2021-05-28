@@ -14,7 +14,7 @@ final class PathsErrorTests: XCTestCase {
     func test_missingPaths() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -32,7 +32,7 @@ final class PathsErrorTests: XCTestCase {
     func test_wrongTypeParameter() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -58,7 +58,7 @@ final class PathsErrorTests: XCTestCase {
 
         let documentYML2 =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -86,7 +86,7 @@ final class PathsErrorTests: XCTestCase {
     func test_optionalPositionalPathParam() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -121,7 +121,7 @@ final class PathsErrorTests: XCTestCase {
     func test_noContentOrSchemaParam() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -154,7 +154,7 @@ final class PathsErrorTests: XCTestCase {
     func test_bothContentAndSchemaParam() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -193,7 +193,7 @@ final class PathsErrorTests: XCTestCase {
     func test_paramSchemaHasProblemDeeplyNestedInSchema() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0

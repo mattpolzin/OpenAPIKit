@@ -142,7 +142,7 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            openAPIVersion: Version = .v3_0_0,
+            openAPIVersion: Version = .v3_1_0,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -361,10 +361,7 @@ extension OpenAPI.Document {
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
     public enum Version: String, Codable {
-        case v3_0_0 = "3.0.0"
-        case v3_0_1 = "3.0.1"
-        case v3_0_2 = "3.0.2"
-        case v3_0_3 = "3.0.3"
+        case v3_1_0 = "3.1.0"
     }
 }
 

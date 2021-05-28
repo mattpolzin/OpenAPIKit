@@ -19,7 +19,7 @@ final class DocumentTests: XCTestCase {
         )
 
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_2,
+            openAPIVersion: .v3_1_0,
             info: .init(title: "hi", version: "1.0"),
             servers: [
                 .init(url: URL(string: "https://google.com")!)
@@ -364,7 +364,7 @@ final class DocumentTests: XCTestCase {
         let docData =
         """
         {
-            "openapi": "3.0.0",
+            "openapi": "3.1.0",
             "info": {
                 "title": "test",
                 "version": "1.0"
@@ -409,7 +409,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               }
@@ -426,7 +426,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           }
@@ -447,7 +447,7 @@ extension DocumentTests {
 
     func test_specifyOpenAPIVersion_encode() throws {
         let document = OpenAPI.Document(
-            openAPIVersion: .v3_0_2,
+            openAPIVersion: .v3_1_0,
             info: .init(title: "API", version: "1.0"),
             servers: [],
             paths: [:],
@@ -463,7 +463,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.2",
+              "openapi" : "3.1.0",
               "paths" : {
 
               }
@@ -480,7 +480,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.2",
+          "openapi" : "3.1.0",
           "paths" : {
 
           }
@@ -491,7 +491,7 @@ extension DocumentTests {
         XCTAssertEqual(
             document,
             OpenAPI.Document(
-                openAPIVersion: .v3_0_2,
+                openAPIVersion: .v3_1_0,
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],
@@ -517,7 +517,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               },
@@ -539,7 +539,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           },
@@ -580,7 +580,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
                 "\\/test" : {
                   "summary" : "hi"
@@ -599,7 +599,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
             "\\/test" : {
               "summary" : "hi"
@@ -649,7 +649,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               },
@@ -682,7 +682,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           },
@@ -729,7 +729,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               },
@@ -751,7 +751,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           },
@@ -797,7 +797,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               }
@@ -817,7 +817,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           }
@@ -859,7 +859,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.0.0",
+              "openapi" : "3.1.0",
               "paths" : {
 
               },
@@ -883,7 +883,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           },
@@ -939,7 +939,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.0.0",
+          "openapi" : "3.1.0",
           "paths" : {
 
           },
@@ -1026,7 +1026,7 @@ extension DocumentTests {
           "title": "API",
           "version": "1.0"
         },
-        "openapi": "3.0.0",
+        "openapi": "3.1.0",
         "paths": {
         },
         "webhooks": {

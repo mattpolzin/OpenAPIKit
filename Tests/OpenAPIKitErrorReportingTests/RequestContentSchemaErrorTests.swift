@@ -14,7 +14,7 @@ final class RequestContentSchemaErrorTests: XCTestCase {
     func test_wrongTypeContentSchemaTypeProperty() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0

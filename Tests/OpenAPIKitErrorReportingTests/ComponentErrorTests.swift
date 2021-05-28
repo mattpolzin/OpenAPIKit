@@ -15,7 +15,7 @@ final class ComponentErrorTests: XCTestCase {
     func test_badComponentKeyNames() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
@@ -38,7 +38,7 @@ final class ComponentErrorTests: XCTestCase {
     func test_badResponseBecauseOfHeaderInsideComponents() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0
