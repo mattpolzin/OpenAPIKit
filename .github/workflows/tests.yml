@@ -25,6 +25,18 @@ jobs:
           - swift:5.3-focal
           - swift:5.3-centos8
           - swift:5.3-amazonlinux2
+    container: ${{ matrix.image }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Run tests
+      run: swift test --enable-test-discovery
+  linux-5_4-plus:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
           - swift:5.4-xenial
           - swift:5.4-bionic
           - swift:5.4-focal
@@ -34,8 +46,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Run tests
-      run: swift test --enable-test-discovery
+    - name: Run tests (without test discovery flag)
+      run: swift test
   osx:
     runs-on: macOS-latest
     steps:
