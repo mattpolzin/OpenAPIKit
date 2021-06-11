@@ -47,7 +47,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Run tests (without test discovery flag)
-      run: swift test
+      run: swift test -Xswiftc -Xfrontend -Xswiftc -sil-verify-none
   osx:
     runs-on: macOS-latest
     steps:
