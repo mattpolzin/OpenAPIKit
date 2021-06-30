@@ -70,7 +70,7 @@ extension OpenAPI {
         }
 
         public init(
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             description: String? = nil,
             required: Bool = false,
             deprecated: Bool = false,
@@ -100,7 +100,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Header {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Header>, OpenAPI.Header>>
+    public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Header>, OpenAPI.Header>>
 }
 
 // MARK: - Header Convenience
@@ -119,7 +119,7 @@ extension OpenAPI.Parameter.SchemaContext {
     }
 
     public static func header(
-        schemaReference: JSONReference<JSONSchema>,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
         allowReserved: Bool = false,
         example: AnyCodable? = nil
     ) -> Self {
@@ -145,7 +145,7 @@ extension OpenAPI.Parameter.SchemaContext {
     }
 
     public static func header(
-        schemaReference: JSONReference<JSONSchema>,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
         allowReserved: Bool = false,
         examples: OpenAPI.Example.Map?
     ) -> Self {

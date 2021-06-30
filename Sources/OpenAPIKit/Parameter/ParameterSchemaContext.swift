@@ -16,7 +16,7 @@ extension OpenAPI.Parameter {
         public let style: Style
         public let explode: Bool
         public let allowReserved: Bool //defaults to false
-        public let schema: Either<JSONReference<JSONSchema>, JSONSchema>
+        public let schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
 
         public let example: AnyCodable?
         public let examples: OpenAPI.Example.Map?
@@ -47,7 +47,7 @@ extension OpenAPI.Parameter {
             self.explode = style.defaultExplode
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     explode: Bool,
                     allowReserved: Bool = false,
@@ -60,7 +60,7 @@ extension OpenAPI.Parameter {
             self.examples = nil
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     allowReserved: Bool = false,
                     example: AnyCodable? = nil) {
@@ -99,7 +99,7 @@ extension OpenAPI.Parameter {
             self.explode = style.defaultExplode
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     explode: Bool,
                     allowReserved: Bool = false,
@@ -112,7 +112,7 @@ extension OpenAPI.Parameter {
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     allowReserved: Bool = false,
                     examples: OpenAPI.Example.Map?) {
@@ -124,7 +124,6 @@ extension OpenAPI.Parameter {
 
             self.explode = style.defaultExplode
         }
-
     }
 }
 
@@ -211,7 +210,7 @@ extension OpenAPI.Parameter.SchemaContext {
     public init(from decoder: Decoder, for location: OpenAPI.Parameter.Context) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        schema = try container.decode(Either<JSONReference<JSONSchema>, JSONSchema>.self, forKey: .schema)
+        schema = try container.decode(Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.self, forKey: .schema)
 
         let style = try container.decodeIfPresent(Style.self, forKey: .style) ?? Style.default(for: location)
         self.style = style

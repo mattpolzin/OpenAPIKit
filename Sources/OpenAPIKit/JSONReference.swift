@@ -292,6 +292,35 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     }
 }
 
+extension OpenAPI {
+    /// A Reference that carries both a standard JSON Rreference in addition to
+    /// optionally overriding the `summary` and/or `description` of the
+    /// referenced component.
+    ///
+    /// Per the specification, these summary and description overrides are irrelevant
+    /// if the referenced component does not support the given attribute.
+    @dynamicMemberLookup
+    public struct Reference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
+        public let jsonReference: JSONReference<ReferenceType>
+        public let summary: String?
+        public let description: String?
+
+        public init(
+            _ reference: JSONReference<ReferenceType>,
+            summary: String? = nil,
+            description: String? = nil
+        ) {
+            self.jsonReference = reference
+            self.summary = summary
+            self.description = description
+        }
+
+        public subscript<T>(dynamicMember path: KeyPath<JSONReference<ReferenceType>, T>) -> T {
+            return jsonReference[keyPath: path]
+        }
+    }
+}
+
 // MARK: - Codable
 
 extension JSONReference {
@@ -345,6 +374,35 @@ extension JSONReference: Decodable {
     }
 }
 
+extension OpenAPI.Reference {
+    private enum CodingKeys: String, CodingKey {
+        case ref = "$ref"
+        case summary = "summary"
+        case description = "description"
+    }
+}
+
+extension OpenAPI.Reference: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try jsonReference.encode(to: encoder)
+
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
+    }
+}
+
+extension OpenAPI.Reference: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        jsonReference = try JSONReference(from: decoder)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+    }
+}
+
 // MARK: - LocallyDereferenceable
 extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
@@ -369,4 +427,27 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     }
 }
 
-extension JSONReference: Validatable where ReferenceType: Validatable {}
+extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
+    /// Look up the component this reference points to and then
+    /// dereference it.
+    ///
+    /// For all external uses, call `dereferenced(in:)` (provided for free by the
+    /// `LocallyDereferenceable` protocol) instead.
+    ///
+    /// If you just want to look the reference up, use the `subscript` or the
+    /// `lookup()` method on `Components`.
+    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> ReferenceType.DereferencedSelf {
+
+        var newReferences = references
+        let (inserted, _) = newReferences.insert(self)
+        guard inserted else {
+            throw OpenAPI.Components.ReferenceCycleError(ref: self.absoluteString)
+        }
+
+        return try components
+            .lookup(self)
+            ._dereferenced(in: components, following: newReferences)
+    }
+}
+
+extension OpenAPI.Reference: Validatable where ReferenceType: Validatable {}

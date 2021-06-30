@@ -64,7 +64,7 @@ extension OpenAPI.PathItem: ComponentDictionaryLocatable {
 }
 
 /// A dereferenceable type can be recursively looked up in
-/// the `OpenAPI.Components` until there are no `JSONReferences`
+/// the `OpenAPI.Components` until there are no `OpenAPI.References`
 /// left in it or any of its properties.
 public protocol LocallyDereferenceable {
     associatedtype DereferencedSelf

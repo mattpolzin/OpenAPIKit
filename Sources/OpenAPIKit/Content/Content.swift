@@ -12,7 +12,7 @@ extension OpenAPI {
     /// 
     /// See [OpenAPI Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#media-type-object).
     public struct Content: Equatable, CodableVendorExtendable {
-        public var schema: Either<JSONReference<JSONSchema>, JSONSchema>?
+        public var schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?
         public var example: AnyCodable?
         public var examples: Example.Map?
         public var encoding: OrderedDictionary<String, Encoding>?
@@ -27,7 +27,7 @@ extension OpenAPI {
         /// Create `Content` with a schema, a reference to a schema, or no
         /// schema at all and optionally provide a single example.
         public init(
-            schema: Either<JSONReference<JSONSchema>, JSONSchema>?,
+            schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?,
             example: AnyCodable? = nil,
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -42,7 +42,7 @@ extension OpenAPI {
         /// Create `Content` with a reference to a schema and optionally
         /// provide a single example.
         public init(
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             example: AnyCodable? = nil,
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -72,7 +72,7 @@ extension OpenAPI {
         /// Create `Content` with a schema, a reference to a schema, or no
         /// schema at all and optionally provide a map of examples.
         public init(
-            schema: Either<JSONReference<JSONSchema>, JSONSchema>?,
+            schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?,
             examples: Example.Map?,
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -87,7 +87,7 @@ extension OpenAPI {
         /// Create `Content` with a reference to a schema and optionally
         /// provide a map of examples.
         public init(
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             examples: Example.Map?,
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -177,7 +177,7 @@ extension OpenAPI.Content: Decodable {
             )
         }
 
-        schema = try container.decodeIfPresent(Either<JSONReference<JSONSchema>, JSONSchema>.self, forKey: .schema)
+        schema = try container.decodeIfPresent(Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.self, forKey: .schema)
 
         encoding = try container.decodeIfPresent(OrderedDictionary<String, Encoding>.self, forKey: .encoding)
 

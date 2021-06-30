@@ -55,10 +55,10 @@ extension OpenAPI {
     ///
     /// See [OpenAPI Callback Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#callback-object).
     ///
-    public typealias Callbacks = OrderedDictionary<CallbackURL, Either<JSONReference<PathItem>, PathItem>>
+    public typealias Callbacks = OrderedDictionary<CallbackURL, Either<OpenAPI.Reference<PathItem>, PathItem>>
 
     /// A map of named collections of Callback Objects (`OpenAPI.Callbacks`).
-    public typealias CallbacksMap = OrderedDictionary<String, Either<JSONReference<Callbacks>, Callbacks>>
+    public typealias CallbacksMap = OrderedDictionary<String, Either<OpenAPI.Reference<Callbacks>, Callbacks>>
 }
 
 extension OpenAPI.CallbackURL: Encodable {

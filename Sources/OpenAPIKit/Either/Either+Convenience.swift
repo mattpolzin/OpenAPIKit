@@ -32,7 +32,7 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
 
     /// Retrieve the schema value if this property contains a schema context.
     ///
-    /// If the schema is a `JSONReference` this property will be `nil`
+    /// If the schema is a `OpenAPI.Reference` this property will be `nil`
     /// but the `schemaReference` property will be `non-nil`.
     public var schemaValue: JSONSchema? {
         guard case .a(let schemaContext) = self else {
@@ -45,7 +45,7 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
     ///
     /// If the schema is a `JSONSchema` this property will be `nil` but the
     /// `schemaValue` property will be `non-nil`.
-    public var schemaReference: JSONReference<JSONSchema>? {
+    public var schemaReference: OpenAPI.Reference<JSONSchema>? {
         guard case .a(let schemaContext) = self else {
             return nil
         }
@@ -61,7 +61,7 @@ extension Either where A == DereferencedSchemaContext {
 
     /// Retrieve the schema value if this property contains a schema context.
     ///
-    /// If the schema is a `JSONReference` this property will be `nil`
+    /// If the schema is an `OpenAPI.Reference` this property will be `nil`
     /// but the `schemaReference` property will be `non-nil`.
     public var schemaValue: DereferencedJSONSchema? {
         guard case .a(let schemaContext) = self else {

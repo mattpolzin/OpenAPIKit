@@ -12,6 +12,21 @@ extension OpenAPI.Components {
     ///
     /// Look up a reference in this components dictionary. If you want a
     /// non-throwing alternative, you can pull a `JSONReference.InternalReference`
+    /// out of the `reference` (which is of type `JSONReference`) and pass that to `contains`
+    /// instead.
+    ///
+    /// - Throws: If the given reference cannot be checked against `Components`
+    ///     then this method will throw `ReferenceError`. This will occur when
+    ///     the given reference is a remote file reference.
+    public func contains<ReferenceType: Equatable & ComponentDictionaryLocatable>(_ reference: OpenAPI.Reference<ReferenceType>) throws -> Bool {
+
+        return try contains(reference.jsonReference)
+    }
+
+    /// Check if the `Components` contains the given reference or not.
+    ///
+    /// Look up a reference in this components dictionary. If you want a
+    /// non-throwing alternative, you can pull a `JSONReference.InternalReference`
     /// out of your `JSONReference` and pass that to `contains`
     /// instead.
     ///
@@ -37,13 +52,21 @@ extension OpenAPI.Components {
     /// Retrieve a referenced item from the `Components` or
     /// just return the item directly depending on what value
     /// the `Either` contains.
-    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) -> ReferenceType? {
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<OpenAPI.Reference<ReferenceType>, ReferenceType>) -> ReferenceType? {
         switch maybeReference {
         case .a(let reference):
             return self[reference]
         case .b(let value):
             return value
         }
+    }
+
+    /// Retrieve item referenced from the `Components`.
+    ///
+    /// If you want a throwing lookup, use the `lookup()` method.
+    public subscript<ReferenceType: ComponentDictionaryLocatable>(_ reference: OpenAPI.Reference<ReferenceType>) -> ReferenceType? {
+
+        return self[reference.jsonReference]
     }
 
     /// Retrieve item referenced from the `Components`.
@@ -64,6 +87,29 @@ extension OpenAPI.Components {
         return reference.name
             .flatMap(OpenAPI.ComponentKey.init(rawValue:))
             .flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
+    }
+
+    /// Pass a reference to a component.
+    /// `lookup()` will return the component value if it is found
+    /// in the Components Object.
+    ///
+    /// If you want to look something up without throwing, you might want to use the subscript
+    /// operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead
+    /// of just looking it up see the various `dereference` functions
+    /// on this type for more information.
+    ///
+    /// - Important: Looking up an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
+    ///     on whether the reference points to another file or just points to a component in
+    ///     the same file that cannot be found in the Components Object.
+    public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ reference: OpenAPI.Reference<ReferenceType>) throws -> ReferenceType {
+
+        return try lookup(reference.jsonReference)
     }
 
     /// Pass a reference to a component.
@@ -112,19 +158,27 @@ extension OpenAPI.Components {
     ///     `MissingReferenceError.referenceMissingOnLookup(name:)` depending
     ///     on whether the reference points to another file or just points to a component in
     ///     the same file that cannot be found in the Components Object.
-    public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<JSONReference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
+    public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<OpenAPI.Reference<ReferenceType>, ReferenceType>) throws -> ReferenceType {
         switch maybeReference {
         case .a(let reference):
-            return try lookup(reference)
+            return try lookup(reference.jsonReference)
         case .b(let value):
             return value
         }
     }
 
+    /// Create an `OpenAPI.Reference`.
+    ///
+    /// - Throws: If the given name does not refer to an existing component of the given type.
+    public func reference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType type: ReferenceType.Type) throws -> OpenAPI.Reference<ReferenceType> {
+
+        return try OpenAPI.Reference(jsonReference(named: name, ofType: type))
+    }
+
     /// Create a `JSONReference`.
     ///
     /// - Throws: If the given name does not refer to an existing component of the given type.
-    public func reference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType: ReferenceType.Type) throws -> JSONReference<ReferenceType> {
+    public func jsonReference<ReferenceType: ComponentDictionaryLocatable & Equatable>(named name: String, ofType: ReferenceType.Type) throws -> JSONReference<ReferenceType> {
         let internalReference = JSONReference<ReferenceType>.InternalReference.component(name: name)
         let reference = JSONReference<ReferenceType>.internal(internalReference)
 

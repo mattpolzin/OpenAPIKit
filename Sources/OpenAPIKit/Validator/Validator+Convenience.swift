@@ -268,7 +268,7 @@ public func unwrap<T, U>(
 ///             the KeyPath points to.
 ///
 public func lookup<T, U>(
-    _ path: KeyPath<T, Either<JSONReference<U>, U>>,
+    _ path: KeyPath<T, Either<OpenAPI.Reference<U>, U>>,
     thenApply validations: Validation<U>...
 ) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
@@ -302,7 +302,7 @@ public func lookup<T, U>(
 ///             the KeyPath points to.
 ///
 public func unwrapAndLookup<T, U>(
-    _ path: KeyPath<T, Either<JSONReference<U>, U>?>,
+    _ path: KeyPath<T, Either<OpenAPI.Reference<U>, U>?>,
     thenApply validations: Validation<U>...
 ) -> (ValidationContext<T>) -> [ValidationError] {
     return { context in
