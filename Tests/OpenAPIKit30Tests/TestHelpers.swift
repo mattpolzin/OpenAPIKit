@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Yams
 import XCTest
 
 fileprivate let foundationTestEncoder = { () -> JSONEncoder in

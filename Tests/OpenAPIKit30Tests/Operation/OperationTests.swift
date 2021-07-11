@@ -341,7 +341,7 @@ extension OperationTests {
             ]
         )
 
-        let encodedOperation2 = try orderStableYAMLEncode(operation2),
+        let encodedOperation2 = try orderStableYAMLEncode(operation2)
 
         XCTAssertEqual(
             encodedOperation2,
