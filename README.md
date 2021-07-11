@@ -27,6 +27,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
   - [Generating OpenAPI Documents](#generating-openapi-documents)
   - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
+- [Contributing](#contributing)
+- [Security](#security)
 - [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
 ## Usage
@@ -254,6 +256,18 @@ This library *is* opinionated about a few defaults when you use the Swift types,
     * ex. `JSONSchema.string(required: false)` is an optional "string" type.
 
 See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before deciding on an encoder/decoder to use with this library.
+
+## Contributing
+Contributions to OpenAPIKit are welcome and appreciated! The project is mostly maintained by one person which means additional contributors have a huge impact on how much gets done how quickly.
+
+Please see the [Contribution Guidelines](./CONTRIBUTING.md) for a few brief notes on contributing the the project.
+
+## Security
+The OpenAPIKit project takes code security seriously. As part of the Swift Server Workground incubation program, this project follows a shared set of standards around receiving, reporting, and reacting to security vulnerabilies.
+
+Please see [Security](./SECURITY.md) for information on how to report vulnerabilities to the OpenAPIKit project and what to expect after you do.
+
+**Please do not report security vulnerabilities via GitHub issues.**
 
 ## Specification Coverage & Type Reference
 For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
