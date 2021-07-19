@@ -162,7 +162,6 @@ public final class Validator {
     ///
     public convenience init() {
         self.init(validations: [
-//            .init(.operationsContainResponses), INFO: Not required anymore!
             .init(.documentTagNamesAreUnique),
             .init(.pathItemParametersAreUnique),
             .init(.operationParametersAreUnique),
