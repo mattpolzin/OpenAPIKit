@@ -61,6 +61,25 @@ final class OperationTests: XCTestCase {
 // MARK: - Codable Tests
 extension OperationTests {
 
+//    func test_minimal_encode() throws {
+//        let operation = OpenAPI.Operation(
+//            responses: [:]
+//        )
+//
+//        let encodedOperation = try orderUnstableTestStringFromEncoding(of: operation)
+//
+//        assertJSONEquivalent(
+//            encodedOperation,
+//            """
+//            {
+//              "responses" : {
+//
+//              }
+//            }
+//            """
+//        )
+//    }
+    
     func test_minimal_encode() throws {
         let operation = OpenAPI.Operation(
             responses: [:]
@@ -72,9 +91,7 @@ extension OperationTests {
             encodedOperation,
             """
             {
-              "responses" : {
 
-              }
             }
             """
         )

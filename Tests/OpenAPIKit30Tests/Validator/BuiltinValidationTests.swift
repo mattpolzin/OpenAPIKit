@@ -341,7 +341,28 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate()
     }
 
-    func test_noResponsesOnOperationFails() {
+// INFO: This test should fail, so is no longer needed
+//    func test_noResponsesOnOperationFails() {
+//        let document = OpenAPI.Document(
+//            info: .init(title: "test", version: "1.0"),
+//            servers: [],
+//            paths: [
+//                "/hello/world": .init(
+//                    get: .init(responses: [:])
+//                )
+//            ],
+//            components: .noComponents
+//        )
+//
+//        // NOTE this is part of default validation
+//        XCTAssertThrowsError(try document.validate()) { error in
+//            let error = error as? ValidationErrorCollection
+//            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
+//            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
+//        }
+//    }
+    
+    func test_noResponsesOnOperationSucceeds() throws {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
@@ -352,13 +373,8 @@ final class BuiltinValidationTests: XCTestCase {
             ],
             components: .noComponents
         )
-
-        // NOTE this is part of default validation
-        XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
-        }
+        
+        try document.validate()
     }
 
     func test_oneResponseOnOperationSucceeds() throws {
