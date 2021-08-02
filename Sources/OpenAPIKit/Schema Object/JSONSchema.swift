@@ -1158,7 +1158,7 @@ extension JSONSchema {
     /// requirements are met given a discriminator.
     public static func any(
         of schemas: JSONSchema...,
-        required: Bool = false
+        required: Bool = false,
         title: String? = nil,
         description: String? = nil,
         discriminator: OpenAPI.Discriminator? = nil
