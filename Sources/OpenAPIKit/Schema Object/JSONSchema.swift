@@ -100,7 +100,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
              .not(_, core: let context as JSONSchemaContext):
             return context.required
         case .reference:
-            return true
+            return false
         }
     }
 
