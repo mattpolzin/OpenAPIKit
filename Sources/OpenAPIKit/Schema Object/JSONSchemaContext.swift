@@ -950,6 +950,8 @@ extension JSONSchema.ObjectContext: Decodable {
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
+        
+        print("required:\(requiredArray)")
 
         let decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
         properties = Self.properties(decodedProperties, takingRequirementsFrom: requiredArray)
@@ -989,6 +991,8 @@ extension JSONSchema.ObjectContext: Decodable {
                 properties[propertyName] = .fragment(.init(required: true))
             }
 
+        print("properties:\(properties)")
+        
         return properties
     }
 }
