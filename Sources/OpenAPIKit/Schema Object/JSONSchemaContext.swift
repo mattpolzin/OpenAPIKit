@@ -552,6 +552,9 @@ extension JSONSchema {
         /// The maximum number of properties the object
         /// is allowed to have.
         public let maxProperties: Int?
+        // requiredArray is an added field by mndzup.
+        // This is the decoded required field directly from
+        // the OpenAPI document.
         public let requiredArray: [String]
         let _minProperties: Int?
         public let properties: [String: JSONSchema]
