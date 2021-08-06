@@ -25,7 +25,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(
                 .init(),
                 DereferencedJSONSchema.ObjectContext(
-                    JSONSchema.ObjectContext(properties: [:])
+                    JSONSchema.ObjectContext(properties: [:], requiredArray: [])
                 )!
             )
         )
@@ -37,12 +37,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(
                 .init(required: false),
                 DereferencedJSONSchema.ObjectContext(
-                    JSONSchema.ObjectContext(properties: [:])
+                    JSONSchema.ObjectContext(properties: [:], requiredArray: [])
                     )!
             )
         )
         XCTAssertEqual(t4?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>, JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(required: false))
-        XCTAssertEqual(t4?.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!)
+        XCTAssertEqual(t4?.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: [:], requiredArray: []))!)
         XCTAssertNil(t4?.arrayContext)
 
         let t5 = JSONSchema.array.dereferenced()
@@ -156,7 +156,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(
                 .init(),
                 DereferencedJSONSchema.ObjectContext(
-                    JSONSchema.ObjectContext(properties: [:])
+                    JSONSchema.ObjectContext(properties: [:], requiredArray: [])
                     )!
             )
         )
@@ -167,7 +167,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(
                 .init(required: false),
                 DereferencedJSONSchema.ObjectContext(
-                    JSONSchema.ObjectContext(properties: [:])
+                    JSONSchema.ObjectContext(properties: [:], requiredArray: [])
                     )!
             )
         )
@@ -279,7 +279,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = JSONSchema.object(properties: ["test": .string]).dereferenced()
         XCTAssertEqual(
             t1,
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string], requiredArray: []))!)
         )
 
         let t2 = JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced()
@@ -309,9 +309,9 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.object(properties: ["test": .string]).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string], requiredArray: []))!)
         )
-        XCTAssertEqual(t1.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string]))!)
+        XCTAssertEqual(t1.objectContext, DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .string], requiredArray: []))!)
 
         let t2 = try JSONSchema.object(additionalProperties: .init(.boolean)).dereferenced(in: components)
         XCTAssertEqual(
@@ -346,7 +346,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.object(properties: ["test": .reference(.component(named: "test"))]).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean], requiredArray: []))!)
         )
         XCTAssertThrowsError(try JSONSchema.object(properties: ["missing": .reference(.component(named: "missing"))]).dereferenced(in: components))
     }

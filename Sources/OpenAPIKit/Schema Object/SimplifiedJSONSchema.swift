@@ -107,7 +107,8 @@ extension DereferencedJSONSchema {
                     properties: try object.properties.mapValues { try $0.simplified() },
                     additionalProperties: additionalProperties,
                     maxProperties: object.maxProperties,
-                    minProperties: object._minProperties
+                    minProperties: object._minProperties,
+                    requiredArray: object.requiredArray
                 )
             )
 

@@ -82,52 +82,52 @@ final class SchemaFragmentCombiningTests: XCTestCase {
 
     func test_resolvingSingleObject() {
         let fragments: [JSONSchema] = [
-            .object(.init(), .init(properties: [:]))
+            .object(.init(), .init(properties: [:], requiredArray: []))
         ]
         XCTAssertEqual(
             try fragments.combined(resolvingAgainst: .noComponents),
-            .object(.init(), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:], requiredArray: []))!)
         )
     }
 
     func test_resolvingSingleObjectReadOnly() {
         let fragments: [JSONSchema] = [
-            .object(.init(permissions: .readOnly), .init(properties: [:]))
+            .object(.init(permissions: .readOnly), .init(properties: [:], requiredArray: []))
         ]
         XCTAssertEqual(
             try fragments.combined(resolvingAgainst: .noComponents),
-            .object(.init(permissions: .readOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
+            .object(.init(permissions: .readOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:], requiredArray: []))!)
         )
     }
 
     func test_resolvingSingleObjectWriteOnly() {
         let fragments: [JSONSchema] = [
-            .object(.init(permissions: .writeOnly), .init(properties: [:]))
+            .object(.init(permissions: .writeOnly), .init(properties: [:], requiredArray: []))
         ]
         XCTAssertEqual(
             try fragments.combined(resolvingAgainst: .noComponents),
-            .object(.init(permissions: .writeOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:]))!)
+            .object(.init(permissions: .writeOnly), DereferencedJSONSchema.ObjectContext(JSONSchema.ObjectContext(properties: [:], requiredArray: []))!)
         )
     }
 
     func test_rootObjectRequired() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ],
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:], requiredArray: []))!)
         )
     }
 
     func test_rootObjectPropertiesRequired() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(properties: ["test": .string]))
+                .object(.init(), .init(properties: ["test": .string], requiredArray: []))
             ],
             .object(
                 .init(),
                 DereferencedJSONSchema.ObjectContext(
-                    .init(properties: ["test": .string])
+                    .init(properties: ["test": .string], requiredArray: [])
                 )!
             )
         )
@@ -136,12 +136,12 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     func test_rootObjectPropertiesOptional() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(properties: ["test": .string(required: false)]))
+                .object(.init(), .init(properties: ["test": .string(required: false)], requiredArray: []))
             ],
             .object(
                 .init(),
                 DereferencedJSONSchema.ObjectContext(
-                    .init(properties: ["test": .string(required: false)])
+                    .init(properties: ["test": .string(required: false)], requiredArray: [])
                 )!
             )
         )
@@ -207,7 +207,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             (.number(.init(), .init()), .number(.init(discriminator: .init(propertyName: "test")), .init())),
             (.string(.init(), .init()), .string(.init(discriminator: .init(propertyName: "test")), .init())),
             (.array(.init(), .init()), .array(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ArrayContext(.init())!)),
-            (.object(.init(), .init(properties: [:])), .object(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ObjectContext(.init(properties: [:]))!))
+            (.object(.init(), .init(properties: [:], requiredArray: [])), .object(.init(discriminator: .init(propertyName: "test")), DereferencedJSONSchema.ObjectContext(.init(properties: [:], requiredArray: []))!))
         ]
 
         for (fragment, result) in fragmentsAndResults {
@@ -275,15 +275,15 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     func test_deeperObjectFragments() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(properties: [:], additionalProperties: .init(true))),
-                .object(.init(description: "nested"), .init(properties: [:])),
+                .object(.init(), .init(properties: [:], additionalProperties: .init(true), requiredArray: [])),
+                .object(.init(description: "nested"), .init(properties: [:], requiredArray: [])),
                 .object(
                     .init(),
                     .init(
                         properties: [
                             "required": .string
                         ],
-                        minProperties: 2
+                        minProperties: 2, requiredArray: []
                     )
                 ),
                 .object(
@@ -294,7 +294,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                             "someObject": .object(required: false),
                             "anything": .fragment(.init(description: nil))
                         ],
-                        minProperties: 2
+                        minProperties: 2, requiredArray: []
                     )
                 )
             ],
@@ -309,7 +309,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                             "anything": .fragment(.init(description: nil))
                         ],
                         additionalProperties: .init(true),
-                        minProperties: 2
+                        minProperties: 2, requiredArray: []
                     )
                 )!
             )
@@ -323,7 +323,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                 .init(
                     properties: [
                         "more_object": .object(required: false, properties: ["boolean": .boolean])
-                    ]
+                    ], requiredArray: []
                 )
             ),
             .object(
@@ -332,7 +332,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                     properties: [
                         "more_fragments": .all(
                             of: [
-                                .object(.init(description: "nested"), .init(properties: ["someObject": .object])),
+                                .object(.init(description: "nested"), .init(properties: ["someObject": .object], requiredArray: [])),
                                 .object(.init(title: "nested test"), .init(
                                     properties: [
                                         "boolean": .boolean(format: .other("integer"), required: false),
@@ -340,7 +340,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                                         "integer": .integer(required: false, maximum: (10, exclusive: false)),
                                         "number": .number(required: false, maximum: (33.2, exclusive: false)),
                                         "array": .array(required: false, maxItems: 22)
-                                    ]
+                                    ], requiredArray: []
                                 )),
                                 .object(.init(title: "nested test"), .init(
                                     properties: [
@@ -349,11 +349,11 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                                         "integer": .integer(required: false, description: "integer"),
                                         "number": .number(required: false, description: "number"),
                                         "array": .array(required: true, description: "array")
-                                    ]
+                                    ], requiredArray: []
                                 ))
                             ]
                         )
-                    ]
+                    ], requiredArray: []
                 )
             )
         ]
@@ -376,7 +376,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                                 "array": .array(required: true, description: "array", maxItems: 22)
                             ]
                         )
-                    ]
+                    ], requiredArray: []
                 )
             )!
         )
@@ -390,10 +390,10 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     func test_minLessThanMaxObject() throws {
         try assertOrderIndependentCombinedEqual(
             [
-                .object(.init(), .init(properties: [:], minProperties: 2)),
-                .object(.init(), .init(properties: [:], maxProperties: 3))
+                .object(.init(), .init(properties: [:], minProperties: 2, requiredArray: [])),
+                .object(.init(), .init(properties: [:], maxProperties: 3, requiredArray: []))
             ],
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:], maxProperties: 3, minProperties: 2))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: [:], maxProperties: 3, minProperties: 2, requiredArray: []))!)
         )
     }
 
@@ -445,8 +445,8 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
 
         let t2 = [
-            JSONSchema.object(.init(description: "test"), .init(properties: [:])),
-            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+            JSONSchema.object(.init(description: "test"), .init(properties: [:], requiredArray: [])),
+            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))], requiredArray: []))
         ]
         XCTAssertThrowsError(try t2.combined(resolvingAgainst: .noComponents)) { error in
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. \'test\' was not found in schemas.")
@@ -468,8 +468,8 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         )
 
         let t2 = [
-            JSONSchema.object(.init(description: "test"), .init(properties: [:])),
-            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))]))
+            JSONSchema.object(.init(description: "test"), .init(properties: [:], requiredArray: [])),
+            JSONSchema.object(.init(), .init(properties: [ "test": .reference(.component(named: "test"))], requiredArray: []))
         ]
         let schema2 = try t2.combined(resolvingAgainst: components)
         XCTAssertEqual(
@@ -518,7 +518,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         let numberFragment = JSONSchema.number(.init(), .init())
         let stringFragment = JSONSchema.string(.init(), .init())
         let arrayFragment = JSONSchema.array(.init(), .init())
-        let objectFragment = JSONSchema.object(.init(), .init(properties: [:]))
+        let objectFragment = JSONSchema.object(.init(), .init(properties: [:], requiredArray: []))
 
         let fragments = [
             booleanFragment,
@@ -685,8 +685,8 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         for left in formatStrings {
             for right in formatStrings where left != right {
                 let fragments: [JSONSchema] = [
-                    .object(.init(format: left), .init(properties: [:])),
-                    .object(.init(format: right), .init(properties: [:]))
+                    .object(.init(format: left), .init(properties: [:], requiredArray: [])),
+                    .object(.init(format: right), .init(properties: [:], requiredArray: []))
                 ]
                 XCTAssertThrowsError(try fragments.combined(resolvingAgainst: .noComponents)) { error in
                     guard let error = error as? JSONSchemaResolutionError else { XCTFail("Received unexpected error"); return }
@@ -758,7 +758,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         let fragmentsArray4: [[JSONSchema]] = differences.map { $0.map { .number($0.transformed(), .init()) } }
         let fragmentsArray5: [[JSONSchema]] = differences.map { $0.map { .string($0.transformed(), .init()) } }
         let fragmentsArray6: [[JSONSchema]] = differences.map { $0.map { .array($0.transformed(), .init()) } }
-        let fragmentsArray7: [[JSONSchema]] = differences.map { $0.map { .object($0.transformed(), .init(properties: [:])) } }
+        let fragmentsArray7: [[JSONSchema]] = differences.map { $0.map { .object($0.transformed(), .init(properties: [:], requiredArray: [])) } }
 
         let allFragmentsArrays  = fragmentsArray1
             + fragmentsArray2
@@ -932,33 +932,33 @@ final class SchemaFragmentCombiningTests: XCTestCase {
 
     func test_ObjectAttributeConflicts() {
         let differentMaxProperties = [
-            JSONSchema.ObjectContext(properties: [:], maxProperties: 10),
-            JSONSchema.ObjectContext(properties: [:], maxProperties: 2)
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 10, requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 2, requiredArray: [])
         ]
 
         let differentMinProperties = [
-            JSONSchema.ObjectContext(properties: [:], minProperties: 10),
-            JSONSchema.ObjectContext(properties: [:], minProperties: 100)
+            JSONSchema.ObjectContext(properties: [:], minProperties: 10, requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], minProperties: 100, requiredArray: [])
         ]
 
         let differentProperties = [
-            JSONSchema.ObjectContext(properties: ["string1": .string(description: "truth")]),
-            JSONSchema.ObjectContext(properties: ["string1": .string(description: "falsity")])
+            JSONSchema.ObjectContext(properties: ["string1": .string(description: "truth")], requiredArray: []),
+            JSONSchema.ObjectContext(properties: ["string1": .string(description: "falsity")], requiredArray: [])
         ]
 
         let differentAdditionalProperties1 = [
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true)),
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(false))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true), requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(false), requiredArray: [])
         ]
 
         let differentAdditionalProperties2 = [
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true)),
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(true), requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string), requiredArray: [])
         ]
 
         let differentAdditionalProperties3 = [
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.boolean)),
-            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string))
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.boolean), requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], additionalProperties: .init(.string), requiredArray: [])
         ]
 
         let differences = [
@@ -1050,16 +1050,16 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             ],
             // object readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
             [
-                .object(.init(permissions: .readOnly), .init(properties: [:])),
-                .object(.init(permissions: .writeOnly), .init(properties: [:]))
+                .object(.init(permissions: .readOnly), .init(properties: [:], requiredArray: [])),
+                .object(.init(permissions: .writeOnly), .init(properties: [:], requiredArray: []))
             ],
             [
-                .object(.init(permissions: .readOnly), .init(properties: [:])),
-                .object(.init(permissions: .readWrite), .init(properties: [:]))
+                .object(.init(permissions: .readOnly), .init(properties: [:], requiredArray: [])),
+                .object(.init(permissions: .readWrite), .init(properties: [:], requiredArray: []))
             ],
             [
-                .object(.init(permissions: .writeOnly), .init(properties: [:])),
-                .object(.init(permissions: .readWrite), .init(properties: [:]))
+                .object(.init(permissions: .writeOnly), .init(properties: [:], requiredArray: [])),
+                .object(.init(permissions: .readWrite), .init(properties: [:], requiredArray: []))
             ]
         ]
 
@@ -1182,12 +1182,12 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     func test_objectInconsistencyErrors() {
 
         let minBelowZero = [
-            JSONSchema.ObjectContext(properties: [:], minProperties: -1)
+            JSONSchema.ObjectContext(properties: [:], minProperties: -1, requiredArray: [])
         ]
 
         let minHigherThanMax = [
-            JSONSchema.ObjectContext(properties: [:], minProperties: 10),
-            JSONSchema.ObjectContext(properties: [:], maxProperties: 2)
+            JSONSchema.ObjectContext(properties: [:], minProperties: 10, requiredArray: []),
+            JSONSchema.ObjectContext(properties: [:], maxProperties: 2, requiredArray: [])
         ]
 
         let inconsistencies = [

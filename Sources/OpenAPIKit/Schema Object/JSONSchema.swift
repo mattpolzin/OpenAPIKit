@@ -1011,7 +1011,8 @@ extension JSONSchema {
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        example: AnyCodable? = nil
+        example: AnyCodable? = nil,
+        requiredArray: [String] = []
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
             format: format,
@@ -1031,7 +1032,8 @@ extension JSONSchema {
             properties: properties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
-            minProperties: minProperties
+            minProperties: minProperties,
+            requiredArray: requiredArray
         )
         return .object(coreContext, objectContext)
     }

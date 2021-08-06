@@ -30,7 +30,7 @@ final class SchemaFragmentTests: XCTestCase {
         assertNoGeneralProperties(JSONSchema.integer(.init(), .init()))
         assertNoGeneralProperties(JSONSchema.number(.init(), .init()))
         assertNoGeneralProperties(JSONSchema.array(.init(), .init()))
-        assertNoGeneralProperties(JSONSchema.object(.init(), .init(properties: [:])))
+        assertNoGeneralProperties(JSONSchema.object(.init(), .init(properties: [:], requiredArray: [])))
         assertNoGeneralProperties(JSONSchema.reference(.component(named: "test")))
 
         func assertSameGeneralProperties(_ fragment: JSONSchema, as properties: JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, file: StaticString = #file, line: UInt = #line) {
@@ -59,7 +59,7 @@ final class SchemaFragmentTests: XCTestCase {
         assertSameGeneralProperties(t4, as: generalProperties)
         let t5 = JSONSchema.array(generalProperties.transformed(), .init(items: .string, maxItems: 7, minItems: 2, uniqueItems: true))
         assertSameGeneralProperties(t5, as: generalProperties)
-        let t6 = JSONSchema.object(generalProperties.transformed(), .init(properties: ["hello": .string], additionalProperties: .init(.string), maxProperties: 100, minProperties: 0))
+        let t6 = JSONSchema.object(generalProperties.transformed(), .init(properties: ["hello": .string], additionalProperties: .init(.string), maxProperties: 100, minProperties: 0, requiredArray: []))
         assertSameGeneralProperties(t6, as: generalProperties)
     }
 
@@ -76,7 +76,7 @@ final class SchemaFragmentTests: XCTestCase {
         XCTAssertEqual(stringContext.jsonType, .string)
         let arrayContext = JSONSchema.array(.init(), .init())
         XCTAssertEqual(arrayContext.jsonType, .array)
-        let objectContext = JSONSchema.object(.init(), .init(properties: [:]))
+        let objectContext = JSONSchema.object(.init(), .init(properties: [:], requiredArray: []))
         XCTAssertEqual(objectContext.jsonType, .object)
     }
 
@@ -697,7 +697,7 @@ extension SchemaFragmentTests {
     }
 
     func test_objectEncode() throws {
-        let t = JSONSchema.object(.init(), .init(properties: [:]))
+        let t = JSONSchema.object(.init(), .init(properties: [:], requiredArray: []))
 
         let encoded = try orderUnstableTestStringFromEncoding(of: t)
 
@@ -710,7 +710,7 @@ extension SchemaFragmentTests {
             """
         )
 
-        let t2 = JSONSchema.object(.init(permissions: .writeOnly), .init(properties: [:]))
+        let t2 = JSONSchema.object(.init(permissions: .writeOnly), .init(properties: [:], requiredArray: []))
 
         let encoded2 = try orderUnstableTestStringFromEncoding(of: t2)
 
@@ -724,7 +724,7 @@ extension SchemaFragmentTests {
             """
         )
 
-        let t3 = JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true))]))
+        let t3 = JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true))], requiredArray: []))
 
         let encoded3 = try orderUnstableTestStringFromEncoding(of: t3)
 
@@ -745,7 +745,7 @@ extension SchemaFragmentTests {
             """
         )
 
-        let t4 = JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)]))
+        let t4 = JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)], requiredArray: []))
 
         let encoded4 = try orderUnstableTestStringFromEncoding(of: t4)
 
@@ -774,7 +774,7 @@ extension SchemaFragmentTests {
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: t)
 
-        XCTAssertEqual(decoded, JSONSchema.object(.init(), .init(properties: [:])))
+        XCTAssertEqual(decoded, JSONSchema.object(.init(), .init(properties: [:], requiredArray: [])))
 
         let t2 =
         """
@@ -786,7 +786,7 @@ extension SchemaFragmentTests {
 
         let decoded2 = try orderUnstableDecode(JSONSchema.self, from: t2)
 
-        XCTAssertEqual(decoded2, JSONSchema.object(.init(permissions: .writeOnly), .init(properties: [:])))
+        XCTAssertEqual(decoded2, JSONSchema.object(.init(permissions: .writeOnly), .init(properties: [:], requiredArray: [])))
 
         // t3 tests that a required array without any properties will decode as
         // an object with a required property by the given name that is a fragment
@@ -803,7 +803,7 @@ extension SchemaFragmentTests {
 
         let decoded3 = try orderUnstableDecode(JSONSchema.self, from: t3)
 
-        XCTAssertEqual(decoded3, JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true))])))
+        XCTAssertEqual(decoded3, JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true))], requiredArray: [])))
 
         let t4 =
         """
@@ -819,7 +819,7 @@ extension SchemaFragmentTests {
 
         let decoded4 = try orderUnstableDecode(JSONSchema.self, from: t4)
 
-        XCTAssertEqual(decoded4, JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)])))
+        XCTAssertEqual(decoded4, JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)], requiredArray: [])))
 
         let t5 =
         """
@@ -834,7 +834,7 @@ extension SchemaFragmentTests {
 
         let decoded5 = try orderUnstableDecode(JSONSchema.self, from: t5)
 
-        XCTAssertEqual(decoded5, JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)])))
+        XCTAssertEqual(decoded5, JSONSchema.object(.init(), .init(properties: ["hello": .string(required: false)], requiredArray: [])))
     }
 
     func test_referenceEncode() throws {

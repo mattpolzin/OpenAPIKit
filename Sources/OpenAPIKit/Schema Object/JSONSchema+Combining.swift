@@ -491,6 +491,7 @@ extension JSONSchema.ArrayContext {
 
 extension JSONSchema.ObjectContext {
     internal func combined(with other: JSONSchema.ObjectContext, resolvingIn components: OpenAPI.Components) throws -> JSONSchema.ObjectContext {
+        
         let combinedProperties = try combine(properties: properties, with: other.properties, resolvingIn: components)
 
         if let conflict = conflicting(maxProperties, other.maxProperties) {
@@ -525,7 +526,8 @@ extension JSONSchema.ObjectContext {
             properties: combinedProperties,
             additionalProperties: newAdditionalProperties,
             maxProperties: newMaxProperties,
-            minProperties: newMinProperties
+            minProperties: newMinProperties,
+            requiredArray: requiredArray
         )
     }
 }
@@ -673,7 +675,8 @@ extension JSONSchema.ObjectContext {
             properties: properties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
-            minProperties: _minProperties
+            minProperties: _minProperties,
+            requiredArray: requiredArray
         )
     }
 }

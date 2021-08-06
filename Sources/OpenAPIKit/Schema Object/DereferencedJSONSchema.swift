@@ -203,6 +203,7 @@ extension DereferencedJSONSchema {
         let _minProperties: Int?
         public let properties: [String: DereferencedJSONSchema]
         public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
+        public let requiredArray: [String]
 
         // NOTE that an object's required properties
         // array is determined by looking at its properties'
@@ -241,6 +242,7 @@ extension DereferencedJSONSchema {
             properties = otherProperties
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
+            requiredArray = objectContext.requiredArray
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
@@ -262,6 +264,7 @@ extension DereferencedJSONSchema {
             properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
+            requiredArray = objectContext.requiredArray
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
@@ -276,12 +279,14 @@ extension DereferencedJSONSchema {
             properties: [String: DereferencedJSONSchema],
             additionalProperties: Either<Bool, DereferencedJSONSchema>? = nil,
             maxProperties: Int? = nil,
-            minProperties: Int? = nil
+            minProperties: Int? = nil,
+            requiredArray: [String]
         ) {
             self.properties = properties
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties
             self._minProperties = minProperties
+            self.requiredArray = requiredArray
         }
 
         internal var jsonSchemaObjectContext: JSONSchema.ObjectContext {
@@ -299,7 +304,8 @@ extension DereferencedJSONSchema {
                 properties: properties.mapValues { $0.jsonSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
-                minProperties: _minProperties
+                minProperties: _minProperties,
+                requiredArray: requiredArray
             )
         }
     }

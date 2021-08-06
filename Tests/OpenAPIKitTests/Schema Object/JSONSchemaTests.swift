@@ -12,7 +12,7 @@ import OpenAPIKit
 final class SchemaObjectTests: XCTestCase {
     func test_jsonTypeFormat() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let floatNumber = JSONSchema.number(.init(format: .float, required: true), .init())
@@ -144,7 +144,7 @@ final class SchemaObjectTests: XCTestCase {
 
         let others: [JSONSchema] = [
             .boolean(.init(format: .unspecified, required: true)),
-            .object(.init(format: .unspecified, required: true), .init(properties: [:])),
+            .object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: [])),
             .array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true)))),
             .number(.init(format: .unspecified, required: true), .init()),
             .number(.init(format: .float, required: true), .init()),
@@ -256,7 +256,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_required() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -284,7 +284,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_optional() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
-        let object = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: false), .init(items: .boolean(.init(format: .unspecified, required: false))))
         let number = JSONSchema.number(.init(format: .unspecified, required: false), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: false), .init())
@@ -310,7 +310,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_nullable() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, nullable: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, nullable: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, nullable: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, nullable: true), .init())
@@ -336,7 +336,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_notNullable() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -364,7 +364,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_readableAndWritable() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -406,7 +406,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_readOnly() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .readOnly))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .readOnly), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .readOnly), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .readOnly), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .readOnly), .init())
@@ -444,7 +444,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_writeOnly() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, permissions: .writeOnly))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, permissions: .writeOnly), .init())
@@ -481,7 +481,7 @@ final class SchemaObjectTests: XCTestCase {
     }
     func test_notDeprecated() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -510,7 +510,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_deprecated() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, deprecated: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, deprecated: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, deprecated: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, deprecated: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, deprecated: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, deprecated: true), .init())
@@ -537,7 +537,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_title() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, title: "hello"))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, title: "hello"), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, title: "hello"), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, title: "hello"), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, title: "hello"), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, title: "hello"), .init())
@@ -568,7 +568,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_description() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, description: "hello"))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, description: "hello"), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, description: "hello"), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, description: "hello"), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, description: "hello"), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, description: "hello"), .init())
@@ -601,7 +601,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_discriminator() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "name")), .init())
@@ -634,7 +634,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_externalDocs() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init())
@@ -665,7 +665,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_coreContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -696,7 +696,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_objectContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [ "hello": .string]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [ "hello": .string], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -710,7 +710,7 @@ final class SchemaObjectTests: XCTestCase {
         let fragment = JSONSchema.fragment(.init(description: "hello world"))
 
         XCTAssertNil(boolean.objectContext)
-        XCTAssertEqual(object.objectContext, .init(properties: ["hello": .string]))
+        XCTAssertEqual(object.objectContext, .init(properties: ["hello": .string], requiredArray: []))
         XCTAssertNil(array.objectContext)
         XCTAssertNil(number.objectContext)
         XCTAssertNil(integer.objectContext)
@@ -726,7 +726,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_arrayContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -757,7 +757,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_numberContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init(multipleOf: 22.3))
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -787,7 +787,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_integerContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init(multipleOf: 3))
@@ -817,7 +817,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_stringContextAccessor() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true), .init())
@@ -877,7 +877,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_requiredToOptional() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .optionalSchemaObject()
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
             .optionalSchemaObject()
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .optionalSchemaObject()
@@ -917,7 +917,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_optionalToRequired() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
             .requiredSchemaObject()
-        let object = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:], requiredArray: []))
             .requiredSchemaObject()
         let array = JSONSchema.array(.init(format: .unspecified, required: false), .init(items: .boolean(.init(format: .unspecified, required: false))))
             .requiredSchemaObject()
@@ -956,7 +956,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_notNullableToNullable() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .nullableSchemaObject()
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
             .nullableSchemaObject()
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .nullableSchemaObject()
@@ -995,7 +995,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_withInitalAllowedValues() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, allowedValues: [false]))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, allowedValues: [[:]]), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, allowedValues: [[:]]), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, allowedValues: [[false]]), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, allowedValues: [2.5]), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, allowedValues: [5]), .init())
@@ -1014,7 +1014,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_withAddedAllowedValues() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(allowedValues: [false])
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
             .with(allowedValues: [[:]])
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .with(allowedValues: [[false]])
@@ -1056,7 +1056,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_withInitalDefaultValue() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, defaultValue: false))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, defaultValue: [:]), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, defaultValue: [:]), .init(properties: [:], requiredArray: []))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, defaultValue: [false]), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, defaultValue: 2.5), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, defaultValue: 5), .init())
@@ -1075,7 +1075,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_withAddedDefaultValue() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(defaultValue: false)
-        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
             .with(defaultValue: [:])
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .with(defaultValue: [false])
@@ -1116,7 +1116,7 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withInitialExample() {
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, example: [:]), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, example: [:]), .init(properties: [:], requiredArray: []))
         let fragment = JSONSchema.fragment(.init(example: "hi"))
 
         // nonsense
@@ -1137,7 +1137,7 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withAddedExample() throws {
-        let object = try JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
+        let object = try JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], requiredArray: []))
             .with(example: AnyCodable([String: String]()))
         let array = try JSONSchema.array(.init(), .init())
             .with(example: ["hello"])
@@ -1218,14 +1218,14 @@ final class SchemaObjectTests: XCTestCase {
         let obj1 = JSONSchema.ObjectContext(
             properties: [:],
             additionalProperties: .init(true),
-            minProperties: 2
+            minProperties: 2, requiredArray: []
         )
 
         XCTAssertEqual(obj1.minProperties, 2)
 
         let obj2 = JSONSchema.ObjectContext(
             properties: [:],
-            additionalProperties: .init(true)
+            additionalProperties: .init(true), requiredArray: []
         )
 
         XCTAssertEqual(obj2.minProperties, 0)
@@ -1234,7 +1234,7 @@ final class SchemaObjectTests: XCTestCase {
             properties: [
                 "hello": .string
             ],
-            additionalProperties: .init(true)
+            additionalProperties: .init(true), requiredArray: []
         )
 
         XCTAssertEqual(obj3.minProperties, 1)
@@ -1243,7 +1243,7 @@ final class SchemaObjectTests: XCTestCase {
             properties: [
                 "hello": .string(required: false)
             ],
-            additionalProperties: .init(true)
+            additionalProperties: .init(true), requiredArray: []
         )
 
         XCTAssertEqual(obj4.minProperties, 0)
@@ -1253,7 +1253,7 @@ final class SchemaObjectTests: XCTestCase {
                 "hello": .string
             ],
             additionalProperties: .init(true),
-            minProperties: 3
+            minProperties: 3, requiredArray: []
         )
 
         XCTAssertEqual(obj5.minProperties, 3)
@@ -1264,7 +1264,7 @@ final class SchemaObjectTests: XCTestCase {
                 "world": .boolean
             ],
             additionalProperties: .init(true),
-            minProperties: 1
+            minProperties: 1, requiredArray: []
         )
 
         XCTAssertEqual(obj6.minProperties, 2)
@@ -1461,33 +1461,33 @@ extension SchemaObjectTests {
     func test_encodeObject() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let readOnlyObject = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .readOnly), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let writeOnlyObject = JSONSchema.object(.init(format: .unspecified, required: true, permissions: .writeOnly), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let deprecatedObject = JSONSchema.object(.init(format: .unspecified, required: true, deprecated: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
         let defaultValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(defaultValue: AnyCodable(["hello": false]))
-        let discriminatorObject = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init(properties: [:]))
+        let discriminatorObject = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init(properties: [:], requiredArray: []))
 
         testEncodingPropertyLines(
             entity: requiredObject,
@@ -1668,11 +1668,11 @@ extension SchemaObjectTests {
         let defaultValueObject = try orderUnstableDecode(JSONSchema.self, from: defaultValueObjectData)
         let discriminatorObject = try orderUnstableDecode(JSONSchema.self, from: discriminatorObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:])))
-        XCTAssertEqual(readOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .readOnly), .init(properties: [:])))
-        XCTAssertEqual(writeOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .writeOnly), .init(properties: [:])))
-        XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, deprecated: true), .init(properties: [:])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(readOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .readOnly), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(writeOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .writeOnly), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, deprecated: true), .init(properties: [:], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(defaultValueObject.defaultValue, ["hello": false])
@@ -1682,7 +1682,7 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
     }
 
     func test_decodeObjectWithTypeInferred() throws {
@@ -1708,16 +1708,16 @@ extension SchemaObjectTests {
     func test_encodeObjectWithTitle() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true, title: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false, title: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true, title: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true, title: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -1800,8 +1800,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, title: "hello"), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, title: "hello"), .init(properties: [:])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, title: "hello"), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, title: "hello"), .init(properties: [:], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.title, "hello")
@@ -1810,22 +1810,22 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
     }
 
     func test_encodeObjectWithDescription() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true, description: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false, description: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true, description: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true, description: "hello"), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -1908,8 +1908,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, description: "hello"), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, description: "hello"), .init(properties: [:])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, description: "hello"), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, description: "hello"), .init(properties: [:], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.description, "hello")
@@ -1918,22 +1918,22 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
     }
 
     func test_encodeObjectWithExternalDocs() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2024,8 +2024,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.externalDocs, .init(url: URL(string: "http://google.com")!))
@@ -2034,22 +2034,22 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
     }
 
     func test_encodeObjectWithMaxProperties() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], maxProperties: 2))
+        ], maxProperties: 2, requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], maxProperties: 2))
+        ], maxProperties: 2, requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], maxProperties: 2))
+        ], maxProperties: 2, requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], maxProperties: 2))
+        ], maxProperties: 2, requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2132,8 +2132,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], maxProperties: 1)))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], maxProperties: 1)))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], maxProperties: 1, requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], maxProperties: 1, requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2141,22 +2141,22 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], maxProperties: 1))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], maxProperties: 1, requiredArray: []))
     }
 
     func test_encodeObjectWithMinProperties() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], minProperties: 1))
+        ], minProperties: 1, requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], minProperties: 1))
+        ], minProperties: 1, requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], minProperties: 1))
+        ], minProperties: 1, requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], minProperties: 1))
+        ], minProperties: 1, requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2239,8 +2239,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], minProperties: 1)))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], minProperties: 1)))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], minProperties: 1, requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], minProperties: 1, requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2248,22 +2248,22 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], minProperties: 1))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], minProperties: 1, requiredArray: []))
     }
 
     func test_encodeObjectWithAdditionalPropertiesBoolean() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(true)))
+        ], additionalProperties: .init(true), requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(true)))
+        ], additionalProperties: .init(true), requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(true)))
+        ], additionalProperties: .init(true), requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(true)))
+        ], additionalProperties: .init(true), requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2346,8 +2346,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(true))))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(true))))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(true), requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(true), requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2355,23 +2355,23 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(true)))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(true), requiredArray: []))
         XCTAssertEqual(contextB.additionalProperties?.booleanValue, true)
     }
 
     func test_encodeObjectWithAdditionalPropertiesObject() {
         let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
         let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
         let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
         let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        ], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2462,8 +2462,8 @@ extension SchemaObjectTests {
         let nullableObject = try! orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try! orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(.string))))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(.string))))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(.string), requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(.string), requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2471,7 +2471,7 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(.string)))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(.string), requiredArray: []))
     }
 
     func test_encodeObjectWithExample() {
@@ -2479,19 +2479,19 @@ extension SchemaObjectTests {
             .with(example: "hello")
         let requiredObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(example: AnyCodable(["hello": true]))
         let optionalObject = try! JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(example: AnyCodable(["hello": true]))
         let nullableObject = try! JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(example: AnyCodable(["hello": true]))
         let allowedValueObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
             "hello": .boolean(.init(format: .unspecified, required: false))
-        ]))
+        ], requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2608,8 +2608,8 @@ extension SchemaObjectTests {
         let allowedValueObject = try orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
         XCTAssertEqual(string, JSONSchema.string(.init(format: .unspecified, example: "hello"), .init()))
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, example: AnyCodable(["hello": true])), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, example: AnyCodable(["hello": true])), .init(properties: [:])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, example: AnyCodable(["hello": true])), .init(properties: [:], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, example: AnyCodable(["hello": true])), .init(properties: [:], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.example, ["hello" : true])
@@ -2618,14 +2618,14 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
     }
 
     func test_encodeObjectWithNoPropertiesAndAdditionalPropertiesObject() {
-        let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
-        let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
-        let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
-        let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false)))))
+        let requiredObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
+        let optionalObject = JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
+        let nullableObject = JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
+        let allowedValueObject = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:], additionalProperties: .init(.boolean(.init(format: .unspecified, required: false))), requiredArray: []))
             .with(allowedValues: [
                 AnyCodable(["hello": false])
             ])
@@ -2675,7 +2675,7 @@ extension SchemaObjectTests {
             .init(
                 properties: [
                     "hello": .boolean(.init(format: .unspecified, required: true))
-                ], minProperties: 1
+                ], minProperties: 1, requiredArray: []
             )
         )
 
@@ -2684,7 +2684,7 @@ extension SchemaObjectTests {
             .init(
                 properties: [
                     "hello": .boolean(.init(format: .unspecified, required: true))
-                ], minProperties: 1
+                ], minProperties: 1, requiredArray: []
             )
         )
 
@@ -2693,7 +2693,7 @@ extension SchemaObjectTests {
             .init(
                 properties: [
                     "hello": .boolean(.init(format: .unspecified, required: true))
-                ], minProperties: 1
+                ], minProperties: 1, requiredArray: []
             )
         )
 
@@ -2702,7 +2702,7 @@ extension SchemaObjectTests {
             .init(
                 properties: [
                     "hello": .boolean(.init(format: .unspecified, required: true))
-                ], minProperties: 1
+                ], minProperties: 1, requiredArray: []
             )
         )
         .with(
@@ -2818,8 +2818,8 @@ extension SchemaObjectTests {
         let nullableObject = try orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic))])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic))])))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic))], requiredArray: [])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic))], requiredArray: [])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
@@ -2827,7 +2827,7 @@ extension SchemaObjectTests {
             XCTFail("expected object to be parsed as object")
             return
         }
-        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic))]))
+        XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic))], requiredArray: []))
     }
 
     func test_encodeObjectWithCompoundProperties() {
@@ -4570,27 +4570,27 @@ extension SchemaObjectTests {
     func test_encodeAll() {
         let allOf = JSONSchema.all(
             of: [
-                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ]
         )
         let allOfWithTitle = JSONSchema.all(
             of: [
-                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ],
             core: .init(title: "hello")
         )
         let allOfWithDisciminator = JSONSchema.all(
             of: [
-                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ],
             core: .init(discriminator: .init(propertyName: "hello"))
         )
         let allOfWithReference = JSONSchema.all(
             of: [
-                .object(.init(), .init(properties: [:])),
+                .object(.init(), .init(properties: [:], requiredArray: [])),
                 .reference(.component(named: "test"))
             ]
         )
@@ -4707,8 +4707,8 @@ extension SchemaObjectTests {
             all,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init(properties: [:])),
-                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ]
             )
         )
@@ -4717,8 +4717,8 @@ extension SchemaObjectTests {
             allWithTitle,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init(properties: [:])),
-                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ],
                 core: .init(title: "hello")
             )
@@ -4728,8 +4728,8 @@ extension SchemaObjectTests {
             allWithDiscriminator,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init(properties: [:])),
-                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ],
                 core: .init(discriminator: .init(propertyName: "hello"))
             )
@@ -4739,7 +4739,7 @@ extension SchemaObjectTests {
             allWithReference,
             JSONSchema.all(
                 of: [
-                    .object(.init(), .init(properties: [:])),
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
                     .reference(.component(named: "test"))
                 ]
             )
@@ -4749,29 +4749,29 @@ extension SchemaObjectTests {
     func test_encodeOne() {
         let oneOf = JSONSchema.one(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))], requiredArray: []))
             ]
         )
 
         let oneOfWithTitle = JSONSchema.one(
             of: [
-                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ],
             core: .init(title: "hello")
         )
 
         let oneOfWithDiscriminator = JSONSchema.one(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))], requiredArray: []))
             ],
             core: .init(discriminator: .init(propertyName: "hello"))
         )
         let oneOfWithReference = JSONSchema.one(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
                 .reference(.component(named: "test"))
             ]
         )
@@ -4912,8 +4912,8 @@ extension SchemaObjectTests {
             one,
             JSONSchema.one(
                 of: [
-                    .object(.init(format: .generic), .init(properties: [:])),
-                    .object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(format: .generic), .init(properties: [:], requiredArray: [])),
+                    .object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ]
             )
         )
@@ -4922,8 +4922,8 @@ extension SchemaObjectTests {
             oneWithTitle,
             JSONSchema.one(
                 of: [
-                    .object(.init(), .init(properties: [:])),
-                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ],
                 core: .init(title: "hello")
             )
@@ -4933,8 +4933,8 @@ extension SchemaObjectTests {
             oneWithDiscriminator,
             JSONSchema.one(
                 of: [
-                    .object(.init(format: .generic), .init(properties: [:])),
-                    .object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(format: .generic), .init(properties: [:], requiredArray: [])),
+                    .object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ],
                 core: .init(discriminator: .init(propertyName: "hello"))
             )
@@ -4944,7 +4944,7 @@ extension SchemaObjectTests {
             oneWithReference,
             JSONSchema.one(
                 of: [
-                    .object(.init(format: .generic), .init(properties: [:])),
+                    .object(.init(format: .generic), .init(properties: [:], requiredArray: [])),
                     .reference(.component(named: "test"))
                 ]
             )
@@ -4954,30 +4954,30 @@ extension SchemaObjectTests {
     func test_encodeAny() {
         let anyOf = JSONSchema.any(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))], requiredArray: []))
             ]
         )
 
         let anyOfWithTitle = JSONSchema.any(
             of: [
-                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(), .init(properties: [:]))
+                .object(.init(), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(), .init(properties: [:], requiredArray: []))
             ],
             core: .init(title: "hello")
         )
 
         let anyOfWithDiscriminator = JSONSchema.any(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
-                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))]))
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["world": .boolean(.init(format: .generic, required: false))], requiredArray: []))
             ],
             core: .init(discriminator: .init(propertyName: "hello"))
         )
 
         let anyOfWithReference = JSONSchema.any(
             of: [
-                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])),
+                .object(.init(format: .unspecified, required: true), .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])),
                 .reference(.component(named: "test"))
             ]
         )
@@ -5119,7 +5119,7 @@ extension SchemaObjectTests {
             JSONSchema.any(
                 of: [
                     .boolean(.init(format: .generic)),
-                    .object(.init(format: .generic), .init(properties: [:]))
+                    .object(.init(format: .generic), .init(properties: [:], requiredArray: []))
                 ]
             )
         )
@@ -5128,8 +5128,8 @@ extension SchemaObjectTests {
             anyWithTitle,
             JSONSchema.any(
                 of: [
-                    .object(.init(), .init(properties: [:])),
-                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
+                    .object(.init(), .init(properties: [:], requiredArray: [])),
+                    .object(.init(), .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], requiredArray: []))
                 ],
                 core: .init(title: "hello")
             )
@@ -5140,7 +5140,7 @@ extension SchemaObjectTests {
             JSONSchema.any(
                 of: [
                     .boolean(.init(format: .generic)),
-                    .object(.init(format: .generic), .init(properties: [:]))
+                    .object(.init(format: .generic), .init(properties: [:], requiredArray: []))
                 ],
                 core: .init(discriminator: .init(propertyName: "hello"))
             )
@@ -5161,14 +5161,14 @@ extension SchemaObjectTests {
         let not = JSONSchema.not(
             .object(
                 .init(format: .unspecified, required: true),
-                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])
+                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])
             )
         )
 
         let notWithTitle = JSONSchema.not(
             .object(
                 .init(format: .unspecified, required: true),
-                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())])
+                .init(properties: ["hello": .string(.init(format: .generic, required: false), .init())], requiredArray: [])
             ),
             core: .init(title: "hello")
         )
@@ -5631,13 +5631,13 @@ extension SchemaObjectTests {
 
     func test_allOf() {
         let t1: JSONSchema = .all(of:
-            .object(.init(), .init(properties: ["hello": .string])),
-            .object(.init(), .init(properties: ["world": .boolean]))
+                                    .object(.init(), .init(properties: ["hello": .string], requiredArray: [])),
+                                  .object(.init(), .init(properties: ["world": .boolean], requiredArray: []))
         )
         let t2: JSONSchema = .all(
             of: [
-                .object(.init(), .init(properties: ["hello": .string])),
-                .object(.init(), .init(properties: ["world": .boolean]))
+                .object(.init(), .init(properties: ["hello": .string], requiredArray: [])),
+                .object(.init(), .init(properties: ["world": .boolean], requiredArray: []))
             ]
         )
 

@@ -552,6 +552,7 @@ extension JSONSchema {
         /// The maximum number of properties the object
         /// is allowed to have.
         public let maxProperties: Int?
+        public let requiredArray: [String]
         let _minProperties: Int?
         public let properties: [String: JSONSchema]
 
@@ -609,12 +610,14 @@ extension JSONSchema {
             properties: [String: JSONSchema],
             additionalProperties: Either<Bool, JSONSchema>? = nil,
             maxProperties: Int? = nil,
-            minProperties: Int? = nil
+            minProperties: Int? = nil,
+            requiredArray: [String]
         ) {
             self.properties = properties
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties
             self._minProperties = minProperties
+            self.requiredArray = requiredArray
         }
     }
 }
@@ -949,7 +952,7 @@ extension JSONSchema.ObjectContext: Decodable {
         _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
-        let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
+        requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
         
         let decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
         properties = Self.properties(decodedProperties, takingRequirementsFrom: requiredArray)
