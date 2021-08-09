@@ -318,6 +318,58 @@ extension OpenAPI {
         public subscript<T>(dynamicMember path: KeyPath<JSONReference<ReferenceType>, T>) -> T {
             return jsonReference[keyPath: path]
         }
+
+        /// Reference a component of type `ReferenceType` in the
+        /// Components Object.
+        ///
+        /// Example:
+        ///
+        ///     OpenAPI.Reference<JSONSchema>.component(named: "greetings")
+        ///     // encoded string: "#/components/schemas/greetings"
+        ///     // Swift: `document.components.schemas["greetings"]`
+        public static func component(named name: String) -> Self {
+            return .init(.internal(.component(name: name)))
+        }
+
+        /// Reference a path internal to this file but not within the Components Object
+        /// This is likely not what you are looking for. It is advisable to store reusable components
+        /// in the Components Object.
+        ///
+        /// - Important: The path does not contain a leading '#'. Start with the root '/'.
+        public static func `internal`(path: JSONReference<ReferenceType>.Path) -> Self {
+            return .init(.internal(.path(path)))
+        }
+
+        /// Reference an external URL.
+        public static func external(_ url: URL) -> Self {
+            return .init(.external(url))
+        }
+
+        /// `true` for internal references, `false` for
+        /// external references (i.e. to another file).
+        public var isInternal: Bool {
+            return jsonReference.isInternal
+        }
+
+        /// `true` for external references, `false` for
+        /// internal references.
+        public var isExternal: Bool {
+            return jsonReference.isExternal
+        }
+
+        /// Get the name of the referenced object. This method returns optional
+        /// because a reference to an external file might not have any path if the
+        /// file itself is the referenced component.
+        public var name: String? {
+            return jsonReference.name
+        }
+
+        /// The absolute value of an external reference's
+        /// URL or the path fragment string for a local
+        /// reference as defined in [RFC 3986](https://tools.ietf.org/html/rfc3986).
+        public var absoluteString: String {
+            return jsonReference.absoluteString
+        }
     }
 }
 

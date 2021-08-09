@@ -135,7 +135,7 @@ final class ComponentsTests: XCTestCase {
             ]
         )
 
-        let schemas: [Either<JSONReference<JSONSchema>, JSONSchema>] = [
+        let schemas: [Either<OpenAPI.Reference<JSONSchema>, JSONSchema>] = [
             .schema(.string),
             .reference(.component(named: "hello")),
             .reference(.component(named: "not_there"))
@@ -159,20 +159,20 @@ final class ComponentsTests: XCTestCase {
             ]
         )
 
-        let schema1: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "hello"))
+        let schema1: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.component(named: "hello"))
 
         let resolvedSchema = try components.lookup(schema1)
 
         XCTAssertEqual(resolvedSchema, .boolean)
 
-        let schema2: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
+        let schema2: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
 
         XCTAssertThrowsError(try components.lookup(schema2)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
         }
 
-        let schema3: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
+        let schema3: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
 
         XCTAssertThrowsError(try components.lookup(schema3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
