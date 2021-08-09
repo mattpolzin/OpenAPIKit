@@ -17,8 +17,7 @@ let package = Package(
             targets: ["OpenAPIKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0"), // just for tests
-        .package(url: "https://github.com/omochi/FineJSON.git", from: "1.14.0") // just for tests
+        .package(url: "https://github.com/jpsim/Yams.git", from: "4.0.0") // just for tests
     ],
     targets: [
         .target(
@@ -32,7 +31,7 @@ let package = Package(
             dependencies: ["OpenAPIKitCore"]),
         .testTarget(
             name: "OrderedDictionaryTests",
-            dependencies: ["OpenAPIKitCore", "Yams", "FineJSON"]),
+            dependencies: ["OpenAPIKitCore", "Yams"]),
         .testTarget(
             name: "AnyCodableTests",
             dependencies: ["OpenAPIKitCore"]),
@@ -42,7 +41,7 @@ let package = Package(
             dependencies: ["OpenAPIKitCore"]),
         .testTarget(
             name: "OpenAPIKit30Tests",
-            dependencies: ["OpenAPIKit30", "Yams", "FineJSON"]),
+            dependencies: ["OpenAPIKit30", "Yams"]),
         .testTarget(
             name: "OpenAPIKit30CompatibilitySuite",
             dependencies: ["OpenAPIKit30", "Yams"]),
@@ -55,7 +54,7 @@ let package = Package(
             dependencies: ["OpenAPIKitCore"]),
         .testTarget(
             name: "OpenAPIKitTests",
-            dependencies: ["OpenAPIKit", "Yams", "FineJSON"]),
+            dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "OpenAPIKitCompatibilitySuite",
             dependencies: ["OpenAPIKit", "Yams"]),

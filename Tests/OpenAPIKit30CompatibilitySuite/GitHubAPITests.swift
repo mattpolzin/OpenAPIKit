@@ -22,18 +22,15 @@ final class GitHubAPICampatibilityTests: XCTestCase {
 
     override func setUp() {
         /*
-         NOTE: As of GitHub's OpenAPI documentation v 2.22, they started to nest
-            their schema components in a bit of an unusual way. not clear to me that
-            the thing they are doing is disallowed by the spec, but definitely weird.
-
-            At any rate, it fails here for now so I will pin this to version 2.21 and
-            revisit later.
+         NOTE: As of 2/17/2021 the latest released version of GitHub's API documentation
+                does not pass but the latest commit does; I will pin this test to that
+                commit for now.
          */
         if githubAPI == nil {
             githubAPI = Result {
                 try YAMLDecoder().decode(
                     OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/v1.0.0-rc.1/descriptions/ghes-2.21/ghes-2.21.yaml")!)
+                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/e4f28959fbc6c9fc4eea823b495061dded87e84d/descriptions/ghes-3.0/ghes-3.0.yaml")!)
                 )
             }
         }
@@ -69,8 +66,8 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         // contact name is Support
         XCTAssertEqual(apiDoc.info.contact?.name, "Support")
 
-        // contact URL was parsed as https://support.github.com
-        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://support.github.com")!)
+        // contact URL was parsed as https://support.github.com/contact
+        XCTAssertEqual(apiDoc.info.contact?.url, URL(string: "https://support.github.com/contact")!)
 
         // no contact email is provided
         XCTAssert(apiDoc.info.contact?.email?.isEmpty ?? true)
@@ -149,6 +146,6 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         let resolvedDoc = try apiDoc.locallyDereferenced().resolved()
 
         XCTAssertEqual(resolvedDoc.routes.count, apiDoc.paths.count)
-        XCTAssertEqual(resolvedDoc.endpoints.count, 550)
+        XCTAssertEqual(resolvedDoc.endpoints.count, 664)
     }
 }

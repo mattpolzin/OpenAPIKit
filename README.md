@@ -27,6 +27,8 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
   - [Generating OpenAPI Documents](#generating-openapi-documents)
   - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
+- [Contributing](#contributing)
+- [Security](#security)
 - [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
 ## Usage
@@ -100,7 +102,9 @@ You can use this same validation system to dig arbitrarily deep into an OpenAPI 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
 
-If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively.
+If retaining order is important for your use-case, I recommend the [**Yams**](https://github.com/jpsim/Yams) and [**FineJSON**](https://github.com/omochi/FineJSON) libraries for YAML and JSON respectively. Also keep in mind that JSON is entirely valid YAML and therefore you will likely get good results from Yams decoding of JSON as well (it just won't _encode_ as valid JSON). 
+
+The Foundation JSON encoding and decoding will be the most stable and battle-tested option with Yams as a pretty well established and stable option as well. FineJSON is lesser used (to my knowledge) but I have had success with it in the past.
 
 ### OpenAPI Document structure
 The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) version 3.0.3. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
@@ -282,6 +286,18 @@ This library *is* opinionated about a few defaults when you use the Swift types,
     * ex. `JSONSchema.string(required: false)` is an optional "string" type.
 
 See [**A note on dictionary ordering**](#a-note-on-dictionary-ordering) before deciding on an encoder/decoder to use with this library.
+
+## Contributing
+Contributions to OpenAPIKit are welcome and appreciated! The project is mostly maintained by one person which means additional contributors have a huge impact on how much gets done how quickly.
+
+Please see the [Contribution Guidelines](./CONTRIBUTING.md) for a few brief notes on contributing the the project.
+
+## Security
+The OpenAPIKit project takes code security seriously. As part of the Swift Server Workground incubation program, this project follows a shared set of standards around receiving, reporting, and reacting to security vulnerabilies.
+
+Please see [Security](./SECURITY.md) for information on how to report vulnerabilities to the OpenAPIKit project and what to expect after you do.
+
+**Please do not report security vulnerabilities via GitHub issues.**
 
 ## Specification Coverage & Type Reference
 For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).

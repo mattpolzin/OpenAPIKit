@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import FineJSON
+import Yams
 import XCTest
 
 fileprivate let foundationTestEncoder = { () -> JSONEncoder in
@@ -32,12 +32,12 @@ func orderUnstableTestStringFromEncoding<T: Encodable>(of entity: T) throws -> S
     return String(data: try orderUnstableEncode(entity), encoding: .utf8)
 }
 
-fileprivate let fineJSONTestEncoder = { () -> FineJSONEncoder in
-    return FineJSONEncoder()
+fileprivate let yamsTestEncoder = { () -> YAMLEncoder in
+    return YAMLEncoder()
 }()
 
-func orderStableEncode<T: Encodable>(_ value: T) throws -> Data {
-    return try fineJSONTestEncoder.encode(value)
+func orderStableYAMLEncode<T: Encodable>(_ value: T) throws -> String {
+    return try yamsTestEncoder.encode(value)
 }
 
 fileprivate let foundationTestDecoder = { () -> JSONDecoder in
@@ -57,12 +57,12 @@ func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -
     return try foundationTestDecoder.decode(T.self, from: data)
 }
 
-fileprivate let fineJSONTestDecoder = { () -> FineJSONDecoder in
-    return FineJSONDecoder()
+fileprivate let yamsTestDecoder = { () -> YAMLDecoder in
+    return YAMLDecoder()
 }()
 
 func orderStableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-    return try fineJSONTestDecoder.decode(T.self, from: data)
+    return try yamsTestDecoder.decode(T.self, from: data)
 }
 
 func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString = #file, line: UInt = #line) {
