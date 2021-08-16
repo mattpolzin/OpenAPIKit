@@ -523,7 +523,7 @@ extension JSONSchema {
         /// Maximum number of items in array.
         public let maxItems: Int?
 
-        let _minItems: Int?
+        public let _minItems: Int?
         /// Minimum number of items in array.
         /// Defaults to 0.
         public var minItems: Int { _minItems ?? 0 }
