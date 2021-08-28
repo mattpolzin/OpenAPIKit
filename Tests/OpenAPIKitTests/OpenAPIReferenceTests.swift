@@ -74,6 +74,66 @@ final class OpenAPIReferenceTests: XCTestCase {
         XCTAssertEqual(OpenAPI.Reference<OpenAPI.Callbacks>.component(named: "hello").absoluteString, "#/components/callbacks/hello")
         XCTAssertEqual(OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello").absoluteString, "#/components/pathItems/hello")
     }
+
+    func test_summaryAndDescriptionOverrides() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "hello": .string(description: "description")
+            ],
+            responses: [
+                "hello": .init(description: "description")
+            ],
+            parameters: [
+                "hello": .init(name: "name", context: .path, content: [:], description: "description")
+            ],
+            examples: [
+                "hello": .init(summary: "summary", description: "description", value: .b(""))
+            ],
+            requestBodies: [
+                "hello": .init(description: "description", content: [:])
+            ],
+            headers: [
+                "hello": .init(schemaOrContent: .content([:]), description: "description")
+            ],
+            securitySchemes: [
+                "hello": .init(type: .mutualTLS, description: "description")
+            ],
+            callbacks: [
+                "hello": [.init(url: URL(string: "http://website.com")!): .pathItem(.init())]
+            ],
+            pathItems: [
+                "hello": .init(summary: "summary", description: "description")
+            ]
+        )
+
+        XCTAssertEqual(try OpenAPI.Reference<JSONSchema>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<JSONSchema>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Response>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Response>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Parameter>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Parameter>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Example>.component(named: "hello").dereferenced(in: components).summary, "summary")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Example>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Example>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).summary, "new sum")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Example>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Request>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Request>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Header>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.Header>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.SecurityScheme>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.SecurityScheme>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello").dereferenced(in: components).summary, "summary")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello").dereferenced(in: components).description, "description")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).summary, "new sum")
+        XCTAssertEqual(try OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello", summary: "new sum", description: "new desc").dereferenced(in: components).description, "new desc")
+    }
 }
 
 // MARK: Codable
