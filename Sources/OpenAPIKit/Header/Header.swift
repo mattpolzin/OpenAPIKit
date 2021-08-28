@@ -103,6 +103,20 @@ extension OpenAPI.Header {
     public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Header>, OpenAPI.Header>>
 }
 
+// MARK: - Describable
+extension OpenAPI.Header : OpenAPIDescribable {
+    func overriddenNonNil(description: String?) -> OpenAPI.Header {
+        guard let description = description else { return self }
+        return OpenAPI.Header(
+            schemaOrContent: schemaOrContent,
+            description: description,
+            required: required,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
 // MARK: - Header Convenience
 extension OpenAPI.Parameter.SchemaContext {
     public static func header(

@@ -168,6 +168,16 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Response>, B == OpenAPI.Re
     }
 }
 
+// MARK: - Describable
+extension OpenAPI.Response : OpenAPIDescribable {
+    func overriddenNonNil(description: String?) -> OpenAPI.Response {
+        guard let description = description else { return self }
+        var response = self
+        response.description = description
+        return response
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Response {

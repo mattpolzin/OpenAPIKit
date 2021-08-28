@@ -237,6 +237,24 @@ extension OpenAPI.Operation {
     }
 }
 
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.Operation : OpenAPISummarizable {
+    func overriddenNonNil(summary: String?) -> OpenAPI.Operation {
+        guard let summary = summary else { return self }
+        var operation = self
+        operation.summary = summary
+        return operation
+    }
+
+    func overriddenNonNil(description: String?) -> OpenAPI.Operation {
+        guard let description = description else { return self }
+        var operation = self
+        operation.description = description
+        return operation
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Operation: Encodable {

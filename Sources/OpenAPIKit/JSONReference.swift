@@ -339,8 +339,8 @@ extension OpenAPI {
         ///     OpenAPI.Reference<JSONSchema>.component(named: "greetings")
         ///     // encoded string: "#/components/schemas/greetings"
         ///     // Swift: `document.components.schemas["greetings"]`
-        public static func component(named name: String) -> Self {
-            return .init(.internal(.component(name: name)))
+        public static func component(named name: String, summary: String? = nil, description: String? = nil) -> Self {
+            return .init(.internal(.component(name: name)), summary: summary, description: description)
         }
 
         /// Reference a path internal to this file but not within the Components Object
@@ -348,8 +348,8 @@ extension OpenAPI {
         /// in the Components Object.
         ///
         /// - Important: The path does not contain a leading '#'. Start with the root '/'.
-        public static func `internal`(path: JSONReference<ReferenceType>.Path) -> Self {
-            return .init(.internal(.path(path)))
+        public static func `internal`(path: JSONReference<ReferenceType>.Path, summary: String? = nil, description: String? = nil) -> Self {
+            return .init(.internal(.path(path)), summary: summary, description: description)
         }
 
         /// Reference an external URL.
@@ -383,6 +383,14 @@ extension OpenAPI {
             return jsonReference.absoluteString
         }
     }
+}
+
+internal protocol OpenAPIDescribable {
+    func overriddenNonNil(description: String?) -> Self
+}
+
+internal protocol OpenAPISummarizable: OpenAPIDescribable {
+    func overriddenNonNil(summary: String?) -> Self
 }
 
 // MARK: - Codable

@@ -78,6 +78,30 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(t1.schema, .string(.init(), .init()))
     }
 
+    func test_referencedSchemaNoOverrides() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "test": .string(description: "a test string")
+            ]
+        )
+        let t1 = try OpenAPI.Content(
+            schemaReference: .component(named: "test")
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.schema, .string(.init(description: "a test string"), .init()))
+    }
+
+    func test_referencedSchemaOverrideDescription() throws {
+        let components = OpenAPI.Components(
+            schemas: [
+                "test": .string(description: "a test string")
+            ]
+        )
+        let t1 = try OpenAPI.Content(
+            schemaReference: .component(named: "test", description: "overridden description")
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.schema, .string(.init(description: "overridden"), .init()))
+    }
+
     func test_missingSchema() {
         XCTAssertThrowsError(
             try OpenAPI.Content(

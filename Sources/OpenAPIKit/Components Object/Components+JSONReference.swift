@@ -100,6 +100,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
+    /// If the `OpenAPI.Reference` has a `summary` or `description` then the referenced
+    /// object will have its `summary` and/or `description` overridden by that of the reference.
+    /// This only applies if the referenced object would normally have a summary/description.
+    ///
     /// - Important: Looking up an external reference (i.e. one that points to another file)
     ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
     ///
