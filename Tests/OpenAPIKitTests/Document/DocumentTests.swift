@@ -915,7 +915,7 @@ extension DocumentTests {
     func test_webhooks_encode() throws {
         let op = OpenAPI.Operation(responses: [:])
         let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
-        let pathItemTest: Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
+        let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
         
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),

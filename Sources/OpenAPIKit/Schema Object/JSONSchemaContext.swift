@@ -358,6 +358,24 @@ extension JSONSchema.CoreContext {
             example: example
         )
     }
+
+    /// Return this context with the given description
+    public func with(description: String) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            example: example
+        )
+    }
 }
 
 // MARK: - Specific Contexts

@@ -82,7 +82,7 @@ extension OpenAPI {
         public var paths: PathItem.Map
 
         /// Storage for components that need to be referenced elsewhere in the
-        /// OpenAPI Document using `JSONReferences`.
+        /// OpenAPI Document using `OpenAPI.References`.
         ///
         /// Storing components here can be in the interest of being explicit about
         /// the fact that the components are always the same (such as an
@@ -101,7 +101,7 @@ extension OpenAPI {
         /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
         /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
         /// See [OpenAPI Webhook Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#fixed-fields)
-        public var webhooks: OrderedDictionary<String, Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>>
+        public var webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>
         
         /// A declaration of which security mechanisms can be used across the API.
         ///
@@ -146,7 +146,7 @@ extension OpenAPI {
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
-            webhooks: OrderedDictionary<String, Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>> = [:],
+            webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>> = [:],
             components: Components,
             security: [SecurityRequirement] = [],
             tags: [Tag]? = nil,
@@ -317,7 +317,7 @@ extension OpenAPI.Document {
     /// Document.
     ///
     /// A dereferenced document contains no
-    /// `JSONReferences`. All components have been
+    /// `OpenAPI.References`. All components have been
     /// inlined.
     ///
     /// Dereferencing the document is a necessary
@@ -326,7 +326,7 @@ extension OpenAPI.Document {
     /// endpoints.
     ///
     /// - Important: Local dereferencing will `throw` if any
-    ///     `JSONReferences` point to other files or to
+    ///     `OpenAPI.References` point to other files or to
     ///     locations within the same file other than the
     ///     Components Object. It will also fail if any components
     ///     are missing from the Components Object.
@@ -414,7 +414,7 @@ extension OpenAPI.Document: Decodable {
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
           
-            let webhooks = try container.decodeIfPresent(OrderedDictionary<String, Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>>.self, forKey: .webhooks) ?? [:]
+            let webhooks = try container.decodeIfPresent(OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>.self, forKey: .webhooks) ?? [:]
             self.webhooks = webhooks
 
             let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)

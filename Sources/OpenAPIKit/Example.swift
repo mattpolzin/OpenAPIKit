@@ -41,11 +41,11 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Example {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Example>, OpenAPI.Example>>
+    public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Example>, OpenAPI.Example>>
 }
 
 // MARK: - Either Convenience
-extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example {
+extension Either where A == OpenAPI.Reference<OpenAPI.Example>, B == OpenAPI.Example {
     /// Construct an `Example`.
     public static func example(
         summary: String? = nil,
@@ -60,6 +60,30 @@ extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example
                 value: value,
                 vendorExtensions: vendorExtensions
             )
+        )
+    }
+}
+
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.Example : OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Example {
+        guard let summary = summary else { return self }
+        return OpenAPI.Example(
+            summary: summary,
+            description: description,
+            value: value,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.Example {
+        guard let description = description else { return self }
+        return OpenAPI.Example(
+            summary: summary,
+            description: description,
+            value: value,
+            vendorExtensions: vendorExtensions
         )
     }
 }

@@ -145,6 +145,37 @@ extension OpenAPI.Document.Info.License {
     }
 }
 
+// MARK: - Describable & Summarizable
+extension OpenAPI.Document.Info : OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Document.Info {
+        guard let summary = summary else { return self }
+        return OpenAPI.Document.Info(
+            title: title,
+            summary: summary,
+            description: description,
+            termsOfService: termsOfService,
+            contact: contact,
+            license: license,
+            version: version,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.Document.Info {
+        guard let description = description else { return self }
+        return OpenAPI.Document.Info(
+            title: title,
+            summary: summary,
+            description: description,
+            termsOfService: termsOfService,
+            contact: contact,
+            license: license,
+            version: version,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
 // MARK: - Codable
 extension OpenAPI.Document.Info.License: Encodable {
     public func encode(to encoder: Encoder) throws {

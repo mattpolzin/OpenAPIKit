@@ -77,7 +77,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[1] under the `/hello/world` path. \n\nJSONReference<Parameter> could not be decoded because:\nExpected value to be parsable as Mapping but it was not.\n\nParameter could not be decoded because:\nExpected value to be parsable as Mapping but it was not.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[1] under the `/hello/world` path. \n\nReference<Parameter> could not be decoded because:\nExpected value to be parsable as Mapping but it was not.\n\nParameter could not be decoded because:\nExpected value to be parsable as Mapping but it was not.."
             )
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "parameters", "Index 1"])
         }

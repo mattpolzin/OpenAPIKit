@@ -247,6 +247,24 @@ extension OpenAPI.PathItem {
     }
 }
 
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.PathItem : OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.PathItem {
+        guard let summary = summary else { return self }
+        var pathItem = self
+        pathItem.summary = summary
+        return pathItem
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.PathItem {
+        guard let description = description else { return self }
+        var pathItem = self
+        pathItem.description = description
+        return pathItem
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Path: Encodable {

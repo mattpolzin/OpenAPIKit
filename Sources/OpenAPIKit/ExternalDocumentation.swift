@@ -35,6 +35,19 @@ extension OpenAPI {
     }
 }
 
+// MARK: - Describable
+
+extension OpenAPI.ExternalDocumentation : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.ExternalDocumentation {
+        guard let description = description else { return self }
+        return OpenAPI.ExternalDocumentation(
+            description: description,
+            url: url,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.ExternalDocumentation: Encodable {

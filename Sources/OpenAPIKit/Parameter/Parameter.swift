@@ -110,7 +110,7 @@ extension OpenAPI {
         public init(
             name: String,
             context: Context,
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             description: String? = nil,
             deprecated: Bool = false,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -149,7 +149,7 @@ extension OpenAPI.Parameter {
     /// methods on the `OpenAPI.Components` found at
     /// `document.components` to resolve an `Either` to
     /// an `OpenAPI.Parameter`.
-    public typealias Array = [Either<JSONReference<OpenAPI.Parameter>, OpenAPI.Parameter>]
+    public typealias Array = [Either<OpenAPI.Reference<OpenAPI.Parameter>, OpenAPI.Parameter>]
 }
 
 extension OpenAPI.Parameter {
@@ -166,7 +166,7 @@ extension OpenAPI.Parameter {
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
-extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
+extension Either where A == OpenAPI.Reference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
     /// Construct a parameter using a `JSONSchema`.
     public static func parameter(
@@ -208,6 +208,17 @@ extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Param
                 vendorExtensions: vendorExtensions
             )
         )
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.Parameter : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Parameter {
+        guard let description = description else { return self }
+        var parameter = self
+        parameter.description = description
+        return parameter
     }
 }
 

@@ -588,6 +588,36 @@ extension JSONSchema {
             return self
         }
     }
+
+    /// Returns a version of this `JSONSchema` that has the given description.
+    public func with(description: String) -> JSONSchema {
+        switch self {
+        case .boolean(let context):
+            return .boolean(context.with(description: description))
+        case .number(let contextA, let contextB):
+            return .number(contextA.with(description: description), contextB)
+        case .integer(let contextA, let contextB):
+            return .integer(contextA.with(description: description), contextB)
+        case .string(let contextA, let contextB):
+            return .string(contextA.with(description: description), contextB)
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(description: description), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(description: description), contextB)
+        case .all(of: let fragments, core: let core):
+            return .all(of: fragments, core: core.with(description: description))
+        case .one(of: let fragments, core: let core):
+            return .one(of: fragments, core: core.with(description: description))
+        case .any(of: let fragments, core: let core):
+            return .any(of: fragments, core: core.with(description: description))
+        case .not(let schema, core: let core):
+            return .not(schema, core: core.with(description: description))
+        case .fragment(let fragment):
+            return .fragment(fragment.with(description: description))
+        case .reference, .null:
+            return self
+        }
+    }
 }
 
 extension JSONSchema {
@@ -1235,6 +1265,15 @@ extension JSONSchema {
         required: Bool = true
     ) -> JSONSchema {
         return .reference(reference, .init(required: required))
+    }
+}
+
+// MARK: - Describable
+
+extension JSONSchema : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> JSONSchema {
+        guard let description = description else { return self }
+        return self.with(description: description)
     }
 }
 

@@ -64,7 +64,7 @@ extension OpenAPI.Document {
 /// - Parameters are unique within each Path Item.
 /// - Parameters are unique within each Operation.
 /// - Operation Ids are unique across the whole Document.
-/// - All JSONReferences that refer to components in this
+/// - All OpenAPI.References that refer to components in this
 ///     document can be found in the components dictionary.
 ///
 /// If you want a Validator that won't perform any
@@ -157,7 +157,7 @@ public final class Validator {
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
     /// - Operation Ids are unique across the whole Document.
-    /// - All JSONReferences that refer to components in this
+    /// - All OpenAPI.References that refer to components in this
     ///     document can be found in the components dictionary.
     /// - `Enum` must not be empty in the document's
     ///     Server Variable.

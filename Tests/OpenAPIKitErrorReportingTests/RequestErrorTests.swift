@@ -29,7 +29,7 @@ final class RequestErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Request in .requestBody for the **GET** endpoint under `/hello/world`. \n\nJSONReference<Request> could not be decoded because:\nExpected value to be parsable as Mapping but it was not.\n\nRequest could not be decoded because:\nExpected value to be parsable as Mapping but it was not..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Request in .requestBody for the **GET** endpoint under `/hello/world`. \n\nReference<Request> could not be decoded because:\nExpected value to be parsable as Mapping but it was not.\n\nRequest could not be decoded because:\nExpected value to be parsable as Mapping but it was not..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

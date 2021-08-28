@@ -17,7 +17,7 @@ final class ResponseTests: XCTestCase {
         XCTAssertNil(r1.headers)
         XCTAssertEqual(r1.content, [:])
 
-        let content = OpenAPI.Content(schema: .init(JSONReference<JSONSchema>.external(URL(string: "hello.yml")!)))
+        let content = OpenAPI.Content(schema: .init(OpenAPI.Reference<JSONSchema>.external(URL(string: "hello.yml")!)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],

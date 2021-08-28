@@ -94,6 +94,17 @@ extension OpenAPI.SecurityScheme.SecurityType {
     }
 }
 
+// MARK: - Describable
+
+extension OpenAPI.SecurityScheme : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.SecurityScheme {
+        guard let description = description else { return self }
+        var scheme = self
+        scheme.description = description
+        return scheme
+    }
+}
+
 // MARK: - Codable
 extension OpenAPI.SecurityScheme: Encodable {
     public func encode(to encoder: Encoder) throws {
