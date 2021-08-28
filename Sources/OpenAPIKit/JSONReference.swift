@@ -73,11 +73,23 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         return true
     }
 
+    /// Get the internal value if this reference is internal. Otherwise, nil.
+    public var internalValue: InternalReference? {
+        guard case let .internal(value) = self else { return nil }
+        return value
+    }
+
     /// `true` for external references, `false` for
     /// internal references.
     public var isExternal: Bool {
         guard case .external = self else { return false }
         return true
+    }
+
+    /// Get the external value if this reference is external. Otherwise, nil.
+    public var externalValue: URL? {
+        guard case let .external(value) = self else { return nil }
+        return value
     }
 
     /// Get the name of the referenced object. This method returns optional
