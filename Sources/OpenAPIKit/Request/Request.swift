@@ -39,7 +39,7 @@ extension OpenAPI {
 
 // MARK: - Describable
 extension OpenAPI.Request : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> OpenAPI.Request {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Request {
         guard let description = description else { return self }
         var request = self
         request.description = description

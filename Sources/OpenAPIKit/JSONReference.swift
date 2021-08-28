@@ -385,11 +385,26 @@ extension OpenAPI {
     }
 }
 
-internal protocol OpenAPIDescribable {
+public protocol SummaryOverridable {
+    func overriddenNonNil(description: String?) -> Self
+    func overriddenNonNil(summary: String?) -> Self
+}
+
+public extension SummaryOverridable {
+    func overriddenNonNil(summary: String?) -> Self {
+        self
+    }
+
+    func overriddenNonNil(description: String?) -> Self {
+        self
+    }
+}
+
+public protocol OpenAPIDescribable: SummaryOverridable {
     func overriddenNonNil(description: String?) -> Self
 }
 
-internal protocol OpenAPISummarizable: OpenAPIDescribable {
+public protocol OpenAPISummarizable: OpenAPIDescribable {
     func overriddenNonNil(summary: String?) -> Self
 }
 

@@ -9,7 +9,7 @@ import OpenAPIKitCore
 
 /// Anything conforming to ComponentDictionaryLocatable knows
 /// where to find resources of its type in the Components Dictionary.
-public protocol ComponentDictionaryLocatable {
+public protocol ComponentDictionaryLocatable: SummaryOverridable {
     /// The JSON Reference path of this type.
     ///
     /// This can be used to create a JSON path
@@ -28,7 +28,7 @@ extension OpenAPI.Response: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.responses }
 }
 
-extension OpenAPI.Callbacks: ComponentDictionaryLocatable {
+extension OpenAPI.Callbacks: ComponentDictionaryLocatable & SummaryOverridable {
     public static var openAPIComponentsKey: String { "callbacks" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.callbacks }
 }

@@ -114,6 +114,8 @@ extension OpenAPI.Components {
     public func lookup<ReferenceType: ComponentDictionaryLocatable>(_ reference: OpenAPI.Reference<ReferenceType>) throws -> ReferenceType {
 
         return try lookup(reference.jsonReference)
+            .overriddenNonNil(summary: reference.summary)
+            .overriddenNonNil(description: reference.description)
     }
 
     /// Pass a reference to a component.

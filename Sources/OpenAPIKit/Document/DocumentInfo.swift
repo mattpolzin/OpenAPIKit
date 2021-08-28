@@ -147,7 +147,7 @@ extension OpenAPI.Document.Info.License {
 
 // MARK: - Describable & Summarizable
 extension OpenAPI.Document.Info : OpenAPISummarizable {
-    func overriddenNonNil(summary: String?) -> OpenAPI.Document.Info {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Document.Info {
         guard let summary = summary else { return self }
         return OpenAPI.Document.Info(
             title: title,
@@ -161,7 +161,7 @@ extension OpenAPI.Document.Info : OpenAPISummarizable {
         )
     }
 
-    func overriddenNonNil(description: String?) -> OpenAPI.Document.Info {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Document.Info {
         guard let description = description else { return self }
         return OpenAPI.Document.Info(
             title: title,

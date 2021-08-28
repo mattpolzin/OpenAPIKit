@@ -105,7 +105,7 @@ extension OpenAPI.Header {
 
 // MARK: - Describable
 extension OpenAPI.Header : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> OpenAPI.Header {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Header {
         guard let description = description else { return self }
         return OpenAPI.Header(
             schemaOrContent: schemaOrContent,

@@ -46,7 +46,7 @@ extension OpenAPI.Tag: ExpressibleByStringLiteral {
 // MARK: - Describable
 
 extension OpenAPI.Tag : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> OpenAPI.Tag {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Tag {
         guard let description = description else { return self }
         return OpenAPI.Tag(
             name: name,

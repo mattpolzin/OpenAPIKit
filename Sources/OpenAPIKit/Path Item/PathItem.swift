@@ -250,14 +250,14 @@ extension OpenAPI.PathItem {
 // MARK: - Describable & Summarizable
 
 extension OpenAPI.PathItem : OpenAPISummarizable {
-    func overriddenNonNil(summary: String?) -> OpenAPI.PathItem {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.PathItem {
         guard let summary = summary else { return self }
         var pathItem = self
         pathItem.summary = summary
         return pathItem
     }
 
-    func overriddenNonNil(description: String?) -> OpenAPI.PathItem {
+    public func overriddenNonNil(description: String?) -> OpenAPI.PathItem {
         guard let description = description else { return self }
         var pathItem = self
         pathItem.description = description

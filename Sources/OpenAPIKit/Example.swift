@@ -67,7 +67,7 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Example>, B == OpenAPI.Exa
 // MARK: - Describable & Summarizable
 
 extension OpenAPI.Example : OpenAPISummarizable {
-    func overriddenNonNil(summary: String?) -> OpenAPI.Example {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Example {
         guard let summary = summary else { return self }
         return OpenAPI.Example(
             summary: summary,
@@ -77,7 +77,7 @@ extension OpenAPI.Example : OpenAPISummarizable {
         )
     }
 
-    func overriddenNonNil(description: String?) -> OpenAPI.Example {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Example {
         guard let description = description else { return self }
         return OpenAPI.Example(
             summary: summary,

@@ -94,7 +94,7 @@ extension OpenAPI.Server {
 // MARK: - Describable
 
 extension OpenAPI.Server : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> OpenAPI.Server {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Server {
         guard let description = description else { return self }
         return OpenAPI.Server(
             urlTemplate: urlTemplate,

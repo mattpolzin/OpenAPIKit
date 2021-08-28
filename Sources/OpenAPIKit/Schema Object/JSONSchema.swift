@@ -1271,7 +1271,7 @@ extension JSONSchema {
 // MARK: - Describable
 
 extension JSONSchema : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> JSONSchema {
+    public func overriddenNonNil(description: String?) -> JSONSchema {
         guard let description = description else { return self }
         return self.with(description: description)
     }

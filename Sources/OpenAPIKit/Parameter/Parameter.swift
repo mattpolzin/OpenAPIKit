@@ -214,7 +214,7 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Parameter>, B == OpenAPI.P
 // MARK: - Describable
 
 extension OpenAPI.Parameter : OpenAPIDescribable {
-    func overriddenNonNil(description: String?) -> OpenAPI.Parameter {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Parameter {
         guard let description = description else { return self }
         var parameter = self
         parameter.description = description
