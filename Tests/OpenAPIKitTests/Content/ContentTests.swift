@@ -116,7 +116,11 @@ final class ContentTests: XCTestCase {
 
     func test_contentTypeStringReflexivity() {
 
-        XCTAssertNil(OpenAPI.ContentType(rawValue: "not a content type"))
+        let bad = OpenAPI.ContentType(rawValue: "not a content type")
+        XCTAssertEqual(
+            bad?.warnings[0].localizedDescription,
+            "\'not a content type\' could not be parsed as a Content Type which should have the format \'<type>/<subtype>\'"
+        )
 
         let types: [OpenAPI.ContentType] = [
             .bmp,

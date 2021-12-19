@@ -9,7 +9,7 @@ import OpenAPIKitCore
 
 extension OpenAPI {
     /// The Content Type of an API request or response body.
-    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable {
+    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
         internal let underlyingType: Builtin
         public let warnings: [OpenAPI.Warning]
 

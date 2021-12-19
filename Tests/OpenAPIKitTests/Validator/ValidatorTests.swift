@@ -1405,4 +1405,7 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 7)
         }
     }
+
+    // MARK: - Warnings
+
 }
