@@ -281,6 +281,59 @@ extension ResponseTests {
         )
     }
 
+    func test_populatedLinks_encode() {
+        let links: OpenAPI.Link.Map = [
+            "link1": .link(operationId: "op1")
+        ]
+        let response = OpenAPI.Response(
+            description: "hello world",
+            links: links
+        )
+
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
+
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "description" : "hello world",
+              "links" : {
+                "link1" : {
+                  "operationId" : "op1"
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_populatedLinks_decode() throws {
+        let responseData =
+            """
+        {
+            "description" : "hello world",
+              "links" : {
+                "link1" : {
+                  "operationId" : "op1"
+                }
+            }
+        }
+        """.data(using: .utf8)!
+
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
+
+        let links: OpenAPI.Link.Map = [
+            "link1": .link(operationId: "op1")
+        ]
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                links: links
+            )
+        )
+    }
+
     func test_doesNotFailDecodingLinks() {
         let t1 = """
         {
