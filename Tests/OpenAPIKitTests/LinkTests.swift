@@ -81,6 +81,54 @@ extension LinkTests {
         )
     }
 
+    func test_populatedParameters_encode() {
+        let link = Link(
+            operationId: "op1",
+            parameters: [
+                "param": .b(true)
+            ]
+        )
+
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: link)
+
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "operationId" : "op1",
+              "parameters" : {
+                "param" : true
+              }
+            }
+            """
+        )
+    }
+
+    func test_populatedParameters_decode() throws {
+
+        let responseData =
+            """
+        {
+          "operationId" : "op1",
+          "parameters" : {
+            "param" : true
+          }
+        }
+        """.data(using: .utf8)!
+
+        let response = try orderUnstableDecode(OpenAPI.Link.self, from: responseData)
+
+        XCTAssertEqual(
+            response,
+            Link(
+                operationId: "op1",
+                parameters: [
+                    "param": .b(true)
+                ]
+            )
+        )
+    }
+
     func test_populatedExtension_encode() {
         let link = Link(
             operationId: "op1",
@@ -100,7 +148,7 @@ extension LinkTests {
         )
     }
 
-    func test_populatedDescriptionPopulatedContent_withExtension_decode() throws {
+    func test_Extension_decode() throws {
 
         let responseData =
             """
