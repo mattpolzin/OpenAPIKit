@@ -239,7 +239,7 @@ extension OpenAPI.Operation {
 
 // MARK: - Describable & Summarizable
 
-extension OpenAPI.Operation : OpenAPISummarizable {
+extension OpenAPI.Operation: OpenAPISummarizable {
     public func overriddenNonNil(summary: String?) -> OpenAPI.Operation {
         guard let summary = summary else { return self }
         var operation = self

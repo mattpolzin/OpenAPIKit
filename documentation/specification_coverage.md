@@ -87,7 +87,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] requestBodies
 - [x] headers
 - [x] securitySchemes
-- [ ] links
+- [x] links
 - [x] callbacks
 - [x] specification extensions (`vendorExtensions`)
 
@@ -175,7 +175,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] description
 - [x] headers
 - [x] content
-- [ ] links
+- [x] links
 - [x] specification extensions (`vendorExtensions`)
 
 ### Callback Object
@@ -190,13 +190,13 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] specification extensions (`vendorExtensions`)
 
 ### Link Object
-- [ ] operationRef
-- [ ] operationId
-- [ ] parameters
-- [ ] requestBody
-- [ ] description
-- [ ] server
-- [ ] specification extensions
+- [x] operationRef
+- [x] operationId
+- [x] parameters
+- [x] requestBody
+- [x] description
+- [x] server
+- [x] specification extensions
 
 ### Header Object (`OpenAPI.Header`)
 - [x] description
