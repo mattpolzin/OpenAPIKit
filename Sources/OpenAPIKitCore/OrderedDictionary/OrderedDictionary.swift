@@ -96,12 +96,14 @@ public struct OrderedDictionary<Key, Value> where Key: Hashable {
 
     /// Returns whether this dictionary contains a key fulfilling the given predicate.
     public func contains(where predicate: (Key) throws -> Bool) rethrows -> Bool {
-        return try keys.contains(where: predicate)
+        return try unorderedHash.contains(where: { (key: Key, _) in
+            return try predicate(key)
+        })
     }
 
     /// Returns whether the dictionary contains the given key.
     public func contains(key: Key) -> Bool {
-        return keys.contains(key)
+        return unorderedHash[key] != nil
     }
 
     /// Returns a new dictionary containing the keys of this dictionary with the
