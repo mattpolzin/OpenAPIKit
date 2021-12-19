@@ -8,7 +8,93 @@
 import OpenAPIKitCore
 
 extension OpenAPI {
-    public enum ContentType: Codable, Equatable, Hashable {
+    /// The Content Type of an API request or response body.
+    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable {
+        internal let underlyingType: Builtin
+        public let warnings: [OpenAPI.Warning]
+
+        public var rawValue: String {
+            underlyingType.rawValue
+        }
+
+        public init?(rawValue: String) {
+            if let underlying = Builtin.init(rawValue: rawValue) {
+                underlyingType = underlying
+                warnings = []
+            } else {
+                underlyingType = .other(rawValue)
+                warnings = [
+                    .message(
+                        "'\(rawValue)' could not be parsed as a Content Type which should have the format '<type>/<subtype>'"
+                    )
+                ]
+            }
+        }
+
+        internal init(_ builtin: Builtin) {
+            underlyingType = builtin
+            warnings = []
+        }
+    }
+}
+
+// convenience constructors
+public extension OpenAPI.ContentType {
+    /// Bitmap image
+    static let bmp: Self = .init(.bmp)
+    static let css: Self = .init(.css)
+    static let csv: Self = .init(.csv)
+    /// URL-encoded form data. See also: `multipartForm`.
+    static let form: Self = .init(.form)
+    static let html: Self = .init(.html)
+    static let javascript: Self = .init(.javascript)
+    /// JPEG image
+    static let jpg: Self = .init(.jpg)
+    static let json: Self = .init(.json)
+    /// JSON:API Document
+    static let jsonapi: Self = .init(.jsonapi)
+    /// Quicktime video
+    static let mov: Self = .init(.mov)
+    /// MP3 audio
+    static let mp3: Self = .init(.mp3)
+    /// MP4 video
+    static let mp4: Self = .init(.mp4)
+    /// MPEG video
+    static let mpg: Self = .init(.mpg)
+    /// Multipart form data. See also: `form`.
+    static let multipartForm: Self = .init(.multipartForm)
+    static let pdf: Self = .init(.pdf)
+    /// RAR archive
+    static let rar: Self = .init(.rar)
+    static let rtf: Self = .init(.rtf)
+    /// Tape Archive (TAR)
+    static let tar: Self = .init(.tar)
+    /// TIF image
+    static let tif: Self = .init(.tif)
+    /// Plaintext
+    static let txt: Self = .init(.txt)
+    static let xml: Self = .init(.xml)
+    static let yaml: Self = .init(.yaml)
+    /// ZIP archive
+    static let zip: Self = .init(.zip)
+
+    static func other(_ raw: String) -> Self { .init(Builtin.other(raw)) }
+
+    // MARK: - patterns
+
+    static let anyApplication: Self = .init(.anyApplication)
+    static let anyAudio: Self = .init(.anyAudio)
+    static let anyImage: Self = .init(.anyImage)
+    static let anyText: Self = .init(.anyText)
+    static let anyVideo: Self = .init(.anyVideo)
+
+    static let any: Self = .init(.any)
+}
+
+extension OpenAPI.ContentType {
+    // This internal representation makes it easier to ensure that the popular
+    // builtin types supported are fully covered in their rawValue implementation.
+    internal enum Builtin: Codable, Equatable, Hashable {
         /// Bitmap image
         case bmp
         case css
@@ -61,7 +147,7 @@ extension OpenAPI {
     }
 }
 
-extension OpenAPI.ContentType: RawRepresentable {
+extension OpenAPI.ContentType.Builtin: RawRepresentable {
     public var rawValue: String {
         switch self {
         case .bmp: return "image/bmp"
