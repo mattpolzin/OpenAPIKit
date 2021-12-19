@@ -20,6 +20,12 @@ final class LinkTests: XCTestCase {
 
         XCTAssertEqual(link1, link3)
         XCTAssertEqual(link2, link4)
+
+        let either1: Either<OpenAPI.Reference<Link>, Link> = .link(operationRef: URL(string: "http://website.com")!)
+        let either2: Either<OpenAPI.Reference<Link>, Link> = .link(operationId: "op1")
+
+        XCTAssertEqual(either1.linkValue, link1)
+        XCTAssertEqual(either2.linkValue, link2)
     }
 }
 
