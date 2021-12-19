@@ -9,6 +9,22 @@ import XCTest
 import OpenAPIKit
 
 final class ComponentsTests: XCTestCase {
+    typealias Components = OpenAPI.Components
+
+    func test_isEmpty() {
+        let c1 = Components.noComponents
+        let c2 = Components()
+        let c3 = Components(
+            schemas: [
+                "s1": .string
+            ]
+        )
+        XCTAssertEqual(c1, c2)
+
+        XCTAssertTrue(c1.isEmpty)
+        XCTAssertFalse(c3.isEmpty)
+    }
+
     func test_referenceLookup() throws {
         let components = OpenAPI.Components(
             schemas: [
