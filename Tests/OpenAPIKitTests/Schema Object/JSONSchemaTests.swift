@@ -1198,8 +1198,8 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withInitialExample() {
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, example: [:]), .init(properties: [:]))
-        let fragment = JSONSchema.fragment(.init(example: "hi"))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, examples: [[:]]), .init(properties: [:]))
+        let fragment = JSONSchema.fragment(.init(examples: ["hi"]))
 
         // nonsense
         let null = JSONSchema.null
@@ -1209,15 +1209,17 @@ final class SchemaObjectTests: XCTestCase {
         let not = JSONSchema.not(.string)
         let ref = JSONSchema.reference(.external(URL(string: "hello.yml")!))
 
-        XCTAssertEqual(object.example?.value as? [String:String], [:])
-        XCTAssertEqual(fragment.example?.value as? String, "hi")
+        XCTAssertEqual(object.examples[0].value as? [String:String], [:])
+        XCTAssertEqual(object.examples.count, 1)
+        XCTAssertEqual(fragment.examples[0].value as? String, "hi")
+        XCTAssertEqual(fragment.examples.count, 1)
 
-        XCTAssertNil(null.example)
-        XCTAssertNil(all.example)
-        XCTAssertNil(one.example)
-        XCTAssertNil(any.example)
-        XCTAssertNil(not.example)
-        XCTAssertNil(ref.example)
+        XCTAssertTrue(null.examples.isEmpty)
+        XCTAssertTrue(all.examples.isEmpty)
+        XCTAssertTrue(one.examples.isEmpty)
+        XCTAssertTrue(any.examples.isEmpty)
+        XCTAssertTrue(not.examples.isEmpty)
+        XCTAssertTrue(ref.examples.isEmpty)
     }
 
     func test_withAddedExample() throws {
@@ -1251,20 +1253,32 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertThrowsError(try JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
             .with(example: ["hello"]))
 
-        XCTAssertEqual(object.example?.value as? [String: String], [:])
-        XCTAssertEqual(array.example?.value as? [String], ["hello"])
+        XCTAssertEqual(object.examples[0].value as? [String: String], [:])
+        XCTAssertEqual(object.examples.count, 1)
+        XCTAssertEqual(array.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(array.examples.count, 1)
 
-        XCTAssertEqual(boolean.example?.value as? Bool, true)
-        XCTAssertEqual(double.example?.value as? Double, 10.5)
-        XCTAssertEqual(float.example?.value as? Float, 2.5 as Float)
-        XCTAssertEqual(integer.example?.value as? Int, 3)
-        XCTAssertEqual(string.example?.value as? String, "hello world")
+        XCTAssertEqual(boolean.examples[0].value as? Bool, true)
+        XCTAssertEqual(boolean.examples.count, 1)
+        XCTAssertEqual(double.examples[0].value as? Double, 10.5)
+        XCTAssertEqual(double.examples.count, 1)
+        XCTAssertEqual(float.examples[0].value as? Float, 2.5 as Float)
+        XCTAssertEqual(float.examples.count, 1)
+        XCTAssertEqual(integer.examples[0].value as? Int, 3)
+        XCTAssertEqual(integer.examples.count, 1)
+        XCTAssertEqual(string.examples[0].value as? String, "hello world")
+        XCTAssertEqual(string.examples.count, 1)
 
-        XCTAssertEqual(allOf.example?.value as? [String], ["hello"])
-        XCTAssertEqual(anyOf.example?.value as? [String], ["hello"])
-        XCTAssertEqual(oneOf.example?.value as? [String], ["hello"])
-        XCTAssertEqual(not.example?.value as? [String], ["hello"])
-        XCTAssertEqual(fragment.example?.value as? String, "hi")
+        XCTAssertEqual(allOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(allOf.examples.count, 1)
+        XCTAssertEqual(anyOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(anyOf.examples.count, 1)
+        XCTAssertEqual(oneOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(oneOf.examples.count, 1)
+        XCTAssertEqual(not.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(not.examples.count, 1)
+        XCTAssertEqual(fragment.examples[0].value as? String, "hi")
+        XCTAssertEqual(fragment.examples.count, 1)
     }
 
     func test_withDiscriminator() throws {
@@ -1401,6 +1415,9 @@ extension SchemaObjectTests {
     }
 
     func test_decodeExampleFragment() throws {
+        // This way of specifying an example is deprecated in favor of
+        // the examples property (so the encoding of this does not turn
+        // it back into example but rather uses the examples property).
         let exampleSchema = """
         {
             "example" : "hello"
@@ -1409,12 +1426,12 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(
             try orderUnstableDecode(JSONSchema.self, from: exampleSchema),
-            .fragment(.init(example: "hello"))
+            .fragment(.init(examples: ["hello"]))
         )
     }
 
     func test_encodeExampleFragment() throws {
-        let fragment = JSONSchema.fragment(.init(example: "hello"))
+        let fragment = JSONSchema.fragment(.init(examples: ["hello"]))
 
         let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
 
@@ -1422,7 +1439,40 @@ extension SchemaObjectTests {
             encoded,
             """
             {
-              "example" : "hello"
+              "examples" : [
+                "hello"
+              ]
+            }
+            """
+        )
+    }
+
+    func test_decodeMultipleExamplesFragment() throws {
+        let exampleSchema = """
+        {
+            "examples" : ["hello", true]
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: exampleSchema),
+            .fragment(.init(examples: ["hello", true]))
+        )
+    }
+
+    func test_encodeMultipleExamplesFragment() throws {
+        let fragment = JSONSchema.fragment(.init(examples: ["hello", true]))
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "examples" : [
+                "hello",
+                true
+              ]
             }
             """
         )
@@ -2626,15 +2676,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: string,
                                   propertyLines: [
-                                    "\"example\" : \"hello\",",
+                                    "\"examples\" : [",
+                                    "  \"hello\"",
+                                    "],",
                                     "\"type\" : \"string\""
         ])
 
         testEncodingPropertyLines(entity: requiredObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2645,9 +2699,11 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: optionalObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2658,9 +2714,11 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2679,9 +2737,11 @@ extension SchemaObjectTests {
                                     "    \"hello\" : false",
                                     "  }",
                                     "],",
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2689,6 +2749,116 @@ extension SchemaObjectTests {
                                     "},",
                                     "\"type\" : \"object\""
         ])
+    }
+
+    func test_encodeObjectWithMultipleExamples() {
+        let string = try! JSONSchema.string(.init(format: .unspecified, required: true), .init())
+            .with(examples: ["hello", "world"])
+        let requiredObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let optionalObject = try! JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let nullableObject = try! JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let allowedValueObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(allowedValues: [
+                AnyCodable(["hello": false])
+            ])
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+
+        if case let .object(_, objectContext) = requiredObject {
+            XCTAssertEqual(objectContext.requiredProperties, [])
+            XCTAssertEqual(objectContext.optionalProperties, ["hello"])
+        }
+
+        testEncodingPropertyLines(entity: string,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  \"hello\",",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"type\" : \"string\""
+                                  ])
+
+        testEncodingPropertyLines(entity: requiredObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
+
+        testEncodingPropertyLines(entity: optionalObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
+
+        testEncodingPropertyLines(entity: nullableObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
+                                  ])
+
+        testEncodingPropertyLines(entity: allowedValueObject,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  {",
+                                    "    \"hello\" : false",
+                                    "  }",
+                                    "],",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
     }
 
     func test_decodeObjectWithExample() throws {
@@ -2730,12 +2900,12 @@ extension SchemaObjectTests {
         let nullableObject = try orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
         let allowedValueObject = try orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
 
-        XCTAssertEqual(string, JSONSchema.string(.init(format: .unspecified, example: "hello"), .init()))
-        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, example: AnyCodable(["hello": true])), .init(properties: [:])))
-        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, example: AnyCodable(["hello": true])), .init(properties: [:])))
+        XCTAssertEqual(string, JSONSchema.string(.init(format: .unspecified, examples: ["hello"]), .init()))
+        XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, examples: [AnyCodable(["hello": true])]), .init(properties: [:])))
+        XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, examples: [AnyCodable(["hello": true])]), .init(properties: [:])))
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
-        XCTAssertEqual(allowedValueObject.example, ["hello" : true])
+        XCTAssertEqual(allowedValueObject.examples, [["hello" : true]])
 
         guard case let .object(_, contextB) = allowedValueObject else {
             XCTFail("expected object to be parsed as object")

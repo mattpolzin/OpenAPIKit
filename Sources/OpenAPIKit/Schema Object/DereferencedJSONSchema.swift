@@ -132,7 +132,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var defaultValue: AnyCodable? { jsonSchema.defaultValue }
 
     // See `JSONSchemaContext`
-    public var example: AnyCodable? { jsonSchema.example }
+    public var examples: [AnyCodable] { jsonSchema.examples }
 
     // See `JSONSchemaContext`
     public var readOnly: Bool { jsonSchema.readOnly }

@@ -92,8 +92,8 @@ public protocol JSONSchemaContext {
     /// `Format.SwiftType` into a default.
     var defaultValue: AnyCodable? { get }
 
-    /// Get an example, if specified. If unspecified, returns `nil`.
-    var example: AnyCodable? { get }
+    /// Get examples of values fitting the schema.
+    var examples: [AnyCodable] { get }
 
     /// `true` if this schema can only be read from and is therefore
     /// unsupported for request data.
@@ -123,14 +123,23 @@ extension JSONSchema {
 
         public let discriminator: OpenAPI.Discriminator?
 
-        // NOTE: "const" is supported by the newest JSON Schema spec but not
-        // yet by OpenAPI. Instead, will use "enum" with one possible value for now.
+        // TODO: "const" is supported by the newest JSON Schema spec but not
+        //        yet by OpenAPIKit. It is mutually exclusive with "enum"
+        //        (i.e. `allowedValues`).
 //        public let constantValue: Format.SwiftType?
 
         public let allowedValues: [AnyCodable]?
         public let defaultValue: AnyCodable?
 
-        public let example: AnyCodable?
+        /// One or more examples of values fitting the schema. Note that OpenAPI 3.1 supports
+        /// both `examples` (via the JSON Schema specification) and also `example` which
+        /// comes from OpenAPI 3.0 and is now deprecated. Because the latter is deprecated,
+        /// `example` in an OpenAPI document will be parsed as a single-element `examples`
+        /// property of a schema. It will be encoded as `examples` (so there is no way to output
+        /// the deprecated `example` property from OpenAPIKit).
+        ///
+        /// An empty examples array is omitted from encoding.
+        public let examples: [AnyCodable]
 
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
@@ -149,7 +158,7 @@ extension JSONSchema {
                 && externalDocs == nil
                 && allowedValues == nil
                 && defaultValue == nil
-                && example == nil
+                && examples.isEmpty
                 && _permissions == nil
         }
 
@@ -165,7 +174,7 @@ extension JSONSchema {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
-            example: AnyCodable? = nil
+            examples: [AnyCodable] = []
         ) {
             self.format = format
             self.required = required
@@ -178,7 +187,7 @@ extension JSONSchema {
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
-            self.example = example
+            self.examples = examples
         }
 
         public init(
@@ -193,7 +202,7 @@ extension JSONSchema {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
-            example: String
+            examples: [String]
         ) {
             self.format = format
             self.required = required
@@ -206,7 +215,7 @@ extension JSONSchema {
             self.externalDocs = externalDocs
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
-            self.example = AnyCodable(example)
+            self.examples = examples.map(AnyCodable.init)
         }
 
         public enum Permissions: String, Codable {
@@ -247,7 +256,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -265,7 +274,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -283,7 +292,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -301,7 +310,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -319,7 +328,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -337,7 +346,25 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: [example]
+        )
+    }
+
+    /// Return this context with the given examples
+    public func with(examples: [AnyCodable]) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            examples: examples
         )
     }
 
@@ -355,7 +382,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 
@@ -373,7 +400,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 }
@@ -667,7 +694,8 @@ extension JSONSchema {
         case externalDocs
         case allowedValues = "enum"
         case defaultValue = "default"
-        case example
+        case example // deprecated in favor of examples
+        case examples
         case readOnly
         case writeOnly
         case deprecated
@@ -692,7 +720,9 @@ extension JSONSchema.CoreContext: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
-        try container.encodeIfPresent(example, forKey: .example)
+        if !examples.isEmpty {
+            try container.encode(examples, forKey: .examples)
+        }
 
         // deprecated is false if omitted
         if deprecated {
@@ -778,7 +808,11 @@ extension JSONSchema.CoreContext: Decodable {
         }
 
         _deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
-        example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
+        if container.contains(.example) {
+            examples = [try container.decode(AnyCodable.self, forKey: .example)]
+        } else {
+            examples = try container.decodeIfPresent([AnyCodable].self, forKey: .examples) ?? []
+        }
     }
 
     /// Decode whether or not this is a nullable JSONSchema.

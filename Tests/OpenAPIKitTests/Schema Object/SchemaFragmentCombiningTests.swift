@@ -252,6 +252,17 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         )
     }
 
+    func test_examples() throws {
+        let fragments: [JSONSchema] = [
+            .string(examples: ["hello"]),
+            .string(examples: ["world"])
+        ]
+        let combined = try fragments.combined(resolvingAgainst: .noComponents)
+        XCTAssertTrue(combined.examples.contains("hello"))
+        XCTAssertTrue(combined.examples.contains("world"))
+        XCTAssertEqual(combined.examples.count, 2)
+    }
+
     func test_nullAndBoolean() throws {
         try assertOrderIndependentCombinedEqual(
             [
@@ -800,19 +811,13 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             AnyContext(allowedValues: ["string2"])
         ]
 
-        let differentExample = [
-            AnyContext(example: "string1"),
-            AnyContext(example: "string2")
-        ]
-
         let differences = [
             differentDescription,
             differentDiscriminator,
             differentTitle,
             differentDeprecated,
             differentExternalDocs,
-            differentAllowedValues,
-            differentExample
+            differentAllowedValues
         ]
 
         // break up for type checking
@@ -1285,7 +1290,7 @@ extension JSONSchema.CoreContext {
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
-            example: example
+            examples: examples
         )
     }
 }
