@@ -1469,7 +1469,7 @@ extension SchemaObjectTests {
             encoded,
             """
             {
-              "example" : [
+              "examples" : [
                 "hello",
                 true
               ]
@@ -2676,15 +2676,19 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: string,
                                   propertyLines: [
-                                    "\"example\" : \"hello\",",
+                                    "\"examples\" : [",
+                                    "  \"hello\"",
+                                    "],",
                                     "\"type\" : \"string\""
         ])
 
         testEncodingPropertyLines(entity: requiredObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2695,9 +2699,11 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: optionalObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2708,9 +2714,11 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: nullableObject,
                                   propertyLines: [
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2729,9 +2737,11 @@ extension SchemaObjectTests {
                                     "    \"hello\" : false",
                                     "  }",
                                     "],",
-                                    "\"example\" : {",
-                                    "  \"hello\" : true",
-                                    "},",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  }",
+                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2739,6 +2749,116 @@ extension SchemaObjectTests {
                                     "},",
                                     "\"type\" : \"object\""
         ])
+    }
+
+    func test_encodeObjectWithMultipleExamples() {
+        let string = try! JSONSchema.string(.init(format: .unspecified, required: true), .init())
+            .with(examples: ["hello", "world"])
+        let requiredObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let optionalObject = try! JSONSchema.object(.init(format: .unspecified, required: false), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let nullableObject = try! JSONSchema.object(.init(format: .unspecified, required: true, nullable: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+        let allowedValueObject = try! JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+            .with(allowedValues: [
+                AnyCodable(["hello": false])
+            ])
+            .with(examples: [AnyCodable(["hello": true]), "world"])
+
+        if case let .object(_, objectContext) = requiredObject {
+            XCTAssertEqual(objectContext.requiredProperties, [])
+            XCTAssertEqual(objectContext.optionalProperties, ["hello"])
+        }
+
+        testEncodingPropertyLines(entity: string,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  \"hello\",",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"type\" : \"string\""
+                                  ])
+
+        testEncodingPropertyLines(entity: requiredObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
+
+        testEncodingPropertyLines(entity: optionalObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
+
+        testEncodingPropertyLines(entity: nullableObject,
+                                  propertyLines: [
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : [",
+                                    "  \"object\",",
+                                    "  \"null\"",
+                                    "]"
+                                  ])
+
+        testEncodingPropertyLines(entity: allowedValueObject,
+                                  propertyLines: [
+                                    "\"enum\" : [",
+                                    "  {",
+                                    "    \"hello\" : false",
+                                    "  }",
+                                    "],",
+                                    "\"examples\" : [",
+                                    "  {",
+                                    "    \"hello\" : true",
+                                    "  },",
+                                    "  \"world\"",
+                                    "],",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+                                  ])
     }
 
     func test_decodeObjectWithExample() throws {

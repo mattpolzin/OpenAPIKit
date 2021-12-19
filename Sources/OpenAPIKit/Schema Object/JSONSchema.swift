@@ -531,29 +531,35 @@ extension JSONSchema {
     /// Returns a version of this `JSONSchema` that has the given example
     /// attached.
     public func with(example: AnyCodable) throws -> JSONSchema {
+        return try with(examples: [example])
+    }
+
+    /// Returns a version of this `JSONSchema` that has the given examples
+    /// attached.
+    public func with(examples: [AnyCodable]) throws -> JSONSchema {
         switch self {
         case .boolean(let context):
-            return .boolean(context.with(example: example))
+            return .boolean(context.with(examples: examples))
         case .object(let contextA, let contextB):
-            return .object(contextA.with(example: example), contextB)
+            return .object(contextA.with(examples: examples), contextB)
         case .array(let contextA, let contextB):
-            return .array(contextA.with(example: example), contextB)
+            return .array(contextA.with(examples: examples), contextB)
         case .number(let context, let contextB):
-            return .number(context.with(example: example), contextB)
+            return .number(context.with(examples: examples), contextB)
         case .integer(let context, let contextB):
-            return .integer(context.with(example: example), contextB)
+            return .integer(context.with(examples: examples), contextB)
         case .string(let context, let contextB):
-            return .string(context.with(example: example), contextB)
+            return .string(context.with(examples: examples), contextB)
         case .fragment(let context):
-            return .fragment(context.with(example: example))
+            return .fragment(context.with(examples: examples))
         case .all(of: let fragments, core: let core):
-            return .all(of: fragments, core: core.with(example: example))
+            return .all(of: fragments, core: core.with(examples: examples))
         case .one(of: let schemas, core: let core):
-            return .one(of: schemas, core: core.with(example: example))
+            return .one(of: schemas, core: core.with(examples: examples))
         case .any(of: let schemas, core: let core):
-            return .any(of: schemas, core: core.with(example: example))
+            return .any(of: schemas, core: core.with(examples: examples))
         case .not(let schema, core: let core):
-            return .not(schema, core: core.with(example: example))
+            return .not(schema, core: core.with(examples: examples))
         case .reference, .null:
             throw Self.Error.exampleNotSupported
         }

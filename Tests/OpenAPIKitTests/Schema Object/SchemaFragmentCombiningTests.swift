@@ -253,13 +253,14 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     }
 
     func test_examples() throws {
-        try assertOrderIndependentCombinedEqual(
-            [
-                .string(examples: ["hello"]),
-                .string(examples: ["world"])
-            ],
-            .string(.init(examples: ["hello", "world"]), .init())
-        )
+        let fragments: [JSONSchema] = [
+            .string(examples: ["hello"]),
+            .string(examples: ["world"])
+        ]
+        let combined = try fragments.combined(resolvingAgainst: .noComponents)
+        XCTAssertTrue(combined.examples.contains("hello"))
+        XCTAssertTrue(combined.examples.contains("world"))
+        XCTAssertEqual(combined.examples.count, 2)
     }
 
     func test_nullAndBoolean() throws {

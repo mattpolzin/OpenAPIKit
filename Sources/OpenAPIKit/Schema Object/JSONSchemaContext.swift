@@ -346,6 +346,24 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
+            examples: [example]
+        )
+    }
+
+    /// Return this context with the given examples
+    public func with(examples: [AnyCodable]) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
             examples: examples
         )
     }
