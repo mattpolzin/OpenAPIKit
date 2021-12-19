@@ -86,6 +86,11 @@ extension Either where B == OpenAPI.Response {
     public var responseValue: B? { b }
 }
 
+extension Either where B == OpenAPI.Link {
+    /// Retrieve the link if that is what this property contains.
+    public var linkValue: B? { b }
+}
+
 extension Either where B == OpenAPI.Content.Map {
     /// Retrieve the content map if that is what this property contains.
     public var contentValue: B? { b }

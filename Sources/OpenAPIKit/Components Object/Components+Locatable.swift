@@ -58,6 +58,11 @@ extension OpenAPI.SecurityScheme: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.securitySchemes }
 }
 
+extension OpenAPI.Link: ComponentDictionaryLocatable {
+    public static var openAPIComponentsKey: String { "links" }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.links }
+}
+
 extension OpenAPI.PathItem: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "pathItems" }
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.pathItems }
