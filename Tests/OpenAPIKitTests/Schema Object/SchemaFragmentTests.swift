@@ -16,7 +16,7 @@ final class SchemaFragmentTests: XCTestCase {
             XCTAssertEqual(fragment.deprecated, false, file: (file), line: line)
             XCTAssertNil(fragment.description, file: (file), line: line)
             XCTAssertNil(fragment.discriminator, file: (file), line: line)
-            XCTAssertNil(fragment.example, file: (file), line: line)
+            XCTAssertTrue(fragment.examples.isEmpty, file: (file), line: line)
             XCTAssertNil(fragment.externalDocs, file: (file), line: line)
             XCTAssertEqual(fragment.formatString ?? "", "", file: (file), line: line)
             XCTAssertEqual(fragment.nullable, false, file: (file), line: line)
@@ -38,7 +38,7 @@ final class SchemaFragmentTests: XCTestCase {
             XCTAssertEqual(fragment.deprecated, properties.deprecated, file: (file), line: line)
             XCTAssertEqual(fragment.description, properties.description, file: (file), line: line)
             XCTAssertEqual(fragment.discriminator, properties.discriminator, file: (file), line: line)
-            XCTAssertEqual(fragment.example, properties.example, file: (file), line: line)
+            XCTAssertEqual(fragment.examples, properties.examples, file: (file), line: line)
             XCTAssertEqual(fragment.externalDocs, properties.externalDocs, file: (file), line: line)
             XCTAssertEqual(fragment.formatString, properties.formatString, file: (file), line: line)
             XCTAssertEqual(fragment.nullable, properties.nullable, file: (file), line: line)
@@ -48,7 +48,7 @@ final class SchemaFragmentTests: XCTestCase {
         }
 
         // maximal
-        let generalProperties = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(format: .other("date"), nullable: false, permissions: .readWrite, deprecated: false, title: "Date", description: "a date", discriminator: .init(propertyName: "test"), externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], example: "2020-01-01")
+        let generalProperties = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(format: .other("date"), nullable: false, permissions: .readWrite, deprecated: false, title: "Date", description: "a date", discriminator: .init(propertyName: "test"), externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], examples: ["2020-01-01"])
         let t1 = JSONSchema.fragment(generalProperties)
         assertSameGeneralProperties(t1, as: generalProperties)
         let t2 = JSONSchema.integer(generalProperties.transformed(), .init(multipleOf: 10, maximum: (20, exclusive: false), minimum: (0, exclusive: true)))
