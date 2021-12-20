@@ -24,6 +24,7 @@ extension OpenAPI.Document {
     /// to the validation (or starting from scratch), and then pass that
     /// `Validator` to the `validate(using:)` method to use custom validation
     /// criteria.
+    @discardableResult
     public func validate(using validator: Validator = .init()) throws -> [OpenAPI.Warning] {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
