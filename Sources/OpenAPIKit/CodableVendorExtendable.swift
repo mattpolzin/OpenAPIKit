@@ -21,6 +21,10 @@ public protocol VendorExtendable {
     var vendorExtensions: VendorExtensions { get }
 }
 
+public enum VendorExtensionsConfiguration {
+    public static var isEnabled = true
+}
+
 internal protocol ExtendableCodingKey: CodingKey, Equatable {
     /// An array of all keys that are not vendor extensions.
     static var allBuiltinKeys: [Self] { get }
@@ -71,6 +75,9 @@ internal enum VendorExtensionDecodingError: Swift.Error, CustomStringConvertible
 extension CodableVendorExtendable {
 
     internal static func extensions(from decoder: Decoder) throws -> VendorExtensions {
+        guard VendorExtensionsConfiguration.isEnabled else {
+            return [:]
+        }
 
         let decoded = try AnyCodable(from: decoder).value
 
@@ -102,6 +109,9 @@ extension CodableVendorExtendable {
     }
 
     internal func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {
+        guard VendorExtensionsConfiguration.isEnabled else {
+            return
+        }
         for (key, value) in vendorExtensions {
             let xKey = key.starts(with: "x-") ? key : "x-\(key)"
             try container.encode(value, forKey: .extendedKey(for: xKey))
