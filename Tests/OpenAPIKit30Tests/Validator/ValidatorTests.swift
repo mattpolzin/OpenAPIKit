@@ -1405,4 +1405,44 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 7)
         }
     }
+
+    // MARK: - Warnings
+    func test_collectsContentTypeWarning() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "paths": {
+            "test": {
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "test",
+                    "content": {
+                      "gzip": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.paths["test"]?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
+        )
+
+        let warnings = try doc.validate()
+
+        XCTAssertEqual(warnings.count, 1)
+        XCTAssertEqual(
+            warnings.first?.localizedDescription,
+            "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
+        )
+        XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+    }
 }
