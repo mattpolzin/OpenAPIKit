@@ -119,7 +119,7 @@ final class ContentTests: XCTestCase {
         let bad = OpenAPI.ContentType(rawValue: "not a content type")
         XCTAssertEqual(
             bad?.warnings[0].localizedDescription,
-            "\'not a content type\' could not be parsed as a Content Type which should have the format \'<type>/<subtype>\'"
+            "\'not a content type\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
         )
 
         let types: [OpenAPI.ContentType] = [

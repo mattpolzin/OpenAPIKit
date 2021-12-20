@@ -1433,7 +1433,7 @@ final class ValidatorTests: XCTestCase {
 
         XCTAssertEqual(
             doc.paths["test"]?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
-            "\'gzip\' could not be parsed as a Content Type which should have the format \'<type>/<subtype>\'"
+            "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
         )
 
         let warnings = try doc.validate()
