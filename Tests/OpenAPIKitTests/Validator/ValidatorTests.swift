@@ -1443,5 +1443,6 @@ final class ValidatorTests: XCTestCase {
             warnings.first?.localizedDescription,
             "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
         )
+        XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
     }
 }
