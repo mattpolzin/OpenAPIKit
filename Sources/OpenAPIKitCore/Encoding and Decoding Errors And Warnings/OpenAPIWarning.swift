@@ -37,6 +37,11 @@ extension OpenAPI {
             default: return nil
             }
         }
+
+        /// Get a human readable string value of the coding path.
+        public var codingPathString : String? {
+            return codingPath?.stringValue
+        }
     }
 }
 
