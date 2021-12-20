@@ -17,6 +17,7 @@ extension OpenAPI.Document {
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
+    /// - returns: Any warnings that did not cause validation to fail.
     ///
     /// Call without any arguments to validate some aspects of the OpenAPI
     /// Specification not guaranteed by the Swift types in OpenAPIKit.
@@ -24,7 +25,8 @@ extension OpenAPI.Document {
     /// to the validation (or starting from scratch), and then pass that
     /// `Validator` to the `validate(using:)` method to use custom validation
     /// criteria.
-    public func validate(using validator: Validator = .init()) throws {
+    @discardableResult
+    public func validate(using validator: Validator = .init()) throws -> [OpenAPI.Warning] {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
@@ -38,6 +40,7 @@ extension OpenAPI.Document {
         if !validator.errors.isEmpty {
             throw ValidationErrorCollection(values: validator.errors)
         }
+        return validator.warnings
     }
 }
 

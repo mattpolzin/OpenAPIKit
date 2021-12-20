@@ -17,13 +17,18 @@
 /// as `String` will encode as a hash whereas non-`String`
 /// keys result in `Dictionary` encoding as a list of alternating
 /// keys and values.
-public struct OrderedDictionary<Key, Value> where Key: Hashable {
+public struct OrderedDictionary<Key, Value>: HasWarnings where Key: Hashable {
     private var orderedKeys: [Key]
     private var unorderedHash: [Key: Value]
+
+    private var _warnings: [OpenAPI.Warning]
+
+    public var warnings: [OpenAPI.Warning] { _warnings }
 
     public init() {
         orderedKeys = []
         unorderedHash = [:]
+        _warnings = []
     }
 
     public init<S>(
@@ -161,6 +166,7 @@ extension OrderedDictionary: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (Key, Value)...) {
         orderedKeys = []
         unorderedHash = [:]
+        _warnings = []
 
         for (key, value) in elements {
             let old = unorderedHash.updateValue(value, forKey: key)
@@ -225,7 +231,12 @@ extension OrderedDictionary {
 }
 
 // MARK: - Equatable
-extension OrderedDictionary: Equatable where Value: Equatable {}
+extension OrderedDictionary: Equatable where Value: Equatable {
+    public static func == (lhs: OrderedDictionary<Key, Value>, rhs: OrderedDictionary<Key, Value>) -> Bool {
+        return lhs.orderedKeys == rhs.orderedKeys &&
+        lhs.unorderedHash == rhs.unorderedHash
+    }
+}
 
 // MARK: - Codable
 
@@ -354,6 +365,8 @@ extension OrderedDictionary: Decodable where Key: Decodable, Value: Decodable {
     /// - Parameter decoder: The decoder to read data from.
     public init(from decoder: Decoder) throws {
 
+        _warnings = []
+
         // try for String
         if Key.self == String.self {
             self = try Self.decodeStringDict(from: decoder) as! Self
@@ -439,6 +452,9 @@ extension OrderedDictionary: LosslessStringKeyDecodable where Key: LosslessStrin
                     )
                 )
             }
+            if let warnableKey = dictionaryKey as? HasWarnings {
+                dictionary._warnings += warnableKey.warnings
+            }
             dictionary[dictionaryKey] = try container.decode(Value.self, forKey: key)
         }
 
@@ -475,6 +491,9 @@ extension OrderedDictionary: StringRawKeyDecodable where Key: RawRepresentable, 
                         underlyingError: KeyDecodingError(localizedDescription: errorMessage)
                     )
                 )
+            }
+            if let warnableKey = dictionaryKey as? HasWarnings {
+                dictionary._warnings += warnableKey.warnings
             }
             dictionary[dictionaryKey] = try container.decode(Value.self, forKey: key)
         }

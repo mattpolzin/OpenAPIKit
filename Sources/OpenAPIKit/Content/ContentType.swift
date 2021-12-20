@@ -25,7 +25,7 @@ extension OpenAPI {
                 underlyingType = .other(rawValue)
                 warnings = [
                     .message(
-                        "'\(rawValue)' could not be parsed as a Content Type which should have the format '<type>/<subtype>'"
+                        "'\(rawValue)' could not be parsed as a Content Type. Content Types should have the format '<type>/<subtype>'"
                     )
                 ]
             }
