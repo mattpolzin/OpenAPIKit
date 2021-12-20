@@ -1411,7 +1411,7 @@ final class ValidatorTests: XCTestCase {
         let docData = """
         {
           "info": {"title": "test", "version": "1.0"},
-          "openapi": "3.1.0",
+          "openapi": "3.0.1",
           "paths": {
             "test": {
               "get": {
