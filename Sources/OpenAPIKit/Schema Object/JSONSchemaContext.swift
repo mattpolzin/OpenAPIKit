@@ -699,7 +699,11 @@ extension JSONSchema.CoreContext: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
-        allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+        if Format.self == JSONTypeFormat.StringFormat.self {
+            allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+        } else {
+            allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+        }
         defaultValue = try container.decodeIfPresent(AnyCodable.self, forKey: .defaultValue)
         _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
 
