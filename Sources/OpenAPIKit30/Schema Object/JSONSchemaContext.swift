@@ -555,7 +555,7 @@ extension JSONSchema {
         /// is allowed to have.
         public let maxProperties: Int?
         let _minProperties: Int?
-        public let properties: [String: JSONSchema]
+        public let properties: OrderedDictionary<String, JSONSchema>
 
         /// Either a boolean or a schema defining or allowing
         /// additional properties on this object.
@@ -582,9 +582,7 @@ extension JSONSchema {
         ///     is determined by looking at its properties'
         ///     required Bool.
         public var requiredProperties: [String] {
-            return Array(properties.filter { (_, schemaObject) in
-                schemaObject.required
-            }.keys).sorted()
+            properties.filter { _, schema in schema.required }.map { $0.key }
         }
 
         /// The properties of this object that are optional.
@@ -593,9 +591,7 @@ extension JSONSchema {
         ///     is determined by looking at its properties'
         ///     required Bool.
         public var optionalProperties: [String] {
-            return Array(properties.filter { (_, schemaObject) in
-                !schemaObject.required
-            }.keys).sorted()
+            properties.filter { _, schema in !schema.required }.map { $0.key }
         }
 
         /// The minimum number of properties allowed.
@@ -608,7 +604,7 @@ extension JSONSchema {
         }
 
         public init(
-            properties: [String: JSONSchema],
+            properties: OrderedDictionary<String, JSONSchema>,
             additionalProperties: Either<Bool, JSONSchema>? = nil,
             maxProperties: Int? = nil,
             minProperties: Int? = nil
@@ -974,7 +970,7 @@ extension JSONSchema.ObjectContext: Decodable {
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
 
-        let decodedProperties = try container.decodeIfPresent([String: JSONSchema].self, forKey: .properties) ?? [:]
+        let decodedProperties = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .properties) ?? [:]
         properties = Self.properties(decodedProperties, takingRequirementsFrom: requiredArray)
     }
 
@@ -992,9 +988,9 @@ extension JSONSchema.ObjectContext: Decodable {
     ///     - properties: The properties before resolving optionality.
     ///     - required: The array of names of properties that should be required.
     internal static func properties(
-        _ properties: [String: JSONSchema],
+        _ properties: OrderedDictionary<String, JSONSchema>,
         takingRequirementsFrom required: [String]
-    ) -> [String: JSONSchema] {
+    ) -> OrderedDictionary<String, JSONSchema> {
         var properties = properties
 
         // mark any optional properties as optional.

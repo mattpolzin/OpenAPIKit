@@ -1073,7 +1073,7 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         minProperties: Int? = nil,
         maxProperties: Int? = nil,
-        properties: [String: JSONSchema] = [:],
+        properties: OrderedDictionary<String, JSONSchema> = [:],
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,

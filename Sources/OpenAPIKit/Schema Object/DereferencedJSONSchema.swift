@@ -235,22 +235,18 @@ extension DereferencedJSONSchema {
     public struct ObjectContext: Equatable {
         public let maxProperties: Int?
         let _minProperties: Int?
-        public let properties: [String: DereferencedJSONSchema]
+        public let properties: OrderedDictionary<String, DereferencedJSONSchema>
         public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
 
         // NOTE that an object's required properties
         // array is determined by looking at its properties'
         // required Bool.
         public var requiredProperties: [String] {
-            return Array(properties.filter { (_, schemaObject) in
-                schemaObject.required
-            }.keys)
+            properties.filter { _, schema in schema.required }.map { $0.key }
         }
 
         public var optionalProperties: [String] {
-            return Array(properties.filter { (_, schemaObject) in
-                !schemaObject.required
-            }.keys)
+            properties.filter { _, schema in !schema.required }.map { $0.key }
         }
 
         /// The minimum number of properties allowed.
@@ -264,7 +260,7 @@ extension DereferencedJSONSchema {
 
         public init?(_ objectContext: JSONSchema.ObjectContext) {
 
-            var otherProperties = [String: DereferencedJSONSchema]()
+            var otherProperties = OrderedDictionary<String, DereferencedJSONSchema>()
             for (name, property) in objectContext.properties {
                 guard let dereferencedProperty = property.dereferenced() else {
                     return nil
@@ -307,7 +303,7 @@ extension DereferencedJSONSchema {
         }
 
         internal init(
-            properties: [String: DereferencedJSONSchema],
+            properties: OrderedDictionary<String, DereferencedJSONSchema>,
             additionalProperties: Either<Bool, DereferencedJSONSchema>? = nil,
             maxProperties: Int? = nil,
             minProperties: Int? = nil

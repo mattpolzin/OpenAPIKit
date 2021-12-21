@@ -556,12 +556,16 @@ extension JSONSchema.ObjectContext {
     }
 }
 
-internal func combine(properties left: [String: JSONSchema], with right: [String: JSONSchema], resolvingIn components: OpenAPI.Components) throws -> [String: JSONSchema] {
-    var combined = left
-    try combined.merge(right) { (left, right) throws -> JSONSchema in
-        var resolver = FragmentCombiner(components: components)
-        try resolver.combine([left, right])
-        return try resolver.dereferencedSchema().jsonSchema
+internal func combine(properties left: OrderedDictionary<String, JSONSchema>, with right: OrderedDictionary<String, JSONSchema>, resolvingIn components: OpenAPI.Components) throws -> OrderedDictionary<String, JSONSchema> {
+    var combined = right
+    for (key, lhs) in left {
+        if let rhs = combined[key] {
+            var resolver = FragmentCombiner(components: components)
+            try resolver.combine([lhs, rhs])
+            combined[key] = try resolver.dereferencedSchema().jsonSchema
+        } else {
+            combined[key] = lhs
+        }
     }
     return combined
 }
