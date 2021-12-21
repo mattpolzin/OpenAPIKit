@@ -9,6 +9,13 @@ extension OpenAPI {
     /// The Content Type of an API request or response body.
     public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
         internal let underlyingType: Builtin
+        public let warnings: [OpenAPI.Warning]
+
+        /// The type and subtype of the content type. This is everything except for
+        /// any parameters that are also attached.
+        ///
+        /// If you want the full content type string, use `rawValue`.
+        public var typeAndSubtype: String { underlyingType.rawValue }
 
         /// Key/Value pairs serialized as parameters for the content type.
         ///
@@ -19,15 +26,17 @@ extension OpenAPI {
         /// alphabetical order.
         public var parameters: [String: String]
 
-        public let warnings: [OpenAPI.Warning]
-
+        /// The full raw string value of the content type and any of its parameters.
+        ///
+        /// If you only want the type & subtype without any parameters, use
+        /// `typeAndSubtype`.
         public var rawValue: String {
             let rawParams = parameters
                 .sorted(by: { $0.0 < $1.0 })
                 .map { (name, value) in "; \(name)=\(value)" }
                 .joined()
 
-            return underlyingType.rawValue + rawParams
+            return typeAndSubtype + rawParams
         }
 
         public init?(rawValue: String) {
