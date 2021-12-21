@@ -17,6 +17,7 @@ extension OpenAPI.Document {
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
+    /// - returns: Any warnings that did not cause validation to fail.
     ///
     /// Call without any arguments to validate some aspects of the OpenAPI
     /// Specification not guaranteed by the Swift types in OpenAPIKit.
@@ -24,7 +25,8 @@ extension OpenAPI.Document {
     /// to the validation (or starting from scratch), and then pass that
     /// `Validator` to the `validate(using:)` method to use custom validation
     /// criteria.
-    public func validate(using validator: Validator = .init()) throws {
+    @discardableResult
+    public func validate(using validator: Validator = .init()) throws -> [OpenAPI.Warning] {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
@@ -38,6 +40,7 @@ extension OpenAPI.Document {
         if !validator.errors.isEmpty {
             throw ValidationErrorCollection(values: validator.errors)
         }
+        return validator.warnings
     }
 }
 
@@ -291,6 +294,7 @@ class _Validator: Encoder {
     let document: OpenAPI.Document
     private(set) var validations: [AnyValidation]
 
+    var warnings: [OpenAPI.Warning] = []
     var errors: [ValidationError] = []
     var node: ValidityEncoderNode = .unused
 
@@ -371,6 +375,7 @@ class _ReferencingValidator: _Validator {
     }
 
     deinit {
+        encoder.warnings += warnings
         encoder.errors += errors
         switch reference {
         case .dictionary:
@@ -406,77 +411,92 @@ extension _Validator: SingleValueEncodingContainer {
 
     func encode(_ value: Bool) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: String) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Double) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Float) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Int) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Int8) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Int16) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Int32) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: Int64) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: UInt) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: UInt8) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: UInt16) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: UInt32) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode(_ value: UInt64) {
         applyValidations(to: value)
+        collectWarnings(from: value)
         node = .single
     }
 
     func encode<T>(_ value: T) throws where T : Encodable {
         assertCanEncodeNewValue()
         applyValidations(to: value)
+        collectWarnings(from: value)
         try value.encode(to: self)
     }
 
@@ -494,6 +514,27 @@ extension _Validator: SingleValueEncodingContainer {
         let pathTail = key.map { [$0] } ?? []
         for idx in validations.indices {
             errors += validations[idx].apply(to: value, at: codingPath + pathTail, in: document)
+        }
+    }
+
+    // take a warning that does not have a coding path associated and give it
+    // a coding path (when possible).
+    fileprivate func contextualize(at path: [CodingKey]) -> (OpenAPI.Warning) -> OpenAPI.Warning {
+        return { warning in
+            if path.isEmpty {
+                return warning
+            }
+            switch warning {
+            case .underlyingError: return warning
+            case .message(let details): return .underlyingError(CodingPathError(details: details, codingPath: path))
+            }
+        }
+    }
+
+    fileprivate func collectWarnings(from value: Encodable, atKey key: CodingKey? = nil) {
+        let pathTail = key.map { [$0] } ?? []
+        if let warnable = value as? HasWarnings {
+            warnings += warnable.warnings.map(contextualize(at: codingPath + pathTail))
         }
     }
 }
