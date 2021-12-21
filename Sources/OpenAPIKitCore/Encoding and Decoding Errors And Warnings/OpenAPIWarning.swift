@@ -6,7 +6,7 @@
 //
 
 extension OpenAPI {
-    public enum Warning {
+    public enum Warning: Swift.Error {
         case underlyingError(OpenAPIError)
         case message(String)
 

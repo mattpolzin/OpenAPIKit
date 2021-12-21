@@ -9,28 +9,70 @@ extension OpenAPI {
     /// The Content Type of an API request or response body.
     public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
         internal let underlyingType: Builtin
+
+        public var parameters: [String: String]
+
         public let warnings: [OpenAPI.Warning]
 
         public var rawValue: String {
-            underlyingType.rawValue
+            let rawParams = parameters
+                .sorted(by: { $0.0 < $1.0 })
+                .map { (name, value) in "; \(name)=\(value)" }
+                .joined()
+
+            return underlyingType.rawValue + rawParams
         }
 
         public init?(rawValue: String) {
-            if let underlying = Builtin.init(rawValue: rawValue) {
+            let parts = rawValue.split(separator: ";")
+            let type = parts.first.map(String.init) ?? rawValue
+
+            var warnings = [OpenAPI.Warning]()
+            var params = [String:String]()
+            for part in parts.dropFirst() {
+                switch Self.parseParameter(part) {
+                case .success(let (name, value)):
+                    params[name] = value
+                case .failure(let warning):
+                    warnings.append(warning)
+                }
+            }
+
+            parameters = params
+
+            if let underlying = Builtin.init(rawValue: type) {
                 underlyingType = underlying
-                warnings = []
             } else {
-                underlyingType = .other(rawValue)
-                warnings = [
+                underlyingType = .other(type)
+                warnings.append(
                     .message(
                         "'\(rawValue)' could not be parsed as a Content Type. Content Types should have the format '<type>/<subtype>'"
                     )
-                ]
+                )
             }
+            self.warnings = warnings
+        }
+
+        private static func parseParameter(_ param: String.SubSequence) -> Result<(String, String), OpenAPI.Warning> {
+            let parts = param.split(separator: "=")
+
+            guard parts.count == 2,
+                  let name = parts.first,
+                  let value = parts.last else {
+                      return .failure(.message("Could not parse a Content Type parameter from '\(param)'"))
+                  }
+
+            return .success(
+                (
+                    String(name.trimmingCharacters(in: .whitespaces)),
+                    String(value.trimmingCharacters(in: .whitespaces))
+                )
+            )
         }
 
         internal init(_ builtin: Builtin) {
             underlyingType = builtin
+            parameters = [:]
             warnings = []
         }
     }
@@ -41,6 +83,7 @@ public extension OpenAPI.ContentType {
     /// Bitmap image
     static let bmp: Self = .init(.bmp)
     static let css: Self = .init(.css)
+    /// Comma-separated values
     static let csv: Self = .init(.csv)
     /// URL-encoded form data. See also: `multipartForm`.
     static let form: Self = .init(.form)
@@ -61,6 +104,8 @@ public extension OpenAPI.ContentType {
     static let mpg: Self = .init(.mpg)
     /// Multipart form data. See also: `form`.
     static let multipartForm: Self = .init(.multipartForm)
+    /// OpenType font
+    static let otf: Self = .init(.otf)
     static let pdf: Self = .init(.pdf)
     /// RAR archive
     static let rar: Self = .init(.rar)
@@ -69,8 +114,14 @@ public extension OpenAPI.ContentType {
     static let tar: Self = .init(.tar)
     /// TIF image
     static let tif: Self = .init(.tif)
+    /// TrueType font
+    static let ttf: Self = .init(.ttf)
     /// Plaintext
     static let txt: Self = .init(.txt)
+    /// Web Open Font Format
+    static let woff: Self = .init(.woff)
+    /// Web Open Font Format
+    static let woff2: Self = .init(.woff2)
     static let xml: Self = .init(.xml)
     static let yaml: Self = .init(.yaml)
     /// ZIP archive
@@ -82,6 +133,7 @@ public extension OpenAPI.ContentType {
 
     static let anyApplication: Self = .init(.anyApplication)
     static let anyAudio: Self = .init(.anyAudio)
+    static let anyFont: Self = .init(.anyFont)
     static let anyImage: Self = .init(.anyImage)
     static let anyText: Self = .init(.anyText)
     static let anyVideo: Self = .init(.anyVideo)
@@ -96,6 +148,7 @@ extension OpenAPI.ContentType {
         /// Bitmap image
         case bmp
         case css
+        /// Comma-separated values
         case csv
         /// URL-encoded form data. See also: `multipartForm`.
         case form
@@ -116,6 +169,8 @@ extension OpenAPI.ContentType {
         case mpg
         /// Multipart form data. See also: `form`.
         case multipartForm
+        /// OpenType font
+        case otf
         case pdf
         /// RAR archive
         case rar
@@ -124,8 +179,14 @@ extension OpenAPI.ContentType {
         case tar
         /// TIF image
         case tif
+        /// TrueType font
+        case ttf
         /// Plaintext
         case txt
+        /// Web Open Font Format
+        case woff
+        /// Web Open Font Format
+        case woff2
         case xml
         case yaml
         /// ZIP archive
@@ -137,6 +198,7 @@ extension OpenAPI.ContentType {
 
         case anyApplication
         case anyAudio
+        case anyFont
         case anyImage
         case anyText
         case anyVideo
@@ -162,18 +224,23 @@ extension OpenAPI.ContentType.Builtin: RawRepresentable {
         case .mp4: return "video/mp4"
         case .mpg: return "video/mpeg"
         case .multipartForm: return "multipart/form-data"
+        case .otf: return "font/otf"
         case .pdf: return "application/pdf"
         case .rar: return "application/x-rar-compressed"
         case .rtf: return "application/rtf"
         case .tar: return "application/x-tar"
         case .tif: return "image/tiff"
+        case .ttf: return "font/ttf"
         case .txt: return "text/plain"
+        case .woff: return "font/woff"
+        case .woff2: return "font/woff2"
         case .xml: return "application/xml"
         case .yaml: return "application/x-yaml"
         case .zip: return "application/zip"
 
         case .anyApplication: return "application/*"
         case .anyAudio: return "audio/*"
+        case .anyFont: return "font/*"
         case .anyImage: return "image/*"
         case .anyText: return "text/*"
         case .anyVideo: return "video/*"
@@ -200,12 +267,16 @@ extension OpenAPI.ContentType.Builtin: RawRepresentable {
         case "video/mp4": self = .mp4
         case "video/mpeg": self = .mpg
         case "multipart/form-data": self = .multipartForm
+        case "font/otf": self = .otf
         case "application/pdf": self = .pdf
         case "application/x-rar-compressed": self = .rar
         case "application/rtf": self = .rtf
         case "application/x-tar": self = .tar
         case "image/tiff": self = .tif
+        case "font/ttf": self = .ttf
         case "text/plain": self = .txt
+        case "font/woff": self = .woff
+        case "font/woff2": self = .woff2
         case "application/xml": self = .xml
         case "application/x-yaml": self = .yaml
         case "application/zip": self = .zip
@@ -213,6 +284,7 @@ extension OpenAPI.ContentType.Builtin: RawRepresentable {
         case "application/*": self = .anyApplication
         case "audio/*": self = .anyAudio
         case "image/*": self = .anyImage
+        case "font/*": self = .anyFont
         case "text/*": self = .anyText
         case "video/*": self = .anyVideo
         case "*/*": self = .any

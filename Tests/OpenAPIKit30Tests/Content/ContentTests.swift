@@ -113,52 +113,6 @@ final class ContentTests: XCTestCase {
             .any: .init(schema: .string(format: .binary))
         ]
     }
-
-    func test_contentTypeStringReflexivity() {
-
-        let bad = OpenAPI.ContentType(rawValue: "not a content type")
-        XCTAssertEqual(
-            bad?.warnings[0].localizedDescription,
-            "\'not a content type\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
-        )
-
-        let types: [OpenAPI.ContentType] = [
-            .bmp,
-            .css,
-            .csv,
-            .form,
-            .html,
-            .javascript,
-            .jpg,
-            .json,
-            .jsonapi,
-            .mov,
-            .mp3,
-            .mp4,
-            .mpg,
-            .multipartForm,
-            .pdf,
-            .rar,
-            .rtf,
-            .tar,
-            .tif,
-            .txt,
-            .xml,
-            .yaml,
-            .zip,
-            .anyApplication,
-            .anyAudio,
-            .anyImage,
-            .anyText,
-            .anyVideo,
-            .any,
-            .other("application/custom")
-        ]
-
-        for type in types {
-            XCTAssertEqual(type, OpenAPI.ContentType(rawValue: type.rawValue))
-        }
-    }
 }
 
 // MARK: - Codable
