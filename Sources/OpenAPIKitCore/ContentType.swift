@@ -10,6 +10,13 @@ extension OpenAPI {
     public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
         internal let underlyingType: Builtin
 
+        /// Key/Value pairs serialized as parameters for the content type.
+        ///
+        /// For exmaple, in "`text/plain; charset=UTF-8`" "charset" is
+        /// the name of a parameter with the value "UTF-8".
+        ///
+        /// OpenAPIKit will always encode these parameters with the keys in
+        /// alphabetical order.
         public var parameters: [String: String]
 
         public let warnings: [OpenAPI.Warning]
