@@ -582,10 +582,7 @@ extension JSONSchema {
         ///     is determined by looking at its properties'
         ///     required Bool.
         public var requiredProperties: [String] {
-            properties
-                .filter { _, schema in schema.required }
-                .map { $0.key }
-                .sorted()
+            properties.filter { _, schema in schema.required }.map { $0.key }
         }
 
         /// The properties of this object that are optional.
@@ -594,10 +591,7 @@ extension JSONSchema {
         ///     is determined by looking at its properties'
         ///     required Bool.
         public var optionalProperties: [String] {
-            properties
-                .filter { _, schema in !schema.required }
-                .map { $0.key }
-                .sorted()
+            properties.filter { _, schema in !schema.required }.map { $0.key }
         }
 
         /// The minimum number of properties allowed.
