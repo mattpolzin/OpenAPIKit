@@ -60,14 +60,14 @@ final class ResponseTests: XCTestCase {
 
 // MARK: Response Status Code
 extension ResponseTests {
+    typealias StatusCode = OpenAPI.Response.StatusCode
+
     func test_defaultFromString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(StatusCode(rawValue: "default"), .default)
         XCTAssertEqual(StatusCode(rawValue: "default")?.rawValue, "default")
     }
 
     func test_codeFromString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(StatusCode(rawValue: "123"), .status(code: 123))
         XCTAssertEqual(StatusCode(rawValue: "123")?.rawValue, "123")
         XCTAssertEqual(StatusCode(rawValue: "404"), .status(code: 404))
@@ -77,12 +77,16 @@ extension ResponseTests {
     }
 
     func test_NilForNonIntegerString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertNil(StatusCode(rawValue: "hello"))
     }
 
+    func test_fallbackForTwoAlts() {
+        let test = StatusCode(rawValue: "404/500")
+        XCTAssertEqual(test?.rawValue, "404")
+        XCTAssertEqual(test?.warnings.first?.localizedDescription, "Found non-compliant Status Code \'404/500\' but was able to parse as 404")
+    }
+
     func test_codeFromIntegerLiteral() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(123, StatusCode.status(code: 123))
         XCTAssertEqual(404, StatusCode.status(code: 404))
         XCTAssertEqual(500, StatusCode.status(code: 500))

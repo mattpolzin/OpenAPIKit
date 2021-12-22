@@ -82,12 +82,27 @@ extension OpenAPI.Response {
     /// You can use integer literals to specify an exact status code.
     ///
     /// Status code ranges are named in the `StatusCode.Range` enum. For example, the "1XX" range (100-199) can be written as either `.range(.information)` or as `.range(.init(rawValue: "1XX"))`.
-    public enum StatusCode: RawRepresentable, Equatable, Hashable {
+    public struct StatusCode: RawRepresentable, Equatable, Hashable, HasWarnings {
         public typealias RawValue = String
 
-        case `default`
-        case range(Range)
-        case status(code: Int)
+        public let warnings: [OpenAPI.Warning]
+
+        public var value: Code
+
+        internal init(value: Code) {
+            self.value = value
+            warnings = []
+        }
+
+        public static let `default`: Self = .init(value: .default)
+        public static func range(_ range: Range) -> Self { .init(value: .range(range)) }
+        public static func status(code: Int) -> Self { .init(value: .status(code: code)) }
+
+        public enum Code: Equatable, Hashable {
+            case `default`
+            case range(Range)
+            case status(code: Int)
+        }
 
         public enum Range: String {
             /// Status Code `100-199`
@@ -103,7 +118,7 @@ extension OpenAPI.Response {
         }
 
         public var rawValue: String {
-            switch self {
+            switch value {
             case .default:
                 return "default"
 
@@ -116,7 +131,7 @@ extension OpenAPI.Response {
         }
 
         public var isSuccess: Bool {
-            switch self {
+            switch value {
             case .range(.success), .status(code: 200..<300):
                 return true
             case .range, .status, .default:
@@ -126,20 +141,21 @@ extension OpenAPI.Response {
 
         public init?(rawValue: String) {
             if let val = Int(rawValue) {
-                self = .status(code: val)
-
-            } else if rawValue == OpenAPI.Response.StatusCode.default.rawValue {
-                self = .default
-
+                value = .status(code: val)
+                warnings = []
+            } else if rawValue == "default" {
+                value = .default
+                warnings = []
             } else if let range = Range(rawValue: rawValue.uppercased()) {
-                self = .range(range)
-
+                value = .range(range)
+                warnings = []
             } else if rawValue.contains("/"),
                 let first = (rawValue.split(separator: "/")).first,
                 let fallback = Self(rawValue: String(first)) {
-                self = fallback
-                print("WARNING: Found non-compliant Status Code '\(rawValue)' but was able to parse as \(first)")
-
+                value = fallback.value
+                warnings = [
+                    .message("Found non-compliant Status Code '\(rawValue)' but was able to parse as \(first)")
+                ]
             } else {
                 return nil
             }
@@ -150,7 +166,8 @@ extension OpenAPI.Response {
 extension OpenAPI.Response.StatusCode: ExpressibleByIntegerLiteral {
 
     public init(integerLiteral value: Int) {
-        self = .status(code: value)
+        self.value = .status(code: value)
+        warnings = []
     }
 }
 
