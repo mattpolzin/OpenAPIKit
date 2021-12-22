@@ -704,6 +704,9 @@ extension JSONSchema.CoreContext: Decodable {
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
+        let nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
+        _nullable = nullable
+
         // default to `true` at decoding site.
         // It is the responsibility of decoders farther upstream
         // to mark this as _not_ required if needed using
@@ -715,12 +718,15 @@ extension JSONSchema.CoreContext: Decodable {
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         if Format.self == JSONTypeFormat.StringFormat.self {
-            allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            if (nullable ?? false) {
+                allowedValues = try container.decodeIfPresent([String?].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            } else {
+                allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            }
         } else {
             allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
         }
         defaultValue = try container.decodeIfPresent(AnyCodable.self, forKey: .defaultValue)
-        _nullable = try container.decodeIfPresent(Bool.self, forKey: .nullable)
 
         let readOnly = try container.decodeIfPresent(Bool.self, forKey: .readOnly)
         let writeOnly = try container.decodeIfPresent(Bool.self, forKey: .writeOnly)
