@@ -763,7 +763,8 @@ extension JSONSchema.CoreContext: Decodable {
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
-        nullable = try Self.decodeNullable(from: container)
+        let nullable = try Self.decodeNullable(from: container)
+        self.nullable = nullable
 
         // default to `true` at decoding site.
         // It is the responsibility of decoders farther upstream
@@ -776,7 +777,11 @@ extension JSONSchema.CoreContext: Decodable {
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         if Format.self == JSONTypeFormat.StringFormat.self {
-            allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            if nullable {
+                allowedValues = try container.decodeIfPresent([String?].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            } else {
+                allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+            }
         } else {
             allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
         }
