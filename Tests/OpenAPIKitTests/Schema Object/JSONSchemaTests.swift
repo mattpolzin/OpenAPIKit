@@ -4146,6 +4146,7 @@ extension SchemaObjectTests {
         let deprecatedStringData = #"{"type": "string", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueStringData = #"{"type": "string", "enum": ["hello"]}"#.data(using: .utf8)!
         let discriminatorStringData = #"{"type": "string", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
+        let nullableStringWithAllowedValuesData = #"{"type": "string", "nullable": true, "enum": ["hello", null]}"#.data(using: .utf8)!
 
         let string = try orderUnstableDecode(JSONSchema.self, from: stringData)
         let nullableString = try orderUnstableDecode(JSONSchema.self, from: nullableStringData)
@@ -4154,6 +4155,7 @@ extension SchemaObjectTests {
         let deprecatedString = try orderUnstableDecode(JSONSchema.self, from: deprecatedStringData)
         let allowedValueString = try orderUnstableDecode(JSONSchema.self, from: allowedValueStringData)
         let discriminatorString = try orderUnstableDecode(JSONSchema.self, from: discriminatorStringData)
+        let nullableStringWithAllowedValues = try orderUnstableDecode(JSONSchema.self, from: nullableStringWithAllowedValuesData)
 
         XCTAssertEqual(string, JSONSchema.string(.init(format: .generic), .init()))
         XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .generic, nullable: true), .init()))
@@ -4162,6 +4164,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(deprecatedString, JSONSchema.string(.init(format: .generic, deprecated: true), .init()))
         XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .generic, allowedValues: ["hello"]), .init()))
         XCTAssertEqual(discriminatorString, JSONSchema.string(discriminator: .init(propertyName: "hello")))
+        XCTAssertEqual(nullableStringWithAllowedValues, JSONSchema.string(nullable: true, allowedValues: ["hello", nil]))
     }
 
     func test_decodeStringWithTypeInferred() throws {
