@@ -281,19 +281,19 @@ extension JSONSchema {
 
     /// Check if this schema is a `.fragment`.
     public var isFragment: Bool {
-        guard case .fragment = self else { return false }
+        guard case .fragment = value else { return false }
         return true
     }
 
     /// Check if schema is `.null`
     public var isNull : Bool {
-        guard case .null = self else { return false }
+        guard case .null = value else { return false }
         return true
     }
 
     /// Check if a schema is a `.boolean`.
     public var isBoolean: Bool {
-        guard case .boolean = self else { return false }
+        guard case .boolean = value else { return false }
         return true
     }
 
@@ -303,31 +303,31 @@ extension JSONSchema {
     /// `.integer` even though Integer schemas
     /// can be easily transformed into Number schemas.
     public var isNumber: Bool {
-        guard case .number = self else { return false }
+        guard case .number = value else { return false }
         return true
     }
 
     /// Check if a schema is an `.integer`.
     public var isInteger: Bool {
-        guard case .integer = self else { return false }
+        guard case .integer = value else { return false }
         return true
     }
 
     /// Check if a schema is a `.string`.
     public var isString: Bool {
-        guard case .string = self else { return false }
+        guard case .string = value else { return false }
         return true
     }
 
     /// Check if a schema is an `.object`.
     public var isObject: Bool {
-        guard case .object = self else { return false }
+        guard case .object = value else { return false }
         return true
     }
 
     /// Check if a schema is an `.array`.
     public var isArray: Bool {
-        guard case .array = self else { return false }
+        guard case .array = value else { return false }
         return true
     }
 
