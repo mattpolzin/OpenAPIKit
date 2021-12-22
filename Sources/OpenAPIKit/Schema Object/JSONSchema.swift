@@ -10,27 +10,79 @@ import OpenAPIKitCore
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
-public enum JSONSchema: Equatable, JSONSchemaContext {
+public struct JSONSchema: JSONSchemaContext, HasWarnings {
+
+    public let warnings: [OpenAPI.Warning]
+    public let value: Schema
+
+    public init(schema: Schema) {
+        value = schema
+        warnings = []
+    }
+
     /// The null type, which replaces the functionality of the `nullable` property from
     /// previous versions of the OpenAPI specification.
-    case null
-    case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
-    case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
-    case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
-    case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
-    indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
-    indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
-    indirect case all(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
-    indirect case one(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
-    indirect case any(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
-    indirect case not(JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
-    case reference(JSONReference<JSONSchema>, ReferenceContext)
+    public static let null: Self = .init(schema: .null)
+    public static func boolean(_ core: CoreContext<JSONTypeFormat.BooleanFormat>) -> Self {
+        .init(schema: .boolean(core))
+    }
+    public static func number(_ core: CoreContext<JSONTypeFormat.NumberFormat>, _ numeric: NumericContext) -> Self {
+        .init(schema: .number(core, numeric))
+    }
+    public static func integer(_ core: CoreContext<JSONTypeFormat.IntegerFormat>, _ integral: IntegerContext) -> Self {
+        .init(schema: .integer(core, integral))
+    }
+    public static func string(_ core: CoreContext<JSONTypeFormat.StringFormat>, _ string: StringContext) -> Self {
+        .init(schema: .string(core, string))
+    }
+    public static func object(_ core: CoreContext<JSONTypeFormat.ObjectFormat>, _ object: ObjectContext) -> Self {
+        .init(schema: .object(core, object))
+    }
+    public static func array(_ core: CoreContext<JSONTypeFormat.ArrayFormat>, _ array: ArrayContext) -> Self {
+        .init(schema: .array(core, array))
+    }
+    public static func all(of schemas: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .all(of: schemas, core: core))
+    }
+    public static func one(of schemas: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .one(of: schemas, core: core))
+    }
+    public static func any(of schemas: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .any(of: schemas, core: core))
+    }
+    public static func not(_ schema: JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .not(schema, core: core))
+    }
+    public static func reference(_ reference: JSONReference<JSONSchema>, _ context: ReferenceContext) -> Self {
+        .init(schema: .reference(reference, context))
+    }
     /// Schemas without a `type`.
-    case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
+    public static func fragment(_ core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .fragment(core))
+    }
+
+    public enum Schema: Equatable {
+        /// The null type, which replaces the functionality of the `nullable` property from
+        /// previous versions of the OpenAPI specification.
+        case null
+        case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
+        case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
+        case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
+        case string(CoreContext<JSONTypeFormat.StringFormat>, StringContext)
+        indirect case object(CoreContext<JSONTypeFormat.ObjectFormat>, ObjectContext)
+        indirect case array(CoreContext<JSONTypeFormat.ArrayFormat>, ArrayContext)
+        indirect case all(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+        indirect case one(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+        indirect case any(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
+        indirect case not(JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
+        case reference(JSONReference<JSONSchema>, ReferenceContext)
+        /// Schemas without a `type`.
+        case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
+    }
 
     /// The type and format of the schema.
     public var jsonTypeFormat: JSONTypeFormat? {
-        switch self {
+        switch value {
         case .null:
             return .null
         case .boolean(let context):
@@ -67,7 +119,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     /// a type-safe format can be used and retrieved
     /// via the `jsonTypeFormat` property.
     public var formatString: String? {
-        switch self {
+        switch value {
         case .boolean(let context):
             return context.format.rawValue
         case .object(let context, _):
@@ -93,7 +145,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var required: Bool {
-        switch self {
+        switch value {
         case .null:
             #warning("TODO: not sure about this -- maybe null type should get a context still")
             return false
@@ -116,7 +168,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var description: String? {
-        switch self {
+        switch value {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
@@ -136,7 +188,7 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var discriminator: OpenAPI.Discriminator? {
-        switch self {
+        switch value {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
@@ -201,6 +253,12 @@ public enum JSONSchema: Equatable, JSONSchemaContext {
     }
 }
 
+extension JSONSchema: Equatable {
+    public static func == (lhs: JSONSchema, rhs: JSONSchema) -> Bool {
+        lhs.value == rhs.value
+    }
+}
+
 // MARK: - Case Checks
 extension JSONSchema {
     /// Check if this schema is an _empty_ `.fragment`.
@@ -215,7 +273,7 @@ extension JSONSchema {
     ///     }
     ///
     public var isEmpty: Bool {
-        guard case .fragment(let context) = self, context.isEmpty else {
+        guard case .fragment(let context) = value, context.isEmpty else {
             return false
         }
         return true
@@ -275,7 +333,7 @@ extension JSONSchema {
 
     /// Check if a schema is a `.reference`.
     public var isReference: Bool {
-        guard case .reference = self else { return false }
+        guard case .reference = value else { return false }
         return true
     }
 }
@@ -289,7 +347,7 @@ extension JSONSchema {
     /// Notably, `reference` schemas do not have this core context.
     ///
     public var coreContext: JSONSchemaContext? {
-        switch self {
+        switch value {
         case .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
@@ -310,7 +368,7 @@ extension JSONSchema {
     /// Get the context specific to an `object` schema. If not an
     /// object schema, returns `nil`.
     public var objectContext: ObjectContext? {
-        guard case .object(_, let context) = self else {
+        guard case .object(_, let context) = value else {
             return nil
         }
         return context
@@ -319,7 +377,7 @@ extension JSONSchema {
     /// Get the context specific to an `array` schema. If not an
     /// array schema, returns `nil`.
     public var arrayContext: ArrayContext? {
-        guard case .array(_, let context) = self else {
+        guard case .array(_, let context) = value else {
             return nil
         }
         return context
@@ -337,7 +395,7 @@ extension JSONSchema {
     /// accessor.
     ///
     public var numberContext: NumericContext? {
-        guard case .number(_, let context) = self else {
+        guard case .number(_, let context) = value else {
             return nil
         }
         return context
@@ -346,7 +404,7 @@ extension JSONSchema {
     /// Get the context specific to an `integer` schema. If not an
     /// integer schema, returns `nil`.
     public var integerContext: IntegerContext? {
-        guard case .integer(_, let context) = self else {
+        guard case .integer(_, let context) = value else {
             return nil
         }
         return context
@@ -355,7 +413,7 @@ extension JSONSchema {
     /// Get the context specific to a `string` schema. If not a
     /// string schema, returns `nil`.
     public var stringContext: StringContext? {
-        guard case .string(_, let context) = self else {
+        guard case .string(_, let context) = value else {
             return nil
         }
         return context
@@ -364,7 +422,7 @@ extension JSONSchema {
     /// Get the context specific to a `reference` schema. If not a
     /// reference schema, returns `nil`.
     public var referenceContext: ReferenceContext? {
-        guard case .reference(_, let context) = self else {
+        guard case .reference(_, let context) = value else {
             return nil
         }
         return context
@@ -375,7 +433,7 @@ extension JSONSchema {
 extension JSONSchema {
     /// Return the optional version of this `JSONSchema`
     public func optionalSchemaObject() -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.optionalContext())
         case .object(let contextA, let contextB):
@@ -407,7 +465,7 @@ extension JSONSchema {
 
     /// Return the required version of this `JSONSchema`
     public func requiredSchemaObject() -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.requiredContext())
         case .object(let contextA, let contextB):
@@ -439,7 +497,7 @@ extension JSONSchema {
 
     /// Return the nullable version of this `JSONSchema`
     public func nullableSchemaObject() -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.nullableContext())
         case .object(let contextA, let contextB):
@@ -470,7 +528,7 @@ extension JSONSchema {
     /// Return a version of this `JSONSchema` that only allows the given
     /// values.
     public func with(allowedValues: [AnyCodable]) -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.with(allowedValues: allowedValues))
         case .object(let contextA, let contextB):
@@ -500,7 +558,7 @@ extension JSONSchema {
 
     /// Return a version of this `JSONSchema` that has the given default value.
     public func with(defaultValue: AnyCodable) -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.with(defaultValue: defaultValue))
         case .object(let contextA, let contextB):
@@ -537,7 +595,7 @@ extension JSONSchema {
     /// Returns a version of this `JSONSchema` that has the given examples
     /// attached.
     public func with(examples: [AnyCodable]) throws -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.with(examples: examples))
         case .object(let contextA, let contextB):
@@ -567,7 +625,7 @@ extension JSONSchema {
 
     /// Returns a version of this `JSONSchema` that has the given discriminator.
     public func with(discriminator: OpenAPI.Discriminator) -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.with(discriminator: discriminator))
         case .object(let contextA, let contextB):
@@ -597,7 +655,7 @@ extension JSONSchema {
 
     /// Returns a version of this `JSONSchema` that has the given description.
     public func with(description: String) -> JSONSchema {
-        switch self {
+        switch value {
         case .boolean(let context):
             return .boolean(context.with(description: description))
         case .number(let contextA, let contextB):
@@ -1301,7 +1359,7 @@ extension JSONSchema {
 extension JSONSchema: Encodable {
 
     public func encode(to encoder: Encoder) throws {
-        switch self {
+        switch value {
         case .null:
             var container = encoder.container(keyedBy: NullCodingKeys.self)
             try container.encode(JSONType.null.rawValue, forKey: .type)

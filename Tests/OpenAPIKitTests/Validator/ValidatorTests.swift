@@ -1134,7 +1134,7 @@ final class ValidatorTests: XCTestCase {
         let resourceContainsName = Validation<JSONSchema>(
             description: "All JSON resources must have a String name",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let nameProperty = context.properties["name"] else {
                         return false
                 }
@@ -1145,7 +1145,7 @@ final class ValidatorTests: XCTestCase {
         let responseResourceContainsId = Validation<JSONSchema>(
             description: "All JSON response resources must have an Id",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let idProperty = context.properties["id"] else {
                         return false
                 }
@@ -1262,7 +1262,7 @@ final class ValidatorTests: XCTestCase {
         let resourceContainsName = Validation<JSONSchema>(
             description: "All JSON resources must have a String name",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let nameProperty = context.properties["name"] else {
                         return false
                 }
@@ -1273,7 +1273,7 @@ final class ValidatorTests: XCTestCase {
         let responseResourceContainsId = Validation<JSONSchema>(
             description: "All JSON response resources must have an Id",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let idProperty = context.properties["id"] else {
                         return false
                 }
