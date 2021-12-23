@@ -1482,71 +1482,87 @@ extension JSONSchema: Decodable {
             objectContainer.allKeys.isEmpty ? nil : "object"
         ].compactMap { $0 }
 
+        var warnings = [OpenAPI.Warning]()
+
         // TODO: probably support properties from multiple types by turning into
         //       a oneOf for each type.
         if keysFrom.count > 1 {
-            throw InconsistencyError(
-                subjectName: "Schema",
-                details: "A schema contains properties for multiple types of schemas, namely: \(keysFrom).",
-                codingPath: decoder.codingPath
+            warnings.append(
+                .underlyingError(
+                    InconsistencyError(
+                        subjectName: "Schema",
+                        details: "A schema contains properties for multiple types of schemas, namely: \(keysFrom).",
+                        codingPath: decoder.codingPath
+                    )
+                )
             )
         }
 
         // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
         let typeHint = typeHints.first
 
-        func assertNoTypeConflict(with type: JSONType) throws {
+        func assertNoTypeConflict(with type: JSONType) {
             guard let typeHint = typeHint else { return }
-            guard typeHint == type else {
-                throw InconsistencyError(
-                    subjectName: "OpenAPI Schema",
-                    details: "Found schema attributes not consistent with the type specified: \(typeHint)",
-                    codingPath: decoder.codingPath
+            if typeHint != type {
+                warnings.append(
+                    .underlyingError(
+                        InconsistencyError(
+                            subjectName: "OpenAPI Schema",
+                            details: "Found schema attributes not consistent with the type specified: \(typeHint)",
+                            codingPath: decoder.codingPath
+                        )
+                    )
                 )
             }
         }
 
         if typeHint == .null {
-            self = .null
+            value = .null
 
         } else if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
             if typeHint == .integer {
-                self = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
+                value = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
                                 try IntegerContext(from: decoder))
             } else {
-                self = .number(try CoreContext<JSONTypeFormat.NumberFormat>(from: decoder),
+                value = .number(try CoreContext<JSONTypeFormat.NumberFormat>(from: decoder),
                                try NumericContext(from: decoder))
             }
 
         } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
-            try assertNoTypeConflict(with: .string)
-            self = .string(try CoreContext<JSONTypeFormat.StringFormat>(from: decoder),
+            assertNoTypeConflict(with: .string)
+            value = .string(try CoreContext<JSONTypeFormat.StringFormat>(from: decoder),
                            try StringContext(from: decoder))
 
         } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
-            try assertNoTypeConflict(with: .array)
-            self = .array(try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder),
+            assertNoTypeConflict(with: .array)
+            value = .array(try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder),
                           try ArrayContext(from: decoder))
 
         } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
-            try assertNoTypeConflict(with: .object)
-            self = .object(try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder),
+            assertNoTypeConflict(with: .object)
+            value = .object(try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder),
                            try ObjectContext(from: decoder))
 
         } else if typeHint == .boolean {
-            self = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
+            value = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
 
         } else {
             let fragmentContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             if fragmentContext.isEmpty && hintContainerCount > 0 {
-                throw InconsistencyError(
-                    subjectName: "OpenAPI Schema",
-                    details: "Found nothing but unsupported attributes.",
-                    codingPath: decoder.codingPath
+                warnings.append(
+                    .underlyingError(
+                        InconsistencyError(
+                            subjectName: "OpenAPI Schema",
+                            details: "Found nothing but unsupported attributes.",
+                            codingPath: decoder.codingPath
+                        )
+                    )
                 )
             }
-            self = .fragment(fragmentContext)
+            value = .fragment(fragmentContext)
         }
+
+        self.warnings = warnings
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {

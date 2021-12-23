@@ -133,7 +133,7 @@ internal struct FragmentCombiner {
         // make sure any less specialized fragment (i.e. general) is on the left
         let lessSpecializedFragment: JSONSchema
         let equallyOrMoreSpecializedFragment: JSONSchema
-        switch (combinedFragment, fragment) {
+        switch (combinedFragment.value, fragment.value) {
         case (.fragment, _):
             lessSpecializedFragment = combinedFragment
             equallyOrMoreSpecializedFragment = fragment
