@@ -190,7 +190,7 @@ final class PathsErrorTests: XCTestCase {
         }
     }
 
-    func test_paramSchemaHasProblemDeeplyNestedInSchema() {
+    func test_paramSchemaHasProblemDeeplyNestedInSchema() throws {
         let documentYML =
         """
         openapi: "3.0.0"
@@ -212,28 +212,27 @@ final class PathsErrorTests: XCTestCase {
                                     type: string
         """
 
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+        let warnResult = try testDecoder.decode(OpenAPI.Document.self, from: documentYML)
 
-            let openAPIError = OpenAPI.Error(from: error)
+        let openAPIError = try warnResult.validate(using: Validator.blank).first
 
-            XCTAssertEqual(
-                openAPIError.localizedDescription,
+        XCTAssertEqual(
+            openAPIError?.localizedDescription,
                 """
-                Inconsistency encountered when parsing `OpenAPI Schema` in .parameters[0].schema.properties.hi under the `/hello/world` path: Found schema attributes not consistent with the type specified: object.
+                Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object.
                 """
-            )
-            XCTAssertEqual(
-                openAPIError.codingPath.map { $0.stringValue },
-                [
-                    "paths",
-                    "/hello/world",
-                    "parameters",
-                    "Index 0",
-                    "schema",
-                    "properties",
-                    "hi"
-                ]
-            )
-        }
+        )
+        XCTAssertEqual(
+            openAPIError?.codingPath?.map { $0.stringValue },
+            [
+                "paths",
+                "/hello/world",
+                "parameters",
+                "Index 0",
+                "schema",
+                "properties",
+                "hi"
+            ]
+        )
     }
 }

@@ -105,7 +105,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
 
         // check for known schema
         XCTAssertNotNil(apiDoc.components.schemas["Customer"])
-        guard case .object(_, let objectContext) = apiDoc.components[JSONReference<JSONSchema>.component(named: "Customer")] else {
+        guard case .object(_, let objectContext) = apiDoc.components[JSONReference<JSONSchema>.component(named: "Customer")]?.value else {
             XCTFail("Expected customer schema to be an object")
             return
         }

@@ -351,7 +351,7 @@ extension JSONSchema: LocallyDereferenceable {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedJSONSchema {
-        switch self {
+        switch value {
         case .reference(let reference, let context):
             var dereferenced = try reference._dereferenced(in: components, following: references)
             if !context.required {
