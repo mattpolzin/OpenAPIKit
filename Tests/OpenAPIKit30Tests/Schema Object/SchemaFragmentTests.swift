@@ -182,7 +182,7 @@ extension SchemaFragmentTests {
         let warnResult = try orderUnstableDecode(JSONSchema.self, from: t)
 
         XCTAssertEqual(warnResult.warnings.count, 1)
-        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object.")
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
             // we are actually at the root path in this test case so the
             // following should be an empty string!
         XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
@@ -190,7 +190,7 @@ extension SchemaFragmentTests {
             // NOTE: I don't think it actually makes sense to rely more on the
             // properties (which can only belong to an array) than the explicit given
             // type "object" but for now I am going with this and will revisit later.
-        XCTAssertEqual(warnResult.value, .array(.init(), .init(items: .string)))
+        XCTAssertEqual(warnResult.value, .object(.init(), .init(properties: [:])))
     }
 
     func test_decodeFailsWithIntegerWithFloatingPointMin() {

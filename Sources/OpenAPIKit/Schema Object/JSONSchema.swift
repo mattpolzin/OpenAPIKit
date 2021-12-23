@@ -1751,10 +1751,10 @@ extension JSONSchema: Decodable {
         let objectContainer = try decoder.container(keyedBy: JSONSchema.ObjectContext.CodingKeys.self)
 
         let keysFrom = [
-            numericOrIntegerContainer.allKeys.isEmpty ? nil : "number/integer",
-            stringContainer.allKeys.isEmpty ? nil : "string",
-            arrayContainer.allKeys.isEmpty ? nil : "array",
-            objectContainer.allKeys.isEmpty ? nil : "object"
+            numericOrIntegerContainer.allKeys.isEmpty ? nil : JSONType.number.group,
+            stringContainer.allKeys.isEmpty ? nil : JSONType.string.group,
+            arrayContainer.allKeys.isEmpty ? nil : JSONType.array.group,
+            objectContainer.allKeys.isEmpty ? nil : JSONType.object.group
         ].compactMap { $0 }
 
         var _warnings = [OpenAPI.Warning]()
@@ -1776,26 +1776,25 @@ extension JSONSchema: Decodable {
         // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
         let typeHint = typeHints.first
 
-        func assertNoTypeConflict(with type: JSONType) -> [OpenAPI.Warning] {
-            guard let typeHint = typeHint else { return [] }
-            if typeHint != type {
-                return [
+        if let typeHint = typeHint {
+            let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
+            if !keysFromElsewhere.isEmpty {
+                _warnings.append(
                     .underlyingError(
                         InconsistencyError(
                             subjectName: "OpenAPI Schema",
-                            details: "Found schema attributes not consistent with the type specified: \(typeHint)",
+                            details: "Found schema attributes not consistent with the type specified: \(typeHint). Specifically, attributes for these other types: \(keysFromElsewhere)",
                             codingPath: decoder.codingPath
                         )
                     )
-                    ]
+                )
             }
-            return []
         }
 
         if typeHint == .null {
             value = .null
 
-        } else if typeHint == .integer || typeHint == .number || !numericOrIntegerContainer.allKeys.isEmpty {
+        } else if typeHint == .integer || typeHint == .number || (typeHint == nil && !numericOrIntegerContainer.allKeys.isEmpty) {
             if typeHint == .integer {
                 value = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
                                 try IntegerContext(from: decoder))
@@ -1804,20 +1803,17 @@ extension JSONSchema: Decodable {
                                try NumericContext(from: decoder))
             }
 
-        } else if typeHint == .string || !stringContainer.allKeys.isEmpty {
+        } else if typeHint == .string || (typeHint == nil && !stringContainer.allKeys.isEmpty) {
             value = .string(try CoreContext<JSONTypeFormat.StringFormat>(from: decoder),
                            try StringContext(from: decoder))
-            _warnings += assertNoTypeConflict(with: .string)
 
-        } else if typeHint == .array || !arrayContainer.allKeys.isEmpty {
+        } else if typeHint == .array || (typeHint == nil && !arrayContainer.allKeys.isEmpty) {
             value = .array(try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder),
                           try ArrayContext(from: decoder))
-            _warnings += assertNoTypeConflict(with: .array)
 
-        } else if typeHint == .object || !objectContainer.allKeys.isEmpty {
+        } else if typeHint == .object || (typeHint == nil && !objectContainer.allKeys.isEmpty) {
             value = .object(try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder),
                            try ObjectContext(from: decoder))
-            _warnings += assertNoTypeConflict(with: .object)
 
         } else if typeHint == .boolean {
             value = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))

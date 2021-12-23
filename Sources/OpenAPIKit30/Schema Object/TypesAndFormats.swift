@@ -34,6 +34,16 @@ public enum JSONType: String, Codable {
     case number = "number"
     case integer = "integer"
     case string = "string"
+
+    public var group: String {
+        switch self {
+        case .boolean: return "boolean"
+        case .object: return "object"
+        case .array: return "array"
+        case .number, .integer: return "number/integer"
+        case .string: return "string"
+        }
+    }
 }
 
 /// The combination of a JSON Schema type and format.

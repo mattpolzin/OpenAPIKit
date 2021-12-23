@@ -219,7 +219,7 @@ final class PathsErrorTests: XCTestCase {
         XCTAssertEqual(
             openAPIError?.localizedDescription,
                 """
-                Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object.
+                Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].
                 """
         )
         XCTAssertEqual(
