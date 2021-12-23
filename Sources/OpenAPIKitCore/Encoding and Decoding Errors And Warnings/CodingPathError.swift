@@ -1,5 +1,5 @@
 //
-//  ContextualizedError.swift
+//  CodingPathError.swift
 //  
 //
 //  Created by Mathew Polzin on 12/19/21.

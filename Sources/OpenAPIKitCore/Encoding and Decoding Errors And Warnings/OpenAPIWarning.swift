@@ -10,6 +10,13 @@ extension OpenAPI {
         case underlyingError(OpenAPIError)
         case message(String)
 
+        public var underlyingError: OpenAPIError? {
+            switch self {
+            case .underlyingError(let error): return error
+            case .message: return nil
+            }
+        }
+
         public var subjectName: String? {
             switch self {
             case .underlyingError(let err): return err.subjectName
@@ -46,15 +53,13 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Warning: CustomStringConvertible {
-    /// Description of error given in the structure:
-    /// `subject` `context` `error`: `details`
-    ///
-    /// A subject, context, and error are all guaranteed.
-    /// The details are only provided in certain contexts.
+    /// Description of warning.
     public var localizedDescription: String {
         switch self {
-        case .underlyingError(let err): return err.localizedDescription
-        case .message(let msg): return msg
+        case .underlyingError(let err):
+            return err.localizedDescription
+        case .message(let msg):
+            return msg
         }
     }
 

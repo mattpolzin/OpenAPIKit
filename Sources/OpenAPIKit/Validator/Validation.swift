@@ -125,6 +125,8 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
         self.codingPath = path
     }
 
+    public var localizedDescription: String { description }
+
     public var description: String {
         "\(reason) at path: \(codingPath.stringValue)"
     }
@@ -136,6 +138,8 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
 /// errors and throw one value (this collection) at the end of validation.
 public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible {
     public let values: [ValidationError]
+
+    public var localizedDescription: String { description }
 
     public var description: String {
         return values.map(String.init(describing:)).joined(separator: "\n")
