@@ -214,7 +214,7 @@ final class PathsErrorTests: XCTestCase {
 
         let warnResult = try testDecoder.decode(OpenAPI.Document.self, from: documentYML)
 
-        let openAPIError = try warnResult.validate(using: Validator.blank).first
+        let openAPIError = try warnResult.validate(using: Validator.blank, strict: false).first
 
         XCTAssertEqual(
             openAPIError?.localizedDescription,

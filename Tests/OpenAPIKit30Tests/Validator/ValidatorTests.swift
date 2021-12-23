@@ -1407,7 +1407,7 @@ final class ValidatorTests: XCTestCase {
     }
 
     // MARK: - Warnings
-    func test_collectsContentTypeWarning() throws {
+    func test_collectsContentTypeWarningNotStrict() throws {
         let docData = """
         {
           "info": {"title": "test", "version": "1.0"},
@@ -1436,7 +1436,7 @@ final class ValidatorTests: XCTestCase {
             "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
         )
 
-        let warnings = try doc.validate()
+        let warnings = try doc.validate(strict: false)
 
         XCTAssertEqual(warnings.count, 1)
         XCTAssertEqual(
@@ -1444,5 +1444,45 @@ final class ValidatorTests: XCTestCase {
             "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
         )
         XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+    }
+
+    func test_collectsContentTypeWarningStrict() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "paths": {
+            "test": {
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "test",
+                    "content": {
+                      "gzip": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.paths["test"]?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
+        )
+
+        XCTAssertThrowsError(try doc.validate(strict: true)) { error in
+            let errors = error as? ValidationErrorCollection
+            XCTAssertEqual(errors?.values.count, 1)
+            XCTAssertEqual(
+                errors?.localizedDescription,
+                "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+            )
+            XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+        }
     }
 }
