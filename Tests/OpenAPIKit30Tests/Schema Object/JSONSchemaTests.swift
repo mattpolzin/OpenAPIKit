@@ -1273,7 +1273,7 @@ final class SchemaObjectTests: XCTestCase {
 // MARK: - Codable
 extension SchemaObjectTests {
 
-    func test_decodeingFailsForTypo() {
+    func test_decodeingWarnsForTypo() throws {
         let oneOfData = """
         {
             "oneOff": [
@@ -1283,7 +1283,19 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: oneOfData))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: oneOfData)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+            // NOTE: not the most informative warnings, would like to do better.
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+            // we are actually at the root path in this test case so the
+            // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+        XCTAssertEqual(
+            warnResult,
+            .fragment()
+        )
     }
 
     func test_decodingFailsForReadOnlyAndWriteOnly() {
@@ -1298,8 +1310,8 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: readOnlyWriteOnlyData))
     }
 
-    func test_decodingFailsForTypeAndPropertyConflict() {
-        // has type "string" but "items" property that belongs with the "array" type.
+    func test_decodingWarnsForTypeAndPropertyConflict() throws {
+        // has type "object" but "items" property that belongs with the "array" type.
         let badSchema = """
         {
             "type": "object",
@@ -1309,7 +1321,18 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: badSchema))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: badSchema)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
+            // we are actually at the root path in this test case so the
+            // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+            // NOTE: I don't think it actually makes sense to rely more on the
+            // properties (which can only belong to an array) than the explicit given
+            // type "object" but for now I am going with this and will revisit later.
+        XCTAssertEqual(warnResult.value, .object(.init(), .init(properties: [:])))
     }
 
     func test_decodeExampleFragment() throws {
@@ -1677,7 +1700,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(defaultValueObject.defaultValue, ["hello": false])
         XCTAssertEqual(discriminatorObject, JSONSchema.object(discriminator: .init(propertyName: "hello")))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -1805,7 +1828,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.title, "hello")
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -1913,7 +1936,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.description, "hello")
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2029,7 +2052,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.externalDocs, .init(url: URL(string: "http://google.com")!))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2136,7 +2159,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2243,7 +2266,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2350,7 +2373,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2466,7 +2489,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2496,7 +2519,7 @@ extension SchemaObjectTests {
             ])
             .with(example: AnyCodable(["hello": true]))
 
-        if case let .object(_, objectContext) = requiredObject {
+        if case let .object(_, objectContext) = requiredObject.value {
             XCTAssertEqual(objectContext.requiredProperties, [])
             XCTAssertEqual(objectContext.optionalProperties, ["hello"])
         }
@@ -2613,7 +2636,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.example, ["hello" : true])
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -2710,7 +2733,7 @@ extension SchemaObjectTests {
             ]
         )
 
-        if case let .object(_, objectContext) = requiredObject {
+        if case let .object(_, objectContext) = requiredObject.value {
             XCTAssertEqual(objectContext.requiredProperties, ["hello"])
             XCTAssertEqual(objectContext.optionalProperties, [])
         }
@@ -2822,7 +2845,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
-        guard case let .object(_, contextB) = allowedValueObject else {
+        guard case let .object(_, contextB) = allowedValueObject.value else {
             XCTFail("expected object to be parsed as object")
             return
         }
@@ -3000,7 +3023,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(defaultValueArray.defaultValue, [false])
         XCTAssertEqual(discriminatorArray, JSONSchema.array(discriminator: .init(propertyName: "hello")))
 
-        guard case let .array(_, contextB) = allowedValueArray else {
+        guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
             return
         }
@@ -3084,7 +3107,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(items: .boolean(.init(format: .generic)))))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
 
-        guard case let .array(_, contextB) = allowedValueArray else {
+        guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
             return
         }
@@ -3166,7 +3189,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(nullableArray.arrayContext?.uniqueItems, true)
         XCTAssertEqual(allowedValueArray.arrayContext?.uniqueItems, true)
 
-        guard case let .array(_, contextB) = allowedValueArray else {
+        guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
             return
         }
@@ -3224,7 +3247,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(maxItems: 3)))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
 
-        guard case let .array(_, contextB) = allowedValueArray else {
+        guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
             return
         }
@@ -3282,7 +3305,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(minItems: 2)))
         XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
 
-        guard case let .array(_, contextB) = allowedValueArray else {
+        guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
             return
         }

@@ -133,7 +133,7 @@ internal struct FragmentCombiner {
         // make sure any less specialized fragment (i.e. general) is on the left
         let lessSpecializedFragment: JSONSchema
         let equallyOrMoreSpecializedFragment: JSONSchema
-        switch (combinedFragment, fragment) {
+        switch (combinedFragment.value, fragment.value) {
         case (.fragment, _):
             lessSpecializedFragment = combinedFragment
             equallyOrMoreSpecializedFragment = fragment
@@ -142,10 +142,10 @@ internal struct FragmentCombiner {
             equallyOrMoreSpecializedFragment = combinedFragment
         }
 
-        switch (lessSpecializedFragment, equallyOrMoreSpecializedFragment) {
+        switch (lessSpecializedFragment.value, equallyOrMoreSpecializedFragment.value) {
         case (.all(let schemas, core: let core), let other), (let other, .all(let schemas, core: let core)):
             // tease apart one allOf if there is one and continue from there.
-            try self.combine(schemas + [.fragment(core), other])
+            try self.combine(schemas + [.fragment(core), JSONSchema(schema: other)])
 
         case (_, .reference(let reference, let context)), (.reference(let reference, let context), _):
             var component = try components.lookup(reference)
@@ -237,7 +237,7 @@ internal struct FragmentCombiner {
         }
 
         let jsonSchema: JSONSchema
-        switch combinedFragment {
+        switch combinedFragment.value {
         case .fragment, .reference, .null:
             jsonSchema = combinedFragment
         case .boolean(let coreContext):
