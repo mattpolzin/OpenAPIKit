@@ -1375,7 +1375,7 @@ final class SchemaObjectTests: XCTestCase {
 // MARK: - Codable
 extension SchemaObjectTests {
 
-    func test_decodeingFailsForTypo() {
+    func test_decodeingWarnsForTypo() throws {
         let oneOfData = """
         {
             "oneOff": [
@@ -1385,7 +1385,19 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: oneOfData))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: oneOfData)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+        // NOTE: not the most informative warnings, would like to do better.
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        // we are actually at the root path in this test case so the
+        // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+        XCTAssertEqual(
+            warnResult,
+            .fragment()
+        )
     }
 
     func test_decodingFailsForReadOnlyAndWriteOnly() {
@@ -1400,8 +1412,8 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: readOnlyWriteOnlyData))
     }
 
-    func test_decodingFailsForTypeAndPropertyConflict() {
-        // has type "string" but "items" property that belongs with the "array" type.
+    func test_decodingWarnsForTypeAndPropertyConflict() throws {
+        // has type "object" but "items" property that belongs with the "array" type.
         let badSchema = """
         {
             "type": "object",
@@ -1411,7 +1423,18 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: badSchema))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: badSchema)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object.")
+            // we are actually at the root path in this test case so the
+            // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+            // NOTE: I don't think it actually makes sense to rely more on the
+            // properties (which can only belong to an array) than the explicit given
+            // type "object" but for now I am going with this and will revisit later.
+        XCTAssertEqual(warnResult.value, .array(.init(), .init(items: .string)))
     }
 
     func test_decodeExampleFragment() throws {
