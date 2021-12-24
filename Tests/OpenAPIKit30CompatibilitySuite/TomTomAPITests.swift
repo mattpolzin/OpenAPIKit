@@ -46,7 +46,9 @@ final class TomTomAPICampatibilityTests: XCTestCase {
     func test_passesValidation() throws {
         guard let apiDoc = apiDoc else { return }
 
-        try apiDoc.validate()
+        let warnings = try apiDoc.validate(strict: false)
+        // a bunch of warnings about Status Code '404/596' which is not valid:
+        XCTAssertEqual(warnings.count, 18)
     }
 
     func test_successfullyParsedBasicMetadata() throws {

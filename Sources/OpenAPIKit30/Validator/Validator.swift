@@ -14,6 +14,8 @@ extension OpenAPI.Document {
     ///     - validator: Validator to use. By default,
     ///         a validator that just asserts requirements of the OpenAPI
     ///         Specification will be used.
+    ///     - strict: When true, warnings are thrown as errors. Set to false to
+    ///         return warnings instead of throwing them. True by default.
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
@@ -25,7 +27,7 @@ extension OpenAPI.Document {
     /// `Validator` to the `validate(using:)` method to use custom validation
     /// criteria.
     @discardableResult
-    public func validate(using validator: Validator = .init()) throws -> [OpenAPI.Warning] {
+    public func validate(using validator: Validator = .init(), strict: Bool = true) throws -> [OpenAPI.Warning] {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
@@ -36,10 +38,23 @@ extension OpenAPI.Document {
         validator.applyValidations(to: self)
         try container.encode(self)
 
-        if !validator.errors.isEmpty {
-            throw ValidationErrorCollection(values: validator.errors)
+        let errors: [ValidationError]
+        if strict {
+            let warningsAsErrors = validator.warnings.map { warning in
+                return ValidationError(
+                    reason: warning.localizedDescription,
+                    at: warning.codingPath ?? []
+                )
+            }
+            errors = validator.errors + warningsAsErrors
+        } else {
+            errors = validator.errors
         }
-        return validator.warnings
+
+        if !errors.isEmpty {
+            throw ValidationErrorCollection(values: errors)
+        }
+        return (strict ? [] : validator.warnings)
     }
 }
 
