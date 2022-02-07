@@ -27,7 +27,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [Link Object](#link-object)
 - [Header Object (`OpenAPI.Header`)](#header-object-openapiheader)
 - [Tag Object (`OpenAPI.Tag`)](#tag-object-openapitag)
-- [Reference Object (`OpenAPI.Reference`)](#reference-object-openapireference)
+- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
 - [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
 - [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
 - [XML Object (`OpenAPI.XML`)](#xml-object-openapixml)
@@ -190,13 +190,13 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] specification extensions (`vendorExtensions`)
 
 ### Link Object
-- [x] operationRef
-- [x] operationId
+- [x] operationRef (`operation` URL value)
+- [x] operationId (`operation` String value)
 - [x] parameters
 - [x] requestBody
 - [x] description
 - [x] server
-- [x] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Header Object (`OpenAPI.Header`)
 - [x] description
@@ -217,9 +217,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] externalDocs
 - [x] specification extensions (`vendorExtensions`)
 
-### Reference Object (`OpenAPI.Reference`)
-- [x] summary
-- [x] description
+### Reference Object (`JSONReference`)
 - [x] $ref
     - [x] local (same file) reference (`internal` case)
         - [x] encode
