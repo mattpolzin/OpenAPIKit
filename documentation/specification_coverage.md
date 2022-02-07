@@ -190,13 +190,13 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] specification extensions (`vendorExtensions`)
 
 ### Link Object
-- [ ] operationRef
-- [ ] operationId
-- [ ] parameters
-- [ ] requestBody
-- [ ] description
-- [ ] server
-- [ ] specification extensions
+- [x] operationRef (`operation` URL value)
+- [x] operationId (`operation` String value)
+- [x] parameters
+- [x] requestBody
+- [x] description
+- [x] server
+- [x] specification extensions (`vendorExtensions`)
 
 ### Header Object (`OpenAPI.Header`)
 - [x] description
