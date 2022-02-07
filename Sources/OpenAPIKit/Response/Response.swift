@@ -32,6 +32,7 @@ extension OpenAPI {
             self.description = description
             self.headers = headers
             self.content = content
+            self.links = links
             self.vendorExtensions = vendorExtensions
         }
     }
@@ -162,7 +163,8 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
             .init(
                 description: description,
                 headers: headers,
-                content: content
+                content: content,
+                links: links
             )
         )
     }
