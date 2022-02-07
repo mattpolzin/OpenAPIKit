@@ -60,14 +60,14 @@ final class ResponseTests: XCTestCase {
 
 // MARK: Response Status Code
 extension ResponseTests {
+    typealias StatusCode = OpenAPI.Response.StatusCode
+
     func test_defaultFromString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(StatusCode(rawValue: "default"), .default)
         XCTAssertEqual(StatusCode(rawValue: "default")?.rawValue, "default")
     }
 
     func test_codeFromString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(StatusCode(rawValue: "123"), .status(code: 123))
         XCTAssertEqual(StatusCode(rawValue: "123")?.rawValue, "123")
         XCTAssertEqual(StatusCode(rawValue: "404"), .status(code: 404))
@@ -77,12 +77,15 @@ extension ResponseTests {
     }
 
     func test_NilForNonIntegerString() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertNil(StatusCode(rawValue: "hello"))
     }
 
+    func test_fallbackForTwoAlts() {
+        let test = StatusCode(rawValue: "404/500")
+        XCTAssertEqual(test?.rawValue, "404")
+    }
+
     func test_codeFromIntegerLiteral() {
-        typealias StatusCode = OpenAPI.Response.StatusCode
         XCTAssertEqual(123, StatusCode.status(code: 123))
         XCTAssertEqual(404, StatusCode.status(code: 404))
         XCTAssertEqual(500, StatusCode.status(code: 500))
@@ -277,6 +280,59 @@ extension ResponseTests {
                 headers: ["hello": .init(header)],
                 content: [.json: content],
                 vendorExtensions: [ "x-specialFeature": true ]
+            )
+        )
+    }
+
+    func test_populatedLinks_encode() {
+        let links: OpenAPI.Link.Map = [
+            "link1": .link(operationId: "op1")
+        ]
+        let response = OpenAPI.Response(
+            description: "hello world",
+            links: links
+        )
+
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
+
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "description" : "hello world",
+              "links" : {
+                "link1" : {
+                  "operationId" : "op1"
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_populatedLinks_decode() throws {
+        let responseData =
+            """
+        {
+            "description" : "hello world",
+              "links" : {
+                "link1" : {
+                  "operationId" : "op1"
+                }
+            }
+        }
+        """.data(using: .utf8)!
+
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
+
+        let links: OpenAPI.Link.Map = [
+            "link1": .link(operationId: "op1")
+        ]
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                links: links
             )
         )
     }

@@ -24,7 +24,7 @@ extension OpenAPI {
         public var headers: ComponentDictionary<Header>
         public var securitySchemes: ComponentDictionary<SecurityScheme>
         public var callbacks: ComponentDictionary<Callbacks>
-        //    public var links:
+        public var links: ComponentDictionary<Link>
 
         /// Dictionary of vendor extensions.
         ///
@@ -41,6 +41,7 @@ extension OpenAPI {
             requestBodies: ComponentDictionary<Request> = [:],
             headers: ComponentDictionary<Header> = [:],
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
+            links: ComponentDictionary<Link> = [:],
             callbacks: ComponentDictionary<Callbacks> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
@@ -51,6 +52,7 @@ extension OpenAPI {
             self.requestBodies = requestBodies
             self.headers = headers
             self.securitySchemes = securitySchemes
+            self.links = links
             self.callbacks = callbacks
             self.vendorExtensions = vendorExtensions
         }
@@ -160,6 +162,10 @@ extension OpenAPI.Components: Encodable {
             try container.encode(securitySchemes, forKey: .securitySchemes)
         }
 
+        if !links.isEmpty {
+            try container.encode(links, forKey: .links)
+        }
+
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
         }
@@ -192,6 +198,8 @@ extension OpenAPI.Components: Decodable {
                 ?? [:]
 
             securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+
+            links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
 

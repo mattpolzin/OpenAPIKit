@@ -13,7 +13,7 @@ extension OpenAPI {
         public var description: String
         public var headers: Header.Map?
         public var content: Content.Map
-        //    public var links:
+        public var links: Link.Map
 
         /// Dictionary of vendor extensions.
         ///
@@ -26,11 +26,13 @@ extension OpenAPI {
             description: String,
             headers: Header.Map? = nil,
             content: Content.Map = [:],
+            links: Link.Map = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.description = description
             self.headers = headers
             self.content = content
+            self.links = links
             self.vendorExtensions = vendorExtensions
         }
     }
@@ -154,13 +156,15 @@ extension Either where A == JSONReference<OpenAPI.Response>, B == OpenAPI.Respon
     public static func response(
         description: String,
         headers: OpenAPI.Header.Map? = nil,
-        content: OpenAPI.Content.Map = [:]
+        content: OpenAPI.Content.Map = [:],
+        links: OpenAPI.Link.Map = [:]
     ) -> Self {
         return .b(
             .init(
                 description: description,
                 headers: headers,
-                content: content
+                content: content,
+                links: links
             )
         )
     }
@@ -232,6 +236,10 @@ extension OpenAPI.Response: Encodable {
             try container.encode(content, forKey: .content)
         }
 
+        if !links.isEmpty {
+            try container.encode(links, forKey: .links)
+        }
+
         try encodeExtensions(to: &container)
     }
 }
@@ -244,6 +252,7 @@ extension OpenAPI.Response: Decodable {
             description = try container.decode(String.self, forKey: .description)
             headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
             content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
+            links = try container.decodeIfPresent(OpenAPI.Link.Map.self, forKey: .links) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
 
