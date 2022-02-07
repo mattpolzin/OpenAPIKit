@@ -83,7 +83,6 @@ extension ResponseTests {
     func test_fallbackForTwoAlts() {
         let test = StatusCode(rawValue: "404/500")
         XCTAssertEqual(test?.rawValue, "404")
-        XCTAssertEqual(test?.warnings.first?.localizedDescription, "Found non-compliant Status Code \'404/500\' but was able to parse as 404")
     }
 
     func test_codeFromIntegerLiteral() {
