@@ -12,3 +12,5 @@ import enum OpenAPIKit30.OpenAPI
 struct Tmp {
     let tmp: OpenAPI.Document
 }
+
+public typealias OpenAPI30 = OpenAPI
