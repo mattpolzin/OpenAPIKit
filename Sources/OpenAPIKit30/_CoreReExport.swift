@@ -22,6 +22,11 @@ public extension OpenAPI {
     typealias Path = OpenAPIKitCore.Path
     typealias ComponentKey = OpenAPIKitCore.ComponentKey
     typealias Discriminator = OpenAPIKitCore.Discriminator
+    typealias OAuthFlows = OpenAPIKitCore.OAuthFlows
+}
+
+public extension OpenAPI.SecurityScheme {
+    typealias Location = OpenAPIKitCore.SecuritySchemeLocation
 }
 
 public extension JSONSchema {
