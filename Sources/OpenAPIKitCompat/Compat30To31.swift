@@ -63,82 +63,101 @@ private extension OpenAPIKit30.OpenAPI.Server {
 
 private extension OpenAPIKit30.OpenAPI.PathItem {
     func to31() -> OpenAPI31.PathItem {
+        // TODO: finish filling out constructor with all optional arguments.
         OpenAPI31.PathItem(
-            summary: <#T##String?#>
+            summary: summary
         )
+    }
+}
+
+private extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType {
+    func to31() -> OpenAPI31.SecurityScheme.SecurityType {
+        switch self {
+        case .apiKey(name: let name, location: let location):
+            return .apiKey(name: name, location: location)
+        case .http(scheme: let scheme, bearerFormat: let bearerFormat):
+            return .http(scheme: scheme, bearerFormat: bearerFormat)
+        case .oauth2(flows: let flows):
+            return .oauth2(flows: flows)
+        case .openIdConnect(openIdConnectUrl: let openIdConnectUrl):
+            return .openIdConnect(openIdConnectUrl: openIdConnectUrl)
+        }
     }
 }
 
 private extension OpenAPIKit30.OpenAPI.SecurityScheme {
     func to31() -> OpenAPI31.SecurityScheme {
+        // TODO: finish filling out constructor with all optional arguments.
         OpenAPI31.SecurityScheme(
-            type: <#T##OpenAPI.SecurityScheme.SecurityType#>
+            type: type.to31()
         )
     }
 }
 
 private extension OpenAPIKit30.JSONSchema {
     func to31() -> OpenAPIKit.JSONSchema {
-        let schema: OpenAPIKit.JSONSchema.Schema
+//        let schema: OpenAPIKit.JSONSchema.Schema
 
-        switch value {
-        case .boolean(let core):
-            schema = .boolean(
-                .init(
-                    format: core.format,
-                    required: core.required,
-                    nullable: core.nullable,
-                    permissions: core.permissions,
-                    deprecated: core.deprecated,
-                    title: core.title,
-                    description: core.description,
-                    discriminator: core.discriminator,
-                    externalDocs: <#T##OpenAPI.ExternalDocumentation?#>
-                )
-            )
-        case .number(_, _):
-            <#code#>
-        case .integer(_, _):
-            <#code#>
-        case .string(_, _):
-            <#code#>
-        case .object(_, _):
-            <#code#>
-        case .array(_, _):
-            <#code#>
-        case .all(of: let of, core: let core):
-            <#code#>
-        case .one(of: let of, core: let core):
-            <#code#>
-        case .any(of: let of, core: let core):
-            <#code#>
-        case .not(_, core: let core):
-            <#code#>
-        case .reference(_, _):
-            <#code#>
-        case .fragment(_):
-            <#code#>
-        }
+//        switch value {
+//        case .boolean(let core):
+//            schema = .boolean(
+//                .init(
+//                    format: core.format,
+//                    required: core.required,
+//                    nullable: core.nullable,
+//                    permissions: core.permissions,
+//                    deprecated: core.deprecated,
+//                    title: core.title,
+//                    description: core.description,
+//                    discriminator: core.discriminator,
+//                    externalDocs: <#T##OpenAPI.ExternalDocumentation?#>
+//                )
+//            )
+//        case .number(_, _):
+//            <#code#>
+//        case .integer(_, _):
+//            <#code#>
+//        case .string(_, _):
+//            <#code#>
+//        case .object(_, _):
+//            <#code#>
+//        case .array(_, _):
+//            <#code#>
+//        case .all(of: let of, core: let core):
+//            <#code#>
+//        case .one(of: let of, core: let core):
+//            <#code#>
+//        case .any(of: let of, core: let core):
+//            <#code#>
+//        case .not(_, core: let core):
+//            <#code#>
+//        case .reference(_, _):
+//            <#code#>
+//        case .fragment(_):
+//            <#code#>
+//        }
 
+        // TODO: finish filling out constructor, replacing the null schema.
         OpenAPIKit.JSONSchema(
-            schema: schema
+            schema: .null // schema
         )
     }
 }
 
 private extension OpenAPIKit30.OpenAPI.Components {
     func to31() -> OpenAPI31.Components {
+        // TODO: finish filling out constructor with all optional arguments.
         OpenAPI31.Components(
             schemas: schemas.mapValues { $0.to31() },
-            responses: responses.mapValues { $0.to31() },
-            parameters: parameters.mapValues { $0.to31() },
-            examples: examples.mapValues { $0.to31() },
-            requestBodies: requestBodies.mapValues { $0.to31() },
-            headers: headers.mapValues { $0.to31() },
-            securitySchemes: securitySchemes.mapValues { $0.to31() },
-            links: links.mapValues { $0.to31() },
-            callbacks: callbacks.mapValues { $0.to31() },
-            vendorExtensions: vendorExtensions.mapValues { $0.to31() }
+//            responses: responses.mapValues { $0.to31() },
+//            parameters: parameters.mapValues { $0.to31() },
+//            examples: examples.mapValues { $0.to31() },
+//            requestBodies: requestBodies.mapValues { $0.to31() },
+//            headers: headers.mapValues { $0.to31() },
+            securitySchemes: securitySchemes.mapValues { $0.to31() }
+//            links: links.mapValues { $0.to31() },
+//            callbacks: callbacks.mapValues { $0.to31() },
+//            vendorExtensions: vendorExtensions.mapValues { $0.to31() }
         )
     }
 }
