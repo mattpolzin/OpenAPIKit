@@ -21,9 +21,9 @@ public struct OrderedDictionary<Key, Value>: HasWarnings where Key: Hashable {
     private var orderedKeys: [Key]
     private var unorderedHash: [Key: Value]
 
-    private var _warnings: [OpenAPI.Warning]
+    private var _warnings: [Warning]
 
-    public var warnings: [OpenAPI.Warning] { _warnings }
+    public var warnings: [Warning] { _warnings }
 
     public init() {
         orderedKeys = []

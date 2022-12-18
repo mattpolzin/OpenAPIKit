@@ -39,10 +39,10 @@ public extension EitherDecodeNoTypesMatchedError {
         // If the intention was not to use a reference, this error will be superfluous.
         let error1 = isRefKeyNotFoundError(failure1)
             ? nil
-            : OpenAPI.Error(from: failure1.error.replacingPath(with: failure1.codingPath(relativeTo: codingPath))).localizedDescription
+            : Error(from: failure1.error.replacingPath(with: failure1.codingPath(relativeTo: codingPath))).localizedDescription
         let error2 = isRefKeyNotFoundError(failure2)
             ? nil
-            : OpenAPI.Error(from: failure2.error.replacingPath(with: failure2.codingPath(relativeTo: codingPath))).localizedDescription
+            : Error(from: failure2.error.replacingPath(with: failure2.codingPath(relativeTo: codingPath))).localizedDescription
 
         let details1 = error1
             .map { "\(String(describing: failure1.type)) could not be decoded because:\n\($0)" }

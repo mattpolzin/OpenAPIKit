@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 2/28/20.
 //
 
-extension OpenAPI.Error.Decoding {
+extension Error.Decoding {
     public struct Request: OpenAPIError {
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
@@ -23,7 +23,7 @@ extension OpenAPI.Error.Decoding {
     }
 }
 
-extension OpenAPI.Error.Decoding.Request {
+extension Error.Decoding.Request {
     public var subjectName: String {
         switch context {
         case .inconsistency(let error):
@@ -91,7 +91,7 @@ extension OpenAPI.Error.Decoding.Request {
     }
 }
 
-extension OpenAPI.Error.Decoding.Request: DiggingError {
+extension Error.Decoding.Request: DiggingError {
     public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)

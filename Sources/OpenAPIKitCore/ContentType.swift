@@ -5,97 +5,95 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-extension OpenAPI {
-    /// The Content Type of an API request or response body.
-    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
-        internal let underlyingType: Builtin
-        public let warnings: [OpenAPI.Warning]
+/// The Content Type of an API request or response body.
+public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
+    internal let underlyingType: Builtin
+    public let warnings: [Warning]
 
-        /// The type and subtype of the content type. This is everything except for
-        /// any parameters that are also attached.
-        ///
-        /// If you want the full content type string, use `rawValue`.
-        public var typeAndSubtype: String { underlyingType.rawValue }
+    /// The type and subtype of the content type. This is everything except for
+    /// any parameters that are also attached.
+    ///
+    /// If you want the full content type string, use `rawValue`.
+    public var typeAndSubtype: String { underlyingType.rawValue }
 
-        /// Key/Value pairs serialized as parameters for the content type.
-        ///
-        /// For exmaple, in "`text/plain; charset=UTF-8`" "charset" is
-        /// the name of a parameter with the value "UTF-8".
-        ///
-        /// OpenAPIKit will always encode these parameters with the keys in
-        /// alphabetical order.
-        public var parameters: [String: String]
+    /// Key/Value pairs serialized as parameters for the content type.
+    ///
+    /// For exmaple, in "`text/plain; charset=UTF-8`" "charset" is
+    /// the name of a parameter with the value "UTF-8".
+    ///
+    /// OpenAPIKit will always encode these parameters with the keys in
+    /// alphabetical order.
+    public var parameters: [String: String]
 
-        /// The full raw string value of the content type and any of its parameters.
-        ///
-        /// If you only want the type & subtype without any parameters, use
-        /// `typeAndSubtype`.
-        public var rawValue: String {
-            let rawParams = parameters
-                .sorted(by: { $0.0 < $1.0 })
-                .map { (name, value) in "; \(name)=\(value)" }
-                .joined()
+    /// The full raw string value of the content type and any of its parameters.
+    ///
+    /// If you only want the type & subtype without any parameters, use
+    /// `typeAndSubtype`.
+    public var rawValue: String {
+        let rawParams = parameters
+            .sorted(by: { $0.0 < $1.0 })
+            .map { (name, value) in "; \(name)=\(value)" }
+            .joined()
 
-            return typeAndSubtype + rawParams
+        return typeAndSubtype + rawParams
+    }
+
+    public init?(rawValue: String) {
+        let parts = rawValue.split(separator: ";")
+        let type = parts.first.map(String.init) ?? rawValue
+
+        var warnings = [Warning]()
+        var params = [String:String]()
+        for part in parts.dropFirst() {
+            switch Self.parseParameter(part) {
+            case .success(let (name, value)):
+                params[name] = value
+            case .failure(let warning):
+                warnings.append(warning)
+            }
         }
 
-        public init?(rawValue: String) {
-            let parts = rawValue.split(separator: ";")
-            let type = parts.first.map(String.init) ?? rawValue
+        parameters = params
 
-            var warnings = [OpenAPI.Warning]()
-            var params = [String:String]()
-            for part in parts.dropFirst() {
-                switch Self.parseParameter(part) {
-                case .success(let (name, value)):
-                    params[name] = value
-                case .failure(let warning):
-                    warnings.append(warning)
-                }
-            }
-
-            parameters = params
-
-            if let underlying = Builtin.init(rawValue: type) {
-                underlyingType = underlying
-            } else {
-                underlyingType = .other(type)
-                warnings.append(
-                    .message(
-                        "'\(rawValue)' could not be parsed as a Content Type. Content Types should have the format '<type>/<subtype>'"
-                    )
-                )
-            }
-            self.warnings = warnings
-        }
-
-        private static func parseParameter(_ param: String.SubSequence) -> Result<(String, String), OpenAPI.Warning> {
-            let parts = param.split(separator: "=")
-
-            guard parts.count == 2,
-                  let name = parts.first,
-                  let value = parts.last else {
-                      return .failure(.message("Could not parse a Content Type parameter from '\(param)'"))
-                  }
-
-            return .success(
-                (
-                    String(name.trimmingCharacters(in: .whitespaces)),
-                    String(value.trimmingCharacters(in: .whitespaces))
+        if let underlying = Builtin.init(rawValue: type) {
+            underlyingType = underlying
+        } else {
+            underlyingType = .other(type)
+            warnings.append(
+                .message(
+                    "'\(rawValue)' could not be parsed as a Content Type. Content Types should have the format '<type>/<subtype>'"
                 )
             )
         }
+        self.warnings = warnings
+    }
 
-        internal init(_ builtin: Builtin) {
-            underlyingType = builtin
-            parameters = [:]
-            warnings = []
-        }
+    private static func parseParameter(_ param: String.SubSequence) -> Result<(String, String), Warning> {
+        let parts = param.split(separator: "=")
+
+        guard parts.count == 2,
+              let name = parts.first,
+              let value = parts.last else {
+                  return .failure(.message("Could not parse a Content Type parameter from '\(param)'"))
+              }
+
+        return .success(
+            (
+                String(name.trimmingCharacters(in: .whitespaces)),
+                String(value.trimmingCharacters(in: .whitespaces))
+            )
+        )
+    }
+
+    internal init(_ builtin: Builtin) {
+        underlyingType = builtin
+        parameters = [:]
+        warnings = []
     }
 }
 
 // convenience constructors
-public extension OpenAPI.ContentType {
+public extension ContentType {
     /// Bitmap image
     static let bmp: Self = .init(.bmp)
     static let css: Self = .init(.css)
@@ -157,7 +155,7 @@ public extension OpenAPI.ContentType {
     static let any: Self = .init(.any)
 }
 
-extension OpenAPI.ContentType {
+extension ContentType {
     // This internal representation makes it easier to ensure that the popular
     // builtin types supported are fully covered in their rawValue implementation.
     internal enum Builtin: Codable, Equatable, Hashable {
@@ -223,7 +221,7 @@ extension OpenAPI.ContentType {
     }
 }
 
-extension OpenAPI.ContentType.Builtin: RawRepresentable {
+extension ContentType.Builtin: RawRepresentable {
     public var rawValue: String {
         switch self {
         case .bmp: return "image/bmp"
@@ -316,4 +314,4 @@ extension OpenAPI.ContentType.Builtin: RawRepresentable {
     }
 }
 
-extension OpenAPI.ContentType: Validatable {}
+extension ContentType: Validatable {}
