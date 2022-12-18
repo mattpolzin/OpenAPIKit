@@ -210,25 +210,6 @@ extension JSONSchema {
             self.defaultValue = defaultValue
             self.example = AnyCodable(example)
         }
-
-        public enum Permissions: String, Codable {
-            case readOnly
-            case writeOnly
-            case readWrite
-
-            public init<Format: OpenAPIFormat>(
-                _ permissions: CoreContext<Format>.Permissions
-            ) {
-                switch permissions {
-                case .readOnly:
-                    self = .readOnly
-                case .writeOnly:
-                    self = .writeOnly
-                case .readWrite:
-                    self = .readWrite
-                }
-            }
-        }
     }
 }
 
