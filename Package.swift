@@ -15,6 +15,9 @@ let package = Package(
         .library(
             name: "OpenAPIKit",
             targets: ["OpenAPIKit"]),
+        .library(
+            name: "OpenAPIKitCompat",
+            targets: ["OpenAPIKitCompat"]),
     ],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams.git", "4.0.0"..<"6.0.0") // just for tests
@@ -60,7 +63,11 @@ let package = Package(
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "OpenAPIKitErrorReportingTests",
-            dependencies: ["OpenAPIKit", "Yams"])
+            dependencies: ["OpenAPIKit", "Yams"]),
+
+        .target(
+            name: "OpenAPIKitCompat",
+            dependencies: ["OpenAPIKit30", "OpenAPIKit"]),
     ],
     swiftLanguageVersions: [ .v5 ]
 )
