@@ -22,7 +22,6 @@ public extension OpenAPI {
     typealias Path = OpenAPIKitCore.Path
     typealias ComponentKey = OpenAPIKitCore.ComponentKey
     typealias Discriminator = OpenAPIKitCore.Discriminator
-    typealias ExternalDocumentation = OpenAPIKitCore.ExternalDocumentation
 }
 
 public extension JSONSchema {

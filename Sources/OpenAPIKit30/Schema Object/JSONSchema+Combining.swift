@@ -260,7 +260,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
             format: newFormat,
             required: required,
             nullable: _nullable,
-            permissions: _permissions.map(OtherContext.Permissions.init),
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,
@@ -286,7 +286,7 @@ extension JSONSchema.CoreContext {
         if let conflict = conflicting(_permissions, other._permissions) {
             throw JSONSchemaResolutionError(.inconsistency("A schema cannot be both \(conflict.0.rawValue) and \(conflict.1.rawValue)."))
         }
-        let newPermissions: JSONSchema.CoreContext<Format>.Permissions?
+        let newPermissions: JSONSchema.Permissions?
         if _permissions == nil && other._permissions == nil {
             newPermissions = nil
         } else {
@@ -557,13 +557,12 @@ extension JSONSchema.CoreContext {
         guard let newFormat = NewFormat(rawValue: format.rawValue) else {
             throw JSONSchemaResolutionError(.inconsistency("Tried to create a \(NewFormat.self) from the incompatible format value: \(format.rawValue)"))
         }
-        let newPermissions = _permissions.map(JSONSchema.CoreContext<NewFormat>.Permissions.init)
 
         return .init(
             format: newFormat,
             required: required,
             nullable: _nullable,
-            permissions: newPermissions,
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,

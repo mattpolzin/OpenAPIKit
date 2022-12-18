@@ -1313,7 +1313,7 @@ extension JSONSchema.CoreContext {
             format: NewFormat(rawValue: format.rawValue)!,
             required: required,
             nullable: nullable,
-            permissions: JSONSchema.CoreContext<NewFormat>.Permissions(permissions),
+            permissions: permissions,
             deprecated: deprecated,
             title: title,
             description: description,
