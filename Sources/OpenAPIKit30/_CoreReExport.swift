@@ -29,6 +29,14 @@ public extension OpenAPI.SecurityScheme {
     typealias Location = OpenAPIKitCore.SecuritySchemeLocation
 }
 
+public extension OpenAPI.Parameter.SchemaContext {
+    typealias Style = ParameterSchemaContextStyle
+}
+
+public extension OpenAPI.Response {
+    typealias StatusCode = OpenAPIKitCore.ResponseStatusCode
+}
+
 public extension JSONSchema {
     typealias Permissions = OpenAPIKitCore.JSONSchemaPermissions
 }
