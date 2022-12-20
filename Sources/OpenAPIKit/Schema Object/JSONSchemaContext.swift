@@ -389,6 +389,134 @@ extension JSONSchema.CoreContext {
 // MARK: - Specific Contexts
 
 extension JSONSchema {
+    /// The context that only applies to `.number` schemas.
+    ///
+    /// - Note: Although integers are numbers, `integer`
+    /// schemas have their own context type. An
+    /// `IntegerContext` _can_ be asked for the
+    /// `NumericContext` that would describe it via its
+    /// `numericContext` property.
+    public struct NumericContext: Equatable {
+        public struct Bound: Equatable {
+            public let value: Double
+            public let exclusive: Bool
+
+            internal static let defaultExclusion: Bool = false
+        }
+
+        /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
+        public let multipleOf: Double?
+
+        public let maximum: Bound?
+        public let minimum: Bound?
+
+        public init(
+            multipleOf: Double? = nil,
+            maximum: (Double, exclusive: Bool)? = nil,
+            minimum: (Double, exclusive: Bool)? = nil
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+            self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+        }
+
+        internal init(
+            multipleOf: Double?,
+            maximum: Bound?,
+            minimum: Bound?
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
+        }
+    }
+
+    /// The context that only applies to `.integer` schemas.
+    public struct IntegerContext: Equatable {
+        public struct Bound: Equatable {
+            public let value: Int
+            public let exclusive: Bool
+
+            internal static let defaultExclusion: Bool = false
+        }
+
+        /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
+        public let multipleOf: Int?
+
+        public let maximum: Bound?
+        public let minimum: Bound?
+
+        public init(
+            multipleOf: Int? = nil,
+            maximum: (Int, exclusive: Bool)? = nil,
+            minimum: (Int, exclusive: Bool)? = nil
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+            self.minimum = minimum.map { Bound(value: $0.0, exclusive: $0.exclusive) }
+        }
+
+        /// Create an `IntegerContext` from the given `NumericContext`.
+        ///
+        /// This will only succeed if all properties of the `NumericContext` are
+        /// integers.
+        public init?(from numericContext: NumericContext) {
+            let multipleOf: Int?
+            if let numericMultipleOf = numericContext.multipleOf {
+                guard let intMultipleOf = Int(exactly: numericMultipleOf) else {
+                    return nil
+                }
+                multipleOf = intMultipleOf
+            } else {
+                multipleOf = nil
+            }
+
+            let maximum: Bound?
+            if let numericMax = numericContext.maximum {
+                guard let intMaxValue = Int(exactly: numericMax.value) else {
+                    return nil
+                }
+                maximum = Bound(value: intMaxValue, exclusive: numericMax.exclusive)
+            } else {
+                maximum = nil
+            }
+
+            let minimum: Bound?
+            if let numericMin = numericContext.minimum {
+                guard let intMinValue = Int(exactly: numericMin.value) else {
+                    return nil
+                }
+                minimum = Bound(value: intMinValue, exclusive: numericMin.exclusive)
+            } else {
+                minimum = nil
+            }
+
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
+        }
+
+        internal init(
+            multipleOf: Int?,
+            maximum: Bound?,
+            minimum: Bound?
+        ) {
+            self.multipleOf = multipleOf
+            self.maximum = maximum
+            self.minimum = minimum
+        }
+
+        /// Get the `NumericContext` that describes this
+        /// `IntegerContext`.
+        public var numericContext: NumericContext {
+            return .init(
+                multipleOf: multipleOf.map(Double.init),
+                maximum: maximum.map { (Double($0.value), exclusive: $0.exclusive) },
+                minimum: minimum.map { (Double($0.value), exclusive: $0.exclusive) }
+            )
+        }
+    }
+
     /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
@@ -683,25 +811,21 @@ extension JSONSchema.NumericContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
+        multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
 
-        let maximum: Bound?
         if let exclusiveMaximum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum) {
-            maximum = Bound._init(value: exclusiveMaximum, exclusive: true)
+            maximum = Bound(value: exclusiveMaximum, exclusive: true)
         } else {
             maximum = try container.decodeIfPresent(Double.self, forKey: .maximum)
-                .map { Bound._init(value: $0, exclusive: false) }
+                .map { Bound(value: $0, exclusive: false) }
         }
 
-        let minimum: Bound?
         if let exclusiveMinimum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum) {
-            minimum = Bound._init(value: exclusiveMinimum, exclusive: true)
+            minimum = Bound(value: exclusiveMinimum, exclusive: true)
         } else {
             minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
-                .map { Bound._init(value: $0, exclusive: false) }
+                .map { Bound(value: $0, exclusive: false) }
         }
-
-        self = ._init(multipleOf: multipleOf, maximum: maximum, minimum: minimum)
     }
 }
 
@@ -743,7 +867,7 @@ extension JSONSchema.IntegerContext: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
+        multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
 
             // the following acrobatics thanks to some libraries (namely Yams) not
             // being willing to decode floating point representations of whole numbers
@@ -763,17 +887,15 @@ extension JSONSchema.IntegerContext: Decodable {
                         codingPath: decoder.codingPath
                     )
                 }
-                return Bound._init(value: integer, exclusive: exclusive)
+                return Bound(value: integer, exclusive: exclusive)
             }
         }
 
-        let maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
+        maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
         ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
 
-        let minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
+        minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
         ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
-
-        self = ._init(multipleOf: multipleOf, maximum: maximum, minimum: minimum)
     }
 }
 

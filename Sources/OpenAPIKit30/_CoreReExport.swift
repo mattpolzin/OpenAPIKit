@@ -40,8 +40,6 @@ public extension OpenAPI.Response {
 
 public extension JSONSchema {
     typealias Permissions = OpenAPIKitCore.JSONSchemaPermissions
-    typealias NumericContext = OpenAPIKitCore.NumericContext
-    typealias IntegerContext = OpenAPIKitCore.IntegerContext
     typealias StringContext = OpenAPIKitCore.StringContext
     typealias ReferenceContext = OpenAPIKitCore.ReferenceContext
 }

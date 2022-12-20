@@ -424,7 +424,7 @@ extension JSONSchema.IntegerContext {
         let newMultipleOf = multipleOf ?? other.multipleOf
         let newMaximum = maximum ?? other.maximum
         let newMinimum = minimum ?? other.minimum
-        return ._init(
+        return .init(
             multipleOf: newMultipleOf,
             maximum: newMaximum,
             minimum: newMinimum
@@ -454,7 +454,7 @@ extension JSONSchema.NumericContext {
         let newMultipleOf = multipleOf ?? other.multipleOf
         let newMaximum = maximum ?? other.maximum
         let newMinimum = minimum ?? other.minimum
-        return ._init(
+        return .init(
             multipleOf: newMultipleOf,
             maximum: newMaximum,
             minimum: newMinimum
@@ -612,7 +612,7 @@ extension JSONSchema.IntegerContext {
                 throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
             }
         }
-        return ._init(
+        return .init(
             multipleOf: multipleOf,
             maximum: maximum,
             minimum: validatedMinimum
@@ -637,7 +637,7 @@ extension JSONSchema.NumericContext {
                 throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
             }
         }
-        return ._init(
+        return .init(
             multipleOf: multipleOf,
             maximum: maximum,
             minimum: validatedMinimum

@@ -505,6 +505,26 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
     }
 }
 
+extension OpenAPIKit30.JSONSchema.NumericContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.NumericContext {
+        OpenAPIKit.JSONSchema.NumericContext(
+            multipleOf: multipleOf,
+            maximum: maximum.map { ($0.value, $0.exclusive) },
+            minimum: minimum.map { ($0.value, $0.exclusive) }
+        )
+    }
+}
+
+extension OpenAPIKit30.JSONSchema.IntegerContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.IntegerContext {
+        OpenAPIKit.JSONSchema.IntegerContext(
+            multipleOf: multipleOf,
+            maximum: maximum.map { ($0.value, $0.exclusive) },
+            minimum: minimum.map { ($0.value, $0.exclusive) }
+        )
+    }
+}
+
 extension OpenAPIKit30.JSONSchema.ArrayContext: To31 {
     fileprivate func to31() -> OpenAPIKit.JSONSchema.ArrayContext {
         OpenAPIKit.JSONSchema.ArrayContext(
@@ -535,9 +555,9 @@ extension OpenAPIKit30.JSONSchema: To31 {
         case .boolean(let core):
             schema = .boolean(core.to31())
         case .number(let core, let numeric):
-            schema = .number(core.to31(), numeric)
+            schema = .number(core.to31(), numeric.to31())
         case .integer(let core, let integral):
-            schema = .integer(core.to31(), integral)
+            schema = .integer(core.to31(), integral.to31())
         case .string(let core, let stringy):
             schema = .string(core.to31(), stringy)
         case .object(let core, let objective):
