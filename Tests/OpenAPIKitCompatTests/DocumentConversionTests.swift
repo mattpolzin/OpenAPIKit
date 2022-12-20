@@ -21,11 +21,34 @@ final class DocumentConversionTests: XCTestCase {
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
-        assertEqual(newDoc, oldDoc)
+        assertEqualOldToNew(newDoc, oldDoc)
     }
+
+    func test_fullInfo() {
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(
+                title: "Hello World",
+                description: "described",
+                termsOfService: URL(string: "https://website.com"),
+                contact: .init(name: "Me", url: URL(string: "https://website.com"), email: "me@website.com", vendorExtensions: ["x-test": 1]),
+                license: .init(name: "MIT-not", url: URL(string: "https://website.com"), vendorExtensions: ["x-two": 2.0]),
+                version: "1.0.1",
+                vendorExtensions: ["x-good" : "yeah"]
+            ),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        assertEqualOldToNew(newDoc, oldDoc)
+    }
+
+    // TODO: more tests
 }
 
-fileprivate func assertEqual(_ newDoc: OpenAPIKit.OpenAPI.Document, _ oldDoc: OpenAPIKit30.OpenAPI.Document) {
+fileprivate func assertEqualOldToNew(_ newDoc: OpenAPIKit.OpenAPI.Document, _ oldDoc: OpenAPIKit30.OpenAPI.Document) {
     XCTAssertEqual(newDoc.info.title, oldDoc.info.title)
     XCTAssertEqual(newDoc.info.version, oldDoc.info.version)
     XCTAssertEqual(newDoc.info.vendorExtensions, oldDoc.info.vendorExtensions)

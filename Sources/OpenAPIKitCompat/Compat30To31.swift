@@ -78,7 +78,8 @@ extension OpenAPIKit30.OpenAPI.Document.Info.Contact: To31 {
         OpenAPI31.Document.Info.Contact(
             name: name,
             url: url,
-            email: email
+            email: email,
+            vendorExtensions: vendorExtensions
         )
     }
 }
