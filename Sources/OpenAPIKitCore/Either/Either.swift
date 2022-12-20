@@ -55,23 +55,3 @@ public enum Either<A, B> {
 }
 
 extension Either: Equatable where A: Equatable, B: Equatable {}
-
-extension Either {
-    public func mapFirst<T>(_ transform: (A) -> T) -> Either<T,B> {
-        switch self {
-        case .a(let a):
-            return .a(transform(a))
-        case .b(let b):
-            return .b(b)
-        }
-    }
-
-    public func mapSecond<T>(_ transform: (B) -> T) -> Either<A,T> {
-        switch self {
-        case .a(let a):
-            return .a(a)
-        case .b(let b):
-            return .b(transform(b))
-        }
-    }
-}

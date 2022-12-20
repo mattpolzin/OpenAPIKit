@@ -23,6 +23,7 @@ public extension OpenAPI {
     typealias ComponentKey = OpenAPIKitCore.ComponentKey
     typealias Discriminator = OpenAPIKitCore.Discriminator
     typealias OAuthFlows = OpenAPIKitCore.OAuthFlows
+    typealias CallbackURL = OpenAPIKitCore.CallbackURL
 }
 
 public extension OpenAPI.SecurityScheme {

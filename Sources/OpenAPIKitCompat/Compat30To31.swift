@@ -234,9 +234,35 @@ extension OpenAPIKit30.OpenAPI.Parameter: To31 {
     }
 }
 
+extension OpenAPIKit30.OpenAPI.RuntimeExpression.Source: To31 {
+    fileprivate func to31() -> OpenAPI31.RuntimeExpression.Source {
+        switch self {
+        case .header(name: let name):
+            return .header(name: name)
+        case .query(name: let name):
+            return .query(name: name)
+        case .path(name: let name):
+            return .path(name: name)
+        case .body(let ref):
+            return .body(ref?.to31())
+        }
+    }
+}
+
 extension OpenAPIKit30.OpenAPI.RuntimeExpression: To31 {
-    fileprivate func to31() -> OpenAPI31.Run {
-        
+    fileprivate func to31() -> OpenAPI31.RuntimeExpression {
+        switch self {
+        case .url:
+            return .url
+        case .method:
+            return .method
+        case .statusCode:
+            return .statusCode
+        case .request(let source):
+            return .request(source.to31())
+        case .response(let source):
+            return .response(source.to31())
+        }
     }
 }
 
@@ -265,24 +291,59 @@ extension OpenAPIKit30.OpenAPI.Response: To31 {
     }
 }
 
-extension OpenAPIKit30.OpenAPI.Operation: To31 {
-    fileprivate func to31() -> OpenAPI31.Operation {
-        // TODO: finish filling out constructor with all optional arguments.
-        OpenAPI31.Operation(
-            tags: tags,
-            summary: summary,
+extension OpenAPIKit30.OpenAPI.Request: To31 {
+    fileprivate func to31() -> OpenAPI31.Request {
+        OpenAPI31.Request(
             description: description,
-            externalDocs: externalDocs?.to31(),
-            operationId: operationId,
-            parameters: parameters.map(eitherRefTo31),
-//            requestBody: eitherRefTo31(requestBody),
-            responses: responses.mapValues(eitherRefTo31),
-//            callbacks: callbacks.mapValues(eitherRefTo31),
-            deprecated: deprecated,
-//            security: ,
-            servers: servers?.map { $0.to31() },
+            content: content.mapValues { $0.to31() },
+            required: `required`,
             vendorExtensions: vendorExtensions
         )
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Callbacks: To31 {
+    fileprivate func to31() -> OpenAPI31.Callbacks {
+        self.mapValues { (pathItem: OpenAPI30.PathItem) in
+            .b(pathItem.to31())
+        }
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Operation: To31 {
+    fileprivate func to31() -> OpenAPI31.Operation {
+        if let requestBody {
+            return OpenAPI31.Operation(
+                tags: tags,
+                summary: summary,
+                description: description,
+                externalDocs: externalDocs?.to31(),
+                operationId: operationId,
+                parameters: parameters.map(eitherRefTo31),
+                requestBody: eitherRefTo31(requestBody),
+                responses: responses.mapValues(eitherRefTo31),
+                callbacks: callbacks.mapValues(eitherRefTo31),
+                deprecated: deprecated,
+                security: security?.map { $0.to31() },
+                servers: servers?.map { $0.to31() },
+                vendorExtensions: vendorExtensions
+            )
+        } else {
+            return OpenAPI31.Operation(
+                tags: tags,
+                summary: summary,
+                description: description,
+                externalDocs: externalDocs?.to31(),
+                operationId: operationId,
+                parameters: parameters.map(eitherRefTo31),
+                responses: responses.mapValues(eitherRefTo31),
+                callbacks: callbacks.mapValues(eitherRefTo31),
+                deprecated: deprecated,
+                security: security?.map { $0.to31() },
+                servers: servers?.map { $0.to31() },
+                vendorExtensions: vendorExtensions
+            )
+        }
     }
 }
 
@@ -320,16 +381,22 @@ extension OpenAPIKit30.OpenAPI.SecurityRequirement: To31 {
     }
 }
 
+private extension OpenAPIKit30.JSONReference.InternalReference {
+    func to31<T>() -> OpenAPIKit.JSONReference<T>.InternalReference {
+        switch self {
+        case .component(name: let name):
+            return .component(name: name)
+        case .path(let path):
+            return .path(.init(rawValue: path.rawValue))
+        }
+    }
+}
+
 private extension OpenAPIKit30.JSONReference {
     func to31<T>() -> OpenAPIKit.JSONReference<T> {
         switch self {
         case .internal(let ref):
-            switch ref {
-            case .component(name: let name):
-                return .internal(.component(name: name))
-            case .path(let path):
-                return .internal(.path(.init(rawValue: path.rawValue)))
-            }
+            return .internal(ref.to31())
         case .external(let url):
             return OpenAPIKit.JSONReference.external(url)
         }
@@ -382,48 +449,84 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme: To31 {
     }
 }
 
+extension OpenAPIKit30.JSONTypeFormat: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONTypeFormat {
+        switch self {
+        case .boolean(let f):
+            return .boolean(f)
+        case .object(let f):
+            return .object(f)
+        case .array(let f):
+            return .array(f)
+        case .number(let f):
+            return .number(f)
+        case .integer(let f):
+            return .integer(f)
+        case .string(let f):
+            return .string(f)
+        }
+    }
+}
+
+extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.OpenAPIFormat {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.CoreContext<Format> {
+        OpenAPIKit.JSONSchema.CoreContext<Format>(
+            format: format,
+            required: `required`,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs?.to31(),
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            examples: [example].compactMap { $0 }
+        )
+    }
+}
+
+extension OpenAPIKit30.JSONSchema.NumericContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.NumericContext {
+        OpenAPIKit.JSONSchema.NumericContext(
+            multipleOf: multipleOf,
+            maximum: maximum,
+            minimum: minimum
+        )
+    }
+}
+
 extension OpenAPIKit30.JSONSchema: To31 {
     fileprivate func to31() -> OpenAPIKit.JSONSchema {
-//        let schema: OpenAPIKit.JSONSchema.Schema
+        let schema: OpenAPIKit.JSONSchema.Schema
 
-//        switch value {
-//        case .boolean(let core):
-//            schema = .boolean(
-//                .init(
-//                    format: core.format,
-//                    required: core.required,
-//                    nullable: core.nullable,
-//                    permissions: core.permissions,
-//                    deprecated: core.deprecated,
-//                    title: core.title,
-//                    description: core.description,
-//                    discriminator: core.discriminator,
-//                    externalDocs: <#T##OpenAPI.ExternalDocumentation?#>
-//                )
-//            )
-//        case .number(_, _):
-//            <#code#>
-//        case .integer(_, _):
-//            <#code#>
-//        case .string(_, _):
-//            <#code#>
-//        case .object(_, _):
-//            <#code#>
-//        case .array(_, _):
-//            <#code#>
-//        case .all(of: let of, core: let core):
-//            <#code#>
-//        case .one(of: let of, core: let core):
-//            <#code#>
-//        case .any(of: let of, core: let core):
-//            <#code#>
-//        case .not(_, core: let core):
-//            <#code#>
-//        case .reference(_, _):
-//            <#code#>
-//        case .fragment(_):
-//            <#code#>
-//        }
+        switch value {
+        case .boolean(let core):
+            schema = .boolean(core.to31())
+        case .number(let core, let numeric):
+            schema = .number(core.to31(), <#T##JSONSchema.NumericContext#>)
+        case .integer(_, _):
+            <#code#>
+        case .string(_, _):
+            <#code#>
+        case .object(_, _):
+            <#code#>
+        case .array(_, _):
+            <#code#>
+        case .all(of: let of, core: let core):
+            <#code#>
+        case .one(of: let of, core: let core):
+            <#code#>
+        case .any(of: let of, core: let core):
+            <#code#>
+        case .not(_, core: let core):
+            <#code#>
+        case .reference(_, _):
+            <#code#>
+        case .fragment(_):
+            <#code#>
+        }
 
         // TODO: finish filling out constructor, replacing the null schema.
         OpenAPIKit.JSONSchema(
@@ -434,17 +537,16 @@ extension OpenAPIKit30.JSONSchema: To31 {
 
 extension OpenAPIKit30.OpenAPI.Components: To31 {
     fileprivate func to31() -> OpenAPI31.Components {
-        // TODO: finish filling out constructor with all optional arguments.
         OpenAPI31.Components(
             schemas: schemas.mapValues { $0.to31() },
-//            responses: responses.mapValues { $0.to31() },
+            responses: responses.mapValues { $0.to31() },
             parameters: parameters.mapValues { $0.to31() },
             examples: examples.mapValues { $0.to31() },
-//            requestBodies: requestBodies.mapValues { $0.to31() },
+            requestBodies: requestBodies.mapValues { $0.to31() },
             headers: headers.mapValues { $0.to31() },
             securitySchemes: securitySchemes.mapValues { $0.to31() },
-//            links: links.mapValues { $0.to31() },
-//            callbacks: callbacks.mapValues { $0.to31() },
+            links: links.mapValues { $0.to31() },
+            callbacks: callbacks.mapValues { $0.to31() },
             vendorExtensions: vendorExtensions
         )
     }
