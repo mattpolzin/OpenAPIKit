@@ -27,22 +27,14 @@ private protocol To31 {
 
 extension OpenAPIKit30.OpenAPI.Document: To31 {
     fileprivate func to31() -> OpenAPI31.Document {
-        let servers = servers.map { $0.to31() }
-
-        let paths = paths.mapValues { $0.to31() }
-
-        let security = security.map { $0.to31() }
-
-        let tags = tags?.map { $0.to31() }
-
-        return OpenAPI31.Document(
+        OpenAPI31.Document(
             openAPIVersion: .v3_1_0,
             info: info.to31(),
-            servers: servers,
-            paths: paths,
+            servers: servers.map { $0.to31() },
+            paths: paths.mapValues { $0.to31() },
             components: components.to31(),
-            security: security,
-            tags: tags,
+            security: security.map { $0.to31() },
+            tags: tags?.map { $0.to31() },
             externalDocs: externalDocs?.to31(),
             vendorExtensions: vendorExtensions
         )
@@ -87,7 +79,7 @@ extension OpenAPIKit30.OpenAPI.Document.Info.Contact: To31 {
 extension OpenAPIKit30.OpenAPI.Server: To31 {
     fileprivate func to31() -> OpenAPI31.Server {
 
-        let variables = variables.mapValues { variable in
+        let newVariables = variables.mapValues { variable in
             OpenAPI31.Server.Variable(
                 enum: variable.enum,
                 default: variable.default,
@@ -99,7 +91,7 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
         return OpenAPI31.Server(
             urlTemplate: urlTemplate,
             description: description,
-            variables: variables,
+            variables: newVariables,
             vendorExtensions: vendorExtensions
         )
     }
@@ -173,15 +165,15 @@ fileprivate func eitherRefTo31<T, U>(_ either: Either<OpenAPIKit30.JSONReference
 
 extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
     fileprivate func to31() -> OpenAPI31.Parameter.SchemaContext {
-        let examples = examples?.mapValues(eitherRefTo31)
+        let newExamples = examples?.mapValues(eitherRefTo31)
         switch schema {
         case .a(let ref):
-            if let examples {
+            if let newExamples = newExamples {
                 return OpenAPI31.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
                     style: style,
                     allowReserved: allowReserved,
-                    examples: examples
+                    examples: newExamples
                 )
             } else {
                 return OpenAPI31.Parameter.SchemaContext(
@@ -192,12 +184,12 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 )
             }
         case .b(let schema):
-            if let examples {
+            if let newExamples = newExamples {
                 return OpenAPI31.Parameter.SchemaContext(
                     schema.to31(),
                     style: style,
                     allowReserved: allowReserved,
-                    examples: examples
+                    examples: newExamples
                 )
             } else {
                 return OpenAPI31.Parameter.SchemaContext(
@@ -225,11 +217,10 @@ extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
 
 extension OpenAPIKit30.OpenAPI.Content: To31 {
     fileprivate func to31() -> OpenAPI31.Content {
-        let examples = examples?.mapValues(eitherRefTo31)
-        if let examples {
+        if let newExamples = examples?.mapValues(eitherRefTo31) {
             return OpenAPI31.Content(
                 schema: schema.map(eitherRefTo31),
-                examples: examples,
+                examples: newExamples,
                 encoding: encoding?.mapValues { $0.to31() },
                 vendorExtensions: vendorExtensions
             )
@@ -299,7 +290,7 @@ extension OpenAPIKit30.OpenAPI.RuntimeExpression: To31 {
 
 extension OpenAPIKit30.OpenAPI.Link: To31 {
     fileprivate func to31() -> OpenAPI31.Link {
-        return OpenAPI31.Link(
+        OpenAPI31.Link(
             operation: operation,
             parameters: parameters.mapValues { parameter in parameter.mapFirst { $0.to31() }},
             requestBody: requestBody?.mapFirst { $0.to31() },
@@ -343,7 +334,7 @@ extension OpenAPIKit30.OpenAPI.Callbacks: To31 {
 
 extension OpenAPIKit30.OpenAPI.Operation: To31 {
     fileprivate func to31() -> OpenAPI31.Operation {
-        if let requestBody {
+        if let newRequestBody = requestBody {
             return OpenAPI31.Operation(
                 tags: tags,
                 summary: summary,
@@ -351,7 +342,7 @@ extension OpenAPIKit30.OpenAPI.Operation: To31 {
                 externalDocs: externalDocs?.to31(),
                 operationId: operationId,
                 parameters: parameters.map(eitherRefTo31),
-                requestBody: eitherRefTo31(requestBody),
+                requestBody: eitherRefTo31(newRequestBody),
                 responses: responses.mapValues(eitherRefTo31),
                 callbacks: callbacks.mapValues(eitherRefTo31),
                 deprecated: deprecated,
@@ -380,15 +371,11 @@ extension OpenAPIKit30.OpenAPI.Operation: To31 {
 
 extension OpenAPIKit30.OpenAPI.PathItem: To31 {
     fileprivate func to31() -> OpenAPI31.PathItem {
-        let servers = servers?.map { $0.to31() }
-
-        let parameters = parameters.map(eitherRefTo31)
-
-        return OpenAPI31.PathItem(
+        OpenAPI31.PathItem(
             summary: summary,
             description: description,
-            servers: servers,
-            parameters: parameters,
+            servers: servers?.map { $0.to31() },
+            parameters: parameters.map(eitherRefTo31),
             get: `get`?.to31(),
             put: put?.to31(),
             post: post?.to31(),
