@@ -62,20 +62,19 @@ jobs:
           - swift:5.5-focal
           - swift:5.5-centos8
           - swift:5.5-amazonlinux2
-          - swift:5.6-xenial
           - swift:5.6-bionic
           - swift:5.6-focal
-          - swift:5.6-centos8
+          - swift:5.6-centos7
           - swift:5.6-amazonlinux2
-          - swift:5.7-xenial
           - swift:5.7-bionic
           - swift:5.7-focal
-          - swift:5.7-centos8
+          - swift:5.7-jammpy
+          - swift:5.7-centos7
           - swift:5.7-amazonlinux2
-          - swiftlang/swift:nightly-xenial
           - swiftlang/swift:nightly-bionic
           - swiftlang/swift:nightly-focal
-          - swiftlang/swift:nightly-centos8
+          - swiftlang/swift:nightly-jammy
+          - swiftlang/swift:nightly-centos7
           - swiftlang/swift:nightly-amazonlinux2
     container: ${{ matrix.image }}
     steps:
