@@ -17,7 +17,16 @@ public struct NumericContext: Equatable {
         public let value: Double
         public let exclusive: Bool
 
-        internal static let defaultExclusion: Bool = false
+        public static let _defaultExclusion: Bool = false
+
+        internal init(value: Double, exclusive: Bool) {
+            self.value = value
+            self.exclusive = exclusive
+        }
+
+        public static func _init(value: Double, exclusive: Bool) -> Bound {
+            .init(value: value, exclusive: exclusive)
+        }
     }
 
     /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
@@ -59,7 +68,16 @@ public struct IntegerContext: Equatable {
         public let value: Int
         public let exclusive: Bool
 
-        internal static let defaultExclusion: Bool = false
+        public static let _defaultExclusion: Bool = false
+
+        internal init(value: Int, exclusive: Bool) {
+            self.value = value
+            self.exclusive = exclusive
+        }
+
+        public static func _init(value: Int, exclusive: Bool) -> Bound {
+            .init(value: value, exclusive: exclusive)
+        }
     }
 
     /// A numeric instance is valid only if division by this keyword's value results in an integer. Defaults to nil.
@@ -188,125 +206,6 @@ public struct ReferenceContext: Equatable {
 
     public func optionalContext() -> ReferenceContext {
         return .init(required: false)
-    }
-}
-
-extension NumericContext {
-    public enum CodingKeys: String, CodingKey {
-        case multipleOf
-        case maximum
-        case exclusiveMaximum
-        case minimum
-        case exclusiveMinimum
-    }
-}
-
-extension NumericContext: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
-
-        if let max = maximum {
-            try container.encode(max.value, forKey: .maximum)
-            if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
-            }
-        }
-
-        if let min =  minimum {
-            try container.encode(min.value, forKey: .minimum)
-            if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
-            }
-        }
-    }
-}
-
-extension NumericContext: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
-
-        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? Bound.defaultExclusion
-        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? Bound.defaultExclusion
-
-        maximum = (try container.decodeIfPresent(Double.self, forKey: .maximum))
-            .map { Bound(value: $0, exclusive: exclusiveMaximum) }
-        minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
-            .map { Bound(value: $0, exclusive: exclusiveMinimum) }
-    }
-}
-
-extension IntegerContext {
-    public enum CodingKeys: String, CodingKey {
-        case multipleOf
-        case maximum
-        case exclusiveMaximum
-        case minimum
-        case exclusiveMinimum
-    }
-}
-
-extension IntegerContext: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
-
-        if let max = maximum {
-            try container.encode(max.value, forKey: .maximum)
-            if max.exclusive {
-                try container.encode(true, forKey: .exclusiveMaximum)
-            }
-        }
-
-        if let min =  minimum {
-            try container.encode(min.value, forKey: .minimum)
-            if min.exclusive {
-                try container.encode(true, forKey: .exclusiveMinimum)
-            }
-        }
-    }
-}
-
-extension IntegerContext: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
-
-        let exclusiveMaximum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMaximum) ?? false
-        let exclusiveMinimum = try container.decodeIfPresent(Bool.self, forKey: .exclusiveMinimum) ?? false
-
-        // the following acrobatics thanks to some libraries (namely Yams) not
-        // being willing to decode floating point representations of whole numbers
-        // as integer values.
-        let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
-        let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
-
-        maximum = try maximumAttempt.map { floatMax in
-            guard let integer = Int(exactly: floatMax) else {
-                throw InconsistencyError(
-                    subjectName: "maximum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
-                )
-            }
-            return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMaximum) }
-
-        minimum = try minimumAttempt.map { floatMin in
-            guard let integer = Int(exactly: floatMin) else {
-                throw InconsistencyError(
-                    subjectName: "minimum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
-                )
-            }
-            return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMinimum) }
     }
 }
 

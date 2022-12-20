@@ -645,6 +645,138 @@ extension JSONSchema.CoreContext: Decodable {
     }
 }
 
+extension JSONSchema.NumericContext {
+    internal enum CodingKeys: String, CodingKey {
+        case multipleOf
+        case maximum
+        case exclusiveMaximum
+        case minimum
+        case exclusiveMinimum
+    }
+}
+
+extension JSONSchema.NumericContext: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
+
+        if let max = maximum {
+            if max.exclusive {
+                try container.encode(max.value, forKey: .exclusiveMaximum)
+            } else {
+                try container.encode(max.value, forKey: .maximum)
+            }
+        }
+
+        if let min =  minimum {
+            if min.exclusive {
+                try container.encode(min.value, forKey: .exclusiveMinimum)
+            } else {
+                try container.encode(min.value, forKey: .minimum)
+            }
+        }
+    }
+}
+
+extension JSONSchema.NumericContext: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        let multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
+
+        let maximum: Bound?
+        if let exclusiveMaximum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum) {
+            maximum = Bound._init(value: exclusiveMaximum, exclusive: true)
+        } else {
+            maximum = try container.decodeIfPresent(Double.self, forKey: .maximum)
+                .map { Bound._init(value: $0, exclusive: false) }
+        }
+
+        let minimum: Bound?
+        if let exclusiveMinimum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum) {
+            minimum = Bound._init(value: exclusiveMinimum, exclusive: true)
+        } else {
+            minimum = (try container.decodeIfPresent(Double.self, forKey: .minimum))
+                .map { Bound._init(value: $0, exclusive: false) }
+        }
+
+        self = ._init(multipleOf: multipleOf, maximum: maximum, minimum: minimum)
+    }
+}
+
+extension JSONSchema.IntegerContext {
+    internal enum CodingKeys: String, CodingKey {
+        case multipleOf
+        case maximum
+        case exclusiveMaximum
+        case minimum
+        case exclusiveMinimum
+    }
+}
+
+extension JSONSchema.IntegerContext: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
+
+        if let max = maximum {
+            if max.exclusive {
+                try container.encode(max.value, forKey: .exclusiveMaximum)
+            } else {
+                try container.encode(max.value, forKey: .maximum)
+            }
+        }
+
+        if let min =  minimum {
+            if min.exclusive {
+                try container.encode(min.value, forKey: .exclusiveMinimum)
+            } else {
+                try container.encode(min.value, forKey: .minimum)
+            }
+        }
+    }
+}
+
+extension JSONSchema.IntegerContext: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        let multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
+
+            // the following acrobatics thanks to some libraries (namely Yams) not
+            // being willing to decode floating point representations of whole numbers
+            // as integer values.
+        let exclusiveMaximumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
+        let exclusiveMinimumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
+
+        let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
+        let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
+
+        func boundFromAttempt(_ attempt: Double?, max: Bool, exclusive: Bool) throws -> Bound? {
+            return try attempt.map { floatVal in
+                guard let integer = Int(exactly: floatVal) else {
+                    throw InconsistencyError(
+                        subjectName: max ? "maximum" : "minimum",
+                        details: "Expected an Integer literal but found a floating point value",
+                        codingPath: decoder.codingPath
+                    )
+                }
+                return Bound._init(value: integer, exclusive: exclusive)
+            }
+        }
+
+        let maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
+        ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
+
+        let minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
+        ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
+
+        self = ._init(multipleOf: multipleOf, maximum: maximum, minimum: minimum)
+    }
+}
+
 extension JSONSchema.ArrayContext {
     internal enum CodingKeys: String, CodingKey {
         case items
