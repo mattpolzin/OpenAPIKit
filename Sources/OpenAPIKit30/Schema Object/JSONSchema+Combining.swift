@@ -404,7 +404,7 @@ extension JSONSchema.IntegerContext {
         let newMultipleOf = multipleOf ?? other.multipleOf
         let newMaximum = maximum ?? other.maximum
         let newMinimum = minimum ?? other.minimum
-        return .init(
+        return ._init(
             multipleOf: newMultipleOf,
             maximum: newMaximum,
             minimum: newMinimum
@@ -434,7 +434,7 @@ extension JSONSchema.NumericContext {
         let newMultipleOf = multipleOf ?? other.multipleOf
         let newMaximum = maximum ?? other.maximum
         let newMinimum = minimum ?? other.minimum
-        return .init(
+        return ._init(
             multipleOf: newMultipleOf,
             maximum: newMaximum,
             minimum: newMinimum
@@ -447,7 +447,7 @@ extension JSONSchema.StringContext {
         if let conflict = conflicting(maxLength, other.maxLength) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "maxLength", original: String(conflict.0), new: String(conflict.1)))
         }
-        if let conflict = conflicting(_minLength, other._minLength) {
+        if let conflict = conflicting(StringContext._minLength(self), StringContext._minLength(other)) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "minLength", original: String(conflict.0), new: String(conflict.1)))
         }
         if let conflict = conflicting(pattern, other.pattern) {
@@ -456,7 +456,7 @@ extension JSONSchema.StringContext {
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxLength = maxLength ?? other.maxLength
-        let newMinLength = _minLength ?? other._minLength
+        let newMinLength = StringContext._minLength(self) ?? StringContext._minLength(other)
         let newPattern = pattern ?? other.pattern
         return .init(
             maxLength: newMaxLength,
@@ -592,7 +592,7 @@ extension JSONSchema.IntegerContext {
                 throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
             }
         }
-        return .init(
+        return ._init(
             multipleOf: multipleOf,
             maximum: maximum,
             minimum: validatedMinimum
@@ -617,7 +617,7 @@ extension JSONSchema.NumericContext {
                 throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(min.value) cannot be higher than maximum (\(max.value)"))
             }
         }
-        return .init(
+        return ._init(
             multipleOf: multipleOf,
             maximum: maximum,
             minimum: validatedMinimum
@@ -627,7 +627,7 @@ extension JSONSchema.NumericContext {
 
 extension JSONSchema.StringContext {
     internal func validatedContext() throws -> JSONSchema.StringContext {
-        if let minimum = _minLength {
+        if let minimum = StringContext._minLength(self) {
             guard minimum >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(minimum) cannot be less than 0"))
             }
@@ -639,7 +639,7 @@ extension JSONSchema.StringContext {
         }
         return .init(
             maxLength: maxLength,
-            minLength: _minLength,
+            minLength: StringContext._minLength(self),
             pattern: pattern
         )
     }

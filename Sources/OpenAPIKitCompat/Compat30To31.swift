@@ -487,12 +487,24 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
     }
 }
 
-extension OpenAPIKit30.JSONSchema.NumericContext: To31 {
-    fileprivate func to31() -> OpenAPIKit.JSONSchema.NumericContext {
-        OpenAPIKit.JSONSchema.NumericContext(
-            multipleOf: multipleOf,
-            maximum: maximum,
-            minimum: minimum
+extension OpenAPIKit30.JSONSchema.ArrayContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.ArrayContext {
+        OpenAPIKit.JSONSchema.ArrayContext(
+            items: items.map { $0.to31() },
+            maxItems: maxItems,
+            minItems: minItems,
+            uniqueItems: uniqueItems
+        )
+    }
+}
+
+extension OpenAPIKit30.JSONSchema.ObjectContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.ObjectContext {
+        OpenAPIKit.JSONSchema.ObjectContext(
+            properties: properties.mapValues { $0.to31() },
+            additionalProperties: additionalProperties?.mapSecond { $0.to31() },
+            maxProperties: maxProperties,
+            minProperties: minProperties
         )
     }
 }
@@ -505,32 +517,31 @@ extension OpenAPIKit30.JSONSchema: To31 {
         case .boolean(let core):
             schema = .boolean(core.to31())
         case .number(let core, let numeric):
-            schema = .number(core.to31(), <#T##JSONSchema.NumericContext#>)
-        case .integer(_, _):
-            <#code#>
-        case .string(_, _):
-            <#code#>
-        case .object(_, _):
-            <#code#>
-        case .array(_, _):
-            <#code#>
+            schema = .number(core.to31(), numeric)
+        case .integer(let core, let integral):
+            schema = .integer(core.to31(), integral)
+        case .string(let core, let stringy):
+            schema = .string(core.to31(), stringy)
+        case .object(let core, let objective):
+            schema = .object(core.to31(), objective.to31())
+        case .array(let core, let listy):
+            schema = .array(core.to31(), listy.to31())
         case .all(of: let of, core: let core):
-            <#code#>
+            schema = .all(of: of.map { $0.to31() }, core: core.to31())
         case .one(of: let of, core: let core):
-            <#code#>
+            schema = .one(of: of.map { $0.to31() }, core: core.to31())
         case .any(of: let of, core: let core):
-            <#code#>
-        case .not(_, core: let core):
-            <#code#>
-        case .reference(_, _):
-            <#code#>
-        case .fragment(_):
-            <#code#>
+            schema = .any(of: of.map { $0.to31() }, core: core.to31())
+        case .not(let not, core: let core):
+            schema = .not(not.to31(), core: core.to31())
+        case .reference(let ref, let context):
+            schema = .reference(ref.to31(), context)
+        case .fragment(let core):
+            schema = .fragment(core.to31())
         }
 
-        // TODO: finish filling out constructor, replacing the null schema.
-        OpenAPIKit.JSONSchema(
-            schema: .null // schema
+        return OpenAPIKit.JSONSchema(
+            schema: schema
         )
     }
 }
