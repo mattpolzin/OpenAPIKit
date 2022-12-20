@@ -27,10 +27,6 @@ private protocol To31 {
 
 extension OpenAPIKit30.OpenAPI.Document: To31 {
     fileprivate func to31() -> OpenAPI31.Document {
-        let info = OpenAPI31.Document.Info(
-            title: info.title, version: info.version
-        )
-
         let servers = servers.map { $0.to31() }
 
         let paths = paths.mapValues { $0.to31() }
@@ -41,7 +37,7 @@ extension OpenAPIKit30.OpenAPI.Document: To31 {
 
         return OpenAPI31.Document(
             openAPIVersion: .v3_1_0,
-            info: info,
+            info: info.to31(),
             servers: servers,
             paths: paths,
             components: components.to31(),
@@ -49,6 +45,40 @@ extension OpenAPIKit30.OpenAPI.Document: To31 {
             tags: tags,
             externalDocs: externalDocs?.to31(),
             vendorExtensions: vendorExtensions
+        )
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Document.Info: To31 {
+    fileprivate func to31() -> OpenAPI31.Document.Info {
+        OpenAPI31.Document.Info(
+            title: title,
+            description: description,
+            termsOfService: termsOfService,
+            contact: contact?.to31(),
+            license: license?.to31(),
+            version: version,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Document.Info.License: To31 {
+    fileprivate func to31() -> OpenAPI31.Document.Info.License {
+        OpenAPI31.Document.Info.License(
+            name: name,
+            url: url,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Document.Info.Contact: To31 {
+    fileprivate func to31() -> OpenAPI31.Document.Info.Contact {
+        OpenAPI31.Document.Info.Contact(
+            name: name,
+            url: url,
+            email: email
         )
     }
 }

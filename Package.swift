@@ -68,6 +68,9 @@ let package = Package(
         .target(
             name: "OpenAPIKitCompat",
             dependencies: ["OpenAPIKit30", "OpenAPIKit"]),
+        .testTarget(
+            name: "OpenAPIKitCompatTests",
+            dependencies: ["OpenAPIKitCompat"])
     ],
     swiftLanguageVersions: [ .v5 ]
 )
