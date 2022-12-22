@@ -13,10 +13,27 @@ import XCTest
 final class DocumentConversionTests: XCTestCase {
     func test_barebonesDocument() {
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            openAPIVersion: .v3_0_3,
             info: .init(title: "Hello World", version: "1.0.1"),
             servers: [],
             paths: [:],
             components: .noComponents
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        assertEqualOldToNew(newDoc, oldDoc)
+        XCTAssertEqual(newDoc.openAPIVersion, .v3_1_0)
+    }
+
+    func test_vendorExtensionsOnDoc() {
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            openAPIVersion: .v3_0_3,
+            info: .init(title: "Hello World", version: "1.0.1"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: ["x-doc": "document"]
         )
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
@@ -45,10 +62,37 @@ final class DocumentConversionTests: XCTestCase {
         assertEqualOldToNew(newDoc, oldDoc)
     }
 
+    func test_servers() {
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [
+                .init(
+                    url: URL(string: "https://website.com")!,
+                    description: "ok",
+                    variables: ["x-ok": .init(default: "1.0")],
+                    vendorExtensions: ["x-cool": 1.5]
+                ),
+                .init(
+                    urlTemplate: .init(url: URL(string: "https://website.com")!),
+                    description: "hi",
+                    variables: ["hello": .init(enum: ["1"], default: "1", description: "described", vendorExtensions: ["x-hi": "hello"])],
+                    vendorExtensions: ["x-test": 2]
+                )
+            ],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        assertEqualOldToNew(newDoc, oldDoc)
+    }
+
     // TODO: more tests
 }
 
 fileprivate func assertEqualOldToNew(_ newDoc: OpenAPIKit.OpenAPI.Document, _ oldDoc: OpenAPIKit30.OpenAPI.Document) {
+    // INFO
     XCTAssertEqual(newDoc.info.title, oldDoc.info.title)
     XCTAssertEqual(newDoc.info.version, oldDoc.info.version)
     XCTAssertEqual(newDoc.info.vendorExtensions, oldDoc.info.vendorExtensions)
@@ -63,5 +107,37 @@ fileprivate func assertEqualOldToNew(_ newDoc: OpenAPIKit.OpenAPI.Document, _ ol
     XCTAssertEqual(newDoc.info.license?.vendorExtensions, oldDoc.info.license?.vendorExtensions)
     XCTAssertNil(newDoc.info.summary)
 
+    // SERVERS
+    XCTAssertEqual(newDoc.servers.count, oldDoc.servers.count)
+    for (newServer, oldServer) in zip(newDoc.servers, oldDoc.servers) {
+        assertEqualOldToNew(newServer, oldServer)
+    }
+
+    // PATHS
+
+    // COMPONENTS
+
+    // SECURITY
+
+    // TAGS
+
+    // EXTERNAL DOCS
+
+    // VENDOR EXTENSIONS
+    XCTAssertEqual(newDoc.vendorExtensions, oldDoc.vendorExtensions)
+
     // TODO: test the rest of equality.
+}
+
+fileprivate func assertEqualOldToNew(_ newServer: OpenAPIKit.OpenAPI.Server, _ oldServer: OpenAPIKit30.OpenAPI.Server) {
+    XCTAssertEqual(newServer.urlTemplate, oldServer.urlTemplate)
+    XCTAssertEqual(newServer.description, oldServer.description)
+    XCTAssertEqual(newServer.vendorExtensions, oldServer.vendorExtensions)
+    for (key, newVariable) in newServer.variables {
+        let oldVariable = oldServer.variables[key]
+        XCTAssertEqual(newVariable.description, oldVariable?.description)
+        XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        XCTAssertEqual(newVariable.`default`, oldVariable?.`default`)
+        XCTAssertEqual(newVariable.vendorExtensions, oldVariable?.vendorExtensions)
+    }
 }
