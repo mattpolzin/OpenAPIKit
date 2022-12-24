@@ -15,45 +15,45 @@
 import OpenAPIKitCore
 
 public extension OpenAPI {
-    typealias HttpMethod = OpenAPIKitCore.HttpMethod
-    typealias ContentType = OpenAPIKitCore.ContentType
+    typealias HttpMethod = OpenAPIKitCore.Shared.HttpMethod
+    typealias ContentType = OpenAPIKitCore.Shared.ContentType
     typealias Error = OpenAPIKitCore.Error
     typealias Warning = OpenAPIKitCore.Warning
-    typealias Path = OpenAPIKitCore.Path
-    typealias ComponentKey = OpenAPIKitCore.ComponentKey
-    typealias Discriminator = OpenAPIKitCore.Discriminator
-    typealias OAuthFlows = OpenAPIKitCore.OAuthFlows
-    typealias CallbackURL = OpenAPIKitCore.CallbackURL
+    typealias Path = OpenAPIKitCore.Shared.Path
+    typealias ComponentKey = OpenAPIKitCore.Shared.ComponentKey
+    typealias Discriminator = OpenAPIKitCore.Shared.Discriminator
+    typealias OAuthFlows = OpenAPIKitCore.Shared.OAuthFlows
+    typealias CallbackURL = OpenAPIKitCore.Shared.CallbackURL
 }
 
 public extension OpenAPI.SecurityScheme {
-    typealias Location = OpenAPIKitCore.SecuritySchemeLocation
+    typealias Location = OpenAPIKitCore.Shared.SecuritySchemeLocation
 }
 
 public extension OpenAPI.Parameter.Context {
-    typealias Location = OpenAPIKitCore.ParameterContextLocation
+    typealias Location = OpenAPIKitCore.Shared.ParameterContextLocation
 }
 
 public extension OpenAPI.Parameter.SchemaContext {
-    typealias Style = ParameterSchemaContextStyle
+    typealias Style = OpenAPIKitCore.Shared.ParameterSchemaContextStyle
 }
 
 public extension OpenAPI.Response {
-    typealias StatusCode = OpenAPIKitCore.ResponseStatusCode
+    typealias StatusCode = OpenAPIKitCore.Shared.ResponseStatusCode
 }
 
 public extension JSONSchema {
-    typealias Permissions = OpenAPIKitCore.JSONSchemaPermissions
-    typealias StringContext = OpenAPIKitCore.StringContext
-    typealias ReferenceContext = OpenAPIKitCore.ReferenceContext
+    typealias Permissions = OpenAPIKitCore.Shared.JSONSchemaPermissions
+    typealias StringContext = OpenAPIKitCore.Shared.StringContext
+    typealias ReferenceContext = OpenAPIKitCore.Shared.ReferenceContext
 }
 
 public extension JSONTypeFormat {
-    typealias AnyFormat = OpenAPIKitCore.AnyFormat
-    typealias BooleanFormat = OpenAPIKitCore.BooleanFormat
-    typealias ObjectFormat = OpenAPIKitCore.ObjectFormat
-    typealias ArrayFormat = OpenAPIKitCore.ArrayFormat
-    typealias NumberFormat = OpenAPIKitCore.NumberFormat
-    typealias IntegerFormat = OpenAPIKitCore.IntegerFormat
-    typealias StringFormat = OpenAPIKitCore.StringFormat
+    typealias AnyFormat = OpenAPIKitCore.Shared.AnyFormat
+    typealias BooleanFormat = OpenAPIKitCore.Shared.BooleanFormat
+    typealias ObjectFormat = OpenAPIKitCore.Shared.ObjectFormat
+    typealias ArrayFormat = OpenAPIKitCore.Shared.ArrayFormat
+    typealias NumberFormat = OpenAPIKitCore.Shared.NumberFormat
+    typealias IntegerFormat = OpenAPIKitCore.Shared.IntegerFormat
+    typealias StringFormat = OpenAPIKitCore.Shared.StringFormat
 }

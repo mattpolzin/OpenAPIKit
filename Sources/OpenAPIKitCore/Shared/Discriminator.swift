@@ -5,23 +5,25 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
-/// OpenAPI Spec "Disciminator Object"
-///
-/// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
-public struct Discriminator: Equatable {
-    public let propertyName: String
-    public let mapping: [String: String]?
+extension Shared {
+    /// OpenAPI Spec "Disciminator Object"
+    ///
+    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
+    public struct Discriminator: Equatable {
+        public let propertyName: String
+        public let mapping: [String: String]?
 
-    public init(propertyName: String,
-                mapping: [String: String]? = nil) {
-        self.propertyName = propertyName
-        self.mapping = mapping
+        public init(propertyName: String,
+                    mapping: [String: String]? = nil) {
+            self.propertyName = propertyName
+            self.mapping = mapping
+        }
     }
 }
 
 // MARK: - Codable
 
-extension Discriminator: Encodable {
+extension Shared.Discriminator: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -30,7 +32,7 @@ extension Discriminator: Encodable {
     }
 }
 
-extension Discriminator: Decodable {
+extension Shared.Discriminator: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -39,11 +41,11 @@ extension Discriminator: Decodable {
     }
 }
 
-extension Discriminator {
+extension Shared.Discriminator {
     private enum CodingKeys: String, CodingKey {
         case propertyName
         case mapping
     }
 }
 
-extension Discriminator: Validatable {}
+extension Shared.Discriminator: Validatable {}

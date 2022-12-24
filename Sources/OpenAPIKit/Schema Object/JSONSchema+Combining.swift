@@ -467,7 +467,7 @@ extension JSONSchema.StringContext {
         if let conflict = conflicting(maxLength, other.maxLength) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "maxLength", original: String(conflict.0), new: String(conflict.1)))
         }
-        if let conflict = conflicting(StringContext._minLength(self), StringContext._minLength(other)) {
+        if let conflict = conflicting(Self._minLength(self), Self._minLength(other)) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "minLength", original: String(conflict.0), new: String(conflict.1)))
         }
         if let conflict = conflicting(pattern, other.pattern) {
@@ -476,7 +476,7 @@ extension JSONSchema.StringContext {
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxLength = maxLength ?? other.maxLength
-        let newMinLength = StringContext._minLength(self) ?? StringContext._minLength(other)
+        let newMinLength = Self._minLength(self) ?? Self._minLength(other)
         let newPattern = pattern ?? other.pattern
         return .init(
             maxLength: newMaxLength,
@@ -647,7 +647,7 @@ extension JSONSchema.NumericContext {
 
 extension JSONSchema.StringContext {
     internal func validatedContext() throws -> JSONSchema.StringContext {
-        if let minimum = StringContext._minLength(self) {
+        if let minimum = Self._minLength(self) {
             guard minimum >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(minimum) cannot be less than 0"))
             }
@@ -659,7 +659,7 @@ extension JSONSchema.StringContext {
         }
         return .init(
             maxLength: maxLength,
-            minLength: StringContext._minLength(self),
+            minLength: Self._minLength(self),
             pattern: pattern
         )
     }

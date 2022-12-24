@@ -54,7 +54,7 @@ extension OpenAPI {
         }
 
         public enum SecurityType: Equatable {
-            case apiKey(name: String, location: SecuritySchemeLocation)
+            case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
             case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
