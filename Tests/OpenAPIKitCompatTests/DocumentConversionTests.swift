@@ -246,16 +246,8 @@ fileprivate func assertEqualOldToNew(_ newServer: OpenAPIKit.OpenAPI.Server, _ o
     }
 }
 
-fileprivate func assertEqualOldToNew(_ newPathItem: OpenAPIKit.OpenAPI.PathItem, _ oldPathItem: OpenAPIKit30.OpenAPI.PathItem) throws {
-    XCTAssertEqual(newPathItem.summary, oldPathItem.summary)
-    XCTAssertEqual(newPathItem.description, oldPathItem.description)
-    if let newServers = newPathItem.servers {
-        let oldServers = try XCTUnwrap(oldPathItem.servers)
-        for (newServer, oldServer) in zip(newServers, oldServers) {
-                assertEqualOldToNew(newServer, oldServer)
-        }
-    }
-    for (newParameter, oldParameter) in zip(newPathItem.parameters, oldPathItem.parameters) {
+fileprivate func assertEqualOldToNew(_ newParamArray: OpenAPIKit.OpenAPI.Parameter.Array, _ oldParamArray: OpenAPIKit30.OpenAPI.Parameter.Array) {
+    for (newParameter, oldParameter) in zip(newParamArray, oldParamArray) {
         switch (newParameter, oldParameter) {
         case (.a(let ref), .a(let ref2)):
             XCTAssertNil(ref.summary)
@@ -272,6 +264,18 @@ fileprivate func assertEqualOldToNew(_ newPathItem: OpenAPIKit.OpenAPI.PathItem,
             XCTFail("Parameters are not equal because one is a reference and the other is not: \(newParameter)  / \(oldParameter)")
         }
     }
+}
+
+fileprivate func assertEqualOldToNew(_ newPathItem: OpenAPIKit.OpenAPI.PathItem, _ oldPathItem: OpenAPIKit30.OpenAPI.PathItem) throws {
+    XCTAssertEqual(newPathItem.summary, oldPathItem.summary)
+    XCTAssertEqual(newPathItem.description, oldPathItem.description)
+    if let newServers = newPathItem.servers {
+        let oldServers = try XCTUnwrap(oldPathItem.servers)
+        for (newServer, oldServer) in zip(newServers, oldServers) {
+                assertEqualOldToNew(newServer, oldServer)
+        }
+    }
+    assertEqualOldToNew(newPathItem.parameters, oldPathItem.parameters)
     try assertEqualOldToNew(newPathItem.get, oldPathItem.get)
     try assertEqualOldToNew(newPathItem.put, oldPathItem.put)
     try assertEqualOldToNew(newPathItem.post, oldPathItem.post)
@@ -303,8 +307,231 @@ fileprivate func assertEqualOldToNew(_ newParamContext: OpenAPIKit.OpenAPI.Param
 fileprivate func assertEqualOldToNew(_ newOperation: OpenAPIKit.OpenAPI.Operation?, _ oldOperation: OpenAPIKit30.OpenAPI.Operation?) throws {
     if let newOp = newOperation {
         let oldOp = try XCTUnwrap(oldOperation)
-        // TODO
+
+        XCTAssertEqual(newOp.tags, oldOp.tags)
+        XCTAssertEqual(newOp.summary, oldOp.summary)
+        XCTAssertEqual(newOp.description, oldOp.description)
+        try assertEqualOldToNew(newOp.externalDocs, oldOp.externalDocs)
+        XCTAssertEqual(newOp.operationId, oldOp.operationId)
+        assertEqualOldToNew(newOp.parameters, oldOp.parameters)
+        if let newRequest = newOp.requestBody {
+            let oldRequest = try XCTUnwrap(oldOp.requestBody)
+            switch (newRequest, oldRequest) {
+            case (.a(let ref1), .a(let ref2)):
+                XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+            case (.b(let req1), .b(let req2)):
+                try assertEqualOldToNew(req1, req2)
+            default:
+                XCTFail("One request was a reference and the other was not. \(newRequest)  /  \(oldRequest)")
+            }
+        } else {
+            XCTAssertNil(oldOp.requestBody)
+        }
+        assertEqualOldToNew(newOp.responses, oldOp.responses)
+        try assertEqualOldToNew(newOp.callbacks, oldOp.callbacks)
+        XCTAssertEqual(newOp.deprecated, oldOp.deprecated)
+        if let newSecurity = newOp.security {
+            let oldSecurity = try XCTUnwrap(oldOp.security)
+
+            for (newSecurityReq, oldSecurityReq) in zip(newSecurity, oldSecurity) {
+                try assertEqualOldToNew(newSecurityReq, oldSecurityReq)
+            }
+        } else {
+            XCTAssertNil(oldOp.security)
+        }
+        if let newServers = newOp.servers {
+            let oldServers = try XCTUnwrap(oldOp.servers)
+
+            for (newServer, oldServer) in zip(newServers, oldServers) {
+                assertEqualOldToNew(newServer, oldServer)
+            }
+        } else {
+            XCTAssertNil(oldOp.servers)
+        }
+        XCTAssertEqual(newOp.vendorExtensions, oldOp.vendorExtensions)
     } else {
         XCTAssertNil(oldOperation)
+    }
+}
+
+fileprivate func assertEqualOldToNew(_ newSecurityReq: OpenAPIKit.OpenAPI.SecurityRequirement, _ oldSecurityReq: OpenAPIKit30.OpenAPI.SecurityRequirement) throws {
+    for (ref, strs) in newSecurityReq {
+        switch ref {
+        case .internal(let internalRef):
+            let maybeOldRefInternal = OpenAPIKit30.JSONReference<OpenAPIKit30.OpenAPI.SecurityScheme>.InternalReference(rawValue: internalRef.rawValue)
+            let oldRefInternal = try XCTUnwrap(maybeOldRefInternal)
+            let oldRef = OpenAPIKit30.JSONReference<OpenAPIKit30.OpenAPI.SecurityScheme>.internal(oldRefInternal)
+            let oldStrs = oldSecurityReq[oldRef]
+            XCTAssertEqual(strs, oldStrs)
+        case .external(let external):
+            let oldStrs = oldSecurityReq[.external(external)]
+            XCTAssertEqual(strs, oldStrs)
+        }
+    }
+}
+
+fileprivate func assertEqualOldToNew(_ newRequest: OpenAPIKit.OpenAPI.Request, _ oldRequest: OpenAPIKit30.OpenAPI.Request) throws {
+    XCTAssertEqual(newRequest.description, oldRequest.description)
+    try assertEqualOldToNew(newRequest.content, oldRequest.content)
+    XCTAssertEqual(newRequest.required, oldRequest.required)
+    XCTAssertEqual(newRequest.vendorExtensions, oldRequest.vendorExtensions)
+}
+
+fileprivate func assertEqualOldToNew(_ newContentMap: OpenAPIKit.OpenAPI.Content.Map, _ oldContentMap: OpenAPIKit30.OpenAPI.Content.Map) throws {
+    for ((newCt, newContent), (oldCt, oldContent)) in zip(newContentMap, oldContentMap) {
+        XCTAssertEqual(newCt, oldCt)
+        switch (newContent.schema, oldContent.schema) {
+        case (.a(let ref1), .a(let ref2)):
+            XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+        case (.b(let schema1), .b(let schema2)):
+            assertEqualOldToNew(schema1, schema2)
+        default:
+            XCTFail("Found one reference and one schema. \(String(describing: newContent.schema))   /   \(String(describing: oldContent.schema))")
+        }
+        XCTAssertEqual(newContent.example, oldContent.example)
+        if let newContentExamplesRef = newContent.examples {
+            let oldContentExamplesRef = try XCTUnwrap(oldContent.examples)
+            for ((newKey, newExampleRef), (oldKey, oldExampleRef)) in zip(newContentExamplesRef, oldContentExamplesRef) {
+                XCTAssertEqual(newKey, oldKey)
+                switch (newExampleRef, oldExampleRef) {
+                case (.a(let ref1), .a(let ref2)):
+                    XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+                case (.b(let example1), .b(let example2)):
+                    assertEqualOldToNew(example1, example2)
+                default:
+                    XCTFail("Found one reference and one example. \(newExampleRef)   /   \(oldExampleRef)")
+                }
+            }
+        } else {
+            XCTAssertNil(oldContent.examples)
+        }
+        if let newEncodingRef = newContent.encoding {
+            let oldEncodingRef = try XCTUnwrap(oldContent.encoding)
+            for ((newKey, newEncoding), (oldKey, oldEncoding)) in zip(newEncodingRef, oldEncodingRef) {
+                XCTAssertEqual(newKey, oldKey)
+                try assertEqualOldToNew(newEncoding, oldEncoding)
+            }
+        } else {
+            XCTAssertNil(oldContent.encoding)
+        }
+        XCTAssertEqual(newContent.vendorExtensions, oldContent.vendorExtensions)
+    }
+}
+
+fileprivate func assertEqualOldToNew(_ newSchema: OpenAPIKit.JSONSchema, _ oldSchema: OpenAPIKit30.JSONSchema) {
+        // TODO
+}
+
+fileprivate func assertEqualOldToNew(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
+    XCTAssertEqual(newExample.summary, oldExample.summary)
+    XCTAssertEqual(newExample.description, oldExample.description)
+    XCTAssertEqual(newExample.value, oldExample.value)
+    XCTAssertEqual(newExample.vendorExtensions, oldExample.vendorExtensions)
+}
+
+fileprivate func assertEqualOldToNew(_ newEncoding: OpenAPIKit.OpenAPI.Content.Encoding, _ oldEncoding: OpenAPIKit30.OpenAPI.Content.Encoding) throws {
+    XCTAssertEqual(newEncoding.contentType, oldEncoding.contentType)
+    if let newEncodingHeaders = newEncoding.headers {
+        let oldEncodingHeaders = try XCTUnwrap(oldEncoding.headers)
+        for ((newKey, newHeader), (oldKey, oldHeader)) in zip(newEncodingHeaders, oldEncodingHeaders) {
+            XCTAssertEqual(newKey, oldKey)
+            switch (newHeader, oldHeader) {
+            case (.a(let ref1), .a(let ref2)):
+                XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+            case (.b(let header1), .b(let header2)):
+                try assertEqualOldToNew(header1, header2)
+            default:
+                XCTFail("Found one reference and one header. \(newHeader)  /  \(oldHeader)")
+            }
+        }
+    } else {
+        XCTAssertNil(oldEncoding.headers)
+    }
+    XCTAssertEqual(newEncoding.style, oldEncoding.style)
+    XCTAssertEqual(newEncoding.explode, oldEncoding.explode)
+    XCTAssertEqual(newEncoding.allowReserved, oldEncoding.allowReserved)
+}
+
+fileprivate func assertEqualOldToNew(_ newHeader: OpenAPIKit.OpenAPI.Header, _ oldHeader: OpenAPIKit30.OpenAPI.Header) throws {
+    XCTAssertEqual(newHeader.description, oldHeader.description)
+    XCTAssertEqual(newHeader.required, oldHeader.required)
+    XCTAssertEqual(newHeader.deprecated, oldHeader.deprecated)
+    switch (newHeader.schemaOrContent, oldHeader.schemaOrContent) {
+    case (.a(let schema1), .a(let schema2)):
+        try assertEqualOldToNew(schema1, schema2)
+    case (.b(let content1), .b(let content2)):
+        try assertEqualOldToNew(content1, content2)
+    default:
+        XCTFail("Found one schema and one content map. \(newHeader.schemaOrContent)  /  \(oldHeader.schemaOrContent)")
+    }
+    XCTAssertEqual(newHeader.vendorExtensions, oldHeader.vendorExtensions)
+}
+
+fileprivate func assertEqualOldToNew(_ newSchemaContext: OpenAPIKit.OpenAPI.Parameter.SchemaContext, _ oldSchemaContext: OpenAPIKit30.OpenAPI.Parameter.SchemaContext) throws {
+    XCTAssertEqual(newSchemaContext.style, oldSchemaContext.style)
+    XCTAssertEqual(newSchemaContext.explode, oldSchemaContext.explode)
+    XCTAssertEqual(newSchemaContext.allowReserved, oldSchemaContext.allowReserved)
+    switch (newSchemaContext.schema, oldSchemaContext.schema) {
+    case (.a(let ref1), .a(let ref2)):
+        XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+    case (.b(let schema1), .b(let schema2)):
+        assertEqualOldToNew(schema1, schema2)
+    default:
+        XCTFail("Found one reference and one schema. \(newSchemaContext.schema)  /  \(oldSchemaContext.schema)")
+    }
+    XCTAssertEqual(newSchemaContext.example, oldSchemaContext.example)
+    if let newExamplesRef = newSchemaContext.examples {
+        let oldExamplesRef = try XCTUnwrap(oldSchemaContext.examples)
+        for ((newKey, newExampleRef), (oldKey, oldExampleRef)) in zip(newExamplesRef, oldExamplesRef) {
+            XCTAssertEqual(newKey, oldKey)
+            switch (newExampleRef, oldExampleRef) {
+            case (.a(let ref1), .a(let ref2)):
+                XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+            case (.b(let example1), .b(let example2)):
+                assertEqualOldToNew(example1, example2)
+            default:
+                XCTFail("Found one reference and one example. \(newExampleRef)   /   \(oldExampleRef)")
+            }
+        }
+    } else {
+        XCTAssertNil(oldSchemaContext.examples)
+    }
+}
+
+fileprivate func assertEqualOldToNew(_ newResponseMap: OpenAPIKit.OpenAPI.Response.Map, _ oldResponseMap: OpenAPIKit30.OpenAPI.Response.Map) {
+        // TODO
+}
+
+fileprivate func assertEqualOldToNew(_ newCallbacksMap: OpenAPIKit.OpenAPI.CallbacksMap, _ oldCallbacksMap: OpenAPIKit30.OpenAPI.CallbacksMap) throws {
+    XCTAssertEqual(newCallbacksMap.count, oldCallbacksMap.count)
+    for (key, ref) in newCallbacksMap {
+        let oldRef = try XCTUnwrap(oldCallbacksMap[key])
+        switch (ref, oldRef) {
+        case (.a(let ref1), .a(let ref2)):
+            XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
+        case (.b(let callback1), .b(let callback2)):
+            for (url, pathItemRef) in callback1 {
+                let pathItem2 = try XCTUnwrap(callback2[url])
+                switch pathItemRef {
+                case .a(_):
+                    XCTFail("Found a reference in OpenAPI 3.1 document where OpenAPI 3.0 does not support references!")
+                case .b(let pathItem):
+                    try assertEqualOldToNew(pathItem, pathItem2)
+                }
+            }
+        default:
+            XCTFail("Found reference to a callbacks object in one document and actual callbacks object in the other. \(ref)    /    \(oldRef)")
+        }
+    }
+}
+
+fileprivate func assertEqualOldToNew(_ newExternalDocs: OpenAPIKit.OpenAPI.ExternalDocumentation?, _ oldExternalDocs: OpenAPIKit30.OpenAPI.ExternalDocumentation?) throws {
+    if let newDocs = newExternalDocs {
+        let oldDocs = try XCTUnwrap(oldExternalDocs)
+        XCTAssertEqual(newDocs.description, oldDocs.description)
+        XCTAssertEqual(newDocs.url, oldDocs.url)
+        XCTAssertEqual(newDocs.vendorExtensions, oldDocs.vendorExtensions)
+    } else {
+        XCTAssertNil(oldExternalDocs)
     }
 }
