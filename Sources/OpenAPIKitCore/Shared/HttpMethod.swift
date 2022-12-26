@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-extension OpenAPI {
+extension Shared {
     /// Represents the HTTP methods supported by the
     /// OpenAPI Specification.
     ///

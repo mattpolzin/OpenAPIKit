@@ -5,11 +5,11 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
-extension OpenAPI {
+extension Shared {
     /// The Content Type of an API request or response body.
     public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
         internal let underlyingType: Builtin
-        public let warnings: [OpenAPI.Warning]
+        public let warnings: [Warning]
 
         /// The type and subtype of the content type. This is everything except for
         /// any parameters that are also attached.
@@ -43,7 +43,7 @@ extension OpenAPI {
             let parts = rawValue.split(separator: ";")
             let type = parts.first.map(String.init) ?? rawValue
 
-            var warnings = [OpenAPI.Warning]()
+            var warnings = [Warning]()
             var params = [String:String]()
             for part in parts.dropFirst() {
                 switch Self.parseParameter(part) {
@@ -69,14 +69,14 @@ extension OpenAPI {
             self.warnings = warnings
         }
 
-        private static func parseParameter(_ param: String.SubSequence) -> Result<(String, String), OpenAPI.Warning> {
+        private static func parseParameter(_ param: String.SubSequence) -> Result<(String, String), Warning> {
             let parts = param.split(separator: "=")
 
             guard parts.count == 2,
                   let name = parts.first,
                   let value = parts.last else {
-                      return .failure(.message("Could not parse a Content Type parameter from '\(param)'"))
-                  }
+                return .failure(.message("Could not parse a Content Type parameter from '\(param)'"))
+            }
 
             return .success(
                 (
@@ -95,7 +95,7 @@ extension OpenAPI {
 }
 
 // convenience constructors
-public extension OpenAPI.ContentType {
+public extension Shared.ContentType {
     /// Bitmap image
     static let bmp: Self = .init(.bmp)
     static let css: Self = .init(.css)
@@ -157,7 +157,7 @@ public extension OpenAPI.ContentType {
     static let any: Self = .init(.any)
 }
 
-extension OpenAPI.ContentType {
+extension Shared.ContentType {
     // This internal representation makes it easier to ensure that the popular
     // builtin types supported are fully covered in their rawValue implementation.
     internal enum Builtin: Codable, Equatable, Hashable {
@@ -223,7 +223,7 @@ extension OpenAPI.ContentType {
     }
 }
 
-extension OpenAPI.ContentType.Builtin: RawRepresentable {
+extension Shared.ContentType.Builtin: RawRepresentable {
     public var rawValue: String {
         switch self {
         case .bmp: return "image/bmp"
@@ -316,4 +316,4 @@ extension OpenAPI.ContentType.Builtin: RawRepresentable {
     }
 }
 
-extension OpenAPI.ContentType: Validatable {}
+extension Shared.ContentType: Validatable {}

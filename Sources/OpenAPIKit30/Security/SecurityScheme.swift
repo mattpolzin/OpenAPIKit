@@ -55,12 +55,6 @@ extension OpenAPI {
             case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
         }
-
-        public enum Location: String, Codable, Equatable {
-            case query
-            case header
-            case cookie
-        }
     }
 }
 
@@ -249,5 +243,4 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
     }
 }
 
-extension OpenAPI.SecurityScheme.Location: Validatable {}
 extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}

@@ -217,25 +217,6 @@ extension JSONSchema {
             self.defaultValue = defaultValue
             self.examples = examples.map(AnyCodable.init)
         }
-
-        public enum Permissions: String, Codable {
-            case readOnly
-            case writeOnly
-            case readWrite
-
-            public init<Format: OpenAPIFormat>(
-                _ permissions: CoreContext<Format>.Permissions
-            ) {
-                switch permissions {
-                case .readOnly:
-                    self = .readOnly
-                case .writeOnly:
-                    self = .writeOnly
-                case .readWrite:
-                    self = .readWrite
-                }
-            }
-        }
     }
 }
 
@@ -536,29 +517,6 @@ extension JSONSchema {
         }
     }
 
-    /// The context that only applies to `.string` schemas.
-    public struct StringContext: Equatable {
-        public let maxLength: Int?
-        let _minLength: Int?
-
-        public var minLength: Int {
-            return _minLength ?? 0
-        }
-
-        /// Regular expression
-        public let pattern: String?
-
-        public init(
-            maxLength: Int? = nil,
-            minLength: Int? = nil,
-            pattern: String? = nil
-        ) {
-            self.maxLength = maxLength
-            self._minLength = minLength
-            self.pattern = pattern
-        }
-    }
-
     /// The context that only applies to `.array` schemas.
     public struct ArrayContext: Equatable {
         /// A JSON Type Node that describes
@@ -656,23 +614,6 @@ extension JSONSchema {
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties
             self._minProperties = minProperties
-        }
-    }
-
-    /// The context that only applies to `.reference` schemas.
-    public struct ReferenceContext: Equatable {
-        public let required: Bool
-
-        public init(required: Bool = true) {
-            self.required = required
-        }
-
-        public func requiredContext() -> ReferenceContext {
-            return .init(required: true)
-        }
-
-        public func optionalContext() -> ReferenceContext {
-            return .init(required: false)
         }
     }
 }
@@ -928,9 +869,9 @@ extension JSONSchema.IntegerContext: Decodable {
 
         multipleOf = try container.decodeIfPresent(Int.self, forKey: .multipleOf)
 
-        // the following acrobatics thanks to some libraries (namely Yams) not
-        // being willing to decode floating point representations of whole numbers
-        // as integer values.
+            // the following acrobatics thanks to some libraries (namely Yams) not
+            // being willing to decode floating point representations of whole numbers
+            // as integer values.
         let exclusiveMaximumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
         let exclusiveMinimumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
 
@@ -951,38 +892,10 @@ extension JSONSchema.IntegerContext: Decodable {
         }
 
         maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
-            ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
+        ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
 
         minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
-            ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
-    }
-}
-
-extension JSONSchema.StringContext {
-    internal enum CodingKeys: String, CodingKey {
-        case maxLength
-        case minLength
-        case pattern
-    }
-}
-
-extension JSONSchema.StringContext: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encodeIfPresent(maxLength, forKey: .maxLength)
-        try container.encodeIfPresent(_minLength, forKey: .minLength)
-        try container.encodeIfPresent(pattern, forKey: .pattern)
-    }
-}
-
-extension JSONSchema.StringContext: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        maxLength = try container.decodeIfPresent(Int.self, forKey: .maxLength)
-        _minLength = try container.decodeIfPresent(Int.self, forKey: .minLength)
-        pattern = try container.decodeIfPresent(String.self, forKey: .pattern)
+        ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
     }
 }
 

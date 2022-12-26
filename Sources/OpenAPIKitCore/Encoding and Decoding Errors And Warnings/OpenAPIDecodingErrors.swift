@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 2/23/20.
 //
 
-extension OpenAPI.Error {
+extension Error {
     // Just creating a namespace
     public enum Decoding {}
 }

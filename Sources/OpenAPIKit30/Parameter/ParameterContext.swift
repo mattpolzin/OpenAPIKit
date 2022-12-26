@@ -73,13 +73,6 @@ extension OpenAPI.Parameter {
 }
 
 extension OpenAPI.Parameter.Context {
-    public enum Location: String, CaseIterable, Codable {
-        case query
-        case header
-        case path
-        case cookie
-    }
-
     public var location: Location {
         switch self {
         case .query:
@@ -94,4 +87,3 @@ extension OpenAPI.Parameter.Context {
     }
 }
 
-extension OpenAPI.Parameter.Context.Location: Validatable {}

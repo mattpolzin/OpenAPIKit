@@ -260,7 +260,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
             format: newFormat,
             required: required,
             nullable: _nullable,
-            permissions: _permissions.map(OtherContext.Permissions.init),
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,
@@ -286,7 +286,7 @@ extension JSONSchema.CoreContext {
         if let conflict = conflicting(_permissions, other._permissions) {
             throw JSONSchemaResolutionError(.inconsistency("A schema cannot be both \(conflict.0.rawValue) and \(conflict.1.rawValue)."))
         }
-        let newPermissions: JSONSchema.CoreContext<Format>.Permissions?
+        let newPermissions: JSONSchema.Permissions?
         if _permissions == nil && other._permissions == nil {
             newPermissions = nil
         } else {
@@ -447,7 +447,7 @@ extension JSONSchema.StringContext {
         if let conflict = conflicting(maxLength, other.maxLength) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "maxLength", original: String(conflict.0), new: String(conflict.1)))
         }
-        if let conflict = conflicting(_minLength, other._minLength) {
+        if let conflict = conflicting(Self._minLength(self), Self._minLength(other)) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "minLength", original: String(conflict.0), new: String(conflict.1)))
         }
         if let conflict = conflicting(pattern, other.pattern) {
@@ -456,7 +456,7 @@ extension JSONSchema.StringContext {
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxLength = maxLength ?? other.maxLength
-        let newMinLength = _minLength ?? other._minLength
+        let newMinLength = Self._minLength(self) ?? Self._minLength(other)
         let newPattern = pattern ?? other.pattern
         return .init(
             maxLength: newMaxLength,
@@ -557,13 +557,12 @@ extension JSONSchema.CoreContext {
         guard let newFormat = NewFormat(rawValue: format.rawValue) else {
             throw JSONSchemaResolutionError(.inconsistency("Tried to create a \(NewFormat.self) from the incompatible format value: \(format.rawValue)"))
         }
-        let newPermissions = _permissions.map(JSONSchema.CoreContext<NewFormat>.Permissions.init)
 
         return .init(
             format: newFormat,
             required: required,
             nullable: _nullable,
-            permissions: newPermissions,
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,
@@ -628,7 +627,7 @@ extension JSONSchema.NumericContext {
 
 extension JSONSchema.StringContext {
     internal func validatedContext() throws -> JSONSchema.StringContext {
-        if let minimum = _minLength {
+        if let minimum = Self._minLength(self) {
             guard minimum >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(minimum) cannot be less than 0"))
             }
@@ -640,7 +639,7 @@ extension JSONSchema.StringContext {
         }
         return .init(
             maxLength: maxLength,
-            minLength: _minLength,
+            minLength: Self._minLength(self),
             pattern: pattern
         )
     }

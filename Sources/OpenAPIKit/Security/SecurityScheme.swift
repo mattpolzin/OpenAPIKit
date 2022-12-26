@@ -52,19 +52,13 @@ extension OpenAPI {
         public static func mutualTLS(description: String? = nil) -> SecurityScheme {
             return .init(type: .mutualTLS, description: description)
         }
-        
+
         public enum SecurityType: Equatable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
             case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
             case mutualTLS
-        }
-
-        public enum Location: String, Codable, Equatable {
-            case query
-            case header
-            case cookie
         }
     }
 }
@@ -89,7 +83,7 @@ extension OpenAPI.SecurityScheme.SecurityType {
         case .openIdConnect:
             return .openIdConnect
         case .mutualTLS:
-          return .mutualTLS
+            return .mutualTLS
         }
     }
 }
@@ -271,6 +265,3 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         return self
     }
 }
-
-extension OpenAPI.SecurityScheme.Location: Validatable {}
-extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}

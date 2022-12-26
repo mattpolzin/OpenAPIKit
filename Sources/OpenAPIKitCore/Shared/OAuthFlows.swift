@@ -5,10 +5,9 @@
 //  Created by Mathew Polzin on 1/23/20.
 //
 
-import OpenAPIKitCore
 import Foundation
 
-extension OpenAPI {
+extension Shared {
     /// OpenAPI Spec "Oauth Flows Object"
     ///
     /// See [OpenAPI Oauth Flows Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#oauth-flows-object).
@@ -32,7 +31,7 @@ extension OpenAPI {
     }
 }
 
-extension OpenAPI.OAuthFlows {
+extension Shared.OAuthFlows {
     public typealias Scope = String
     public typealias ScopeDescription = String
 
@@ -105,7 +104,7 @@ extension OpenAPI.OAuthFlows {
 }
 
 // MARK: - Codable
-extension OpenAPI.OAuthFlows {
+extension Shared.OAuthFlows {
     private enum CodingKeys: String, CodingKey {
         case implicit
         case password
@@ -114,39 +113,39 @@ extension OpenAPI.OAuthFlows {
     }
 }
 
-extension OpenAPI.OAuthFlows.CommonFields {
+extension Shared.OAuthFlows.CommonFields {
     private enum CodingKeys: String, CodingKey {
         case refreshUrl
         case scopes
     }
 }
 
-extension OpenAPI.OAuthFlows.Implicit {
+extension Shared.OAuthFlows.Implicit {
     private enum CodingKeys: String, CodingKey {
         case authorizationUrl
     }
 }
 
-extension OpenAPI.OAuthFlows.Password {
+extension Shared.OAuthFlows.Password {
     private enum CodingKeys: String, CodingKey {
         case tokenUrl
     }
 }
 
-extension OpenAPI.OAuthFlows.ClientCredentials {
+extension Shared.OAuthFlows.ClientCredentials {
     private enum CodingKeys: String, CodingKey {
         case tokenUrl
     }
 }
 
-extension OpenAPI.OAuthFlows.AuthorizationCode {
+extension Shared.OAuthFlows.AuthorizationCode {
     private enum CodingKeys: String, CodingKey {
         case authorizationUrl
         case tokenUrl
     }
 }
 
-extension OpenAPI.OAuthFlows: Encodable {
+extension Shared.OAuthFlows: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -157,18 +156,18 @@ extension OpenAPI.OAuthFlows: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows: Decodable {
+extension Shared.OAuthFlows: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        implicit = try container.decodeIfPresent(OpenAPI.OAuthFlows.Implicit.self, forKey: .implicit)
-        password = try container.decodeIfPresent(OpenAPI.OAuthFlows.Password.self, forKey: .password)
-        clientCredentials = try container.decodeIfPresent(OpenAPI.OAuthFlows.ClientCredentials.self, forKey: .clientCredentials)
-        authorizationCode = try container.decodeIfPresent(OpenAPI.OAuthFlows.AuthorizationCode.self, forKey: .authorizationCode)
+        implicit = try container.decodeIfPresent(Shared.OAuthFlows.Implicit.self, forKey: .implicit)
+        password = try container.decodeIfPresent(Shared.OAuthFlows.Password.self, forKey: .password)
+        clientCredentials = try container.decodeIfPresent(Shared.OAuthFlows.ClientCredentials.self, forKey: .clientCredentials)
+        authorizationCode = try container.decodeIfPresent(Shared.OAuthFlows.AuthorizationCode.self, forKey: .authorizationCode)
     }
 }
 
-extension OpenAPI.OAuthFlows.CommonFields: Encodable {
+extension Shared.OAuthFlows.CommonFields: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -177,16 +176,16 @@ extension OpenAPI.OAuthFlows.CommonFields: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.CommonFields: Decodable {
+extension Shared.OAuthFlows.CommonFields: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         refreshUrl = try container.decodeURLAsStringIfPresent(forKey: .refreshUrl)
-        scopes = try container.decode(OrderedDictionary<OpenAPI.OAuthFlows.Scope, OpenAPI.OAuthFlows.ScopeDescription>.self, forKey: .scopes)
+        scopes = try container.decode(OrderedDictionary<Shared.OAuthFlows.Scope, Shared.OAuthFlows.ScopeDescription>.self, forKey: .scopes)
     }
 }
 
-extension OpenAPI.OAuthFlows.Implicit: Encodable {
+extension Shared.OAuthFlows.Implicit: Encodable {
     public func encode(to encoder: Encoder) throws {
         try common.encode(to: encoder)
 
@@ -196,9 +195,9 @@ extension OpenAPI.OAuthFlows.Implicit: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.Implicit: Decodable {
+extension Shared.OAuthFlows.Implicit: Decodable {
     public init(from decoder: Decoder) throws {
-        common = try OpenAPI.OAuthFlows.CommonFields(from: decoder)
+        common = try Shared.OAuthFlows.CommonFields(from: decoder)
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -206,7 +205,7 @@ extension OpenAPI.OAuthFlows.Implicit: Decodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.Password: Encodable {
+extension Shared.OAuthFlows.Password: Encodable {
     public func encode(to encoder: Encoder) throws {
         try common.encode(to: encoder)
 
@@ -216,9 +215,9 @@ extension OpenAPI.OAuthFlows.Password: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.Password: Decodable {
+extension Shared.OAuthFlows.Password: Decodable {
     public init(from decoder: Decoder) throws {
-        common = try OpenAPI.OAuthFlows.CommonFields(from: decoder)
+        common = try Shared.OAuthFlows.CommonFields(from: decoder)
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -226,7 +225,7 @@ extension OpenAPI.OAuthFlows.Password: Decodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.ClientCredentials: Encodable {
+extension Shared.OAuthFlows.ClientCredentials: Encodable {
     public func encode(to encoder: Encoder) throws {
         try common.encode(to: encoder)
 
@@ -236,9 +235,9 @@ extension OpenAPI.OAuthFlows.ClientCredentials: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.ClientCredentials: Decodable {
+extension Shared.OAuthFlows.ClientCredentials: Decodable {
     public init(from decoder: Decoder) throws {
-        common = try OpenAPI.OAuthFlows.CommonFields(from: decoder)
+        common = try Shared.OAuthFlows.CommonFields(from: decoder)
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -246,7 +245,7 @@ extension OpenAPI.OAuthFlows.ClientCredentials: Decodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.AuthorizationCode: Encodable {
+extension Shared.OAuthFlows.AuthorizationCode: Encodable {
     public func encode(to encoder: Encoder) throws {
         try common.encode(to: encoder)
 
@@ -257,9 +256,9 @@ extension OpenAPI.OAuthFlows.AuthorizationCode: Encodable {
     }
 }
 
-extension OpenAPI.OAuthFlows.AuthorizationCode: Decodable {
+extension Shared.OAuthFlows.AuthorizationCode: Decodable {
     public init(from decoder: Decoder) throws {
-        common = try OpenAPI.OAuthFlows.CommonFields(from: decoder)
+        common = try Shared.OAuthFlows.CommonFields(from: decoder)
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -268,8 +267,8 @@ extension OpenAPI.OAuthFlows.AuthorizationCode: Decodable {
     }
 }
 
-extension OpenAPI.OAuthFlows: Validatable {}
-extension OpenAPI.OAuthFlows.Implicit: Validatable {}
-extension OpenAPI.OAuthFlows.Password: Validatable {}
-extension OpenAPI.OAuthFlows.ClientCredentials: Validatable {}
-extension OpenAPI.OAuthFlows.AuthorizationCode: Validatable {}
+extension Shared.OAuthFlows: Validatable {}
+extension Shared.OAuthFlows.Implicit: Validatable {}
+extension Shared.OAuthFlows.Password: Validatable {}
+extension Shared.OAuthFlows.ClientCredentials: Validatable {}
+extension Shared.OAuthFlows.AuthorizationCode: Validatable {}
