@@ -28,7 +28,7 @@ jobs:
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Run tests
       run: swift test --enable-test-discovery
   linux-5_4:
@@ -45,7 +45,7 @@ jobs:
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Run tests (without test discovery flag)
       run: swift test -Xswiftc -Xfrontend -Xswiftc -sil-verify-none
   linux-5_5-plus:
@@ -67,17 +67,17 @@ jobs:
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Run tests
       run: swift test
   osx:
     runs-on: macOS-11
     steps:
       - name: Select latest available Xcode
-        uses: maxim-lobanov/setup-xcode@v1.2.3
+        uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run tests
         run: swift test --enable-test-discovery
