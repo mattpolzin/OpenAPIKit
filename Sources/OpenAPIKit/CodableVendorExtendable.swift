@@ -79,14 +79,10 @@ extension CodableVendorExtendable {
             return [:]
         }
 
-        let decoded = try AnyCodable(from: decoder).value
+        let decoded = try AnyCodable(from: decoder)
 
-        guard (decoded as? [Any]) == nil else {
+        guard case .object(let decodedAny) = decoded else {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
-        }
-
-        guard let decodedAny = decoded as? [String: Any] else {
-            throw VendorExtensionDecodingError.foundNonStringKeys
         }
 
         let extensions = decodedAny.filter {
@@ -105,7 +101,7 @@ extension CodableVendorExtendable {
             )
         }
 
-        return extensions.mapValues(AnyCodable.init)
+        return extensions
     }
 
     internal func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {

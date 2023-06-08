@@ -1101,7 +1101,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(allowedValues: ["hello"])
 
         XCTAssertEqual(boolean.allowedValues, [false])
-        XCTAssertEqual(object.allowedValues, [AnyCodable([String: String]())])
+        XCTAssertEqual(object.allowedValues, [AnyCodable.object([:])])
         XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
@@ -1162,7 +1162,7 @@ final class SchemaObjectTests: XCTestCase {
             .with(defaultValue: "hello")
 
         XCTAssertEqual(boolean.defaultValue, false)
-        XCTAssertEqual(object.defaultValue, AnyCodable([String: String]()))
+        XCTAssertEqual(object.defaultValue, AnyCodable.object([:]))
         XCTAssertEqual(array.defaultValue, [false])
         XCTAssertEqual(number.defaultValue, 2.5)
         XCTAssertEqual(integer.defaultValue, 5)

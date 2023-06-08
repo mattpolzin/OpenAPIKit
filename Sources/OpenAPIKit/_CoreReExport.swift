@@ -5,7 +5,7 @@
 //  Created by Mathew Polzin on 2/28/21.
 //
 
-@_exported import struct OpenAPIKitCore.AnyCodable
+@_exported import enum OpenAPIKitCore.AnyCodable
 @_exported import struct OpenAPIKitCore.CodingPathError
 @_exported import enum OpenAPIKitCore.Either
 @_exported import protocol OpenAPIKitCore.OpenAPIError

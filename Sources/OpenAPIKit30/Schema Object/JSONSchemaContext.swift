@@ -748,7 +748,9 @@ extension JSONSchema.CoreContext: Decodable {
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         if Format.self == JSONTypeFormat.StringFormat.self {
             if (nullable ?? false) {
-                allowedValues = try container.decodeIfPresent([String?].self, forKey: .allowedValues)?.map(AnyCodable.init)
+                allowedValues = try container.decodeIfPresent([String?].self, forKey: .allowedValues)?.map {
+                    $0.map(AnyCodable.string) ?? .null
+                }
             } else {
                 allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
             }

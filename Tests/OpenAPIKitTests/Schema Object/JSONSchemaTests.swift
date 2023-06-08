@@ -1267,7 +1267,7 @@ final class SchemaObjectTests: XCTestCase {
 
         XCTAssertEqual(null.allowedValues, [nil])
         XCTAssertEqual(boolean.allowedValues, [false])
-        XCTAssertEqual(object.allowedValues, [AnyCodable([String: String]())])
+        XCTAssertEqual(object.allowedValues, [AnyCodable.object([:])])
         XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
@@ -1331,7 +1331,7 @@ final class SchemaObjectTests: XCTestCase {
 
         XCTAssertEqual(null.defaultValue!, nil)
         XCTAssertEqual(boolean.defaultValue, false)
-        XCTAssertEqual(object.defaultValue, AnyCodable([String: String]()))
+        XCTAssertEqual(object.defaultValue, AnyCodable.object([:]))
         XCTAssertEqual(array.defaultValue, [false])
         XCTAssertEqual(number.defaultValue, 2.5)
         XCTAssertEqual(integer.defaultValue, 5)
@@ -1375,7 +1375,7 @@ final class SchemaObjectTests: XCTestCase {
     func test_withAddedExample() throws {
         let null = try JSONSchema.null().with(example: nil)
         let object = try JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
-            .with(example: AnyCodable([String: String]()))
+            .with(example: [:])
         let array = try JSONSchema.array(.init(), .init())
             .with(example: ["hello"])
 
@@ -1383,8 +1383,6 @@ final class SchemaObjectTests: XCTestCase {
             .with(example: true)
         let double = try JSONSchema.number
             .with(example: 10.5)
-        let float = try JSONSchema.number
-            .with(example: AnyCodable(Float(2.5)))
         let integer = try JSONSchema.integer
             .with(example: 3)
         let string = try JSONSchema.string
@@ -1411,8 +1409,6 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(boolean.examples.count, 1)
         XCTAssertEqual(double.examples[0].value as? Double, 10.5)
         XCTAssertEqual(double.examples.count, 1)
-        XCTAssertEqual(float.examples[0].value as? Float, 2.5 as Float)
-        XCTAssertEqual(float.examples.count, 1)
         XCTAssertEqual(integer.examples[0].value as? Int, 3)
         XCTAssertEqual(integer.examples.count, 1)
         XCTAssertEqual(string.examples[0].value as? String, "hello world")

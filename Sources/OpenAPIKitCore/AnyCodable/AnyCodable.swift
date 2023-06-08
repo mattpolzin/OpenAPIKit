@@ -32,99 +32,31 @@ import Foundation
  and other collections that require `Encodable` or `Decodable` conformance
  by declaring their contained type to be `AnyCodable`.
  */
-public struct AnyCodable {
-    public let value: Any
-
-    public init<T>(_ value: T?) {
-        self.value = value ?? ()
-    }
+public enum AnyCodable: Equatable {
+    
+    case string(String)
+    case bool(Bool)
+    case int(Int)
+    case double(Double)
+    case object([String: AnyCodable])
+    case array([AnyCodable])
+    case null
 }
 
 extension AnyCodable: Encodable {
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        switch value {
-            #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-        case let number as NSNumber:
-            try encode(nsnumber: number, into: &container)
-            #endif
-        case is NSNull, is Void:
+        switch self {
+        case let .string(value): try value.encode(to: encoder)
+        case let .bool(value): try value.encode(to: encoder)
+        case let .int(value): try value.encode(to: encoder)
+        case let .double(value): try value.encode(to: encoder)
+        case let .object(value): try value.encode(to: encoder)
+        case let .array(value): try value.encode(to: encoder)
+        case .null:
+            var container = encoder.singleValueContainer()
             try container.encodeNil()
-        case let bool as Bool:
-            try container.encode(bool)
-        case let int as Int:
-            try container.encode(int)
-        case let int8 as Int8:
-            try container.encode(int8)
-        case let int16 as Int16:
-            try container.encode(int16)
-        case let int32 as Int32:
-            try container.encode(int32)
-        case let int64 as Int64:
-            try container.encode(int64)
-        case let uint as UInt:
-            try container.encode(uint)
-        case let uint8 as UInt8:
-            try container.encode(uint8)
-        case let uint16 as UInt16:
-            try container.encode(uint16)
-        case let uint32 as UInt32:
-            try container.encode(uint32)
-        case let uint64 as UInt64:
-            try container.encode(uint64)
-        case let float as Float:
-            try container.encode(float)
-        case let double as Double:
-            try container.encode(double)
-        case let string as String:
-            try container.encode(string)
-        case let date as Date:
-            try container.encode(date)
-        case let url as URL:
-            try container.encode(url)
-        case let array as [Any?]:
-            try container.encode(array.map { AnyCodable($0) })
-        case let dictionary as [String: Any?]:
-            try container.encode(dictionary.mapValues { AnyCodable($0) })
-        default:
-            let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded")
-            throw EncodingError.invalidValue(value, context)
         }
     }
-
-    #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-    private func encode(nsnumber: NSNumber, into container: inout SingleValueEncodingContainer) throws {
-        switch CFNumberGetType(nsnumber) {
-        case .charType:
-            try container.encode(nsnumber.boolValue)
-        case .sInt8Type:
-            try container.encode(nsnumber.int8Value)
-        case .sInt16Type:
-            try container.encode(nsnumber.int16Value)
-        case .sInt32Type:
-            try container.encode(nsnumber.int32Value)
-        case .sInt64Type:
-            try container.encode(nsnumber.int64Value)
-        case .shortType:
-            try container.encode(nsnumber.uint16Value)
-        case .longType:
-            try container.encode(nsnumber.uint32Value)
-        case .longLongType:
-            try container.encode(nsnumber.uint64Value)
-        case .intType, .nsIntegerType, .cfIndexType:
-            try container.encode(nsnumber.intValue)
-        case .floatType, .float32Type:
-            try container.encode(nsnumber.floatValue)
-        case .doubleType, .float64Type, .cgFloatType:
-            try container.encode(nsnumber.doubleValue)
-            #if swift(>=5.0)
-        @unknown default:
-            fatalError()
-            #endif
-        }
-    }
-    #endif
 }
 
 extension AnyCodable: Decodable {
@@ -132,107 +64,49 @@ extension AnyCodable: Decodable {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
-            self.init(NSNull())
+            self = .null
         } else if let bool = try? container.decode(Bool.self) {
-            self.init(bool)
+            self = .bool(bool)
         } else if let int = try? container.decode(Int.self) {
-            self.init(int)
-        } else if let uint = try? container.decode(UInt.self) {
-            self.init(uint)
+            self = .int(int)
         } else if let double = try? container.decode(Double.self) {
-            self.init(double)
+            self = .double(double)
         } else if let string = try? container.decode(String.self) {
-            self.init(string)
+            self = .string(string)
         } else if let array = try? container.decode([AnyCodable].self) {
-            self.init(array.map { $0.value })
+            self = .array(array)
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
-            self.init(dictionary.mapValues { $0.value })
+            self = .object(dictionary)
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
         }
     }
 }
 
-extension AnyCodable: Equatable {
-    public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
-        switch (lhs.value, rhs.value) {
-        case is (Void, Void):
-            return true
-        case let (lhs as Bool, rhs as Bool):
-            return lhs == rhs
-        case let (lhs as Int, rhs as Int):
-            return lhs == rhs
-        case let (lhs as Int8, rhs as Int8):
-            return lhs == rhs
-        case let (lhs as Int16, rhs as Int16):
-            return lhs == rhs
-        case let (lhs as Int32, rhs as Int32):
-            return lhs == rhs
-        case let (lhs as Int64, rhs as Int64):
-            return lhs == rhs
-        case let (lhs as UInt, rhs as UInt):
-            return lhs == rhs
-        case let (lhs as UInt8, rhs as UInt8):
-            return lhs == rhs
-        case let (lhs as UInt16, rhs as UInt16):
-            return lhs == rhs
-        case let (lhs as UInt32, rhs as UInt32):
-            return lhs == rhs
-        case let (lhs as UInt64, rhs as UInt64):
-            return lhs == rhs
-        case let (lhs as Float, rhs as Float):
-            return lhs == rhs
-        case let (lhs as Double, rhs as Double):
-            return lhs == rhs
-        case let (lhs as String, rhs as String):
-            return lhs == rhs
-        case let (lhs as [String: String], rhs as [String: String]):
-            return lhs == rhs
-        case let (lhs as [String: Int], rhs as [String: Int]):
-            return lhs == rhs
-        case let (lhs as [String: Double], rhs as [String: Double]):
-            return lhs == rhs
-        case let (lhs as [String: Bool], rhs as [String: Bool]):
-            return lhs == rhs
-        case let (lhs as [String: AnyCodable], rhs as [String: AnyCodable]):
-            return lhs == rhs
-        case let (lhs as [String], rhs as [String]):
-            return lhs == rhs
-        case let (lhs as [Int], rhs as [Int]):
-            return lhs == rhs
-        case let (lhs as [Double], rhs as [Double]):
-            return lhs == rhs
-        case let (lhs as [Bool], rhs as [Bool]):
-            return lhs == rhs
-        case let (lhs as [AnyCodable], rhs as [AnyCodable]):
-            return lhs == rhs
-        default:
-            return false
-        }
-    }
-}
-
 extension AnyCodable: CustomStringConvertible {
     public var description: String {
-        switch value {
-        case is Void:
-            return String(describing: nil as Any?)
-        case let value as CustomStringConvertible:
-            return value.description
-        default:
-            return String(describing: value)
+        switch self {
+        case .string(let string):
+            return "\"\(string.description)\""
+        case .bool(let bool):
+            return bool.description
+        case .int(let int):
+            return int.description
+        case .double(let double):
+            return double.description
+        case .object(let dictionary):
+            return "[\(dictionary.sorted(by: { $0.key < $1.key }).map { "\"\($0)\": \($1.description)" }.joined(separator: ", "))]"
+        case .array(let array):
+            return "[\(array.map { $0.description }.joined(separator: ", "))]"
+        case .null:
+            return "nil"
         }
     }
 }
 
 extension AnyCodable: CustomDebugStringConvertible {
     public var debugDescription: String {
-        switch value {
-        case let value as CustomDebugStringConvertible:
-            return "AnyCodable(\(value.debugDescription))"
-        default:
-            return "AnyCodable(\(description))"
-        }
+        "AnyCodable(\(description))"
     }
 }
 
@@ -246,30 +120,167 @@ extension AnyCodable: ExpressibleByDictionaryLiteral {}
 
 extension AnyCodable {
     public init(nilLiteral _: ()) {
-        self.init(nil as Any?)
+        self = .null
     }
 
     public init(booleanLiteral value: Bool) {
-        self.init(value)
+        self = .bool(value)
     }
 
     public init(integerLiteral value: Int) {
-        self.init(value)
+        self = .int(value)
     }
 
     public init(floatLiteral value: Double) {
-        self.init(value)
+        self = .double(value)
     }
 
     public init(stringLiteral value: String) {
-        self.init(value)
+        self = .string(value)
     }
 
-    public init(arrayLiteral elements: Any...) {
-        self.init(elements)
+    public init(arrayLiteral elements: AnyCodable...) {
+        self = .array(elements)
     }
 
-    public init(dictionaryLiteral elements: (AnyHashable, Any)...) {
-        self.init([AnyHashable: Any](elements, uniquingKeysWith: { first, _ in first }))
+    public init(dictionaryLiteral elements: (String, AnyCodable)...) {
+        self = .object([String: AnyCodable](elements, uniquingKeysWith: { first, _ in first }))
     }
+}
+
+// MARK: Backward compatibility
+extension AnyCodable {
+
+    public var value: Any {
+        switch self {
+        case .string(let string):
+            return string
+        case .bool(let bool):
+            return bool
+        case .int(let int):
+            return int
+        case .double(let double):
+            return double
+        case .object(let dictionary):
+            return dictionary.mapValues { $0.value }
+        case .array(let array):
+            return array.map { $0.value }
+        case .null:
+            return Optional<Any>.none as Any
+        }
+    }
+    
+    public init(_ value: Any?) {
+        guard var value = value else {
+            self = .null
+            return
+        }
+        while let optional = value as? OptionalProtocol {
+            if let unwrapped = optional.anyValue {
+                value = unwrapped
+            } else {
+                self = .null
+                return
+            }
+        }
+        switch value {
+        case let anyCodable as AnyCodable:
+            self = anyCodable
+        case is NSNull, is Void:
+            self = .null
+        case let bool as Bool:
+            self = .bool(bool)
+        case let int as Int:
+            self = .int(int)
+        case let int8 as Int8:
+            self = .int(Int(int8))
+        case let int16 as Int16:
+            self = .int(Int(int16))
+        case let int32 as Int32:
+            self = .int(Int(int32))
+        case let int64 as Int64:
+            self = .int(Int(int64))
+        case let uint as UInt:
+            self = .int(Int(uint))
+        case let uint8 as UInt8:
+            self = .int(Int(uint8))
+        case let uint16 as UInt16:
+            self = .int(Int(uint16))
+        case let uint32 as UInt32:
+            self = .int(Int(uint32))
+        case let uint64 as UInt64:
+            self = .int(Int(min(uint64, UInt64(Int.max))))
+        case let float as Float:
+            self = .double(Double(float))
+        case let double as Double:
+            self = .double(double)
+        case let string as String:
+            self = .string(string)
+        case let date as Date:
+            self = .double(date.timeIntervalSince1970)
+        case let url as URL:
+            self = .string(url.absoluteString)
+        case let array as [Any?]:
+            self = .array(array.map { AnyCodable($0) })
+        case let dictionary as [String: Any?]:
+            self = .object(dictionary.mapValues { AnyCodable($0) })
+#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+        case let number as NSNumber:
+            self = .encode(nsnumber: number)
+#endif
+        default:
+            if let encodable = value as? Encodable, let anyCodable = try? AnyCodable.encoded(encodable) {
+                self = anyCodable
+                return
+            }
+            let mirror = Mirror(reflecting: value)
+            switch mirror.displayStyle {
+            case .optional:
+                if mirror.children.isEmpty {
+                    self = .null
+                } else {
+                    self = AnyCodable(mirror.children.first?.value)
+                }
+            case .collection, .set:
+                self = .array(mirror.children.map { AnyCodable($0.value) })
+            default:
+                if mirror.children.isEmpty {
+                    self = .string("\(value)")
+                } else {
+                    self = .object(
+                        mirror.children.reduce(into: [String: AnyCodable]()) { result, child in
+                            result[child.label ?? ".\(result.count)"] = AnyCodable(child.value)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private extension AnyCodable {
+    
+    static func encode(nsnumber: NSNumber) -> AnyCodable {
+        switch CFNumberGetType(nsnumber) {
+        case .charType, .sInt8Type, .sInt16Type, .sInt32Type, .sInt64Type,
+                .shortType, .longType, .longLongType, .intType, .nsIntegerType, .cfIndexType:
+            return .int(nsnumber.intValue)
+        case .floatType, .float32Type, .doubleType, .float64Type, .cgFloatType:
+            return .double(nsnumber.doubleValue)
+#if swift(>=5.0)
+        @unknown default:
+            fatalError()
+#endif
+        }
+    }
+}
+
+private protocol OptionalProtocol {
+
+    var anyValue: Any? { get }
+}
+
+extension Optional: OptionalProtocol {
+
+    var anyValue: Any? { self }
 }

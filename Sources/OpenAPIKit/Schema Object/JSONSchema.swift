@@ -1967,21 +1967,19 @@ extension JSONSchema: Decodable {
             return
         }
 
-        let decoded = try AnyCodable(from: decoder).value
-
-        guard (decoded as? [Any]) == nil else {
+        let decoded = try AnyCodable(from: decoder)
+        
+        switch decoded {
+        case let .object(dictionary):
+            extensions = dictionary
+                .filter { $0.key.lowercased().starts(with: "x-") }
+            
+            self.value = value.with(vendorExtensions: extensions)
+        case .array:
             throw VendorExtensionDecodingError.selfIsArrayNotDict
-        }
-
-        guard let decodedAny = decoded as? [String: Any] else {
+        default:
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
-
-        extensions = decodedAny
-            .filter { $0.key.lowercased().starts(with: "x-") }
-            .mapValues(AnyCodable.init)
-
-        self.value = value.with(vendorExtensions: extensions)
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {
