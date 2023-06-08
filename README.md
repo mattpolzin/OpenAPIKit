@@ -186,6 +186,50 @@ In the OpenAPI specifcation, a security requirement (like can be found on the ro
 
 OpenAPIKit defines the `SecurityRequirement` typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
 
+To give an example, let's say you want to describe OAuth 2.0 authentication via the implicit flow. First, define a Security Scheme:
+```swift
+let oauthScheme = OpenAPI.SecurityScheme.oauth2(
+    flows: .init(
+        implicit: .init(
+            authorizationUrl: URL(string: "https://my-api.com/oauth2/auth")!,
+            scopes: ["read:widget": "read widget"]
+        )
+    )
+)
+```
+
+Next, store it in your OpenAPI document's Components Object (which likely has other entries but we'll only specify the security schemes for this example):
+```swift
+let components = OpenAPI.Components(
+    securitySchemes: ["implicit-oauth": oauthScheme]
+)
+```
+
+Finally, your OpenAPI Document should use the Components Object we just created and also reference the OAuth implicit scheme via an internal JSON reference:
+```swift
+let document = OpenAPI.Document(
+    info: .init(title: "API", version: "1.0"),
+    servers: [],
+    paths: [:],
+    components: components,
+    security: [[.component( named: "implicit-oauth"): ["read:widget"]]]
+)
+```
+
+If your API supports multiple alternative authentication strategies (only one of which needs to be used), you might have additional entries in your Document's Security array:
+```swift
+let document = OpenAPI.Document(
+    info: .init(title: "API", version: "1.0"),
+    servers: [],
+    paths: [:],
+    components: components,
+    security: [
+        [.component( named: "implicit-oauth"): ["read:widget"]],
+        [.component( named: "auth-code-oauth"): ["read:widget"]]
+    ]
+)
+```
+
 #### Specification Extensions
 Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
 
