@@ -294,6 +294,10 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [], core: .init(required: false))
         let oneOf = JSONSchema.one(of: [], core: .init(required: false))
         let not = JSONSchema.not(.string, core: .init(required: false))
+        let reference = JSONSchema.reference(
+            .external(URL(string: "hello/world.json#/hello")!),
+            required: false
+        )
 
         XCTAssertFalse(boolean.required)
         XCTAssertFalse(object.required)
@@ -306,6 +310,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(anyOf.required)
         XCTAssertFalse(oneOf.required)
         XCTAssertFalse(not.required)
+        XCTAssertFalse(reference.required)
     }
 
     func test_nullable() {
@@ -5280,6 +5285,40 @@ extension SchemaObjectTests {
             nodeRef,
             JSONSchema.reference(.component(named: "requiredBool"))
         )
+    }
+
+    func test_encodeReferenceOptionality() {
+        let optionalReference = JSONSchema.reference(.component(named: "optionalBool"))
+            .optionalSchemaObject()
+
+        // to observe that optionality has worked, we must encode within an object.
+        let object = JSONSchema.object(properties: ["optionalBool": optionalReference])
+
+        testEncodingPropertyLines(entity: object, propertyLines: [
+            "\"properties\" : {",
+            "  \"optionalBool\" : {",
+            "    \"$ref\" : \"#\\/components\\/schemas\\/optionalBool\"",
+            "  }",
+            "},",
+            "\"type\" : \"object\""
+        ])
+
+        let requiredReference = JSONSchema.reference(.component(named: "requiredBool"))
+
+            // to observe that optionality has worked, we must encode within an object.
+        let object2 = JSONSchema.object(properties: ["requiredBool": requiredReference])
+
+        testEncodingPropertyLines(entity: object2, propertyLines: [
+            "\"properties\" : {",
+            "  \"requiredBool\" : {",
+            "    \"$ref\" : \"#\\/components\\/schemas\\/requiredBool\"",
+            "  }",
+            "},",
+            "\"required\" : [",
+            "  \"requiredBool\"",
+            "],",
+            "\"type\" : \"object\""
+        ])
     }
 }
 
