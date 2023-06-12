@@ -388,7 +388,9 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        try container.encode(paths, forKey: .paths)
+        if !paths.isEmpty {
+            try container.encode(paths, forKey: .paths)
+        }
 
         try encodeExtensions(to: &container)
 
@@ -417,7 +419,7 @@ extension OpenAPI.Document: Decodable {
             let webhooks = try container.decodeIfPresent(OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>.self, forKey: .webhooks) ?? [:]
             self.webhooks = webhooks
 
-            let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
+            let paths = try container.decodeIfPresent(OpenAPI.PathItem.Map.self, forKey: .paths) ?? [:]
             self.paths = paths
             try validateSecurityRequirements(in: paths, against: components)
 
