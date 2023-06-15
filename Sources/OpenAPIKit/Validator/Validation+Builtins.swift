@@ -10,22 +10,6 @@ import OpenAPIKitCore
 extension Validation {
     // MARK: - Optionally added with `Validator.validating()`
 
-    /// Validate the OpenAPI Document has at least one path in its
-    /// `PathItem.Map`.
-    ///
-    /// The OpenAPI Specifcation does not require that the document
-    /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-filtering)
-    /// but documentation that is public in nature might only ever have
-    /// an empty `PathItem.Map` in error.
-    ///
-    /// - Important: This is not an included validation by default.
-    public static var documentContainsPaths: Validation<OpenAPI.PathItem.Map> {
-        .init(
-            description: "Document contains at least one path",
-            check: \.count > 0
-        )
-    }
-
     /// Validate the OpenAPI Document's `PathItems` all have at least
     /// one operation.
     ///

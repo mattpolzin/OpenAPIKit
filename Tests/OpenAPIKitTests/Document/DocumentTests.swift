@@ -409,10 +409,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -463,10 +460,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -518,9 +512,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "servers" : [
                 {
                   "url" : "http:\\/\\/google.com"
@@ -650,9 +641,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "security" : [
                 {
                   "security" : [
@@ -730,9 +718,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "tags" : [
                 {
                   "name" : "hi"
@@ -797,10 +782,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -860,9 +842,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "x-specialFeature" : [
                 "hello",
                 "world"
@@ -940,9 +919,6 @@ extension DocumentTests {
             "version" : "1.0"
           },
           "openapi" : "3.1.0",
-          "paths" : {
-
-          },
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
