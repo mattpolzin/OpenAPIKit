@@ -100,7 +100,6 @@ extension OpenAPI.Document {
 ///
 ///     let document = OpenAPI.Document(...)
 ///     let validator = Validator()
-///         .validating(.documentContainsPaths)
 ///         .validating(.pathsContainOperations)
 ///     try document.validate(using: validator)
 ///
