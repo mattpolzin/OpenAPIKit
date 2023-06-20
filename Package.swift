@@ -46,7 +46,7 @@ let package = Package(
             name: "OpenAPIKit30Tests",
             dependencies: ["OpenAPIKit30", "Yams"]),
         .testTarget(
-            name: "OpenAPIKit30CompatibilitySuite",
+            name: "OpenAPIKit30RealSpecSuite",
             dependencies: ["OpenAPIKit30", "Yams"]),
         .testTarget(
             name: "OpenAPIKit30ErrorReportingTests",
@@ -59,7 +59,7 @@ let package = Package(
             name: "OpenAPIKitTests",
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
-            name: "OpenAPIKitCompatibilitySuite",
+            name: "OpenAPIKitRealSpecSuite",
             dependencies: ["OpenAPIKit", "Yams"]),
         .testTarget(
             name: "OpenAPIKitErrorReportingTests",
