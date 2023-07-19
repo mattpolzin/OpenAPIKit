@@ -911,6 +911,16 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(not.required)
         XCTAssertFalse(fragment.required)
 
+        // all fragments within required get flipped too:
+        switch(allOf) {
+        case .all(of: let schemas, core: _):
+            for schema in schemas {
+                XCTAssertFalse(schema.required)
+            }
+        default:
+            break
+        }
+
         XCTAssertTrue(reference.required)
     }
 
@@ -951,6 +961,16 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(not.required)
         XCTAssertTrue(reference.required)
         XCTAssertTrue(fragment.required)
+
+        // all fragments within required get flipped too:
+        switch(allOf) {
+        case .all(of: let schemas, core: _):
+            for schema in schemas {
+                XCTAssertTrue(schema.required)
+            }
+        default:
+            break
+        }
     }
 
     func test_notNullableToNullable() {
@@ -4805,10 +4825,10 @@ extension SchemaObjectTests {
             JSONSchema.object(
                 properties: [
                     "prop1": JSONSchema.all(
-                            of: .fragment(description: "hello"),
-                                .reference(.component(named: "test")),
-                            required: false
-                        )
+                        of: .fragment(required: false, description: "hello"),
+                            .reference(.component(named: "test")),
+                        required: false
+                    )
                 ]
             )
         )
