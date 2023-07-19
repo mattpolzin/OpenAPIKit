@@ -134,7 +134,7 @@ final class PathItemTests: XCTestCase {
 
     func test_initializePathItemMap() {
         let _: OpenAPI.PathItem.Map = [
-            "hello/world": .init(),
+            "hello/world": .pathItem(.init()),
         ]
     }
 }
@@ -419,8 +419,8 @@ extension PathItemTests {
 
     func test_pathItemMap_encode() throws {
         let map: OpenAPI.PathItem.Map = [
-            "/hello/world": .init(),
-            "hi/there": .init()
+            "/hello/world": .pathItem(.init()),
+            "hi/there": .pathItem(.init())
         ]
 
         let encodedMap = try orderUnstableTestStringFromEncoding(of: map)
@@ -458,8 +458,8 @@ extension PathItemTests {
         XCTAssertEqual(
             map,
             [
-                "/hello/world": .init(),
-                "/hi/there": .init()
+                "/hello/world": .pathItem(.init()),
+                "/hi/there": .pathItem(.init())
             ]
         )
     }

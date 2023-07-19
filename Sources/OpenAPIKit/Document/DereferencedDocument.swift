@@ -32,6 +32,19 @@ public struct DereferencedDocument: Equatable {
     /// in the array.
     public let security: [DereferencedSecurityRequirement]
 
+    /// All Tags used anywhere in the document.
+    ///
+    /// The tags stored in the `OpenAPI.Document.tags`
+    /// property need not contain all tags used anywhere in
+    /// the document. This property is comprehensive.
+    public var allTags: Set<String> {
+        return Set(
+            (underlyingDocument.tags ?? []).map { $0.name }
+            + paths.values.flatMap { $0.endpoints }
+                .flatMap { $0.operation.tags ?? [] }
+        )
+    }
+
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Document, T>) -> T {
         return underlyingDocument[keyPath: path]
     }
@@ -49,11 +62,7 @@ public struct DereferencedDocument: Equatable {
     ///     component in the same file that cannot be found in the Components Object.
     internal init(_ document: OpenAPI.Document) throws {
         self.paths = try document.paths.mapValues {
-            try DereferencedPathItem(
-                $0,
-                resolvingIn: document.components,
-                following: []
-            )
+            try $0._dereferenced(in: document.components, following: [])
         }
         self.security = try document.security.map {
             try DereferencedSecurityRequirement(

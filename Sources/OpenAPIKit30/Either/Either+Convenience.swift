@@ -71,6 +71,11 @@ extension Either where A == DereferencedSchemaContext {
     }
 }
 
+extension Either where B == OpenAPI.PathItem {
+    /// Retrieve the path item if that is what this property contains.
+    public var pathItem: B? { b }
+}
+
 extension Either where B == OpenAPI.Parameter {
     /// Retrieve the parameter if that is what this property contains.
     public var parameterValue: B? { b }
@@ -145,6 +150,45 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
 extension Either where B == JSONSchema {
     /// Construct a schema value.
     public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
+}
+
+extension Either where B == OpenAPI.PathItem {
+    /// Construct a path item value.
+    public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self { .b(pathItem) }
+
+    public static func pathItem(
+        summary: String? = nil,
+        description: String? = nil,
+        servers: [OpenAPI.Server]? = nil,
+        parameters: OpenAPI.Parameter.Array = [],
+        get: OpenAPI.Operation? = nil,
+        put: OpenAPI.Operation? = nil,
+        post: OpenAPI.Operation? = nil,
+        delete: OpenAPI.Operation? = nil,
+        options: OpenAPI.Operation? = nil,
+        head: OpenAPI.Operation? = nil,
+        patch: OpenAPI.Operation? = nil,
+        trace: OpenAPI.Operation? = nil,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .b(
+            .init(
+                summary: summary,
+                description: description,
+                servers: servers,
+                parameters: parameters,
+                get: get,
+                put: put,
+                post: post,
+                delete: delete,
+                options: options,
+                head: head,
+                patch: patch,
+                trace: trace,
+                vendorExtensions: vendorExtensions
+            )
+        )
+    }
 }
 
 extension Either where B == OpenAPI.Parameter {

@@ -77,6 +77,9 @@ extension Validation {
     /// and the parameter definitions, this validation runs once per document and performs a
     /// loop over each endpoint in the document.
     ///
+    /// - Important: This validation does not assert that all path item references are valid and
+    ///     can be found. Invalid or missing references will be skipped over.
+    ///
     /// - Important: This is not an included validation by default.
     public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
         .init(
@@ -84,19 +87,20 @@ extension Validation {
                 var errors = [ValidationError]()
 
                 for (path, item) in context.subject {
+                    guard let pathItem = context.document.components[item] else { continue }
                     let variablesInPath = path.components
                         .lazy
                         .filter { $0.first == "{" && $0.last == "}" }
                         .map { String($0.dropFirst().dropLast()) }
 
                     let paramsInPathItem = Array(
-                        item.parameters
+                        pathItem.parameters
                         .lazy
                         .compactMap { context.document.components[$0] }
                         .map { $0.name }
                     )
 
-                    for endpoint in item.endpoints {
+                    for endpoint in pathItem.endpoints {
                         let paramsInOperation = Array(
                             endpoint.operation.parameters
                             .lazy
@@ -231,12 +235,18 @@ extension Validation {
     ///
     /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
     ///
+    /// - Important: This validation does not assert that all path references are valid and found in the
+    ///     components for the document. It skips over missing path items.
+    ///
     /// - Important: This is included in validation by default.
     ///
     public static var operationIdsAreUnique: Validation<OpenAPI.Document> {
         .init(
             description: "All Operation Ids in Document are unique",
-            check: take(\.allOperationIds) { operationIds in
+            check: { context in
+                let operationIds = context.subject.paths.values
+                    .flatMap { context.subject.components[$0]?.endpoints ?? [] }
+                    .compactMap { $0.operation.operationId }
                 return Set(operationIds).count == operationIds.count
             }
         )

@@ -25,14 +25,14 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": .init(
+                "/hi/there": .pathItem(.init(
                     parameters: [],
                     get: .init(
                         tags: "hi",
                         parameters: [],
                         responses: [:]
                     )
-                )
+                ))
             ],
             components: .init(schemas: ["hello": .string]),
             security: [],
@@ -41,7 +41,7 @@ final class DocumentTests: XCTestCase {
         )
     }
 
-    func test_getRoutes() {
+    func test_getRoutes() throws {
         let pi1 = OpenAPI.PathItem(
             parameters: [],
             get: .init(
@@ -63,14 +63,14 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": pi1,
-                "/hi": pi2
+                "/hi/there": .pathItem(pi1),
+                "/hi": .pathItem(pi2)
             ],
             components: .init(schemas: ["hello": .string])
         )
 
         XCTAssertEqual(
-            test.routes,
+            try test.routes(),
             [
                 .init(path: "/hi/there", pathItem: pi1),
                 .init(path: "/hi", pathItem: pi2)
@@ -78,70 +78,70 @@ final class DocumentTests: XCTestCase {
         )
     }
 
-    func test_getAllOperationIds() {
+    func test_getAllOperationIds() throws {
         let t1 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .init(
-                    get: .init(operationId: nil, responses: [:])
+                "/hello": .pathItem(.init(
+                    get: .init(operationId: nil, responses: [:]))
                 ),
-                "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:])
+                "/hello/world": .pathItem(.init(
+                    put: .init(operationId: nil, responses: [:]))
                 )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t1.allOperationIds, [])
+        XCTAssertEqual(try t1.allOperationIds(), [])
 
         let t2 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .init(
-                    get: .init(operationId: "test", responses: [:])
+                "/hello": .pathItem(.init(
+                    get: .init(operationId: "test", responses: [:]))
                 ),
-                "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:])
+                "/hello/world": .pathItem(.init(
+                    put: .init(operationId: nil, responses: [:]))
                 )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t2.allOperationIds, ["test"])
+        XCTAssertEqual(try t2.allOperationIds(), ["test"])
 
         let t3 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .init(
-                    get: .init(operationId: "test", responses: [:])
+                "/hello": .pathItem(.init(
+                    get: .init(operationId: "test", responses: [:]))
                 ),
-                "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:])
+                "/hello/world": .pathItem(.init(
+                    put: .init(operationId: "two", responses: [:]))
                 )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t3.allOperationIds, ["test", "two"])
+        XCTAssertEqual(try t3.allOperationIds(), ["test", "two"])
 
         let t4 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .init(
-                    get: .init(operationId: nil, responses: [:])
+                "/hello": .pathItem(.init(
+                    get: .init(operationId: nil, responses: [:]))
                 ),
-                "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:])
+                "/hello/world": .pathItem(.init(
+                    put: .init(operationId: "two", responses: [:]))
                 )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t4.allOperationIds, ["two"])
+        XCTAssertEqual(try t4.allOperationIds(), ["two"])
     }
 
     func test_allServersEmpty() {
@@ -149,13 +149,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -171,13 +171,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -193,13 +193,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [s1, s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -215,13 +215,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s1, s2]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -237,13 +237,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [s1, s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s1, s2]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -260,13 +260,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -284,13 +284,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [s2, s4],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -308,13 +308,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     servers: [s2, s4],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -330,11 +330,11 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .init(
+                "/hello/world": .pathItem(.init(
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])]
                     )
-                )
+                ))
             ],
             components: .noComponents
         )
@@ -347,8 +347,8 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/test1": .init(),
-                "/test2": .init()
+                "/test1": .pathItem(.init()),
+                "/test2": .pathItem(.init())
             ],
             components: .noComponents
         )
@@ -567,7 +567,7 @@ extension DocumentTests {
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),
             servers: [],
-            paths: ["test": .init(summary: "hi")],
+            paths: ["test": .pathItem(.init(summary: "hi"))],
             components: .noComponents
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
@@ -614,7 +614,7 @@ extension DocumentTests {
             OpenAPI.Document(
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
-                paths: ["test": .init(summary: "hi")],
+                paths: ["test": .pathItem(.init(summary: "hi"))],
                 components: .noComponents
             )
         )

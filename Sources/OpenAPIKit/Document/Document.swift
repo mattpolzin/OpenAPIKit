@@ -208,8 +208,15 @@ extension OpenAPI.Document {
     ///
     /// - Returns: An Array of `Routes` with the path
     ///     and the definition of the route.
-    public var routes: [Route] {
-        return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
+    ///     path item is a missing reference depending on whether the reference points to
+    ///     another file or just points to a component in the same file that cannot be found
+    ///     in the Components Object.
+    ///
+    public func routes() throws -> [Route] {
+        return try paths.map { (path, pathItem) in .init(path: path, pathItem: try components.lookup(pathItem)) }
     }
 
     /// Retrieve an array of all Operation Ids defined by
@@ -223,9 +230,15 @@ extension OpenAPI.Document {
     ///
     /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
     ///
-    public var allOperationIds: [String] {
-        return paths.values
-            .flatMap { $0.endpoints }
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
+    ///     path item is a missing reference depending on whether the reference points to
+    ///     another file or just points to a component in the same file that cannot be found
+    ///     in the Components Object.
+    ///
+    public func allOperationIds() throws -> [String] {
+        return try paths.values
+            .flatMap { try components.lookup($0).endpoints }
             .compactMap { $0.operation.operationId }
     }
 
@@ -288,11 +301,12 @@ extension OpenAPI.Document {
         }
 
         for pathItem in paths.values {
-            let pathItemServers = pathItem.servers ?? []
+            let pathItemServers = pathItem.pathItemValue?.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
-            let endpointServers = pathItem.endpoints.flatMap { $0.operation.servers ?? [] }
-            endpointServers.forEach(insertUniquely)
+            if let endpointServers = (pathItem.pathItemValue?.endpoints.flatMap { $0.operation.servers ?? [] }) {
+                endpointServers.forEach(insertUniquely)
+            }
         }
 
         return collectedServers
@@ -303,10 +317,17 @@ extension OpenAPI.Document {
     /// The tags stored in the `OpenAPI.Document.tags`
     /// property need not contain all tags used anywhere in
     /// the document. This property is comprehensive.
-    public var allTags: Set<String> {
-        return Set(
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
+    ///     path item is a missing reference depending on whether the reference points to
+    ///     another file or just points to a component in the same file that cannot be found
+    ///     in the Components Object.
+    ///
+    public func allTags() throws -> Set<String> {
+        return try Set(
             (tags ?? []).map { $0.name }
-            + paths.values.flatMap { $0.endpoints }
+            + paths.values.flatMap { try components.lookup($0).endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )
     }
@@ -580,7 +601,9 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
 
 internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
     for (path, pathItem) in paths {
-        for endpoint in pathItem.endpoints {
+        guard let pathItemValue = pathItem.pathItemValue else { continue }
+
+        for endpoint in pathItemValue.endpoints {
             if let securityRequirements = endpoint.operation.security {
                 try validate(
                     securityRequirements: securityRequirements,
