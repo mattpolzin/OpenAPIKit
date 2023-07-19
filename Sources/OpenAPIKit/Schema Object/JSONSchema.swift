@@ -365,7 +365,7 @@ extension JSONSchema {
         case .fragment(let context):
             return .fragment(context.optionalContext())
         case .all(of: let fragments, core: let core):
-            return .all(of: fragments, core: core.optionalContext())
+            return .all(of: fragments.map { $0.optionalSchemaObject() }, core: core.optionalContext())
         case .one(of: let schemas, core: let core):
             return .one(of: schemas, core: core.optionalContext())
         case .any(of: let schemas, core: let core):
@@ -395,7 +395,7 @@ extension JSONSchema {
         case .fragment(let context):
             return .fragment(context.requiredContext())
         case .all(of: let fragments, core: let core):
-            return .all(of: fragments, core: core.requiredContext())
+            return .all(of: fragments.map { $0.requiredSchemaObject() }, core: core.requiredContext())
         case .one(of: let schemas, core: let core):
             return .one(of: schemas, core: core.requiredContext())
         case .any(of: let schemas, core: let core):

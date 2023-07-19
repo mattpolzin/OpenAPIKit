@@ -911,6 +911,16 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(not.required)
         XCTAssertFalse(fragment.required)
 
+        // all fragments within required get flipped too:
+        switch(allOf) {
+        case .all(of: let schemas, core: _):
+            for schema in schemas {
+                XCTAssertFalse(schema.required)
+            }
+        default:
+            break
+        }
+
         XCTAssertTrue(reference.required)
     }
 
@@ -951,6 +961,16 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(not.required)
         XCTAssertTrue(reference.required)
         XCTAssertTrue(fragment.required)
+
+        // all fragments within required get flipped too:
+        switch(allOf) {
+        case .all(of: let schemas, core: _):
+            for schema in schemas {
+                XCTAssertTrue(schema.required)
+            }
+        default:
+            break
+        }
     }
 
     func test_notNullableToNullable() {
@@ -4597,6 +4617,12 @@ extension SchemaObjectTests {
                 .reference(.component(named: "test"))
             ]
         )
+        let allOfWithReferenceAndDescription = JSONSchema.all(
+            of: [
+                .fragment(description: "hello"),
+                .reference(.component(named: "test"))
+            ]
+        )
 
         testEncodingPropertyLines(entity: allOf, propertyLines: [
             "\"allOf\" : [",
@@ -4660,6 +4686,17 @@ extension SchemaObjectTests {
             "  }",
             "]"
         ])
+
+        testEncodingPropertyLines(entity: allOfWithReferenceAndDescription, propertyLines: [
+            "\"allOf\" : [",
+            "  {",
+            "    \"description\" : \"hello\"",
+            "  },",
+            "  {",
+            "    \"$ref\" : \"#\\/components\\/schemas\\/test\"",
+            "  }",
+            "]"
+        ])
     }
 
     func test_decodeAll() throws {
@@ -4701,10 +4738,35 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
+        let allWithReferenceAndDescriptionData = """
+        {
+            "allOf": [
+                { "description": "hello" },
+                { "$ref": "#/components/schemas/test" }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let nestedOptionalAllData = """
+        {
+            "type": "object",
+            "properties": {
+                "prop1": {
+                    "allOf": [
+                        { "description": "hello" },
+                        { "$ref": "#/components/schemas/test" }
+                    ]
+                }
+            }
+        }
+        """.data(using: .utf8)!
+
         let all = try orderUnstableDecode(JSONSchema.self, from: allData)
         let allWithTitle = try orderUnstableDecode(JSONSchema.self, from: allWithTitleData)
         let allWithDiscriminator = try orderUnstableDecode(JSONSchema.self, from: allWithDiscriminatorData)
         let allWithReference = try orderUnstableDecode(JSONSchema.self, from: allWithReferenceData)
+        let allWithReferenceAndDescription = try orderUnstableDecode(JSONSchema.self, from: allWithReferenceAndDescriptionData)
+        let nestedOptionalAll = try orderUnstableDecode(JSONSchema.self, from: nestedOptionalAllData)
 
         XCTAssertEqual(
             all,
@@ -4744,6 +4806,29 @@ extension SchemaObjectTests {
                 of: [
                     .object(.init(), .init(properties: [:])),
                     .reference(.component(named: "test"))
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            allWithReferenceAndDescription,
+            JSONSchema.all(
+                of: [
+                    .fragment(description: "hello"),
+                    .reference(.component(named: "test"))
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            nestedOptionalAll,
+            JSONSchema.object(
+                properties: [
+                    "prop1": JSONSchema.all(
+                        of: .fragment(required: false, description: "hello"),
+                            .reference(.component(named: "test")),
+                        required: false
+                    )
                 ]
             )
         )
