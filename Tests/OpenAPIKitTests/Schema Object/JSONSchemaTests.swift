@@ -989,7 +989,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertFalse(reference.required)
 
         // all fragments within required get flipped too:
-        switch(allOf) {
+        switch(allOf.value) {
         case .all(of: let schemas, core: _):
             for schema in schemas {
                 XCTAssertFalse(schema.required)
@@ -1040,7 +1040,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertTrue(fragment.required)
 
         // all fragments within required get flipped too:
-        switch(allOf) {
+        switch(allOf.value) {
         case .all(of: let schemas, core: _):
             for schema in schemas {
                 XCTAssertTrue(schema.required)
@@ -5173,7 +5173,7 @@ extension SchemaObjectTests {
                 properties: [
                     "prop1": JSONSchema.all(
                         of: .fragment(required: false, description: "hello"),
-                            .reference(.component(named: "test")),
+                            .reference(.component(named: "test"), required: false),
                         required: false
                     )
                 ]
