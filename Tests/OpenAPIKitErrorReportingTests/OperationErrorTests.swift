@@ -120,7 +120,7 @@ extension OperationErrorTests {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths. \n\nPathItem could not be decoded because:\nExpected to find `responses` key for the **GET** endpoint under `/one-item` but it is missing..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths['/one-item']. \n\nPathItem could not be decoded because:\nExpected to find `responses` key for the **GET** endpoint under `/one-item` but it is missing..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/one-item"

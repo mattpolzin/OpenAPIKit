@@ -51,6 +51,27 @@ final class PathsErrorTests: XCTestCase {
         }
     }
 
+    func test_wayOffMarkForPathItemOrReference() {
+        let documentYML =
+        """
+        openapi: "3.1.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world: {"boo": 123}
+        """
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths['/hello/world']. \n\nPathItem could not be decoded because:\nInconsistency encountered when parsing `Vendor Extension` under the `/hello/world` path: Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: [ boo ].."
+            )
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
+        }
+    }
+
     func test_wrongTypeParameter() {
         let documentYML =
         """
