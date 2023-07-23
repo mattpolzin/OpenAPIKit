@@ -77,24 +77,25 @@ extension Either: Decodable where A: Decodable, B: Decodable {
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
 
-		let attempts = [
-            try decode(A.self, from: container).map { Either.a($0) },
-			try decode(B.self, from: container).map { Either.b($0) }]
+        // try for an `A`
+        let attemptA = try decode(A.self, from: container).map { Either.a($0) }
+        if case let .success(a) = attemptA {
+            self = a
+            return
+        }
 
-		let maybeVal: Either<A, B>? = attempts
-            .lazy
-			.compactMap { $0.value }
-			.first
+        // try for a `B`
+        let attemptB = try decode(B.self, from: container).map { Either.b($0) }
+        if case let .success(b) = attemptB {
+            self = b
+            return
+        }
 
-		guard let val = maybeVal else {
-            let individualFailures = attempts.map { $0.error }.compactMap { $0 }
+        let individualFailures = [attemptA, attemptB].map { $0.error }.compactMap { $0 }
 
-            throw EitherDecodeNoTypesMatchedError(
-                codingPath: decoder.codingPath,
-                individualTypeFailures: individualFailures
-            )
-		}
-
-		self = val
+        throw EitherDecodeNoTypesMatchedError(
+            codingPath: decoder.codingPath,
+            individualTypeFailures: individualFailures
+        )
 	}
 }

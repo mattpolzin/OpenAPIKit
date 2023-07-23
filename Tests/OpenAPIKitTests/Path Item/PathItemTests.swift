@@ -420,7 +420,8 @@ extension PathItemTests {
     func test_pathItemMap_encode() throws {
         let map: OpenAPI.PathItem.Map = [
             "/hello/world": .pathItem(.init()),
-            "hi/there": .pathItem(.init())
+            "hi/there": .pathItem(.init()),
+            "/reference/": .reference(.component(named: "pathRef"))
         ]
 
         let encodedMap = try orderUnstableTestStringFromEncoding(of: map)
@@ -434,6 +435,9 @@ extension PathItemTests {
               },
               "\\/hi\\/there" : {
 
+              },
+              "\\/reference\\/" : {
+                "$ref" : "#\\/components\\/pathItems\\/pathRef"
               }
             }
             """
@@ -449,6 +453,9 @@ extension PathItemTests {
           },
           "\\/hi\\/there" : {
 
+          },
+          "\\/reference\\/" : {
+            "$ref" : "#\\/components\\/pathItems\\/pathRef"
           }
         }
         """.data(using: .utf8)!
@@ -459,7 +466,8 @@ extension PathItemTests {
             map,
             [
                 "/hello/world": .pathItem(.init()),
-                "/hi/there": .pathItem(.init())
+                "/hi/there": .pathItem(.init()),
+                "/reference/": .reference(.component(named: "pathRef"))
             ]
         )
     }
