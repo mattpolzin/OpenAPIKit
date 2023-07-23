@@ -25,6 +25,14 @@ final class TagTests: XCTestCase {
         )
         XCTAssertEqual(t3.description, "world")
         XCTAssertEqual(t3.externalDocs, .init(url: URL(string: "http://google.com")!))
+
+        let t4 = OpenAPI.Tag(
+            name: "tag",
+            description: "orig"
+        ).overriddenNonNil(description: "new")
+            .overriddenNonNil(summary: "no-op")
+            .overriddenNonNil(description: nil) // no effect
+        XCTAssertEqual(t4.description, "new")
     }
 }
 
