@@ -220,6 +220,60 @@ extension ResponseTests {
         )
     }
 
+    func test_schemaReferenceHeader_encode() {
+        let header = OpenAPI.Header(schemaReference: .component(named: "schemaRef"), description: "a good header")
+        let response = OpenAPI.Response(
+            description: "hello world",
+            headers: ["hello": .init(header)],
+            content: [:]
+        )
+
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
+
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "description" : "hello world",
+              "headers" : {
+                "hello" : {
+                  "description" : "a good header",
+                  "schema" : {
+                    "$ref" : "#\\/components\\/schemas\\/schemaRef"
+                  }
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_schemaReferenceHeader_decode() throws {
+        let responseData =
+        """
+        {
+            "description": "hello world",
+            "headers": {
+                "hello": {
+                    "description": "a good header",
+                    "schema" : { "$ref" : "#/components/schemas/schemaRef" }
+                }
+            }
+        }
+        """.data(using: .utf8)!
+
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
+
+        let header = OpenAPI.Header(schemaReference: .component(named: "schemaRef"), description: "a good header")
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                headers: ["hello": .init(header)]
+            )
+        )
+    }
+
     func test_populatedDescriptionPopulatedContent_withExtension_encode() {
         let content = OpenAPI.Content(schema: .init(.string))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
