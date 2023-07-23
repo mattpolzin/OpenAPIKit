@@ -127,7 +127,7 @@ extension OpenAPI.Document {
 /// `where` clause both examine the same type (i.e. `OpenAPI.Document.Info`
 /// from the previous example and `OpenAPI.Document` from the next example).
 ///
-/// The next example also uses `given()`  in its `where` caluse. This allows you to
+/// The next example also uses `take()`  in its `where` caluse. This allows you to
 /// dig into a value based on its KeyPath just like the previous example but you can
 /// use it for more complicated criteria than equality/inequality.
 ///
@@ -142,12 +142,12 @@ extension OpenAPI.Document {
 ///         .validating(
 ///             "At least two servers are specified if one of them is the test server.",
 ///             check: \.document.servers.count >= 2,
-///             when: given(\OpenAPI.Document.servers) { servers in
+///             when: take(\OpenAPI.Document.servers) { servers in
 ///                 servers.map { $0.url.absoluteString }.contains("https://test.server.com")
 ///             }
 ///     )
 ///
-/// Context access, the `given()` method, and the inequality KeyPath syntax are all
+/// Context access, the `take()` method, and the inequality KeyPath syntax are all
 /// allowed in both the `check` and `where` clauses. Just keep in mind that if you
 /// omit information about the type of thing being validated in one clause (as you do
 /// when you access `\.document`) then you need to indicate the type (perhaps with
