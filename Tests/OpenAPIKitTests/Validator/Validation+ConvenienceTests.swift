@@ -302,7 +302,7 @@ final class ValidationConvenienceTests: XCTestCase {
             )
         )
 
-        let context = ValidationContext<OpenAPI.PathItem>(document: document, subject: document.paths["/test"]!, codingPath: [])
+        let context = ValidationContext<OpenAPI.PathItem>(document: document, subject: document.paths["/test"]!.pathItem!, codingPath: [])
 
         // passses
         XCTAssertTrue(
@@ -348,19 +348,19 @@ final class ValidationConvenienceTests: XCTestCase {
 
         // passes
         XCTAssertTrue(
-            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[0], thenApply: v)(context).isEmpty
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.pathItem?.parameters[0], thenApply: v)(context).isEmpty
         )
         // wrong name
         XCTAssertFalse(
-            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[1], thenApply: v)(context).isEmpty
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.pathItem?.parameters[1], thenApply: v)(context).isEmpty
         )
         // not found reference
         XCTAssertFalse(
-            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.parameters[2], thenApply: v)(context).isEmpty
+            unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.pathItem?.parameters[2], thenApply: v)(context).isEmpty
         )
         // nil keypath
         XCTAssertFalse(
-            unwrapAndLookup(\OpenAPI.Document.paths["/test2"]?.parameters.first, thenApply: v)(context).isEmpty
+            unwrapAndLookup(\OpenAPI.Document.paths["/test2"]?.pathItem?.parameters.first, thenApply: v)(context).isEmpty
         )
     }
 
