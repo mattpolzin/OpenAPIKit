@@ -24,8 +24,8 @@ extension OpenAPI {
         public var requestBodies: ComponentDictionary<Request>
         public var headers: ComponentDictionary<Header>
         public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var callbacks: ComponentDictionary<Callbacks>
         public var links: ComponentDictionary<Link>
+        public var callbacks: ComponentDictionary<Callbacks>
 
         /// Dictionary of vendor extensions.
         ///

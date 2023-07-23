@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 
-    /// See [OpenAPI Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#media-type-object).
+    /// See [OpenAPI Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#media-type-object).
     public struct Content: Equatable, CodableVendorExtendable {
         public var schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?
         public var example: AnyCodable?

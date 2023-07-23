@@ -14,7 +14,7 @@ extension Validation {
     /// `PathItem.Map`.
     ///
     /// The OpenAPI Specifcation does not require that the document
-    /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-filtering)
+    /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// an empty `PathItem.Map` in error.
     ///
@@ -30,7 +30,7 @@ extension Validation {
     /// one operation.
     ///
     /// The OpenAPI Specifcation does not require that path items
-    /// contain any operations for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-filtering)
+    /// contain any operations for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// a `PathItem` with no operations in error.
     ///
@@ -159,7 +159,7 @@ extension Validation {
     /// one response.
     ///
     /// The OpenAPI Specifcation requires that Responses Objects
-    /// contain [at least one response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responses-object).
+    /// contain [at least one response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#responses-object).
     /// The specification recommends that if there is only one response then
     /// it be a successful response.
     ///
@@ -177,7 +177,7 @@ extension Validation {
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
     /// The OpenAPI Specifcation requires that tag names on the Document
-    /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object).
+    /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#openapi-object).
     ///
     /// - Important: This is included in validation by default.
     public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
@@ -197,7 +197,7 @@ extension Validation {
     /// A Path Item Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#path-item-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -215,7 +215,7 @@ extension Validation {
     /// An Operation's Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -229,7 +229,7 @@ extension Validation {
 
     /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
     ///
-    /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object).
     ///
     /// - Important: This is included in validation by default.
     ///

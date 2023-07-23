@@ -313,6 +313,8 @@ extension OperationTests {
 
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
+
+        XCTAssertNil(operation.callbacks["callback"]?.b?.keys.first?.url)
     }
 
     // Note that JSONEncoder for Linux Foundation does not respect order
