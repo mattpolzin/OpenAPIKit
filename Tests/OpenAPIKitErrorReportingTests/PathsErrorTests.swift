@@ -45,7 +45,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths. \n\nReference<PathItem> could not be decoded because:\nInconsistency encountered when parsing `$ref`: Expected a reference string, but found an empty string instead..."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths['/hello/world']. \n\nReference<PathItem> could not be decoded because:\nInconsistency encountered when parsing `$ref`: Expected a reference string, but found an empty string instead..."
             )
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
         }

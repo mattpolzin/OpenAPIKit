@@ -73,7 +73,7 @@ extension OpenAPI.Error.Decoding.Document {
         case .path(let pathError):
             return pathError.relativeCodingPathString
         case .neither(let eitherError):
-            return eitherError.relativeCodingPathString
+            return eitherError.codingPath.stringValue
         }
     }
 

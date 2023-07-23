@@ -27,7 +27,7 @@ final class OperationErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths. \n\nPathItem could not be decoded because:\nExpected to find `responses` key for the **GET** endpoint under `/hello/world` but it is missing..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths['/hello/world']. \n\nPathItem could not be decoded because:\nExpected to find `responses` key for the **GET** endpoint under `/hello/world` but it is missing..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world"
