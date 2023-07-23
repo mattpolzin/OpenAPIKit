@@ -16,6 +16,7 @@ extension OpenAPI.Error.Decoding {
             case path(Path)
             case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)
+            case neither(EitherDecodeNoTypesMatchedError)
         }
     }
 }
@@ -31,6 +32,9 @@ extension OpenAPI.Error.Decoding.Document {
 
         case .inconsistency(let error):
             return error.subjectName
+
+        case .neither(let eitherError):
+            return eitherError.subjectName
         }
     }
 
@@ -38,7 +42,7 @@ extension OpenAPI.Error.Decoding.Document {
         switch context {
         case .path(let pathError):
             return pathError.contextString
-        case .other, .inconsistency:
+        case .other, .inconsistency, .neither:
             return relativeCodingPathString.isEmpty
                 ? "in the root Document object"
                 : "in Document\(relativeCodingPathString)"
@@ -53,6 +57,8 @@ extension OpenAPI.Error.Decoding.Document {
             return error.errorCategory
         case .inconsistency(let error):
             return .inconsistency(details: error.details)
+        case .neither(let eitherError):
+            return eitherError.errorCategory
         }
     }
 
@@ -66,6 +72,8 @@ extension OpenAPI.Error.Decoding.Document {
                 : error.codingPath.dropLast().stringValue
         case .path(let pathError):
             return pathError.relativeCodingPathString
+        case .neither(let eitherError):
+            return eitherError.relativeCodingPathString
         }
     }
 
@@ -82,5 +90,31 @@ extension OpenAPI.Error.Decoding.Document {
     internal init(_ error: OpenAPI.Error.Decoding.Path) {
         context = .path(error)
         codingPath = error.codingPath
+    }
+
+    internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
+        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
+            self = Self(unwrapping: eitherBranchToDigInto)
+            return
+        }
+
+        context = .neither(eitherError)
+        codingPath = eitherError.codingPath
+    }
+}
+
+extension OpenAPI.Error.Decoding.Document: DiggingError {
+    public init(unwrapping error: Swift.DecodingError) {
+        if let decodingError = error.underlyingError as? Swift.DecodingError {
+            self = Self(unwrapping: decodingError)
+        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
+            self = Self(inconsistencyError)
+        } else if let pathError = error.underlyingError as? OpenAPI.Error.Decoding.Path {
+            self = Self(pathError)
+        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
+            self = Self(eitherError)
+        } else {
+            self = Self(error)
+        }
     }
 }

@@ -29,6 +29,28 @@ final class PathsErrorTests: XCTestCase {
         }
     }
 
+    func test_badPathReference() {
+        let documentYML =
+        """
+        openapi: "3.1.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                $ref: ''
+        """
+
+        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a PathItem in Document.paths. \n\nReference<PathItem> could not be decoded because:\nInconsistency encountered when parsing `$ref`: Expected a reference string, but found an empty string instead..."
+            )
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
+        }
+    }
+
     func test_wrongTypeParameter() {
         let documentYML =
         """

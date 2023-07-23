@@ -53,8 +53,8 @@ public extension Swift.DecodingError {
             return .missing(.value)
         case .keyNotFound:
             return .missing(.key)
-        case .dataCorrupted:
-            return .dataCorrupted(underlying: underlyingError)
+        case .dataCorrupted(let context):
+            return .inconsistency(details: context.debugDescription)
         @unknown default:
             return .dataCorrupted(underlying: underlyingError)
         }

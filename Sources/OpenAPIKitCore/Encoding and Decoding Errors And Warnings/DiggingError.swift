@@ -32,7 +32,7 @@ extension DiggingError {
     /// trivially (i.e. the user does not need to know that both branches failed because one
     /// of those branches is very unlikely to have been the intended one). If that happens, it is
     /// more useful to dig into the less trivial branch and display a more granular error to the user
-    /// from deeper in that brach. When this occurs, this function retruns the udnerlying error on
+    /// from deeper in that brach. When this occurs, this function retruns the underlying error on
     /// that branch.
     public static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
         // Just a guard against this being an error with more than 2 branches.
