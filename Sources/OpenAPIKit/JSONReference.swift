@@ -385,6 +385,10 @@ extension OpenAPI {
     }
 }
 
+/// `SummaryOverridable` exists to provide a parent protocol to `OpenAPIDescribable`
+/// and `OpenAPISummarizable`. The structure is designed to provide default no-op
+/// implementations of both the members of this protocol to all types that implement either
+/// of the child protocols.
 public protocol SummaryOverridable {
     func overriddenNonNil(description: String?) -> Self
     func overriddenNonNil(summary: String?) -> Self
@@ -400,10 +404,16 @@ public extension SummaryOverridable {
     }
 }
 
+/// `OpenAPIDescribable` types allow their descriptions to be overridden to facilitate
+/// the OpenAPI 3.1.x feature that a `$ref` can specify a description to be used instead of
+/// whatever description the referenced object has.
 public protocol OpenAPIDescribable: SummaryOverridable {
     func overriddenNonNil(description: String?) -> Self
 }
 
+/// `OpenAPISummarizable` types allow their summaries to be overridden to facilitate
+/// the OpenAPI 3.1.x feature that a `$ref` can specify a summary to be used instead of
+/// whatever summary the referenced object has.
 public protocol OpenAPISummarizable: OpenAPIDescribable {
     func overriddenNonNil(summary: String?) -> Self
 }

@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
-    /// See [OpenAPI Tag Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#tag-object).
+    /// See [OpenAPI Tag Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#tag-object).
     public struct Tag: Equatable, CodableVendorExtendable {
         public let name: String
         public let description: String?

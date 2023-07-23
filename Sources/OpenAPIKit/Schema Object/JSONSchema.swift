@@ -9,7 +9,7 @@ import OpenAPIKitCore
 
 /// OpenAPI "Schema Object"
 /// 
-/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
+/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schema-object).
 public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     public let warnings: [OpenAPI.Warning]
@@ -477,7 +477,7 @@ extension JSONSchema {
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.optionalContext())
+                schema: .all(of: fragments.map { $0.optionalSchemaObject() }, core: core.optionalContext())
             )
         case .one(of: let schemas, core: let core):
             return .init(
@@ -545,7 +545,7 @@ extension JSONSchema {
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.requiredContext())
+                schema: .all(of: fragments.map { $0.requiredSchemaObject() }, core: core.requiredContext())
             )
         case .one(of: let schemas, core: let core):
             return .init(
