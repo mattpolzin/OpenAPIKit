@@ -156,7 +156,7 @@ extension Either where B == OpenAPI.PathItem {
     /// Construct a path item value.
     public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self { .b(pathItem) }
 
-    public static func pathItem(
+    public init(
         summary: String? = nil,
         description: String? = nil,
         servers: [OpenAPI.Server]? = nil,
@@ -170,8 +170,8 @@ extension Either where B == OpenAPI.PathItem {
         patch: OpenAPI.Operation? = nil,
         trace: OpenAPI.Operation? = nil,
         vendorExtensions: [String: AnyCodable] = [:]
-    ) -> Self {
-        .b(
+    ) {
+        self = .b(
             .init(
                 summary: summary,
                 description: description,
