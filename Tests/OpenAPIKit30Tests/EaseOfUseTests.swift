@@ -439,7 +439,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         XCTAssertEqual(countByMethod[.post], 1)
 
         let easyMode = document.routes.flatMap { $0.pathItem.endpoints }
-        XCTAssertEqual(endpoints.count, easyMode.count)
+        XCTAssertEqual(endpoints.reduce(0, { sum, next in sum + next.value.count }), easyMode.count)
         XCTAssertEqual(endpoints.values.flatMap { $0.self }, easyMode)
     }
 
