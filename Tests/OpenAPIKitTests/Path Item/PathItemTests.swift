@@ -134,7 +134,7 @@ final class PathItemTests: XCTestCase {
 
     func test_initializePathItemMap() {
         let _: OpenAPI.PathItem.Map = [
-            "hello/world": .pathItem(.init()),
+            "hello/world": .init(),
         ]
     }
 }
@@ -419,8 +419,8 @@ extension PathItemTests {
 
     func test_pathItemMap_encode() throws {
         let map: OpenAPI.PathItem.Map = [
-            "/hello/world": .pathItem(.init()),
-            "hi/there": .pathItem(.init()),
+            "/hello/world": .init(),
+            "hi/there": .init(),
             "/reference/": .reference(.component(named: "pathRef"))
         ]
 
@@ -465,8 +465,8 @@ extension PathItemTests {
         XCTAssertEqual(
             map,
             [
-                "/hello/world": .pathItem(.init()),
-                "/hi/there": .pathItem(.init()),
+                "/hello/world": .init(),
+                "/hi/there": .init(),
                 "/reference/": .reference(.component(named: "pathRef"))
             ]
         )

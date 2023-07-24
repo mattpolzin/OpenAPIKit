@@ -25,14 +25,14 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": .pathItem(.init(
+                "/hi/there": .init(
                     parameters: [],
                     get: .init(
                         tags: "hi",
                         parameters: [],
                         responses: [:]
                     )
-                ))
+                )
             ],
             components: .init(schemas: ["hello": .string]),
             security: [],
@@ -41,7 +41,7 @@ final class DocumentTests: XCTestCase {
         )
     }
 
-    func test_getRoutes() throws {
+    func test_getRoutes() {
         let pi1 = OpenAPI.PathItem(
             parameters: [],
             get: .init(
@@ -78,17 +78,15 @@ final class DocumentTests: XCTestCase {
         )
     }
 
-    func test_getAllOperationIds() throws {
+    func test_getAllOperationIds() {
         let t1 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(.init(
-                    get: .init(operationId: nil, responses: [:]))
-                ),
-                "/hello/world": .pathItem(.init(
+                "/hello": .init(
+                    get: .init(operationId: nil, responses: [:])),
+                "/hello/world": .init(
                     put: .init(operationId: nil, responses: [:]))
-                )
             ],
             components: .noComponents
         )
@@ -99,12 +97,10 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(.init(
-                    get: .init(operationId: "test", responses: [:]))
-                ),
-                "/hello/world": .pathItem(.init(
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [:])),
+                "/hello/world": .init(
                     put: .init(operationId: nil, responses: [:]))
-                )
             ],
             components: .noComponents
         )
@@ -115,12 +111,10 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(.init(
-                    get: .init(operationId: "test", responses: [:]))
-                ),
-                "/hello/world": .pathItem(.init(
+                "/hello": .init(
+                    get: .init(operationId: "test", responses: [:])),
+                "/hello/world": .init(
                     put: .init(operationId: "two", responses: [:]))
-                )
             ],
             components: .noComponents
         )
@@ -131,12 +125,10 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(.init(
-                    get: .init(operationId: nil, responses: [:]))
-                ),
-                "/hello/world": .pathItem(.init(
+                "/hello": .init(
+                    get: .init(operationId: nil, responses: [:])),
+                "/hello/world": .init(
                     put: .init(operationId: "two", responses: [:]))
-                )
             ],
             components: .noComponents
         )
@@ -149,13 +141,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -171,13 +163,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -193,13 +185,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: []
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -215,13 +207,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s1, s2]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -237,13 +229,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s1, s2]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -260,13 +252,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [s2],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -284,13 +276,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -308,13 +300,13 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
                         servers: [s3]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -330,11 +322,11 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [s1, s2],
             paths: [
-                "/hello/world": .pathItem(.init(
+                "/hello/world": .init(
                     get: .init(
                         responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])]
                     )
-                ))
+                )
             ],
             components: .noComponents
         )
@@ -347,8 +339,8 @@ final class DocumentTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/test1": .pathItem(.init()),
-                "/test2": .pathItem(.init())
+                "/test1": .init(),
+                "/test2": .init()
             ],
             components: .noComponents
         )
@@ -567,7 +559,7 @@ extension DocumentTests {
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),
             servers: [],
-            paths: ["test": .pathItem(.init(summary: "hi"))],
+            paths: ["test": .init(summary: "hi")],
             components: .noComponents
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
@@ -614,7 +606,7 @@ extension DocumentTests {
             OpenAPI.Document(
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
-                paths: ["test": .pathItem(.init(summary: "hi"))],
+                paths: ["test": .init(summary: "hi")],
                 components: .noComponents
             )
         )
@@ -1077,7 +1069,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
+                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)
