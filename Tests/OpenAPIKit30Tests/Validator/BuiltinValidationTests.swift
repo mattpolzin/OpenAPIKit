@@ -639,7 +639,7 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": path
+                "/hello": .pathItem(path)
             ],
             components: .noComponents
         )
@@ -706,7 +706,7 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": path
+                "/hello": .pathItem(path)
             ],
             components: .init(
                 schemas: [

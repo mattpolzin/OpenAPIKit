@@ -63,8 +63,8 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": pi1,
-                "/hi": pi2
+                "/hi/there": .pathItem(pi1),
+                "/hi": .pathItem(pi2)
             ],
             components: .init(schemas: ["hello": .string])
         )

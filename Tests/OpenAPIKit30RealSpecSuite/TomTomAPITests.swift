@@ -82,13 +82,13 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         XCTAssert(apiDoc.paths.contains(key: "/search/{versionNumber}/geometrySearch/{query}.{ext}"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.pathItemValue?.post?.responses[200 as OpenAPI.Response.StatusCode])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.pathItemValue?.get?.responses[200 as OpenAPI.Response.StatusCode])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.get?.parameters.isEmpty ?? true)
+        XCTAssertFalse(apiDoc.paths["/search/{versionNumber}/geometrySearch/{query}.{ext}"]?.pathItemValue?.get?.parameters.isEmpty ?? true)
     }
 
     func test_successfullyParsedComponents() throws {

@@ -429,7 +429,14 @@ fileprivate func assertEqualNewToOld(_ newDoc: OpenAPIKit.OpenAPI.Document, _ ol
     XCTAssertEqual(newDoc.paths.count, oldDoc.paths.count)
     for (path, newPathItem) in newDoc.paths {
         let oldPathItem = try XCTUnwrap(oldDoc.paths[path])
-        try assertEqualNewToOld(newPathItem.pathItemValue, oldPathItem) // TODO: switch back to not only testing the non-reference case once OpenAPIKit30 has gained the ability to reference path items as well.
+        switch (newPathItem, oldPathItem) {
+        case (.a(let ref), .a(let ref2)):
+            XCTAssertEqual(ref.absoluteString, ref2.absoluteString)
+        case (.b(let pathItem), .b(let pathItem2)):
+            try assertEqualNewToOld(pathItem, pathItem2)
+        default:
+            XCTFail("One path had a reference and the other had a concrete path item. \(newPathItem)    /    \(oldPathItem)")
+        }
     }
 
     // COMPONENTS
