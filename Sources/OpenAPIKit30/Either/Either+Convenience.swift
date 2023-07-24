@@ -73,7 +73,7 @@ extension Either where A == DereferencedSchemaContext {
 
 extension Either where B == OpenAPI.PathItem {
     /// Retrieve the path item if that is what this property contains.
-    public var pathItem: B? { b }
+    public var pathItemValue: B? { b }
 }
 
 extension Either where B == OpenAPI.Parameter {

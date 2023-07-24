@@ -32,18 +32,7 @@ public struct DereferencedDocument: Equatable {
     /// in the array.
     public let security: [DereferencedSecurityRequirement]
 
-    /// All Tags used anywhere in the document.
-    ///
-    /// The tags stored in the `OpenAPI.Document.tags`
-    /// property need not contain all tags used anywhere in
-    /// the document. This property is comprehensive.
-    public var allTags: Set<String> {
-        return Set(
-            (underlyingDocument.tags ?? []).map { $0.name }
-            + paths.values.flatMap { $0.endpoints }
-                .flatMap { $0.operation.tags ?? [] }
-        )
-    }
+
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Document, T>) -> T {
         return underlyingDocument[keyPath: path]
@@ -76,7 +65,13 @@ public struct DereferencedDocument: Equatable {
     }
 }
 
+// MARK: - Dereferenced Helpers
 extension DereferencedDocument {
+    // We override the following helpers defined on `Document`
+    // because they utilize `PathItems` which might be references
+    // on a `Document` but are guaranteed to be derefenced at this
+    // point
+
     /// The pairing of a path and the path item that describes the
     /// route at that path.
     public struct Route: Equatable {
@@ -98,8 +93,110 @@ extension DereferencedDocument {
     public var routes: [Route] {
         return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
     }
+
+    /// Retrieve an array of all locally defined Operation Ids defined by
+    /// this API. These Ids are guaranteed to be unique by
+    /// the OpenAPI Specification.
+    ///
+    /// The ordering is not necessarily significant, but it will
+    /// be the order in which each operation is occurred within
+    /// each path, traversed in the order the paths appear in
+    /// the document.
+    ///
+    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object) in the specifcation.
+    ///
+    public var allOperationIds: [String] {
+        return paths.values
+            .flatMap { $0.endpoints }
+            .compactMap { $0.operation.operationId }
+    }
+
+    /// All servers referenced anywhere in the whole document.
+    ///
+    /// This property contains all servers defined at any level the document
+    /// and therefore may or may not contain servers not found in the
+    /// root servers array.
+    ///
+    /// The `servers` property on `OpenAPI.Document`, by contrast, contains
+    /// servers that are applicable to all paths and operations that
+    /// do not define their own `serves` array to override the root array.
+    ///
+    /// - Important: For the purposes of returning one of each `Server`,
+    ///     two servers are considered identical if they have the same `url`
+    ///     and `variables`. Differing `description` properties for
+    ///     otherwise identical servers are considered to be two ways to
+    ///     describe the same server. `vendorExtensions` are also
+    ///     ignored when determining server uniqueness.
+    ///
+    ///     The first `Server` encountered will be used, so if the only
+    ///     difference between a server at the root document level and
+    ///     one in an `Operation`'s override of the servers array is the
+    ///     description, the description of the `Server` returned by this
+    ///     property will be that of the root document definition.
+    ///
+    public var allServers: [OpenAPI.Server] {
+            // We hash `Variable` without its
+            // `description` or `vendorExtensions`.
+        func hash(variable: OpenAPI.Server.Variable, into hasher: inout Hasher) {
+            hasher.combine(variable.enum)
+            hasher.combine(variable.default)
+        }
+
+            // We hash `Server` without its `description` or
+            // `vendorExtensions`.
+        func hash(server: OpenAPI.Server, into hasher: inout Hasher) {
+            hasher.combine(server.urlTemplate)
+            for (key, value) in server.variables {
+                hasher.combine(key)
+                hash(variable: value, into: &hasher)
+            }
+        }
+
+        func hash(for server: OpenAPI.Server) -> Int {
+            var hasher = Hasher()
+            hash(server: server, into: &hasher)
+            return hasher.finalize()
+        }
+
+        var collectedServers = underlyingDocument.servers
+        var seenHashes = Set(underlyingDocument.servers.map(hash(for:)))
+
+        func insertUniquely(server: OpenAPI.Server) {
+            let serverHash = hash(for: server)
+            if !seenHashes.contains(serverHash) {
+                seenHashes.insert(serverHash)
+                collectedServers.append(server)
+            }
+        }
+
+        for pathItem in paths.values {
+            let pathItemServers = pathItem.servers ?? []
+            pathItemServers.forEach(insertUniquely)
+
+            let endpointServers: [OpenAPI.Server] =
+                pathItem.endpoints
+                .flatMap { $0.operation.servers ?? [] }
+            endpointServers.forEach(insertUniquely)
+        }
+
+        return collectedServers
+    }
+
+    /// All Tags used anywhere in the document.
+    ///
+    /// The tags stored in the `OpenAPI.Document.tags`
+    /// property need not contain all tags used anywhere in
+    /// the document. This property is comprehensive.
+    public var allTags: Set<String> {
+        return Set(
+            (underlyingDocument.tags ?? []).map { $0.name }
+            + paths.values.flatMap { $0.endpoints }
+                .flatMap { $0.operation.tags ?? [] }
+        )
+    }
 }
 
+// MARK: - ResolvedDocument
 extension DereferencedDocument {
     /// Resolve the document's routes and endpoints.
     ///

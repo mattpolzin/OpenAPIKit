@@ -73,7 +73,7 @@ extension Either where A == DereferencedSchemaContext {
 
 extension Either where B == OpenAPI.PathItem {
     /// Retrieve the path item if that is what this property contains.
-    public var pathItem: B? { b }
+    public var pathItemValue: B? { b }
 }
 
 extension Either where B == OpenAPI.Parameter {
@@ -129,11 +129,6 @@ extension Either where B == AnyCodable {
 extension Either where B == OpenAPI.Header {
     /// Retrieve the header if that is what this property contains.
     public var headerValue: B? { b }
-}
-
-extension Either where B == OpenAPI.PathItem {
-    /// Retrieve the path item if that is what this property contains.
-    public var pathItemValue: B? { b }
 }
 
 // MARK: - Convenience constructors

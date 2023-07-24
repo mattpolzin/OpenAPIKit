@@ -429,7 +429,7 @@ fileprivate func assertEqualNewToOld(_ newDoc: OpenAPIKit.OpenAPI.Document, _ ol
     XCTAssertEqual(newDoc.paths.count, oldDoc.paths.count)
     for (path, newPathItem) in newDoc.paths {
         let oldPathItem = try XCTUnwrap(oldDoc.paths[path])
-        try assertEqualNewToOld(newPathItem.pathItem, oldPathItem) // TODO: switch back to not only testing the non-reference case once OpenAPIKit30 has gained the ability to reference path items as well.
+        try assertEqualNewToOld(newPathItem.pathItemValue, oldPathItem) // TODO: switch back to not only testing the non-reference case once OpenAPIKit30 has gained the ability to reference path items as well.
     }
 
     // COMPONENTS

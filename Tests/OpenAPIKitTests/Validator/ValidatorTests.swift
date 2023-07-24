@@ -1432,7 +1432,7 @@ final class ValidatorTests: XCTestCase {
         let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
 
         XCTAssertEqual(
-            doc.paths["test"]?.pathItem?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            doc.paths["test"]?.pathItemValue?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
             "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
         )
 
@@ -1471,7 +1471,7 @@ final class ValidatorTests: XCTestCase {
         let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
 
         XCTAssertEqual(
-            doc.paths["test"]?.pathItem?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            doc.paths["test"]?.pathItemValue?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
             "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
         )
 
