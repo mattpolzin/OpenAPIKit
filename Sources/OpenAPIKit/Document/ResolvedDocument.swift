@@ -125,13 +125,4 @@ public struct ResolvedDocument: Equatable {
     ///
     /// An empty security requirement in the array means that security is optional.
     public var security: [DereferencedSecurityRequirement] { underlyingDocument.security }
-
-    /// All Tags used anywhere in the document.
-    ///
-    /// The tags stored in the `OpenAPI.Document.tags`
-    /// property need not contain all tags used anywhere in
-    /// the document. This property is comprehensive.
-    public var allTags: Set<String> {
-        return underlyingDocument.allTags
-    }
 }
