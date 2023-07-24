@@ -204,24 +204,25 @@ extension OpenAPI.Document {
         }
     }
 
-    /// Get all routes for this document.
+    /// Get all locally defined routes for this document. PathItems will be
+    /// looked up in the components, but any remote references or path items
+    /// missing from the components will be ignored.
     ///
     /// - Returns: An Array of `Routes` with the path
     ///     and the definition of the route.
     ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
-    ///     path item is a missing reference depending on whether the reference points to
-    ///     another file or just points to a component in the same file that cannot be found
-    ///     in the Components Object.
-    ///
-    public func routes() throws -> [Route] {
-        return try paths.map { (path, pathItem) in .init(path: path, pathItem: try components.lookup(pathItem)) }
+    public var routes: [Route] {
+        return paths.compactMap { (path, pathItemRef) in
+            components[pathItemRef].map { .init(path: path, pathItem: $0) }
+        }
     }
 
-    /// Retrieve an array of all Operation Ids defined by
+    /// Retrieve an array of all locally defined Operation Ids defined by
     /// this API. These Ids are guaranteed to be unique by
     /// the OpenAPI Specification.
+    ///
+    /// PathItems will be looked up in the components, but any remote references
+    /// or path items missing from the components will be ignored.
     ///
     /// The ordering is not necessarily significant, but it will
     /// be the order in which each operation is occurred within
@@ -230,15 +231,10 @@ extension OpenAPI.Document {
     ///
     /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object) in the specifcation.
     ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
-    ///     path item is a missing reference depending on whether the reference points to
-    ///     another file or just points to a component in the same file that cannot be found
-    ///     in the Components Object.
-    ///
-    public func allOperationIds() throws -> [String] {
-        return try paths.values
-            .flatMap { try components.lookup($0).endpoints }
+    public var allOperationIds: [String] {
+        return paths.values
+            .compactMap { components[$0] }
+            .flatMap { $0.endpoints }
             .compactMap { $0.operation.operationId }
     }
 
@@ -301,10 +297,10 @@ extension OpenAPI.Document {
         }
 
         for pathItem in paths.values {
-            let pathItemServers = pathItem.pathItemValue?.servers ?? []
+            let pathItemServers = components[pathItem]?.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
-            if let endpointServers = (pathItem.pathItemValue?.endpoints.flatMap { $0.operation.servers ?? [] }) {
+            if let endpointServers = (components[pathItem]?.endpoints.flatMap { $0.operation.servers ?? [] }) {
                 endpointServers.forEach(insertUniquely)
             }
         }
@@ -318,16 +314,11 @@ extension OpenAPI.Document {
     /// property need not contain all tags used anywhere in
     /// the document. This property is comprehensive.
     ///
-    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
-    ///     `MissingReferenceError.referenceMissingOnLookup(name:)` if a
-    ///     path item is a missing reference depending on whether the reference points to
-    ///     another file or just points to a component in the same file that cannot be found
-    ///     in the Components Object.
-    ///
-    public func allTags() throws -> Set<String> {
-        return try Set(
+    public var allTags: Set<String> {
+        return Set(
             (tags ?? []).map { $0.name }
-            + paths.values.flatMap { try components.lookup($0).endpoints }
+            + paths.values.compactMap { components[$0] }
+                .flatMap { $0.endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )
     }

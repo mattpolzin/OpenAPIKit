@@ -70,7 +70,7 @@ final class DocumentTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            try test.routes(),
+            test.routes,
             [
                 .init(path: "/hi/there", pathItem: pi1),
                 .init(path: "/hi", pathItem: pi2)
@@ -93,7 +93,7 @@ final class DocumentTests: XCTestCase {
             components: .noComponents
         )
 
-        XCTAssertEqual(try t1.allOperationIds(), [])
+        XCTAssertEqual(t1.allOperationIds, [])
 
         let t2 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -109,7 +109,7 @@ final class DocumentTests: XCTestCase {
             components: .noComponents
         )
 
-        XCTAssertEqual(try t2.allOperationIds(), ["test"])
+        XCTAssertEqual(t2.allOperationIds, ["test"])
 
         let t3 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -125,7 +125,7 @@ final class DocumentTests: XCTestCase {
             components: .noComponents
         )
 
-        XCTAssertEqual(try t3.allOperationIds(), ["test", "two"])
+        XCTAssertEqual(t3.allOperationIds, ["test", "two"])
 
         let t4 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -141,7 +141,7 @@ final class DocumentTests: XCTestCase {
             components: .noComponents
         )
 
-        XCTAssertEqual(try t4.allOperationIds(), ["two"])
+        XCTAssertEqual(t4.allOperationIds, ["two"])
     }
 
     func test_allServersEmpty() {
