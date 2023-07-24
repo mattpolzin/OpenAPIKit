@@ -84,19 +84,20 @@ extension Validation {
                 var errors = [ValidationError]()
 
                 for (path, item) in context.subject {
+                    guard let pathItem = context.document.components[item] else { continue }
                     let variablesInPath = path.components
                         .lazy
                         .filter { $0.first == "{" && $0.last == "}" }
                         .map { String($0.dropFirst().dropLast()) }
 
                     let paramsInPathItem = Array(
-                        item.parameters
+                        pathItem.parameters
                         .lazy
                         .compactMap { context.document.components[$0] }
                         .map { $0.name }
                     )
 
-                    for endpoint in item.endpoints {
+                    for endpoint in pathItem.endpoints {
                         let paramsInOperation = Array(
                             endpoint.operation.parameters
                             .lazy

@@ -134,7 +134,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.PathItem {
-    public typealias Map = OrderedDictionary<OpenAPI.Path, OpenAPI.PathItem>
+    public typealias Map = OrderedDictionary<OpenAPI.Path, Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>>
 }
 
 extension OrderedDictionary where Key == OpenAPI.Path {

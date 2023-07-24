@@ -199,7 +199,9 @@ extension OpenAPI.Document {
     /// - Returns: An Array of `Routes` with the path
     ///     and the definition of the route.
     public var routes: [Route] {
-        return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
+        return paths.compactMap { (path, pathItemRef) in
+            components[pathItemRef].map { .init(path: path, pathItem: $0) }
+        }
     }
 
     /// Retrieve an array of all Operation Ids defined by
@@ -215,6 +217,7 @@ extension OpenAPI.Document {
     ///
     public var allOperationIds: [String] {
         return paths.values
+            .compactMap { components[$0] }
             .flatMap { $0.endpoints }
             .compactMap { $0.operation.operationId }
     }
@@ -278,10 +281,12 @@ extension OpenAPI.Document {
         }
 
         for pathItem in paths.values {
-            let pathItemServers = pathItem.servers ?? []
+            guard let pathItemValue = components[pathItem] else { continue }
+
+            let pathItemServers = pathItemValue.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
-            let endpointServers = pathItem.endpoints.flatMap { $0.operation.servers ?? [] }
+            let endpointServers = pathItemValue.endpoints.flatMap { $0.operation.servers ?? [] }
             endpointServers.forEach(insertUniquely)
         }
 
@@ -296,7 +301,8 @@ extension OpenAPI.Document {
     public var allTags: Set<String> {
         return Set(
             (tags ?? []).map { $0.name }
-            + paths.values.flatMap { $0.endpoints }
+            + paths.values.compactMap { components[$0] }
+                .flatMap { $0.endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )
     }
@@ -560,7 +566,9 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
 
 internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
     for (path, pathItem) in paths {
-        for endpoint in pathItem.endpoints {
+        guard let pathItemValue = components[pathItem] else { continue }
+
+        for endpoint in pathItemValue.endpoints {
             if let securityRequirements = endpoint.operation.security {
                 try validate(
                     securityRequirements: securityRequirements,
