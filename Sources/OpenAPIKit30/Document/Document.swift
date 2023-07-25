@@ -427,6 +427,9 @@ extension OpenAPI.Document: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Document(error)
+        } catch let error as EitherDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Document(error)
         }
     }
 }
