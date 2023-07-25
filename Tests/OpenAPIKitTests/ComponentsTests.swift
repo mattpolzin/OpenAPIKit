@@ -120,6 +120,9 @@ final class ComponentsTests: XCTestCase {
                 "nine": [
                     OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
                 ]
+            ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [:]))
             ]
         )
 
@@ -132,6 +135,7 @@ final class ComponentsTests: XCTestCase {
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
         let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Link.self)
         let ref9 = try components.reference(named: "nine", ofType: OpenAPI.Callbacks.self)
+        let ref10 = try components.reference(named: "ten", ofType: OpenAPI.PathItem.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
@@ -147,6 +151,7 @@ final class ComponentsTests: XCTestCase {
                 OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
             ]
         )
+        XCTAssertEqual(components[ref10], .init(get: .init(responses: [:])))
     }
 
     func test_subscriptLookup() throws {
@@ -311,6 +316,9 @@ extension ComponentsTests {
                     )
                 ]
             ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [200: .response(description: "response")]))
+            ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
@@ -357,6 +365,17 @@ extension ComponentsTests {
                   },
                   "in" : "query",
                   "name" : "hi"
+                }
+              },
+              "pathItems" : {
+                "ten" : {
+                  "get" : {
+                    "responses" : {
+                      "200" : {
+                        "description" : "response"
+                      }
+                    }
+                  }
                 }
               },
               "requestBodies" : {
@@ -434,6 +453,17 @@ extension ComponentsTests {
               "name" : "hi"
             }
           },
+          "pathItems" : {
+            "ten" : {
+              "get" : {
+                "responses" : {
+                  "200" : {
+                    "description" : "response"
+                  }
+                }
+              }
+            }
+          },
           "requestBodies" : {
             "five" : {
               "content" : {
@@ -507,6 +537,9 @@ extension ComponentsTests {
                             )
                         )
                     ]
+                ],
+                pathItems: [
+                    "ten": .init(get: .init(responses: [200: .response(description: "response")]))
                 ],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
