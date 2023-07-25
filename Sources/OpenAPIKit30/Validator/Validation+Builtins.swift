@@ -243,7 +243,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all JSONSchema references are found in the document's
+    /// Validate that all non-external JSONSchema references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -265,7 +265,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Response references are found in the document's
+    /// Validate that all non-external Response references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -287,7 +287,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Parameter references are found in the document's
+    /// Validate that all non-external Parameter references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -309,7 +309,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Example references are found in the document's
+    /// Validate that all non-external Example references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -331,7 +331,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Request references are found in the document's
+    /// Validate that all non-external Request references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -353,7 +353,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Header references are found in the document's
+    /// Validate that all non-external Header references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -364,6 +364,28 @@ extension Validation {
             check: { context in
                 guard case let .internal(internalReference) = context.subject,
                     case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all non-external Link references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var linkReferencesAreValid: Validation<JSONReference<OpenAPI.Link>> {
+        .init(
+            description: "Link reference can be found in components/links",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                      case .component = internalReference else {
                         // don't make assertions about external references
                         // TODO: could make a stronger assertion including
                         // internal references outside of components given

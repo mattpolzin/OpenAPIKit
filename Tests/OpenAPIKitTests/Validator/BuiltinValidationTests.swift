@@ -732,7 +732,8 @@ final class BuiltinValidationTests: XCTestCase {
                                 ]
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1"))
-                        ]
+                        ],
+                        links: ["linky": .reference(.component(named: "link1"))]
                     )
                 ]
             )
@@ -742,7 +743,8 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(path)
+                "/hello": .pathItem(path),
+                "/world": .reference(.component(named: "path1"))
             ],
             components: .noComponents
         )
@@ -750,7 +752,7 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.count, 6)
+            XCTAssertEqual(error?.values.count, 8)
             XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
             XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")
             XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
@@ -763,6 +765,10 @@ final class BuiltinValidationTests: XCTestCase {
             XCTAssertEqual(error?.values[4].codingPathString, ".paths['/hello'].get.responses.404.content['application/json'].examples.example1")
             XCTAssertEqual(error?.values[5].reason, "Failed to satisfy: JSONSchema reference can be found in components/schemas")
             XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].get.responses.404.content['application/xml'].schema")
+            XCTAssertEqual(error?.values[6].reason, "Failed to satisfy: Link reference can be found in components/links")
+            XCTAssertEqual(error?.values[6].codingPathString, ".paths['/hello'].get.responses.404.links.linky")
+            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: PathItem reference can be found in components/pathItems")
+            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/world']")
         }
     }
 
@@ -799,7 +805,8 @@ final class BuiltinValidationTests: XCTestCase {
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
-                        ]
+                        ],
+                        links: ["linky": .reference(.component(named: "link1"))]
                     )
                 ]
             )
@@ -809,7 +816,8 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": .pathItem(path)
+                "/hello": .pathItem(path),
+                "/world": .reference(.component(named: "path1"))
             ],
             components: .init(
                 schemas: [
@@ -829,6 +837,12 @@ final class BuiltinValidationTests: XCTestCase {
                 ],
                 headers: [
                     "header1": .init(schema: .string)
+                ],
+                links: [
+                    "link1": .init(operationId: "op 1")
+                ],
+                pathItems: [
+                    "path1": .init()
                 ]
             )
         )
