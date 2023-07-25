@@ -177,6 +177,9 @@ final class ComponentsTests: XCTestCase {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .boolean
+            ],
+            links: [
+                "linky": .init(operationId: "op 1")
             ]
         )
 
@@ -197,6 +200,13 @@ final class ComponentsTests: XCTestCase {
 
         XCTAssertThrowsError(try components.lookup(schema3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
+        }
+
+        let link1: Either<JSONReference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "hello"))
+
+        XCTAssertThrowsError(try components.lookup(link1)) { error in
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "hello", key: "links"))
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'hello' was not found in links.")
         }
 
         let reference1: JSONReference<JSONSchema> = .component(named: "hello")
