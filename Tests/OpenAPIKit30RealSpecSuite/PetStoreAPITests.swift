@@ -88,16 +88,16 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         XCTAssert(apiDoc.paths.contains(key: "/store/inventory"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/pet/{petId}/uploadImage"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/pet/{petId}/uploadImage"]?.pathItemValue?.post?.responses[200 as OpenAPI.Response.StatusCode])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/pet/{petId}"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/pet/{petId}"]?.pathItemValue?.get?.responses[200 as OpenAPI.Response.StatusCode])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/pet/{petId}"]?.get?.parameters.isEmpty ?? true)
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.name, "petId")
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.context, .path)
-        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64))
+        XCTAssertFalse(apiDoc.paths["/pet/{petId}"]?.pathItemValue?.get?.parameters.isEmpty ?? true)
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.pathItemValue?.get?.parameters.first?.parameterValue?.name, "petId")
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.pathItemValue?.get?.parameters.first?.parameterValue?.context, .path)
+        XCTAssertEqual(apiDoc.paths["/pet/{petId}"]?.pathItemValue?.get?.parameters.first?.parameterValue?.schemaOrContent.schemaValue, .integer(format: .int64))
     }
 
     func test_successfullyParsedComponents() throws {

@@ -63,6 +63,13 @@ extension OpenAPI.Link: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.links }
 }
 
+// Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+// references, albeit in a less than ideal way.
+extension OpenAPI.PathItem: ComponentDictionaryLocatable {
+    public static var openAPIComponentsKey: String { "pathItems" }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.pathItems }
+}
+
 /// A dereferenceable type can be recursively looked up in
 /// the `OpenAPI.Components` until there are no `JSONReferences`
 /// left in it or any of its properties.

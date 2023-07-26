@@ -189,7 +189,8 @@ public final class Validator {
             .init(.parameterReferencesAreValid),
             .init(.exampleReferencesAreValid),
             .init(.requestReferencesAreValid),
-            .init(.headerReferencesAreValid)
+            .init(.headerReferencesAreValid),
+            .init(.linkReferencesAreValid)
         ])
     }
 

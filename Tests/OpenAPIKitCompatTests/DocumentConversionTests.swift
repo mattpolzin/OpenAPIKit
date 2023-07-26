@@ -429,7 +429,14 @@ fileprivate func assertEqualNewToOld(_ newDoc: OpenAPIKit.OpenAPI.Document, _ ol
     XCTAssertEqual(newDoc.paths.count, oldDoc.paths.count)
     for (path, newPathItem) in newDoc.paths {
         let oldPathItem = try XCTUnwrap(oldDoc.paths[path])
-        try assertEqualNewToOld(newPathItem, oldPathItem)
+        switch (newPathItem, oldPathItem) {
+        case (.a(let ref), .a(let ref2)):
+            XCTAssertEqual(ref.absoluteString, ref2.absoluteString)
+        case (.b(let pathItem), .b(let pathItem2)):
+            try assertEqualNewToOld(pathItem, pathItem2)
+        default:
+            XCTFail("One path had a reference and the other had a concrete path item. \(newPathItem)    /    \(oldPathItem)")
+        }
     }
 
     // COMPONENTS
@@ -496,16 +503,13 @@ fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Paramet
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) {
-    XCTAssertEqual(newParam.name, oldParam.name)
-    assertEqualNewToOld(newParam.context, oldParam.context)
-    XCTAssertEqual(newParam.description, oldParam.description)
-    XCTAssertEqual(newParam.deprecated, oldParam.deprecated)
-    XCTAssertEqual(newParam.vendorExtensions, oldParam.vendorExtensions)
-    XCTAssertEqual(newParam.required, oldParam.required)
-}
+fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem?, _ oldPathItem: OpenAPIKit30.OpenAPI.PathItem?) throws {
+    guard let newPathItem = newPathItem else {
+        XCTAssertNil(oldPathItem)
+        return
+    }
+    let oldPathItem = try XCTUnwrap(oldPathItem)
 
-fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem, _ oldPathItem: OpenAPIKit30.OpenAPI.PathItem) throws {
     XCTAssertEqual(newPathItem.summary, oldPathItem.summary)
     XCTAssertEqual(newPathItem.description, oldPathItem.description)
     if let newServers = newPathItem.servers {
@@ -525,6 +529,15 @@ fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem,
     try assertEqualNewToOld(newPathItem.trace, oldPathItem.trace)
 
     XCTAssertEqual(newPathItem.vendorExtensions, oldPathItem.vendorExtensions)
+}
+
+fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) {
+    XCTAssertEqual(newParam.name, oldParam.name)
+    assertEqualNewToOld(newParam.context, oldParam.context)
+    XCTAssertEqual(newParam.description, oldParam.description)
+    XCTAssertEqual(newParam.deprecated, oldParam.deprecated)
+    XCTAssertEqual(newParam.vendorExtensions, oldParam.vendorExtensions)
+    XCTAssertEqual(newParam.required, oldParam.required)
 }
 
 fileprivate func assertEqualNewToOld(_ newParamContext: OpenAPIKit.OpenAPI.Parameter.Context, _ oldParamContext: OpenAPIKit30.OpenAPI.Parameter.Context) {

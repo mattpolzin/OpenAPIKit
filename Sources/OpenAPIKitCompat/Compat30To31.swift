@@ -30,7 +30,7 @@ extension OpenAPIKit30.OpenAPI.Document: To31 {
             openAPIVersion: .v3_1_0,
             info: info.to31(),
             servers: servers.map { $0.to31() },
-            paths: paths.mapValues { $0.to31() },
+            paths: paths.mapValues { eitherRefTo31($0) },
             components: components.to31(),
             security: security.map { $0.to31() },
             tags: tags?.map { $0.to31() },

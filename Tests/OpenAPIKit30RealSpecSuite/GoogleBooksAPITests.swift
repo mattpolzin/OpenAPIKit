@@ -86,13 +86,13 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
         XCTAssert(apiDoc.paths.contains(key: "/books/v1/familysharing/share"))
 
         // check for a known POST response
-        XCTAssertNotNil(apiDoc.paths["/books/v1/cloudloading/addBook"]?.post?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/books/v1/cloudloading/addBook"]?.pathItemValue?.post?.responses[200 as OpenAPI.Response.StatusCode])
 
         // and a known GET response
-        XCTAssertNotNil(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.get?.responses[200 as OpenAPI.Response.StatusCode])
+        XCTAssertNotNil(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.pathItemValue?.get?.responses[200 as OpenAPI.Response.StatusCode])
 
         // check for parameters
-        XCTAssertFalse(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.parameters.isEmpty ?? true)
+        XCTAssertFalse(apiDoc.paths["/books/v1/dictionary/listOfflineMetadata"]?.pathItemValue?.parameters.isEmpty ?? true)
     }
 
     func test_successfullyParsedComponents() throws {
@@ -112,7 +112,7 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
     func test_someReferences() throws {
         guard let apiDoc = apiDoc else { return }
 
-        let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]
+        let addBooksPath = apiDoc.paths["/books/v1/cloudloading/addBook"]?.pathItemValue
 
         let addBooksParameters = addBooksPath?.parameters.compactMap { apiDoc.components[$0] }
 

@@ -26,6 +26,7 @@ extension OpenAPI {
         public var securitySchemes: ComponentDictionary<SecurityScheme>
         public var links: ComponentDictionary<Link>
         public var callbacks: ComponentDictionary<Callbacks>
+        internal var pathItems: ComponentDictionary<PathItem>
 
         /// Dictionary of vendor extensions.
         ///
@@ -56,6 +57,9 @@ extension OpenAPI {
             self.links = links
             self.callbacks = callbacks
             self.vendorExtensions = vendorExtensions
+            // Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+            // references, albeit in a less than ideal way.
+            self.pathItems = [:]
         }
 
         /// An empty OpenAPI Components Object.
@@ -145,6 +149,10 @@ extension OpenAPI.Components: Decodable {
             links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+
+            // Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+            // references, albeit in a less than ideal way.
+            pathItems = [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {

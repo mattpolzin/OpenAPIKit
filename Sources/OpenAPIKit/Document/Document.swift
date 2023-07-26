@@ -8,7 +8,7 @@
 import OpenAPIKitCore
 
 extension OpenAPI {
-    /// The root of an OpenAPI 3.0 document.
+    /// The root of an OpenAPI 3.1 document.
     /// 
     /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md).
     ///
@@ -204,17 +204,25 @@ extension OpenAPI.Document {
         }
     }
 
-    /// Get all routes for this document.
+    /// Get all locally defined routes for this document. PathItems will be
+    /// looked up in the components, but any remote references or path items
+    /// missing from the components will be ignored.
     ///
     /// - Returns: An Array of `Routes` with the path
     ///     and the definition of the route.
+    ///
     public var routes: [Route] {
-        return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
+        return paths.compactMap { (path, pathItemRef) in
+            components[pathItemRef].map { .init(path: path, pathItem: $0) }
+        }
     }
 
-    /// Retrieve an array of all Operation Ids defined by
+    /// Retrieve an array of all locally defined Operation Ids defined by
     /// this API. These Ids are guaranteed to be unique by
     /// the OpenAPI Specification.
+    ///
+    /// PathItems will be looked up in the components, but any remote references
+    /// or path items missing from the components will be ignored.
     ///
     /// The ordering is not necessarily significant, but it will
     /// be the order in which each operation is occurred within
@@ -225,6 +233,7 @@ extension OpenAPI.Document {
     ///
     public var allOperationIds: [String] {
         return paths.values
+            .compactMap { components[$0] }
             .flatMap { $0.endpoints }
             .compactMap { $0.operation.operationId }
     }
@@ -288,11 +297,12 @@ extension OpenAPI.Document {
         }
 
         for pathItem in paths.values {
-            let pathItemServers = pathItem.servers ?? []
+            let pathItemServers = components[pathItem]?.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
-            let endpointServers = pathItem.endpoints.flatMap { $0.operation.servers ?? [] }
-            endpointServers.forEach(insertUniquely)
+            if let endpointServers = (components[pathItem]?.endpoints.flatMap { $0.operation.servers ?? [] }) {
+                endpointServers.forEach(insertUniquely)
+            }
         }
 
         return collectedServers
@@ -303,10 +313,12 @@ extension OpenAPI.Document {
     /// The tags stored in the `OpenAPI.Document.tags`
     /// property need not contain all tags used anywhere in
     /// the document. This property is comprehensive.
+    ///
     public var allTags: Set<String> {
         return Set(
             (tags ?? []).map { $0.name }
-            + paths.values.flatMap { $0.endpoints }
+            + paths.values.compactMap { components[$0] }
+                .flatMap { $0.endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )
     }
@@ -433,6 +445,9 @@ extension OpenAPI.Document: Decodable {
 
             throw OpenAPI.Error.Decoding.Document(error)
         } catch let error as DecodingError {
+
+            throw OpenAPI.Error.Decoding.Document(error)
+        } catch let error as EitherDecodeNoTypesMatchedError {
 
             throw OpenAPI.Error.Decoding.Document(error)
         }
@@ -580,7 +595,9 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
 
 internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
     for (path, pathItem) in paths {
-        for endpoint in pathItem.endpoints {
+        guard let pathItemValue = components[pathItem] else { continue }
+
+        for endpoint in pathItemValue.endpoints {
             if let securityRequirements = endpoint.operation.security {
                 try validate(
                     securityRequirements: securityRequirements,
