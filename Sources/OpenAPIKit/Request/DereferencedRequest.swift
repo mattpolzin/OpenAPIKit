@@ -50,4 +50,10 @@ extension OpenAPI.Request: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedRequest {
         return try DereferencedRequest(self, resolvingIn: components, following: references)
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Request where Context : ExternalLoaderContext {
+        // TODO: externally dereference the content
+#warning("externally dereference the content")
+        return self
+    }
 }

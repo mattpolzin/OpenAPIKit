@@ -51,4 +51,13 @@ extension OpenAPI.Content.Encoding: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedContentEncoding {
         return try DereferencedContentEncoding(self, resolvingIn: components, following: references)
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Content.Encoding where Context : ExternalLoaderContext {
+        var contentEncoding = self
+
+        // TODO: need to externally dereference the headers here. 
+#warning("need to externally dereference the headers here.")
+
+        return self
+    }
 }

@@ -186,6 +186,10 @@ extension OpenAPI.Example: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.Example {
         return self
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Example where Context : ExternalLoaderContext {
+        return self
+    }
 }
 
 extension OpenAPI.Example: Validatable {}

@@ -407,4 +407,10 @@ extension JSONSchema: LocallyDereferenceable {
     public func dereferenced() -> DereferencedJSONSchema? {
         return try? dereferenced(in: .noComponents)
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
+        // TODO: externally dereference this schema 
+#warning("need to externally dereference json schemas")
+        return self
+    }
 }

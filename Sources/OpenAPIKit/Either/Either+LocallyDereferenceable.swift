@@ -17,4 +17,13 @@ extension Either: LocallyDereferenceable where A: LocallyDereferenceable, B: Loc
             return try value._dereferenced(in: components, following: references)
         }
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
+        switch self {
+        case .a(let a):
+           return .a(try a.externallyDereferenced(in: &context))
+        case .b(let b):
+           return .b(try b.externallyDereferenced(in: &context))
+        }
+    }
 }

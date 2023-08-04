@@ -264,4 +264,8 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.SecurityScheme {
         return self
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.SecurityScheme where Context : ExternalLoaderContext {
+        return self
+    }
 }

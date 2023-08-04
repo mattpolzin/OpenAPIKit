@@ -71,4 +71,13 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedParameter {
         return try DereferencedParameter(self, resolvingIn: components, following: references)
     }
+
+    public func externallyDereferenced<Context: ExternalLoaderContext>(in context: inout Context) throws -> Self {
+        var parameter = self
+        
+        // TODO: externallyDerefence the schemaOrContent
+#warning("need to externally dereference the schemaOrContent here")
+
+        return parameter
+    }
 }

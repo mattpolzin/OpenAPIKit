@@ -472,3 +472,60 @@ extension PathItemTests {
         )
     }
 }
+
+// MARK: External Dereferencing Tests
+extension PathItemTests {
+    struct MockLoad: ExternalLoaderContext {
+        var components: OpenAPI.Components
+
+        func nextComponentKey<T>(type: T.Type, at url: URL) -> OpenAPI.ComponentKey {
+           "hello-world" 
+        }
+
+        static func load<T>(_: URL) throws -> T where T : Decodable {
+            if let ret = OpenAPI.Request(description: "hello", content: [:]) as? T {
+                return ret
+            }
+            if let ret = OpenAPI.Parameter(name: "other-param", context: .header, schema: .string) as? T {
+                return ret
+            }
+            throw ValidationError(reason: "", at: [])
+        }
+    }
+
+    func test_tmp() throws {
+        let components = OpenAPI.Components(
+           parameters: [
+               "already-internal":
+                 .init(name: "internal-param", context: .query, schema: .string),   
+           ]
+        )
+        let op = OpenAPI.Operation(responses: [:])
+        let pathItem = OpenAPI.PathItem(
+            summary: "summary",
+            description: "description",
+            servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
+            parameters: [
+                .parameter(name: "hello", context: .query, schema: .string),
+                .reference(.component(named: "already-internal")),
+                .reference(.external(URL(string: "https://some-param.com")!))
+            ],
+            get: .init(requestBody: .reference(.external(URL(string: "https://website.com")!)), responses: [:]),
+            put: op,
+            post: op,
+            delete: op,
+            options: op,
+            head: op,
+            patch: op,
+            trace: op
+        )
+
+        print(pathItem.parameters.debugDescription)
+        print("------")
+        var context = MockLoad(components: components)
+        let x = try pathItem.externallyDereferenced(in: &context)
+        print(x.parameters.debugDescription)
+        print("=======")
+        print(context.components.parameters)
+    }
+}

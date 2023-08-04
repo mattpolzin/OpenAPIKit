@@ -749,7 +749,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        // NOTE this is part of default validation
+        // NOTE these are part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 8)

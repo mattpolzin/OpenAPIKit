@@ -110,4 +110,10 @@ extension OpenAPI.Operation: LocallyDereferenceable {
     public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedOperation {
         return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
+
+    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Operation where Context : ExternalLoaderContext {
+        // TODO: externally dereference security, responses, requestBody, and parameters
+#warning("externally dereference security, responses, requestBody, and parameters")
+        return self
+    }
 }
