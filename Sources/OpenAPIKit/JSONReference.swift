@@ -523,17 +523,17 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
             ._dereferenced(in: components, following: newReferences)
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
         switch self {
         case .internal(let ref):
-           let value = try context.components.lookup(self)
-               .externallyDereferenced(in: &context)
+           let value = try loader.components.lookup(self)
+               .externallyDereferenced(with: &loader)
            let key = try OpenAPI.ComponentKey.forceInit(rawValue: ref.name) 
-           context.components[keyPath: ReferenceType.openAPIComponentsKeyPath][key] =
+           loader.components[keyPath: ReferenceType.openAPIComponentsKeyPath][key] =
                value 
            return self
         case .external(let url):
-            return try context.store(type: ReferenceType.self, from: url).jsonReference
+            return try loader.store(type: ReferenceType.self, from: url).jsonReference
         }
     }
 }
@@ -560,8 +560,8 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
             ._dereferenced(in: components, following: newReferences)
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
-        return .init(try jsonReference.externallyDereferenced(in: &context))
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
+        return .init(try jsonReference.externallyDereferenced(with: &loader))
     }
 }
 

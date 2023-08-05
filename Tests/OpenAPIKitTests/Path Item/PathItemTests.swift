@@ -476,9 +476,7 @@ extension PathItemTests {
 // MARK: External Dereferencing Tests
 extension PathItemTests {
     struct MockLoad: ExternalLoaderContext {
-        var components: OpenAPI.Components
-
-        func nextComponentKey<T>(type: T.Type, at url: URL) -> OpenAPI.ComponentKey {
+        func nextComponentKey<T>(type: T.Type, at url: URL, given components: OpenAPI.Components) -> OpenAPI.ComponentKey {
            "hello-world" 
         }
 
@@ -522,10 +520,11 @@ extension PathItemTests {
 
         print(pathItem.parameters.debugDescription)
         print("------")
-        var context = MockLoad(components: components)
-        let x = try pathItem.externallyDereferenced(in: &context)
+        let context = MockLoad()
+        var loader = ExternalLoader(components: components, context: context) 
+        let x = try pathItem.externallyDereferenced(with: &loader)
         print(x.parameters.debugDescription)
         print("=======")
-        print(context.components.parameters)
+        print(loader.components.parameters)
     }
 }

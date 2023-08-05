@@ -95,7 +95,7 @@ public protocol LocallyDereferenceable {
     /// implementation for free.
     func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSelf
 
-    func externallyDereferenced<Context: ExternalLoaderContext>(in context: inout Context) throws -> Self
+    func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self
 }
 
 extension LocallyDereferenceable {

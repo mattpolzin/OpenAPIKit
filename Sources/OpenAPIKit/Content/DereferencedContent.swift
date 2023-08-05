@@ -64,7 +64,7 @@ extension OpenAPI.Content: LocallyDereferenceable {
         return try DereferencedContent(self, resolvingIn: components, following: references)
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Content where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Content where Context : ExternalLoaderContext {
         var content = self
 
        // TOOD: need to locally dereference the schema, examples, and content encoding here.

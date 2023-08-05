@@ -1077,3 +1077,122 @@ extension DocumentTests {
         )
     }
 }
+
+// MARK: - External Dereferencing
+extension DocumentTests {
+    // temporarily test with an example of the new interface
+    func test_example() throws {
+
+        /// An example of implementing a loader context for loading external references
+        /// into an OpenAPI document.
+        struct ExampleLoaderContext: ExternalLoaderContext {
+            static func load<T>(_ url: URL) throws -> T where T : Decodable {
+                // load data from file, perhaps. we will just mock that up for the example:
+                let data = mockParameterData(url)
+
+                return try JSONDecoder().decode(T.self, from: data)
+            }
+
+            mutating func nextComponentKey<T>(type: T.Type, at url: URL, given components: OpenAPIKit.OpenAPI.Components) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+                // do anything you want here to determine what key the new component should be stored at.
+                // for the example, we will just transform the URL into a valid components key:
+                let urlString = url.pathComponents.dropFirst().joined(separator: "_").replacingOccurrences(of: ".", with: "_")
+                return try .forceInit(rawValue: urlString)
+            }
+
+            /// Mock up some data, just for the example. 
+            static func mockParameterData(_ url: URL) -> Data {
+                return """
+                {
+                    "name": "name",
+                    "in": "path",
+                    "schema": { "type": "string" },
+                    "required": true
+                }
+                """.data(using: .utf8)!
+            }
+        }
+
+
+        var document = OpenAPI.Document(
+           info: .init(title: "test document", version: "1.0.0"),
+           servers: [],
+           paths: [
+               "/hello/{name}": .init(
+                   parameters: [
+                       .reference(.external(URL(string: "file://./params/name.json")!))
+                   ]
+               )
+            ],
+           components: .init(
+               // just to show, no parameters defined within document components :
+               parameters: [:]
+           )
+        )
+
+       let encoder = JSONEncoder()
+       encoder.outputFormatting = .prettyPrinted
+
+       // - MARK: Before 
+       print(
+           String(data: try encoder.encode(document), encoding: .utf8)!
+       )
+       /*
+        {
+          "openapi": "3.1.0",
+          "info": {
+            "title": "test document",
+            "version": "1.0.0"
+          },
+          "paths": {
+            "\/hello\/{name}": {
+              "parameters": [
+                {
+                  "$ref": "file:\/\/.\/params\/name.json"
+                }
+              ]
+            }
+          }
+        }
+       */
+
+       let context = ExampleLoaderContext()
+       try document.externallyDereference(in: context)
+
+       // - MARK: After
+
+       print(
+           String(data: try encoder.encode(document), encoding: .utf8)!
+       )
+       /*
+        {
+          "paths": {
+            "\/hello\/{name}": {
+              "parameters": [
+                {
+                  "$ref": "#\/components\/parameters\/params_name_json"
+                }
+              ]
+            }
+          },
+          "components": {
+            "parameters": {
+              "params_name_json": {
+                "in": "path",
+                "name": "name",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "openapi": "3.1.0",
+          "info": {
+            "title": "test document",
+            "version": "1.0.0"
+          }
+        }
+       */
+    }
+}

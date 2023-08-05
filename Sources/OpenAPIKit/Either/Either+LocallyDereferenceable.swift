@@ -18,12 +18,12 @@ extension Either: LocallyDereferenceable where A: LocallyDereferenceable, B: Loc
         }
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
         switch self {
         case .a(let a):
-           return .a(try a.externallyDereferenced(in: &context))
+           return .a(try a.externallyDereferenced(with: &loader))
         case .b(let b):
-           return .b(try b.externallyDereferenced(in: &context))
+           return .b(try b.externallyDereferenced(with: &loader))
         }
     }
 }

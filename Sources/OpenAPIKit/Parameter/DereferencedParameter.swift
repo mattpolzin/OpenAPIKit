@@ -72,7 +72,7 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
         return try DereferencedParameter(self, resolvingIn: components, following: references)
     }
 
-    public func externallyDereferenced<Context: ExternalLoaderContext>(in context: inout Context) throws -> Self {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self {
         var parameter = self
         
         // TODO: externallyDerefence the schemaOrContent

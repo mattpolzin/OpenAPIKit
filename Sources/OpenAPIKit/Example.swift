@@ -187,7 +187,7 @@ extension OpenAPI.Example: LocallyDereferenceable {
         return self
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> OpenAPI.Example where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Example where Context : ExternalLoaderContext {
         return self
     }
 }

@@ -408,7 +408,7 @@ extension JSONSchema: LocallyDereferenceable {
         return try? dereferenced(in: .noComponents)
     }
 
-    public func externallyDereferenced<Context>(in context: inout Context) throws -> Self where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
         // TODO: externally dereference this schema 
 #warning("need to externally dereference json schemas")
         return self
