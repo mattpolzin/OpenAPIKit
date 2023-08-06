@@ -1090,7 +1090,15 @@ extension DocumentTests {
                 // load data from file, perhaps. we will just mock that up for the example:
                 let data = mockParameterData(url)
 
-                return try JSONDecoder().decode(T.self, from: data)
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                let finished: T
+                if var extendable = decoded as? VendorExtendable {
+                    extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
+                    finished = extendable as! T
+                } else {
+                    finished = decoded 
+                }
+                return finished
             }
 
             mutating func nextComponentKey<T>(type: T.Type, at url: URL, given components: OpenAPIKit.OpenAPI.Components) throws -> OpenAPIKit.OpenAPI.ComponentKey {
@@ -1160,7 +1168,6 @@ extension DocumentTests {
        try document.externallyDereference(in: context)
 
        // - MARK: After
-
        print(
            String(data: try encoder.encode(document), encoding: .utf8)!
        )
@@ -1178,6 +1185,7 @@ extension DocumentTests {
           "components": {
             "parameters": {
               "params_name_json": {
+                "x-source-url": "file:\/\/.\/params\/name.json",
                 "in": "path",
                 "name": "name",
                 "required": true,
