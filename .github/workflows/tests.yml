@@ -69,6 +69,10 @@ jobs:
           - swift:5.7-focal
           - swift:5.7-jammy
           - swift:5.7-amazonlinux2
+          - swift:5.8-bionic
+          - swift:5.8-focal
+          - swift:5.8-jammy
+          - swift:5.8-amazonlinux2
           - swiftlang/swift:nightly-bionic
           - swiftlang/swift:nightly-focal
           - swiftlang/swift:nightly-jammy
