@@ -319,7 +319,7 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value.codableValue?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.codableValue?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {
