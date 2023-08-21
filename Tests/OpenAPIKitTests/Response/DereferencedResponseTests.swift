@@ -43,7 +43,10 @@ final class DereferencedResponseTests: XCTestCase {
                 "Header": .reference(.component(named: "test"))
             ]
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.headers?["Header"]?.underlyingHeader, .init(schema: .string))
+        XCTAssertEqual(
+            t1.headers?["Header"]?.underlyingHeader,
+            .init(schema: .string, vendorExtensions: ["x-component-name": "test"])
+        )
     }
 
     func test_referencedHeaderMissing() {
