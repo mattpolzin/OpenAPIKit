@@ -71,6 +71,14 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.Components {
+    /// The extension name used to store a Components Object name (the key something is stored under
+    /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
+    /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
+    /// in the OpenAPI Document).
+    public static let componentNameExtension: String = "x-component-name"
+}
+
 extension OpenAPI {
 
     public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
