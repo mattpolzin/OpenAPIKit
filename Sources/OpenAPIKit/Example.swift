@@ -189,8 +189,22 @@ extension OpenAPI.Example {
 extension OpenAPI.Example: LocallyDereferenceable {
     /// Examples do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.Example {
-        return self
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.Example{
+        var vendorExtensions = self.vendorExtensions
+        if let name = name {
+            vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
+        return .init(
+            summary: self.summary,
+            description: self.description,
+            value: self.value,
+            vendorExtensions: vendorExtensions
+        )
     }
 }
 

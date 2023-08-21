@@ -49,7 +49,11 @@ public struct DereferencedDocument: Equatable {
     ///     component in the same file that cannot be found in the Components Object.
     internal init(_ document: OpenAPI.Document) throws {
         self.paths = try document.paths.mapValues {
-            try $0._dereferenced(in: document.components, following: [])
+            try $0._dereferenced(
+                in: document.components,
+                following: [],
+                dereferencedFromComponentNamed: nil
+            )
         }
         self.security = try document.security.map {
             try DereferencedSecurityRequirement(

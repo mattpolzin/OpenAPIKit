@@ -33,7 +33,7 @@ public struct DereferencedContentEncoding: Equatable {
     ) throws {
         self.headers = try contentEncoding.headers.map { headersMap in
             try headersMap.mapValues { header in
-                try header._dereferenced(in: components, following: references)
+                try header._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
             }
         }
 
@@ -48,7 +48,11 @@ extension OpenAPI.Content.Encoding: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedContentEncoding {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedContentEncoding {
         return try DereferencedContentEncoding(self, resolvingIn: components, following: references)
     }
 }
