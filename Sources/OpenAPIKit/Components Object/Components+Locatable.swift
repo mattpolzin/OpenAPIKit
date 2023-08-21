@@ -85,13 +85,14 @@ public protocol LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSelf
+    func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>, dereferencedFromComponentNamed name: String?) throws -> DereferencedSelf
 }
 
 extension LocallyDereferenceable {
     // default implementation of public `dereferenced(in:)` based on internal
     // method that tracks reference cycles.
     public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSelf {
-        try _dereferenced(in: components, following: [])
+        try _dereferenced(in: components, following: [], dereferencedFromComponentNamed: nil)
     }
 }
+
