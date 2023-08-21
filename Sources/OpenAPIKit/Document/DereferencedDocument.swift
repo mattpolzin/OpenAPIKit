@@ -50,7 +50,8 @@ public struct DereferencedDocument: Equatable {
             try DereferencedPathItem(
                 $0,
                 resolvingIn: document.components,
-                following: []
+                following: [],
+                dereferencedFromComponentNamed: nil
             )
         }
         self.security = try document.security.map {

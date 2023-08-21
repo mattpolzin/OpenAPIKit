@@ -50,15 +50,15 @@ public struct DereferencedOperation: Equatable {
         following references: Set<AnyHashable>
     ) throws {
         self.parameters = try operation.parameters.map { parameter in
-            try parameter._dereferenced(in: components, following: references)
+            try parameter._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.requestBody = try operation.requestBody.map { request in
-            try request._dereferenced(in: components, following: references)
+            try request._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.responses = try operation.responses.mapValues { response in
-            try response._dereferenced(in: components, following: references)
+            try response._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.security = try operation.security?.map {
@@ -105,7 +105,11 @@ extension OpenAPI.Operation: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedOperation {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedOperation {
         return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
 }
