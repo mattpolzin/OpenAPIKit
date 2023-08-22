@@ -132,6 +132,14 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssert(passwordString.jsonTypeFormat?.swiftType == String.self)
     }
 
+    func test_vendorExtensionsInit() {
+        let schema = JSONSchema(.string(), vendorExtensions: ["x-test": "hello world"])
+
+        XCTAssertEqual(schema.value, .string(.init(), .init()))
+        XCTAssertTrue(schema.warnings.isEmpty)
+        XCTAssertEqual(schema.vendorExtensions, ["x-test": "hello world"])
+    }
+
     func test_isFragmentAndIsEmpty() {
         let empty = JSONSchema.fragment(.init())
         let fragment = JSONSchema.fragment(.init(nullable: true))
@@ -1435,6 +1443,36 @@ extension SchemaObjectTests {
             """
             {
               "description" : "hello world"
+            }
+            """
+        )
+    }
+
+    func test_decodeExampleWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "example" : "hello",
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            JSONSchema(.fragment(.init(example: "hello")), vendorExtensions: ["x-hello": "hello"])
+        )
+    }
+
+    func test_encodeExampleVendorExtension() throws {
+        let fragment = JSONSchema(.fragment(.init(example: "hello")), vendorExtensions: ["x-hello": "hello"])
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "example" : "hello",
+              "x-hello" : "hello"
             }
             """
         )
