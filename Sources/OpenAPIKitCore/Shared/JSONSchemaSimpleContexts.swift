@@ -37,10 +37,15 @@ extension Shared {
 
     /// The context that only applies to `.reference` schemas.
     public struct ReferenceContext: Equatable {
+        /// A description that overrides any description that may be
+        /// found in the referenced schema.
+        public let description: String?
+
         public let required: Bool
 
-        public init(required: Bool = true) {
+        public init(required: Bool = true, description: String? = nil) {
             self.required = required
+            self.description = description
         }
 
         public func requiredContext() -> ReferenceContext {

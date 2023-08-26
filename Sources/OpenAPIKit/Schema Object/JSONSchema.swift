@@ -1701,9 +1701,10 @@ extension JSONSchema {
     /// Construct a reference schema
     public static func reference(
         _ reference: JSONReference<JSONSchema>,
-        required: Bool = true
+        required: Bool = true,
+        description: String? = nil
     ) -> JSONSchema {
-        return .reference(reference, .init(required: required))
+        return .reference(reference, .init(required: required, description: description))
     }
 }
 
@@ -1728,6 +1729,11 @@ extension JSONSchema {
 
     private enum NullCodingKeys: String, CodingKey {
         case type
+    }
+
+    private enum ReferenceCodingKeys: String, CodingKey {
+        case ref = "$ref"
+        case description
     }
 
     private enum VendorExtensionKeys: CodingKey, ExtendableCodingKey {
@@ -1795,10 +1801,11 @@ extension JSONSchema: Encodable {
             try container.encode(node, forKey: .not)
             try core.encode(to: encoder)
 
-        case .reference(let reference, _):
-            var container = encoder.singleValueContainer()
+        case .reference(let reference, let referenceContext):
+            var container = encoder.container(keyedBy: ReferenceCodingKeys.self)
 
-            try container.encode(reference)
+            try container.encodeIfPresent(referenceContext.description, forKey: .description)
+            try reference.encode(to: encoder)
 
         case .fragment(let context):
             var container = encoder.singleValueContainer()
@@ -1833,9 +1840,10 @@ extension JSONSchema: Decodable {
 
     public init(from decoder: Decoder) throws {
 
-        if let singleValueContainer = try? decoder.singleValueContainer() {
-            if let ref = try? singleValueContainer.decode(JSONReference<JSONSchema>.self) {
-                self = .reference(ref, required: true)
+        if let referenceContainer = try? decoder.container(keyedBy: ReferenceCodingKeys.self) {
+            if let ref = try? JSONReference<JSONSchema>(from: decoder) {
+                let description = try referenceContainer.decodeIfPresent(String.self, forKey: .description)
+                self = .reference(ref, required: true, description: description)
                 return
             }
         }
