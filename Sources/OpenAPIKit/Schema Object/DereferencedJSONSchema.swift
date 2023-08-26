@@ -401,6 +401,7 @@ extension JSONSchema: LocallyDereferenceable {
             if let refDescription = context.description {
                 dereferenced = dereferenced.with(description: refDescription)
             }
+            // TODO: consider which other core context properties to override here as with description ^
             return dereferenced
         case .boolean(let context):
             return .boolean(context)

@@ -634,7 +634,11 @@ extension OpenAPIKit30.JSONSchema: To31 {
         case .not(let not, core: let core):
             schema = .not(not.to31(), core: core.to31())
         case .reference(let ref, let context):
-            schema = .reference(ref.to31(), context)
+            let coreContext: OpenAPIKit.JSONSchema.CoreContext<OpenAPIKit.JSONTypeFormat.AnyFormat>
+            coreContext = .init(
+                required: context.required
+            )
+            schema = .reference(ref.to31(), coreContext)
         case .fragment(let core):
             schema = .fragment(core.to31())
         }
