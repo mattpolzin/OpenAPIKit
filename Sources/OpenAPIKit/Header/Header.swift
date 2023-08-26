@@ -170,6 +170,7 @@ extension OpenAPI.Header {
 
         // the following are parsed as part of Schema
         case style
+        case explode
         case allowReserved
         case example
         case examples
@@ -184,6 +185,7 @@ extension OpenAPI.Header {
                 .content,
                 .schema,
                 .style,
+                .explode,
                 .allowReserved,
                 .example,
                 .examples
@@ -208,6 +210,8 @@ extension OpenAPI.Header {
                 self = .schema
             case "style":
                 self = .style
+            case "explode":
+                self = .explode
             case "allowReserved":
                 self = .allowReserved
             case "example":
@@ -233,6 +237,8 @@ extension OpenAPI.Header {
                 return "schema"
             case .style:
                 return "style"
+            case .explode:
+                return "explode"
             case .allowReserved:
                 return "allowReserved"
             case .example:
