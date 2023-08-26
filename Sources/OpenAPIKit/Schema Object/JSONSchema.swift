@@ -1053,7 +1053,13 @@ extension JSONSchema {
                 schema: .fragment(fragment.with(description: description)),
                 vendorExtensions: vendorExtensions
             )
-        case .reference, .null:
+        case .reference(let ref, let referenceContext):
+            return .init(
+                warnings: warnings,
+                schema: .reference(ref, referenceContext.with(description: description)),
+                vendorExtensions: vendorExtensions
+            )
+        case .null:
             return self
         }
     }

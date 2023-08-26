@@ -55,6 +55,10 @@ extension Shared {
         public func optionalContext() -> ReferenceContext {
             return .init(required: false)
         }
+
+        public func with(description: String) -> ReferenceContext {
+            return .init(required: required, description: description)
+        }
     }
 }
 
