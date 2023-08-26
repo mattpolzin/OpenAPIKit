@@ -142,6 +142,36 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var deprecated: Bool { jsonSchema.deprecated }
+
+    /// Returns a version of this `DereferencedJSONSchema` that has the given description.
+    public func with(description: String) -> DereferencedJSONSchema {
+        switch self {
+        case .null:
+            return .null
+        case .boolean(let context):
+            return .boolean(context.with(description: description))
+        case .object(let coreContext, let objectContext):
+            return .object(coreContext.with(description: description), objectContext)
+        case .array(let coreContext, let arrayContext):
+            return .array(coreContext.with(description: description), arrayContext)
+        case .number(let coreContext, let numberContext):
+            return .number(coreContext.with(description: description), numberContext)
+        case .integer(let coreContext, let integerContext):
+            return .integer(coreContext.with(description: description), integerContext)
+        case .string(let coreContext, let stringContext):
+            return .string(coreContext.with(description: description), stringContext)
+        case .all(of: let schemas, core: let coreContext):
+            return .all(of: schemas, core: coreContext.with(description: description))
+        case .one(of: let schemas, core: let coreContext):
+            return .one(of: schemas, core: coreContext.with(description: description))
+        case .any(of: let schemas, core: let coreContext):
+            return .any(of: schemas, core: coreContext.with(description: description))
+        case .not(let schema, core: let coreContext):
+            return .not(schema, core: coreContext.with(description: description))
+        case .fragment(let context):
+            return .fragment(context.with(description: description))
+        }
+    }
 }
 
 extension DereferencedJSONSchema {
@@ -368,6 +398,10 @@ extension JSONSchema: LocallyDereferenceable {
             if !context.required {
                 dereferenced = dereferenced.optionalSchemaObject()
             }
+            if let refDescription = context.description {
+                dereferenced = dereferenced.with(description: refDescription)
+            }
+            // TODO: consider which other core context properties to override here as with description ^
             return dereferenced
         case .boolean(let context):
             return .boolean(context)

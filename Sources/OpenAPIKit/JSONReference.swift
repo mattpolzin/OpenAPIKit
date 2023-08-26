@@ -385,6 +385,16 @@ extension OpenAPI {
     }
 }
 
+public extension JSONReference {
+    /// Create an OpenAPI.Reference from the given JSONReference.
+    func openAPIReference(withDescription description: String? = nil) -> OpenAPI.Reference<ReferenceType> {
+        OpenAPI.Reference(
+            self,
+            description: description
+        )
+    }
+}
+
 /// `SummaryOverridable` exists to provide a parent protocol to `OpenAPIDescribable`
 /// and `OpenAPISummarizable`. The structure is designed to provide default no-op
 /// implementations of both the members of this protocol to all types that implement either

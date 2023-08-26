@@ -643,7 +643,7 @@ final class SchemaObjectTests: XCTestCase {
         let anyOf = JSONSchema.any(of: [boolean], core: .init(description: "hello"))
         let oneOf = JSONSchema.one(of: [boolean], core: .init(description: "hello"))
         let not = JSONSchema.not(boolean, core: .init(description: "hello"))
-        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!))
+        let reference = JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!), description: "hello")
         let fragment = JSONSchema.fragment(.init(description: nil))
         let fragmentWithDescription = JSONSchema.fragment(.init(description: "hello"))
 
@@ -659,8 +659,8 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(anyOf.description, "hello")
         XCTAssertEqual(oneOf.description, "hello")
         XCTAssertEqual(not.description, "hello")
+        XCTAssertEqual(reference.description, "hello")
 
-        XCTAssertNil(reference.description)
         XCTAssertNil(fragment.description)
         XCTAssertNil(null.description)
     }
@@ -761,8 +761,8 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(anyOf.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertEqual(oneOf.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertEqual(not.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
+        XCTAssertEqual(reference.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
 
-        XCTAssertNil(reference.coreContext)
         XCTAssertNil(null.coreContext)
     }
 
@@ -1346,6 +1346,40 @@ final class SchemaObjectTests: XCTestCase {
 
         XCTAssertNil(null.discriminator)
         XCTAssertNil(reference.discriminator)
+    }
+
+    func test_withDescription() throws {
+        let null = JSONSchema.null.with(description: "test")
+        let object = JSONSchema.object.with(description: "test")
+        let array = JSONSchema.array.with(description: "test")
+
+        let boolean = JSONSchema.boolean.with(description: "test")
+        let number = JSONSchema.number.with(description: "test")
+        let integer = JSONSchema.integer.with(description: "test")
+        let string = JSONSchema.string.with(description: "test")
+        let fragment = JSONSchema.fragment(.init()).with(description: "test")
+        let all = JSONSchema.all(of: .string).with(description: "test")
+        let one = JSONSchema.one(of: .string).with(description: "test")
+        let any = JSONSchema.any(of: .string).with(description: "test")
+        let not = JSONSchema.not(.string).with(description: "test")
+        let reference = JSONSchema.reference(.component(named: "test")).with(description: "test")
+
+        XCTAssertEqual(object.description, "test")
+        XCTAssertEqual(array.description, "test")
+
+        XCTAssertEqual(boolean.description, "test")
+        XCTAssertEqual(number.description, "test")
+        XCTAssertEqual(integer.description, "test")
+        XCTAssertEqual(string.description, "test")
+        XCTAssertEqual(fragment.description, "test")
+
+        XCTAssertEqual(all.description, "test")
+        XCTAssertEqual(one.description, "test")
+        XCTAssertEqual(any.description, "test")
+        XCTAssertEqual(not.description, "test")
+        XCTAssertEqual(reference.description, "test")
+
+        XCTAssertNil(null.description)
     }
 
     func test_minObjectProperties() {
@@ -5731,6 +5765,89 @@ extension SchemaObjectTests {
         XCTAssertEqual(
             nodeRef,
             JSONSchema.reference(.component(named: "requiredBool"))
+        )
+    }
+
+    func test_encodeReferenceDescription() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), description: "hello")
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"description\" : \"hello\""
+        ])
+    }
+
+    func test_decodeReferenceDescription() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "description": "hello" }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), description: "hello")
+        )
+    }
+
+    func test_encodeReferenceDeprecated() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(deprecated: true))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"deprecated\" : true"
+        ])
+    }
+
+    func test_decodeReferenceDeprecated() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "deprecated": true }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(deprecated: true))
+        )
+    }
+
+    func test_encodeReferenceDefault() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(defaultValue: "hello"))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"default\" : \"hello\""
+        ])
+    }
+
+    func test_decodeReferenceDefault() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "default": "hello" }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(defaultValue: "hello"))
+        )
+    }
+
+
+    func test_encodeReferenceExamples() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(examples: ["hello"]))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"examples\" : [",
+            "  \"hello\"",
+            "]",
+        ])
+    }
+
+    func test_decodeReferenceExamples() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "examples": ["hello"] }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(examples: ["hello"]))
         )
     }
 
