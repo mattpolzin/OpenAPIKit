@@ -5788,6 +5788,69 @@ extension SchemaObjectTests {
         )
     }
 
+    func test_encodeReferenceDeprecated() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(deprecated: true))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"deprecated\" : true"
+        ])
+    }
+
+    func test_decodeReferenceDeprecated() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "deprecated": true }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(deprecated: true))
+        )
+    }
+
+    func test_encodeReferenceDefault() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(defaultValue: "hello"))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"default\" : \"hello\""
+        ])
+    }
+
+    func test_decodeReferenceDefault() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "default": "hello" }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(defaultValue: "hello"))
+        )
+    }
+
+
+    func test_encodeReferenceExamples() {
+        let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), .init(examples: ["hello"]))
+
+        testEncodingPropertyLines(entity: nodeRef, propertyLines: [
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"examples\" : [",
+            "  \"hello\"",
+            "]",
+        ])
+    }
+
+    func test_decodeReferenceExamples() throws {
+        let nodeRefData = ##"{ "$ref": "#/components/schemas/requiredBool", "examples": ["hello"] }"##.data(using: .utf8)!
+
+        let nodeRef = try orderUnstableDecode(JSONSchema.self, from: nodeRefData)
+
+        XCTAssertEqual(
+            nodeRef,
+            JSONSchema.reference(.component(named: "requiredBool"), .init(examples: ["hello"]))
+        )
+    }
+
     func test_encodeReferenceOptionality() {
         let optionalReference = JSONSchema.reference(.component(named: "optionalBool"))
             .optionalSchemaObject()
