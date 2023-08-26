@@ -196,7 +196,9 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.description
-        case .reference, .null:
+        case .reference(_, let referenceContext):
+            return referenceContext.description
+        case .null:
             return nil
         }
     }

@@ -5772,8 +5772,8 @@ extension SchemaObjectTests {
         let nodeRef = JSONSchema.reference(.component(named: "requiredBool"), description: "hello")
 
         testEncodingPropertyLines(entity: nodeRef, propertyLines: [
-            "\"description\" : \"hello\"",
-            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\""
+            "\"$ref\" : \"#\\/components\\/schemas\\/requiredBool\",",
+            "\"description\" : \"hello\""
         ])
     }
 
