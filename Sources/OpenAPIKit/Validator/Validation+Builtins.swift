@@ -157,23 +157,25 @@ extension Validation {
         )
     }
 
-    // MARK: - Included with `Validator()` by default
-
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
-    /// The OpenAPI Specifcation requires that Responses Objects
-    /// contain [at least one response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#responses-object).
-    /// The specification recommends that if there is only one response then
-    /// it be a successful response.
+    /// The OpenAPI Specifcation does not require that Responses Objects
+    /// contain at least one response but you may wish to validate that all 
+    /// operations contain at least one response in your own API.
     ///
-    /// - Important: This is included in validation by default.
+    /// The specification recommends that if there is only one response then
+    /// it be a successful response but this validation does not require that.
+    ///
+    /// - Important: This is not an included validation by default.
     public static var operationsContainResponses: Validation<OpenAPI.Response.Map> {
         .init(
             description: "Operations contain at least one response",
             check: \.count > 0
         )
     }
+
+    // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
     // by calling `Validator.blank`.

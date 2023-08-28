@@ -273,7 +273,9 @@ extension OpenAPI.Operation: Encodable {
 
         try container.encodeIfPresent(requestBody, forKey: .requestBody)
 
-        try container.encode(responses, forKey: .responses)
+        if !responses.isEmpty {
+            try container.encode(responses, forKey: .responses)
+        }
 
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
@@ -312,7 +314,7 @@ extension OpenAPI.Operation: Decodable {
 
             requestBody = try container.decodeIfPresent(Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
-            responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
+            responses = try container.decodeIfPresent(OpenAPI.Response.Map.self, forKey: .responses) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.CallbacksMap.self, forKey: .callbacks) ?? [:]
 
