@@ -24,6 +24,8 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc, oldDoc)
         XCTAssertEqual(newDoc.openAPIVersion, .v3_1_0)
+
+        try newDoc.validate()
     }
 
     func test_vendorExtensionsOnDoc() throws {
@@ -39,6 +41,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_fullInfo() throws {
@@ -60,6 +64,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_servers() throws {
@@ -93,6 +99,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_paths() throws {
@@ -194,6 +202,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func testJSONSchemas() throws {
@@ -300,6 +310,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func testSecurity() throws {
@@ -330,6 +342,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc2 = oldDoc2.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc2, oldDoc2)
+
+        try newDoc.validate()
     }
 
     func testTags() throws {
@@ -371,6 +385,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc3 = oldDoc3.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc3, oldDoc3)
+
+        try newDoc.validate()
     }
 
     func testExternalDocs() throws {
@@ -405,6 +421,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     // TODO: more tests
