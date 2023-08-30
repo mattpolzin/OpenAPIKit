@@ -86,9 +86,16 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
     /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
     public func to31() -> OpenAPIKit.OpenAPI.Server {
 
-        let newVariables = variables.mapValues { variable in
-            OpenAPIKit.OpenAPI.Server.Variable(
-                enum: variable.enum,
+        let newVariables: OrderedDictionary<String, OpenAPIKit.OpenAPI.Server.Variable> = variables.mapValues { variable in
+            let enumValue: [String]?
+            if !variable.enum.isEmpty {
+                enumValue = variable.enum
+            } else {
+                enumValue = nil
+            }
+
+            return OpenAPIKit.OpenAPI.Server.Variable(
+                enum: enumValue,
                 default: variable.default,
                 description: variable.description,
                 vendorExtensions: variable.vendorExtensions
