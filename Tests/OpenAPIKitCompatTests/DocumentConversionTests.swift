@@ -147,23 +147,25 @@ final class DocumentConversionTests: XCTestCase {
             .component(named: "security"): ["hello"]
         ]
 
-        let operation = OpenAPIKit30.OpenAPI.Operation(
-            tags: ["hello"],
-            summary: "sum",
-            description: "described",
-            externalDocs: externalDocs,
-            operationId: "ident",
-            parameters: params,
-            requestBody: .request(request),
-            responses: [200: .b(response)],
-            callbacks: [
-                "callback": .b(callbacks),
-                "other_callback": .a(.component(named: "other_callback"))],
-            deprecated: true,
-            security: [securityRequirement],
-            servers: [server],
-            vendorExtensions: ["x-hello": 101]
-        )
+        let operation = (0...7).map { idx in 
+            OpenAPIKit30.OpenAPI.Operation(
+                tags: ["hello"],
+                summary: "sum",
+                description: "described",
+                externalDocs: externalDocs,
+                operationId: "ident\(idx)",
+                parameters: params,
+                requestBody: .request(request),
+                responses: [200: .b(response)],
+                callbacks: [
+                    "callback": .b(callbacks),
+                    "other_callback": .a(.component(named: "other_callback"))],
+                deprecated: true,
+                security: [securityRequirement],
+                servers: [server],
+                vendorExtensions: ["x-hello": 101]
+            )
+        }
 
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
@@ -185,18 +187,22 @@ final class DocumentConversionTests: XCTestCase {
                         .a(.internal(.component(name: "test"))),
                         .parameter(.init(name: "test", context: .query, schema: .string))
                     ],
-                    get: operation,
-                    put: operation,
-                    post: operation,
-                    delete: operation,
-                    options: operation,
-                    head: operation,
-                    patch: operation,
-                    trace: operation,
+                    get: operation[0],
+                    put: operation[1],
+                    post: operation[2],
+                    delete: operation[3],
+                    options: operation[4],
+                    head: operation[5],
+                    patch: operation[6],
+                    trace: operation[7],
                     vendorExtensions: ["x-test": 123]
                 )
             ],
-            components: .noComponents
+            components: .init(
+                parameters: [
+                    "test": .init(name: "referencedParam", context: .query, schema: .string)
+                ]
+            )
         )
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
@@ -244,7 +250,8 @@ final class DocumentConversionTests: XCTestCase {
 
         let components = OpenAPIKit30.OpenAPI.Components(
             schemas: [
-                "schema1": .string
+                "schema1": .string,
+                "test3_param": .integer(format: .int32, required: false)
             ],
             responses: [
                 "response1": response
