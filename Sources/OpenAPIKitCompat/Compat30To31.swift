@@ -87,8 +87,15 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
     public func to31() -> OpenAPIKit.OpenAPI.Server {
 
         let newVariables = variables.mapValues { variable in
-            OpenAPIKit.OpenAPI.Server.Variable(
-                enum: variable.enum,
+            let enumValue: [String]?
+            if !variable.enum.isEmpty {
+                enumValue = variable.enum
+            } else {
+                enumValue = nil
+            }
+
+            return OpenAPIKit.OpenAPI.Server.Variable(
+                enum: enumValue,
                 default: variable.default,
                 description: variable.description,
                 vendorExtensions: variable.vendorExtensions

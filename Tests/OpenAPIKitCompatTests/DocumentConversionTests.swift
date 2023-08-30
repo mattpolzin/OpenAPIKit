@@ -77,6 +77,13 @@ final class DocumentConversionTests: XCTestCase {
                     description: "hi",
                     variables: ["hello": .init(enum: ["1"], default: "1", description: "described", vendorExtensions: ["x-hi": "hello"])],
                     vendorExtensions: ["x-test": 2]
+                ),
+                .init(
+                    urlTemplate: try .init(templateString: "{protocol}://{hostname}/api/v3"),
+                    variables: [
+                        "protocol": .init(default: "http", description: "protocol"),
+                        "hostname": .init(default: "HOSTNAME", description: "host name")
+                    ]
                 )
             ],
             paths: [:],
@@ -479,10 +486,15 @@ fileprivate func assertEqualNewToOld(_ newServer: OpenAPIKit.OpenAPI.Server?, _ 
     XCTAssertEqual(newServer.urlTemplate, oldServer.urlTemplate)
     XCTAssertEqual(newServer.description, oldServer.description)
     XCTAssertEqual(newServer.vendorExtensions, oldServer.vendorExtensions)
+    XCTAssertEqual(newServer.variables.count, oldServer.variables.count)
     for (key, newVariable) in newServer.variables {
         let oldVariable = oldServer.variables[key]
         XCTAssertEqual(newVariable.description, oldVariable?.description)
-        XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        if (oldVariable?.enum ?? []).isEmpty {
+            XCTAssertNil(newVariable.`enum`)
+        } else {
+            XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        }
         XCTAssertEqual(newVariable.`default`, oldVariable?.`default`)
         XCTAssertEqual(newVariable.vendorExtensions, oldVariable?.vendorExtensions)
     }
