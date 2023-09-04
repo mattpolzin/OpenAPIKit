@@ -24,6 +24,8 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc, oldDoc)
         XCTAssertEqual(newDoc.openAPIVersion, .v3_1_0)
+
+        try newDoc.validate()
     }
 
     func test_vendorExtensionsOnDoc() throws {
@@ -39,6 +41,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_fullInfo() throws {
@@ -60,6 +64,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_servers() throws {
@@ -77,6 +83,13 @@ final class DocumentConversionTests: XCTestCase {
                     description: "hi",
                     variables: ["hello": .init(enum: ["1"], default: "1", description: "described", vendorExtensions: ["x-hi": "hello"])],
                     vendorExtensions: ["x-test": 2]
+                ),
+                .init(
+                    urlTemplate: try .init(templateString: "{protocol}://{hostname}/api/v3"),
+                    variables: [
+                        "protocol": .init(default: "http", description: "protocol"),
+                        "hostname": .init(default: "HOSTNAME", description: "host name")
+                    ]
                 )
             ],
             paths: [:],
@@ -86,6 +99,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_paths() throws {
@@ -132,23 +147,25 @@ final class DocumentConversionTests: XCTestCase {
             .component(named: "security"): ["hello"]
         ]
 
-        let operation = OpenAPIKit30.OpenAPI.Operation(
-            tags: ["hello"],
-            summary: "sum",
-            description: "described",
-            externalDocs: externalDocs,
-            operationId: "ident",
-            parameters: params,
-            requestBody: .request(request),
-            responses: [200: .b(response)],
-            callbacks: [
-                "callback": .b(callbacks),
-                "other_callback": .a(.component(named: "other_callback"))],
-            deprecated: true,
-            security: [securityRequirement],
-            servers: [server],
-            vendorExtensions: ["x-hello": 101]
-        )
+        let operation = (0...7).map { idx in 
+            OpenAPIKit30.OpenAPI.Operation(
+                tags: ["hello"],
+                summary: "sum",
+                description: "described",
+                externalDocs: externalDocs,
+                operationId: "ident\(idx)",
+                parameters: params,
+                requestBody: .request(request),
+                responses: [200: .b(response)],
+                callbacks: [
+                    "callback": .b(callbacks),
+                    "other_callback": .a(.component(named: "other_callback"))],
+                deprecated: true,
+                security: [securityRequirement],
+                servers: [server],
+                vendorExtensions: ["x-hello": 101]
+            )
+        }
 
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
@@ -170,23 +187,29 @@ final class DocumentConversionTests: XCTestCase {
                         .a(.internal(.component(name: "test"))),
                         .parameter(.init(name: "test", context: .query, schema: .string))
                     ],
-                    get: operation,
-                    put: operation,
-                    post: operation,
-                    delete: operation,
-                    options: operation,
-                    head: operation,
-                    patch: operation,
-                    trace: operation,
+                    get: operation[0],
+                    put: operation[1],
+                    post: operation[2],
+                    delete: operation[3],
+                    options: operation[4],
+                    head: operation[5],
+                    patch: operation[6],
+                    trace: operation[7],
                     vendorExtensions: ["x-test": 123]
                 )
             ],
-            components: .noComponents
+            components: .init(
+                parameters: [
+                    "test": .init(name: "referencedParam", context: .query, schema: .string)
+                ]
+            )
         )
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func testJSONSchemas() throws {
@@ -227,7 +250,8 @@ final class DocumentConversionTests: XCTestCase {
 
         let components = OpenAPIKit30.OpenAPI.Components(
             schemas: [
-                "schema1": .string
+                "schema1": .string,
+                "test3_param": .integer(format: .int32, required: false)
             ],
             responses: [
                 "response1": response
@@ -293,6 +317,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func testSecurity() throws {
@@ -323,6 +349,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc2 = oldDoc2.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc2, oldDoc2)
+
+        try newDoc.validate()
     }
 
     func testTags() throws {
@@ -364,6 +392,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc3 = oldDoc3.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc3, oldDoc3)
+
+        try newDoc.validate()
     }
 
     func testExternalDocs() throws {
@@ -398,6 +428,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     // TODO: more tests
@@ -479,10 +511,15 @@ fileprivate func assertEqualNewToOld(_ newServer: OpenAPIKit.OpenAPI.Server?, _ 
     XCTAssertEqual(newServer.urlTemplate, oldServer.urlTemplate)
     XCTAssertEqual(newServer.description, oldServer.description)
     XCTAssertEqual(newServer.vendorExtensions, oldServer.vendorExtensions)
+    XCTAssertEqual(newServer.variables.count, oldServer.variables.count)
     for (key, newVariable) in newServer.variables {
         let oldVariable = oldServer.variables[key]
         XCTAssertEqual(newVariable.description, oldVariable?.description)
-        XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        if (oldVariable?.enum ?? []).isEmpty {
+            XCTAssertNil(newVariable.`enum`)
+        } else {
+            XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        }
         XCTAssertEqual(newVariable.`default`, oldVariable?.`default`)
         XCTAssertEqual(newVariable.vendorExtensions, oldVariable?.vendorExtensions)
     }
