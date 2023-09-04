@@ -37,7 +37,9 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     /// The null type, which replaces the functionality of the `nullable` property from
     /// previous versions of the OpenAPI specification.
-    public static let null: Self = .init(schema: .null(.init(nullable: true)))
+    public static func null(_ core: CoreContext<JSONTypeFormat.AnyFormat> = .init(nullable: true)) -> Self {
+        .init(schema: .null(core.nullableContext()))
+    }
     public static func boolean(_ core: CoreContext<JSONTypeFormat.BooleanFormat>) -> Self {
         .init(schema: .boolean(core))
     }
@@ -1695,9 +1697,10 @@ extension JSONSchema {
     public static func reference(
         _ reference: JSONReference<JSONSchema>,
         required: Bool = true,
+        title: String? = nil,
         description: String? = nil
     ) -> JSONSchema {
-        return .reference(reference, .init(required: required, description: description))
+        return .reference(reference, .init(required: required, title: title, description: description))
     }
 }
 

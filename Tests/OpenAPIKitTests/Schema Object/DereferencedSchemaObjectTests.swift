@@ -125,8 +125,8 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t20, .all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))))
         XCTAssertEqual(t20?.discriminator, .init(propertyName: "test"))
 
-        let t21 = JSONSchema.null.dereferenced()
-        XCTAssertEqual(t21, .null)
+        let t21 = JSONSchema.null().dereferenced()
+        XCTAssertEqual(t21, .null(.init(nullable: true)))
 
         // bonus tests around simplifying:
         let t22 = try JSONSchema.all(of: []).dereferenced()?.simplified()
@@ -259,8 +259,8 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
         XCTAssertEqual(t23.discriminator, .init(propertyName: "test"))
 
-        let t24 = try JSONSchema.null.dereferenced(in: components)
-        XCTAssertEqual(t24, .null)
+        let t24 = try JSONSchema.null().dereferenced(in: components)
+        XCTAssertEqual(t24, .null(.init(nullable: true)))
     }
 
     func test_optionalReferenceMissing() {
@@ -514,7 +514,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
     }
 
     func test_withDescription() throws {
-        let null = JSONSchema.null.dereferenced()!.with(description: "test")
+        let null = JSONSchema.null().dereferenced()!.with(description: "test")
         let object = JSONSchema.object.dereferenced()!.with(description: "test")
         let array = JSONSchema.array.dereferenced()!.with(description: "test")
 
@@ -542,7 +542,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(any.description, "test")
         XCTAssertEqual(not.description, "test")
 
-        XCTAssertNil(null.description)
+        XCTAssertEqual(null.description, "test")
     }
 
 }

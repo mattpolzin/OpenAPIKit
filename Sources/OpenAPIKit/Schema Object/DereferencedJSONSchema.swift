@@ -16,7 +16,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public typealias IntegerContext = JSONSchema.IntegerContext
     public typealias StringContext = JSONSchema.StringContext
 
-    case null
+    case null(CoreContext<JSONTypeFormat.AnyFormat>)
     case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
     case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -43,8 +43,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// not true.
     public var jsonSchema: JSONSchema {
         switch self {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext)
         case .boolean(let context):
             return .boolean(context)
         case .object(let coreContext, let objectContext):
@@ -72,8 +72,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     func optionalSchemaObject() -> DereferencedJSONSchema {
         switch self {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext.optionalContext())
         case .boolean(let context):
             return .boolean(context.optionalContext())
         case .object(let contextA, let contextB):
@@ -146,8 +146,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// Returns a version of this `DereferencedJSONSchema` that has the given description.
     public func with(description: String) -> DereferencedJSONSchema {
         switch self {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext.with(description: description))
         case .boolean(let context):
             return .boolean(context.with(description: description))
         case .object(let coreContext, let objectContext):
@@ -391,8 +391,8 @@ extension JSONSchema: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedJSONSchema {
         switch value {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext)
         case .reference(let reference, let context):
             var dereferenced = try reference._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
             if !context.required {
