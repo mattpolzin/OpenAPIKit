@@ -130,10 +130,22 @@ extension OpenAPI.Error.Decoding.Path {
     }
 
     internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
-        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
-            self = Self(unwrapping: eitherBranchToDigInto)
-            return
-        }
+        // *IMPORTANT*
+        // -----------
+        // In theory the following commented-out code is desirable but in practice it never
+        // results in useful output because `eitherBranchToDigInto` checks for things that
+        // never occur on `PathItem`'s only `Either` type (the array of `Parameter`s). Because
+        // `Parameter` is such a simple type, it is never worth "digging" into more deeply.
+        //
+        // I intend to leave this code here commented out to be a guide if it the future the
+        // `PathItem` type does gain deeper `Either` properties because in that case the code
+        // below can simply be uncommented instead of needing to wrap my head around the situation
+        // from scratch.
+
+//        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
+//            self = Self(unwrapping: eitherBranchToDigInto)
+//            return
+//        }
 
         var codingPath = eitherError.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
@@ -144,16 +156,21 @@ extension OpenAPI.Error.Decoding.Path {
     }
 }
 
-extension OpenAPI.Error.Decoding.Path: DiggingError {
-    public init(unwrapping error: Swift.DecodingError) {
-        if let decodingError = error.underlyingError as? Swift.DecodingError {
-            self = Self(unwrapping: decodingError)
-        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
-            self = Self(inconsistencyError)
-        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
-            self = Self(eitherError)
-        } else {
-            self = Self(error)
-        }
-    }
-}
+// *IMPORTANT*
+// -----------
+// See the note above in the `init(_ eitherError:)` initializer to understand why I want to
+// leave the following commented out code intact.
+
+//extension OpenAPI.Error.Decoding.Path: DiggingError {
+//    public init(unwrapping error: Swift.DecodingError) {
+//        if let decodingError = error.underlyingError as? Swift.DecodingError {
+//            self = Self(unwrapping: decodingError)
+//        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
+//            self = Self(inconsistencyError)
+//        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
+//            self = Self(eitherError)
+//        } else {
+//            self = Self(error)
+//        }
+//    }
+//}

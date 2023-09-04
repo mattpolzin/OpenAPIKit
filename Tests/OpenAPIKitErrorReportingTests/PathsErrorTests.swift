@@ -51,6 +51,8 @@ final class PathsErrorTests: XCTestCase {
         }
     }
 
+    /// Errors as bad vendor extension since "boo" is not a valid expected property and all unexpected properties are assumed to be extensions and
+    /// all extensions must begin with `x-`.
     func test_wayOffMarkForPathItemOrReference() {
         let documentYML =
         """
