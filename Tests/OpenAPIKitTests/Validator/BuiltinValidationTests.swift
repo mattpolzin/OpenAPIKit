@@ -430,7 +430,7 @@ final class BuiltinValidationTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get"])
         }
     }
 

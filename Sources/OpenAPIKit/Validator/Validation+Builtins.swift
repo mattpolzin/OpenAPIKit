@@ -168,10 +168,10 @@ extension Validation {
     /// it be a successful response but this validation does not require that.
     ///
     /// - Important: This is not an included validation by default.
-    public static var operationsContainResponses: Validation<OpenAPI.Response.Map> {
+    public static var operationsContainResponses: Validation<OpenAPI.Operation> {
         .init(
             description: "Operations contain at least one response",
-            check: \.count > 0
+            check: \.responses.count > 0
         )
     }
 
