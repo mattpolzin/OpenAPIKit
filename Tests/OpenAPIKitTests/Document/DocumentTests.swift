@@ -63,8 +63,8 @@ final class DocumentTests: XCTestCase {
                 .init(url: URL(string: "https://google.com")!)
             ],
             paths: [
-                "/hi/there": pi1,
-                "/hi": pi2
+                "/hi/there": .pathItem(pi1),
+                "/hi": .pathItem(pi2)
             ],
             components: .init(schemas: ["hello": .string])
         )
@@ -84,11 +84,9 @@ final class DocumentTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .init(
-                    get: .init(operationId: nil, responses: [:])
-                ),
+                    get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:])
-                )
+                    put: .init(operationId: nil, responses: [:]))
             ],
             components: .noComponents
         )
@@ -100,11 +98,9 @@ final class DocumentTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .init(
-                    get: .init(operationId: "test", responses: [:])
-                ),
+                    get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:])
-                )
+                    put: .init(operationId: nil, responses: [:]))
             ],
             components: .noComponents
         )
@@ -116,11 +112,9 @@ final class DocumentTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .init(
-                    get: .init(operationId: "test", responses: [:])
-                ),
+                    get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:])
-                )
+                    put: .init(operationId: "two", responses: [:]))
             ],
             components: .noComponents
         )
@@ -132,11 +126,9 @@ final class DocumentTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .init(
-                    get: .init(operationId: nil, responses: [:])
-                ),
+                    get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:])
-                )
+                    put: .init(operationId: "two", responses: [:]))
             ],
             components: .noComponents
         )
@@ -922,44 +914,28 @@ extension DocumentTests {
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
-                "responses" : {
 
-                }
               },
               "get" : {
-                "responses" : {
 
-                }
               },
               "head" : {
-                "responses" : {
 
-                }
               },
               "options" : {
-                "responses" : {
 
-                }
               },
               "patch" : {
-                "responses" : {
 
-                }
               },
               "post" : {
-                "responses" : {
 
-                }
               },
               "put" : {
-                "responses" : {
 
-                }
               },
               "trace" : {
-                "responses" : {
 
-                }
               }
             }
           }
@@ -1008,36 +984,20 @@ extension DocumentTests {
         "webhooks": {
           "webhook-test": {
             "delete": {
-              "responses": {
-              }
             },
             "get": {
-              "responses": {
-              }
             },
             "head": {
-              "responses": {
-              }
             },
             "options": {
-              "responses": {
-              }
             },
             "patch": {
-              "responses": {
-              }
             },
             "post": {
-              "responses": {
-              }
             },
             "put": {
-              "responses": {
-              }
             },
             "trace": {
-              "responses": {
-              }
             }
           }
         }
@@ -1053,7 +1013,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
+                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)

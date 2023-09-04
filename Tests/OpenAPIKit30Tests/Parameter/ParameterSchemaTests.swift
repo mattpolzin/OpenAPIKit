@@ -112,7 +112,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t7.example)
         XCTAssertEqual(t7.example?.value as? String, "hello")
         XCTAssertNotNil(t7.examples)
-        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value.codableValue?.value as? String, "world")
+        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
 
         // straight to schema override explode multiple examples
         let t8 = Schema(
@@ -132,7 +132,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t8.example)
         XCTAssertEqual(t8.example?.value as? String, "hello")
         XCTAssertNotNil(t8.examples)
-        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value.codableValue?.value as? String, "world")
+        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
 
         // schema reference multiple examples
         let t9 = Schema(

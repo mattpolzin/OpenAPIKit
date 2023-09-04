@@ -34,15 +34,28 @@ public extension EitherDecodeNoTypesMatchedError {
             return key.stringValue == "$ref"
         }
 
-        // We want to omit details if the problem is a missing '$ref' key.
-        // If the intention was to write a reference, this error will be obvious.
-        // If the intention was not to use a reference, this error will be superfluous.
+        func looksLikeReferenceKey(_ failure: IndividualFailure) -> Bool {
+            guard case .dataCorrupted(let e) = failure.error else {
+                return false
+            }
+            return e.codingPath[e.codingPath.count-1].stringValue == "$ref"
+        }
+
+        // - We want to omit details if the problem is a missing '$ref' key.
+        // - If the intention was not to use a reference, a reference error will be superfluous.
+        // - If the intention was to write a reference and `$ref` was not used, this error will be obvious.
+        // - If the intention was to write a reference and `$ref` _was_ used, we definitely want to zero in
+        //   on the reference error (which means omitting the _other_ error).
         let error1 = isRefKeyNotFoundError(failure1)
             ? nil
-            : Error(from: failure1.error.replacingPath(with: failure1.codingPath(relativeTo: codingPath))).localizedDescription
+            : looksLikeReferenceKey(failure2)
+                ? nil
+                : Error(from: failure1.error.replacingPath(with: failure1.codingPath(relativeTo: codingPath))).localizedDescription
         let error2 = isRefKeyNotFoundError(failure2)
             ? nil
-            : Error(from: failure2.error.replacingPath(with: failure2.codingPath(relativeTo: codingPath))).localizedDescription
+            : looksLikeReferenceKey(failure1)
+                ? nil
+                : Error(from: failure2.error.replacingPath(with: failure2.codingPath(relativeTo: codingPath))).localizedDescription
 
         let details1 = error1
             .map { "\(String(describing: failure1.type)) could not be decoded because:\n\($0)" }

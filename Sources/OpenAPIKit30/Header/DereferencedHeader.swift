@@ -32,7 +32,8 @@ public struct DereferencedHeader: Equatable {
     internal init(
         _ header: OpenAPI.Header,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         switch header.schemaOrContent {
         case .a(let schemaContext):
@@ -55,6 +56,11 @@ public struct DereferencedHeader: Equatable {
             )
         }
 
+        var header = header
+        if let name = name {
+            header.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
         self.underlyingHeader = header
     }
 
@@ -68,7 +74,11 @@ extension OpenAPI.Header: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedHeader {
-        return try DereferencedHeader(self, resolvingIn: components, following: references)
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedHeader {
+        return try DereferencedHeader(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }

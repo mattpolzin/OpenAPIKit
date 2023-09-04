@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
-    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
+    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#header-object).
     public struct Header: Equatable, CodableVendorExtendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
@@ -186,6 +186,7 @@ extension OpenAPI.Header {
 
         // the following are parsed as part of Schema
         case style
+        case explode
         case allowReserved
         case example
         case examples
@@ -200,6 +201,7 @@ extension OpenAPI.Header {
                 .content,
                 .schema,
                 .style,
+                .explode,
                 .allowReserved,
                 .example,
                 .examples
@@ -224,6 +226,8 @@ extension OpenAPI.Header {
                 self = .schema
             case "style":
                 self = .style
+            case "explode":
+                self = .explode
             case "allowReserved":
                 self = .allowReserved
             case "example":
@@ -249,6 +253,8 @@ extension OpenAPI.Header {
                 return "schema"
             case .style:
                 return "style"
+            case .explode:
+                return "explode"
             case .allowReserved:
                 return "allowReserved"
             case .example:

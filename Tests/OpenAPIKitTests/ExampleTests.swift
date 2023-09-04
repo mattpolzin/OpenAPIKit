@@ -40,6 +40,12 @@ final class ExampleTests: XCTestCase {
         XCTAssertNil(small.description)
         XCTAssertEqual(small.value, .init("hello"))
         XCTAssertEqual(small.vendorExtensions, [:])
+
+        let noValue = OpenAPI.Example()
+        XCTAssertNil(noValue.summary)
+        XCTAssertNil(noValue.description)
+        XCTAssertNil(noValue.value)
+        XCTAssertEqual(noValue.vendorExtensions, [:])
     }
 
     func test_locallyDereferenceable() throws {
@@ -62,6 +68,9 @@ final class ExampleTests: XCTestCase {
 
         let small = OpenAPI.Example(value: .init("hello"))
         XCTAssertEqual(try small.dereferenced(in: .noComponents), small)
+
+        let noValue = OpenAPI.Example()
+        XCTAssertEqual(try noValue.dereferenced(in: .noComponents), noValue)
     }
 }
 
@@ -98,7 +107,7 @@ extension ExampleTests {
 
         XCTAssertEqual(example, OpenAPI.Example(summary: "hello",
                                                 value: .init(URL(string: "https://google.com")!)))
-        XCTAssertEqual(example.value.urlValue, URL(string: "https://google.com")!)
+        XCTAssertEqual(example.value?.urlValue, URL(string: "https://google.com")!)
     }
 
     func test_descriptionAndInternalExample_encode() throws {
@@ -217,6 +226,32 @@ extension ExampleTests {
         let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
 
         XCTAssertEqual(example, OpenAPI.Example(value: .init(URL(string: "https://google.com")!)))
+    }
+
+    func test_noExample_encode() throws {
+        let example = OpenAPI.Example()
+        let encodedExample = try orderUnstableTestStringFromEncoding(of: example)
+
+        assertJSONEquivalent(
+            encodedExample,
+            """
+            {
+
+            }
+            """
+        )
+    }
+
+    func test_noExample_decode() throws {
+        let exampleData =
+        """
+        {
+        }
+        """.data(using: .utf8)!
+
+        let example = try orderUnstableDecode(OpenAPI.Example.self, from: exampleData)
+
+        XCTAssertEqual(example, OpenAPI.Example())
     }
 
     func test_failedDecodeForInternalAndExternalExamples() {

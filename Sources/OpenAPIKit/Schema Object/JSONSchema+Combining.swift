@@ -120,8 +120,8 @@ internal struct FragmentCombiner {
         } else {
             // the only case where starting with a fragment breaks down is when you actually
             // should end up with plain old `.null`
-            guard fragment != .null else {
-                self.combinedFragment = .null
+            if case let .null(coreContext) = fragment.value {
+                self.combinedFragment = .null(coreContext)
                 return
             }
             // combination can turn `required: false` into `required: true`
@@ -154,8 +154,8 @@ internal struct FragmentCombiner {
             }
             try combine(component)
 
-        case (.null, .null):
-            self.combinedFragment = .null
+        case (.null(let leftCoreContext), .null(let rightCoreContext)):
+            self.combinedFragment = .null(try leftCoreContext.combined(with: rightCoreContext))
 
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
             self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))

@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
-    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object).
+    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-scheme-object).
     public struct SecurityScheme: Equatable, CodableVendorExtendable {
         public var type: SecurityType
         public var description: String?
@@ -261,7 +261,15 @@ extension OpenAPI.SecurityScheme {
 extension OpenAPI.SecurityScheme: LocallyDereferenceable {
     /// Security Schemes do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.SecurityScheme {
-        return self
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.SecurityScheme {
+        var ret = self
+        if let name = name {
+            ret.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+        return ret
     }
 }

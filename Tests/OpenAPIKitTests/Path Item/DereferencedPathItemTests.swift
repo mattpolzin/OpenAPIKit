@@ -68,7 +68,14 @@ final class DereferencedPathItemTests: XCTestCase {
             ]
         ).dereferenced(in: components)
 
-        XCTAssertEqual(t1.parameters.map { $0.schemaOrContent.schemaValue?.jsonSchema }, [.string])
+        XCTAssertEqual(
+            t1.parameters.map { $0.schemaOrContent.schemaValue?.jsonSchema },
+            [.string]
+        )
+        XCTAssertEqual(
+           t1.parameters.map { $0.vendorExtensions },
+           [ ["x-component-name": "test"] ]
+        )
     }
 
     func test_missingReferencedParameter() {

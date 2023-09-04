@@ -120,6 +120,9 @@ final class ComponentsTests: XCTestCase {
                 "nine": [
                     OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
                 ]
+            ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [:]))
             ]
         )
 
@@ -132,6 +135,7 @@ final class ComponentsTests: XCTestCase {
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
         let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Link.self)
         let ref9 = try components.reference(named: "nine", ofType: OpenAPI.Callbacks.self)
+        let ref10 = try components.reference(named: "ten", ofType: OpenAPI.PathItem.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
@@ -147,6 +151,7 @@ final class ComponentsTests: XCTestCase {
                 OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
             ]
         )
+        XCTAssertEqual(components[ref10], .init(get: .init(responses: [:])))
     }
 
     func test_subscriptLookup() throws {
@@ -177,6 +182,9 @@ final class ComponentsTests: XCTestCase {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .boolean
+            ],
+            links: [
+                "linky": .init(operationId: "op 1")
             ]
         )
 
@@ -197,6 +205,13 @@ final class ComponentsTests: XCTestCase {
 
         XCTAssertThrowsError(try components.lookup(schema3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
+        }
+
+        let link1: Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "hello"))
+
+        XCTAssertThrowsError(try components.lookup(link1)) { error in
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "hello", key: "links"))
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'hello' was not found in links.")
         }
 
         let reference1: JSONReference<JSONSchema> = .component(named: "hello")
@@ -301,6 +316,9 @@ extension ComponentsTests {
                     )
                 ]
             ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [200: .response(description: "response")]))
+            ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
 
@@ -347,6 +365,17 @@ extension ComponentsTests {
                   },
                   "in" : "query",
                   "name" : "hi"
+                }
+              },
+              "pathItems" : {
+                "ten" : {
+                  "get" : {
+                    "responses" : {
+                      "200" : {
+                        "description" : "response"
+                      }
+                    }
+                  }
                 }
               },
               "requestBodies" : {
@@ -424,6 +453,17 @@ extension ComponentsTests {
               "name" : "hi"
             }
           },
+          "pathItems" : {
+            "ten" : {
+              "get" : {
+                "responses" : {
+                  "200" : {
+                    "description" : "response"
+                  }
+                }
+              }
+            }
+          },
           "requestBodies" : {
             "five" : {
               "content" : {
@@ -498,6 +538,9 @@ extension ComponentsTests {
                         )
                     ]
                 ],
+                pathItems: [
+                    "ten": .init(get: .init(responses: [200: .response(description: "response")]))
+                ],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
         )
@@ -552,44 +595,28 @@ extension ComponentsTests {
             "pathItems" : {
               "path-test" : {
                 "delete" : {
-                  "responses" : {
 
-                  }
                 },
                 "get" : {
-                  "responses" : {
 
-                  }
                 },
                 "head" : {
-                  "responses" : {
 
-                  }
                 },
                 "options" : {
-                  "responses" : {
 
-                  }
                 },
                 "patch" : {
-                  "responses" : {
 
-                  }
                 },
                 "post" : {
-                  "responses" : {
 
-                  }
                 },
                 "put" : {
-                  "responses" : {
 
-                  }
                 },
                 "trace" : {
-                  "responses" : {
 
-                  }
                 }
               }
             }
@@ -605,44 +632,20 @@ extension ComponentsTests {
             "pathItems" : {
               "path-test" : {
                 "delete" : {
-                  "responses" : {
-
-                  }
                 },
                 "get" : {
-                  "responses" : {
-
-                  }
                 },
                 "head" : {
-                  "responses" : {
-
-                  }
                 },
                 "options" : {
-                  "responses" : {
-
-                  }
                 },
                 "patch" : {
-                  "responses" : {
-
-                  }
                 },
                 "post" : {
-                  "responses" : {
-
-                  }
                 },
                 "put" : {
-                  "responses" : {
-
-                  }
                 },
                 "trace" : {
-                  "responses" : {
-
-                  }
                 }
               }
             }

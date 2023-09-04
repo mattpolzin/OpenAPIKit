@@ -63,6 +63,13 @@ extension OpenAPI.Link: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.links }
 }
 
+// Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+// references, albeit in a less than ideal way.
+extension OpenAPI.PathItem: ComponentDictionaryLocatable {
+    public static var openAPIComponentsKey: String { "pathItems" }
+    public static var openAPIComponentsKeyPath: KeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.pathItems }
+}
+
 /// A dereferenceable type can be recursively looked up in
 /// the `OpenAPI.Components` until there are no `JSONReferences`
 /// left in it or any of its properties.
@@ -87,13 +94,17 @@ public protocol LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSelf
+    func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedSelf
 }
 
 extension LocallyDereferenceable {
     // default implementation of public `dereferenced(in:)` based on internal
     // method that tracks reference cycles.
     public func dereferenced(in components: OpenAPI.Components) throws -> DereferencedSelf {
-        try _dereferenced(in: components, following: [])
+        try _dereferenced(in: components, following: [], dereferencedFromComponentNamed: nil)
     }
 }

@@ -72,27 +72,37 @@ extension OperationTests {
             encodedOperation,
             """
             {
-              "responses" : {
 
-              }
             }
             """
         )
     }
 
     func test_minimal_decode() throws {
-        let operationData =
+        let operationData1 =
         """
         {
           "responses" : {}
         }
         """.data(using: .utf8)!
 
-        let operation = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData)
+        let operationData2 =
+        """
+        {
+        }
+        """.data(using: .utf8)!
+
+        let operation1 = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData1)
+        let operation2 = try orderUnstableDecode(OpenAPI.Operation.self, from: operationData2)
 
         XCTAssertEqual(
-            operation,
+            operation1,
             OpenAPI.Operation(responses: [:])
+        )
+
+        XCTAssertEqual(
+            operation1,
+            operation2
         )
     }
 
@@ -313,6 +323,8 @@ extension OperationTests {
 
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))
+
+        XCTAssertNil(operation.callbacks["callback"]?.b?.keys.first?.url)
     }
 
     // Note that JSONEncoder for Linux Foundation does not respect order

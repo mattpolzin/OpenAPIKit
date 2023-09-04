@@ -128,6 +128,48 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(JSONReference<OpenAPI.Callbacks>.component(named: "hello").absoluteString, "#/components/callbacks/hello")
         XCTAssertEqual(JSONReference<OpenAPI.PathItem>.component(named: "hello").absoluteString, "#/components/pathItems/hello")
     }
+
+    func test_toOpenAPIReference() {
+        let t1 = JSONReference<JSONSchema>.component(named: "hello")
+        let t2 = JSONReference<OpenAPI.Response>.component(named: "hello")
+        let t3 = JSONReference<OpenAPI.Parameter>.component(named: "hello")
+        let t4 = JSONReference<OpenAPI.Example>.component(named: "hello")
+        let t5 = JSONReference<OpenAPI.Request>.component(named: "hello")
+        let t6 = JSONReference<OpenAPI.Header>.component(named: "hello")
+        let t7 = JSONReference<OpenAPI.SecurityScheme>.component(named: "hello")
+        let t8 = JSONReference<OpenAPI.Callbacks>.component(named: "hello")
+        let t9 = JSONReference<OpenAPI.PathItem>.component(named: "hello")
+
+        XCTAssertEqual(t1.openAPIReference().jsonReference, t1)
+        XCTAssertEqual(t2.openAPIReference().jsonReference, t2)
+        XCTAssertEqual(t3.openAPIReference().jsonReference, t3)
+        XCTAssertEqual(t4.openAPIReference().jsonReference, t4)
+        XCTAssertEqual(t5.openAPIReference().jsonReference, t5)
+        XCTAssertEqual(t6.openAPIReference().jsonReference, t6)
+        XCTAssertEqual(t7.openAPIReference().jsonReference, t7)
+        XCTAssertEqual(t8.openAPIReference().jsonReference, t8)
+        XCTAssertEqual(t9.openAPIReference().jsonReference, t9)
+
+        XCTAssertNil(t1.openAPIReference().description)
+        XCTAssertNil(t2.openAPIReference().description)
+        XCTAssertNil(t3.openAPIReference().description)
+        XCTAssertNil(t4.openAPIReference().description)
+        XCTAssertNil(t5.openAPIReference().description)
+        XCTAssertNil(t6.openAPIReference().description)
+        XCTAssertNil(t7.openAPIReference().description)
+        XCTAssertNil(t8.openAPIReference().description)
+        XCTAssertNil(t9.openAPIReference().description)
+
+        XCTAssertEqual(t1.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t2.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t3.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t4.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t5.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t6.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t7.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t8.openAPIReference(withDescription: "hi").description, "hi")
+        XCTAssertEqual(t9.openAPIReference(withDescription: "hi").description, "hi")
+    }
 }
 
 // MARK: Codable

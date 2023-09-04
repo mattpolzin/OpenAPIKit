@@ -125,8 +125,8 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t20, .all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))))
         XCTAssertEqual(t20?.discriminator, .init(propertyName: "test"))
 
-        let t21 = JSONSchema.null.dereferenced()
-        XCTAssertEqual(t21, .null)
+        let t21 = JSONSchema.null().dereferenced()
+        XCTAssertEqual(t21, .null(.init(nullable: true)))
 
         // bonus tests around simplifying:
         let t22 = try JSONSchema.all(of: []).dereferenced()?.simplified()
@@ -259,8 +259,8 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
         XCTAssertEqual(t23.discriminator, .init(propertyName: "test"))
 
-        let t24 = try JSONSchema.null.dereferenced(in: components)
-        XCTAssertEqual(t24, .null)
+        let t24 = try JSONSchema.null().dereferenced(in: components)
+        XCTAssertEqual(t24, .null(.init(nullable: true)))
     }
 
     func test_optionalReferenceMissing() {
@@ -279,6 +279,14 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         )
         let t1 = try JSONSchema.reference(.component(named: "test")).dereferenced(in: components)
         XCTAssertEqual(t1, .string(.init(), .init()))
+    }
+
+    func test_throwingReferenceWithOverriddenDescription() throws {
+        let components = OpenAPI.Components(
+            schemas: ["test": .string]
+        )
+        let t1 = try JSONSchema.reference(.component(named: "test"), description: "hello").dereferenced(in: components)
+        XCTAssertEqual(t1, .string(.init(description: "hello"), .init()))
     }
 
     func test_optionalObjectWithoutReferences() {
@@ -504,4 +512,37 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             )
         }
     }
+
+    func test_withDescription() throws {
+        let null = JSONSchema.null().dereferenced()!.with(description: "test")
+        let object = JSONSchema.object.dereferenced()!.with(description: "test")
+        let array = JSONSchema.array.dereferenced()!.with(description: "test")
+
+        let boolean = JSONSchema.boolean.dereferenced()!.with(description: "test")
+        let number = JSONSchema.number.dereferenced()!.with(description: "test")
+        let integer = JSONSchema.integer.dereferenced()!.with(description: "test")
+        let string = JSONSchema.string.dereferenced()!.with(description: "test")
+        let fragment = JSONSchema.fragment(.init()).dereferenced()!.with(description: "test")
+        let all = JSONSchema.all(of: .string).dereferenced()!.with(description: "test")
+        let one = JSONSchema.one(of: .string).dereferenced()!.with(description: "test")
+        let any = JSONSchema.any(of: .string).dereferenced()!.with(description: "test")
+        let not = JSONSchema.not(.string).dereferenced()!.with(description: "test")
+
+        XCTAssertEqual(object.description, "test")
+        XCTAssertEqual(array.description, "test")
+
+        XCTAssertEqual(boolean.description, "test")
+        XCTAssertEqual(number.description, "test")
+        XCTAssertEqual(integer.description, "test")
+        XCTAssertEqual(string.description, "test")
+        XCTAssertEqual(fragment.description, "test")
+
+        XCTAssertEqual(all.description, "test")
+        XCTAssertEqual(one.description, "test")
+        XCTAssertEqual(any.description, "test")
+        XCTAssertEqual(not.description, "test")
+
+        XCTAssertEqual(null.description, "test")
+    }
+
 }

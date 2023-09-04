@@ -10,11 +10,27 @@ import OpenAPIKitCore
 extension Validation {
     // MARK: - Optionally added with `Validator.validating()`
 
+    /// Validate the OpenAPI Document has at least one path in its
+    /// `PathItem.Map`.
+    ///
+    /// The OpenAPI Specifcation does not require that the document
+    /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
+    /// but documentation that is public in nature might only ever have
+    /// an empty `PathItem.Map` in error.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var documentContainsPaths: Validation<OpenAPI.Document> {
+        .init(
+            description: "Document contains at least one path",
+            check: \.paths.count > 0
+        )
+    }
+
     /// Validate the OpenAPI Document's `PathItems` all have at least
     /// one operation.
     ///
     /// The OpenAPI Specifcation does not require that path items
-    /// contain any operations for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-filtering)
+    /// contain any operations for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// a `PathItem` with no operations in error.
     ///
@@ -61,6 +77,9 @@ extension Validation {
     /// and the parameter definitions, this validation runs once per document and performs a
     /// loop over each endpoint in the document.
     ///
+    /// - Important: This validation does not assert that all path item references are valid and
+    ///     can be found. Invalid or missing references will be skipped over.
+    ///
     /// - Important: This is not an included validation by default.
     public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
         .init(
@@ -68,19 +87,20 @@ extension Validation {
                 var errors = [ValidationError]()
 
                 for (path, item) in context.subject {
+                    guard let pathItem = context.document.components[item] else { continue }
                     let variablesInPath = path.components
                         .lazy
                         .filter { $0.first == "{" && $0.last == "}" }
                         .map { String($0.dropFirst().dropLast()) }
 
                     let paramsInPathItem = Array(
-                        item.parameters
+                        pathItem.parameters
                         .lazy
                         .compactMap { context.document.components[$0] }
                         .map { $0.name }
                     )
 
-                    for endpoint in item.endpoints {
+                    for endpoint in pathItem.endpoints {
                         let paramsInOperation = Array(
                             endpoint.operation.parameters
                             .lazy
@@ -137,23 +157,25 @@ extension Validation {
         )
     }
 
-    // MARK: - Included with `Validator()` by default
-
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
-    /// The OpenAPI Specifcation requires that Responses Objects
-    /// contain [at least one response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responses-object).
-    /// The specification recommends that if there is only one response then
-    /// it be a successful response.
+    /// The OpenAPI Specifcation does not require that Responses Objects
+    /// contain at least one response but you may wish to validate that all 
+    /// operations contain at least one response in your own API.
     ///
-    /// - Important: This is included in validation by default.
-    public static var operationsContainResponses: Validation<OpenAPI.Response.Map> {
+    /// The specification recommends that if there is only one response then
+    /// it be a successful response but this validation does not require that.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var operationsContainResponses: Validation<OpenAPI.Operation> {
         .init(
             description: "Operations contain at least one response",
-            check: \.count > 0
+            check: \.responses.count > 0
         )
     }
+
+    // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
     // by calling `Validator.blank`.
@@ -161,7 +183,7 @@ extension Validation {
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
     /// The OpenAPI Specifcation requires that tag names on the Document
-    /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#openapi-object).
+    /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#openapi-object).
     ///
     /// - Important: This is included in validation by default.
     public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
@@ -181,7 +203,7 @@ extension Validation {
     /// A Path Item Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#path-item-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -199,7 +221,7 @@ extension Validation {
     /// An Operation's Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -213,20 +235,26 @@ extension Validation {
 
     /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
     ///
-    /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object).
+    ///
+    /// - Important: This validation does not assert that all path references are valid and found in the
+    ///     components for the document. It skips over missing path items.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var operationIdsAreUnique: Validation<OpenAPI.Document> {
         .init(
             description: "All Operation Ids in Document are unique",
-            check: take(\.allOperationIds) { operationIds in
+            check: { context in
+                let operationIds = context.subject.paths.values
+                    .flatMap { context.subject.components[$0]?.endpoints ?? [] }
+                    .compactMap { $0.operation.operationId }
                 return Set(operationIds).count == operationIds.count
             }
         )
     }
 
-    /// Validate that all JSONSchema references are found in the document's
+    /// Validate that all non-external JSONSchema references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -248,7 +276,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Response references are found in the document's
+    /// Validate that all non-external Response references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -270,7 +298,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Parameter references are found in the document's
+    /// Validate that all non-external Parameter references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -292,7 +320,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Example references are found in the document's
+    /// Validate that all non-external Example references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -314,7 +342,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Request references are found in the document's
+    /// Validate that all non-external Request references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -336,7 +364,7 @@ extension Validation {
         )
     }
 
-    /// Validate that all Header references are found in the document's
+    /// Validate that all non-external Header references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
@@ -347,6 +375,50 @@ extension Validation {
             check: { context in
                 guard case let .internal(internalReference) = context.subject.jsonReference,
                     case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all non-external Link references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var linkReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Link>> {
+        .init(
+            description: "Link reference can be found in components/links",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject.jsonReference,
+                      case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all non-external PathItem references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var pathItemReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+        .init(
+            description: "PathItem reference can be found in components/pathItems",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject.jsonReference,
+                      case .component = internalReference else {
                         // don't make assertions about external references
                         // TODO: could make a stronger assertion including
                         // internal references outside of components given

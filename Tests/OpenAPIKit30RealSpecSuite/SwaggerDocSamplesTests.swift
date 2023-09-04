@@ -68,7 +68,7 @@ final class SwaggerDocSamplesTests: XCTestCase {
             try doc.validate()
 
             XCTAssertEqual(
-                doc.paths["/pets"]?.patch?.requestBody?.requestValue?
+                doc.paths["/pets"]?.pathItemValue?.patch?.requestBody?.requestValue?
                     .content[.json]?.schema?.schemaValue,
                 JSONSchema.one(
                     of: .reference(.component(named: "Cat")),

@@ -24,8 +24,9 @@ extension OpenAPI {
         public var requestBodies: ComponentDictionary<Request>
         public var headers: ComponentDictionary<Header>
         public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var callbacks: ComponentDictionary<Callbacks>
         public var links: ComponentDictionary<Link>
+        public var callbacks: ComponentDictionary<Callbacks>
+        internal var pathItems: ComponentDictionary<PathItem>
 
         /// Dictionary of vendor extensions.
         ///
@@ -56,6 +57,9 @@ extension OpenAPI {
             self.links = links
             self.callbacks = callbacks
             self.vendorExtensions = vendorExtensions
+            // Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+            // references, albeit in a less than ideal way.
+            self.pathItems = [:]
         }
 
         /// An empty OpenAPI Components Object.
@@ -65,6 +69,14 @@ extension OpenAPI {
             return self == .noComponents
         }
     }
+}
+
+extension OpenAPI.Components {
+    /// The extension name used to store a Components Object name (the key something is stored under
+    /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
+    /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
+    /// in the OpenAPI Document).
+    public static let componentNameExtension: String = "x-component-name"
 }
 
 extension OpenAPI {
@@ -145,6 +157,10 @@ extension OpenAPI.Components: Decodable {
             links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+
+            // Until OpenAPI 3.1, path items cannot actually be stored in the Components Object. This is here to facilitate path item
+            // references, albeit in a less than ideal way.
+            pathItems = [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {

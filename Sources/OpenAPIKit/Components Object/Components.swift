@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Components Object".
     ///
-    /// See [OpenAPI Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#components-object).
+    /// See [OpenAPI Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#components-object).
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
@@ -69,6 +69,14 @@ extension OpenAPI {
             return self == .noComponents
         }
     }
+}
+
+extension OpenAPI.Components {
+    /// The extension name used to store a Components Object name (the key something is stored under
+    /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
+    /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
+    /// in the OpenAPI Document).
+    public static let componentNameExtension: String = "x-component-name"
 }
 
 extension OpenAPI {

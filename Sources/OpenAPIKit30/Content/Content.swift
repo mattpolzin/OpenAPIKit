@@ -129,7 +129,7 @@ extension OpenAPI.Content {
     internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
             .lazy
-            .compactMap { $0.value.exampleValue?.value.codableValue }
+            .compactMap { $0.value.exampleValue?.value?.codableValue }
             .first
     }
 
@@ -138,7 +138,7 @@ extension OpenAPI.Content {
     internal static func firstExample(from exampleDict: OrderedDictionary<String, OpenAPI.Example>) -> AnyCodable? {
         return exampleDict
         .lazy
-        .compactMap { $0.value.value.codableValue }
+        .compactMap { $0.value.value?.codableValue }
         .first
     }
 }

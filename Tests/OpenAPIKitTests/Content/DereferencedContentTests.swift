@@ -24,7 +24,10 @@ final class DereferencedContentTests: XCTestCase {
             examples: ["test": .reference(.component(named: "test"))]
         ).dereferenced(in: components)
         XCTAssertEqual(t1.example, "hello world")
-        XCTAssertEqual(t1.examples, ["test": .init(value: .init("hello world"))])
+        XCTAssertEqual(
+            t1.examples, 
+            ["test": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
+        )
     }
 
     func test_multipleExamplesReferenced() throws {
@@ -45,8 +48,8 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(
             t1.examples,
             [
-                "test1": .init(value: .init("hello world")),
-                "test2": .init(value: .init(URL(string: "http://website.com")!))
+                "test1": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
+                "test2": .init(value: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
             ]
         )
     }

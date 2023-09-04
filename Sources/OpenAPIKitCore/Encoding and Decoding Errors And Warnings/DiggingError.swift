@@ -9,6 +9,16 @@
 /// underlying context to attempt to pull out a more granular reason for the
 /// failure.
 ///
+/// In practice (currently) such digging only occurs when there is an `Either`
+/// that fails to decode and that presents an opportunity to do one of three things:
+/// 1. Present the error that neither of two things decoded successfully.
+/// 2. Present the error that thing 1 failed to decode.
+/// 3. Present the error that thing 2 failed to decode.
+/// The reason it ever makes sense to only present an error from one of the two
+/// branches is that sometimes we can heuristically determine that it was exceedingly
+/// unlikely the user intended to represent the thing from the other branch. This error
+/// protocol is all about determining whether that is the case or not.
+///
 /// This is a relevant concept with respect to `DecodingError`s in particular
 /// because they often have underlying causes.
 ///
@@ -32,7 +42,7 @@ extension DiggingError {
     /// trivially (i.e. the user does not need to know that both branches failed because one
     /// of those branches is very unlikely to have been the intended one). If that happens, it is
     /// more useful to dig into the less trivial branch and display a more granular error to the user
-    /// from deeper in that brach. When this occurs, this function retruns the udnerlying error on
+    /// from deeper in that brach. When this occurs, this function retruns the underlying error on
     /// that branch.
     public static func eitherBranchToDigInto(_ eitherError: EitherDecodeNoTypesMatchedError) -> DecodingError? {
         // Just a guard against this being an error with more than 2 branches.
