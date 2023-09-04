@@ -170,7 +170,6 @@ public final class Validator {
     /// `Validator.blank`.
     ///
     /// The default validations are
-    /// - Operations must contain at least one response.
     /// - Document-level tag names are unique.
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
@@ -184,7 +183,6 @@ public final class Validator {
     ///
     public convenience init() {
         self.init(validations: [
-            .init(.operationsContainResponses),
             .init(.documentTagNamesAreUnique),
             .init(.pathItemParametersAreUnique),
             .init(.operationParametersAreUnique),
