@@ -579,6 +579,7 @@ Here's a table of Array/Map types for which this quirk is relevant and which mod
   | `OpenAPI.Components.securitySchemes` | `ComponentDictionary`   | x            | x          |
   | `OpenAPI.Document.components`        | `Components`            | x            | x          |
   | `OpenAPI.Document.security`          | `[SecurityRequirement]` | x            | x          |
+  | `OpenAPI.Document.paths`             | `PathItem.Map`          |              | x          |
   | `OpenAPI.Document.servers`           | `[Server]`              | x            | x          |
   | `OpenAPI.Document.webhooks`          | `OrderedDictionary`     |              | x          |
   | `OpenAPI.Link.parameters`            | `OrderedDictionary`     | x            | x          |

@@ -401,10 +401,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -455,10 +452,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -510,9 +504,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "servers" : [
                 {
                   "url" : "http:\\/\\/google.com"
@@ -642,9 +633,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "security" : [
                 {
                   "security" : [
@@ -722,9 +710,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "tags" : [
                 {
                   "name" : "hi"
@@ -789,10 +774,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
-              "paths" : {
-
-              }
+              "openapi" : "3.1.0"
             }
             """
         )
@@ -852,9 +834,6 @@ extension DocumentTests {
                 "version" : "1.0"
               },
               "openapi" : "3.1.0",
-              "paths" : {
-
-              },
               "x-specialFeature" : [
                 "hello",
                 "world"
@@ -932,9 +911,6 @@ extension DocumentTests {
             "version" : "1.0"
           },
           "openapi" : "3.1.0",
-          "paths" : {
-
-          },
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
@@ -1038,6 +1014,120 @@ extension DocumentTests {
                 paths: [:],
                 webhooks:  [
                     "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+                ],
+                components: .noComponents,
+                externalDocs: .init(url: URL(string: "http://google.com")!)
+            )
+        )
+    }
+    
+    func test_webhooks_noPaths_encode() throws {
+        let op = OpenAPI.Operation(responses: [:])
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
+        
+        let document = OpenAPI.Document(
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            webhooks:  [
+                "webhook-test": pathItemTest
+            ],
+            components: .noComponents,
+            externalDocs: .init(url: URL(string: "http://google.com")!)
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        let documentJSON: String? =
+            """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.0",
+          "webhooks" : {
+            "webhook-test" : {
+              "delete" : {
+
+              },
+              "get" : {
+
+              },
+              "head" : {
+
+              },
+              "options" : {
+
+              },
+              "patch" : {
+
+              },
+              "post" : {
+
+              },
+              "put" : {
+
+              },
+              "trace" : {
+
+              }
+            }
+          }
+        }
+        """
+
+        assertJSONEquivalent(encodedDocument, documentJSON)
+    }
+    
+  func test_webhooks_noPaths_decode() throws {
+      let documentData =
+      """
+      {
+        "externalDocs": {
+          "url": "http:\\/\\/google.com"
+        },
+        "info": {
+          "title": "API",
+          "version": "1.0"
+        },
+        "openapi": "3.1.0",
+        "webhooks": {
+          "webhook-test": {
+            "delete": {
+            },
+            "get": {
+            },
+            "head": {
+            },
+            "options": {
+            },
+            "patch": {
+            },
+            "post": {
+            },
+            "put": {
+            },
+            "trace": {
+            }
+          }
+        }
+      }
+      """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+        
+        let op = OpenAPI.Operation(responses: [:])
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                webhooks:  [
+                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)

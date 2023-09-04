@@ -11,24 +11,6 @@ import OpenAPIKit
 import Yams
 
 final class PathsErrorTests: XCTestCase {
-    func test_missingPaths() {
-        let documentYML =
-        """
-        openapi: "3.1.0"
-        info:
-            title: test
-            version: 1.0
-        """
-
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
-
-            let openAPIError = OpenAPI.Error(from: error)
-
-            XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `paths` key in the root Document object but it is missing.")
-            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
-        }
-    }
-
     func test_badPathReference() {
         let documentYML =
         """

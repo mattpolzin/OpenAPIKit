@@ -15,14 +15,14 @@ extension Validation {
     ///
     /// The OpenAPI Specifcation does not require that the document
     /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
-    /// but documentation that is public in nature might only ever have
-    /// an empty `PathItem.Map` in error.
+    /// or even because it only contains webhooks, but authors may still
+    /// want to protect against an empty `PathItem.Map` in some cases.
     ///
     /// - Important: This is not an included validation by default.
-    public static var documentContainsPaths: Validation<OpenAPI.PathItem.Map> {
+    public static var documentContainsPaths: Validation<OpenAPI.Document> {
         .init(
             description: "Document contains at least one path",
-            check: \.count > 0
+            check: \.paths.count > 0
         )
     }
 
