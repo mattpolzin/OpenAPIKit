@@ -11,6 +11,37 @@ import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
 
+    func test_noPathsOnDocumentFails() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.documentContainsPaths)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+
+    func test_onePathOnDocumentSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init()
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.documentContainsPaths)
+        try document.validate(using: validator)
+    }
+
     func test_noOperationsOnPathItemFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),

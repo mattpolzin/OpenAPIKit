@@ -11,18 +11,6 @@ import OpenAPIKit
 import Yams
 
 final class PathsErrorTests: XCTestCase {
-    func test_missingPaths() {
-        let documentYML =
-        """
-        openapi: "3.1.0"
-        info:
-            title: test
-            version: 1.0
-        """
-
-        XCTAssertNoThrow(try testDecoder.decode(OpenAPI.Document.self, from: documentYML))
-    }
-
     func test_badPathReference() {
         let documentYML =
         """
