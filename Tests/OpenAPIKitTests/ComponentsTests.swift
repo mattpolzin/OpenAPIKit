@@ -595,44 +595,28 @@ extension ComponentsTests {
             "pathItems" : {
               "path-test" : {
                 "delete" : {
-                  "responses" : {
 
-                  }
                 },
                 "get" : {
-                  "responses" : {
 
-                  }
                 },
                 "head" : {
-                  "responses" : {
 
-                  }
                 },
                 "options" : {
-                  "responses" : {
 
-                  }
                 },
                 "patch" : {
-                  "responses" : {
 
-                  }
                 },
                 "post" : {
-                  "responses" : {
 
-                  }
                 },
                 "put" : {
-                  "responses" : {
 
-                  }
                 },
                 "trace" : {
-                  "responses" : {
 
-                  }
                 }
               }
             }
@@ -648,44 +632,20 @@ extension ComponentsTests {
             "pathItems" : {
               "path-test" : {
                 "delete" : {
-                  "responses" : {
-
-                  }
                 },
                 "get" : {
-                  "responses" : {
-
-                  }
                 },
                 "head" : {
-                  "responses" : {
-
-                  }
                 },
                 "options" : {
-                  "responses" : {
-
-                  }
                 },
                 "patch" : {
-                  "responses" : {
-
-                  }
                 },
                 "post" : {
-                  "responses" : {
-
-                  }
                 },
                 "put" : {
-                  "responses" : {
-
-                  }
                 },
                 "trace" : {
-                  "responses" : {
-
-                  }
                 }
               }
             }

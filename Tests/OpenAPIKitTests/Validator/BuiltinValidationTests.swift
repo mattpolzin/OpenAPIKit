@@ -414,6 +414,44 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    func test_noResponsesOnOperationFails() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get"])
+        }
+    }
+
+    func test_oneResponseOnOperationSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        try document.validate(using: validator)
+    }
+
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -438,44 +476,6 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents,
             tags: ["hello", "world"]
-        )
-
-        // NOTE this is part of default validation
-        try document.validate()
-    }
-
-    func test_noResponsesOnOperationFails() {
-        let document = OpenAPI.Document(
-            info: .init(title: "test", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    get: .init(responses: [:])
-                )
-            ],
-            components: .noComponents
-        )
-
-        // NOTE this is part of default validation
-        XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
-        }
-    }
-
-    func test_oneResponseOnOperationSucceeds() throws {
-        let document = OpenAPI.Document(
-            info: .init(title: "test", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    get: .init(responses: [
-                        200: .response(description: "hi")
-                    ])
-                )
-            ],
-            components: .noComponents
         )
 
         // NOTE this is part of default validation
@@ -806,7 +806,10 @@ final class BuiltinValidationTests: XCTestCase {
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
                         ],
-                        links: ["linky": .reference(.component(named: "link1"))]
+                        links: [
+                            "linky": .reference(.component(named: "link1")),
+                            "linky2": .reference(.external(URL(string: "https://linky.com")!))
+                        ]
                     )
                 ]
             )
@@ -817,7 +820,8 @@ final class BuiltinValidationTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .pathItem(path),
-                "/world": .reference(.component(named: "path1"))
+                "/world": .reference(.component(named: "path1")),
+                "/external": .reference(.external(URL(string: "https://other-world.com")!))
             ],
             components: .init(
                 schemas: [

@@ -938,44 +938,28 @@ extension DocumentTests {
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
-                "responses" : {
 
-                }
               },
               "get" : {
-                "responses" : {
 
-                }
               },
               "head" : {
-                "responses" : {
 
-                }
               },
               "options" : {
-                "responses" : {
 
-                }
               },
               "patch" : {
-                "responses" : {
 
-                }
               },
               "post" : {
-                "responses" : {
 
-                }
               },
               "put" : {
-                "responses" : {
 
-                }
               },
               "trace" : {
-                "responses" : {
 
-                }
               }
             }
           }
@@ -1024,36 +1008,20 @@ extension DocumentTests {
         "webhooks": {
           "webhook-test": {
             "delete": {
-              "responses": {
-              }
             },
             "get": {
-              "responses": {
-              }
             },
             "head": {
-              "responses": {
-              }
             },
             "options": {
-              "responses": {
-              }
             },
             "patch": {
-              "responses": {
-              }
             },
             "post": {
-              "responses": {
-              }
             },
             "put": {
-              "responses": {
-              }
             },
             "trace": {
-              "responses": {
-              }
             }
           }
         }
