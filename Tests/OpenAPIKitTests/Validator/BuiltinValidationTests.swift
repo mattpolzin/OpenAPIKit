@@ -806,7 +806,10 @@ final class BuiltinValidationTests: XCTestCase {
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
                         ],
-                        links: ["linky": .reference(.component(named: "link1"))]
+                        links: [
+                            "linky": .reference(.component(named: "link1")),
+                            "linky2": .reference(.external(URL(string: "https://linky.com")!))
+                        ]
                     )
                 ]
             )
@@ -817,7 +820,8 @@ final class BuiltinValidationTests: XCTestCase {
             servers: [],
             paths: [
                 "/hello": .pathItem(path),
-                "/world": .reference(.component(named: "path1"))
+                "/world": .reference(.component(named: "path1")),
+                "/external": .reference(.external(URL(string: "https://other-world.com")!))
             ],
             components: .init(
                 schemas: [
