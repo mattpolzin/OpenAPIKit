@@ -549,7 +549,7 @@ try document.validate(using: validator)
 ### Tips and Quirks
 This section contains tips for using the validation framework and quirks of the framework that could cause some confusion.
 
-#### Validation is tied to encoding
+#### Validation of empty Arrays & Maps
 The validation framework is tied to the process of encoding an OpenAPI document. This generally
 provides some really nice benefits for free (like tracking the path under which a validation is
 being run).
@@ -562,4 +562,32 @@ A concrete example of this quirk is the `Response.Map` under a `PathItem`. If th
 (but not `OpenAPIKit30`) will omit the `responses` key from encoding. If you want to check that the responses are not 
 empty as is done in the built-in validation `operationsContainResponses` you need your validation context to be the whole 
 `Operation` not just the `Response.Map`.
+
+Here's a table of Array/Map types for which this quirk is relevant and which modules the quirk applies to:
+
+  | Property                             | Type                    | OpenAPIKit30 | OpenAPIKit |
+  |--------------------------------------|-------------------------|--------------|------------|
+  | `OpenAPI.Components.callbacks`       | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.examples`        | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.headers`         | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.links`           | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.parameters`      | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.pathItems`       | `ComponentDictionary`   |              | x          |
+  | `OpenAPI.Components.requestBodies`   | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.responses`       | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.schemas`         | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.securitySchemes` | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Document.components`        | `Components`            | x            | x          |
+  | `OpenAPI.Document.security`          | `[SecurityRequirement]` | x            | x          |
+  | `OpenAPI.Document.servers`           | `[Server]`              | x            | x          |
+  | `OpenAPI.Document.webhooks`          | `OrderedDictionary`     |              | x          |
+  | `OpenAPI.Link.parameters`            | `OrderedDictionary`     | x            | x          |
+  | `OpenAPI.Operation.callbacks`        | `CallbacksMap`          | x            | x          |
+  | `OpenAPI.Operation.parameters`       | `Parameter.Array`       | x            | x          |
+  | `OpenAPI.Operation.responses`        | `Response.Map`          |              | x          |
+  | `OpenAPI.PathItem.parameters`        | `Parameter.Array`       | x            | x          |
+  | `OpenAPI.PathItem.responses`         | `Response.Map`          | x            | x          |
+  | `OpenAPI.Response.content`           | `Content.Map`           | x            | x          |
+  | `OpenAPI.Response.links`             | `Link.Map`              | x            | x          |
+  | `OpenAPI.Server.Variable.enum`       | `[String]`              | x            | x          |
 
