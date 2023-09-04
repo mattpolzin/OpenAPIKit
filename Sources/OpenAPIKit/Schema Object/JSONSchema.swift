@@ -37,7 +37,9 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     /// The null type, which replaces the functionality of the `nullable` property from
     /// previous versions of the OpenAPI specification.
-    public static let null: Self = .init(schema: .null)
+    public static func null(_ core: CoreContext<JSONTypeFormat.AnyFormat> = .init(nullable: true)) -> Self {
+        .init(schema: .null(core.nullableContext()))
+    }
     public static func boolean(_ core: CoreContext<JSONTypeFormat.BooleanFormat>) -> Self {
         .init(schema: .boolean(core))
     }
@@ -79,7 +81,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
     public enum Schema: Equatable {
         /// The null type, which replaces the functionality of the `nullable` property from
         /// previous versions of the OpenAPI specification.
-        case null
+        case null(CoreContext<JSONTypeFormat.AnyFormat>)
         case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
         case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
         case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -160,53 +162,19 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     // See `JSONSchemaContext`
     public var required: Bool {
-        switch value {
-        case .null:
-            #warning("TODO: not sure about this -- maybe null type should get a context still")
-            return false
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _),
-             .fragment(let context as JSONSchemaContext),
-             .all(of: _, core: let context as JSONSchemaContext),
-             .one(of: _, core: let context as JSONSchemaContext),
-             .any(of: _, core: let context as JSONSchemaContext),
-             .not(_, core: let context as JSONSchemaContext):
-            return context.required
-        case .reference(_, let context):
-            return context.required
-        }
+        return coreContext?.required ?? true
     }
 
     // See `JSONSchemaContext`
     public var description: String? {
-        switch value {
-        case .boolean(let context as JSONSchemaContext),
-             .object(let context as JSONSchemaContext, _),
-             .array(let context as JSONSchemaContext, _),
-             .number(let context as JSONSchemaContext, _),
-             .integer(let context as JSONSchemaContext, _),
-             .string(let context as JSONSchemaContext, _),
-             .fragment(let context as JSONSchemaContext),
-             .all(of: _, core: let context as JSONSchemaContext),
-             .one(of: _, core: let context as JSONSchemaContext),
-             .any(of: _, core: let context as JSONSchemaContext),
-             .not(_, core: let context as JSONSchemaContext):
-            return context.description
-        case .reference(_, let referenceContext):
-            return referenceContext.description
-        case .null:
-            return nil
-        }
+        return coreContext?.description
     }
 
     // See `JSONSchemaContext`
     public var discriminator: OpenAPI.Discriminator? {
         switch value {
-        case .boolean(let context as JSONSchemaContext),
+        case .null(let context as JSONSchemaContext),
+             .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
@@ -218,14 +186,13 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.discriminator
-        case .reference, .null:
+        case .reference:
             return nil
         }
     }
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
-        guard self != .null else { return true }
         return coreContext?.nullable ?? false
     }
 
@@ -365,7 +332,8 @@ extension JSONSchema {
     ///
     public var coreContext: JSONSchemaContext? {
         switch value {
-        case .boolean(let context as JSONSchemaContext),
+        case .null(let context as JSONSchemaContext),
+             .boolean(let context as JSONSchemaContext),
              .object(let context as JSONSchemaContext, _),
              .array(let context as JSONSchemaContext, _),
              .number(let context as JSONSchemaContext, _),
@@ -375,12 +343,9 @@ extension JSONSchema {
              .all(of: _, core: let context as JSONSchemaContext),
              .one(of: _, core: let context as JSONSchemaContext),
              .any(of: _, core: let context as JSONSchemaContext),
-             .not(_, core: let context as JSONSchemaContext):
+             .not(_, core: let context as JSONSchemaContext),
+             .reference(_, let context as JSONSchemaContext):
             return context
-        case .reference(_, let context as JSONSchemaContext):
-            return context
-        case .null:
-            return nil
         }
     }
 
@@ -516,8 +481,12 @@ extension JSONSchema {
                 schema: .reference(reference, context.optionalContext()),
                 vendorExtensions: vendorExtensions
             )
-        case .null:
-            return self
+        case .null(let context):
+            return .init(
+                warnings: warnings,
+                schema: .null(context.optionalContext()),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 
@@ -596,8 +565,12 @@ extension JSONSchema {
                 schema: .reference(reference, context.requiredContext()),
                 vendorExtensions: vendorExtensions
             )
-        case .null:
-            return self
+        case .null(let context):
+            return .init(
+                warnings: warnings,
+                schema: .null(context.requiredContext()),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 
@@ -745,8 +718,18 @@ extension JSONSchema {
                 schema: .not(schema, core: core.with(allowedValues: allowedValues)),
                 vendorExtensions: vendorExtensions
             )
-        case .reference, .null:
-            return self
+        case .reference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .reference(schema, core.with(allowedValues: allowedValues)),
+                vendorExtensions: vendorExtensions
+            )
+        case .null(let core):
+            return .init(
+                warnings: warnings,
+                schema: .null(core.with(allowedValues: allowedValues)),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 
@@ -819,8 +802,18 @@ extension JSONSchema {
                 schema: .not(schema, core: core.with(defaultValue: defaultValue)),
                 vendorExtensions: vendorExtensions
             )
-        case .reference, .null:
-            return self
+        case .reference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .reference(schema, core.with(defaultValue: defaultValue)),
+                vendorExtensions: vendorExtensions
+            )
+        case .null(let core):
+            return .init(
+                warnings: warnings,
+                schema: .null(core.with(defaultValue: defaultValue)),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 
@@ -900,8 +893,18 @@ extension JSONSchema {
                 schema: .not(schema, core: core.with(examples: examples)),
                 vendorExtensions: vendorExtensions
             )
-        case .reference, .null:
-            throw Self.Error.exampleNotSupported
+        case .reference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .reference(schema, core.with(examples: examples)),
+                vendorExtensions: vendorExtensions
+            )
+        case .null(let core):
+            return .init(
+                warnings: warnings,
+                schema: .null(core.with(examples: examples)),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 
@@ -1054,21 +1057,12 @@ extension JSONSchema {
                 schema: .reference(ref, referenceContext.with(description: description)),
                 vendorExtensions: vendorExtensions
             )
-        case .null:
-            return self
-        }
-    }
-}
-
-extension JSONSchema {
-    internal enum Error: Swift.Error, CustomStringConvertible, Equatable {
-        case exampleNotSupported
-
-        public var description: String {
-            switch self {
-            case .exampleNotSupported:
-                return "examples not supported for `.allOf`, `.oneOf`, `.anyOf`, `.not`, `.null` or for JSON references ($ref)."
-            }
+        case .null(let referenceContext):
+            return .init(
+                warnings: warnings,
+                schema: .null(referenceContext.with(description: description)),
+                vendorExtensions: vendorExtensions
+            )
         }
     }
 }
@@ -1703,9 +1697,10 @@ extension JSONSchema {
     public static func reference(
         _ reference: JSONReference<JSONSchema>,
         required: Bool = true,
+        title: String? = nil,
         description: String? = nil
     ) -> JSONSchema {
-        return .reference(reference, .init(required: required, description: description))
+        return .reference(reference, .init(required: required, title: title, description: description))
     }
 }
 
@@ -1758,9 +1753,10 @@ extension JSONSchema: Encodable {
 
     public func encode(to encoder: Encoder) throws {
         switch value {
-        case .null:
+        case .null(let coreContext):
             var container = encoder.container(keyedBy: NullCodingKeys.self)
             try container.encode(JSONType.null.rawValue, forKey: .type)
+            try coreContext.encode(to: encoder)
 
         case .boolean(let context):
             try context.encode(to: encoder)
@@ -1925,7 +1921,8 @@ extension JSONSchema: Decodable {
         }
 
         if typeHint == .null {
-            value = .null
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            value = .null(coreContext)
 
         } else if typeHint == .integer || typeHint == .number || (typeHint == nil && !numericOrIntegerContainer.allKeys.isEmpty) {
             if typeHint == .integer {
