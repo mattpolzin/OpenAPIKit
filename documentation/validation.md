@@ -14,6 +14,7 @@
     - [A Valid OpenAPI Document](#a-valid-openapi-document)
     - [An Invalid OpenAPI Document](#an-invalid-openapi-document)
     - [Validation Code](#validation-code)
+- [Tips and Quirks](#tips-and-quirks)
 
 ### Executing Validations
 
@@ -544,3 +545,21 @@ let validator = Validator()
 
 try document.validate(using: validator)
 ```
+
+### Tips and Quirks
+This section contains tips for using the validation framework and quirks of the framework that could cause some confusion.
+
+#### Validation is tied to encoding
+The validation framework is tied to the process of encoding an OpenAPI document. This generally
+provides some really nice benefits for free (like tracking the path under which a validation is
+being run).
+
+One place where this can cause confusion is where certain values within an OpenAPIKit type are omitted from encoding
+when they are empty. Because of this, using those types as the `Context` for a validation will only work if the type is
+not empty and cannot be used to assert that the type is or is not empty.
+
+A concrete example of this quirk is the `Response.Map` under a `PathItem`. If this map is empty, the `OpenAPIKit` module
+(but not `OpenAPIKit30`) will omit the `responses` key from encoding. If you want to check that the responses are not 
+empty as is done in the built-in validation `operationsContainResponses` you need your validation context to be the whole 
+`Operation` not just the `Response.Map`.
+
