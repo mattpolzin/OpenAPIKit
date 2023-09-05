@@ -109,7 +109,7 @@ public struct Validation<Subject: Validatable> {
 
 /// Validation errors are just a textual reason for validation failure and
 /// a coding path where the validation error occurred.
-public struct ValidationError: Swift.Error, CustomStringConvertible {
+public struct ValidationError: Swift.Error, CustomStringConvertible, PathContextError {
     /// The reason for the validation failure.
     public let reason: String
     /// The location where the failure occurred.
@@ -149,6 +149,7 @@ public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible, E
     public var description: String { localizedDescription }
 
     public var swiftErrors: [Swift.Error] { values }
+    public var pathContextErrors: [PathContextError] { values }
 }
 
 /// Erases the type on which a `Validator` is specialized and combines

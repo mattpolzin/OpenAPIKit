@@ -28,7 +28,16 @@ public enum ErrorCategory {
     }
 }
 
-public protocol OpenAPIError: Swift.Error, CustomStringConvertible {
+public protocol PathContextError {
+    /// The complete coding path for where the error occurred.
+    ///
+    /// This will often overlap with the `contextString` but there is not
+    /// a 1-1 relationship between the two. This is the same concept of
+    /// "codingPath" as is used elsewhere for the Swift `Codable` featureset.
+    var codingPath: [CodingKey] { get }
+}
+
+public protocol OpenAPIError: Swift.Error, CustomStringConvertible, PathContextError {
     /// The subject of the error (i.e. the thing being worked with
     ///     when the error occurred).
     ///
@@ -52,12 +61,6 @@ public protocol OpenAPIError: Swift.Error, CustomStringConvertible {
     ///     key in Document.info but it is missing." the **category** is
     ///     `.missing(.key)`.
     var errorCategory: ErrorCategory { get }
-    /// The complete coding path for where the error occurred.
-    ///
-    /// This will often overlap with the `contextString` but there is not
-    /// a 1-1 relationship between the two. This is the same concept of
-    /// "codingPath" as is used elsewhere for the Swift `Codable` featureset.
-    var codingPath: [CodingKey] { get }
 }
 
 public extension OpenAPIError {
@@ -121,6 +124,7 @@ public extension OpenAPIError {
 
 public protocol ErrorCollection {
     var swiftErrors: [Swift.Error] { get }
+    var pathContextErrors: [PathContextError] { get }
 
     var localizedDescription: String { get }
 }
