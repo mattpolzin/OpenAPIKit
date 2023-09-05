@@ -26,11 +26,7 @@ extension OpenAPI.Document {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
-        // we kick things off by applying validations to the root (OpenAPI.Document)
-        // and then encoding with the single value container.
-        // After this, validations are only applied by keyed/unkeyed containers and
-        // by the leaf node methods of the single value container.
-        validator.applyValidations(to: self)
+        // Validation is done by "encoding"
         try container.encode(self)
 
         if !validator.errors.isEmpty {
