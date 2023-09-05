@@ -34,8 +34,8 @@ You can also get a `codingPathString` if you want a convenient string representa
 let document = OpenAPI.Document(...)
 do {
     try document.validate()
-} catch let errors as ValidationErrors {
-    for error in errors {
+} catch let errors as ValidationErrorCollection {
+    for error in errors.values {
         print(error.reason)
         print("occurred at \(error.codingPathString)")
     }

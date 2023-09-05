@@ -119,6 +119,12 @@ public extension OpenAPIError {
     var description: String { localizedDescription }
 }
 
+public protocol ErrorCollection {
+    var swiftErrors: [Swift.Error] { get }
+
+    var localizedDescription: String { get }
+}
+
 public extension Swift.Array where Element == CodingKey {
     var stringValue: String {
         return self.map { key in
