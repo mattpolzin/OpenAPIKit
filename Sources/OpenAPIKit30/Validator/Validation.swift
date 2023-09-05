@@ -109,7 +109,7 @@ public struct Validation<Subject: Validatable> {
 
 /// Validation errors are just a textual reason for validation failure and
 /// a coding path where the validation error occurred.
-public struct ValidationError: Swift.Error, CustomStringConvertible {
+public struct ValidationError: Swift.Error, CustomStringConvertible, PathContextError {
     /// The reason for the validation failure.
     public let reason: String
     /// The location where the failure occurred.
@@ -128,7 +128,10 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     public var localizedDescription: String { description }
 
     public var description: String {
-        "\(reason) at path: \(codingPath.stringValue)"
+        guard !codingPath.isEmpty else {
+            return "\(reason) at root of document"
+        }
+        return "\(reason) at path: \(codingPath.stringValue)"
     }
 }
 
@@ -136,14 +139,17 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
 ///
 /// This type is responsible for making it possible to collect validation
 /// errors and throw one value (this collection) at the end of validation.
-public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible {
+public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible, ErrorCollection {
     public let values: [ValidationError]
 
-    public var localizedDescription: String { description }
-
-    public var description: String {
+    public var localizedDescription: String {
         return values.map(String.init(describing:)).joined(separator: "\n")
     }
+
+    public var description: String { localizedDescription }
+
+    public var swiftErrors: [Swift.Error] { values }
+    public var pathContextErrors: [PathContextError] { values }
 }
 
 /// Erases the type on which a `Validator` is specialized and combines
