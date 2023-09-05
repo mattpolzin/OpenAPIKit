@@ -35,7 +35,7 @@ extension OpenAPI.Document {
         // and then encoding with the single value container.
         // After this, validations are only applied by keyed/unkeyed containers and
         // by the leaf node methods of the single value container.
-        validator.applyValidations(to: self)
+//        validator.applyValidations(to: self)
         try container.encode(self)
 
         let errors: [ValidationError]
