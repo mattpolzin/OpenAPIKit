@@ -128,7 +128,10 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
     public var localizedDescription: String { description }
 
     public var description: String {
-        "\(reason) at path: \(codingPath.stringValue)"
+        guard !codingPath.isEmpty else {
+            return "\(reason) at root of document"
+        }
+        return "\(reason) at path: \(codingPath.stringValue)"
     }
 }
 
@@ -136,14 +139,16 @@ public struct ValidationError: Swift.Error, CustomStringConvertible {
 ///
 /// This type is responsible for making it possible to collect validation
 /// errors and throw one value (this collection) at the end of validation.
-public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible {
+public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible, ErrorCollection {
     public let values: [ValidationError]
 
-    public var localizedDescription: String { description }
-
-    public var description: String {
+    public var localizedDescription: String {
         return values.map(String.init(describing:)).joined(separator: "\n")
     }
+
+    public var description: String { localizedDescription }
+
+    public var swiftErrors: [Swift.Error] { values }
 }
 
 /// Erases the type on which a `Validator` is specialized and combines

@@ -148,9 +148,7 @@ public struct ValidationErrorCollection: Swift.Error, CustomStringConvertible, E
 
     public var description: String { localizedDescription }
 
-    public var swiftErrors: [Swift.Error] {
-        return values
-    }
+    public var swiftErrors: [Swift.Error] { values }
 }
 
 /// Erases the type on which a `Validator` is specialized and combines
