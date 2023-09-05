@@ -24,6 +24,7 @@ final class BuiltinValidationTests: XCTestCase {
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
+            XCTAssertEqual(error?.values.count, 1)
         }
     }
 
@@ -57,6 +58,7 @@ final class BuiltinValidationTests: XCTestCase {
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Paths contain at least one operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
+            XCTAssertEqual(error?.values.count, 1)
         }
     }
 
