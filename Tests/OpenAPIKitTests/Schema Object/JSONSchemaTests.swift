@@ -138,7 +138,7 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_vendorExtensionsInit() {
-        let schema = JSONSchema(.string(), vendorExtensions: ["x-test": "hello world"])
+        let schema: JSONSchema = .string().with(vendorExtensions: ["x-test": "hello world"])
 
         XCTAssertEqual(schema.value, .string(.init(), .init()))
         XCTAssertTrue(schema.warnings.isEmpty)
@@ -1651,12 +1651,12 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(
             try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
-            JSONSchema(.fragment(.init(examples: ["hello"])), vendorExtensions: ["x-hello": "hello"])
+            .fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
         )
     }
 
     func test_encodeExamplesVendorExtension() throws {
-        let fragment = JSONSchema(.fragment(.init(examples: ["hello"])), vendorExtensions: ["x-hello": "hello"])
+        let fragment: JSONSchema = .fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
 
         let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
 
