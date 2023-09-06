@@ -105,6 +105,9 @@ public protocol JSONSchemaContext {
 
     /// `true` if this schema is deprecated, `false` otherwise.
     var deprecated: Bool { get }
+
+    /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
+    var vendorExtensions: [String: AnyCodable] { get }
 }
 
 extension JSONSchema {
@@ -141,6 +144,8 @@ extension JSONSchema {
         /// An empty examples array is omitted from encoding.
         public let examples: [AnyCodable]
 
+        public let vendorExtensions: [String : AnyCodable]
+
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
 
@@ -174,7 +179,8 @@ extension JSONSchema {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
-            examples: [AnyCodable] = []
+            examples: [AnyCodable] = [],
+            vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.format = format
             self.required = required
@@ -188,6 +194,7 @@ extension JSONSchema {
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.examples = examples
+            self.vendorExtensions = vendorExtensions
         }
 
         public init(
@@ -202,7 +209,8 @@ extension JSONSchema {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
-            examples: [String]
+            examples: [String],
+            vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.format = format
             self.required = required
@@ -216,6 +224,7 @@ extension JSONSchema {
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.examples = examples.map(AnyCodable.init)
+            self.vendorExtensions = vendorExtensions
         }
     }
 }
@@ -237,7 +246,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -255,7 +265,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -273,7 +284,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -291,7 +303,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -309,7 +322,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -327,7 +341,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: [example]
+            examples: [example],
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -345,7 +360,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -363,7 +379,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 
@@ -381,7 +398,27 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    /// Return this context with the given description
+    public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            examples: examples,
+            vendorExtensions: vendorExtensions
         )
     }
 }
@@ -759,6 +796,10 @@ extension JSONSchema.CoreContext: Decodable {
         } else {
             examples = try container.decodeIfPresent([AnyCodable].self, forKey: .examples) ?? []
         }
+        // vendor extensions get decoded by the JSONSchema because although vendor extensions
+        // apply to all schemas (core context) they are more accurately in the context of the
+        // full JSON Schema.
+        vendorExtensions = [:]
     }
 
     /// Decode whether or not this is a nullable JSONSchema.

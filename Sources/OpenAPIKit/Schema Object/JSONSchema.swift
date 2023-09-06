@@ -10,29 +10,19 @@ import OpenAPIKitCore
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schema-object).
-public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
+public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     public let warnings: [OpenAPI.Warning]
     public let value: Schema
 
-    public let vendorExtensions: [String: AnyCodable]
-
     internal init(warnings: [OpenAPI.Warning], schema: Schema, vendorExtensions: [String: AnyCodable]) {
         self.warnings = warnings
-        self.value = schema
-        self.vendorExtensions = vendorExtensions
+        self.value = schema.with(vendorExtensions: vendorExtensions)
     }
 
     public init(schema: Schema, vendorExtensions: [String: AnyCodable] = [:]) {
-        value = schema
         warnings = []
-        self.vendorExtensions = vendorExtensions
-    }
-
-    public init(_ schema: JSONSchema, vendorExtensions: [String: AnyCodable]) {
-        value = schema.value
-        warnings = schema.warnings
-        self.vendorExtensions = vendorExtensions
+        value = schema.with(vendorExtensions: vendorExtensions)
     }
 
     /// The null type, which replaces the functionality of the `nullable` property from
@@ -162,12 +152,12 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     // See `JSONSchemaContext`
     public var required: Bool {
-        return coreContext?.required ?? true
+        return coreContext.required
     }
 
     // See `JSONSchemaContext`
     public var description: String? {
-        return coreContext?.description
+        return coreContext.description
     }
 
     // See `JSONSchemaContext`
@@ -193,47 +183,47 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
-        return coreContext?.nullable ?? false
+        return coreContext.nullable
     }
 
     // See `JSONSchemaContext`
     public var readOnly: Bool {
-        return coreContext?.readOnly ?? false
+        return coreContext.readOnly
     }
 
     // See `JSONSchemaContext`
     public var writeOnly: Bool {
-        return coreContext?.writeOnly ?? false
+        return coreContext.writeOnly
     }
 
     // See `JSONSchemaContext`
     public var deprecated: Bool {
-        return coreContext?.deprecated ?? false
+        return coreContext.deprecated
     }
 
     // See `JSONSchemaContext`
     public var title: String? {
-        return coreContext?.title
+        return coreContext.title
     }
 
     // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
-        return coreContext?.externalDocs
+        return coreContext.externalDocs
     }
 
     // See `JSONSchemaContext`
     public var allowedValues: [AnyCodable]? {
-        return coreContext?.allowedValues
+        return coreContext.allowedValues
     }
 
     // See `JSONSchemaContext`
     public var defaultValue: AnyCodable? {
-        return coreContext?.defaultValue
+        return coreContext.defaultValue
     }
 
     // See `JSONSchemaContext`
     public var examples: [AnyCodable] {
-        return coreContext?.examples ?? []
+        return coreContext.examples
     }
 }
 
@@ -326,11 +316,8 @@ extension JSONSchema {
 extension JSONSchema {
     /// Get the core context most JSONSchemas have.
     ///
-    /// This is the information shared by most schemas.
-    ///
-    /// Notably, `reference` schemas do not have this core context.
-    ///
-    public var coreContext: JSONSchemaContext? {
+    /// This is the information shared by all schemas.
+    public var coreContext: JSONSchemaContext {
         switch value {
         case .null(let context as JSONSchemaContext),
              .boolean(let context as JSONSchemaContext),
@@ -401,6 +388,54 @@ extension JSONSchema {
             return nil
         }
         return context
+    }
+}
+
+// MARK: - Vendor Extensions
+extension JSONSchema: VendorExtendable {
+    public var vendorExtensions: VendorExtensions {
+        coreContext.vendorExtensions
+    }
+
+    public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {
+        .init(
+            warnings: warnings, 
+            schema: value,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
+extension JSONSchema.Schema {
+    public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema.Schema {
+        switch self {
+        case .null(let context):
+            return .null(context.with(vendorExtensions: vendorExtensions))
+        case .boolean(let context):
+            return .boolean(context.with(vendorExtensions: vendorExtensions))
+        case .number(let contextA, let contextB):
+            return .number(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .integer(let contextA, let contextB):
+            return .integer(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .string(let contextA, let contextB):
+            return .string(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .all(of: let of, core: let core):
+            return .all(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .one(of: let of, core: let core):
+            return .one(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .any(of: let of, core: let core):
+            return .any(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .not(let of, core: let core):
+            return .not(of, core: core.with(vendorExtensions: vendorExtensions))
+        case .reference(let context, let coreContext):
+            return .reference(context, coreContext.with(vendorExtensions: vendorExtensions))
+        case .fragment(let context):
+            return .fragment(context.with(vendorExtensions: vendorExtensions))
+        }
     }
 }
 
@@ -1920,6 +1955,7 @@ extension JSONSchema: Decodable {
             }
         }
 
+        let value: Schema
         if typeHint == .null {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             value = .null(coreContext)
@@ -1967,8 +2003,10 @@ extension JSONSchema: Decodable {
         self.warnings = _warnings
 
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
+        let extensions: [String: AnyCodable]
+
         guard VendorExtensionsConfiguration.isEnabled else {
-            self.vendorExtensions = [:]
+            self.value = value
             return
         }
 
@@ -1982,9 +2020,11 @@ extension JSONSchema: Decodable {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 
-        let extensions = decodedAny.filter { $0.key.lowercased().starts(with: "x-") }
+        extensions = decodedAny
+            .filter { $0.key.lowercased().starts(with: "x-") }
+            .mapValues(AnyCodable.init)
 
-        self.vendorExtensions = extensions.mapValues(AnyCodable.init)
+        self.value = value.with(vendorExtensions: extensions)
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {

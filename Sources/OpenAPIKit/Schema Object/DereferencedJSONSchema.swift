@@ -143,6 +143,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     // See `JSONSchemaContext`
     public var deprecated: Bool { jsonSchema.deprecated }
 
+    // See `JSONSchemaContext`
+    public var vendorExtensions: [String : AnyCodable] { jsonSchema.vendorExtensions }
+
     /// Returns a version of this `DereferencedJSONSchema` that has the given description.
     public func with(description: String) -> DereferencedJSONSchema {
         switch self {
