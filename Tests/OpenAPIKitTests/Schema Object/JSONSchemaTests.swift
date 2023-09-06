@@ -137,14 +137,6 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssert(passwordString.jsonTypeFormat?.swiftType == String.self)
     }
 
-    func test_vendorExtensionsInit() {
-        let schema = JSONSchema.string().with(vendorExtensions: ["x-test": "hello world"])
-
-        XCTAssertEqual(schema.value, .string(.init(), .init()))
-        XCTAssertTrue(schema.warnings.isEmpty)
-        XCTAssertEqual(schema.vendorExtensions, ["x-test": "hello world"])
-    }
-
     func test_isFragmentAndIsEmpty() {
         let empty = JSONSchema.fragment(.init())
         let fragment = JSONSchema.fragment(.init(nullable: true, description: "hello"))
@@ -1378,6 +1370,37 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(any.description, "test")
         XCTAssertEqual(not.description, "test")
         XCTAssertEqual(reference.description, "test")
+    }
+
+    func test_withAddedVendorExtensionsInit() {
+        let null = JSONSchema.null().with(vendorExtensions: ["x-test": "hello world"])
+        let object = JSONSchema.object.with(vendorExtensions: ["x-test": "hello world"])
+        let array = JSONSchema.array.with(vendorExtensions: ["x-test": "hello world"])
+
+        let boolean = JSONSchema.boolean.with(vendorExtensions: ["x-test": "hello world"])
+        let number = JSONSchema.number.with(vendorExtensions: ["x-test": "hello world"])
+        let integer = JSONSchema.integer.with(vendorExtensions: ["x-test": "hello world"])
+        let string = JSONSchema.string.with(vendorExtensions: ["x-test": "hello world"])
+        let fragment = JSONSchema.fragment(.init()).with(vendorExtensions: ["x-test": "hello world"])
+        let all = JSONSchema.all(of: .string).with(vendorExtensions: ["x-test": "hello world"])
+        let one = JSONSchema.one(of: .string).with(vendorExtensions: ["x-test": "hello world"])
+        let any = JSONSchema.any(of: .string).with(vendorExtensions: ["x-test": "hello world"])
+        let not = JSONSchema.not(.string).with(vendorExtensions: ["x-test": "hello world"])
+        let reference = JSONSchema.reference(.component(named: "test")).with(vendorExtensions: ["x-test": "hello world"])
+
+        XCTAssertEqual(null.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(object.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(array.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(boolean.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(number.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(integer.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(string.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(fragment.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(all.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(one.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(any.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(not.vendorExtensions, ["x-test": "hello world"])
+        XCTAssertEqual(reference.vendorExtensions, ["x-test": "hello world"])
     }
 
     func test_minObjectProperties() {
