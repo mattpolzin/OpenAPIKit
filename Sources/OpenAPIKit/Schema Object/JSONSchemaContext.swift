@@ -139,7 +139,7 @@ extension JSONSchema {
         /// An empty examples array is omitted from encoding.
         public let examples: [AnyCodable]
 
-        public let vendorExtensions: [String : AnyCodable]
+        public var vendorExtensions: [String : AnyCodable]
 
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
