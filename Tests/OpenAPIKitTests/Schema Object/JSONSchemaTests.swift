@@ -1651,7 +1651,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(
             try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
-            .fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
+            JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
         )
     }
 
