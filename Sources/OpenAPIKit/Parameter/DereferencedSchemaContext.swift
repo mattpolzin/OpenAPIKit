@@ -43,7 +43,8 @@ public struct DereferencedSchemaContext: Equatable {
         following references: Set<AnyHashable>
     ) throws {
         self.schema = try schemaContext.schema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
-        let examples = try schemaContext.examples?.mapValues { try components.lookup($0) }
+        let examples = try schemaContext.examples?
+            .mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
