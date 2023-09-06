@@ -1700,6 +1700,37 @@ extension SchemaObjectTests {
         )
     }
 
+    /// Specifically test encoding enum here because in most places I just let the 
+    /// allowed values be singular and encode as const since testing enum encoding 
+    /// requires working around the fact that the array is encoded in an order-unstable
+    /// way which is a real pain.
+    func test_encodeEnum() throws {
+        let multipleAllowedValues = JSONSchema.string(allowedValues: "hello", "world")
+
+        let encodedString = try orderUnstableTestStringFromEncoding(of: multipleAllowedValues)
+        let option1 = """
+        {
+          "enum" : [
+            "hello",
+            "world"
+          ],
+          "type" : "string"
+        }
+        """
+        let option2 = """
+        {
+          "enum" : [
+            "world",
+            "hello"
+          ],
+          "type" : "string"
+        }
+        """
+        XCTAssert(
+            encodedString == option1 || encodedString == option2
+        )
+    }
+
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let optionalBoolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
@@ -2185,10 +2216,10 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"description\" : \"hello\",",
                                     "\"const\" : {",
                                     "  \"hello\" : false",
                                     "},",
+                                    "\"description\" : \"hello\",",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -3387,7 +3418,7 @@ extension SchemaObjectTests {
             deprecatedEntity: deprecatedArray,
             allowedValues: (
                 entity: allowedValueArray,
-                value: "[\n      10\n    ]"
+                value: "[\n    10\n  ]"
             ),
             defaultValue: (
                 entity: defaultValueArray,
@@ -3436,14 +3467,13 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithTypeInferred() throws {
-        let objectData =
-"""
-{
-    "items": {
-        "type": "boolean"
-    }
-}
-""".data(using: .utf8)!
+        let objectData = """
+        {
+            "items": {
+                "type": "boolean"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -3783,12 +3813,11 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithTypeInferred() throws {
-        let objectData =
-"""
-{
-    "maximum": 10
-}
-""".data(using: .utf8)!
+        let objectData = """
+        {
+            "maximum": 10
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -3826,14 +3855,17 @@ extension SchemaObjectTests {
         let numberData = #"{"type": "number", "format": "float"}"#.data(using: .utf8)!
         let nullableNumberData = #"{"type": ["number", "null"], "format": "float"}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "format": "float", "enum": [1, 2.5]}"#.data(using: .utf8)!
+        let constValueNumberData = #"{"type": "number", "format": "float", "const": 2.5}"#.data(using: .utf8)!
 
         let number = try orderUnstableDecode(JSONSchema.self, from: numberData)
         let nullableNumber = try orderUnstableDecode(JSONSchema.self, from: nullableNumberData)
         let allowedValueNumber = try orderUnstableDecode(JSONSchema.self, from: allowedValueNumberData)
+        let constValueNumber = try orderUnstableDecode(JSONSchema.self, from: constValueNumberData)
 
         XCTAssertEqual(number, JSONSchema.number(.init(format: .float), .init()))
         XCTAssertEqual(nullableNumber, JSONSchema.number(.init(format: .float, nullable: true), .init()))
         XCTAssertEqual(allowedValueNumber, JSONSchema.number(.init(format: .float, allowedValues: [1, 2.5]), .init()))
+        XCTAssertEqual(constValueNumber, JSONSchema.number(.init(format: .float, allowedValues: [2.5]), .init()))
     }
 
     func test_encodeDoubleNumber() {
