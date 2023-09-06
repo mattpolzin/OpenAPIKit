@@ -253,4 +253,29 @@ extension OpenAPI.Link {
     }
 }
 
+// MARK: - LocallyDereferenceable
+extension OpenAPI.Link: LocallyDereferenceable {
+    /// Links do not contain any references but for convenience
+    /// they can be "dereferenced" to themselves.
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.Link {
+        var vendorExtensions = self.vendorExtensions
+        if let name = name {
+            vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
+        return .init(
+            operation: operation,
+            parameters: parameters,
+            requestBody: requestBody,
+            description: description,
+            server: server,
+            vendorExtensions: vendorExtensions
+        )
+    }
+}
+
 extension OpenAPI.Link: Validatable {}

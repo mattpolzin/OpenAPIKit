@@ -25,10 +25,14 @@ final class DereferencedResponseTests: XCTestCase {
             ],
             content: [
                 .json: .init(schema: .string)
+            ],
+            links: [
+                "Link": .link(operationId: "link1")
             ]
         ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.headers?["Header"]?.underlyingHeader, .init(schema: .string))
         XCTAssertEqual(t1.content[.json]?.underlyingContent, .init(schema: .string))
+        XCTAssertEqual(t1.links["Link"], .init(operationId: "link1"))
     }
 
     func test_referencedHeader() throws {
@@ -84,5 +88,20 @@ final class DereferencedResponseTests: XCTestCase {
                 ]
             ).dereferenced(in: .noComponents)
         )
+    }
+
+    func test_referencedLink() throws {
+        let components = OpenAPI.Components(
+            links: [
+                "link1": .init(operationId: "linka")
+            ]
+        )
+        let t1 = try OpenAPI.Response(
+            description: "test",
+            links: [
+                "link1": .reference(.component(named: "link1"))
+            ]
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.links["link1"], .init(operationId: "linka", vendorExtensions: ["x-component-name": "link1"]))
     }
 }

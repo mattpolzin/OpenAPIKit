@@ -126,11 +126,6 @@ extension JSONSchema {
 
         public let discriminator: OpenAPI.Discriminator?
 
-        // TODO: "const" is supported by the newest JSON Schema spec but not
-        //        yet by OpenAPIKit. It is mutually exclusive with "enum"
-        //        (i.e. `allowedValues`).
-//        public let constantValue: Format.SwiftType?
-
         public let allowedValues: [AnyCodable]?
         public let defaultValue: AnyCodable?
 
@@ -667,6 +662,7 @@ extension JSONSchema {
         case discriminator
         case externalDocs
         case allowedValues = "enum"
+        case const
         case defaultValue = "default"
         case example // deprecated in favor of examples
         case examples
@@ -688,7 +684,11 @@ extension JSONSchema.CoreContext: Encodable {
             try container.encode(format, forKey: .format)
         }
 
-        try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        if (allowedValues?.count == 1) {
+            try container.encode(allowedValues?.first, forKey: .const)
+        } else {
+            try container.encodeIfPresent(allowedValues, forKey: .allowedValues)
+        }
         try container.encodeIfPresent(defaultValue, forKey: .defaultValue)
         try container.encodeIfPresent(title, forKey: .title)
         try container.encodeIfPresent(description, forKey: .description)
@@ -756,12 +756,12 @@ extension JSONSchema.CoreContext: Decodable {
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
         if Format.self == JSONTypeFormat.StringFormat.self {
             if nullable {
-                allowedValues = try container.decodeIfPresent([String?].self, forKey: .allowedValues)?.map(AnyCodable.init)
+                allowedValues = try Self.decodeAllowedValuesOrConst(String?.self, inContainer: container)?.map(AnyCodable.init)
             } else {
-                allowedValues = try container.decodeIfPresent([String].self, forKey: .allowedValues)?.map(AnyCodable.init)
+                allowedValues = try Self.decodeAllowedValuesOrConst(String.self, inContainer: container)?.map(AnyCodable.init)
             }
         } else {
-            allowedValues = try container.decodeIfPresent([AnyCodable].self, forKey: .allowedValues)
+            allowedValues = try Self.decodeAllowedValuesOrConst(AnyCodable.self, inContainer: container)
         }
         defaultValue = try container.decodeIfPresent(AnyCodable.self, forKey: .defaultValue)
 
@@ -800,6 +800,17 @@ extension JSONSchema.CoreContext: Decodable {
         // apply to all schemas (core context) they are more accurately in the context of the
         // full JSON Schema.
         vendorExtensions = [:]
+    }
+
+    /// Support both `enum` and `const` when decoding allowed values for the schema.
+    private static func decodeAllowedValuesOrConst<To: Decodable>(_ type: To.Type, inContainer container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> [To]? {
+        if let manyValues = try container.decodeIfPresent([To].self, forKey: .allowedValues) {
+            return manyValues
+        }
+        if let oneValue = try container.decodeIfPresent(To.self, forKey: .const) {
+            return [oneValue]
+        }
+        return nil
     }
 
     /// Decode whether or not this is a nullable JSONSchema.
