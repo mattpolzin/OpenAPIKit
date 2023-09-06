@@ -1700,6 +1700,37 @@ extension SchemaObjectTests {
         )
     }
 
+    /// Specifically test encoding enum here because in most places I just let the 
+    /// allowed values be singular and encode as const since testing enum encoding 
+    /// requires working around the fact that the array is encoded in an order-unstable
+    /// way which is a real pain.
+    func test_encodeEnum() throws {
+        let multipleAllowedValues = JSONSchema.string(allowedValues: "hello", "world")
+
+        let encodedString = try orderUnstableTestStringFromEncoding(of: multipleAllowedValues)
+        let option1 = """
+        {
+          "enum" : [
+            "hello",
+            "world"
+          ],
+          "type" : "string"
+        }
+        """
+        let option2 = """
+        {
+          "enum" : [
+            "world",
+            "hello"
+          ],
+          "type" : "string"
+        }
+        """
+        XCTAssert(
+            encodedString == option1 || encodedString == option2
+        )
+    }
+
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let optionalBoolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
@@ -1743,6 +1774,7 @@ extension SchemaObjectTests {
         let writeOnlyBooleanData = #"{"type": "boolean", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedBooleanData = #"{"type": "boolean", "deprecated": true}"#.data(using: .utf8)!
         let allowedValueBooleanData = #"{"type": "boolean", "enum": [false]}"#.data(using: .utf8)!
+        let constValueBooleanData = #"{"type": "boolean", "const": false}"#.data(using: .utf8)!
         let defaultValueBooleanData = #"{"type": "boolean", "default": false}"#.data(using: .utf8)!
         let discriminatorBooleanData = #"{"type": "boolean", "discriminator": { "propertyName": "hello" }}"#.data(using: .utf8)!
 
@@ -1752,6 +1784,7 @@ extension SchemaObjectTests {
         let writeOnlyBoolean = try orderUnstableDecode(JSONSchema.self, from: writeOnlyBooleanData)
         let deprecatedBoolean = try orderUnstableDecode(JSONSchema.self, from: deprecatedBooleanData)
         let allowedValueBoolean = try orderUnstableDecode(JSONSchema.self, from: allowedValueBooleanData)
+        let constValueBoolean = try orderUnstableDecode(JSONSchema.self, from: constValueBooleanData)
         let defaultValueBoolean = try orderUnstableDecode(JSONSchema.self, from: defaultValueBooleanData)
         let discriminatorBoolean = try orderUnstableDecode(JSONSchema.self, from: discriminatorBooleanData)
 
@@ -1761,6 +1794,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(writeOnlyBoolean, JSONSchema.boolean(.init(format: .generic, permissions: .writeOnly)))
         XCTAssertEqual(deprecatedBoolean, JSONSchema.boolean(.init(format: .generic, deprecated: true)))
         XCTAssertEqual(allowedValueBoolean, JSONSchema.boolean(.init(format: .generic, allowedValues: [false])))
+        XCTAssertEqual(constValueBoolean, JSONSchema.boolean(.init(format: .generic, allowedValues: [false])))
         XCTAssertEqual(defaultValueBoolean, JSONSchema.boolean(.init(format: .generic, defaultValue: false)))
         XCTAssertEqual(discriminatorBoolean, JSONSchema.boolean(.init(format: .generic, discriminator: .init(propertyName: "hello"))))
     }
@@ -1877,11 +1911,9 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: allowedValueObject,
             propertyLines: [
-                "\"enum\" : [",
-                "  {",
-                "    \"hello\" : false",
-                "  }",
-                "],",
+                "\"const\" : {",
+                "  \"hello\" : false",
+                "},",
                 "\"properties\" : {",
                 "  \"hello\" : {",
                 "    \"type\" : \"boolean\"",
@@ -1946,6 +1978,13 @@ extension SchemaObjectTests {
             "deprecated": true
         }
         """.data(using: .utf8)!
+        let constValueObjectData = """
+        {
+            "type": "object",
+            "properties": {"hello": { "type": "boolean"}},
+            "const": {"hello": false}
+        }
+        """.data(using: .utf8)!
         let allowedValueObjectData = """
         {
             "type": "object",
@@ -1972,6 +2011,7 @@ extension SchemaObjectTests {
         let readOnlyObject = try orderUnstableDecode(JSONSchema.self, from: readOnlyObjectData)
         let writeOnlyObject = try orderUnstableDecode(JSONSchema.self, from: writeOnlyObjectData)
         let deprecatedObject = try orderUnstableDecode(JSONSchema.self, from: deprecatedObjectData)
+        let constValueObject = try orderUnstableDecode(JSONSchema.self, from: constValueObjectData)
         let allowedValueObject = try orderUnstableDecode(JSONSchema.self, from: allowedValueObjectData)
         let defaultValueObject = try orderUnstableDecode(JSONSchema.self, from: defaultValueObjectData)
         let discriminatorObject = try orderUnstableDecode(JSONSchema.self, from: discriminatorObjectData)
@@ -1981,6 +2021,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(readOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .readOnly), .init(properties: [:])))
         XCTAssertEqual(writeOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .writeOnly), .init(properties: [:])))
         XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, deprecated: true), .init(properties: [:])))
+        XCTAssertEqual(constValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(defaultValueObject.defaultValue, ["hello": false])
@@ -2068,11 +2109,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2177,12 +2216,10 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"description\" : \"hello\",",
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2292,11 +2329,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"externalDocs\" : {",
                                     "  \"url\" : \"http:\\/\\/google.com\"",
                                     "},",
@@ -2403,11 +2438,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"maxProperties\" : 2,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
@@ -2511,11 +2544,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"minProperties\" : 1,",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
@@ -2620,11 +2651,9 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
                                     "\"additionalProperties\" : true,",
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2737,11 +2766,9 @@ extension SchemaObjectTests {
                                     "\"additionalProperties\" : {",
                                     "  \"type\" : \"boolean\"",
                                     "},",
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"properties\" : {",
                                     "  \"hello\" : {",
                                     "    \"type\" : \"boolean\"",
@@ -2875,11 +2902,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"examples\" : [",
                                     "  {",
                                     "    \"hello\" : true",
@@ -2984,11 +3009,9 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueObject,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"examples\" : [",
                                     "  {",
                                     "    \"hello\" : true",
@@ -3098,11 +3121,9 @@ extension SchemaObjectTests {
                                     "\"additionalProperties\" : {",
                                     "  \"type\" : \"boolean\"",
                                     "},",
-                                    "\"enum\" : [",
-                                    "  {",
-                                    "    \"hello\" : false",
-                                    "  }",
-                                    "],",
+                                    "\"const\" : {",
+                                    "  \"hello\" : false",
+                                    "},",
                                     "\"type\" : \"object\""
         ])
     }
@@ -3208,11 +3229,9 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: allowedValueObject,
             propertyLines: [
-                "\"enum\" : [",
-                "  {",
-                "    \"hello\" : false",
-                "  }",
-                "],",
+                "\"const\" : {",
+                "  \"hello\" : false",
+                "},",
                 "\"minProperties\" : 1,",
                 "\"properties\" : {",
                 "  \"hello\" : {",
@@ -3399,7 +3418,7 @@ extension SchemaObjectTests {
             deprecatedEntity: deprecatedArray,
             allowedValues: (
                 entity: allowedValueArray,
-                value: "[\n      10\n    ]"
+                value: "[\n    10\n  ]"
             ),
             defaultValue: (
                 entity: defaultValueArray,
@@ -3448,14 +3467,13 @@ extension SchemaObjectTests {
     }
 
     func test_decodeArrayWithTypeInferred() throws {
-        let objectData =
-"""
-{
-    "items": {
-        "type": "boolean"
-    }
-}
-""".data(using: .utf8)!
+        let objectData = """
+        {
+            "items": {
+                "type": "boolean"
+            }
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -3501,10 +3519,8 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueArray,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  [",
-                                    "    10",
-                                    "  ]",
+                                    "\"const\" : [",
+                                    "  10",
                                     "],",
                                     "\"items\" : {",
                                     "  \"type\" : \"boolean\"",
@@ -3582,10 +3598,8 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: allowedValueArray,
             propertyLines: [
-                "\"enum\" : [",
-                "  [",
-                "    10",
-                "  ]",
+                "\"const\" : [",
+                "  10",
                 "],",
                 "\"type\" : \"array\",",
                 "\"uniqueItems\" : true"
@@ -3647,10 +3661,8 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueArray,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  [",
-                                    "    10",
-                                    "  ]",
+                                    "\"const\" : [",
+                                    "  10",
                                     "],",
                                     "\"maxItems\" : 2,",
                                     "\"type\" : \"array\""
@@ -3707,10 +3719,8 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueArray,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  [",
-                                    "    10",
-                                    "  ]",
+                                    "\"const\" : [",
+                                    "  10",
                                     "],",
                                     "\"minItems\" : 2,",
                                     "\"type\" : \"array\""
@@ -3803,12 +3813,11 @@ extension SchemaObjectTests {
     }
 
     func test_decodeNumberWithTypeInferred() throws {
-        let objectData =
-"""
-{
-    "maximum": 10
-}
-""".data(using: .utf8)!
+        let objectData = """
+        {
+            "maximum": 10
+        }
+        """.data(using: .utf8)!
 
         let decoded = try orderUnstableDecode(JSONSchema.self, from: objectData)
 
@@ -3846,14 +3855,17 @@ extension SchemaObjectTests {
         let numberData = #"{"type": "number", "format": "float"}"#.data(using: .utf8)!
         let nullableNumberData = #"{"type": ["number", "null"], "format": "float"}"#.data(using: .utf8)!
         let allowedValueNumberData = #"{"type": "number", "format": "float", "enum": [1, 2.5]}"#.data(using: .utf8)!
+        let constValueNumberData = #"{"type": "number", "format": "float", "const": 2.5}"#.data(using: .utf8)!
 
         let number = try orderUnstableDecode(JSONSchema.self, from: numberData)
         let nullableNumber = try orderUnstableDecode(JSONSchema.self, from: nullableNumberData)
         let allowedValueNumber = try orderUnstableDecode(JSONSchema.self, from: allowedValueNumberData)
+        let constValueNumber = try orderUnstableDecode(JSONSchema.self, from: constValueNumberData)
 
         XCTAssertEqual(number, JSONSchema.number(.init(format: .float), .init()))
         XCTAssertEqual(nullableNumber, JSONSchema.number(.init(format: .float, nullable: true), .init()))
         XCTAssertEqual(allowedValueNumber, JSONSchema.number(.init(format: .float, allowedValues: [1, 2.5]), .init()))
+        XCTAssertEqual(constValueNumber, JSONSchema.number(.init(format: .float, allowedValues: [2.5]), .init()))
     }
 
     func test_encodeDoubleNumber() {
@@ -3924,9 +3936,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"multipleOf\" : 11,",
                                     "\"type\" : \"number\""
         ])
@@ -3976,9 +3986,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"maximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
@@ -4028,9 +4036,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"exclusiveMaximum\" : 11.5,",
                                     "\"type\" : \"number\""
         ])
@@ -4080,9 +4086,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"minimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
@@ -4132,9 +4136,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueNumber,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"exclusiveMinimum\" : 0.5,",
                                     "\"type\" : \"number\""
         ])
@@ -4325,9 +4327,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueInteger,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"multipleOf\" : 11,",
                                     "\"type\" : \"integer\""
             ])
@@ -4377,9 +4377,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueInteger,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"maximum\" : 11,",
                                     "\"type\" : \"integer\""
             ])
@@ -4432,9 +4430,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueInteger,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"exclusiveMaximum\" : 11,",
                                     "\"type\" : \"integer\""
             ])
@@ -4484,9 +4480,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueInteger,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  5",
-                                    "],",
+                                    "\"const\" : 5,",
                                     "\"minimum\" : 5,",
                                     "\"type\" : \"integer\""
             ])
@@ -4539,9 +4533,7 @@ extension SchemaObjectTests {
 
         testEncodingPropertyLines(entity: allowedValueInteger,
                                   propertyLines: [
-                                    "\"enum\" : [",
-                                    "  10",
-                                    "],",
+                                    "\"const\" : 10,",
                                     "\"exclusiveMinimum\" : 5,",
                                     "\"type\" : \"integer\""
             ])
@@ -4879,9 +4871,7 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: allowedValueString,
             propertyLines: [
-                "\"enum\" : [",
-                "  \"hello\"",
-                "],",
+                "\"const\" : \"hello\",",
                 "\"maxLength\" : 10,",
                 "\"type\" : \"string\""
             ]
@@ -4939,9 +4929,7 @@ extension SchemaObjectTests {
         testEncodingPropertyLines(
             entity: allowedValueString,
             propertyLines: [
-                "\"enum\" : [",
-                "  \"hello\"",
-                "],",
+                "\"const\" : \"hello\",",
                 "\"minLength\" : 5,",
                 "\"type\" : \"string\""
             ]
@@ -4967,6 +4955,8 @@ extension SchemaObjectTests {
         let optionalString = JSONSchema.string(.init(format: .unspecified, required: false), .init(pattern: ".*hello [wW]orld"))
         let nullableString = JSONSchema.string(.init(format: .unspecified, required: true, nullable: true), .init(pattern: ".*hello [wW]orld"))
         let allowedValueString = JSONSchema.string(.init(format: .unspecified, required: true), .init(pattern: ".*hello [wW]orld"))
+            .with(allowedValues: ["hello World", "hi"])
+        let constValueString = JSONSchema.string(.init(format: .unspecified, required: true), .init(pattern: ".*hello [wW]orld"))
             .with(allowedValues: ["hello World"])
         let defaultValueString = JSONSchema.string(.init(format: .unspecified, defaultValue: "hello"), .init(pattern: ".*hello [wW]orld"))
 
@@ -4998,15 +4988,19 @@ extension SchemaObjectTests {
         )
 
         testEncodingPropertyLines(
-            entity: allowedValueString,
+            entity: constValueString,
             propertyLines: [
-                "\"enum\" : [",
-                "  \"hello World\"",
-                "],",
+                "\"const\" : \"hello World\",",
                 "\"pattern\" : \".*hello [wW]orld\",",
                 "\"type\" : \"string\""
             ]
         )
+
+        // can't check exact string because of order instability, but we can confirm it is encoding the 
+        // `enum` property instead of the `const` property.
+        let encoded = try! orderUnstableTestStringFromEncoding(of: allowedValueString)
+        XCTAssert(encoded?.contains("\"enum\"") ?? false)
+        XCTAssert(!(encoded?.contains("\"const\"") ?? true))
 
         testEncodingPropertyLines(
             entity: defaultValueString,
@@ -5980,9 +5974,7 @@ private func testAllSharedSimpleContextEncoding<T: Encodable>(
     testEncodingPropertyLines(
         entity: allowedValues.entity,
         propertyLines: [
-            "\"enum\" : [",
-            "  \(allowedValues.value)",
-            "],",
+            "\"const\" : \(allowedValues.value),",
             "\"type\" : \"\(typeName)\""
         ]
     )
@@ -6077,9 +6069,7 @@ private func testAllSharedFormattedContextEncoding<T: Encodable>(
     testEncodingPropertyLines(
         entity: allowedValues.entity,
         propertyLines: [
-            "\"enum\" : [",
-            "  \(allowedValues.value)",
-            "],",
+            "\"const\" : \(allowedValues.value),",
             "\"format\" : \"\(formatName)\",",
             "\"type\" : \"\(typeName)\""
         ]
