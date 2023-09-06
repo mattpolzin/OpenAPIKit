@@ -18,6 +18,8 @@ public struct DereferencedResponse: Equatable {
     public let headers: DereferencedHeader.Map?
     /// The map of dereferenced content for this response.
     public let content: DereferencedContent.Map
+    /// The map of dereferenced links for this response.
+    public let links: OrderedDictionary<String, OpenAPI.Link>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Response, T>) -> T {
         return underlyingResponse[keyPath: path]
@@ -42,6 +44,10 @@ public struct DereferencedResponse: Equatable {
 
         self.content = try response.content.mapValues { content in
             try content._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+        }
+
+        self.links = try response.links.mapValues { link in 
+            try link._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         var response = response
