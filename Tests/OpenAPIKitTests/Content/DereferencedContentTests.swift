@@ -80,7 +80,7 @@ final class DereferencedContentTests: XCTestCase {
         ).dereferenced(in: components)
         XCTAssertEqual(
             t1.schema,
-            DereferencedJSONSchema.string(.init().with(vendorExtensions: ["x-component-name": "test"]), .init())
+            DereferencedJSONSchema.string(JSONSchema.CoreContext().with(vendorExtensions: ["x-component-name": "test"]), .init())
         )
     }
 
@@ -95,7 +95,7 @@ final class DereferencedContentTests: XCTestCase {
         ).dereferenced(in: components)
         XCTAssertEqual(
             t1.schema, 
-            DereferencedJSONSchema.string(.init(description: "a test string").with(vendorExtensions: ["x-component-name": "test"]), .init())
+            DereferencedJSONSchema.string(JSONSchema.CoreContext(description: "a test string").with(vendorExtensions: ["x-component-name": "test"]), .init())
         )
     }
 
@@ -111,7 +111,7 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(t1.schema?.description, "overridden description")
         XCTAssertEqual(
             t1.schema, 
-            DereferencedJSONSchema.string(.init(description: "overridden description").with(vendorExtensions: ["x-component-name": "test"]), .init())
+            DereferencedJSONSchema.string(JSONSchema.CoreContext(description: "overridden description").with(vendorExtensions: ["x-component-name": "test"]), .init())
         )
     }
 
