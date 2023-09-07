@@ -222,12 +222,6 @@ final class DocumentConversionTests: XCTestCase {
         let param3: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test3", context: .header, schemaReference: .component(named: "test3_param"))
         let param4: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test4", context: .path, schemaOrContent: .schema(.header(.boolean)))
 
-        let externalDocs = OpenAPIKit30.OpenAPI.ExternalDocumentation(
-            description: "hello",
-            url: URL(string: "https://website.com")!,
-            vendorExtensions: ["x-hi": 3]
-        )
-
         let request = OpenAPIKit30.OpenAPI.Request(
             description: "describble",
             content: [

@@ -85,7 +85,7 @@ final class DereferencedSchemaContextTests: XCTestCase {
         ).dereferenced(in: components)
         XCTAssertEqual(
             t1.schema, 
-            .string(.init(), .init()).with(vendorExtensions: ["x-component-name": "test"])
+            DereferencedJSONSchema.string(.init(), .init()).with(vendorExtensions: ["x-component-name": "test"])
         )
     }
 
