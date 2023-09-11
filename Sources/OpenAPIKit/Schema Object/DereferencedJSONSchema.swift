@@ -144,7 +144,36 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var deprecated: Bool { jsonSchema.deprecated }
 
     // See `JSONSchemaContext`
-    public var vendorExtensions: [String : AnyCodable] { jsonSchema.vendorExtensions }
+    public var vendorExtensions: [String : AnyCodable] {
+        // NOTE: this doesnot just do `jsonSchema.vendorExtensions` because of some wild
+        //       Swift bug that I don't have time to think through at the moment.
+        switch self {
+        case .null(let context):
+            return context.vendorExtensions
+        case .boolean(let context):
+            return context.vendorExtensions
+        case .number(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .integer(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .string(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .object(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .array(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .all(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .one(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .any(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .not(_, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .fragment(let context):
+            return context.vendorExtensions
+        }
+    }
 
     /// Returns a version of this `DereferencedJSONSchema` that has the given description.
     public func with(description: String) -> DereferencedJSONSchema {

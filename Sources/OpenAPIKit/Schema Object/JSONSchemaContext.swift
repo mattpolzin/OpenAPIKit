@@ -139,6 +139,11 @@ extension JSONSchema {
         /// An empty examples array is omitted from encoding.
         public let examples: [AnyCodable]
 
+        /// Dictionary of vendor extensions.
+        ///
+        /// These should be of the form:
+        /// `[ "x-extensionKey": <anything>]`
+        /// where the values are anything codable.
         public var vendorExtensions: [String : AnyCodable]
 
         public var permissions: Permissions { _permissions ?? .readWrite}

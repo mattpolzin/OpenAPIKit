@@ -576,5 +576,4 @@ final class DereferencedSchemaObjectTests: XCTestCase {
 
         XCTAssertEqual(null.vendorExtensions, ["x-test": "test"])
     }
-
 }
