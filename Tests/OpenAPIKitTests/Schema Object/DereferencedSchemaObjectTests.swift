@@ -545,4 +545,35 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(null.description, "test")
     }
 
+    func test_withVendorExtensions() throws {
+        let null = JSONSchema.null().dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let object = JSONSchema.object.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let array = JSONSchema.array.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+
+        let boolean = JSONSchema.boolean.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let number = JSONSchema.number.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let integer = JSONSchema.integer.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let string = JSONSchema.string.dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let fragment = JSONSchema.fragment(.init()).dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let all = JSONSchema.all(of: .string).dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let one = JSONSchema.one(of: .string).dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let any = JSONSchema.any(of: .string).dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+        let not = JSONSchema.not(.string).dereferenced()!.with(vendorExtensions: ["x-test": "test"])
+
+        XCTAssertEqual(object.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(array.vendorExtensions, ["x-test": "test"])
+
+        XCTAssertEqual(boolean.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(number.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(integer.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(string.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(fragment.vendorExtensions, ["x-test": "test"])
+
+        XCTAssertEqual(all.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(one.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(any.vendorExtensions, ["x-test": "test"])
+        XCTAssertEqual(not.vendorExtensions, ["x-test": "test"])
+
+        XCTAssertEqual(null.vendorExtensions, ["x-test": "test"])
+    }
 }

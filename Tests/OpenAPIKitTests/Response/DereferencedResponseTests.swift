@@ -76,7 +76,10 @@ final class DereferencedResponseTests: XCTestCase {
                 .json: .init(schemaReference: .component(named: "test"))
             ]
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
+        XCTAssertEqual(
+            t1.content[.json]?.schema?.jsonSchema,
+            JSONSchema.string.with(vendorExtensions: ["x-component-name": "test"])
+        )
     }
 
     func test_referencedContentMissing() {

@@ -34,7 +34,7 @@ public struct DereferencedRequest: Equatable {
         dereferencedFromComponentNamed name: String?
     ) throws {
         self.content = try request.content.mapValues { content in
-            try DereferencedContent(content, resolvingIn: components, following: references)
+            try content._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         var request = request

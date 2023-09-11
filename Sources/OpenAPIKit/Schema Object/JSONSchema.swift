@@ -10,29 +10,19 @@ import OpenAPIKitCore
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schema-object).
-public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
+public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     public let warnings: [OpenAPI.Warning]
     public let value: Schema
 
-    public let vendorExtensions: [String: AnyCodable]
-
-    internal init(warnings: [OpenAPI.Warning], schema: Schema, vendorExtensions: [String: AnyCodable]) {
+    internal init(warnings: [OpenAPI.Warning], schema: Schema) {
         self.warnings = warnings
         self.value = schema
-        self.vendorExtensions = vendorExtensions
     }
 
-    public init(schema: Schema, vendorExtensions: [String: AnyCodable] = [:]) {
-        value = schema
+    public init(schema: Schema) {
         warnings = []
-        self.vendorExtensions = vendorExtensions
-    }
-
-    public init(_ schema: JSONSchema, vendorExtensions: [String: AnyCodable]) {
-        value = schema.value
-        warnings = schema.warnings
-        self.vendorExtensions = vendorExtensions
+        value = schema
     }
 
     /// The null type, which replaces the functionality of the `nullable` property from
@@ -162,12 +152,12 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     // See `JSONSchemaContext`
     public var required: Bool {
-        return coreContext?.required ?? true
+        return coreContext.required
     }
 
     // See `JSONSchemaContext`
     public var description: String? {
-        return coreContext?.description
+        return coreContext.description
     }
 
     // See `JSONSchemaContext`
@@ -193,47 +183,47 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
     // See `JSONSchemaContext`
     public var nullable: Bool {
-        return coreContext?.nullable ?? false
+        return coreContext.nullable
     }
 
     // See `JSONSchemaContext`
     public var readOnly: Bool {
-        return coreContext?.readOnly ?? false
+        return coreContext.readOnly
     }
 
     // See `JSONSchemaContext`
     public var writeOnly: Bool {
-        return coreContext?.writeOnly ?? false
+        return coreContext.writeOnly
     }
 
     // See `JSONSchemaContext`
     public var deprecated: Bool {
-        return coreContext?.deprecated ?? false
+        return coreContext.deprecated
     }
 
     // See `JSONSchemaContext`
     public var title: String? {
-        return coreContext?.title
+        return coreContext.title
     }
 
     // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
-        return coreContext?.externalDocs
+        return coreContext.externalDocs
     }
 
     // See `JSONSchemaContext`
     public var allowedValues: [AnyCodable]? {
-        return coreContext?.allowedValues
+        return coreContext.allowedValues
     }
 
     // See `JSONSchemaContext`
     public var defaultValue: AnyCodable? {
-        return coreContext?.defaultValue
+        return coreContext.defaultValue
     }
 
     // See `JSONSchemaContext`
     public var examples: [AnyCodable] {
-        return coreContext?.examples ?? []
+        return coreContext.examples
     }
 }
 
@@ -326,11 +316,8 @@ extension JSONSchema {
 extension JSONSchema {
     /// Get the core context most JSONSchemas have.
     ///
-    /// This is the information shared by most schemas.
-    ///
-    /// Notably, `reference` schemas do not have this core context.
-    ///
-    public var coreContext: JSONSchemaContext? {
+    /// This is the information shared by all schemas.
+    public var coreContext: JSONSchemaContext {
         switch value {
         case .null(let context as JSONSchemaContext),
              .boolean(let context as JSONSchemaContext),
@@ -404,6 +391,58 @@ extension JSONSchema {
     }
 }
 
+// MARK: - Vendor Extensions
+extension JSONSchema: VendorExtendable {
+    /// Dictionary of vendor extensions.
+    ///
+    /// These should be of the form:
+    /// `[ "x-extensionKey": <anything>]`
+    /// where the values are anything codable.
+    public var vendorExtensions: VendorExtensions {
+        coreContext.vendorExtensions
+    }
+
+    public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {
+        .init(
+            warnings: warnings, 
+            schema: value.with(vendorExtensions: vendorExtensions)
+        )
+    }
+}
+
+extension JSONSchema.Schema {
+    public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema.Schema {
+        switch self {
+        case .null(let context):
+            return .null(context.with(vendorExtensions: vendorExtensions))
+        case .boolean(let context):
+            return .boolean(context.with(vendorExtensions: vendorExtensions))
+        case .number(let contextA, let contextB):
+            return .number(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .integer(let contextA, let contextB):
+            return .integer(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .string(let contextA, let contextB):
+            return .string(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(vendorExtensions: vendorExtensions), contextB)
+        case .all(of: let of, core: let core):
+            return .all(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .one(of: let of, core: let core):
+            return .one(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .any(of: let of, core: let core):
+            return .any(of: of, core: core.with(vendorExtensions: vendorExtensions))
+        case .not(let of, core: let core):
+            return .not(of, core: core.with(vendorExtensions: vendorExtensions))
+        case .reference(let context, let coreContext):
+            return .reference(context, coreContext.with(vendorExtensions: vendorExtensions))
+        case .fragment(let context):
+            return .fragment(context.with(vendorExtensions: vendorExtensions))
+        }
+    }
+}
+
 // MARK: - Transformations
 extension JSONSchema {
     /// Return the optional version of this `JSONSchema`
@@ -412,80 +451,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.optionalContext())
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.optionalContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.optionalContext(), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.optionalContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.optionalContext(), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.optionalContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.optionalContext(), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.optionalContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.optionalContext(), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.optionalContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.optionalContext(), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.optionalContext())
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments.map { $0.optionalSchemaObject() }, core: core.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments.map { $0.optionalSchemaObject() }, core: core.optionalContext())
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.optionalContext())
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.optionalContext())
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.optionalContext())
             )
         case .reference(let reference, let context):
             return .init(
                 warnings: warnings,
-                schema: .reference(reference, context.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .reference(reference, context.optionalContext())
             )
         case .null(let context):
             return .init(
                 warnings: warnings,
-                schema: .null(context.optionalContext()),
-                vendorExtensions: vendorExtensions
+                schema: .null(context.optionalContext())
             )
         }
     }
@@ -496,80 +522,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.requiredContext())
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.requiredContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.requiredContext(), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.requiredContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.requiredContext(), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.requiredContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.requiredContext(), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.requiredContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.requiredContext(), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.requiredContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.requiredContext(), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.requiredContext())
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments.map { $0.requiredSchemaObject() }, core: core.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments.map { $0.requiredSchemaObject() }, core: core.requiredContext())
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.requiredContext())
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.requiredContext())
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.requiredContext())
             )
         case .reference(let reference, let context):
             return .init(
                 warnings: warnings,
-                schema: .reference(reference, context.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .reference(reference, context.requiredContext())
             )
         case .null(let context):
             return .init(
                 warnings: warnings,
-                schema: .null(context.requiredContext()),
-                vendorExtensions: vendorExtensions
+                schema: .null(context.requiredContext())
             )
         }
     }
@@ -580,68 +593,57 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.nullableContext())
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.nullableContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.nullableContext(), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.nullableContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.nullableContext(), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.nullableContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.nullableContext(), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.nullableContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.nullableContext(), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.nullableContext(), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.nullableContext(), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.nullableContext())
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.nullableContext())
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.nullableContext())
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.nullableContext())
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.nullableContext()),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.nullableContext())
             )
         case .reference, .null:
             return self
@@ -655,80 +657,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.with(allowedValues: allowedValues))
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.with(allowedValues: allowedValues), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.with(allowedValues: allowedValues), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.with(allowedValues: allowedValues), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.with(allowedValues: allowedValues), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.with(allowedValues: allowedValues), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.with(allowedValues: allowedValues), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.with(allowedValues: allowedValues), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.with(allowedValues: allowedValues), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.with(allowedValues: allowedValues), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.with(allowedValues: allowedValues), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.with(allowedValues: allowedValues))
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.with(allowedValues: allowedValues))
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.with(allowedValues: allowedValues))
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.with(allowedValues: allowedValues))
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.with(allowedValues: allowedValues))
             )
         case .reference(let schema, let core):
             return .init(
                 warnings: warnings,
-                schema: .reference(schema, core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .reference(schema, core.with(allowedValues: allowedValues))
             )
         case .null(let core):
             return .init(
                 warnings: warnings,
-                schema: .null(core.with(allowedValues: allowedValues)),
-                vendorExtensions: vendorExtensions
+                schema: .null(core.with(allowedValues: allowedValues))
             )
         }
     }
@@ -739,80 +728,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.with(defaultValue: defaultValue))
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.with(defaultValue: defaultValue), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.with(defaultValue: defaultValue), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.with(defaultValue: defaultValue), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.with(defaultValue: defaultValue), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.with(defaultValue: defaultValue), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.with(defaultValue: defaultValue), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.with(defaultValue: defaultValue), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.with(defaultValue: defaultValue), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.with(defaultValue: defaultValue), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.with(defaultValue: defaultValue), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.with(defaultValue: defaultValue))
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.with(defaultValue: defaultValue))
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.with(defaultValue: defaultValue))
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.with(defaultValue: defaultValue))
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.with(defaultValue: defaultValue))
             )
         case .reference(let schema, let core):
             return .init(
                 warnings: warnings,
-                schema: .reference(schema, core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .reference(schema, core.with(defaultValue: defaultValue))
             )
         case .null(let core):
             return .init(
                 warnings: warnings,
-                schema: .null(core.with(defaultValue: defaultValue)),
-                vendorExtensions: vendorExtensions
+                schema: .null(core.with(defaultValue: defaultValue))
             )
         }
     }
@@ -830,80 +806,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.with(examples: examples))
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.with(examples: examples), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.with(examples: examples), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.with(examples: examples), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.with(examples: examples), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.with(examples: examples), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.with(examples: examples), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.with(examples: examples), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.with(examples: examples), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.with(examples: examples), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.with(examples: examples), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.with(examples: examples))
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.with(examples: examples))
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.with(examples: examples))
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.with(examples: examples))
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.with(examples: examples))
             )
         case .reference(let schema, let core):
             return .init(
                 warnings: warnings,
-                schema: .reference(schema, core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .reference(schema, core.with(examples: examples))
             )
         case .null(let core):
             return .init(
                 warnings: warnings,
-                schema: .null(core.with(examples: examples)),
-                vendorExtensions: vendorExtensions
+                schema: .null(core.with(examples: examples))
             )
         }
     }
@@ -914,68 +877,57 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.with(discriminator: discriminator))
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.with(discriminator: discriminator), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.with(discriminator: discriminator), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.with(discriminator: discriminator), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.with(discriminator: discriminator), contextB)
             )
         case .number(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(context.with(discriminator: discriminator), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(context.with(discriminator: discriminator), contextB)
             )
         case .integer(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(context.with(discriminator: discriminator), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(context.with(discriminator: discriminator), contextB)
             )
         case .string(let context, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(context.with(discriminator: discriminator), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(context.with(discriminator: discriminator), contextB)
             )
         case .fragment(let context):
             return .init(
                 warnings: warnings,
-                schema: .fragment(context.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(context.with(discriminator: discriminator))
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.with(discriminator: discriminator))
             )
         case .one(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: schemas, core: core.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: schemas, core: core.with(discriminator: discriminator))
             )
         case .any(of: let schemas, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: schemas, core: core.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: schemas, core: core.with(discriminator: discriminator))
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.with(discriminator: discriminator)),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.with(discriminator: discriminator))
             )
         case .reference, .null:
             return self
@@ -988,80 +940,67 @@ extension JSONSchema {
         case .boolean(let context):
             return .init(
                 warnings: warnings,
-                schema: .boolean(context.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .boolean(context.with(description: description))
             )
         case .number(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .number(contextA.with(description: description), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .number(contextA.with(description: description), contextB)
             )
         case .integer(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .integer(contextA.with(description: description), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .integer(contextA.with(description: description), contextB)
             )
         case .string(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .string(contextA.with(description: description), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .string(contextA.with(description: description), contextB)
             )
         case .object(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .object(contextA.with(description: description), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .object(contextA.with(description: description), contextB)
             )
         case .array(let contextA, let contextB):
             return .init(
                 warnings: warnings,
-                schema: .array(contextA.with(description: description), contextB),
-                vendorExtensions: vendorExtensions
+                schema: .array(contextA.with(description: description), contextB)
             )
         case .all(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .all(of: fragments, core: core.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .all(of: fragments, core: core.with(description: description))
             )
         case .one(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .one(of: fragments, core: core.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .one(of: fragments, core: core.with(description: description))
             )
         case .any(of: let fragments, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .any(of: fragments, core: core.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .any(of: fragments, core: core.with(description: description))
             )
         case .not(let schema, core: let core):
             return .init(
                 warnings: warnings,
-                schema: .not(schema, core: core.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .not(schema, core: core.with(description: description))
             )
         case .fragment(let fragment):
             return .init(
                 warnings: warnings,
-                schema: .fragment(fragment.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .fragment(fragment.with(description: description))
             )
         case .reference(let ref, let referenceContext):
             return .init(
                 warnings: warnings,
-                schema: .reference(ref, referenceContext.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .reference(ref, referenceContext.with(description: description))
             )
         case .null(let referenceContext):
             return .init(
                 warnings: warnings,
-                schema: .null(referenceContext.with(description: description)),
-                vendorExtensions: vendorExtensions
+                schema: .null(referenceContext.with(description: description))
             )
         }
     }
@@ -1920,6 +1859,7 @@ extension JSONSchema: Decodable {
             }
         }
 
+        let value: Schema
         if typeHint == .null {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             value = .null(coreContext)
@@ -1967,8 +1907,10 @@ extension JSONSchema: Decodable {
         self.warnings = _warnings
 
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
+        let extensions: [String: AnyCodable]
+
         guard VendorExtensionsConfiguration.isEnabled else {
-            self.vendorExtensions = [:]
+            self.value = value
             return
         }
 
@@ -1982,9 +1924,11 @@ extension JSONSchema: Decodable {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 
-        let extensions = decodedAny.filter { $0.key.lowercased().starts(with: "x-") }
+        extensions = decodedAny
+            .filter { $0.key.lowercased().starts(with: "x-") }
+            .mapValues(AnyCodable.init)
 
-        self.vendorExtensions = extensions.mapValues(AnyCodable.init)
+        self.value = value.with(vendorExtensions: extensions)
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {

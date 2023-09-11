@@ -78,7 +78,10 @@ final class DereferencedContentTests: XCTestCase {
         let t1 = try OpenAPI.Content(
             schemaReference: .component(named: "test")
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.schema, .string(.init(), .init()))
+        XCTAssertEqual(
+            t1.schema,
+            DereferencedJSONSchema.string(JSONSchema.CoreContext().with(vendorExtensions: ["x-component-name": "test"]), .init())
+        )
     }
 
     func test_referencedSchemaNoOverrides() throws {
@@ -90,7 +93,10 @@ final class DereferencedContentTests: XCTestCase {
         let t1 = try OpenAPI.Content(
             schemaReference: .component(named: "test")
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.schema, .string(.init(description: "a test string"), .init()))
+        XCTAssertEqual(
+            t1.schema, 
+            DereferencedJSONSchema.string(JSONSchema.CoreContext(description: "a test string").with(vendorExtensions: ["x-component-name": "test"]), .init())
+        )
     }
 
     func test_referencedSchemaOverrideDescription() throws {
@@ -103,7 +109,10 @@ final class DereferencedContentTests: XCTestCase {
             schemaReference: .component(named: "test", description: "overridden description")
         ).dereferenced(in: components)
         XCTAssertEqual(t1.schema?.description, "overridden description")
-        XCTAssertEqual(t1.schema, .string(.init(description: "overridden description"), .init()))
+        XCTAssertEqual(
+            t1.schema, 
+            DereferencedJSONSchema.string(JSONSchema.CoreContext(description: "overridden description").with(vendorExtensions: ["x-component-name": "test"]), .init())
+        )
     }
 
     func test_missingSchema() {
