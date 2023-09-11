@@ -26,4 +26,14 @@ extension OpenAPI {
     /// A dictionary of Dereferenced map of callbacks.
     public typealias DereferencedCallbacksMap = OrderedDictionary<String, DereferencedCallbacks>
 }
+
+extension OpenAPI.CallbackURL: LocallyDereferenceable {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.CallbackURL {
+        self
+    }
 }
+
