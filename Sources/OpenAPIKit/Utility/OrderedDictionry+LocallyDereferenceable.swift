@@ -25,9 +25,9 @@ extension OrderedDictionary: LocallyDereferenceable where Key: LocallyDereferenc
                               dereferencedFromComponentNamed name: String?) throws -> OpenAPIKitCore.OrderedDictionary<Key.DereferencedSelf, Value.DereferencedSelf> {
 
         try reduce(into: OrderedDictionary<Key.DereferencedSelf, Value.DereferencedSelf>()) { result, element in
-            let key = try element.key._dereferenced(in: components, following: references, dereferencedFromComponentNamed: name)
+            let key = try element.key._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
 
-            let value = try element.value._dereferenced(in: components, following: references, dereferencedFromComponentNamed: name)
+            let value = try element.value._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
             result[key] = value
         }
 
