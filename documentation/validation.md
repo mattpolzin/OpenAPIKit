@@ -26,6 +26,8 @@ try document.validate()
 
 If validation fails, `document.validate()` will throw a `ValidationErrorCollection` value. `ValidationErrorCollection` is a `Swift.Error` that holds all of the validation errors that occurred. You can access the individual validation errors with its `values` property.
 
+By default, validation is "strict" in that any warnings produced when parsing the OpenAPI document will produce errors when validating. If you would like to handle these warnings differently, you can use `document.validate(strict: false)` which will not throw errors for warnings but instead returns those warnings.
+
 Each element of the `ValdiationErrorCollection` `values` property is a `ValidationError`. Each `ValidationError` in turn offers you a `reason` (`String`) for the failure and the `codingPath` (`[CodingKey]`) where the failure occurred. 
 
 You can also get a `codingPathString` if you want a convenient string representation of the coding path.
