@@ -4,13 +4,24 @@
 
 # OpenAPIKit <!-- omit in toc -->
 
-A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) Documents and their components.
+A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) and [OpenAPI 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) Documents and their components.
+
+The single most confusing thing you will grapple with out of the gate is explained by the following grid of what OpenAPIKit versions support which OpenAPI specification versions.
+
+| OpenAPIKit  | OpenAPI v3.0  | OpenAPI v3.1 |
+|-------------|---------------|--------------|
+| v2.x        | ✅            | ❌           |
+| v3.x        | ✅            | ✅           |
 
 - [Usage](#usage)
+  - [Migration](#migration)
+    - [1.x to 2.x](#1.x-to-2.x)
+    - [2.x to 3.x](#2.x-to-3.x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
   - [Validating OpenAPI Documents](#validating-openapi-documents)
+  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-3.0.x-documents)
   - [A note on dictionary ordering](#a-note-on-dictionary-ordering)
   - [OpenAPI Document structure](#openapi-document-structure)
     - [Document Root](#document-root)
@@ -35,10 +46,12 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 
 ### Migration
 #### 1.x to 2.x
-If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [migration guide](./documentation/v2_migration_guide.md).
+If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [v2 migration guide](./documentation/v2_migration_guide.md).
 
-#### 2.x to 3.0.0
-There is not yet a migration guide for upgrading from OpenAPIKit 2.x to OpenAPIKit 3.0.0. You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
+#### 2.x to 3.x
+If you are migrating from OpenAPIKit 2.x to OpenAPIKit 3.x, check out the [v3 migration guide](./documentation/v3_migration_guide.md).
+
+You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
 
 In package manifests, dependencies will be one of:
 ```
@@ -58,10 +71,16 @@ import OpenAPIKit30
 import OpenAPIKit
 ```
 
+It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-3.0.x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
+
 ### Decoding OpenAPI Documents
+
+Most documentation will focus on what it looks like to work with the `OpenAPIKit` module and OpenAPI 3.1.x documents. If you need to support OpenAPI 3.0.x documents, take a look at the section on [supporting OpenAPI 3.0.x documents](#supporting-openapi-3.0.x-documents) before you get too deep into this library's docs.
 
 You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
 ```swift
+import OpenAPIKit
+
 let decoder = ... // JSONDecoder() or YAMLDecoder()
 let openAPIDoc = try decoder.decode(OpenAPI.Document.self, from: ...)
 ```
@@ -98,6 +117,40 @@ try openAPIDoc.validate()
 ```
 
 You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [OpenAPIKit Validation Documentation](./documentation/validation.md).
+
+### Supporting OpenAPI 3.0.x Documents
+If you need to operate on OpenAPI 3.0.x documents and only 3.0.x documents, you can use the `OpenAPIKit30` module throughout your code.
+
+However, if you need to operate on both OpenAPI 3.0.x and 3.1.x documents, the recommendation is to use the OpenAPIKit compatibility layer to read in a 3.0.x document and convert it to a 3.1.x document so that you can use just the one set of Swift types throughout most of your program. An example of that follows.
+
+In this example, only one file in the whole project needs to import `OpenAPIKit30` or `OpenAPIKitCompat`. Every other file would just import `OpenAPIKit` and work with the document in the 3.1.x format.
+
+#### Converting from 3.0.x to 3.1.x
+```swift
+// import OpenAPIKit30 for OpenAPI 3.0 document support
+import OpenAPIKit30
+// import OpenAPIKit for OpenAPI 3.1 document support
+import OpenAPIKit
+// import OpenAPIKitCompat to convert between the versions
+import OpenAPIKitCompat
+
+// if most of your project just works with OpenAPI v3.1, most files only need to import OpenAPIKit.
+// Only in the file where you are supporting converting from OpenAPI v3.0 to v3.1 do you need the
+// other two imports.
+
+// we can support either version by attempting to parse an old version and then a new version if the old version fails
+let oldDoc: OpenAPIKit30.OpenAPI.Document?
+let newDoc: OpenAPIKit.OpenAPI.Document
+
+oldDoc = try? JSONDecoder().decode(OpenAPI.Document.self, from: someFileData)
+
+newDoc = oldDoc?.convert(to: .v3_1_0) ??
+  (try! JSONDecoder().decode(OpenAPI.Document.self, from: someFileData))
+// ^ Here we simply fall-back to 3.1.x if loading as 3.0.x failed. You could do a more
+//   graceful job of this by determining up front which version to attempt to load or by 
+//   holding onto errors for each decode attempt so you can tell the user why the document 
+//   failed to decode as neither 3.0.x nor 3.1.x if it fails in both cases.
+```
 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
