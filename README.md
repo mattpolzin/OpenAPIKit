@@ -11,6 +11,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
   - [Validating OpenAPI Documents](#validating-openapi-documents)
+  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-3-documents)
   - [A note on dictionary ordering](#a-note-on-dictionary-ordering)
   - [OpenAPI Document structure](#openapi-document-structure)
     - [Document Root](#document-root)
@@ -60,7 +61,7 @@ import OpenAPIKit30
 import OpenAPIKit
 ```
 
-It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then converting them to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
+It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-3.0.x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
 
 ### Decoding OpenAPI Documents
 
@@ -102,6 +103,40 @@ try openAPIDoc.validate()
 ```
 
 You can use this same validation system to dig arbitrarily deep into an OpenAPI Document and assert things that the OpenAPI Specification does not actually mandate. For more on validation, see the [OpenAPIKit Validation Documentation](./documentation/validation.md).
+
+### Supporting OpenAPI 3.0.x Documents
+If you need to operate on OpenAPI 3.0.x documents and only 3.0.x documents, you can use the `OpenAPIKit30` module throughout your code.
+
+However, if you need to operate on both OpenAPI 3.0.x and 3.1.x documents, the recommendation is to use the OpenAPIKit compatibility layer to read in a 3.0.x document and convert it to a 3.1.x document so that you can use just the one set of Swift types throughout most of your program. An example of that follows.
+
+In this example, only one file in the whole project needs to import `OpenAPIKit30` or `OpenAPIKitCompat`. Every other file would just import `OpenAPIKit` and work with the document in the 3.1.x format.
+
+#### Converting from 3.0.x to 3.1.x
+```swift
+// import OpenAPIKit30 for OpenAPI 3.0 document support
+import OpenAPIKit30
+// import OpenAPIKit for OpenAPI 3.1 document support
+import OpenAPIKit
+// import OpenAPIKitCompat to convert between the versions
+import OpenAPIKitCompat
+
+// if most of your project just works with OpenAPI v3.1, most files only need to import OpenAPIKit.
+// Only in the file where you are supporting converting from OpenAPI v3.0 to v3.1 do you need the
+// other two imports.
+
+// we can support either version by attempting to parse an old version and then a new version if the old version fails
+let oldDoc: OpenAPIKit30.OpenAPI.Document?
+let newDoc: OpenAPIKit.OpenAPI.Document
+
+oldDoc = try? JSONDecoder().decode(OpenAPI.Document.self, from: someFileData)
+
+newDoc = oldDoc?.convert(to: .v3_1_0) ??
+  (try! JSONDecoder().decode(OpenAPI.Document.self, from: someFileData))
+// ^ Here we simply fall-back to 3.1.x if loading as 3.0.x failed. You could do a more
+//   graceful job of this by determining up front which version to attempt to load or by 
+//   holding onto errors for each decode attempt so you can tell the user why the document 
+//   failed to decode as neither 3.0.x nor 3.1.x if it fails in both cases.
+```
 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any guarantees about the ordering of keyed containers. This means decoding a JSON OpenAPI Document and then encoding again might result in the document's various hashed structures being in a different order.
