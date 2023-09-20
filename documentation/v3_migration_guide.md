@@ -122,6 +122,8 @@ The `DereferencedResponse` type's `links` property is now an `OrderedDictionary<
 #### OrderedDictionary proliferation
 More `Dictionary` types have been changed to `OrderedDictionary` so that ordering is retained in more situations. This change won't impact most code, but because _some_ `Dictionary` methods are not supported by `OrderedDictionary`, there is a small chance of code breaking. See the following file changes if you need to know which properties switched from `Dictionary` to `OrderedDictionary`: https://github.com/mattpolzin/OpenAPIKit/pull/233/files
 
+An additional location where `OrderedDictionary` replaced `Dictionary` is the `mapping` property of `Discriminator`.
+
 ### Migrating to the OpenAPIKit module
 This section describes migrating to the module that supports OpenAPI 3.1.x documents.
 
@@ -235,6 +237,8 @@ The `DereferencedResponse` type's `links` property is now an `OrderedDictionary<
 
 #### OrderedDictionary proliferation
 More `Dictionary` types have been changed to `OrderedDictionary` so that ordering is retained in more situations. This change won't impact most code, but because _some_ `Dictionary` methods are not supported by `OrderedDictionary`, there is a small chance of code breaking. See the following file changes if you need to know which properties switched from `Dictionary` to `OrderedDictionary`: https://github.com/mattpolzin/OpenAPIKit/pull/233/files
+
+An additional location where `OrderedDictionary` replaced `Dictionary` is the `mapping` property of `Discriminator`.
 
 #### Validations difference
 The `Document` `validate()` method now throws errors related to warnings from parsing the OpenAPI Document by defualt. If you want to ignore or handle those warnings differently, use `validate(strict: false)`.
