@@ -32,7 +32,9 @@ import OpenAPIKit30
 
 If you are using Swift Package Manager, also change your dependency from the string `"OpenAPIKit"` or the product `.product(name: "OpenAPIKit", package: "OpenAPIKit")` to `.product(name: "OpenAPIKit30", package: "OpenAPIKit")`.
 
-### JSONSchema differences
+#### JSONSchema differences
+`JSONSchema` changed from an `enum` to a `struct`. For most code, use will not change, but if you switch over any `JSONSchema`s you should change to switching over the `JSONSchema` `value` property instead.
+
 The `reference` case has gained a `CoreContext` so switching on it will need to change as follows:
 
 Before:
@@ -45,15 +47,92 @@ After:
 case .reference(let ref, let context): ...
 ```
 
+#### ContentType differences
+`ContentType` changed from an `enum` to a `struct`. Equality checks for all of the previous enum's cases will still work against the new static constructors on the struct, but switch statements will no longer be possible.
+
+#### Response.StatusCode differences
+`Response.StatusCode` changed from an `enum` to a `struct`. For most code, use will not change, but if you switch over any values of this type your code will need to change to switch over the `StatusCode` `value` property instead.
+
+#### Paths differences
+Constructing an entry in the `Document.paths` dictionary now requires specifying `Either` a **JSON reference** to a **Path Item Object** or the **Path Item Object** itself.
+
+This means that where you used to write something like:
+```swift
+paths: [
+  "/hello/world": OpenAPI.PathItem(description: "hi", ...)
+]
+```
+
+You will now need to wrap it in an `Either` constructor like:
+```swift
+paths: [
+  "/hello/world": .pathItem(OpenAPI.PathItem(description: "hi", ...))
+]
+```
+
+There is also a convenience initializer for `Either` in this context which means that you can also write:
+```swift
+paths: [
+  "/hello/world": .init(description: "hi", ...)
+]
+```
+
+You may already have been using the `.init` shorthand to construct `OpenAPI.PathItem`s in which case your code does not need to change.
+
+Accessing an entry in the `Document.paths` dictionary now requires digging into an `Either` that may be a **JSON Reference** or a **Path Item Object** -- this means that where you used to write something like:
+```swift
+let pathItem = document.paths["hello/world"]
+```
+You will now need to decide between the following:
+```swift
+// access the path item (ignoring the possibility that it could be a reference)
+let pathItemObject = document.paths["hello/world"]?.pathItemValue
+
+// access the reference directly (ignoring the possibility that it could be a path item object):
+let pathItemReference = document.paths["hello/world"]?.reference
+
+// look the path item up in the Components Object (OpenAPIKit module only because this requires OpenAPI 3.1.x):
+let pathItem = document.paths["hello/world"].flatMap { document.components[$0] }
+
+// switch on the Either and handle it differently depending on the result:
+switch document.paths["hello/world"] {
+  case .a(let reference):
+    break
+  case .b(let pathItem):
+    break
+  case nil:
+    break
+}
+```
+
+NOTE: The error you will get in places where you need to make the above adjustments will look like:
+```
+Cannot convert value of type 'OpenAPI.PathItem' to expected dictionary value type 'Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>'
+```
+
+#### Example differences
+The `OpenAPI.Example` type's `value` property has become optional so you will now need to handle a `nil` case or use optional chaining in places where you switch-on or otherwise access that property.
+
+#### DereferencedOperation differences
+The `DereferencedOperation` type's `callbacks` property is now an `OpenAPI.DereferencedCallbacksMap` instead of an `OpenAPI.CallbacksMap`.
+
+#### DereferencedResponse differences
+The `DereferencedResponse` type's `links` property is now an `OrderedDictionary<String, OpenAPI.Link>` instead of an `OpenAPI.Link.Map`.
+
+#### OrderedDictionary proliferation
+More `Dictionary` types have been changed to `OrderedDictionary` so that ordering is retained in more situations. This change won't impact most code, but because _some_ `Dictionary` methods are not supported by `OrderedDictionary`, there is a small chance of code breaking. See the following file changes if you need to know which properties switched from `Dictionary` to `OrderedDictionary`: https://github.com/mattpolzin/OpenAPIKit/pull/233/files
+
 ### Migrating to the OpenAPIKit module
 This section describes migrating to the module that supports OpenAPI 3.1.x documents.
 
-### JSONReference differences
+#### JSONReference differences
 All occurrences of `JSONReference` outside of `JSONSchema` have been replaced by `OpenAPI.Reference`, a type that supports OpenAPI 3.1.x's ability to override summary and description.
 
 Anywhere your code used to create a reference with `JSONReference.internal(.path(...))` you will now use `OpenAPI.Reference.internal(path: ...)` (and similarly for external references).
 
-### JSONSchema differences
+#### JSONSchema differences
+`JSONSchema` changed from an `enum` to a `struct`. For most code, use will not change, but if you switch over any `JSONSchema`s you should change to switching over the `JSONSchema` `value` property instead.
+
 The `.reference` case has gained a `CoreContext` so switching on it will need to change as follows:
 
 Before:
@@ -65,3 +144,100 @@ After:
 ```swift 
 case .reference(let ref, let context): ...
 ```
+
+`JSONSchema` only exposes an `examples` (plural) property. This is backwards compatible with the `example` (singular) property when decoding, but code that references the `example` (singular) property will need to be updated to use the `examples` array instead.
+
+In order to support new versions of the JSON Schema specification that allow `$ref` properties to live alongside other annotations like `description`, the `JSONSchema` type's `reference` case had its `ReferenceContext` replaced with a full `CoreContext`.
+
+Because the `ReferenceContext` contained only a `required` property and the `CoreContext` also has a `required` property, some code bases will not need to change at all. However, if you did use the `ReferenceContext` by name in your code, you will need to address compiler errors because of this change.
+
+Another way this change may break code is if you have used the `JSONSchema` `referenceContext` accessor. This accessor has been removed and you can now use the `coreContext` accessor on `JSONSchema` to get the `CoreContext` when it is relevant (which includes `reference` cases going forward).
+
+The `.null` case of `JSONSchema` now has a `CoreContext` property associated with it. If you pattern match on it, your code may need to change (though you are still allowed to match against just `.null` and ignore the associated value if desirable).
+
+The `JSONSchema.null` property that used to serve as a convenient way of creating a null-type `JSONSchema` is now a function. You can call it as `.null()` which means most code will just need to gain the `()` parens.
+
+When a `JSONSchema` only has one `allowedValue`, it will now be encoded as `const` rather than `enum`. There's nothing to change about your code in response to this, but be aware of the difference in encoding behavior.
+
+The `JSONSchema` type's `coreContext` accessor now gives a non-optional value because all cases have a `CoreContext`. The compiler will let you know where you need to stop handling it as Optional.
+
+#### ContentType differences
+`ContentType` changed from an `enum` to a `struct`. Equality checks for all of the previous enum's cases will still work against the new static constructors on the struct, but switch statements will no longer be possible.
+
+#### Response.StatusCode differences
+`Response.StatusCode` changed from an `enum` to a `struct`. For most code, use will not change, but if you switch over any values of this type your code will need to change to switch over the `StatusCode` `value` property instead.
+
+#### Paths differences
+Constructing an entry in the `Document.paths` dictionary now requires specifying `Either` a **JSON reference** to a **Path Item Object** or the **Path Item Object** itself.
+
+This means that where you used to write something like:
+```swift
+paths: [
+  "/hello/world": OpenAPI.PathItem(description: "hi", ...)
+]
+```
+
+You will now need to wrap it in an `Either` constructor like:
+```swift
+paths: [
+  "/hello/world": .pathItem(OpenAPI.PathItem(description: "hi", ...))
+]
+```
+
+There is also a convenience initializer for `Either` in this context which means that you can also write:
+```swift
+paths: [
+  "/hello/world": .init(description: "hi", ...)
+]
+```
+
+You may already have been using the `.init` shorthand to construct `OpenAPI.PathItem`s in which case your code does not need to change.
+
+Accessing an entry in the `Document.paths` dictionary now requires digging into an `Either` that may be a **JSON Reference** or a **Path Item Object** -- this means that where you used to write something like:
+```swift
+let pathItem = document.paths["hello/world"]
+```
+You will now need to decide between the following:
+```swift
+// access the path item (ignoring the possibility that it could be a reference)
+let pathItemObject = document.paths["hello/world"]?.pathItemValue
+
+// access the reference directly (ignoring the possibility that it could be a path item object):
+let pathItemReference = document.paths["hello/world"]?.reference
+
+// look the path item up in the Components Object (OpenAPIKit module only because this requires OpenAPI 3.1.x):
+let pathItem = document.paths["hello/world"].flatMap { document.components[$0] }
+
+// switch on the Either and handle it differently depending on the result:
+switch document.paths["hello/world"] {
+  case .a(let reference):
+    break
+  case .b(let pathItem):
+    break
+  case nil:
+    break
+}
+```
+
+NOTE: The error you will get in places where you need to make the above adjustments will look like:
+```
+Cannot convert value of type 'OpenAPI.PathItem' to expected dictionary value type 'Either<JSONReference<OpenAPI.PathItem>, OpenAPI.PathItem>'
+```
+
+#### Example differences
+The `OpenAPI.Example` type's `value` property has become optional so you will now need to handle a `nil` case or use optional chaining in places where you switch-on or otherwise access that property.
+
+#### DereferencedOperation differences
+The `DereferencedOperation` type's `callbacks` property is now an `OpenAPI.DereferencedCallbacksMap` instead of an `OpenAPI.CallbacksMap`.
+
+#### DereferencedResponse differences
+The `DereferencedResponse` type's `links` property is now an `OrderedDictionary<String, OpenAPI.Link>` instead of an `OpenAPI.Link.Map`.
+
+#### OrderedDictionary proliferation
+More `Dictionary` types have been changed to `OrderedDictionary` so that ordering is retained in more situations. This change won't impact most code, but because _some_ `Dictionary` methods are not supported by `OrderedDictionary`, there is a small chance of code breaking. See the following file changes if you need to know which properties switched from `Dictionary` to `OrderedDictionary`: https://github.com/mattpolzin/OpenAPIKit/pull/233/files
+
+#### Validations difference
+The `Document` `validate()` method now throws errors related to warnings from parsing the OpenAPI Document by defualt. If you want to ignore or handle those warnings differently, use `validate(strict: false)`.
+
+The `.operationsContainResponses` validation is now opt-in instead of applied by default when validating. If you still want to ensure documents have responses in all Operation objects, tack the `.operationsContainResponses` validation onto your validator, e.g.: `try document.validate(using: Validator().validating(.operationsContainResponses))`.
+
