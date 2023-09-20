@@ -4,14 +4,24 @@
 
 # OpenAPIKit <!-- omit in toc -->
 
-A library containing Swift types that encode to- and decode from [OpenAPI](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) Documents and their components.
+A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) and [OpenAPI 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) Documents and their components.
+
+The single most confusing thing you will grapple with out of the gate is explained by the following grid of what OpenAPIKit versions support which OpenAPI specification versions.
+
+| OpenAPIKit  | OpenAPI v3.0  | OpenAPI v3.1 |
+|-------------|---------------|--------------|
+| v2.x        | ✅            | ❌           |
+| v3.x        | ✅            | ✅           |
 
 - [Usage](#usage)
+  - [Migration](#migration)
+    - [1.x to 2.x](#1.x-to-2.x)
+    - [2.x to 3.x](#2.x-to-3.x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
   - [Validating OpenAPI Documents](#validating-openapi-documents)
-  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-3-documents)
+  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-3.0.x-documents)
   - [A note on dictionary ordering](#a-note-on-dictionary-ordering)
   - [OpenAPI Document structure](#openapi-document-structure)
     - [Document Root](#document-root)
@@ -38,7 +48,7 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 #### 1.x to 2.x
 If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [v2 migration guide](./documentation/v2_migration_guide.md).
 
-#### 2.x to 3.0.0
+#### 2.x to 3.x
 If you are migrating from OpenAPIKit 2.x to OpenAPIKit 3.x, check out the [v3 migration guide](./documentation/v3_migration_guide.md).
 
 You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
@@ -65,8 +75,12 @@ It is recommended that you build your project against the `OpenAPIKit` module an
 
 ### Decoding OpenAPI Documents
 
+Most documentation will focus on what it looks like to work with the `OpenAPIKit` module and OpenAPI 3.1.x documents. If you need to support OpenAPI 3.0.x documents, take a look at the section on [supporting OpenAPI 3.0.x documents](#supporting-openapi-3.0.x-documents) before you get too deep into this library's docs.
+
 You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
 ```swift
+import OpenAPIKit
+
 let decoder = ... // JSONDecoder() or YAMLDecoder()
 let openAPIDoc = try decoder.decode(OpenAPI.Document.self, from: ...)
 ```
