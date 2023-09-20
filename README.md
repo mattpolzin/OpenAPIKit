@@ -35,10 +35,12 @@ A library containing Swift types that encode to- and decode from [OpenAPI](https
 
 ### Migration
 #### 1.x to 2.x
-If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [migration guide](./documentation/v2_migration_guide.md).
+If you are migrating from OpenAPIKit 1.x to OpenAPIKit 2.x, check out the [v2 migration guide](./documentation/v2_migration_guide.md).
 
 #### 2.x to 3.0.0
-There is not yet a migration guide for upgrading from OpenAPIKit 2.x to OpenAPIKit 3.0.0. You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
+If you are migrating from OpenAPIKit 2.x to OpenAPIKit 3.x, check out the [v3 migration guide](./documentation/v3_migration_guide.md).
+
+You will need to start being explicit about which of the two new modules you want to use in your project: `OpenAPIKit` (now supports OpenAPI spec v3.1) and/or `OpenAPIKit30` (continues to support OpenAPI spec v3.0 like the previous versions of OpenAPIKit did).
 
 In package manifests, dependencies will be one of:
 ```
@@ -57,6 +59,8 @@ import OpenAPIKit30
 // v3.1 of spec:
 import OpenAPIKit
 ```
+
+It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then converting them to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
 
 ### Decoding OpenAPI Documents
 
