@@ -5403,12 +5403,18 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertEqual(
-            anyWithNullableSchema,
-            JSONSchema.any(
+        XCTAssertTrue(
+            anyWithNullableSchema == JSONSchema.any(
                 of: [
                     .string(),
                     .number(nullable: true)
+                ],
+                core: .init(nullable: true)
+            )
+            || anyWithNullableSchema == JSONSchema.any(
+                of: [
+                    .number(nullable: true),
+                    .string()
                 ],
                 core: .init(nullable: true)
             )
