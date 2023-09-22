@@ -1792,7 +1792,7 @@ extension JSONSchema: Decodable {
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
             if schema.subschemas.contains(where: { $0.nullable }) {
-                schema = schema.nullableSchemaObject()
+                schema = schema.requiredSchemaObject()
             }
 
             self = schema

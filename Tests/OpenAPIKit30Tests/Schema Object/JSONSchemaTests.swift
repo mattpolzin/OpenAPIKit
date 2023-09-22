@@ -5109,7 +5109,7 @@ extension SchemaObjectTests {
 
         let oneWithNullableSchemaData = """
         {
-            "allOf": [
+            "oneOf": [
                 { "type": "string" },
                 { "type": "number", "nullable": true }
             ]
