@@ -455,6 +455,11 @@ final class DocumentConversionTests: XCTestCase {
             example: 3
         )
 
+        let schema3 = OpenAPIKit30.JSONSchema(
+            schema: .array(.init(), .init(items: .string)),
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
             servers: [],
@@ -463,6 +468,7 @@ final class DocumentConversionTests: XCTestCase {
                 schemas: [
                     "schema1": schema1,
                     "schema2": schema2,
+                    "schema3": schema3,
                 ]
             )
         )
@@ -473,9 +479,11 @@ final class DocumentConversionTests: XCTestCase {
 
         let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
         let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
 
         assertEqualNewToOld(newSchema1, schema1)
         assertEqualNewToOld(newSchema2, schema2)
+        assertEqualNewToOld(newSchema3, schema3)
     }
 
     func test_JSONSchemaAllOf() throws {
@@ -501,6 +509,11 @@ final class DocumentConversionTests: XCTestCase {
             discriminator: .init(propertyName: "prop", mapping: ["prop": "hi"])
         )
 
+        let schema3 = OpenAPIKit30.JSONSchema(
+            schema: .not(.string, core: .init()),
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
             servers: [],
@@ -509,6 +522,7 @@ final class DocumentConversionTests: XCTestCase {
                 schemas: [
                     "schema1": schema1,
                     "schema2": schema2,
+                    "schema3": schema3,
                 ]
             )
         )
@@ -519,9 +533,11 @@ final class DocumentConversionTests: XCTestCase {
 
         let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
         let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
 
         assertEqualNewToOld(newSchema1, schema1)
         assertEqualNewToOld(newSchema2, schema2)
+        assertEqualNewToOld(newSchema3, schema3)
     }
 
     func test_JSONSchemaReference() throws {
