@@ -389,6 +389,29 @@ extension JSONSchema {
         }
         return context
     }
+
+    /// Get subschemas if this schema is an anyOf, allOf, etc.
+    /// Returns an empty array for any schema that does not have
+    /// subschemas.
+    ///
+    /// - IMPORTANT: An object's properties are NOT considered
+    ///              subschemas.
+    public var subschemas: [JSONSchema] {
+        switch self.value {
+            case .not(let schema, core: _):
+                return [schema]
+            case .array(_, let arrayContext):
+                return arrayContext.items.map { [$0] } ?? []
+            case .all(of: let schemas, core: _):
+                return schemas
+            case .any(of: let schemas, core: _):
+                return schemas
+            case .one(of: let schemas, core: _):
+                return schemas
+            default:
+                return []
+        }
+    }
 }
 
 // MARK: - Vendor Extensions
@@ -1778,34 +1801,54 @@ extension JSONSchema: Decodable {
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            self = .all(
+            var schema: JSONSchema = .all(
                 of: try container.decode([JSONSchema].self, forKey: .allOf),
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
+            if schema.subschemas.contains(where: { $0.nullable }) {
+                schema = schema.nullableSchemaObject()
+            }
+
+            self = schema
             return
         }
 
         if container.contains(.anyOf) {
-            self = .any(
+            var schema: JSONSchema = .any(
                 of: try container.decode([JSONSchema].self, forKey: .anyOf),
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
+            if schema.subschemas.contains(where: { $0.nullable }) {
+                schema = schema.nullableSchemaObject()
+            }
+
+            self = schema
             return
         }
 
         if container.contains(.oneOf) {
-            self = .one(
+            var schema: JSONSchema = .one(
                 of: try container.decode([JSONSchema].self, forKey: .oneOf),
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
+            if schema.subschemas.contains(where: { $0.nullable }) {
+                schema = schema.nullableSchemaObject()
+            }
+
+            self = schema
             return
         }
 
         if container.contains(.not) {
-            self = .not(
+            var schema: JSONSchema = .not(
                 try container.decode(JSONSchema.self, forKey: .not),
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
+            if schema.subschemas.contains(where: { $0.nullable }) {
+                schema = schema.requiredSchemaObject()
+            }
+            
+            self = schema
             return
         }
 
