@@ -73,7 +73,6 @@ jobs:
           - swift:5.8-focal
           - swift:5.8-jammy
           - swift:5.8-amazonlinux2
-          - swift:5.9-centos7
           - swift:5.9-focal
           - swift:5.9-jammy
           - swift:5.9-amazonlinux2
