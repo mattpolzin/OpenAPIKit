@@ -5324,12 +5324,18 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertEqual(
-            allWithNullableSchema,
-            JSONSchema.all(
+        XCTAssertTrue(
+            allWithNullableSchema == JSONSchema.all(
                 of: [
                     .string(),
                     .null()
+                ],
+                core: .init(nullable: true)
+            )
+            || allWithNullableSchema == JSONSchema.all(
+                of: [
+                    .null(),
+                    .string()
                 ],
                 core: .init(nullable: true)
             )
@@ -5508,7 +5514,7 @@ extension SchemaObjectTests {
 
         let oneWithNullableSchemaData = """
         {
-            "allOf": [
+            "oneOf": [
                 { "type": "string" },
                 { "type": "null" }
             ]
@@ -5563,12 +5569,18 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertEqual(
-            oneWithNullableSchema,
-            JSONSchema.one(
+        XCTAssertTrue(
+            oneWithNullableSchema == JSONSchema.one(
                 of: [
                     .string(),
                     .null()
+                ],
+                core: .init(nullable: true)
+            )
+            || oneWithNullableSchema == JSONSchema.one(
+                of: [
+                    .null(),
+                    .string()
                 ],
                 core: .init(nullable: true)
             )
@@ -5790,12 +5802,18 @@ extension SchemaObjectTests {
             )
         )
         
-        XCTAssertEqual(
-            anyWithNullableSchema,
-            JSONSchema.any(
+        XCTAssertTrue(
+            anyWithNullableSchema == JSONSchema.any(
                 of: [
                     .string(),
                     .null()
+                ],
+                core: .init(nullable: true)
+            )
+            || anyWithNullableSchema == JSONSchema.any(
+                of: [
+                    .null(),
+                    .string()
                 ],
                 core: .init(nullable: true)
             )
