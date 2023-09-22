@@ -1787,13 +1787,10 @@ extension JSONSchema: Decodable {
         }
 
         if container.contains(.not) {
-            var schema: JSONSchema = .not(
+            let schema: JSONSchema = .not(
                 try container.decode(JSONSchema.self, forKey: .not),
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
-            if schema.subschemas.contains(where: { $0.nullable }) {
-                schema = schema.requiredSchemaObject()
-            }
 
             self = schema
             return

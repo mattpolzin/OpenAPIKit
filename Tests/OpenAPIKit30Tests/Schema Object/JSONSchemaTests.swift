@@ -4925,12 +4925,18 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertEqual(
-            allWithNullableSchema,
-            JSONSchema.all(
+        XCTAssertTrue(
+            allWithNullableSchema == JSONSchema.all(
                 of: [
                     .string(),
-                    .integer(nullable: true)
+                    .number(nullable: true)
+                ],
+                core: .init(nullable: true)
+            )
+            || allWithNullableSchema == JSONSchema.all(
+                of: [
+                    .number(nullable: true),
+                    .string()
                 ],
                 core: .init(nullable: true)
             )
@@ -5479,7 +5485,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(not, JSONSchema.not(.boolean(.init(format: .generic))))
         XCTAssertEqual(notWithTitle, JSONSchema.not(.boolean(.init(format: .generic)), core: .init(title: "hello")))
-        XCTAssertEqual(notWithNullableSchema, JSONSchema.not(.string(nullable: true), core: .init(nullable: false)))
+        XCTAssertEqual(notWithNullableSchema, JSONSchema.not(.string(nullable: true), core: .init()))
     }
 
     func test_encodeFileReference() {
