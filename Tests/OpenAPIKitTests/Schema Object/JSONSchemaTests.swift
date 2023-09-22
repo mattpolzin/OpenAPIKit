@@ -5324,18 +5324,12 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertTrue(
-            allWithNullableSchema == JSONSchema.all(
+        XCTAssertEqual(
+            allWithNullableSchema,
+            JSONSchema.all(
                 of: [
                     .string(),
                     .null()
-                ],
-                core: .init(nullable: true)
-            )
-            || allWithNullableSchema == JSONSchema.all(
-                of: [
-                    .null(),
-                    .string()
                 ],
                 core: .init(nullable: true)
             )
@@ -5569,18 +5563,12 @@ extension SchemaObjectTests {
             )
         )
 
-        XCTAssertTrue(
-            oneWithNullableSchema == JSONSchema.one(
+        XCTAssertEqual(
+            oneWithNullableSchema,
+            JSONSchema.one(
                 of: [
                     .string(),
                     .null()
-                ],
-                core: .init(nullable: true)
-            )
-            || oneWithNullableSchema == JSONSchema.one(
-                of: [
-                    .null(),
-                    .string()
                 ],
                 core: .init(nullable: true)
             )
@@ -5802,18 +5790,12 @@ extension SchemaObjectTests {
             )
         )
         
-        XCTAssertTrue(
-            anyWithNullableSchema == JSONSchema.any(
+        XCTAssertEqual(
+            anyWithNullableSchema,
+            JSONSchema.any(
                 of: [
                     .string(),
                     .null()
-                ],
-                core: .init(nullable: true)
-            )
-            || anyWithNullableSchema == JSONSchema.any(
-                of: [
-                    .null(),
-                    .string()
                 ],
                 core: .init(nullable: true)
             )
