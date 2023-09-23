@@ -839,52 +839,52 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
     switch oldSchema.value {
         case .boolean(let coreContext):
             XCTAssertTrue(newSchema.isBoolean)
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .number(let coreContext, let numericContext):
             let newNumericContext = try XCTUnwrap(newSchema.numberContext)
             // TODO: compare number contexts
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .integer(let coreContext, let integerContext):
             let newIntegerContext = try XCTUnwrap(newSchema.integerContext)
             // TODO: compare integer contexts
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .string(let coreContext, let stringContext):
             let newStringContext = try XCTUnwrap(newSchema.stringContext)
             // TODO: compare string contexts
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .object(let coreContext, let objectContext):
             let newObjectContext = try XCTUnwrap(newSchema.objectContext)
             // TODO: compare object contexts
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .array(let coreContext, let arrayContext):
             let newArrayContext = try XCTUnwrap(newSchema.arrayContext)
             // TODO: compare array contexts
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .all(of: let schemas, core: let coreContext):
             let newSchemas = try XCTUnwrap(newSchema.subschemas)
             // TODO: compare subschemas
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .one(of: let schemas, core: let coreContext):
             let newSchemas = try XCTUnwrap(newSchema.subschemas)
             // TODO: compare subschemas
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .any(of: let of, core: let coreContext):
             let newSchemas = try XCTUnwrap(newSchema.subschemas)
             // TODO: compare subschemas
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .not(let schema, core: let coreContext):
             let newSchemas = try XCTUnwrap(newSchema.subschemas)
             // TODO: compare subschemas
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .reference(let reference, let referenceContext):
             guard case .reference(let newReference, _) = newSchema.value else {
@@ -896,12 +896,24 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .fragment(let coreContext):
             XCTAssertTrue(newSchema.isFragment)
-            assertEqualNewToOld(newCoreContext, coreContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaContext, _ oldCoreContext: OpenAPIKit30.JSONSchemaContext) {
-    // TODO: compare core contexts
+fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaContext, _ oldCoreContext: OpenAPIKit30.JSONSchemaContext) throws {
+    XCTAssertEqual(newCoreContext.formatString, oldCoreContext.formatString)
+    XCTAssertEqual(newCoreContext.required, oldCoreContext.required)
+    XCTAssertEqual(newCoreContext.nullable, oldCoreContext.nullable)
+    XCTAssertEqual(newCoreContext.title, oldCoreContext.title)
+    XCTAssertEqual(newCoreContext.description, oldCoreContext.description)
+    XCTAssertEqual(newCoreContext.discriminator, oldCoreContext.discriminator)
+    try assertEqualNewToOld(newCoreContext.externalDocs, oldCoreContext.externalDocs)
+    XCTAssertEqual(newCoreContext.allowedValues, oldCoreContext.allowedValues)
+    XCTAssertEqual(newCoreContext.defaultValue, oldCoreContext.defaultValue)
+    XCTAssertEqual(newCoreContext.examples, [oldCoreContext.example])
+    XCTAssertEqual(newCoreContext.readOnly, oldCoreContext.readOnly)
+    XCTAssertEqual(newCoreContext.writeOnly, oldCoreContext.writeOnly)
+    XCTAssertEqual(newCoreContext.deprecated, oldCoreContext.deprecated)
 }
 
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
