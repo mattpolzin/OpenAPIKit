@@ -910,7 +910,7 @@ fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaCont
     try assertEqualNewToOld(newCoreContext.externalDocs, oldCoreContext.externalDocs)
     XCTAssertEqual(newCoreContext.allowedValues, oldCoreContext.allowedValues)
     XCTAssertEqual(newCoreContext.defaultValue, oldCoreContext.defaultValue)
-    XCTAssertEqual(newCoreContext.examples, [oldCoreContext.example])
+    XCTAssertEqual(newCoreContext.examples, [oldCoreContext.example].compactMap { $0 })
     XCTAssertEqual(newCoreContext.readOnly, oldCoreContext.readOnly)
     XCTAssertEqual(newCoreContext.writeOnly, oldCoreContext.writeOnly)
     XCTAssertEqual(newCoreContext.deprecated, oldCoreContext.deprecated)
