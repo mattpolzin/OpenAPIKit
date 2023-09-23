@@ -481,9 +481,9 @@ final class DocumentConversionTests: XCTestCase {
         let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
         let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
 
-        assertEqualNewToOld(newSchema1, schema1)
-        assertEqualNewToOld(newSchema2, schema2)
-        assertEqualNewToOld(newSchema3, schema3)
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
     }
 
     func test_JSONSchemaAllOf() throws {
@@ -535,9 +535,9 @@ final class DocumentConversionTests: XCTestCase {
         let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
         let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
 
-        assertEqualNewToOld(newSchema1, schema1)
-        assertEqualNewToOld(newSchema2, schema2)
-        assertEqualNewToOld(newSchema3, schema3)
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
     }
 
     func test_JSONSchemaReference() throws {
@@ -797,7 +797,7 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
         case (.a(let ref1), .a(let ref2)):
             XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
         case (.b(let schema1), .b(let schema2)):
-            assertEqualNewToOld(schema1, schema2)
+            try assertEqualNewToOld(schema1, schema2)
         default:
             XCTFail("Found one reference and one schema. \(String(describing: newContent.schema))   /   \(String(describing: oldContent.schema))")
         }
@@ -831,10 +831,77 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSchema: OpenAPIKit30.JSONSchema) {
+fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSchema: OpenAPIKit30.JSONSchema) throws {
     XCTAssertEqual(newSchema.vendorExtensions, oldSchema.vendorExtensions)
 
-    // TODO: finish testing schema equivalence
+    let newCoreContext = newSchema.coreContext
+
+    switch oldSchema.value {
+        case .boolean(let coreContext):
+            XCTAssertTrue(newSchema.isBoolean)
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .number(let coreContext, let numericContext):
+            let newNumericContext = try XCTUnwrap(newSchema.numberContext)
+            // TODO: compare number contexts
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .integer(let coreContext, let integerContext):
+            let newIntegerContext = try XCTUnwrap(newSchema.integerContext)
+            // TODO: compare integer contexts
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .string(let coreContext, let stringContext):
+            let newStringContext = try XCTUnwrap(newSchema.stringContext)
+            // TODO: compare string contexts
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .object(let coreContext, let objectContext):
+            let newObjectContext = try XCTUnwrap(newSchema.objectContext)
+            // TODO: compare object contexts
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .array(let coreContext, let arrayContext):
+            let newArrayContext = try XCTUnwrap(newSchema.arrayContext)
+            // TODO: compare array contexts
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .all(of: let schemas, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            // TODO: compare subschemas
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .one(of: let schemas, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            // TODO: compare subschemas
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .any(of: let of, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            // TODO: compare subschemas
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .not(let schema, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            // TODO: compare subschemas
+            assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .reference(let reference, let referenceContext):
+            guard case .reference(let newReference, _) = newSchema.value else {
+                XCTFail("Expected new schema to be a reference but it was not.")
+                return
+            }
+            XCTAssertEqual(newReference.absoluteString, reference.absoluteString)
+            XCTAssertEqual(newSchema.required, referenceContext.required)
+
+        case .fragment(let coreContext):
+            XCTAssertTrue(newSchema.isFragment)
+            assertEqualNewToOld(newCoreContext, coreContext)
+    }
+}
+
+fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaContext, _ oldCoreContext: OpenAPIKit30.JSONSchemaContext) {
+    // TODO: compare core contexts
 }
 
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
@@ -890,7 +957,7 @@ fileprivate func assertEqualNewToOld(_ newSchemaContext: OpenAPIKit.OpenAPI.Para
     case (.a(let ref1), .a(let ref2)):
         XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
     case (.b(let schema1), .b(let schema2)):
-        assertEqualNewToOld(schema1, schema2)
+        try assertEqualNewToOld(schema1, schema2)
     default:
         XCTFail("Found one reference and one schema. \(newSchemaContext.schema)  /  \(oldSchemaContext.schema)")
     }
@@ -1085,7 +1152,7 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
 
     for (key, newSchema) in newComponents.schemas {
         let oldSchema = try XCTUnwrap(oldComponents.schemas[key])
-        assertEqualNewToOld(newSchema, oldSchema)
+        try assertEqualNewToOld(newSchema, oldSchema)
     }
     for (key, newResponse) in newComponents.responses {
         let oldResponse = try XCTUnwrap(oldComponents.responses[key])
