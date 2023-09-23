@@ -892,7 +892,7 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .not(let schema, core: let coreContext):
             let newSchemas = try XCTUnwrap(newSchema.subschemas)
-            try assertEqualNewToOld(newSchema, schema)
+            try assertEqualNewToOld(newSchemas.first!, schema)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .reference(let reference, let referenceContext):
