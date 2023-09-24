@@ -652,7 +652,7 @@ extension OpenAPIKit30.JSONSchema: To31 {
 
         return OpenAPIKit.JSONSchema(
             schema: schema
-        )
+        ).with(vendorExtensions: vendorExtensions)
     }
 }
 
