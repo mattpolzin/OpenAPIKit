@@ -100,7 +100,7 @@ do {
 
 You can encode a JSON OpenAPI document (i.e. using the `JSONEncoder` from the **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLEncoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
 ```swift
-let openAPIDoc = ...
+let openAPIDoc: OpenAPI.Document = ...
 let encoder = ... // JSONEncoder() or YAMLEncoder()
 let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 ```
@@ -111,7 +111,7 @@ Thanks to Swift's type system, the vast majority of the OpenAPI Specification is
 That being said, there are a small number of additional checks that you can perform to really put any concerns to bed.
 
 ```swift
-let openAPIDoc = ...
+let openAPIDoc: OpenAPI.Document = ...
 // perform additional validations on the document:
 try openAPIDoc.validate()
 ```
@@ -160,7 +160,7 @@ If retaining order is important for your use-case, I recommend the [**Yams**](ht
 The Foundation JSON encoding and decoding will be the most stable and battle-tested option with Yams as a pretty well established and stable option as well. FineJSON is lesser used (to my knowledge) but I have had success with it in the past.
 
 ### OpenAPI Document structure
-The types used by this library largely mirror the object definitions found in the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) version 3.0.3. The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library.
+The types used by this library largely mirror the object definitions found in the OpenAPI specification [version 3.1.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) (`OpenAPIKit` module) and [version 3.0.3](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) (`OpenAPIKit30` module). The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library. The project status page currently focuses on OpenAPI 3.1.x but for the purposes of determining what things are named and what is supported you can mostly infer the status of the OpenAPI 3.0.x support as well.
 
 #### Document Root
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences` and `OpenAPI.References`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
@@ -183,7 +183,7 @@ A schema can be made **optional** (i.e. it can be omitted) with `JSONSchema.inte
 
 A schema can be made **nullable** with `JSONSchema.number(nullable: true)` or an existing schema can be asked for a `nullableSchemaObject()`.
 
-Nullability highlights an important decision OpenAPIKit makes. The JSON Schema specification that dictates how OpenAPI v3.1 documents _encode_ nullability states that a nullable property is encoded as having the `null` type in addition to whatever other type(s) it has. So in OpenAPIKit you set `nullability` as a property of a schema, but when encoded/decoded it will represent the inclusion of absence of `null` in the list of `type`s of the schema.
+Nullability highlights an important decision OpenAPIKit makes. The JSON Schema specification that dictates how OpenAPI v3.1 documents _encode_ nullability states that a nullable property is encoded as having the `null` type in addition to whatever other type(s) it has. So in OpenAPIKit you set `nullability` as a property of a schema, but when encoded/decoded it will represent the inclusion of absence of `null` in the list of `type`s of the schema. If you are using the `OpenAPIKit30` module then nullability is encoded as a `nullable` property per the OpenAPI 3.0.x specification.
 
 Some types of schemas can be further specialized with a **format**. For example, `JSONSchema.number(format: .double)` or `JSONSchema.string(format: .dateTime)`.
 
@@ -311,7 +311,7 @@ Unlike what happens when you lookup an individual component using the `lookup()`
 
 Anywhere that a type would have had either a reference or a component, the dereferenced variety will simply have the component. For example, `PathItem` has an array of parameters, each of which is `Either<OpenAPI.Reference<Parameter>, Parameter>` whereas a `DereferencedPathItem` has an array of `DereferencedParameter`s. The dereferenced variant of each type exposes all the same properties and you can get at the underlying `OpenAPI` type via an `underlying{TypeName}` property. This can make for a much more convenient way to traverse a document because you don't need to check for or look up references anywhere the OpenAPI Specification allows them.
 
-For all dereferenced types except for `JSONSchema`, dereferencing will store a new vendor extension on the dereferenced value to keep track of the Component Object name the value used to be referenced at. This vendor extension is a string value with the `x-component-name` key.
+For all dereferenced types, dereferencing will store a new vendor extension on the dereferenced value to keep track of the Component Object name the value used to be referenced at. This vendor extension is a string value with the `x-component-name` key.
 
 You can take things a step further and resolve the document. Calling `resolved()` on a `DereferencedDocument` will produce a canonical form of an `OpenAPI.Document`. The `ResolvedRoute`s and `ResolvedEndpoint`s that the `ResolvedDocument` exposes collect all relevant information from the whole document into themselves. For example, a `ResolvedEndpoint` knows what servers it can be used on, what path it is located at, and which parameters it supports (even if some of those parameters were defined in an `OpenAPI.Operation` and others were defined in the containing `OpenAPI.PathItem`).
 
@@ -359,15 +359,18 @@ Following is a short list of integrations that might be immediately useful or ju
 
 If you have a library you would like to propose for this section, please create a pull request and explain a bit about your project.
 
-### Declarative OpenAPI Documents
-
-The [**Swift Package Registry API Docs**](https://github.com/mattt/swift-package-registry-oas) define the OpenAPI documentation for the Swift Package Registry standard using declarative Swift code and OpenAPIKit. This project also provides a useful example of producing a user-friendly ReDoc web interface to the OpenAPI documentation after encoding it as YAML.
+### Generating Swift
+The [**swift-openapi-generator**](https://github.com/apple/swift-openapi-generator) uses OpenAPIKit under the hood and generates Swift code for interfacing with APIs that have OpenAPI descriptions.
 
 ### Generating OpenAPI Documents
 
 [**VaporOpenAPI**](https://github.com/mattpolzin/VaporOpenAPI) / [VaporOpenAPIExample](https://github.com/mattpolzin/VaporOpenAPIExample) provide an example of generating OpenAPI from a Vapor application's routes.
 
 [**JSONAPI+OpenAPI**](https://github.com/mattpolzin/jsonapi-openapi) is a library that generates OpenAPI schemas from JSON:API types. The library has some rudimentary and experimental support for going the other direction and generating Swift types that represent JSON:API resources described by OpenAPI documentation.
+
+### Declarative OpenAPI Documents
+
+The [**Swift Package Registry API Docs**](https://github.com/mattt/swift-package-registry-oas) define the OpenAPI documentation for the Swift Package Registry standard using declarative Swift code and OpenAPIKit. This project also provides a useful example of producing a user-friendly ReDoc web interface to the OpenAPI documentation after encoding it as YAML.
 
 ### Semantic Diffing of OpenAPI Documents
 
