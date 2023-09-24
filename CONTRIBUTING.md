@@ -2,6 +2,8 @@ Thank you for considering contributing to OpenAPIKit!
 
 Take a look at the [Code of Conduct](https://github.com/mattpolzin/OpenAPIKit/blob/master/CODE_OF_CONDUCT.md) and note the [MIT license](https://github.com/mattpolzin/OpenAPIKit/blob/master/LICENSE.txt) associated with this project.
 
+If you are preparing a change for the current release of OpenAPIKit (major version 3), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 2 of OpenAPIKit, branch off of the `release/2_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version 4), branch off of the `release/4_0` branch of this repository.
+
 Please do the following in the course of preparing a branch and pull request for this project.
 
 - Create an issue motivating the changes you've made if one does not already exist. If you are unsure of how to adress an issue, seek out converstation on the issue before committing to a strategy.
