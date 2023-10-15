@@ -23,9 +23,7 @@ private protocol To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Document: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Document {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Document {
         OpenAPIKit.OpenAPI.Document(
             openAPIVersion: .v3_1_0,
             info: info.to31(),
@@ -41,9 +39,7 @@ extension OpenAPIKit30.OpenAPI.Document: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Document.Info: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Document.Info {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Document.Info {
         OpenAPIKit.OpenAPI.Document.Info(
             title: title,
             description: description,
@@ -57,9 +53,7 @@ extension OpenAPIKit30.OpenAPI.Document.Info: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Document.Info.License: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Document.Info.License {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Document.Info.License {
         OpenAPIKit.OpenAPI.Document.Info.License(
             name: name,
             url: url,
@@ -69,9 +63,7 @@ extension OpenAPIKit30.OpenAPI.Document.Info.License: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Document.Info.Contact: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Document.Info.Contact {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Document.Info.Contact {
         OpenAPIKit.OpenAPI.Document.Info.Contact(
             name: name,
             url: url,
@@ -82,9 +74,7 @@ extension OpenAPIKit30.OpenAPI.Document.Info.Contact: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Server: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Server {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Server {
 
         let newVariables: OrderedDictionary<String, OpenAPIKit.OpenAPI.Server.Variable> = variables.mapValues { variable in
             let enumValue: [String]?
@@ -112,9 +102,7 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Header: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Header {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Header {
         let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
         switch schemaOrContent {
         case .a(let context):
@@ -134,9 +122,7 @@ extension OpenAPIKit30.OpenAPI.Header: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Parameter.Context: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Parameter.Context {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.Context {
         switch self {
         case .query(required: let required, allowEmptyValue: let allowEmptyValue):
             return .query(required: required, allowEmptyValue: allowEmptyValue)
@@ -151,9 +137,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.Context: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Example: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Example {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Example {
         OpenAPIKit.OpenAPI.Example(
             summary: summary,
             description: description,
@@ -184,9 +168,7 @@ fileprivate func eitherRefTo31<T, U>(_ either: Either<OpenAPIKit30.JSONReference
 }
 
 extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Parameter.SchemaContext {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.SchemaContext {
         let newExamples = examples?.mapValues(eitherRefTo31)
         switch schema {
         case .a(let ref):
@@ -226,9 +208,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
         OpenAPIKit.OpenAPI.Content.Encoding(
             contentType: contentType,
             headers: headers?.mapValues(eitherRefTo31),
@@ -240,9 +220,7 @@ extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Content: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Content {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Content {
         if let newExamples = examples?.mapValues(eitherRefTo31) {
             return OpenAPIKit.OpenAPI.Content(
                 schema: schema.map(eitherRefTo31),
@@ -262,9 +240,7 @@ extension OpenAPIKit30.OpenAPI.Content: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Parameter: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Parameter {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter {
         let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
         switch schemaOrContent {
         case .a(let context):
@@ -285,9 +261,7 @@ extension OpenAPIKit30.OpenAPI.Parameter: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.RuntimeExpression.Source: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.RuntimeExpression.Source {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.RuntimeExpression.Source {
         switch self {
         case .header(name: let name):
             return .header(name: name)
@@ -302,9 +276,7 @@ extension OpenAPIKit30.OpenAPI.RuntimeExpression.Source: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.RuntimeExpression: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.RuntimeExpression {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.RuntimeExpression {
         switch self {
         case .url:
             return .url
@@ -321,9 +293,7 @@ extension OpenAPIKit30.OpenAPI.RuntimeExpression: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Link: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Link {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Link {
         OpenAPIKit.OpenAPI.Link(
             operation: operation,
             parameters: parameters.mapValues { parameter in parameter.mapFirst { $0.to31() }},
@@ -336,9 +306,7 @@ extension OpenAPIKit30.OpenAPI.Link: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Response: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Response {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Response {
         OpenAPIKit.OpenAPI.Response(
             description: description,
             headers: headers?.mapValues(eitherRefTo31),
@@ -350,9 +318,7 @@ extension OpenAPIKit30.OpenAPI.Response: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Request: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Request {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Request {
         OpenAPIKit.OpenAPI.Request(
             description: description,
             content: content.mapValues { $0.to31() },
@@ -363,9 +329,7 @@ extension OpenAPIKit30.OpenAPI.Request: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Callbacks: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Callbacks {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Callbacks {
         self.mapValues { (pathItem: OpenAPIKit30.OpenAPI.PathItem) in
             .b(pathItem.to31())
         }
@@ -373,9 +337,7 @@ extension OpenAPIKit30.OpenAPI.Callbacks: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Operation: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Operation {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Operation {
         if let newRequestBody = requestBody {
             return OpenAPIKit.OpenAPI.Operation(
                 tags: tags,
@@ -412,9 +374,7 @@ extension OpenAPIKit30.OpenAPI.Operation: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.PathItem: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.PathItem {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.PathItem {
         OpenAPIKit.OpenAPI.PathItem(
             summary: summary,
             description: description,
@@ -434,9 +394,7 @@ extension OpenAPIKit30.OpenAPI.PathItem: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.SecurityRequirement: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.SecurityRequirement {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.SecurityRequirement {
         var result = [OpenAPIKit.JSONReference<OpenAPIKit.OpenAPI.SecurityScheme>: [String]]()
         for (key, value) in self {
             result[key.to31()] = value
@@ -468,9 +426,7 @@ private extension OpenAPIKit30.JSONReference {
 }
 
 extension OpenAPIKit30.OpenAPI.Tag: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Tag {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Tag {
         OpenAPIKit.OpenAPI.Tag(
             name: name,
             description: description,
@@ -481,9 +437,7 @@ extension OpenAPIKit30.OpenAPI.Tag: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.ExternalDocumentation: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.ExternalDocumentation {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.ExternalDocumentation {
         OpenAPIKit.OpenAPI.ExternalDocumentation(
             description: description,
             url: url,
@@ -493,9 +447,7 @@ extension OpenAPIKit30.OpenAPI.ExternalDocumentation: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.SecurityScheme.SecurityType {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.SecurityScheme.SecurityType {
         switch self {
         case .apiKey(name: let name, location: let location):
             return .apiKey(name: name, location: location)
@@ -510,9 +462,7 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.SecurityScheme: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.SecurityScheme {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.SecurityScheme {
         OpenAPIKit.OpenAPI.SecurityScheme(
             type: type.to31(),
             description: description,
@@ -522,9 +472,7 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme: To31 {
 }
 
 extension OpenAPIKit30.JSONTypeFormat: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONTypeFormat {
+    fileprivate func to31() -> OpenAPIKit.JSONTypeFormat {
         switch self {
         case .boolean(let f):
             return .boolean(f)
@@ -543,9 +491,7 @@ extension OpenAPIKit30.JSONTypeFormat: To31 {
 }
 
 extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.OpenAPIFormat {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema.CoreContext<Format> {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.CoreContext<Format> {
         OpenAPIKit.JSONSchema.CoreContext<Format>(
             format: format,
             required: `required`,
@@ -564,9 +510,7 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
 }
 
 extension OpenAPIKit30.JSONSchema.NumericContext: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema.NumericContext {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.NumericContext {
         OpenAPIKit.JSONSchema.NumericContext(
             multipleOf: multipleOf,
             maximum: maximum.map { ($0.value, $0.exclusive) },
@@ -576,9 +520,7 @@ extension OpenAPIKit30.JSONSchema.NumericContext: To31 {
 }
 
 extension OpenAPIKit30.JSONSchema.IntegerContext: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema.IntegerContext {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.IntegerContext {
         OpenAPIKit.JSONSchema.IntegerContext(
             multipleOf: multipleOf,
             maximum: maximum.map { ($0.value, $0.exclusive) },
@@ -588,9 +530,7 @@ extension OpenAPIKit30.JSONSchema.IntegerContext: To31 {
 }
 
 extension OpenAPIKit30.JSONSchema.ArrayContext: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema.ArrayContext {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.ArrayContext {
         OpenAPIKit.JSONSchema.ArrayContext(
             items: items.map { $0.to31() },
             maxItems: maxItems,
@@ -601,9 +541,7 @@ extension OpenAPIKit30.JSONSchema.ArrayContext: To31 {
 }
 
 extension OpenAPIKit30.JSONSchema.ObjectContext: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema.ObjectContext {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.ObjectContext {
         OpenAPIKit.JSONSchema.ObjectContext(
             properties: properties.mapValues { $0.to31() },
             additionalProperties: additionalProperties?.mapSecond { $0.to31() },
@@ -614,9 +552,7 @@ extension OpenAPIKit30.JSONSchema.ObjectContext: To31 {
 }
 
 extension OpenAPIKit30.JSONSchema: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.JSONSchema {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema {
         let schema: OpenAPIKit.JSONSchema.Schema
 
         switch value {
@@ -657,9 +593,7 @@ extension OpenAPIKit30.JSONSchema: To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Components: To31 {
-    /// This function will be made private in the future. Please only rely on this function
-    /// to facilitate incremental migration within your codebase from OpenAPIKit30 to OpenAPIKit.
-    public func to31() -> OpenAPIKit.OpenAPI.Components {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Components {
         OpenAPIKit.OpenAPI.Components(
             schemas: schemas.mapValues { $0.to31() },
             responses: responses.mapValues { $0.to31() },
