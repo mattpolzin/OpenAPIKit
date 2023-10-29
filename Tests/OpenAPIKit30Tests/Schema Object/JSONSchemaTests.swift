@@ -3052,6 +3052,61 @@ extension SchemaObjectTests {
         )
     }
 
+    func test_decodeObjectWithVendorExtensions() throws {
+        let requiredPropertiesObjectData = """
+        {
+            "required": ["test"],
+            "properties": {
+                "test": {
+                    "default": true,
+                    "title": "Apply Watermark",
+                    "type": "boolean",
+                    "x-order": 15
+                }
+            },
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+
+        let optionalPropertiesObjectData = """
+        {
+            "properties": {
+                "test": {
+                    "default": true,
+                    "title": "Apply Watermark",
+                    "type": "boolean",
+                    "x-order": 15
+                }
+            },
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+
+        let requiredPropertiesObject = try orderUnstableDecode(JSONSchema.self, from: requiredPropertiesObjectData)
+        let optionalPropertiesObject = try orderUnstableDecode(JSONSchema.self, from: optionalPropertiesObjectData)
+
+        XCTAssertEqual(requiredPropertiesObject.objectContext?.properties["test"]?.vendorExtensions, [ "x-order": 15 ])
+        XCTAssertEqual(optionalPropertiesObject.objectContext?.properties["test"]?.vendorExtensions, [ "x-order": 15 ])
+
+        XCTAssertEqual(
+            requiredPropertiesObject,
+            JSONSchema.object(
+                properties: [
+                    "test": JSONSchema(.boolean(required: true, title: "Apply Watermark", defaultValue: true), vendorExtensions: [ "x-order": 15 ])
+                ]
+            )
+        )
+
+        XCTAssertEqual(
+            optionalPropertiesObject,
+            JSONSchema.object(
+                properties: [
+                    "test": JSONSchema(.boolean(required: false, title: "Apply Watermark", defaultValue: true), vendorExtensions: [ "x-order": 15 ])
+                ]
+            )
+        )
+    }
+
     func test_encodeArray() {
         let requiredArray = JSONSchema.array(.init(format: .unspecified, required: true), .init())
         let optionalArray = JSONSchema.array(.init(format: .unspecified, required: false), .init())
