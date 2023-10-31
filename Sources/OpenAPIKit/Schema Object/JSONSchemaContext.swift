@@ -653,6 +653,54 @@ extension JSONSchema {
             self._minProperties = minProperties
         }
     }
+
+    /// The context that only applies to `.string` schemas.
+    public struct StringContext: Equatable {
+        public let maxLength: Int?
+        let _minLength: Int?
+
+        public let contentMediaType: OpenAPI.ContentType?
+        public let contentEncoding: OpenAPI.ContentEncoding?
+
+        public var minLength: Int {
+            return _minLength ?? 0
+        }
+
+        /// Regular expression
+        public let pattern: String?
+
+        public init(
+            maxLength: Int? = nil,
+            minLength: Int? = nil,
+            pattern: String? = nil,
+            contentMediaType: OpenAPI.ContentType? = nil,
+            contentEncoding: OpenAPI.ContentEncoding? = nil
+        ) {
+            self.maxLength = maxLength
+            self._minLength = minLength
+            self.pattern = pattern
+            self.contentMediaType = contentMediaType
+            self.contentEncoding = contentEncoding
+        }
+
+        // we make the following a static function so it doesn't muddy the namespace while auto-completing on a value.
+        public static func _minLength(_ context: StringContext) -> Int? {
+            return context._minLength
+        }
+    }
+}
+
+extension OpenAPI {
+    /// An encoding, as specified in RFC 2054, part 6.1 and RFC 4648.
+    public enum ContentEncoding: String, Codable {
+        case _7bit = "7bit"
+        case _8bit = "8bit"
+        case binary
+        case quoted_printable = "quoted-printable"
+        case base16
+        case base32
+        case base64
+    }
 }
 
 // MARK: - Codable
@@ -1066,5 +1114,39 @@ extension JSONSchema.ObjectContext: Decodable {
             }
 
         return properties
+    }
+}
+
+extension JSONSchema.StringContext {
+    public enum CodingKeys: String, CodingKey {
+        case maxLength
+        case minLength
+        case pattern
+        case contentMediaType
+        case contentEncoding
+    }
+}
+
+extension JSONSchema.StringContext: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encodeIfPresent(maxLength, forKey: .maxLength)
+        try container.encodeIfPresent(_minLength, forKey: .minLength)
+        try container.encodeIfPresent(pattern, forKey: .pattern)
+        try container.encodeIfPresent(contentMediaType, forKey: .contentMediaType)
+        try container.encodeIfPresent(contentEncoding, forKey: .contentEncoding)
+    }
+}
+
+extension JSONSchema.StringContext: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        maxLength = try container.decodeIfPresent(Int.self, forKey: .maxLength)
+        _minLength = try container.decodeIfPresent(Int.self, forKey: .minLength)
+        pattern = try container.decodeIfPresent(String.self, forKey: .pattern)
+        contentMediaType = try container.decodeIfPresent(OpenAPI.ContentType.self, forKey: .contentMediaType)
+        contentEncoding = try container.decodeIfPresent(OpenAPI.ContentEncoding.self, forKey: .contentEncoding)
     }
 }
