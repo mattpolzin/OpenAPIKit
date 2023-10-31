@@ -551,6 +551,16 @@ extension OpenAPIKit30.JSONSchema.ObjectContext: To31 {
     }
 }
 
+extension OpenAPIKit30.JSONSchema.StringContext: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.StringContext {
+        OpenAPIKit.JSONSchema.StringContext(
+            maxLength: maxLength,
+            minLength: OpenAPIKit30.JSONSchema.StringContext._minLength(self),
+            pattern: pattern
+        )
+    }
+}
+
 extension OpenAPIKit30.JSONSchema: To31 {
     fileprivate func to31() -> OpenAPIKit.JSONSchema {
         let schema: OpenAPIKit.JSONSchema.Schema
@@ -563,7 +573,7 @@ extension OpenAPIKit30.JSONSchema: To31 {
         case .integer(let core, let integral):
             schema = .integer(core.to31(), integral.to31())
         case .string(let core, let stringy):
-            schema = .string(core.to31(), stringy)
+            schema = .string(core.to31(), stringy.to31())
         case .object(let core, let objective):
             schema = .object(core.to31(), objective.to31())
         case .array(let core, let listy):
