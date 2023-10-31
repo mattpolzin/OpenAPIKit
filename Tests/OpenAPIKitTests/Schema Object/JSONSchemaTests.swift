@@ -5218,6 +5218,85 @@ extension SchemaObjectTests {
         XCTAssertEqual(defaultValueString, JSONSchema.string(.init(defaultValue: "hello"), .init(contentMediaType: .bmp)))
     }
 
+    func test_encodeStringWithEncoding() {
+        let requiredString = JSONSchema.string(.init(required: true), .init(contentEncoding: .base64))
+        let optionalString = JSONSchema.string(.init(required: false), .init(contentEncoding: .base64))
+        let nullableString = JSONSchema.string(.init(nullable: true), .init(contentEncoding: .base64))
+        let allowedValueString = JSONSchema.string(.init(), .init(contentEncoding: .base64))
+            .with(allowedValues: ["hello World", "hi"])
+        let constValueString = JSONSchema.string(.init(), .init(contentEncoding: .base64))
+            .with(allowedValues: ["hello World"])
+        let defaultValueString = JSONSchema.string(.init(defaultValue: "hello"), .init(contentEncoding: .base64))
+
+        testEncodingPropertyLines(
+            entity: requiredString,
+            propertyLines: [
+                "\"contentEncoding\" : \"base64\",",
+                "\"type\" : \"string\"",
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: optionalString,
+            propertyLines: [
+                "\"contentEncoding\" : \"base64\",",
+                "\"type\" : \"string\""
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: nullableString,
+            propertyLines: [
+                "\"contentEncoding\" : \"base64\",",
+                "\"type\" : [",
+                "  \"string\",",
+                "  \"null\"",
+                "]"
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: constValueString,
+            propertyLines: [
+                "\"const\" : \"hello World\",",
+                "\"contentEncoding\" : \"base64\",",
+                "\"type\" : \"string\""
+            ]
+        )
+
+        // can't check exact string because of order instability, but we can confirm it is encoding the 
+        // `enum` property instead of the `const` property.
+        let encoded = try! orderUnstableTestStringFromEncoding(of: allowedValueString)
+        XCTAssert(encoded?.contains("\"enum\"") ?? false)
+        XCTAssert(!(encoded?.contains("\"const\"") ?? true))
+
+        testEncodingPropertyLines(
+            entity: defaultValueString,
+            propertyLines: [
+                "\"contentEncoding\" : \"base64\",",
+                "\"default\" : \"hello\",",
+                "\"type\" : \"string\"",
+            ]
+        )
+    }
+
+    func test_decodeStringWithEncoding() throws {
+        let stringData = #"{"type": "string", "contentEncoding": "base64"}"#.data(using: .utf8)!
+        let nullableStringData = #"{"type": ["string", "null"], "contentEncoding": "base64"}"#.data(using: .utf8)!
+        let allowedValueStringData = #"{"type": "string", "contentEncoding": "base64", "enum": ["hello", "world"]}"#.data(using: .utf8)!
+        let defaultValueStringData = #"{"type": "string", "contentEncoding": "base64", "default": "hello"}"#.data(using: .utf8)!
+
+        let string = try orderUnstableDecode(JSONSchema.self, from: stringData)
+        let nullableString = try orderUnstableDecode(JSONSchema.self, from: nullableStringData)
+        let allowedValueString = try orderUnstableDecode(JSONSchema.self, from: allowedValueStringData)
+        let defaultValueString = try orderUnstableDecode(JSONSchema.self, from: defaultValueStringData)
+
+        XCTAssertEqual(string, JSONSchema.string(.init(), .init(contentEncoding: .base64)))
+        XCTAssertEqual(nullableString, JSONSchema.string(.init(nullable: true), .init(contentEncoding: .base64)))
+        XCTAssertEqual(allowedValueString, JSONSchema.string(.init(allowedValues: ["hello", "world"]), .init(contentEncoding: .base64)))
+        XCTAssertEqual(defaultValueString, JSONSchema.string(.init(defaultValue: "hello"), .init(contentEncoding: .base64)))
+    }
+
     func test_encodeAll() {
         let allOf = JSONSchema.all(
             of: [
