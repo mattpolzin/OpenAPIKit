@@ -1070,7 +1070,7 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .string(let coreContext, let stringContext):
             let newStringContext = try XCTUnwrap(newSchema.stringContext)
-            // TODO: compare string contexts
+            assertEqualNewToOld(newStringContext, stringContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .object(let coreContext, let objectContext):
@@ -1140,6 +1140,15 @@ fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaCont
     XCTAssertEqual(newCoreContext.readOnly, oldCoreContext.readOnly)
     XCTAssertEqual(newCoreContext.writeOnly, oldCoreContext.writeOnly)
     XCTAssertEqual(newCoreContext.deprecated, oldCoreContext.deprecated)
+}
+
+fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.StringContext, _ oldStringContext: OpenAPIKit30.JSONSchema.StringContext) {
+    XCTAssertEqual(newStringContext.pattern, oldStringContext.pattern)
+    XCTAssertEqual(newStringContext.maxLength, oldStringContext.maxLength)
+    XCTAssertEqual(newStringContext.minLength, oldStringContext.minLength)
+    XCTAssertEqual(OpenAPIKit.JSONSchema.StringContext._minLength(newStringContext), OpenAPIKit30.JSONSchema.StringContext._minLength(oldStringContext))
+    XCTAssertNil(newStringContext.contentEncoding)
+    XCTAssertNil(newStringContext.contentMediaType)
 }
 
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
