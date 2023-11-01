@@ -96,13 +96,21 @@ extension Shared {
 
 // convenience constructors
 public extension Shared.ContentType {
+    /// AAC audio
+    static let aac: Self = .init(.aac)
+    /// Audio Video Interleave
+    static let avi: Self = .init(.avi)
     /// Bitmap image
     static let bmp: Self = .init(.bmp)
     static let css: Self = .init(.css)
     /// Comma-separated values
     static let csv: Self = .init(.csv)
+    static let doc: Self = .init(.doc)
+    static let docx: Self = .init(.docx)
     /// URL-encoded form data. See also: `multipartForm`.
     static let form: Self = .init(.form)
+    /// Graphics Interchange Format
+    static let gif: Self = .init(.gif)
     static let html: Self = .init(.html)
     static let javascript: Self = .init(.javascript)
     /// JPEG image
@@ -161,13 +169,21 @@ extension Shared.ContentType {
     // This internal representation makes it easier to ensure that the popular
     // builtin types supported are fully covered in their rawValue implementation.
     internal enum Builtin: Codable, Equatable, Hashable {
+        /// AAC audio
+        case aac
+        /// Audio Video Interleave
+        case avi
         /// Bitmap image
         case bmp
         case css
         /// Comma-separated values
         case csv
+        case doc
+        case docx
         /// URL-encoded form data. See also: `multipartForm`.
         case form
+        /// Graphics Interchange Format
+        case gif
         case html
         case javascript
         /// JPEG image
@@ -226,10 +242,15 @@ extension Shared.ContentType {
 extension Shared.ContentType.Builtin: RawRepresentable {
     public var rawValue: String {
         switch self {
+        case .aac: return "audio/aac"
+        case .avi: return "video/x-msvideo"
         case .bmp: return "image/bmp"
         case .css: return "text/css"
         case .csv: return "text/csv"
+        case .doc: return "application/msword"
+        case .docx: return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         case .form: return "application/x-www-form-urlencoded"
+        case .gif: return "image/gif"
         case .html: return "text/html"
         case .javascript: return "application/javascript"
         case .jpg: return "image/jpeg"
@@ -269,10 +290,15 @@ extension Shared.ContentType.Builtin: RawRepresentable {
 
     public init?(rawValue: String) {
         switch rawValue {
+        case "audio/aac": self = .aac
+        case "video/x-msvideo": self = .avi
         case "image/bmp": self = .bmp
         case "text/css": self = .css
         case "text/csv": self = .csv
+        case "application/msword": self = .doc
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": self = .docx
         case "application/x-www-form-urlencoded": self = .form
+        case "image/gif": self = .gif
         case "text/html": self = .html
         case "application/javascript": self = .javascript
         case "image/jpeg": self = .jpg

@@ -19,10 +19,15 @@ final class ContentTypeTests: XCTestCase {
 
     func test_contentTypeStringReflexivity() {
         let types: [Shared.ContentType] = [
+            .avi,
+            .aac,
             .bmp,
             .css,
             .csv,
+            .doc,
+            .docx,
             .form,
+            .gif,
             .html,
             .javascript,
             .jpg,
