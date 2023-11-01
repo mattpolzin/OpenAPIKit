@@ -6536,7 +6536,9 @@ extension SchemaObjectTests {
         let _ = JSONSchema.string(
             required: false,
             nullable: false,
-            pattern: "ab..efgh"
+            pattern: "ab..efgh",
+            contentMediaType: .mp4,
+            contentEncoding: .base64
         )
         let _ = JSONSchema.string(
             allowedValues: "hello", "world"
