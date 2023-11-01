@@ -1212,6 +1212,8 @@ extension JSONSchema {
         minLength: Int? = nil,
         maxLength: Int? = nil,
         pattern: String? = nil,
+        contentMediaType: OpenAPI.ContentType? = nil,
+        contentEncoding: OpenAPI.ContentEncoding? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
         examples: [AnyCodable] = []
@@ -1233,7 +1235,9 @@ extension JSONSchema {
         let stringContext = JSONSchema.StringContext(
             maxLength: maxLength,
             minLength: minLength,
-            pattern: pattern
+            pattern: pattern,
+            contentMediaType: contentMediaType,
+            contentEncoding: contentEncoding
         )
         return .string(genericContext, stringContext)
     }
@@ -1253,6 +1257,8 @@ extension JSONSchema {
         minLength: Int? = nil,
         maxLength: Int? = nil,
         pattern: String? = nil,
+        contentMediaType: OpenAPI.ContentType? = nil,
+        contentEncoding: OpenAPI.ContentEncoding? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
         examples: [AnyCodable] = []
@@ -1270,6 +1276,8 @@ extension JSONSchema {
             minLength: minLength,
             maxLength: maxLength,
             pattern: pattern,
+            contentMediaType: contentMediaType,
+            contentEncoding: contentEncoding,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples
