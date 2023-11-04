@@ -670,7 +670,9 @@ extension JSONSchema.StringContext {
         return .init(
             maxLength: maxLength,
             minLength: Self._minLength(self),
-            pattern: pattern
+            pattern: pattern,
+            contentMediaType: contentMediaType,
+            contentEncoding: contentEncoding
         )
     }
 }

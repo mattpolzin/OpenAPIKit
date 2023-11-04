@@ -232,9 +232,9 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(), .init()),
-                .fragment(.init(format: .other("binary")))
+                .fragment(.init(format: .other("uuid")))
             ],
-            .string(.init(), .init(contentEncoding: .binary))
+            .string(.init(format: .uuid), .init())
         )
     }
 
