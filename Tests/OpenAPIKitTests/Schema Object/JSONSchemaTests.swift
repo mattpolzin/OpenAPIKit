@@ -22,11 +22,27 @@ final class SchemaObjectTests: XCTestCase {
         let integer32 = JSONSchema.integer(.init(format: .int32, required: true), .init())
         let integer64 = JSONSchema.integer(.init(format: .int64, required: true), .init())
         let string = JSONSchema.string(.init(format: .unspecified, required: true), .init())
-        let byteString = JSONSchema.string(.init(format: .byte, required: true), .init())
-        let binaryString = JSONSchema.string(.init(format: .binary, required: true), .init())
         let dateString = JSONSchema.string(.init(format: .date, required: true), .init())
         let dateTimeString = JSONSchema.string(.init(format: .dateTime, required: true), .init())
+        let durationString = JSONSchema.string(.init(format: .duration, required: true), .init())
+        let emailString = JSONSchema.string(.init(format: .email, required: true), .init())
+        let hostnameString = JSONSchema.string(.init(format: .hostname, required: true), .init())
+        let idnEmailString = JSONSchema.string(.init(format: .idnEmail, required: true), .init())
+        let idnHostnameString = JSONSchema.string(.init(format: .idnHostname, required: true), .init())
+        let ipv4String = JSONSchema.string(.init(format: .ipv4, required: true), .init())
+        let ipv6String = JSONSchema.string(.init(format: .ipv6, required: true), .init())
+        let iriString = JSONSchema.string(.init(format: .iri, required: true), .init())
+        let iriReferenceString = JSONSchema.string(.init(format: .iriReference, required: true), .init())
+        let jsonPointerString = JSONSchema.string(.init(format: .jsonPointer, required: true), .init())
         let passwordString = JSONSchema.string(.init(format: .password, required: true), .init())
+        let regexString = JSONSchema.string(.init(format: .regex, required: true), .init())
+        let relativeJsonPointerString = JSONSchema.string(.init(format: .relativeJsonPointer, required: true), .init())
+        let timeString = JSONSchema.string(.init(format: .time, required: true), .init())
+        let uriString = JSONSchema.string(.init(format: .uri, required: true), .init())
+        let uriReferenceString = JSONSchema.string(.init(format: .uriReference, required: true), .init())
+        let uriTemplateString = JSONSchema.string(.init(format: .uriTemplate, required: true), .init())
+        let uuidString = JSONSchema.string(.init(format: .uuid, required: true), .init())
+        let otherString = JSONSchema.string(.init(format: .other("hello world"), required: true), .init())
         let allOf = JSONSchema.all(of: [.string(.init(), .init())])
         let anyOf = JSONSchema.any(of: [boolean])
         let oneOf = JSONSchema.one(of: [boolean])
@@ -46,11 +62,27 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(integer32.jsonTypeFormat, .integer(.int32))
         XCTAssertEqual(integer64.jsonTypeFormat, .integer(.int64))
         XCTAssertEqual(string.jsonTypeFormat, .string(.unspecified))
-        XCTAssertEqual(byteString.jsonTypeFormat, .string(.byte))
-        XCTAssertEqual(binaryString.jsonTypeFormat, .string(.binary))
         XCTAssertEqual(dateString.jsonTypeFormat, .string(.date))
         XCTAssertEqual(dateTimeString.jsonTypeFormat, .string(.dateTime))
+        XCTAssertEqual(durationString.jsonTypeFormat, .string(.duration))
+        XCTAssertEqual(emailString.jsonTypeFormat, .string(.email))
+        XCTAssertEqual(hostnameString.jsonTypeFormat, .string(.hostname))
+        XCTAssertEqual(idnEmailString.jsonTypeFormat, .string(.idnEmail))
+        XCTAssertEqual(idnHostnameString.jsonTypeFormat, .string(.idnHostname))
+        XCTAssertEqual(ipv4String.jsonTypeFormat, .string(.ipv4))
+        XCTAssertEqual(ipv6String.jsonTypeFormat, .string(.ipv6))
+        XCTAssertEqual(iriString.jsonTypeFormat, .string(.iri))
+        XCTAssertEqual(iriReferenceString.jsonTypeFormat, .string(.iriReference))
+        XCTAssertEqual(jsonPointerString.jsonTypeFormat, .string(.jsonPointer))
         XCTAssertEqual(passwordString.jsonTypeFormat, .string(.password))
+        XCTAssertEqual(regexString.jsonTypeFormat, .string(.regex))
+        XCTAssertEqual(relativeJsonPointerString.jsonTypeFormat, .string(.relativeJsonPointer))
+        XCTAssertEqual(timeString.jsonTypeFormat, .string(.time))
+        XCTAssertEqual(uriString.jsonTypeFormat, .string(.uri))
+        XCTAssertEqual(uriReferenceString.jsonTypeFormat, .string(.uriReference))
+        XCTAssertEqual(uriTemplateString.jsonTypeFormat, .string(.uriTemplate))
+        XCTAssertEqual(uuidString.jsonTypeFormat, .string(.uuid))
+        XCTAssertEqual(otherString.jsonTypeFormat, .string(.other("hello world")))
         XCTAssertNil(allOf.jsonTypeFormat)
         XCTAssertNil(anyOf.jsonTypeFormat)
         XCTAssertNil(oneOf.jsonTypeFormat)
@@ -70,11 +102,28 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(integer32.jsonTypeFormat?.jsonType, .integer)
         XCTAssertEqual(integer64.jsonTypeFormat?.jsonType, .integer)
         XCTAssertEqual(string.jsonTypeFormat?.jsonType, .string)
-        XCTAssertEqual(byteString.jsonTypeFormat?.jsonType, .string)
-        XCTAssertEqual(binaryString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(dateString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(dateTimeString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(durationString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(emailString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(hostnameString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(idnEmailString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(idnHostnameString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(ipv4String.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(ipv6String.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(iriString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(iriReferenceString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(jsonPointerString.jsonTypeFormat?.jsonType, .string)
         XCTAssertEqual(passwordString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(regexString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(relativeJsonPointerString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(timeString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(uriString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(uriReferenceString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(uriTemplateString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(uuidString.jsonTypeFormat?.jsonType, .string)
+        XCTAssertEqual(otherString.jsonTypeFormat?.jsonType, .string)
+
         XCTAssertEqual(boolean.jsonType, .boolean)
         XCTAssertEqual(object.jsonType, .object)
         XCTAssertEqual(array.jsonType, .array)
@@ -85,11 +134,27 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(integer32.jsonType, .integer)
         XCTAssertEqual(integer64.jsonType, .integer)
         XCTAssertEqual(string.jsonType, .string)
-        XCTAssertEqual(byteString.jsonType, .string)
-        XCTAssertEqual(binaryString.jsonType, .string)
         XCTAssertEqual(dateString.jsonType, .string)
         XCTAssertEqual(dateTimeString.jsonType, .string)
+        XCTAssertEqual(durationString.jsonType, .string)
+        XCTAssertEqual(emailString.jsonType, .string)
+        XCTAssertEqual(hostnameString.jsonType, .string)
+        XCTAssertEqual(idnEmailString.jsonType, .string)
+        XCTAssertEqual(idnHostnameString.jsonType, .string)
+        XCTAssertEqual(ipv4String.jsonType, .string)
+        XCTAssertEqual(ipv6String.jsonType, .string)
+        XCTAssertEqual(iriString.jsonType, .string)
+        XCTAssertEqual(iriReferenceString.jsonType, .string)
+        XCTAssertEqual(jsonPointerString.jsonType, .string)
         XCTAssertEqual(passwordString.jsonType, .string)
+        XCTAssertEqual(regexString.jsonType, .string)
+        XCTAssertEqual(relativeJsonPointerString.jsonType, .string)
+        XCTAssertEqual(timeString.jsonType, .string)
+        XCTAssertEqual(uriString.jsonType, .string)
+        XCTAssertEqual(uriReferenceString.jsonType, .string)
+        XCTAssertEqual(uriTemplateString.jsonType, .string)
+        XCTAssertEqual(uuidString.jsonType, .string)
+        XCTAssertEqual(otherString.jsonType, .string)
 
         XCTAssertNil(fragment.jsonType)
         // kind of arbitrary, but if you try really hard you can
@@ -112,11 +177,27 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(integer32.formatString, "int32")
         XCTAssertEqual(integer64.formatString, "int64")
         XCTAssertEqual(string.formatString, "")
-        XCTAssertEqual(byteString.formatString, "byte")
-        XCTAssertEqual(binaryString.formatString, "binary")
         XCTAssertEqual(dateString.formatString, "date")
         XCTAssertEqual(dateTimeString.formatString, "date-time")
+        XCTAssertEqual(durationString.formatString, "duration")
+        XCTAssertEqual(emailString.formatString, "email")
+        XCTAssertEqual(hostnameString.formatString, "hostname")
+        XCTAssertEqual(idnEmailString.formatString, "idn-email")
+        XCTAssertEqual(idnHostnameString.formatString, "idn-hostname")
+        XCTAssertEqual(ipv4String.formatString, "ipv4")
+        XCTAssertEqual(ipv6String.formatString, "ipv6")
+        XCTAssertEqual(iriString.formatString, "iri")
+        XCTAssertEqual(iriReferenceString.formatString, "iri-reference")
+        XCTAssertEqual(jsonPointerString.formatString, "json-pointer")
         XCTAssertEqual(passwordString.formatString, "password")
+        XCTAssertEqual(regexString.formatString, "regex")
+        XCTAssertEqual(relativeJsonPointerString.formatString, "relative-json-pointer")
+        XCTAssertEqual(timeString.formatString, "time")
+        XCTAssertEqual(uriString.formatString, "uri")
+        XCTAssertEqual(uriReferenceString.formatString, "uri-reference")
+        XCTAssertEqual(uriTemplateString.formatString, "uri-template")
+        XCTAssertEqual(uuidString.formatString, "uuid")
+        XCTAssertEqual(otherString.formatString, "hello world")
 
         // SwiftType
         XCTAssert(null.jsonTypeFormat?.swiftType == Any?.self)
@@ -130,11 +211,27 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssert(integer32.jsonTypeFormat?.swiftType == Int.self)
         XCTAssert(integer64.jsonTypeFormat?.swiftType == Int.self)
         XCTAssert(string.jsonTypeFormat?.swiftType == String.self)
-        XCTAssert(byteString.jsonTypeFormat?.swiftType == String.self)
-        XCTAssert(binaryString.jsonTypeFormat?.swiftType == String.self)
         XCTAssert(dateString.jsonTypeFormat?.swiftType == String.self)
         XCTAssert(dateTimeString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(durationString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(emailString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(hostnameString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(idnEmailString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(idnHostnameString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(ipv4String.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(ipv6String.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(iriString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(iriReferenceString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(jsonPointerString.jsonTypeFormat?.swiftType == String.self)
         XCTAssert(passwordString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(regexString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(relativeJsonPointerString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(timeString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(uriString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(uriReferenceString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(uriTemplateString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(uuidString.jsonTypeFormat?.swiftType == String.self)
+        XCTAssert(otherString.jsonTypeFormat?.swiftType == String.self)
     }
 
     func test_isFragmentAndIsEmpty() {
@@ -159,8 +256,6 @@ final class SchemaObjectTests: XCTestCase {
             .integer(.init(format: .int32, required: true), .init()),
             .integer(.init(format: .int64, required: true), .init()),
             .string(.init(format: .unspecified, required: true), .init()),
-            .string(.init(format: .byte, required: true), .init()),
-            .string(.init(format: .binary, required: true), .init()),
             .string(.init(format: .date, required: true), .init()),
             .string(.init(format: .dateTime, required: true), .init()),
             .string(.init(format: .password, required: true), .init()),
@@ -4744,86 +4839,6 @@ extension SchemaObjectTests {
         )
     }
 
-    func test_encodeByteString() {
-        let requiredString = JSONSchema.string(.init(format: .byte, required: true), .init())
-        let optionalString = JSONSchema.string(.init(format: .byte, required: false), .init())
-        let nullableString = JSONSchema.string(.init(format: .byte, required: true, nullable: true), .init())
-        let readOnlyString = JSONSchema.string(.init(format: .byte, required: true, permissions: .readOnly), .init())
-        let writeOnlyString = JSONSchema.string(.init(format: .byte, required: true, permissions: .writeOnly), .init())
-        let deprecatedString = JSONSchema.string(.init(format: .byte, required: true, deprecated: true), .init())
-        let allowedValueString = JSONSchema.string(.init(format: .byte, required: true), .init())
-            .with(allowedValues: ["hello"])
-
-        testAllSharedFormattedContextEncoding(
-            typeName: "string",
-            formatName: "byte",
-            requiredEntity: requiredString,
-            optionalEntity: optionalString,
-            nullableEntity: nullableString,
-            readOnlyEntity: readOnlyString,
-            writeOnlyEntity: writeOnlyString,
-            deprecatedEntity: deprecatedString,
-            allowedValues: (
-                entity: allowedValueString,
-                value: "\"hello\""
-            )
-        )
-    }
-
-    func test_decodeByteString() {
-        let stringData = #"{"type": "string", "format": "byte"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": ["string", "null"], "format": "byte"}"#.data(using: .utf8)!
-        let allowedValueStringData = #"{"type": "string", "format": "byte", "enum": ["hello"]}"#.data(using: .utf8)!
-
-        let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
-        let nullableString = try! orderUnstableDecode(JSONSchema.self, from: nullableStringData)
-        let allowedValueString = try! orderUnstableDecode(JSONSchema.self, from: allowedValueStringData)
-
-        XCTAssertEqual(string, JSONSchema.string(.init(format: .byte), .init()))
-        XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .byte, nullable: true), .init()))
-        XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .byte, allowedValues: ["hello"]), .init()))
-    }
-
-    func test_encodeBinaryString() {
-        let requiredString = JSONSchema.string(.init(format: .binary, required: true), .init())
-        let optionalString = JSONSchema.string(.init(format: .binary, required: false), .init())
-        let nullableString = JSONSchema.string(.init(format: .binary, required: true, nullable: true), .init())
-        let readOnlyString = JSONSchema.string(.init(format: .binary, required: true, permissions: .readOnly), .init())
-        let writeOnlyString = JSONSchema.string(.init(format: .binary, required: true, permissions: .writeOnly), .init())
-        let deprecatedString = JSONSchema.string(.init(format: .binary, required: true, deprecated: true), .init())
-        let allowedValueString = JSONSchema.string(.init(format: .binary, required: true), .init())
-            .with(allowedValues: ["hello"])
-
-        testAllSharedFormattedContextEncoding(
-            typeName: "string",
-            formatName: "binary",
-            requiredEntity: requiredString,
-            optionalEntity: optionalString,
-            nullableEntity: nullableString,
-            readOnlyEntity: readOnlyString,
-            writeOnlyEntity: writeOnlyString,
-            deprecatedEntity: deprecatedString,
-            allowedValues: (
-                entity: allowedValueString,
-                value: "\"hello\""
-            )
-        )
-    }
-
-    func test_decodeBinaryString() {
-        let stringData = #"{"type": "string", "format": "binary"}"#.data(using: .utf8)!
-        let nullableStringData = #"{"type": ["string", "null"], "format": "binary"}"#.data(using: .utf8)!
-        let allowedValueStringData = #"{"type": "string", "format": "binary", "enum": ["hello"]}"#.data(using: .utf8)!
-
-        let string = try! orderUnstableDecode(JSONSchema.self, from: stringData)
-        let nullableString = try! orderUnstableDecode(JSONSchema.self, from: nullableStringData)
-        let allowedValueString = try! orderUnstableDecode(JSONSchema.self, from: allowedValueStringData)
-
-        XCTAssertEqual(string, JSONSchema.string(.init(format: .binary), .init()))
-        XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .binary, nullable: true), .init()))
-        XCTAssertEqual(allowedValueString, JSONSchema.string(.init(format: .binary, allowedValues: ["hello"]), .init()))
-    }
-
     func test_encodeDateString() {
         let requiredString = JSONSchema.string(.init(format: .date, required: true), .init())
         let optionalString = JSONSchema.string(.init(format: .date, required: false), .init())
@@ -6544,12 +6559,10 @@ extension SchemaObjectTests {
             allowedValues: "hello", "world"
         )
 
-        let t1 = JSONSchema.string(format: .extended(.uuid))
-        XCTAssertEqual(t1, JSONSchema.string(format: .other("uuid")))
+        let t1 = JSONSchema.string(format: .uuid)
         XCTAssertEqual(t1, JSONSchema.string(format: .init(rawValue: "uuid")))
 
-        let t2 = JSONSchema.string(format: .extended(.email))
-        XCTAssertEqual(t2, JSONSchema.string(format: .other("email")))
+        let t2 = JSONSchema.string(format: .email)
         XCTAssertEqual(t2, JSONSchema.string(format: .init(rawValue: "email")))
 
         let t3 = JSONSchema.string(format: .generic)

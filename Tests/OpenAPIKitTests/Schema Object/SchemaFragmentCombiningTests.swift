@@ -180,11 +180,11 @@ final class SchemaFragmentCombiningTests: XCTestCase {
 
     func test_resolveSingleStringWithFormat() {
         let fragments: [JSONSchema] = [
-            .string(.init(format: .binary), .init())
+            .string(.init(), .init(contentEncoding: .binary))
         ]
         XCTAssertEqual(
             try fragments.combined(resolvingAgainst: .noComponents),
-            .string(.init(format: .binary), .init())
+            .string(.init(), .init(contentEncoding: .binary))
         )
     }
 
@@ -234,7 +234,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                 .string(.init(), .init()),
                 .fragment(.init(format: .other("binary")))
             ],
-            .string(.init(format: .binary), .init())
+            .string(.init(), .init(contentEncoding: .binary))
         )
     }
 
@@ -242,10 +242,10 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(description: "test"), .init(minLength: 2)),
-                .string(.init(format: .byte), .init(maxLength: 5)),
+                .string(.init(), .init(maxLength: 5, contentEncoding: .base64)),
                 .string(.init(description: "test"), .init())
             ],
-            .string(.init(format: .byte, description: "test"), .init(maxLength: 5, minLength: 2))
+            .string(.init(description: "test"), .init(maxLength: 5, minLength: 2, contentEncoding: .base64))
         )
     }
 
@@ -727,17 +727,13 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     }
 
     func test_StringFormatConflicts() {
-        let byte: JSONTypeFormat.StringFormat = .byte
-        let binary: JSONTypeFormat.StringFormat = .binary
         let date: JSONTypeFormat.StringFormat = .date
         let dateTime: JSONTypeFormat.StringFormat = .dateTime
         let password: JSONTypeFormat.StringFormat = .password
-        let uuid: JSONTypeFormat.StringFormat = .extended(.uuid)
+        let uuid: JSONTypeFormat.StringFormat = .uuid
         let other: JSONTypeFormat.StringFormat = .other("moontalk")
 
         let formatStrings = [
-            byte,
-            binary,
             date,
             dateTime,
             password,

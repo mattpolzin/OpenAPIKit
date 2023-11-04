@@ -121,6 +121,108 @@ public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable,
     var jsonType: JSONType { get }
 }
 
+/// These are just the OpenAPIFormats that are specific to this module; there are shared
+/// formats in OpenAPIKitCore/Shared/JSONTypeFormat.swift as well.
+extension JSONTypeFormat {
+    /// The allowed "format" properties for `.string` schemas.
+    public enum StringFormat: RawRepresentable, Equatable {
+        case generic
+        case date
+        /// A string instance is valid against this attribute if it is a valid
+        /// date representation as defined by
+        /// https://tools.ietf.org/html/rfc3339#section-5.6
+        case dateTime
+        case duration
+        case email
+        case hostname
+        case idnEmail
+        case idnHostname
+        case ipv4
+        case ipv6
+        /// International version of .uri
+        case iri
+        /// International version of .uriReference
+        case iriReference
+        case jsonPointer
+        case password
+        case regex
+        case relativeJsonPointer
+        case time
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uri
+        /// A string instance is valid against this attribute if it is a valid
+        /// URI, according to
+        /// https://tools.ietf.org/html/rfc3986
+        case uriReference
+        case uriTemplate
+        case uuid
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .date: return "date"
+            case .dateTime: return "date-time"
+            case .duration: return "duration"
+            case .email: return "email"
+            case .hostname: return "hostname"
+            case .idnEmail: return "idn-email"
+            case .idnHostname: return "idn-hostname"
+            case .ipv4: return "ipv4"
+            case .ipv6: return "ipv6"
+            case .iri: return "iri"
+            case .iriReference: return "iri-reference"
+            case .jsonPointer: return "json-pointer"
+            case .password: return "password"
+            case .regex: return "regex"
+            case .relativeJsonPointer: return "relative-json-pointer"
+            case .time: return "time"
+            case .uri: return "uri"
+            case .uriReference: return "uri-reference"
+            case .uriTemplate: return "uri-template"
+            case .uuid: return "uuid"
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            case "date": self = .date
+            case "date-time": self = .dateTime
+            case "duration": self = .duration
+            case "email": self = .email
+            case "hostname": self = .hostname
+            case "idn-email": self = .idnEmail
+            case "idn-hostname": self = .idnHostname
+            case "ipv4": self = .ipv4
+            case "ipv6": self = .ipv6
+            case "iri": self = .iri
+            case "iri-reference": self = .iriReference
+            case "json-pointer": self = .jsonPointer
+            case "password": self = .password
+            case "regex": self = .regex
+            case "relative-json-pointer": self = .relativeJsonPointer
+            case "time": self = .time
+            case "uri": self = .uri
+            case "uri-reference": self = .uriReference
+            case "uri-template": self = .uriTemplate
+            case "uuid": self = .uuid
+            default: self = .other(rawValue)
+            }
+        }
+
+        public typealias SwiftType = String
+
+        public static var unspecified: StringFormat {
+            return .generic
+        }
+    }
+}
+
 /// A format used when no type is known or any type is allowed.
 ///
 /// There are no built-in formats that do not have an associated

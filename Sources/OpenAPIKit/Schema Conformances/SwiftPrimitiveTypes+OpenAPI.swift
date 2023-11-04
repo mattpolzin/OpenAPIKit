@@ -73,12 +73,12 @@ extension Int64: OpenAPISchemaType {
 
 extension URL: OpenAPISchemaType {
     public static var openAPISchema: JSONSchema {
-        .string(format: .extended(.uri))
+        .string(format: .uri)
     }
 }
 
 extension UUID: OpenAPISchemaType {
     public static var openAPISchema: JSONSchema {
-        .string(format: .extended(.uuid))
+        .string(format: .uuid)
     }
 }

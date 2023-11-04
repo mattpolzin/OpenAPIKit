@@ -53,5 +53,4 @@ public extension JSONTypeFormat {
     typealias ArrayFormat = OpenAPIKitCore.Shared.ArrayFormat
     typealias NumberFormat = OpenAPIKitCore.Shared.NumberFormat
     typealias IntegerFormat = OpenAPIKitCore.Shared.IntegerFormat
-    typealias StringFormat = OpenAPIKitCore.Shared.StringFormat
 }

@@ -115,6 +115,81 @@ public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable,
     var jsonType: JSONType { get }
 }
 
+/// These are just the OpenAPIFormats that are specific to this module; there are shared
+/// formats in OpenAPIKitCore/Shared/JSONTypeFormat.swift as well.
+extension JSONTypeFormat {
+    /// The allowed "format" properties for `.string` schemas.
+    public enum StringFormat: RawRepresentable, Equatable {
+        case generic
+        case byte
+        case binary
+        case date
+        /// A string instance is valid against this attribute if it is a valid
+        /// date representation as defined by
+        /// https://tools.ietf.org/html/rfc3339#section-5.6
+        case dateTime
+        case password
+        case other(String)
+
+        public var rawValue: String {
+            switch self {
+            case .generic: return ""
+            case .byte: return "byte"
+            case .binary: return "binary"
+            case .date: return "date"
+            case .dateTime: return "date-time"
+            case .password: return "password"
+            case .other(let other):
+                return other
+            }
+        }
+
+        public init(rawValue: String) {
+            switch rawValue {
+            case "": self = .generic
+            case "byte": self = .byte
+            case "binary": self = .binary
+            case "date": self = .date
+            case "date-time": self = .dateTime
+            case "password": self = .password
+            default: self = .other(rawValue)
+            }
+        }
+
+        public typealias SwiftType = String
+
+        public static var unspecified: StringFormat {
+            return .generic
+        }
+    }
+}
+
+extension JSONTypeFormat.StringFormat {
+
+    /// Popular non-standard "format" properties for `.string` schemas.
+    ///
+    /// Specify with e.g. `.string(format: .extended(.uuid))`
+    public enum Extended: String, Equatable {
+        case uuid = "uuid"
+        case email = "email"
+        case hostname = "hostname"
+        case ipv4 = "ipv4"
+        case ipv6 = "ipv6"
+            /// A string instance is valid against this attribute if it is a valid
+            /// URI, according to
+            /// https://tools.ietf.org/html/rfc3986
+        case uri = "uri"
+            /// A string instance is valid against this attribute if it is a valid
+            /// URI, according to
+            /// https://tools.ietf.org/html/rfc3986
+        case uriReference = "uriref"
+    }
+
+    public static func extended(_ format: Extended) -> Self {
+        return .other(format.rawValue)
+    }
+}
+
 /// A format used when no type is known or any type is allowed.
 ///
 /// There are no built-in formats that do not have an associated
