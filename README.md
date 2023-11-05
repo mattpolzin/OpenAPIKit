@@ -21,7 +21,7 @@ The single most confusing thing you will grapple with out of the gate is explain
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
   - [Validating OpenAPI Documents](#validating-openapi-documents)
-  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-3.0.x-documents)
+  - [Supporting OpenAPI 3.0.x Documents](#supporting-openapi-30x-documents)
   - [A note on dictionary ordering](#a-note-on-dictionary-ordering)
   - [OpenAPI Document structure](#openapi-document-structure)
     - [Document Root](#document-root)
@@ -71,11 +71,11 @@ import OpenAPIKit30
 import OpenAPIKit
 ```
 
-It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-3.0.x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
+It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-30x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
 
 ### Decoding OpenAPI Documents
 
-Most documentation will focus on what it looks like to work with the `OpenAPIKit` module and OpenAPI 3.1.x documents. If you need to support OpenAPI 3.0.x documents, take a look at the section on [supporting OpenAPI 3.0.x documents](#supporting-openapi-3.0.x-documents) before you get too deep into this library's docs.
+Most documentation will focus on what it looks like to work with the `OpenAPIKit` module and OpenAPI 3.1.x documents. If you need to support OpenAPI 3.0.x documents, take a look at the section on [supporting OpenAPI 3.0.x documents](#supporting-openapi-30x-documents) before you get too deep into this library's docs.
 
 You can decode a JSON OpenAPI document (i.e. using the `JSONDecoder` from **Foundation** library) or a YAML OpenAPI document (i.e. using the `YAMLDecoder` from the [**Yams**](https://github.com/jpsim/Yams) library) with the following code:
 ```swift
