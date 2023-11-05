@@ -473,15 +473,25 @@ extension JSONSchema.StringContext {
         if let conflict = conflicting(pattern, other.pattern) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "pattern", original: conflict.0, new: conflict.1))
         }
+        if let conflict = conflicting(contentMediaType, other.contentMediaType) {
+            throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "contentMediaType", original: conflict.0.rawValue, new: conflict.1.rawValue))
+        }
+        if let conflict = conflicting(contentEncoding, other.contentEncoding) {
+            throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "contentEncoding", original: conflict.0.rawValue, new: conflict.1.rawValue))
+        }
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxLength = maxLength ?? other.maxLength
         let newMinLength = Self._minLength(self) ?? Self._minLength(other)
         let newPattern = pattern ?? other.pattern
+        let newContentMediaType = contentMediaType ?? other.contentMediaType
+        let newContentEncoding = contentEncoding ?? other.contentEncoding
         return .init(
             maxLength: newMaxLength,
             minLength: newMinLength,
-            pattern: newPattern
+            pattern: newPattern,
+            contentMediaType: newContentMediaType,
+            contentEncoding: newContentEncoding
         )
     }
 }
@@ -660,7 +670,9 @@ extension JSONSchema.StringContext {
         return .init(
             maxLength: maxLength,
             minLength: Self._minLength(self),
-            pattern: pattern
+            pattern: pattern,
+            contentMediaType: contentMediaType,
+            contentEncoding: contentEncoding
         )
     }
 }

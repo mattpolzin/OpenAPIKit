@@ -471,6 +471,12 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme: To31 {
     }
 }
 
+extension OpenAPIKit30.JSONTypeFormat.StringFormat: To31 {
+    fileprivate func to31() -> OpenAPIKit.JSONTypeFormat.StringFormat {
+        .init(rawValue: rawValue)
+    }
+}
+
 extension OpenAPIKit30.JSONTypeFormat: To31 {
     fileprivate func to31() -> OpenAPIKit.JSONTypeFormat {
         switch self {
@@ -485,7 +491,7 @@ extension OpenAPIKit30.JSONTypeFormat: To31 {
         case .integer(let f):
             return .integer(f)
         case .string(let f):
-            return .string(f)
+            return .string(f.to31())
         }
     }
 }
@@ -494,6 +500,25 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
     fileprivate func to31() -> OpenAPIKit.JSONSchema.CoreContext<Format> {
         OpenAPIKit.JSONSchema.CoreContext<Format>(
             format: format,
+            required: `required`,
+            nullable: nullable,
+            permissions: permissions,
+            deprecated: deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs?.to31(),
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            examples: [example].compactMap { $0 }
+        )
+    }
+}
+
+extension OpenAPIKit30.JSONSchema.CoreContext where Format == OpenAPIKit30.JSONTypeFormat.StringFormat {
+    fileprivate func to31() -> OpenAPIKit.JSONSchema.CoreContext<OpenAPIKit.JSONTypeFormat.StringFormat> {
+        OpenAPIKit.JSONSchema.CoreContext<OpenAPIKit.JSONTypeFormat.StringFormat>(
+            format: format.to31(),
             required: `required`,
             nullable: nullable,
             permissions: permissions,
@@ -551,12 +576,20 @@ extension OpenAPIKit30.JSONSchema.ObjectContext: To31 {
     }
 }
 
-extension OpenAPIKit30.JSONSchema.StringContext: To31 {
-    fileprivate func to31() -> OpenAPIKit.JSONSchema.StringContext {
-        OpenAPIKit.JSONSchema.StringContext(
+extension OpenAPIKit30.JSONSchema.StringContext {
+    fileprivate func to31(format: OpenAPIKit30.JSONTypeFormat.StringFormat) -> OpenAPIKit.JSONSchema.StringContext {
+        let contentEncoding: OpenAPIKit.OpenAPI.ContentEncoding?
+        switch format {
+            case .byte: contentEncoding = .base64
+            case .binary: contentEncoding = .binary
+            default: contentEncoding = nil
+        }
+
+        return OpenAPIKit.JSONSchema.StringContext(
             maxLength: maxLength,
             minLength: OpenAPIKit30.JSONSchema.StringContext._minLength(self),
-            pattern: pattern
+            pattern: pattern,
+            contentEncoding: contentEncoding
         )
     }
 }
@@ -573,7 +606,7 @@ extension OpenAPIKit30.JSONSchema: To31 {
         case .integer(let core, let integral):
             schema = .integer(core.to31(), integral.to31())
         case .string(let core, let stringy):
-            schema = .string(core.to31(), stringy.to31())
+            schema = .string(core.to31(), stringy.to31(format: core.format))
         case .object(let core, let objective):
             schema = .object(core.to31(), objective.to31())
         case .array(let core, let listy):
