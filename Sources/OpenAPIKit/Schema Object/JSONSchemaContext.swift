@@ -691,7 +691,7 @@ extension JSONSchema {
 }
 
 extension OpenAPI {
-    /// An encoding, as specified in RFC 2054, part 6.1 and RFC 4648.
+    /// An encoding, as specified in RFC 2045, part 6.1 and RFC 4648.
     public enum ContentEncoding: String, Codable {
         case _7bit = "7bit"
         case _8bit = "8bit"
