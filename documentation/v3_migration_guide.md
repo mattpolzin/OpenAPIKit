@@ -163,8 +163,24 @@ When a `JSONSchema` only has one `allowedValue`, it will now be encoded as `cons
 
 The `JSONSchema` type's `coreContext` accessor now gives a non-optional value because all cases have a `CoreContext`. The compiler will let you know where you need to stop handling it as Optional.
 
+#### JSONSchema StringFormat differences
+There is no longer `.extended` formats for `.string` JSON Schemas. Instead, all existing `.extended` formats are now just regular .`string` formats (e.g. you can just replace `.extended(.uuid)` with `.uuid`).
+
+There are no longer `.byte` or `.binary` formats for `.string` JSON Schemas. Instead, use the `contentEncoding`s of `.base64` and `.binary`, respectively.
+
+The `.uriReference` `.extended` JSON Schema `.string` format used to serialize to `uriref` whereas the new `.uriReference` JSON Schema `.string` format serializes to `uri-reference`, per the JSON Schema standard.
+
 #### ContentType differences
 `ContentType` changed from an `enum` to a `struct`. Equality checks for all of the previous enum's cases will still work against the new static constructors on the struct, but switch statements will no longer be possible.
+
+The following ContentTypes have been added as builtins (you can use static functions on the `ContentType` type to construct these content types):
+  - `.avi`
+  - `.aac`
+  - `.doc`
+  - `.docx`
+  - `.gif`
+
+This also means that if you have previously constructed these media types yourself (e.g. `.other("image/gif")`), those custom types will not compare as equal to the new builtin types. You may find use in comparing the `.rawValue` of such content types instead if you want two content types to be equal as long as their string serializations are the same.  
 
 #### Response.StatusCode differences
 `Response.StatusCode` changed from an `enum` to a `struct`. For most code, use will not change, but if you switch over any values of this type your code will need to change to switch over the `StatusCode` `value` property instead.
