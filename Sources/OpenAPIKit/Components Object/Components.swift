@@ -5,12 +5,13 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "Components Object".
     ///
-    /// See [OpenAPI Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#components-object).
+    /// See [OpenAPI Components Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#components-object).
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
@@ -23,8 +24,10 @@ extension OpenAPI {
         public var requestBodies: ComponentDictionary<Request>
         public var headers: ComponentDictionary<Header>
         public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var callbacks: ComponentDictionary<Callbacks>
         public var links: ComponentDictionary<Link>
+        public var callbacks: ComponentDictionary<Callbacks>
+      
+        public var pathItems: ComponentDictionary<PathItem>
 
         /// Dictionary of vendor extensions.
         ///
@@ -43,6 +46,7 @@ extension OpenAPI {
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
             links: ComponentDictionary<Link> = [:],
             callbacks: ComponentDictionary<Callbacks> = [:],
+            pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.schemas = schemas
@@ -54,6 +58,7 @@ extension OpenAPI {
             self.securitySchemes = securitySchemes
             self.links = links
             self.callbacks = callbacks
+            self.pathItems = pathItems
             self.vendorExtensions = vendorExtensions
         }
 
@@ -75,64 +80,6 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI {
-    /// A key for one of the component dictionaries.
-    ///
-    /// These keys must match the regex
-    /// `^[a-zA-Z0-9\.\-_]+$`.
-    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable, StringConvertibleHintProvider {
-        public let rawValue: String
-
-        public init(stringLiteral value: StringLiteralType) {
-            self.rawValue = value
-        }
-
-        public init?(rawValue: String) {
-            guard !rawValue.isEmpty else {
-                return nil
-            }
-            var allowedCharacters = CharacterSet.alphanumerics
-            allowedCharacters.insert(charactersIn: "-_.")
-            guard CharacterSet(charactersIn: rawValue).isSubset(of: allowedCharacters) else {
-                return nil
-            }
-            self.rawValue = rawValue
-        }
-
-        public static func problem(with proposedString: String) -> String? {
-            if Self(rawValue: proposedString) == nil {
-                return "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(proposedString)' does not.."
-            }
-            return nil
-        }
-
-        public init(from decoder: Decoder) throws {
-            let rawValue = try decoder.singleValueContainer().decode(String.self)
-            guard let key = Self(rawValue: rawValue) else {
-                throw InconsistencyError(
-                    subjectName: "Component Key",
-                    details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
-                    codingPath: decoder.codingPath
-                )
-            }
-            self = key
-        }
-
-        public func encode(to encoder: Encoder) throws {
-            var container = encoder.singleValueContainer()
-
-            // we check for consistency on encode because a string literal
-            // may result in an invalid component key being constructed.
-            guard Self(rawValue: rawValue) != nil else {
-                throw InconsistencyError(
-                    subjectName: "Component Key",
-                    details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
-                    codingPath: container.codingPath
-                )
-            }
-
-            try container.encode(rawValue)
-        }
-    }
 
     public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
 }
@@ -177,6 +124,10 @@ extension OpenAPI.Components: Encodable {
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
         }
+      
+        if !pathItems.isEmpty {
+            try container.encode(pathItems, forKey: .pathItems)
+        }
 
         try encodeExtensions(to: &container)
     }
@@ -210,6 +161,8 @@ extension OpenAPI.Components: Decodable {
             links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+          
+            pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
@@ -236,6 +189,7 @@ extension OpenAPI.Components {
         case securitySchemes
         case links
         case callbacks
+        case pathItems
 
         case extended(String)
 
@@ -249,7 +203,8 @@ extension OpenAPI.Components {
                 .headers,
                 .securitySchemes,
                 .links,
-                .callbacks
+                .callbacks,
+                .pathItems
             ]
         }
 
@@ -277,6 +232,8 @@ extension OpenAPI.Components {
                 self = .links
             case "callbacks":
                 self = .callbacks
+            case "pathItems":
+                self = .pathItems
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -302,6 +259,8 @@ extension OpenAPI.Components {
                 return "links"
             case .callbacks:
                 return "callbacks"
+            case .pathItems:
+                return "pathItems"
             case .extended(let key):
                 return key
             }

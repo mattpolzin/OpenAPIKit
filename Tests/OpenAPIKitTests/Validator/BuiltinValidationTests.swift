@@ -10,6 +10,7 @@ import XCTest
 import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
+
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -21,10 +22,14 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.documentContainsPaths)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
-            XCTAssertEqual(error?.values.count, 1)
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.map { $0.stringValue }, [])
+            XCTAssertEqual(errorCollection?.values.count, 1)
+
+            let openAPIError = OpenAPI.Error(from: error)
+            XCTAssertEqual(openAPIError.localizedDescription, "Failed to satisfy: Document contains at least one path at root of document")
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
         }
     }
 
@@ -312,6 +317,146 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.serverVariablesAreDefined)
         try document.validate(using: validator)
     }
+    
+    func test_serverVariableEnumIsValidFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: [],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's enum is either not defined or is non-empty (if defined).")
+        }
+    }
+    
+    func test_serverVariableEnumIsValidSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        try document.validate(using: validator)
+    }
+    
+    func test_serverVariableDefaultExistsInEnumFails() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "random",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's default must exist in enum, if enum is defined.")
+        }
+    }
+    
+    func test_serverVariableDefaultExistsInEnumSucceeds() throws {
+        let server = OpenAPI.Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["one", "two"],
+                    default: "one",
+                    description: "hello enum",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+        )
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [server],
+            paths: [:],
+            components: .noComponents
+        )
+        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        try document.validate(using: validator)
+    }
+
+    func test_noResponsesOnOperationFails() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get"])
+        }
+    }
+
+    func test_oneResponseOnOperationSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(responses: [
+                        200: .response(description: "hi")
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.operationsContainResponses)
+        try document.validate(using: validator)
+    }
 
     func test_duplicateTagOnDocumentFails() {
         let document = OpenAPI.Document(
@@ -337,44 +482,6 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents,
             tags: ["hello", "world"]
-        )
-
-        // NOTE this is part of default validation
-        try document.validate()
-    }
-
-    func test_noResponsesOnOperationFails() {
-        let document = OpenAPI.Document(
-            info: .init(title: "test", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    get: .init(responses: [:])
-                )
-            ],
-            components: .noComponents
-        )
-
-        // NOTE this is part of default validation
-        XCTAssertThrowsError(try document.validate()) { error in
-            let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Operations contain at least one response")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world", "get", "responses"])
-        }
-    }
-
-    func test_oneResponseOnOperationSucceeds() throws {
-        let document = OpenAPI.Document(
-            info: .init(title: "test", version: "1.0"),
-            servers: [],
-            paths: [
-                "/hello/world": .init(
-                    get: .init(responses: [
-                        200: .response(description: "hi")
-                    ])
-                )
-            ],
-            components: .noComponents
         )
 
         // NOTE this is part of default validation
@@ -631,7 +738,8 @@ final class BuiltinValidationTests: XCTestCase {
                                 ]
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1"))
-                        ]
+                        ],
+                        links: ["linky": .reference(.component(named: "link1"))]
                     )
                 ]
             )
@@ -641,7 +749,8 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": path
+                "/hello": .pathItem(path),
+                "/world": .reference(.component(named: "path1"))
             ],
             components: .noComponents
         )
@@ -649,7 +758,7 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE this is part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.count, 6)
+            XCTAssertEqual(error?.values.count, 8)
             XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
             XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")
             XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
@@ -662,6 +771,10 @@ final class BuiltinValidationTests: XCTestCase {
             XCTAssertEqual(error?.values[4].codingPathString, ".paths['/hello'].get.responses.404.content['application/json'].examples.example1")
             XCTAssertEqual(error?.values[5].reason, "Failed to satisfy: JSONSchema reference can be found in components/schemas")
             XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].get.responses.404.content['application/xml'].schema")
+            XCTAssertEqual(error?.values[6].reason, "Failed to satisfy: Link reference can be found in components/links")
+            XCTAssertEqual(error?.values[6].codingPathString, ".paths['/hello'].get.responses.404.links.linky")
+            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: PathItem reference can be found in components/pathItems")
+            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/world']")
         }
     }
 
@@ -698,6 +811,10 @@ final class BuiltinValidationTests: XCTestCase {
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
+                        ],
+                        links: [
+                            "linky": .reference(.component(named: "link1")),
+                            "linky2": .reference(.external(URL(string: "https://linky.com")!))
                         ]
                     )
                 ]
@@ -708,7 +825,9 @@ final class BuiltinValidationTests: XCTestCase {
             info: .init(title: "test", version: "1.0"),
             servers: [],
             paths: [
-                "/hello": path
+                "/hello": .pathItem(path),
+                "/world": .reference(.component(named: "path1")),
+                "/external": .reference(.external(URL(string: "https://other-world.com")!))
             ],
             components: .init(
                 schemas: [
@@ -728,6 +847,12 @@ final class BuiltinValidationTests: XCTestCase {
                 ],
                 headers: [
                     "header1": .init(schema: .string)
+                ],
+                links: [
+                    "link1": .init(operationId: "op 1")
+                ],
+                pathItems: [
+                    "path1": .init()
                 ]
             )
         )

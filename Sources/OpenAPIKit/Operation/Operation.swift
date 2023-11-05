@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
-    /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object).
     public struct Operation: Equatable, CodableVendorExtendable {
         public var tags: [String]?
         public var summary: String?
@@ -25,7 +27,7 @@ extension OpenAPI {
         /// `document.components` to resolve one of these entries to
         /// an `OpenAPI.Parameter`.
         public var parameters: Parameter.Array
-        public var requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>?
+        public var requestBody: Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>?
 
         /// The possible responses for this operation, keyed by status code.
         ///
@@ -40,15 +42,15 @@ extension OpenAPI {
         ///
         /// **Example:**
         ///
-        ///     let firstResponse: (OpenAPI.Response.StatusCode, Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>)
+        ///     let firstResponse: (OpenAPI.Response.StatusCode, Either<OpenAPI.Reference<OpenAPI.Response>, OpenAPI.Response>)
         ///     firstResponse = operation.responses[0]!
         ///
         ///     // literally documented as "200" status code:
-        ///     let successResponse: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ///     let successResponse: Either<OpenAPI.Reference<OpenAPI.Response>, OpenAPI.Response>
         ///     successResponse = operation.responses[status: 200]!
         ///
         ///     // documented as "2XX" status code:
-        ///     let successResponse2: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        ///     let successResponse2: Either<OpenAPI.Reference<OpenAPI.Response>, OpenAPI.Response>
         ///     successResponse2 = operation.responses[.range(.success)]!
         ///
         /// If you want to access the response (assuming it is inlined) you need to grab
@@ -110,7 +112,7 @@ extension OpenAPI {
 
         // allowing Request Body reference
         /// Create an Operation with a request body specified by an
-        /// `Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>`.
+        /// `Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>`.
         public init(
             tags: [String]? = nil,
             summary: String? = nil,
@@ -118,7 +120,7 @@ extension OpenAPI {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             operationId: String? = nil,
             parameters: Parameter.Array = [],
-            requestBody: Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>,
+            requestBody: Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>,
             responses: OpenAPI.Response.Map,
             callbacks: OpenAPI.CallbacksMap = [:],
             deprecated: Bool = false,
@@ -215,11 +217,11 @@ extension OpenAPI.Operation {
     /// status code and a response.
     public struct ResponseOutcome: Equatable {
         public let status: OpenAPI.Response.StatusCode
-        public let response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+        public let response: Either<OpenAPI.Reference<OpenAPI.Response>, OpenAPI.Response>
 
         public init(
             status: OpenAPI.Response.StatusCode,
-            response: Either<JSONReference<OpenAPI.Response>, OpenAPI.Response>
+            response: Either<OpenAPI.Reference<OpenAPI.Response>, OpenAPI.Response>
         ) {
             self.status = status
             self.response = response
@@ -232,6 +234,24 @@ extension OpenAPI.Operation {
     ///     and the response for the status.
     public var responseOutcomes: [ResponseOutcome] {
         return responses.map { (status, response) in .init(status: status, response: response) }
+    }
+}
+
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.Operation: OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Operation {
+        guard let summary = summary else { return self }
+        var operation = self
+        operation.summary = summary
+        return operation
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.Operation {
+        guard let description = description else { return self }
+        var operation = self
+        operation.description = description
+        return operation
     }
 }
 
@@ -253,7 +273,9 @@ extension OpenAPI.Operation: Encodable {
 
         try container.encodeIfPresent(requestBody, forKey: .requestBody)
 
-        try container.encode(responses, forKey: .responses)
+        if !responses.isEmpty {
+            try container.encode(responses, forKey: .responses)
+        }
 
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
@@ -290,9 +312,9 @@ extension OpenAPI.Operation: Decodable {
 
             parameters = try container.decodeIfPresent(OpenAPI.Parameter.Array.self, forKey: .parameters) ?? []
 
-            requestBody = try container.decodeIfPresent(Either<JSONReference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
+            requestBody = try container.decodeIfPresent(Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>.self, forKey: .requestBody)
 
-            responses = try container.decode(OpenAPI.Response.Map.self, forKey: .responses)
+            responses = try container.decodeIfPresent(OpenAPI.Response.Map.self, forKey: .responses) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.CallbacksMap.self, forKey: .callbacks) ?? [:]
 

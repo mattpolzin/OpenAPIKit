@@ -271,44 +271,28 @@ extension PathItemTests {
             """
             {
               "delete" : {
-                "responses" : {
 
-                }
               },
               "get" : {
-                "responses" : {
 
-                }
               },
               "head" : {
-                "responses" : {
 
-                }
               },
               "options" : {
-                "responses" : {
 
-                }
               },
               "patch" : {
-                "responses" : {
 
-                }
               },
               "post" : {
-                "responses" : {
 
-                }
               },
               "put" : {
-                "responses" : {
 
-                }
               },
               "trace" : {
-                "responses" : {
 
-                }
               }
             }
             """
@@ -320,44 +304,20 @@ extension PathItemTests {
         """
         {
           "delete" : {
-            "responses" : {
-
-            }
           },
           "get" : {
-            "responses" : {
-
-            }
           },
           "head" : {
-            "responses" : {
-
-            }
           },
           "options" : {
-            "responses" : {
-
-            }
           },
           "patch" : {
-            "responses" : {
-
-            }
           },
           "post" : {
-            "responses" : {
-
-            }
           },
           "put" : {
-            "responses" : {
-
-            }
           },
           "trace" : {
-            "responses" : {
-
-            }
           }
         }
         """.data(using: .utf8)!
@@ -420,7 +380,8 @@ extension PathItemTests {
     func test_pathItemMap_encode() throws {
         let map: OpenAPI.PathItem.Map = [
             "/hello/world": .init(),
-            "hi/there": .init()
+            "hi/there": .init(),
+            "/reference/": .reference(.component(named: "pathRef"))
         ]
 
         let encodedMap = try orderUnstableTestStringFromEncoding(of: map)
@@ -434,6 +395,9 @@ extension PathItemTests {
               },
               "\\/hi\\/there" : {
 
+              },
+              "\\/reference\\/" : {
+                "$ref" : "#\\/components\\/pathItems\\/pathRef"
               }
             }
             """
@@ -449,6 +413,9 @@ extension PathItemTests {
           },
           "\\/hi\\/there" : {
 
+          },
+          "\\/reference\\/" : {
+            "$ref" : "#\\/components\\/pathItems\\/pathRef"
           }
         }
         """.data(using: .utf8)!
@@ -459,7 +426,8 @@ extension PathItemTests {
             map,
             [
                 "/hello/world": .init(),
-                "/hi/there": .init()
+                "/hi/there": .init(),
+                "/reference/": .reference(.component(named: "pathRef"))
             ]
         )
     }

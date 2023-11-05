@@ -44,7 +44,7 @@ final class DocumentErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Could not parse `openapi` in the root Document object.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value null.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "openapi"
             ])
@@ -92,7 +92,7 @@ final class DocumentErrorTests: XCTestCase {
     func test_missingInfo() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         paths: {}
         """
 
@@ -108,7 +108,7 @@ final class DocumentErrorTests: XCTestCase {
     func test_wrongTypesInfo() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info: null
         paths: {}
         """
@@ -125,7 +125,7 @@ final class DocumentErrorTests: XCTestCase {
 
         let documentYML2 =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info: []
         paths: {}
         """
@@ -144,7 +144,7 @@ final class DocumentErrorTests: XCTestCase {
     func test_missingTitleInsideInfo() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info: {}
         paths: {}
         """
@@ -163,7 +163,7 @@ final class DocumentErrorTests: XCTestCase {
     func test_missingNameInsideSecondTag() {
         let documentYML =
         """
-        openapi: "3.0.0"
+        openapi: "3.1.0"
         info:
             title: test
             version: 1.0

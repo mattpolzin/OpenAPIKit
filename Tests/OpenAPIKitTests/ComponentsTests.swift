@@ -118,8 +118,11 @@ final class ComponentsTests: XCTestCase {
             ],
             callbacks: [
                 "nine": [
-                    OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                    OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
                 ]
+            ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [:]))
             ]
         )
 
@@ -132,6 +135,7 @@ final class ComponentsTests: XCTestCase {
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
         let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Link.self)
         let ref9 = try components.reference(named: "nine", ofType: OpenAPI.Callbacks.self)
+        let ref10 = try components.reference(named: "ten", ofType: OpenAPI.PathItem.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
@@ -144,9 +148,10 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(
             components[ref9],
             [
-                OpenAPI.CallbackURL(rawValue: "{$url}")!: OpenAPI.PathItem(post: .init(responses: [:]))
+                OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
             ]
         )
+        XCTAssertEqual(components[ref10], .init(get: .init(responses: [:])))
     }
 
     func test_subscriptLookup() throws {
@@ -156,7 +161,7 @@ final class ComponentsTests: XCTestCase {
             ]
         )
 
-        let schemas: [Either<JSONReference<JSONSchema>, JSONSchema>] = [
+        let schemas: [Either<OpenAPI.Reference<JSONSchema>, JSONSchema>] = [
             .schema(.string),
             .reference(.component(named: "hello")),
             .reference(.component(named: "not_there"))
@@ -177,26 +182,36 @@ final class ComponentsTests: XCTestCase {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .boolean
+            ],
+            links: [
+                "linky": .init(operationId: "op 1")
             ]
         )
 
-        let schema1: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "hello"))
+        let schema1: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.component(named: "hello"))
 
         let resolvedSchema = try components.lookup(schema1)
 
         XCTAssertEqual(resolvedSchema, .boolean)
 
-        let schema2: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
+        let schema2: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.component(named: "not_there"))
 
         XCTAssertThrowsError(try components.lookup(schema2)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "not_there", key: "schemas"))
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'not_there' was not found in schemas.")
         }
 
-        let schema3: Either<JSONReference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
+        let schema3: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = .reference(.external(URL(string: "https://hi.com/hi.json#/hello/world")!))
 
         XCTAssertThrowsError(try components.lookup(schema3)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .cannotLookupRemoteReference)
+        }
+
+        let link1: Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "hello"))
+
+        XCTAssertThrowsError(try components.lookup(link1)) { error in
+            XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "hello", key: "links"))
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'hello' was not found in links.")
         }
 
         let reference1: JSONReference<JSONSchema> = .component(named: "hello")
@@ -288,16 +303,21 @@ extension ComponentsTests {
             ],
             callbacks: [
                 "nine": [
-                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                        post: .init(
-                            responses: [
-                                200: .response(
-                                    description: "callback successfully processed"
-                                )
-                            ]
+                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                        .init(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
                         )
                     )
                 ]
+            ],
+            pathItems: [
+                "ten": .init(get: .init(responses: [200: .response(description: "response")]))
             ],
             vendorExtensions: ["x-specialFeature": ["hello", "world"]]
         )
@@ -345,6 +365,17 @@ extension ComponentsTests {
                   },
                   "in" : "query",
                   "name" : "hi"
+                }
+              },
+              "pathItems" : {
+                "ten" : {
+                  "get" : {
+                    "responses" : {
+                      "200" : {
+                        "description" : "response"
+                      }
+                    }
+                  }
                 }
               },
               "requestBodies" : {
@@ -422,6 +453,17 @@ extension ComponentsTests {
               "name" : "hi"
             }
           },
+          "pathItems" : {
+            "ten" : {
+              "get" : {
+                "responses" : {
+                  "200" : {
+                    "description" : "response"
+                  }
+                }
+              }
+            }
+          },
           "requestBodies" : {
             "five" : {
               "content" : {
@@ -483,16 +525,21 @@ extension ComponentsTests {
                 ],
                 callbacks: [
                     "nine": [
-                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: OpenAPI.PathItem(
-                            post: .init(
-                                responses: [
-                                    200: .response(
-                                        description: "callback successfully processed"
-                                    )
-                                ]
+                        OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                            .init(
+                                post: .init(
+                                    responses: [
+                                        200: .response(
+                                            description: "callback successfully processed"
+                                        )
+                                    ]
+                                )
                             )
                         )
                     ]
+                ],
+                pathItems: [
+                    "ten": .init(get: .init(responses: [200: .response(description: "response")]))
                 ],
                 vendorExtensions: ["x-specialFeature": ["hello", "world"]]
             )
@@ -516,6 +563,117 @@ extension ComponentsTests {
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
     }
+}
+
+// MARK: PathItems
+
+extension ComponentsTests {
+  
+  func test_pathItems_encode() throws {
+      let op = OpenAPI.Operation(responses: [:])
+      let t1 = OpenAPI.Components(
+        pathItems: [
+          "path-test" : .init(
+            get: op,
+            put: op,
+            post: op,
+            delete: op,
+            options: op,
+            head: op,
+            patch: op,
+            trace: op
+          )
+        ]
+      )
+
+      let encoded = try orderUnstableTestStringFromEncoding(of: t1)
+
+      assertJSONEquivalent(
+          encoded,
+          """
+          {
+            "pathItems" : {
+              "path-test" : {
+                "delete" : {
+
+                },
+                "get" : {
+
+                },
+                "head" : {
+
+                },
+                "options" : {
+
+                },
+                "patch" : {
+
+                },
+                "post" : {
+
+                },
+                "put" : {
+
+                },
+                "trace" : {
+
+                }
+              }
+            }
+          }
+          """
+      )
+  }
+
+  func test_pathItems_decode() throws {
+      let t1 =
+      """
+          {
+            "pathItems" : {
+              "path-test" : {
+                "delete" : {
+                },
+                "get" : {
+                },
+                "head" : {
+                },
+                "options" : {
+                },
+                "patch" : {
+                },
+                "post" : {
+                },
+                "put" : {
+                },
+                "trace" : {
+                }
+              }
+            }
+          }
+      """.data(using: .utf8)!
+
+      let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
+      let op = OpenAPI.Operation(responses: [:])
+
+      XCTAssertEqual(
+          decoded,
+          OpenAPI.Components(
+                  pathItems: [
+                    "path-test" : .init(
+                      get: op,
+                      put: op,
+                      post: op,
+                      delete: op,
+                      options: op,
+                      head: op,
+                      patch: op,
+                      trace: op
+                    )
+                  ]
+                )
+      )
+  }
+  
 }
 
 // MARK: ComponentKey

@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
-    /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#request-body-object).
+    /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#request-body-object).
     public struct Request: Equatable, CodableVendorExtendable {
         public var description: String?
         public var content: Content.Map
@@ -32,6 +34,16 @@ extension OpenAPI {
             self.required = required
             self.vendorExtensions = vendorExtensions
         }
+    }
+}
+
+// MARK: - Describable
+extension OpenAPI.Request : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Request {
+        guard let description = description else { return self }
+        var request = self
+        request.description = description
+        return request
     }
 }
 

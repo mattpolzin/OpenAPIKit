@@ -16,7 +16,7 @@ final class SchemaFragmentTests: XCTestCase {
             XCTAssertEqual(fragment.deprecated, false, file: (file), line: line)
             XCTAssertNil(fragment.description, file: (file), line: line)
             XCTAssertNil(fragment.discriminator, file: (file), line: line)
-            XCTAssertNil(fragment.example, file: (file), line: line)
+            XCTAssertTrue(fragment.examples.isEmpty, file: (file), line: line)
             XCTAssertNil(fragment.externalDocs, file: (file), line: line)
             XCTAssertEqual(fragment.formatString ?? "", "", file: (file), line: line)
             XCTAssertEqual(fragment.nullable, false, file: (file), line: line)
@@ -38,7 +38,7 @@ final class SchemaFragmentTests: XCTestCase {
             XCTAssertEqual(fragment.deprecated, properties.deprecated, file: (file), line: line)
             XCTAssertEqual(fragment.description, properties.description, file: (file), line: line)
             XCTAssertEqual(fragment.discriminator, properties.discriminator, file: (file), line: line)
-            XCTAssertEqual(fragment.example, properties.example, file: (file), line: line)
+            XCTAssertEqual(fragment.examples, properties.examples, file: (file), line: line)
             XCTAssertEqual(fragment.externalDocs, properties.externalDocs, file: (file), line: line)
             XCTAssertEqual(fragment.formatString, properties.formatString, file: (file), line: line)
             XCTAssertEqual(fragment.nullable, properties.nullable, file: (file), line: line)
@@ -48,7 +48,7 @@ final class SchemaFragmentTests: XCTestCase {
         }
 
         // maximal
-        let generalProperties = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(format: .other("date"), nullable: false, permissions: .readWrite, deprecated: false, title: "Date", description: "a date", discriminator: .init(propertyName: "test"), externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], example: "2020-01-01")
+        let generalProperties = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(format: .other("date"), nullable: false, permissions: .readWrite, deprecated: false, title: "Date", description: "a date", discriminator: .init(propertyName: "test"), externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], examples: ["2020-01-01"])
         let t1 = JSONSchema.fragment(generalProperties)
         assertSameGeneralProperties(t1, as: generalProperties)
         let t2 = JSONSchema.integer(generalProperties.transformed(), .init(multipleOf: 10, maximum: (20, exclusive: false), minimum: (0, exclusive: true)))
@@ -144,7 +144,7 @@ final class SchemaFragmentTests: XCTestCase {
 // MARK: - Codable Tests
 extension SchemaFragmentTests {
 
-    func test_decodeFailsWithConflictingProperties() {
+    func test_decodeWarnsWithConflictingProperties() throws {
         let t =
         """
         {
@@ -157,10 +157,18 @@ extension SchemaFragmentTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: t)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `Schema`: A schema contains properties for multiple types of schemas, namely: [\"array\", \"object\"]..")
+        // we are actually at the root path in this test case so the
+        // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+        XCTAssertEqual(warnResult.value, .array(.init(), .init(items: .string)))
     }
 
-    func test_decodeFailsWithTypeAndPropertyConflict() {
+    func test_decodeWarnsWithTypeAndPropertyConflict() throws {
         let t =
         """
         {
@@ -171,7 +179,15 @@ extension SchemaFragmentTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t))
+        let warnResult = try orderUnstableDecode(JSONSchema.self, from: t)
+
+        XCTAssertEqual(warnResult.warnings.count, 1)
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
+        // we are actually at the root path in this test case so the
+        // following should be an empty string!
+        XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
+
+        XCTAssertEqual(warnResult.value, .object(.init(), .init(properties: [:])))
     }
 
     func test_decodeFailsWithIntegerWithFloatingPointMin() {
@@ -186,7 +202,7 @@ extension SchemaFragmentTests {
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t))
     }
 
-    func test_decodeFailsWithInvalidReference() {
+    func test_decodeWarnsWithInvalidReference() throws {
         let t1 =
         """
         {
@@ -202,9 +218,23 @@ extension SchemaFragmentTests {
         }
         """.data(using: .utf8)!
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t1))
+        let warnResult1 = try orderUnstableDecode(JSONSchema.self, from: t1)
 
-        XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: t2))
+        XCTAssertEqual(warnResult1.warnings.count, 1)
+        // NOTE: Not a very informative warning, would like to do better.
+        XCTAssertEqual(warnResult1.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        // we are actually at the root path in this test case so the
+        // following should be an empty string!
+        XCTAssertEqual(warnResult1.warnings.first?.codingPathString, "")
+
+        let warnResult2 = try orderUnstableDecode(JSONSchema.self, from: t2)
+
+        XCTAssertEqual(warnResult2.warnings.count, 1)
+        // NOTE: Not a very informative warning, would like to do better.
+        XCTAssertEqual(warnResult2.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        // we are actually at the root path in this test case so the
+        // following should be an empty string!
+        XCTAssertEqual(warnResult2.warnings.first?.codingPathString, "")
     }
 
     func test_generalEncode() throws {

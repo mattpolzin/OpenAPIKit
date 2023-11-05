@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Operation` type that guarantees
 /// its `parameters`, `requestBody`, `responses`,
 /// and `security` are inlined instead of referenced.
@@ -18,6 +20,9 @@ public struct DereferencedOperation: Equatable {
     public let requestBody: DereferencedRequest?
     /// A dereferenced map of responses.
     public let responses: DereferencedResponse.Map
+    /// A dereferenced map of callbacks.
+    public let callbacks: OpenAPI.DereferencedCallbacksMap
+    
     /// An array of dereferenced security requirements.
     ///
     /// If defined, overrides the security requirements in the
@@ -67,6 +72,12 @@ public struct DereferencedOperation: Equatable {
                 resolvingIn: components,
                 following: references
             )
+        }
+
+        self.callbacks = try operation.callbacks.mapValues { callback in
+            try callback._dereferenced(in: components,
+                                       following: references,
+                                       dereferencedFromComponentNamed: nil)
         }
 
         self.underlyingOperation = operation

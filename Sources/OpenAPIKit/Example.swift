@@ -5,18 +5,20 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
-    /// See [OpenAPI Example Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#example-object).
+    /// See [OpenAPI Example Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#example-object).
     public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?
+
         /// Represents the OpenAPI `externalValue` as a URL _or_
         /// the OpenAPI `value` as `AnyCodable`.
-        public let value: Either<URL, AnyCodable>
+        public let value: Either<URL, AnyCodable>?
 
         /// Dictionary of vendor extensions.
         ///
@@ -28,7 +30,7 @@ extension OpenAPI {
         public init(
             summary: String? = nil,
             description: String? = nil,
-            value: Either<URL, AnyCodable>,
+            value: Either<URL, AnyCodable>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.summary = summary
@@ -40,16 +42,16 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Example {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Example>, OpenAPI.Example>>
+    public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Example>, OpenAPI.Example>>
 }
 
 // MARK: - Either Convenience
-extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example {
+extension Either where A == OpenAPI.Reference<OpenAPI.Example>, B == OpenAPI.Example {
     /// Construct an `Example`.
     public static func example(
         summary: String? = nil,
         description: String? = nil,
-        value: Either<URL, AnyCodable>,
+        value: Either<URL, AnyCodable>? = nil,
         vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
@@ -59,6 +61,30 @@ extension Either where A == JSONReference<OpenAPI.Example>, B == OpenAPI.Example
                 value: value,
                 vendorExtensions: vendorExtensions
             )
+        )
+    }
+}
+
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.Example : OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Example {
+        guard let summary = summary else { return self }
+        return OpenAPI.Example(
+            summary: summary,
+            description: description,
+            value: value,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.Example {
+        guard let description = description else { return self }
+        return OpenAPI.Example(
+            summary: summary,
+            description: description,
+            value: value,
+            vendorExtensions: vendorExtensions
         )
     }
 }
@@ -76,6 +102,8 @@ extension OpenAPI.Example: Encodable {
             try container.encode(url.absoluteURL, forKey: .externalValue)
         case .b(let example):
             try container.encode(example, forKey: .value)
+        case nil:
+            break
         }
 
         try encodeExtensions(to: &container)
@@ -94,13 +122,16 @@ extension OpenAPI.Example: Decodable {
             )
         }
 
-        let externalValue = try container.decodeURLAsStringIfPresent(forKey: .externalValue)
+        if let externalValue = try container.decodeURLAsStringIfPresent(forKey: .externalValue) {
+            value = .a(externalValue)
+        } else if let internalValue = try container.decodeIfPresent(AnyCodable.self, forKey: .value) {
+            value = .b(internalValue)
+        } else {
+            value = nil
+        }
 
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-
-        value = try externalValue.map(Either.init)
-            ?? .init( container.decode(AnyCodable.self, forKey: .value))
 
         vendorExtensions = try Self.extensions(from: decoder)
     }

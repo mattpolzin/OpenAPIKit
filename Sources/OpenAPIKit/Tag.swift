@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
-    /// See [OpenAPI Tag Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#tag-object).
+    /// See [OpenAPI Tag Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#tag-object).
     public struct Tag: Equatable, CodableVendorExtendable {
         public let name: String
         public let description: String?
@@ -38,6 +40,20 @@ extension OpenAPI {
 extension OpenAPI.Tag: ExpressibleByStringLiteral {
     public init(stringLiteral: String) {
         self.init(name: stringLiteral)
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.Tag : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Tag {
+        guard let description = description else { return self }
+        return OpenAPI.Tag(
+            name: name,
+            description: description,
+            externalDocs: externalDocs,
+            vendorExtensions: vendorExtensions
+        )
     }
 }
 

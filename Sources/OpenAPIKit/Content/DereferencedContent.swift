@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/18/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.Content` type that guarantees
 /// its `schema`, `encoding`, and `examples` are
 /// inlined instead of referenced.

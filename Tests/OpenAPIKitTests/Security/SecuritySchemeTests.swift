@@ -32,6 +32,11 @@ final class SecuritySchemeTests: XCTestCase {
             OpenAPI.SecurityScheme(type: .openIdConnect(openIdConnectUrl: URL(string: "https://google.com")!), description: "description"),
             OpenAPI.SecurityScheme.openIdConnect(url: URL(string: "https://google.com")!, description: "description")
         )
+        
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .mutualTLS, description: "description"),
+            OpenAPI.SecurityScheme.mutualTLS(description: "description")
+        )
     }
 
     func test_locallyDereferenced() throws {
@@ -62,6 +67,11 @@ final class SecuritySchemeTests: XCTestCase {
         XCTAssertEqual(
             OpenAPI.SecurityScheme(type: .openIdConnect(openIdConnectUrl: URL(string: "https://google.com")!), description: "description").type.name,
             .openIdConnect
+        )
+        
+        XCTAssertEqual(
+            OpenAPI.SecurityScheme(type: .mutualTLS, description: "description").type.name,
+            .mutualTLS
         )
     }
 }
@@ -344,6 +354,70 @@ extension SecuritySchemeTests {
                 ),
                 vendorExtensions: [ "x-specialFeature": "hello" ]
             )
+        )
+    }
+    
+    func test_mutualTLS_encode() throws {
+        let mutualTLSConnect = OpenAPI.SecurityScheme.mutualTLS()
+
+        let encodedMutualTLSConnect = try orderUnstableTestStringFromEncoding(of: mutualTLSConnect)
+
+        assertJSONEquivalent(
+            encodedMutualTLSConnect,
+            """
+            {
+              "type" : "mutualTLS"
+            }
+            """
+        )
+    }
+
+    func test_mutualTLS_decode() throws {
+        let mutualTLSData =
+        """
+        {
+          "type" : "mutualTLS"
+        }
+        """.data(using: .utf8)!
+
+        let mutualTLSConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: mutualTLSData)
+
+        XCTAssertEqual(
+            mutualTLSConnect,
+            OpenAPI.SecurityScheme.mutualTLS()
+        )
+    }
+    
+    func test_mutualTLSWithDescription_encode() throws {
+        let mutualTLSConnect = OpenAPI.SecurityScheme.mutualTLS(description: "hello")
+
+        let encodedMutualTLSConnect = try orderUnstableTestStringFromEncoding(of: mutualTLSConnect)
+
+        assertJSONEquivalent(
+            encodedMutualTLSConnect,
+            """
+            {
+              "description" : "hello",
+              "type" : "mutualTLS"
+            }
+            """
+        )
+    }
+
+    func test_mutualTLSWithDescription_decode() throws {
+        let mutualTLSData =
+        """
+        {
+          "type" : "mutualTLS",
+          "description" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        let mutualTLSConnect = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: mutualTLSData)
+
+        XCTAssertEqual(
+            mutualTLSConnect,
+            OpenAPI.SecurityScheme.mutualTLS(description: "hello")
         )
     }
 }

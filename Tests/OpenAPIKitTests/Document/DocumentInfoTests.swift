@@ -26,6 +26,8 @@ final class DocumentInfoTests: XCTestCase {
         let _ = OpenAPI.Document.Info.License(name: "license")
         let _ = OpenAPI.Document.Info.License(name: "license", url: URL(string: "http://google.com")!)
 
+        let _ = OpenAPI.Document.Info.License(name: "spdx license", spdxIdentifier: "spdx id")
+
         let _ = OpenAPI.Document.Info.License.MIT
         let _ = OpenAPI.Document.Info.License.MIT(url: URL(string: "http://google.com")!)
         let _ = OpenAPI.Document.Info.License.apache2
@@ -96,6 +98,38 @@ extension DocumentInfoTests {
         XCTAssertEqual(
             license,
             .MIT(url: URL(string: "http://google.com")!)
+        )
+    }
+
+    func test_license_withSPDX_encode() throws {
+        let license = OpenAPI.Document.Info.License(name: "license", spdxIdentifier: "SPDX id")
+
+        let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
+
+        assertJSONEquivalent(
+            encodedLicense,
+            """
+            {
+              "identifier" : "SPDX id",
+              "name" : "license"
+            }
+            """
+        )
+    }
+
+    func test_license_withSPDX_decode() throws {
+        let licenseData =
+        """
+        {
+          "identifier" : "SPDX id",
+          "name" : "license"
+        }
+        """.data(using: .utf8)!
+        let license = try orderUnstableDecode(OpenAPI.Document.Info.License.self, from: licenseData)
+
+        XCTAssertEqual(
+            license,
+            .init(name: "license", spdxIdentifier: "SPDX id")
         )
     }
 
@@ -354,6 +388,48 @@ extension DocumentInfoTests {
             )
         )
     }
+  
+  func test_info_withSummary_encode() throws {
+      let info = OpenAPI.Document.Info(
+          title: "title",
+          summary: "summary",
+          version: "1.0"
+      )
+
+      let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
+
+      assertJSONEquivalent(
+          encodedInfo,
+          """
+          {
+            "summary" : "summary",
+            "title" : "title",
+            "version" : "1.0"
+          }
+          """
+      )
+  }
+
+  func test_info_withSummary_decode() throws {
+      let infoData =
+      """
+      {
+        "summary" : "summary",
+        "title" : "title",
+        "version" : "1.0"
+      }
+      """.data(using: .utf8)!
+      let info = try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)
+
+      XCTAssertEqual(
+          info,
+          .init(
+              title: "title",
+              summary: "summary",
+              version: "1.0"
+          )
+      )
+  }
 
     func test_info_withTOS_encode() throws {
         let info = OpenAPI.Document.Info(
@@ -406,7 +482,7 @@ extension DocumentInfoTests {
           "version" : "1.0"
         }
         """.data(using: .utf8)!
-        XCTAssertThrowsError( try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)) { error in
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)) { error in
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `termsOfService`: If specified, must be a valid URL.")
         }
     }

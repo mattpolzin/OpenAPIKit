@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
-    /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations).
+    /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-locations).
     ///
     /// Query, Header, and Cookie parameters are
     /// all optional by default unless you pass
@@ -71,13 +73,6 @@ extension OpenAPI.Parameter {
 }
 
 extension OpenAPI.Parameter.Context {
-    public enum Location: String, CaseIterable, Codable {
-        case query
-        case header
-        case path
-        case cookie
-    }
-
     public var location: Location {
         switch self {
         case .query:
@@ -91,5 +86,3 @@ extension OpenAPI.Parameter.Context {
         }
     }
 }
-
-extension OpenAPI.Parameter.Context.Location: Validatable {}

@@ -1,4 +1,4 @@
-@testable import OpenAPIKit
+@testable import OpenAPIKitCore
 import XCTest
 
 class AnyCodableTests: XCTestCase {

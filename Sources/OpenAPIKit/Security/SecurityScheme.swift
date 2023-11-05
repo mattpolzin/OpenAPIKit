@@ -5,12 +5,13 @@
 //  Created by Mathew Polzin on 12/30/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
-    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object).
+    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-scheme-object).
     public struct SecurityScheme: Equatable, CodableVendorExtendable {
         public var type: SecurityType
         public var description: String?
@@ -48,17 +49,16 @@ extension OpenAPI {
             return .init(type: .openIdConnect(openIdConnectUrl: url), description: description)
         }
 
+        public static func mutualTLS(description: String? = nil) -> SecurityScheme {
+            return .init(type: .mutualTLS, description: description)
+        }
+
         public enum SecurityType: Equatable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
             case oauth2(flows: OAuthFlows)
             case openIdConnect(openIdConnectUrl: URL)
-        }
-
-        public enum Location: String, Codable, Equatable {
-            case query
-            case header
-            case cookie
+            case mutualTLS
         }
     }
 }
@@ -69,6 +69,7 @@ extension OpenAPI.SecurityScheme.SecurityType {
         case http
         case oauth2
         case openIdConnect
+        case mutualTLS
     }
 
     public var name: Name {
@@ -81,7 +82,20 @@ extension OpenAPI.SecurityScheme.SecurityType {
             return .oauth2
         case .openIdConnect:
             return .openIdConnect
+        case .mutualTLS:
+            return .mutualTLS
         }
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.SecurityScheme : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.SecurityScheme {
+        guard let description = description else { return self }
+        var scheme = self
+        scheme.description = description
+        return scheme
     }
 }
 
@@ -107,6 +121,8 @@ extension OpenAPI.SecurityScheme: Encodable {
         case .oauth2(flows: let flows):
             try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
+        case .mutualTLS:
+            try container.encode(SecurityType.Name.mutualTLS, forKey: .type)
         }
 
         try encodeExtensions(to: &container)
@@ -142,6 +158,8 @@ extension OpenAPI.SecurityScheme: Decodable {
             type = .openIdConnect(
                 openIdConnectUrl: try container.decodeURLAsString(forKey: .openIdConnectUrl)
             )
+        case .mutualTLS:
+            type = .mutualTLS
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
@@ -255,6 +273,3 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         return ret
     }
 }
-
-extension OpenAPI.SecurityScheme.Location: Validatable {}
-extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}

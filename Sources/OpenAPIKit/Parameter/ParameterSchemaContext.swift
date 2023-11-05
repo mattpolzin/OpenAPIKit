@@ -5,16 +5,18 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object)
-    /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values).
+    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object)
+    /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#style-values).
     public struct SchemaContext: Equatable {
         public let style: Style
         public let explode: Bool
         public let allowReserved: Bool //defaults to false
-        public let schema: Either<JSONReference<JSONSchema>, JSONSchema>
+        public let schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
 
         public let example: AnyCodable?
         public let examples: OpenAPI.Example.Map?
@@ -45,7 +47,7 @@ extension OpenAPI.Parameter {
             self.explode = style.defaultExplode
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     explode: Bool,
                     allowReserved: Bool = false,
@@ -58,7 +60,7 @@ extension OpenAPI.Parameter {
             self.examples = nil
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     allowReserved: Bool = false,
                     example: AnyCodable? = nil) {
@@ -97,7 +99,7 @@ extension OpenAPI.Parameter {
             self.explode = style.defaultExplode
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     explode: Bool,
                     allowReserved: Bool = false,
@@ -110,7 +112,7 @@ extension OpenAPI.Parameter {
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
         }
 
-        public init(schemaReference: JSONReference<JSONSchema>,
+        public init(schemaReference: OpenAPI.Reference<JSONSchema>,
                     style: Style,
                     allowReserved: Bool = false,
                     examples: OpenAPI.Example.Map?) {
@@ -122,45 +124,34 @@ extension OpenAPI.Parameter {
 
             self.explode = style.defaultExplode
         }
-
     }
 }
 
-extension OpenAPI.Parameter.SchemaContext {
-    public enum Style: String, CaseIterable, Codable {
-        case form
-        case simple
-        case matrix
-        case label
-        case spaceDelimited
-        case pipeDelimited
-        case deepObject
-
-        /// Get the default `Style` for the given location
-        /// per the OpenAPI Specification.
-        ///
-        /// See the `style` fixed field under
-        /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
-        public static func `default`(for location: OpenAPI.Parameter.Context) -> Self {
-            switch location {
-            case .query:
-                return .form
-            case .cookie:
-                return .form
-            case .path:
-                return .simple
-            case .header:
-                return .simple
-            }
+extension OpenAPI.Parameter.SchemaContext.Style {
+    /// Get the default `Style` for the given location
+    /// per the OpenAPI Specification.
+    ///
+    /// See the `style` fixed field under
+    /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
+    public static func `default`(for location: OpenAPI.Parameter.Context) -> Self {
+        switch location {
+        case .query:
+            return .form
+        case .cookie:
+            return .form
+        case .path:
+            return .simple
+        case .header:
+            return .simple
         }
+    }
 
-        internal var defaultExplode: Bool {
-            switch self {
-            case .form:
-                return true
-            default:
-                return false
-            }
+    internal var defaultExplode: Bool {
+        switch self {
+        case .form:
+            return true
+        default:
+            return false
         }
     }
 }
@@ -209,7 +200,7 @@ extension OpenAPI.Parameter.SchemaContext {
     public init(from decoder: Decoder, for location: OpenAPI.Parameter.Context) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        schema = try container.decode(Either<JSONReference<JSONSchema>, JSONSchema>.self, forKey: .schema)
+        schema = try container.decode(Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.self, forKey: .schema)
 
         let style = try container.decodeIfPresent(Style.self, forKey: .style) ?? Style.default(for: location)
         self.style = style

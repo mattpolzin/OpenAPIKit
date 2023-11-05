@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 1/13/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
-    /// The root of an OpenAPI 3.0 document.
+    /// The root of an OpenAPI 3.1 document.
     /// 
-    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
+    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md).
     ///
     /// An OpenAPI Document can say a _lot_ about the API it describes.
     /// A read-through of the specification is highly recommended because
@@ -80,7 +82,7 @@ extension OpenAPI {
         public var paths: PathItem.Map
 
         /// Storage for components that need to be referenced elsewhere in the
-        /// OpenAPI Document using `JSONReferences`.
+        /// OpenAPI Document using `OpenAPI.References`.
         ///
         /// Storing components here can be in the interest of being explicit about
         /// the fact that the components are always the same (such as an
@@ -93,7 +95,14 @@ extension OpenAPI {
         /// you still might want to consider using the Components Object for its impact
         /// on the JSON/YAML structure of your document once encoded.
         public var components: Components
-
+      
+        /// The incoming webhooks that MAY be received as part of this API and that the API consumer MAY choose to implement.
+        ///
+        /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
+        /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
+        /// See [OpenAPI Webhook Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#fixed-fields)
+        public var webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>
+        
         /// A declaration of which security mechanisms can be used across the API.
         ///
         /// The list of values includes alternative security requirement objects that can
@@ -133,10 +142,11 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            openAPIVersion: Version = .v3_0_0,
+            openAPIVersion: Version = .v3_1_0,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
+            webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>> = [:],
             components: Components,
             security: [SecurityRequirement] = [],
             tags: [Tag]? = nil,
@@ -147,6 +157,7 @@ extension OpenAPI {
             self.info = info
             self.servers = servers
             self.paths = paths
+            self.webhooks = webhooks
             self.components = components
             self.security = security
             self.tags = tags
@@ -167,6 +178,7 @@ extension OpenAPI.Document {
             info: info,
             servers: servers,
             paths: filteredPaths,
+            webhooks: webhooks,
             components: components,
             security: security,
             tags: tags,
@@ -192,27 +204,36 @@ extension OpenAPI.Document {
         }
     }
 
-    /// Get all routes for this document.
+    /// Get all locally defined routes for this document. PathItems will be
+    /// looked up in the components, but any remote references or path items
+    /// missing from the components will be ignored.
     ///
     /// - Returns: An Array of `Routes` with the path
     ///     and the definition of the route.
+    ///
     public var routes: [Route] {
-        return paths.map { (path, pathItem) in .init(path: path, pathItem: pathItem) }
+        return paths.compactMap { (path, pathItemRef) in
+            components[pathItemRef].map { .init(path: path, pathItem: $0) }
+        }
     }
 
-    /// Retrieve an array of all Operation Ids defined by
+    /// Retrieve an array of all locally defined Operation Ids defined by
     /// this API. These Ids are guaranteed to be unique by
     /// the OpenAPI Specification.
+    ///
+    /// PathItems will be looked up in the components, but any remote references
+    /// or path items missing from the components will be ignored.
     ///
     /// The ordering is not necessarily significant, but it will
     /// be the order in which each operation is occurred within
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
+    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values
+            .compactMap { components[$0] }
             .flatMap { $0.endpoints }
             .compactMap { $0.operation.operationId }
     }
@@ -276,11 +297,12 @@ extension OpenAPI.Document {
         }
 
         for pathItem in paths.values {
-            let pathItemServers = pathItem.servers ?? []
+            let pathItemServers = components[pathItem]?.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
-            let endpointServers = pathItem.endpoints.flatMap { $0.operation.servers ?? [] }
-            endpointServers.forEach(insertUniquely)
+            if let endpointServers = (components[pathItem]?.endpoints.flatMap { $0.operation.servers ?? [] }) {
+                endpointServers.forEach(insertUniquely)
+            }
         }
 
         return collectedServers
@@ -291,10 +313,12 @@ extension OpenAPI.Document {
     /// The tags stored in the `OpenAPI.Document.tags`
     /// property need not contain all tags used anywhere in
     /// the document. This property is comprehensive.
+    ///
     public var allTags: Set<String> {
         return Set(
             (tags ?? []).map { $0.name }
-            + paths.values.flatMap { $0.endpoints }
+            + paths.values.compactMap { components[$0] }
+                .flatMap { $0.endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )
     }
@@ -305,7 +329,7 @@ extension OpenAPI.Document {
     /// Document.
     ///
     /// A dereferenced document contains no
-    /// `JSONReferences`. All components have been
+    /// `OpenAPI.References`. All components have been
     /// inlined.
     ///
     /// Dereferencing the document is a necessary
@@ -314,7 +338,7 @@ extension OpenAPI.Document {
     /// endpoints.
     ///
     /// - Important: Local dereferencing will `throw` if any
-    ///     `JSONReferences` point to other files or to
+    ///     `OpenAPI.References` point to other files or to
     ///     locations within the same file other than the
     ///     Components Object. It will also fail if any components
     ///     are missing from the Components Object.
@@ -338,7 +362,7 @@ extension OpenAPI {
     /// Multiple entries in this dictionary indicate all schemes named are
     /// required on the same request.
     ///
-    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
+    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 
@@ -349,10 +373,7 @@ extension OpenAPI.Document {
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
     public enum Version: String, Codable {
-        case v3_0_0 = "3.0.0"
-        case v3_0_1 = "3.0.1"
-        case v3_0_2 = "3.0.2"
-        case v3_0_3 = "3.0.3"
+        case v3_1_0 = "3.1.0"
     }
 }
 
@@ -379,12 +400,18 @@ extension OpenAPI.Document: Encodable {
             try encodeSecurity(requirements: security, to: &container, forKey: .security)
         }
 
-        try container.encode(paths, forKey: .paths)
+        if !paths.isEmpty {
+            try container.encode(paths, forKey: .paths)
+        }
 
         try encodeExtensions(to: &container)
 
         if !components.isEmpty {
             try container.encode(components, forKey: .components)
+        }
+      
+        if !webhooks.isEmpty {
+          try container.encode(webhooks, forKey: .webhooks)
         }
     }
 }
@@ -400,8 +427,11 @@ extension OpenAPI.Document: Decodable {
 
             let components = try container.decodeIfPresent(OpenAPI.Components.self, forKey: .components) ?? .noComponents
             self.components = components
+          
+            let webhooks = try container.decodeIfPresent(OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>.self, forKey: .webhooks) ?? [:]
+            self.webhooks = webhooks
 
-            let paths = try container.decode(OpenAPI.PathItem.Map.self, forKey: .paths)
+            let paths = try container.decodeIfPresent(OpenAPI.PathItem.Map.self, forKey: .paths) ?? [:]
             self.paths = paths
             try validateSecurityRequirements(in: paths, against: components)
 
@@ -419,6 +449,9 @@ extension OpenAPI.Document: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Document(error)
+        } catch let error as EitherDecodeNoTypesMatchedError {
+
+            throw OpenAPI.Error.Decoding.Document(error)
         }
     }
 }
@@ -429,6 +462,7 @@ extension OpenAPI.Document {
         case info
         case servers
         case paths
+        case webhooks
         case components
         case security
         case tags
@@ -441,6 +475,7 @@ extension OpenAPI.Document {
                 .info,
                 .servers,
                 .paths,
+                .webhooks,
                 .components,
                 .security,
                 .tags,
@@ -462,6 +497,8 @@ extension OpenAPI.Document {
                 self = .servers
             case "paths":
                 self = .paths
+            case "webhooks":
+                self = .webhooks
             case "components":
                 self = .components
             case "security":
@@ -485,6 +522,8 @@ extension OpenAPI.Document {
                 return "servers"
             case .paths:
                 return "paths"
+            case .webhooks:
+                return "webhooks"
             case .components:
                 return "components"
             case .security:
@@ -558,7 +597,9 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
 
 internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, against components: OpenAPI.Components) throws {
     for (path, pathItem) in paths {
-        for endpoint in pathItem.endpoints {
+        guard let pathItemValue = components[pathItem] else { continue }
+
+        for endpoint in pathItemValue.endpoints {
             if let securityRequirements = endpoint.operation.security {
                 try validate(
                     securityRequirements: securityRequirements,

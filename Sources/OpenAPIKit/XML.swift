@@ -5,12 +5,13 @@
 //  Created by Mathew Polzin on 1/15/20.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "XML Object"
     ///
-    /// See [OpenAPI XML Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#xml-object).
+    /// See [OpenAPI XML Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#xml-object).
     public struct XML: Equatable {
         public let name: String?
         public let namespace: URL?

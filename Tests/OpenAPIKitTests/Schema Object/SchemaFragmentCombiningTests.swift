@@ -30,6 +30,16 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         )
     }
 
+    func test_resolvingSingleNull() {
+        let fragments: [JSONSchema] = [
+            .null()
+        ]
+        XCTAssertEqual(
+            try fragments.combined(resolvingAgainst: .noComponents),
+            .null(.init(nullable: true))
+        )
+    }
+
     func test_resolvingSingleBoolean() {
         let fragments: [JSONSchema] = [
             .boolean(.init())
@@ -170,29 +180,26 @@ final class SchemaFragmentCombiningTests: XCTestCase {
 
     func test_resolveSingleStringWithFormat() {
         let fragments: [JSONSchema] = [
-            .string(.init(format: .binary), .init())
+            .string(.init(), .init(contentEncoding: .binary))
         ]
         XCTAssertEqual(
             try fragments.combined(resolvingAgainst: .noComponents),
-            .string(.init(format: .binary), .init())
+            .string(.init(), .init(contentEncoding: .binary))
         )
     }
 
     // MARK: - Fragment Combinations
     func assertOrderIndependentCombinedEqual(_ fragments: [JSONSchema], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
-        let resolved1 = try fragments.combined(resolvingAgainst: .noComponents)
+        try assertCombinedEqual(fragments, schema, file: file, line: line)
+        try assertCombinedEqual(fragments.reversed(), schema, file: file, line: line)
+    }
+    
+    func assertCombinedEqual(_ fragments: [JSONSchema], _ schema: DereferencedJSONSchema, file: StaticString = #file, line: UInt = #line) throws {
+        let resolved = try fragments.combined(resolvingAgainst: .noComponents)
         let schemaString = try orderUnstableTestStringFromEncoding(of: schema.jsonSchema)
-        let resolvedSchemaString = try orderUnstableTestStringFromEncoding(of: resolved1.jsonSchema)
+        let resolvedSchemaString = try orderUnstableTestStringFromEncoding(of: resolved.jsonSchema)
         XCTAssertEqual(
-            resolved1,
-            schema,
-            "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
-            file: (file),
-            line: line
-        )
-        let resolved2 = try fragments.reversed().combined(resolvingAgainst: .noComponents)
-        XCTAssertEqual(
-            resolved2,
+            resolved,
             schema,
             "\n\n\(resolvedSchemaString ?? "nil") \n!=\n \(schemaString ?? "nil")",
             file: (file),
@@ -225,9 +232,9 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(), .init()),
-                .fragment(.init(format: .other("binary")))
+                .fragment(.init(format: .other("uuid")))
             ],
-            .string(.init(format: .binary), .init())
+            .string(.init(format: .uuid), .init())
         )
     }
 
@@ -235,10 +242,81 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         try assertOrderIndependentCombinedEqual(
             [
                 .string(.init(description: "test"), .init(minLength: 2)),
-                .string(.init(format: .byte), .init(maxLength: 5)),
+                .string(.init(), .init(maxLength: 5, contentEncoding: .base64)),
                 .string(.init(description: "test"), .init())
             ],
-            .string(.init(format: .byte, description: "test"), .init(maxLength: 5, minLength: 2))
+            .string(.init(description: "test"), .init(maxLength: 5, minLength: 2, contentEncoding: .base64))
+        )
+    }
+
+    func test_examples() throws {
+        let fragments: [JSONSchema] = [
+            .string(examples: ["hello"]),
+            .string(examples: ["world"])
+        ]
+        let combined = try fragments.combined(resolvingAgainst: .noComponents)
+        XCTAssertTrue(combined.examples.contains("hello"))
+        XCTAssertTrue(combined.examples.contains("world"))
+        XCTAssertEqual(combined.examples.count, 2)
+    }
+
+    func test_nullAndBoolean() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .boolean()
+            ],
+            .boolean(.init(nullable: true))
+        )
+    }
+
+    func test_nullAndInteger() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .integer()
+            ],
+            .integer(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndNumber() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .number()
+            ],
+            .number(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndString() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .string()
+            ],
+            .string(.init(nullable: true), .init())
+        )
+    }
+
+    func test_nullAndArray() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .array()
+            ],
+            .array(.init(nullable: true), DereferencedJSONSchema.ArrayContext.init(.init())!)
+        )
+    }
+
+    func test_nullAndObject() throws {
+        try assertOrderIndependentCombinedEqual(
+            [
+                .null(),
+                .object()
+            ],
+            .object(.init(nullable: true), DereferencedJSONSchema.ObjectContext.init(.init(properties: [:]))!)
         )
     }
 
@@ -273,47 +351,62 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     }
 
     func test_deeperObjectFragments() throws {
-        try assertOrderIndependentCombinedEqual(
-            [
-                .object(.init(), .init(properties: [:], additionalProperties: .init(true))),
-                .object(.init(description: "nested"), .init(properties: [:])),
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "required": .string
-                        ],
-                        minProperties: 2
-                    )
-                ),
-                .object(
-                    .init(),
-                    .init(
-                        properties: [
-                            "optional": .boolean(required: false),
-                            "someObject": .object(required: false),
-                            "anything": .fragment(.init(description: nil))
-                        ],
-                        minProperties: 2
-                    )
-                )
-            ],
+        let fragments: [JSONSchema] = [
+            .object(.init(), .init(properties: [:], additionalProperties: .init(true))),
+            .object(.init(description: "nested"), .init(properties: [:])),
             .object(
-                .init(description: "nested"),
-                DereferencedJSONSchema.ObjectContext(
-                    .init(
-                        properties: [
-                            "required": .string,
-                            "optional": .boolean(required: false),
-                            "someObject": .object(required: false),
-                            "anything": .fragment(.init(description: nil))
-                        ],
-                        additionalProperties: .init(true),
-                        minProperties: 2
-                    )
-                )!
+                .init(),
+                .init(
+                    properties: [
+                        "required": .string
+                    ],
+                    minProperties: 2
+                )
+            ),
+            .object(
+                .init(),
+                .init(
+                    properties: [
+                        "optional": .boolean(required: false),
+                        "someObject": .object(required: false),
+                        "anything": .fragment(.init(description: nil))
+                    ],
+                    minProperties: 2
+                )
             )
-        )
+        ]
+        
+        try assertCombinedEqual(fragments, .object(
+            .init(description: "nested"),
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [
+                        "required": .string,
+                        "optional": .boolean(required: false),
+                        "someObject": .object(required: false),
+                        "anything": .fragment(.init(description: nil))
+                    ],
+                    additionalProperties: .init(true),
+                    minProperties: 2
+                )
+            )!
+        ))
+        
+        try assertCombinedEqual(fragments.reversed(), .object(
+            .init(description: "nested"),
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [
+                        "optional": .boolean(required: false),
+                        "someObject": .object(required: false),
+                        "anything": .fragment(.init(description: nil)),
+                        "required": .string
+                    ],
+                    additionalProperties: .init(true),
+                    minProperties: 2
+                )
+            )!
+        ))
     }
 
     func test_evenDeeperObjectFragments() throws {
@@ -357,8 +450,8 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                 )
             )
         ]
-
-        let expectedResult = DereferencedJSONSchema.object(
+        
+        try assertCombinedEqual(fragments, DereferencedJSONSchema.object(
             .init(),
             DereferencedJSONSchema.ObjectContext(
                 .init(
@@ -379,12 +472,30 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                     ]
                 )
             )!
-        )
+        ))
 
-        try assertOrderIndependentCombinedEqual(
-            fragments,
-            expectedResult
-        )
+        try assertCombinedEqual(fragments.reversed(), DereferencedJSONSchema.object(
+            .init(),
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [
+                        "more_fragments": .object(
+                            title: "nested test",
+                            description: "nested",
+                            properties: [
+                                "someObject": .object,
+                                "boolean": .boolean(format: .other("integer"), required: false, description: "boolean"),
+                                "string": .string(required: true, description: "string", maxLength: 50),
+                                "integer": .integer(required: false, description: "integer", maximum: (10, exclusive: false)),
+                                "number": .number(required: false, description: "number", maximum: (33.2, exclusive: false)),
+                                "array": .array(required: true, description: "array", maxItems: 22)
+                            ]
+                        ),
+                        "more_object": .object(required: false, properties: ["boolean": .boolean])
+                    ]
+                )
+            )!
+        ))
     }
 
     func test_minLessThanMaxObject() throws {
@@ -616,17 +727,13 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     }
 
     func test_StringFormatConflicts() {
-        let byte: JSONTypeFormat.StringFormat = .byte
-        let binary: JSONTypeFormat.StringFormat = .binary
         let date: JSONTypeFormat.StringFormat = .date
         let dateTime: JSONTypeFormat.StringFormat = .dateTime
         let password: JSONTypeFormat.StringFormat = .password
-        let uuid: JSONTypeFormat.StringFormat = .extended(.uuid)
+        let uuid: JSONTypeFormat.StringFormat = .uuid
         let other: JSONTypeFormat.StringFormat = .other("moontalk")
 
         let formatStrings = [
-            byte,
-            binary,
             date,
             dateTime,
             password,
@@ -715,11 +822,6 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             AnyContext(title: "string2")
         ]
 
-        let differentNullable = [
-            AnyContext(nullable: true),
-            AnyContext(nullable: false)
-        ]
-
         let differentDeprecated = [
             AnyContext(deprecated: true),
             AnyContext(deprecated: false)
@@ -735,20 +837,13 @@ final class SchemaFragmentCombiningTests: XCTestCase {
             AnyContext(allowedValues: ["string2"])
         ]
 
-        let differentExample = [
-            AnyContext(example: "string1"),
-            AnyContext(example: "string2")
-        ]
-
         let differences = [
             differentDescription,
             differentDiscriminator,
             differentTitle,
-            differentNullable,
             differentDeprecated,
             differentExternalDocs,
-            differentAllowedValues,
-            differentExample
+            differentAllowedValues
         ]
 
         // break up for type checking
@@ -1214,14 +1309,14 @@ extension JSONSchema.CoreContext {
             format: NewFormat(rawValue: format.rawValue)!,
             required: required,
             nullable: nullable,
-            permissions: JSONSchema.CoreContext<NewFormat>.Permissions(permissions),
+            permissions: permissions,
             deprecated: deprecated,
             title: title,
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
             allowedValues: allowedValues,
-            example: example
+            examples: examples
         )
     }
 }

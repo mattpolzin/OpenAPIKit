@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 8/25/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
-    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
+    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#header-object).
     public struct Header: Equatable, CodableVendorExtendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
@@ -68,7 +70,7 @@ extension OpenAPI {
         }
 
         public init(
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             description: String? = nil,
             required: Bool = false,
             deprecated: Bool = false,
@@ -98,7 +100,21 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Header {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Header>, OpenAPI.Header>>
+    public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Header>, OpenAPI.Header>>
+}
+
+// MARK: - Describable
+extension OpenAPI.Header : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Header {
+        guard let description = description else { return self }
+        return OpenAPI.Header(
+            schemaOrContent: schemaOrContent,
+            description: description,
+            required: required,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
 }
 
 // MARK: - Header Convenience
@@ -117,7 +133,7 @@ extension OpenAPI.Parameter.SchemaContext {
     }
 
     public static func header(
-        schemaReference: JSONReference<JSONSchema>,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
         allowReserved: Bool = false,
         example: AnyCodable? = nil
     ) -> Self {
@@ -143,7 +159,7 @@ extension OpenAPI.Parameter.SchemaContext {
     }
 
     public static func header(
-        schemaReference: JSONReference<JSONSchema>,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
         allowReserved: Bool = false,
         examples: OpenAPI.Example.Map?
     ) -> Self {

@@ -1,6 +1,6 @@
 //
 //  LinkTests.swift
-//
+//  
 //
 //  Created by Mathew Polzin on 1/23/20.
 //
@@ -21,8 +21,8 @@ final class LinkTests: XCTestCase {
         XCTAssertEqual(link1, link3)
         XCTAssertEqual(link2, link4)
 
-        let either1: Either<JSONReference<Link>, Link> = .link(operationRef: URL(string: "http://website.com")!)
-        let either2: Either<JSONReference<Link>, Link> = .link(operationId: "op1")
+        let either1: Either<OpenAPI.Reference<Link>, Link> = .link(operationRef: URL(string: "http://website.com")!)
+        let either2: Either<OpenAPI.Reference<Link>, Link> = .link(operationId: "op1")
 
         XCTAssertEqual(either1.linkValue, link1)
         XCTAssertEqual(either2.linkValue, link2)
@@ -148,7 +148,7 @@ extension LinkTests {
         )
     }
 
-    func test_populatedExtension_decode() throws {
+    func test_Extension_decode() throws {
 
         let responseData =
             """

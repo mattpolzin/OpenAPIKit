@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 6/19/20.
 //
 
+import OpenAPIKitCore
+
 /// An `OpenAPI.SecurityRequirement` type that
 /// contains the actual security schemas it would otherwise
 /// just be referencing with the keys of the Security Requirement
@@ -61,7 +63,7 @@ public struct DereferencedSecurityRequirement: Equatable {
         /// not require a specified scope. For other security scheme types,
         /// the array MUST be empty.
         ///
-        /// See  [Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object) for more.
+        /// See  [Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-requirement-object) for more.
         public let requiredScopes: [String]
     }
 }

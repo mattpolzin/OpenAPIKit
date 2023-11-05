@@ -5,10 +5,11 @@
 //  Created by Mathew Polzin on 3/29/20.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 // MARK: - Convenience accessors
-extension Either where A: OpenAPIKit._OpenAPIReference {
+extension Either where A: OpenAPIKitCore._OpenAPIReference {
     /// Retrieve the JSON Reference if that is what this property contains.
     public var reference: A? { a }
 }
@@ -31,7 +32,7 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
 
     /// Retrieve the schema value if this property contains a schema context.
     ///
-    /// If the schema is a `JSONReference` this property will be `nil`
+    /// If the schema is a `OpenAPI.Reference` this property will be `nil`
     /// but the `schemaReference` property will be `non-nil`.
     public var schemaValue: JSONSchema? {
         guard case .a(let schemaContext) = self else {
@@ -44,7 +45,7 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
     ///
     /// If the schema is a `JSONSchema` this property will be `nil` but the
     /// `schemaValue` property will be `non-nil`.
-    public var schemaReference: JSONReference<JSONSchema>? {
+    public var schemaReference: OpenAPI.Reference<JSONSchema>? {
         guard case .a(let schemaContext) = self else {
             return nil
         }
@@ -60,7 +61,7 @@ extension Either where A == DereferencedSchemaContext {
 
     /// Retrieve the schema value if this property contains a schema context.
     ///
-    /// If the schema is a `JSONReference` this property will be `nil`
+    /// If the schema is an `OpenAPI.Reference` this property will be `nil`
     /// but the `schemaReference` property will be `non-nil`.
     public var schemaValue: DereferencedJSONSchema? {
         guard case .a(let schemaContext) = self else {
@@ -68,6 +69,11 @@ extension Either where A == DereferencedSchemaContext {
         }
         return schemaContext.schema
     }
+}
+
+extension Either where B == OpenAPI.PathItem {
+    /// Retrieve the path item if that is what this property contains.
+    public var pathItemValue: B? { b }
 }
 
 extension Either where B == OpenAPI.Parameter {
@@ -144,6 +150,45 @@ extension Either where A == OpenAPI.Parameter.SchemaContext {
 extension Either where B == JSONSchema {
     /// Construct a schema value.
     public static func schema(_ schema: JSONSchema) -> Self { .b(schema) }
+}
+
+extension Either where B == OpenAPI.PathItem {
+    /// Construct a path item value.
+    public static func pathItem(_ pathItem: OpenAPI.PathItem) -> Self { .b(pathItem) }
+
+    public init(
+        summary: String? = nil,
+        description: String? = nil,
+        servers: [OpenAPI.Server]? = nil,
+        parameters: OpenAPI.Parameter.Array = [],
+        get: OpenAPI.Operation? = nil,
+        put: OpenAPI.Operation? = nil,
+        post: OpenAPI.Operation? = nil,
+        delete: OpenAPI.Operation? = nil,
+        options: OpenAPI.Operation? = nil,
+        head: OpenAPI.Operation? = nil,
+        patch: OpenAPI.Operation? = nil,
+        trace: OpenAPI.Operation? = nil,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) {
+        self = .b(
+            .init(
+                summary: summary,
+                description: description,
+                servers: servers,
+                parameters: parameters,
+                get: get,
+                put: put,
+                post: post,
+                delete: delete,
+                options: options,
+                head: head,
+                patch: patch,
+                trace: trace,
+                vendorExtensions: vendorExtensions
+            )
+        )
+    }
 }
 
 extension Either where B == OpenAPI.Parameter {

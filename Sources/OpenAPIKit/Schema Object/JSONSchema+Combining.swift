@@ -5,6 +5,8 @@
 //  Created by Mathew Polzin on 8/1/20.
 //
 
+import OpenAPIKitCore
+
 extension Array where Element == JSONSchema {
     /// An array of schema fragments can be combined into a
     /// single `DereferencedJSONSchema` if all references can
@@ -116,6 +118,12 @@ internal struct FragmentCombiner {
         if let currentFragment = self.combinedFragment {
             combinedFragment = currentFragment
         } else {
+            // the only case where starting with a fragment breaks down is when you actually
+            // should end up with plain old `.null`
+            if case let .null(coreContext) = fragment.value {
+                self.combinedFragment = .null(coreContext)
+                return
+            }
             // combination can turn `required: false` into `required: true`
             // but not the other way around. We start optional and the first
             // time we combine with something required we become required.
@@ -125,7 +133,7 @@ internal struct FragmentCombiner {
         // make sure any less specialized fragment (i.e. general) is on the left
         let lessSpecializedFragment: JSONSchema
         let equallyOrMoreSpecializedFragment: JSONSchema
-        switch (combinedFragment, fragment) {
+        switch (combinedFragment.value, fragment.value) {
         case (.fragment, _):
             lessSpecializedFragment = combinedFragment
             equallyOrMoreSpecializedFragment = fragment
@@ -134,16 +142,25 @@ internal struct FragmentCombiner {
             equallyOrMoreSpecializedFragment = combinedFragment
         }
 
-        switch (lessSpecializedFragment, equallyOrMoreSpecializedFragment) {
+        switch (lessSpecializedFragment.value, equallyOrMoreSpecializedFragment.value) {
         case (.all(let schemas, core: let core), let other), (let other, .all(let schemas, core: let core)):
             // tease apart one allOf if there is one and continue from there.
-            try self.combine(schemas + [.fragment(core), other])
+            try self.combine(schemas + [.fragment(core), JSONSchema(schema: other)])
 
-        case (_, .reference(let reference)), (.reference(let reference), _):
-            try combine(components.lookup(reference))
+        case (_, .reference(let reference, let context)), (.reference(let reference, let context), _):
+            var component = try components.lookup(reference)
+            if !context.required {
+                component = component.optionalSchemaObject()
+            }
+            try combine(component)
+
+        case (.null(let leftCoreContext), .null(let rightCoreContext)):
+            self.combinedFragment = .null(try leftCoreContext.combined(with: rightCoreContext))
 
         case (.fragment(let leftCoreContext), .fragment(let rightCoreContext)):
             self.combinedFragment = .fragment(try leftCoreContext.combined(with: rightCoreContext))
+        case (.fragment(let leftCoreContext), .null):
+            self.combinedFragment = .fragment(leftCoreContext.nullableContext())
         case (.fragment(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.fragment(let leftCoreContext), .integer(let rightCoreContext, let integerContext)):
@@ -156,6 +173,7 @@ internal struct FragmentCombiner {
             self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
         case (.fragment(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+
         case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
         case (.integer(let leftCoreContext, let leftIntegerContext), .integer(let rightCoreContext, let rightIntegerContext)):
@@ -169,6 +187,19 @@ internal struct FragmentCombiner {
         case (.object(let leftCoreContext, let leftObjectContext), .object(let rightCoreContext, let rightObjectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), try leftObjectContext.combined(with: rightObjectContext, resolvingIn: components))
 
+        case (.boolean(let coreContext), .null), (.null, .boolean(let coreContext)):
+            self.combinedFragment = .boolean(coreContext.nullableContext())
+        case (.integer(let coreContext, let specContext), .null), (.null, .integer(let coreContext, let specContext)):
+            self.combinedFragment = .integer(coreContext.nullableContext(), specContext)
+        case (.number(let coreContext, let specContext), .null), (.null, .number(let coreContext, let specContext)):
+            self.combinedFragment = .number(coreContext.nullableContext(), specContext)
+        case (.string(let coreContext, let specContext), .null), (.null, .string(let coreContext, let specContext)):
+            self.combinedFragment = .string(coreContext.nullableContext(), specContext)
+        case (.array(let coreContext, let specContext), .null), (.null, .array(let coreContext, let specContext)):
+            self.combinedFragment = .array(coreContext.nullableContext(), specContext)
+        case (.object(let coreContext, let specContext), .null), (.null, .object(let coreContext, let specContext)):
+            self.combinedFragment = .object(coreContext.nullableContext(), specContext)
+
         case (_, .any), (.any, _), (_, .not), (.not, _), (_, .one), (.one, _):
             throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), and one(of:) are not yet supported for schema resolution"))
         case (.boolean, _),
@@ -176,7 +207,8 @@ internal struct FragmentCombiner {
              (.number, _),
              (.string, _),
              (.array, _),
-             (.object, _):
+             (.object, _),
+             (.null, _):
             throw (
                 zip(combinedFragment.jsonType, fragment.jsonType).map {
                     JSONSchemaResolutionError(.typeConflict(original: $0, new: $1))
@@ -205,8 +237,8 @@ internal struct FragmentCombiner {
         }
 
         let jsonSchema: JSONSchema
-        switch combinedFragment {
-        case .fragment, .reference:
+        switch combinedFragment.value {
+        case .fragment, .reference, .null:
             jsonSchema = combinedFragment
         case .boolean(let coreContext):
             jsonSchema = .boolean(try coreContext.validatedContext())
@@ -253,8 +285,8 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
         let transformedContext = OtherContext(
             format: newFormat,
             required: required,
-            nullable: _nullable,
-            permissions: _permissions.map(OtherContext.Permissions.init),
+            nullable: nullable,
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,
@@ -262,7 +294,7 @@ extension JSONSchema.CoreContext where Format == JSONTypeFormat.AnyFormat {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
         return try transformedContext.combined(with: other)
     }
@@ -280,7 +312,7 @@ extension JSONSchema.CoreContext {
         if let conflict = conflicting(_permissions, other._permissions) {
             throw JSONSchemaResolutionError(.inconsistency("A schema cannot be both \(conflict.0.rawValue) and \(conflict.1.rawValue)."))
         }
-        let newPermissions: JSONSchema.CoreContext<Format>.Permissions?
+        let newPermissions: JSONSchema.Permissions?
         if _permissions == nil && other._permissions == nil {
             newPermissions = nil
         } else {
@@ -306,10 +338,7 @@ extension JSONSchema.CoreContext {
         }
         let newTitle = title ?? other.title
 
-        if let conflict = conflicting(_nullable, other._nullable) {
-            throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "nullable", original: String(conflict.0), new: String(conflict.1)))
-        }
-        let newNullable = _nullable ?? other._nullable
+        let newNullable = nullable || other.nullable
 
         if let conflict = conflicting(_deprecated, other._deprecated) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "deprecated", original: String(conflict.0), new: String(conflict.1)))
@@ -334,10 +363,7 @@ extension JSONSchema.CoreContext {
         let newAllowedValues = allowedValues ?? other.allowedValues
         let newDefaultValue = defaultValue ?? other.defaultValue
 
-        if let conflict = conflicting(example, other.example) {
-            throw JSONSchemaResolutionError(.attributeConflict(jsonType: nil, name: "example", original: String(describing: conflict.0), new: String(describing: conflict.1)))
-        }
-        let newExample = example ?? other.example
+        let newExamples = examples + other.examples
 
         let newRequired = required || other.required
         return .init(
@@ -352,7 +378,7 @@ extension JSONSchema.CoreContext {
             externalDocs: newExternalDocs,
             allowedValues: newAllowedValues,
             defaultValue: newDefaultValue,
-            example: newExample
+            examples: newExamples
         )
     }
 }
@@ -441,21 +467,31 @@ extension JSONSchema.StringContext {
         if let conflict = conflicting(maxLength, other.maxLength) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "maxLength", original: String(conflict.0), new: String(conflict.1)))
         }
-        if let conflict = conflicting(_minLength, other._minLength) {
+        if let conflict = conflicting(Self._minLength(self), Self._minLength(other)) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "minLength", original: String(conflict.0), new: String(conflict.1)))
         }
         if let conflict = conflicting(pattern, other.pattern) {
             throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "pattern", original: conflict.0, new: conflict.1))
         }
+        if let conflict = conflicting(contentMediaType, other.contentMediaType) {
+            throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "contentMediaType", original: conflict.0.rawValue, new: conflict.1.rawValue))
+        }
+        if let conflict = conflicting(contentEncoding, other.contentEncoding) {
+            throw JSONSchemaResolutionError(.attributeConflict(jsonType: .string, name: "contentEncoding", original: conflict.0.rawValue, new: conflict.1.rawValue))
+        }
         // explicitly declaring these constants one at a time
         // helps the type checker a lot.
         let newMaxLength = maxLength ?? other.maxLength
-        let newMinLength = _minLength ?? other._minLength
+        let newMinLength = Self._minLength(self) ?? Self._minLength(other)
         let newPattern = pattern ?? other.pattern
+        let newContentMediaType = contentMediaType ?? other.contentMediaType
+        let newContentEncoding = contentEncoding ?? other.contentEncoding
         return .init(
             maxLength: newMaxLength,
             minLength: newMinLength,
-            pattern: newPattern
+            pattern: newPattern,
+            contentMediaType: newContentMediaType,
+            contentEncoding: newContentEncoding
         )
     }
 }
@@ -530,12 +566,16 @@ extension JSONSchema.ObjectContext {
     }
 }
 
-internal func combine(properties left: [String: JSONSchema], with right: [String: JSONSchema], resolvingIn components: OpenAPI.Components) throws -> [String: JSONSchema] {
-    var combined = left
-    try combined.merge(right) { (left, right) throws -> JSONSchema in
-        var resolver = FragmentCombiner(components: components)
-        try resolver.combine([left, right])
-        return try resolver.dereferencedSchema().jsonSchema
+internal func combine(properties left: OrderedDictionary<String, JSONSchema>, with right: OrderedDictionary<String, JSONSchema>, resolvingIn components: OpenAPI.Components) throws -> OrderedDictionary<String, JSONSchema> {
+    var combined = right
+    for (key, lhs) in left {
+        if let rhs = combined[key] {
+            var resolver = FragmentCombiner(components: components)
+            try resolver.combine([lhs, rhs])
+            combined[key] = try resolver.dereferencedSchema().jsonSchema
+        } else {
+            combined[key] = lhs
+        }
     }
     return combined
 }
@@ -547,13 +587,12 @@ extension JSONSchema.CoreContext {
         guard let newFormat = NewFormat(rawValue: format.rawValue) else {
             throw JSONSchemaResolutionError(.inconsistency("Tried to create a \(NewFormat.self) from the incompatible format value: \(format.rawValue)"))
         }
-        let newPermissions = _permissions.map(JSONSchema.CoreContext<NewFormat>.Permissions.init)
 
         return .init(
             format: newFormat,
             required: required,
-            nullable: _nullable,
-            permissions: newPermissions,
+            nullable: nullable,
+            permissions: _permissions,
             deprecated: _deprecated,
             title: title,
             description: description,
@@ -561,7 +600,7 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            examples: examples
         )
     }
 }
@@ -618,7 +657,7 @@ extension JSONSchema.NumericContext {
 
 extension JSONSchema.StringContext {
     internal func validatedContext() throws -> JSONSchema.StringContext {
-        if let minimum = _minLength {
+        if let minimum = Self._minLength(self) {
             guard minimum >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("String minimum length (\(minimum) cannot be less than 0"))
             }
@@ -630,8 +669,10 @@ extension JSONSchema.StringContext {
         }
         return .init(
             maxLength: maxLength,
-            minLength: _minLength,
-            pattern: pattern
+            minLength: Self._minLength(self),
+            pattern: pattern,
+            contentMediaType: contentMediaType,
+            contentEncoding: contentEncoding
         )
     }
 }

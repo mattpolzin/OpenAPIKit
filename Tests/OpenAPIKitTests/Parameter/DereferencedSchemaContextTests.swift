@@ -31,7 +31,10 @@ final class DereferencedSchemaContextTests: XCTestCase {
             examples: ["test": .reference(.component(named: "test"))]
         ).dereferenced(in: components)
         XCTAssertEqual(t1.example, "hello world")
-        XCTAssertEqual(t1.examples, ["test": .init(value: .init("hello world"))])
+        XCTAssertEqual(
+            t1.examples, 
+            ["test": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
+        )
     }
 
     func test_multipleExamplesReferenced() throws {
@@ -53,8 +56,8 @@ final class DereferencedSchemaContextTests: XCTestCase {
         XCTAssertEqual(
             t1.examples,
             [
-                "test1": .init(value: .init("hello world")),
-                "test2": .init(value: .init(URL(string: "http://website.com")!))
+                "test1": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
+                "test2": .init(value: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
             ]
         )
     }
@@ -80,7 +83,10 @@ final class DereferencedSchemaContextTests: XCTestCase {
             schemaReference: .component(named: "test"),
             style: .default(for: .header)
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.schema, .string(.init(), .init()))
+        XCTAssertEqual(
+            t1.schema, 
+            DereferencedJSONSchema.string(.init(), .init()).with(vendorExtensions: ["x-component-name": "test"])
+        )
     }
 
     func test_missingSchema() {

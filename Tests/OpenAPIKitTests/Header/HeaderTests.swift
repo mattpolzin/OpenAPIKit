@@ -142,6 +142,42 @@ extension HeaderTests {
         )
     }
 
+    func test_header_schema_reference_encode() throws {
+        let header = OpenAPI.Header(
+            schemaReference: .component(named: "schemaRef")
+        )
+
+        let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
+
+        assertJSONEquivalent(
+            headerEncoding,
+            """
+            {
+              "schema" : {
+                "$ref" : "#\\/components\\/schemas\\/schemaRef"
+              }
+            }
+            """
+        )
+    }
+
+    func test_header_schema_reference_decode() throws {
+        let headerData =
+        """
+        {
+          "schema" : {
+            "$ref" : "#/components/schemas/schemaRef"
+          }
+        }
+        """.data(using: .utf8)!
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
+
+        XCTAssertEqual(
+            header,
+            OpenAPI.Header(schemaReference: .component(named: "schemaRef"))
+        )
+    }
+
     func test_header_schema_withExntesion_encode() throws {
         let header = OpenAPI.Header(schema: .string, vendorExtensions: ["x-hello": "hi"])
 

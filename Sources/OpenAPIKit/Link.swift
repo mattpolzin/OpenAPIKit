@@ -9,6 +9,7 @@
 //       refer to Operation objects in the document that have the
 //       given ids.
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
@@ -98,11 +99,11 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Link {
-    public typealias Map = OrderedDictionary<String, Either<JSONReference<OpenAPI.Link>, OpenAPI.Link>>
+    public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link>>
 }
 
 // MARK: `Either` convenience methods
-extension Either where A == JSONReference<OpenAPI.Link>, B == OpenAPI.Link {
+extension Either where A == OpenAPI.Reference<OpenAPI.Link>, B == OpenAPI.Link {
 
     public static func link(
         operationId: String,
@@ -138,6 +139,17 @@ extension Either where A == JSONReference<OpenAPI.Link>, B == OpenAPI.Link {
                 server: server
             )
         )
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.Link: OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Link {
+        guard let description = description else { return self }
+        var link = self
+        link.description = description
+        return link
     }
 }
 
@@ -249,6 +261,31 @@ extension OpenAPI.Link {
                 return key
             }
         }
+    }
+}
+
+// MARK: - LocallyDereferenceable
+extension OpenAPI.Link: LocallyDereferenceable {
+    /// Links do not contain any references but for convenience
+    /// they can be "dereferenced" to themselves.
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.Link {
+        var vendorExtensions = self.vendorExtensions
+        if let name = name {
+            vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
+        return .init(
+            operation: operation,
+            parameters: parameters,
+            requestBody: requestBody,
+            description: description,
+            server: server,
+            vendorExtensions: vendorExtensions
+        )
     }
 }
 

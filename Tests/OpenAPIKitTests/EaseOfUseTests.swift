@@ -12,7 +12,7 @@ import XCTest
 final class DeclarativeEaseOfUseTests: XCTestCase {
     func test_wholeBoi() {
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_0,
+            openAPIVersion: .v3_1_0,
             info: .init(
                 title: "Test Documentation",
                 description: "Description of Test Documentation",
@@ -263,11 +263,11 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         )
 
         let _ = OpenAPI.Document(
-            openAPIVersion: .v3_0_0,
+            openAPIVersion: .v3_1_0,
             info: apiInfo,
             servers: [server],
             paths: [
-                "/test/api/endpoint/{param}": testRoute
+                "/test/api/endpoint/{param}": .pathItem(testRoute)
             ],
             components: components,
             security: [],
@@ -430,13 +430,17 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let document = testDocument
 
         // get endpoints for each path
-        let endpoints = document.paths.mapValues { $0.endpoints }
+        let endpoints = document.paths.mapValues { $0.pathItemValue?.endpoints ?? [] }
 
         // count endpoints by HTTP method
         let endpointMethods = endpoints.values.flatMap { $0 }.map { $0.method }
         let countByMethod = Dictionary(grouping: endpointMethods, by: { $0 }).mapValues { $0.count }
         XCTAssertEqual(countByMethod[.get], 2)
         XCTAssertEqual(countByMethod[.post], 1)
+
+        let easyMode = document.routes.flatMap { $0.pathItem.endpoints }
+        XCTAssertEqual(endpoints.reduce(0, { sum, next in sum + next.value.count }), easyMode.count)
+        XCTAssertEqual(endpoints.values.flatMap { $0.self }, easyMode)
     }
 
     func test_resolveSecurity() {
@@ -453,7 +457,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
     func test_getResponseSchema() {
         let document = testDocument
 
-        let endpoint = document.paths["/widgets/{id}"]?.get
+        let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.get
         let response = endpoint?.responses[status: 200]?.responseValue
         let responseSchemaReference = response?.content[.json]?.schema
         // this response schema is a reference found in the Components Object. We dereference
@@ -466,7 +470,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
     func test_getRequestSchema() {
         let document = testDocument
 
-        let endpoint = document.paths["/widgets/{id}"]?.post
+        let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.post
         let request = endpoint?.requestBody?.requestValue
         let requestSchemaReference = request?.content[.json]?.schema
         // this request schema is defined inline but dereferencing still produces the schema
@@ -505,11 +509,11 @@ fileprivate let testInfo = OpenAPI.Document.Info(title: "Test API", version: "1.
 fileprivate let testServer = OpenAPI.Server(url: URL(string: "http://website.com")!)
 
 fileprivate let testDocument =  OpenAPI.Document(
-    openAPIVersion: .v3_0_3,
+    openAPIVersion: .v3_1_0,
     info: testInfo,
     servers: [testServer],
     paths: [
-        "/widgets/{id}": OpenAPI.PathItem(
+        "/widgets/{id}": .init(
             parameters: [
                 .parameter(
                     name: "id",
@@ -554,7 +558,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                 ]
             )
         ),
-        "/docs": OpenAPI.PathItem(
+        "/docs": .init(
             get: OpenAPI.Operation(
                 tags: "Documentation",
                 responses: [

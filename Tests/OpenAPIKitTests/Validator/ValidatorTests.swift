@@ -16,11 +16,11 @@ final class ValidatorTests: XCTestCase {
 
         _ = validator.validating(
             "",
-            check: \OpenAPI.Document.openAPIVersion == .v3_0_0
+            check: \OpenAPI.Document.openAPIVersion == .v3_1_0
         )
         _ = validator.validating(
             "",
-            check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_0_0 }
+            check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_1_0 }
         )
 
         _ = validator.validating(
@@ -1084,6 +1084,8 @@ final class ValidatorTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    /// This test confirms the last example in the validation documentation file (documentation/validation.md)
+    /// functions as-written.
     func test_requestBodySchemaValidationFails() {
         // should fail in three ways:
         // 1. No `name` in request schema
@@ -1134,7 +1136,7 @@ final class ValidatorTests: XCTestCase {
         let resourceContainsName = Validation<JSONSchema>(
             description: "All JSON resources must have a String name",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let nameProperty = context.properties["name"] else {
                         return false
                 }
@@ -1145,7 +1147,7 @@ final class ValidatorTests: XCTestCase {
         let responseResourceContainsId = Validation<JSONSchema>(
             description: "All JSON response resources must have an Id",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let idProperty = context.properties["id"] else {
                         return false
                 }
@@ -1214,6 +1216,8 @@ final class ValidatorTests: XCTestCase {
         }
     }
 
+    /// This test confirms the last example in the validation documentation file (documentation/validation.md)
+    /// functions as-written.
     func test_requestBodySchemaValidationSucceeds() throws {
         let createRequest = OpenAPI.Request(
             content: [
@@ -1262,7 +1266,7 @@ final class ValidatorTests: XCTestCase {
         let resourceContainsName = Validation<JSONSchema>(
             description: "All JSON resources must have a String name",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let nameProperty = context.properties["name"] else {
                         return false
                 }
@@ -1273,7 +1277,7 @@ final class ValidatorTests: XCTestCase {
         let responseResourceContainsId = Validation<JSONSchema>(
             description: "All JSON response resources must have an Id",
             check: take(\.subject) { schema in
-                guard case let .object(_, context) = schema,
+                guard case let .object(_, context) = schema.value,
                     let idProperty = context.properties["id"] else {
                         return false
                 }
@@ -1403,6 +1407,86 @@ final class ValidatorTests: XCTestCase {
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let errors = error as? ValidationErrorCollection
             XCTAssertEqual(errors?.values.count, 7)
+        }
+    }
+
+    // MARK: - Warnings
+    func test_collectsContentTypeWarningNotStrict() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "paths": {
+            "test": {
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "test",
+                    "content": {
+                      "gzip": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.paths["test"]?.pathItemValue?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
+        )
+
+        let warnings = try doc.validate(strict: false)
+
+        XCTAssertEqual(warnings.count, 1)
+        XCTAssertEqual(
+            warnings.first?.localizedDescription,
+            "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
+        )
+        XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+    }
+
+    func test_collectsContentTypeWarningStrict() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "paths": {
+            "test": {
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "test",
+                    "content": {
+                      "gzip": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.paths["test"]?.pathItemValue?.get?.responses[200]?.responseValue?.content.keys.first?.warnings.first?.localizedDescription,
+            "\'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'"
+        )
+
+        XCTAssertThrowsError(try doc.validate(strict: true)) { error in
+            let errors = error as? ValidationErrorCollection
+            XCTAssertEqual(errors?.values.count, 1)
+            XCTAssertEqual(
+                errors?.localizedDescription,
+                "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+            )
+            XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
         }
     }
 }

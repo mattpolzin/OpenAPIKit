@@ -5,11 +5,8 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
+import OpenAPIKitCore
 import Foundation
-
-/// Used as a quick check internally in this library to determine if a type is
-/// a reference (which only `JSONReference` should be).
-public protocol _OpenAPIReference {}
 
 /// A reference following the JSON Reference specification.
 ///
@@ -76,11 +73,23 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         return true
     }
 
+    /// Get the internal value if this reference is internal. Otherwise, nil.
+    public var internalValue: InternalReference? {
+        guard case let .internal(value) = self else { return nil }
+        return value
+    }
+
     /// `true` for external references, `false` for
     /// internal references.
     public var isExternal: Bool {
         guard case .external = self else { return false }
         return true
+    }
+
+    /// Get the external value if this reference is external. Otherwise, nil.
+    public var externalValue: URL? {
+        guard case let .external(value) = self else { return nil }
+        return value
     }
 
     /// Get the name of the referenced object. This method returns optional
@@ -295,6 +304,130 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     }
 }
 
+extension OpenAPI {
+    /// A Reference that carries both a standard JSON Rreference in addition to
+    /// optionally overriding the `summary` and/or `description` of the
+    /// referenced component.
+    ///
+    /// Per the specification, these summary and description overrides are irrelevant
+    /// if the referenced component does not support the given attribute.
+    @dynamicMemberLookup
+    public struct Reference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
+        public let jsonReference: JSONReference<ReferenceType>
+        public let summary: String?
+        public let description: String?
+
+        public init(
+            _ reference: JSONReference<ReferenceType>,
+            summary: String? = nil,
+            description: String? = nil
+        ) {
+            self.jsonReference = reference
+            self.summary = summary
+            self.description = description
+        }
+
+        public subscript<T>(dynamicMember path: KeyPath<JSONReference<ReferenceType>, T>) -> T {
+            return jsonReference[keyPath: path]
+        }
+
+        /// Reference a component of type `ReferenceType` in the
+        /// Components Object.
+        ///
+        /// Example:
+        ///
+        ///     OpenAPI.Reference<JSONSchema>.component(named: "greetings")
+        ///     // encoded string: "#/components/schemas/greetings"
+        ///     // Swift: `document.components.schemas["greetings"]`
+        public static func component(named name: String, summary: String? = nil, description: String? = nil) -> Self {
+            return .init(.internal(.component(name: name)), summary: summary, description: description)
+        }
+
+        /// Reference a path internal to this file but not within the Components Object
+        /// This is likely not what you are looking for. It is advisable to store reusable components
+        /// in the Components Object.
+        ///
+        /// - Important: The path does not contain a leading '#'. Start with the root '/'.
+        public static func `internal`(path: JSONReference<ReferenceType>.Path, summary: String? = nil, description: String? = nil) -> Self {
+            return .init(.internal(.path(path)), summary: summary, description: description)
+        }
+
+        /// Reference an external URL.
+        public static func external(_ url: URL) -> Self {
+            return .init(.external(url))
+        }
+
+        /// `true` for internal references, `false` for
+        /// external references (i.e. to another file).
+        public var isInternal: Bool {
+            return jsonReference.isInternal
+        }
+
+        /// `true` for external references, `false` for
+        /// internal references.
+        public var isExternal: Bool {
+            return jsonReference.isExternal
+        }
+
+        /// Get the name of the referenced object. This method returns optional
+        /// because a reference to an external file might not have any path if the
+        /// file itself is the referenced component.
+        public var name: String? {
+            return jsonReference.name
+        }
+
+        /// The absolute value of an external reference's
+        /// URL or the path fragment string for a local
+        /// reference as defined in [RFC 3986](https://tools.ietf.org/html/rfc3986).
+        public var absoluteString: String {
+            return jsonReference.absoluteString
+        }
+    }
+}
+
+public extension JSONReference {
+    /// Create an OpenAPI.Reference from the given JSONReference.
+    func openAPIReference(withDescription description: String? = nil) -> OpenAPI.Reference<ReferenceType> {
+        OpenAPI.Reference(
+            self,
+            description: description
+        )
+    }
+}
+
+/// `SummaryOverridable` exists to provide a parent protocol to `OpenAPIDescribable`
+/// and `OpenAPISummarizable`. The structure is designed to provide default no-op
+/// implementations of both the members of this protocol to all types that implement either
+/// of the child protocols.
+public protocol SummaryOverridable {
+    func overriddenNonNil(description: String?) -> Self
+    func overriddenNonNil(summary: String?) -> Self
+}
+
+public extension SummaryOverridable {
+    func overriddenNonNil(summary: String?) -> Self {
+        self
+    }
+
+    func overriddenNonNil(description: String?) -> Self {
+        self
+    }
+}
+
+/// `OpenAPIDescribable` types allow their descriptions to be overridden to facilitate
+/// the OpenAPI 3.1.x feature that a `$ref` can specify a description to be used instead of
+/// whatever description the referenced object has.
+public protocol OpenAPIDescribable: SummaryOverridable {
+    func overriddenNonNil(description: String?) -> Self
+}
+
+/// `OpenAPISummarizable` types allow their summaries to be overridden to facilitate
+/// the OpenAPI 3.1.x feature that a `$ref` can specify a summary to be used instead of
+/// whatever summary the referenced object has.
+public protocol OpenAPISummarizable: OpenAPIDescribable {
+    func overriddenNonNil(summary: String?) -> Self
+}
+
 // MARK: - Codable
 
 extension JSONReference {
@@ -348,6 +481,35 @@ extension JSONReference: Decodable {
     }
 }
 
+extension OpenAPI.Reference {
+    private enum CodingKeys: String, CodingKey {
+        case ref = "$ref"
+        case summary = "summary"
+        case description = "description"
+    }
+}
+
+extension OpenAPI.Reference: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try jsonReference.encode(to: encoder)
+
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
+    }
+}
+
+extension OpenAPI.Reference: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        jsonReference = try JSONReference(from: decoder)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+    }
+}
+
 // MARK: - LocallyDereferenceable
 extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
@@ -375,4 +537,31 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     }
 }
 
-extension JSONReference: Validatable where ReferenceType: Validatable {}
+extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
+    /// Look up the component this reference points to and then
+    /// dereference it.
+    ///
+    /// For all external uses, call `dereferenced(in:)` (provided for free by the
+    /// `LocallyDereferenceable` protocol) instead.
+    ///
+    /// If you just want to look the reference up, use the `subscript` or the
+    /// `lookup()` method on `Components`.
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> ReferenceType.DereferencedSelf {
+
+        var newReferences = references
+        let (inserted, _) = newReferences.insert(self)
+        guard inserted else {
+            throw OpenAPI.Components.ReferenceCycleError(ref: self.absoluteString)
+        }
+
+        return try components
+            .lookup(self)
+            ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
+    }
+}
+
+extension OpenAPI.Reference: Validatable where ReferenceType: Validatable {}

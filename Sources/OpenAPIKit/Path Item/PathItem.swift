@@ -5,49 +5,12 @@
 //  Created by Mathew Polzin on 6/22/19.
 //
 
-extension OpenAPI {
-    /// OpenAPI Spec "Paths Object" path field pattern support.
-    ///
-    /// See [OpenAPI Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#paths-object)
-    /// and [OpenAPI Patterned Fields](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#patterned-fields).
-    public struct Path: RawRepresentable, Equatable, Hashable {
-        public let components: [String]
-        public let trailingSlash: Bool
-
-        public init(_ components: [String], trailingSlash: Bool = false) {
-            self.components = components
-            self.trailingSlash = trailingSlash
-        }
-
-        public init(rawValue: String) {
-            let pathComponents = rawValue.split(separator: "/").map(String.init)
-            components = pathComponents.count > 0 && pathComponents[0].isEmpty
-                ? Array(pathComponents.dropFirst())
-                : pathComponents
-            trailingSlash = rawValue.hasSuffix("/")
-        }
-
-        public var rawValue: String {
-            let path =
-                "/\(components.joined(separator: "/"))"
-
-            let suffix = trailingSlash ? "/" : ""
-
-            return path + suffix
-        }
-    }
-}
-
-extension OpenAPI.Path: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-}
+import OpenAPIKitCore
 
 extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
-    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#path-item-object).
     ///
     /// In addition to parameters that apply to all endpoints under the current path,
     /// this type offers access to each possible endpoint operation under properties
@@ -171,7 +134,7 @@ extension OpenAPI {
 }
 
 extension OpenAPI.PathItem {
-    public typealias Map = OrderedDictionary<OpenAPI.Path, OpenAPI.PathItem>
+    public typealias Map = OrderedDictionary<OpenAPI.Path, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>
 }
 
 extension OrderedDictionary where Key == OpenAPI.Path {
@@ -250,6 +213,24 @@ extension OpenAPI.PathItem {
         return OpenAPI.HttpMethod.allCases.compactMap { method in
             self.for(method).map { .init(method: method, operation: $0) }
         }
+    }
+}
+
+// MARK: - Describable & Summarizable
+
+extension OpenAPI.PathItem : OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> OpenAPI.PathItem {
+        guard let summary = summary else { return self }
+        var pathItem = self
+        pathItem.summary = summary
+        return pathItem
+    }
+
+    public func overriddenNonNil(description: String?) -> OpenAPI.PathItem {
+        guard let description = description else { return self }
+        var pathItem = self
+        pathItem.description = description
+        return pathItem
     }
 }
 

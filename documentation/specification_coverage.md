@@ -1,6 +1,6 @@
 
 ## Specification Coverage <!-- omit in toc -->
-The list below is organized like the [OpenAPI Specification 3.0.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
+The list below is organized like the [OpenAPI Specification 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
 
 For more information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
 
@@ -27,7 +27,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [Link Object](#link-object)
 - [Header Object (`OpenAPI.Header`)](#header-object-openapiheader)
 - [Tag Object (`OpenAPI.Tag`)](#tag-object-openapitag)
-- [Reference Object (`JSONReference`)](#reference-object-jsonreference)
+- [Reference Object (`OpenAPI.Reference`)](#reference-object-openapireference)
 - [Schema Object (`JSONSchema`)](#schema-object-jsonschema)
 - [Discriminator Object (`OpenAPI.Discriminator`)](#discriminator-object-openapidiscriminator)
 - [XML Object (`OpenAPI.XML`)](#xml-object-openapixml)
@@ -39,8 +39,10 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 ### OpenAPI Object (`OpenAPI.Document`)
 - [x] openapi (`openAPIVersion`)
 - [x] info
+- [ ] jsonSchemaDialect
 - [x] servers
 - [x] paths
+- [x] webhooks
 - [x] components
 - [x] security
 - [x] tags
@@ -49,6 +51,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### Info Object (`OpenAPI.Document.Info`)
 - [x] title
+- [x] summary
 - [x] description
 - [x] termsOfService
 - [x] contact
@@ -64,7 +67,8 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### License Object (`OpenAPI.Document.Info.License`)
 - [x] name
-- [x] url
+- [x] identifier (`Identifier` `spdx` case)
+- [x] url (`Identifier` `url` case)
 - [x] specification extensions (`vendorExtensions`)
 
 ### Server Object (`OpenAPI.Server`)
@@ -89,6 +93,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] securitySchemes
 - [x] links
 - [x] callbacks
+- [x] pathItems
 - [x] specification extensions (`vendorExtensions`)
 
 ### Paths Object (`OpenAPI.PathItem.Map`)
@@ -96,10 +101,9 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - ~[ ] specification extensions~ (not a planned addition)
 
 ### Path Item Object (`OpenAPI.PathItem`)
+- [x] $ref
 - [x] summary
 - [x] description
-- [x] servers
-- [x] parameters
 - [x] get
 - [x] put
 - [x] post
@@ -108,6 +112,8 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] head
 - [x] patch
 - [x] trace
+- [x] servers
+- [x] parameters
 - [x] specification extensions (`vendorExtensions`)
 
 ### Operation Object (`OpenAPI.Operation`)
@@ -137,13 +143,13 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] required (part of `context`)
 - [x] deprecated
 - [x] allowEmptyValue (part of `context`)
-- [x] content (`schemaOrContent`)
 - [x] schema (`schemaOrContent`)
     - [x] style
     - [x] explode
     - [x] allowReserved
     - [x] example
     - [x] examples
+- [x] content (`schemaOrContent`)
 - [x] specification extensions (`vendorExtensions`)
 
 ### Request Body Object (`OpenAPI.Request`)
@@ -168,6 +174,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [ ] specification extensions
 
 ### Responses Object (`OpenAPI.Response.Map`)
+- [x] default (`Response.StatusCode.Code` `.default` case)
 - [x] *dictionary*
 - ~[ ] specification extensions~ (not a planned addition)
 
@@ -202,13 +209,13 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] description
 - [x] required
 - [x] deprecated
-- [x] content
-- [x] schema
+- [x] schema (`schemaOrContent`)
     - [x] style
     - [x] explode
     - [x] allowReserved
     - [x] example
     - [x] examples
+- [x] content (`schemaOrContent`)
 - [x] specification extensions (`vendorExtensions`)
 
 ### Tag Object (`OpenAPI.Tag`)
@@ -217,7 +224,9 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] externalDocs
 - [x] specification extensions (`vendorExtensions`)
 
-### Reference Object (`JSONReference`)
+### Reference Object (`OpenAPI.Reference`)
+- [x] summary
+- [x] description
 - [x] $ref
     - [x] local (same file) reference (`internal` case)
         - [x] encode
@@ -229,8 +238,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
         - [ ] dereference
 
 ### Schema Object (`JSONSchema`)
-- [x] Mostly complete support for JSON Schema inherited keywords
-- [x] nullable
+- [x] Mostly complete support for JSON Schema inherited keywords (select ones enumerated below)
 - [x] discriminator
 - [x] readOnly (`permissions` `.readOnly` case)
 - [x] writeOnly (`permissions` `.writeOnly` case)
@@ -238,11 +246,12 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] externalDocs
 - [x] example
 - [x] deprecated
-- [ ] specification extensions
+- [x] specification extensions (`vendorExtensions`)
 
 ### Discriminator Object (`OpenAPI.Discriminator`)
 - [x] propertyName
 - [x] mapping
+- [ ] specification extensions
 
 ### XML Object (`OpenAPI.XML`)
 - [x] name

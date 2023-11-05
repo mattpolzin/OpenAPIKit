@@ -78,25 +78,25 @@ final class ContentTests: XCTestCase {
 
     func test_contentMap() {
         let _: OpenAPI.Content.Map = [
-            .bmp: .init(schema: .init(.string(format: .binary))),
+            .bmp: .init(schema: .init(.string(contentEncoding: .binary))),
             .css: .init(schema: .init(.string)),
             .csv: .init(schema: .init(.string)),
             .form: .init(schema: .init(.object(properties: ["hello": .string]))),
             .html: .init(schema: .init(.string)),
             .javascript: .init(schema: .init(.string)),
-            .jpg: .init(schema: .init(.string(format: .binary))),
+            .jpg: .init(schema: .init(.string(contentEncoding: .binary))),
             .json: .init(schema: .init(.string)),
             .jsonapi: .init(schema: .init(.string)),
-            .mov: .init(schema: .init(.string(format: .binary))),
-            .mp3: .init(schema: .init(.string(format: .binary))),
-            .mp4: .init(schema: .init(.string(format: .binary))),
-            .mpg: .init(schema: .init(.string(format: .binary))),
+            .mov: .init(schema: .init(.string(contentEncoding: .binary))),
+            .mp3: .init(schema: .init(.string(contentEncoding: .binary))),
+            .mp4: .init(schema: .init(.string(contentEncoding: .binary))),
+            .mpg: .init(schema: .init(.string(contentEncoding: .binary))),
             .multipartForm: .init(schema: .init(.string)),
             .pdf: .init(schema: .init(.string)),
             .rar: .init(schema: .init(.integer)),
             .rtf: .init(schema: .init(.string)),
             .tar: .init(schema: .init(.boolean)),
-            .tif: .init(schema: .init(.string(format: .binary))),
+            .tif: .init(schema: .init(.string(contentEncoding: .binary))),
             .txt: .init(schema: .init(.number)),
             .xml: .init(schema: .init(.external(URL(string: "hello.json#/world")!))),
             .yaml: .init(schema: .init(.string)),
@@ -104,56 +104,14 @@ final class ContentTests: XCTestCase {
 
             .other("application/custom"): .init(schema: .string),
 
-            .anyApplication: .init(schema: .string(format: .binary)),
-            .anyAudio: .init(schema: .string(format: .binary)),
-            .anyImage: .init(schema: .string(format: .binary)),
-            .anyText: .init(schema: .string(format: .binary)),
-            .anyVideo: .init(schema: .string(format: .binary)),
+            .anyApplication: .init(schema: .string(contentEncoding: .binary)),
+            .anyAudio: .init(schema: .string(contentEncoding: .binary)),
+            .anyImage: .init(schema: .string(contentEncoding: .binary)),
+            .anyText: .init(schema: .string(contentEncoding: .binary)),
+            .anyVideo: .init(schema: .string(contentEncoding: .binary)),
 
-            .any: .init(schema: .string(format: .binary))
+            .any: .init(schema: .string(contentEncoding: .binary))
         ]
-    }
-
-    func test_contentTypeStringReflexivity() {
-
-        XCTAssertNil(OpenAPI.ContentType(rawValue: "not a content type"))
-
-        let types: [OpenAPI.ContentType] = [
-            .bmp,
-            .css,
-            .csv,
-            .form,
-            .html,
-            .javascript,
-            .jpg,
-            .json,
-            .jsonapi,
-            .mov,
-            .mp3,
-            .mp4,
-            .mpg,
-            .multipartForm,
-            .pdf,
-            .rar,
-            .rtf,
-            .tar,
-            .tif,
-            .txt,
-            .xml,
-            .yaml,
-            .zip,
-            .anyApplication,
-            .anyAudio,
-            .anyImage,
-            .anyText,
-            .anyVideo,
-            .any,
-            .other("application/custom")
-        ]
-
-        for type in types {
-            XCTAssertEqual(type, OpenAPI.ContentType(rawValue: type.rawValue))
-        }
     }
 }
 
@@ -361,7 +319,7 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value.codableValue?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.codableValue?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {

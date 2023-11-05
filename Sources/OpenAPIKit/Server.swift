@@ -5,12 +5,13 @@
 //  Created by Mathew Polzin on 8/25/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
-    /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
+    /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#server-object).
     ///
     public struct Server: Equatable, CodableVendorExtendable {
         /// OpenAPI Server URLs can have variable placeholders in them.
@@ -62,10 +63,10 @@ extension OpenAPI {
 extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
-    /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
+    /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#server-variable-object).
     ///
     public struct Variable: Equatable, CodableVendorExtendable {
-        public var `enum`: [String]
+        public var `enum`: [String]?
         public var `default`: String
         public var description: String?
 
@@ -77,7 +78,7 @@ extension OpenAPI.Server {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            enum: [String] = [],
+            enum: [String]? = nil,
             default: String,
             description: String? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -87,6 +88,20 @@ extension OpenAPI.Server {
             self.description = description
             self.vendorExtensions = vendorExtensions
         }
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.Server : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Server {
+        guard let description = description else { return self }
+        return OpenAPI.Server(
+            urlTemplate: urlTemplate,
+            description: description,
+            variables: variables,
+            vendorExtensions: vendorExtensions
+        )
     }
 }
 
@@ -171,7 +186,7 @@ extension OpenAPI.Server.Variable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        if !`enum`.isEmpty {
+        if let `enum` = `enum`, !`enum`.isEmpty {
             try container.encode(`enum`, forKey: .enum)
         }
 
@@ -187,7 +202,7 @@ extension OpenAPI.Server.Variable: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) ?? []
+        `enum` = try container.decodeIfPresent([String].self, forKey: .enum) 
 
         `default` = try container.decode(String.self, forKey: .default)
 

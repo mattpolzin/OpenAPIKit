@@ -5,12 +5,13 @@
 //  Created by Mathew Polzin on 11/2/19.
 //
 
+import OpenAPIKitCore
 import Foundation
 
 extension OpenAPI {
     /// OpenAPI Spec "External Documentation Object"
     /// 
-    /// See [OpenAPI External Documentation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#external-documentation-object).
+    /// See [OpenAPI External Documentation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#external-documentation-object).
     public struct ExternalDocumentation: Equatable, CodableVendorExtendable {
         public var description: String?
         public var url: URL
@@ -31,6 +32,19 @@ extension OpenAPI {
             self.url = url
             self.vendorExtensions = vendorExtensions
         }
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.ExternalDocumentation : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.ExternalDocumentation {
+        guard let description = description else { return self }
+        return OpenAPI.ExternalDocumentation(
+            description: description,
+            url: url,
+            vendorExtensions: vendorExtensions
+        )
     }
 }
 

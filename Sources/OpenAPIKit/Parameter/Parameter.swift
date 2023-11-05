@@ -5,10 +5,12 @@
 //  Created by Mathew Polzin on 7/4/19.
 //
 
+import OpenAPIKitCore
+
 extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
     public struct Parameter: Equatable, CodableVendorExtendable {
         public var name: String
 
@@ -108,7 +110,7 @@ extension OpenAPI {
         public init(
             name: String,
             context: Context,
-            schemaReference: JSONReference<JSONSchema>,
+            schemaReference: OpenAPI.Reference<JSONSchema>,
             description: String? = nil,
             deprecated: Bool = false,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -147,7 +149,7 @@ extension OpenAPI.Parameter {
     /// methods on the `OpenAPI.Components` found at
     /// `document.components` to resolve an `Either` to
     /// an `OpenAPI.Parameter`.
-    public typealias Array = [Either<JSONReference<OpenAPI.Parameter>, OpenAPI.Parameter>]
+    public typealias Array = [Either<OpenAPI.Reference<OpenAPI.Parameter>, OpenAPI.Parameter>]
 }
 
 extension OpenAPI.Parameter {
@@ -155,7 +157,7 @@ extension OpenAPI.Parameter {
     /// containing exactly the things that differentiate
     /// one parameter from another, per the specification.
     ///
-    /// See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+    /// See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
     internal struct ParameterIdentity: Hashable {
         let name: String
         let location: Context.Location
@@ -164,7 +166,7 @@ extension OpenAPI.Parameter {
 
 // MARK: `Either` convenience methods
 // OpenAPI.PathItem.Array.Element =>
-extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
+extension Either where A == OpenAPI.Reference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
     /// Construct a parameter using a `JSONSchema`.
     public static func parameter(
@@ -206,6 +208,17 @@ extension Either where A == JSONReference<OpenAPI.Parameter>, B == OpenAPI.Param
                 vendorExtensions: vendorExtensions
             )
         )
+    }
+}
+
+// MARK: - Describable
+
+extension OpenAPI.Parameter : OpenAPIDescribable {
+    public func overriddenNonNil(description: String?) -> OpenAPI.Parameter {
+        guard let description = description else { return self }
+        var parameter = self
+        parameter.description = description
+        return parameter
     }
 }
 

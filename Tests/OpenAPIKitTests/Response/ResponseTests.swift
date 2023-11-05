@@ -17,7 +17,7 @@ final class ResponseTests: XCTestCase {
         XCTAssertNil(r1.headers)
         XCTAssertEqual(r1.content, [:])
 
-        let content = OpenAPI.Content(schema: .init(JSONReference<JSONSchema>.external(URL(string: "hello.yml")!)))
+        let content = OpenAPI.Content(schema: .init(OpenAPI.Reference<JSONSchema>.external(URL(string: "hello.yml")!)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],
@@ -83,6 +83,7 @@ extension ResponseTests {
     func test_fallbackForTwoAlts() {
         let test = StatusCode(rawValue: "404/500")
         XCTAssertEqual(test?.rawValue, "404")
+        XCTAssertEqual(test?.warnings.first?.localizedDescription, "Found non-compliant Status Code \'404/500\' but was able to parse as 404")
     }
 
     func test_codeFromIntegerLiteral() {
@@ -215,6 +216,60 @@ extension ResponseTests {
                 description: "hello world",
                 headers: ["hello": .init(header)],
                 content: [.json: content]
+            )
+        )
+    }
+
+    func test_schemaReferenceHeader_encode() {
+        let header = OpenAPI.Header(schemaReference: .component(named: "schemaRef"), description: "a good header")
+        let response = OpenAPI.Response(
+            description: "hello world",
+            headers: ["hello": .init(header)],
+            content: [:]
+        )
+
+        let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
+
+        assertJSONEquivalent(
+            encodedResponse,
+            """
+            {
+              "description" : "hello world",
+              "headers" : {
+                "hello" : {
+                  "description" : "a good header",
+                  "schema" : {
+                    "$ref" : "#\\/components\\/schemas\\/schemaRef"
+                  }
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_schemaReferenceHeader_decode() throws {
+        let responseData =
+        """
+        {
+            "description": "hello world",
+            "headers": {
+                "hello": {
+                    "description": "a good header",
+                    "schema" : { "$ref" : "#/components/schemas/schemaRef" }
+                }
+            }
+        }
+        """.data(using: .utf8)!
+
+        let response = try orderUnstableDecode(OpenAPI.Response.self, from: responseData)
+
+        let header = OpenAPI.Header(schemaReference: .component(named: "schemaRef"), description: "a good header")
+        XCTAssertEqual(
+            response,
+            OpenAPI.Response(
+                description: "hello world",
+                headers: ["hello": .init(header)]
             )
         )
     }
