@@ -836,10 +836,13 @@ extension JSONSchema.IntegerContext: Decodable {
         // the following acrobatics thanks to some libraries (namely Yams) not
         // being willing to decode floating point representations of whole numbers
         // as integer values.
-        let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
-        let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
+        let maximumIntegerAttempt = try? container.decodeIfPresent(Int.self, forKey: .maximum)
+        let minimumIntegerAttempt = try? container.decodeIfPresent(Int.self, forKey: .minimum)
+        let maximumDoubleAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
+        let minimumDoubleAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
 
-        maximum = try maximumAttempt.map { floatMax in
+        let maximumAttempt = try maximumIntegerAttempt
+            ?? maximumDoubleAttempt.map { floatMax in
             guard let integer = Int(exactly: floatMax) else {
                 throw InconsistencyError(
                     subjectName: "maximum",
@@ -849,9 +852,12 @@ extension JSONSchema.IntegerContext: Decodable {
                 )
             }
             return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMaximum) }
+        }
 
-        minimum = try minimumAttempt.map { floatMin in
+        maximum = maximumAttempt.map { Bound(value: $0, exclusive: exclusiveMaximum) }
+
+        let minimumAttempt = try minimumIntegerAttempt
+            ?? minimumDoubleAttempt.map { floatMin in
             guard let integer = Int(exactly: floatMin) else {
                 throw InconsistencyError(
                     subjectName: "minimum",
@@ -861,7 +867,9 @@ extension JSONSchema.IntegerContext: Decodable {
                 )
             }
             return integer
-        }.map { Bound(value: $0, exclusive: exclusiveMinimum) }
+        }
+
+        minimum = minimumAttempt.map { Bound(value: $0, exclusive: exclusiveMinimum) }
     }
 }
 
