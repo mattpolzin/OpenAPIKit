@@ -843,8 +843,9 @@ extension JSONSchema.IntegerContext: Decodable {
             guard let integer = Int(exactly: floatMax) else {
                 throw InconsistencyError(
                     subjectName: "maximum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
+                    details: "Expected an Integer literal but found a floating point value (\(String(describing: floatMax)))",
+                    codingPath: decoder.codingPath,
+                    pathIncludesSubject: false
                 )
             }
             return integer
@@ -854,8 +855,9 @@ extension JSONSchema.IntegerContext: Decodable {
             guard let integer = Int(exactly: floatMin) else {
                 throw InconsistencyError(
                     subjectName: "minimum",
-                    details: "Expected an Integer literal but found a floating point value",
-                    codingPath: decoder.codingPath
+                    details: "Expected an Integer literal but found a floating point value (\(String(describing: floatMin)))",
+                    codingPath: decoder.codingPath,
+                    pathIncludesSubject: false
                 )
             }
             return integer
