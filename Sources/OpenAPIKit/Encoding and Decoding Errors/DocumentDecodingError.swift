@@ -67,9 +67,9 @@ extension OpenAPI.Error.Decoding.Document {
         case .other(let decodingError):
             return decodingError.relativeCodingPathString
         case .inconsistency(let error):
-            return error.codingPath.isEmpty
-                ? ""
-                : error.codingPath.dropLast().stringValue
+            return error.codingPath.isEmpty ? ""
+                : error.pathIncludesSubject ? error.codingPath.dropLast().stringValue
+                  : error.codingPath.stringValue
         case .path(let pathError):
             return pathError.relativeCodingPathString
         case .neither(let eitherError):

@@ -977,30 +977,37 @@ extension JSONSchema.IntegerContext: Decodable {
             // the following acrobatics thanks to some libraries (namely Yams) not
             // being willing to decode floating point representations of whole numbers
             // as integer values.
-        let exclusiveMaximumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
-        let exclusiveMinimumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
+        let exclusiveIntegerMaximumAttempt = try? container.decodeIfPresent(Int.self, forKey: .exclusiveMaximum)
+        let exclusiveIntegerMinimumAttempt = try? container.decodeIfPresent(Int.self, forKey: .exclusiveMinimum)
+        let exclusiveDoubleMaximumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
+        let exclusiveDoubleMinimumAttempt = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
 
-        let maximumAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
-        let minimumAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
+        let maximumIntegerAttempt = try? container.decodeIfPresent(Int.self, forKey: .maximum)
+        let minimumIntegerAttempt = try? container.decodeIfPresent(Int.self, forKey: .minimum)
+        let maximumDoubleAttempt = try container.decodeIfPresent(Double.self, forKey: .maximum)
+        let minimumDoubleAttempt = try container.decodeIfPresent(Double.self, forKey: .minimum)
 
-        func boundFromAttempt(_ attempt: Double?, max: Bool, exclusive: Bool) throws -> Bound? {
-            return try attempt.map { floatVal in
+        func boundFrom(integer intAttempt: Int?, double doubleAttempt: Double?, max: Bool, exclusive: Bool) throws -> Bound? {
+            let value = try intAttempt
+                ?? doubleAttempt.map { floatVal in
                 guard let integer = Int(exactly: floatVal) else {
                     throw InconsistencyError(
                         subjectName: max ? "maximum" : "minimum",
-                        details: "Expected an Integer literal but found a floating point value",
-                        codingPath: decoder.codingPath
+                        details: "Expected an Integer literal but found a floating point value (\(String(describing: floatVal)))",
+                        codingPath: decoder.codingPath,
+                        pathIncludesSubject: false
                     )
                 }
-                return Bound(value: integer, exclusive: exclusive)
+                return integer
             }
+            return value.map { Bound(value: $0, exclusive: exclusive) }
         }
 
-        maximum = try boundFromAttempt(exclusiveMaximumAttempt, max: true, exclusive: true)
-        ?? boundFromAttempt(maximumAttempt, max: true, exclusive: false)
+        maximum = try boundFrom(integer: exclusiveIntegerMaximumAttempt, double: exclusiveDoubleMaximumAttempt, max: true, exclusive: true)
+        ?? boundFrom(integer: maximumIntegerAttempt, double: maximumDoubleAttempt, max: true, exclusive: false)
 
-        minimum = try boundFromAttempt(exclusiveMinimumAttempt, max: false, exclusive: true)
-        ?? boundFromAttempt(minimumAttempt, max: false, exclusive: false)
+        minimum = try boundFrom(integer: exclusiveIntegerMinimumAttempt, double: exclusiveDoubleMinimumAttempt, max: false, exclusive: true)
+        ?? boundFrom(integer: minimumIntegerAttempt, double: minimumDoubleAttempt, max: false, exclusive: false)
     }
 }
 
