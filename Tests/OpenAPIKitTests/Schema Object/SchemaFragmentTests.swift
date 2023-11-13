@@ -833,7 +833,7 @@ extension SchemaFragmentTests {
 
         let decoded3 = try orderUnstableDecode(JSONSchema.self, from: t3)
 
-        XCTAssertEqual(decoded3, JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true))])))
+        XCTAssertEqual(decoded3, JSONSchema.object(.init(), .init(properties: ["hello": .fragment(.init(required: true, _inferred: true))])))
 
         let t4 =
         """
