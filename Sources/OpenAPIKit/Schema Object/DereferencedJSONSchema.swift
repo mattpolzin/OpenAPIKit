@@ -135,6 +135,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var examples: [AnyCodable] { jsonSchema.examples }
 
     // See `JSONSchemaContext`
+    public var inferred: Bool { jsonSchema.inferred }
+
+    // See `JSONSchemaContext`
     public var readOnly: Bool { jsonSchema.readOnly }
 
     // See `JSONSchemaContext`

@@ -255,6 +255,11 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
     public var example: AnyCodable? {
         return coreContext?.example
     }
+
+    // See `JSONSchemaContext`
+    public var inferred: Bool {
+        return coreContext?.inferred ?? false
+    }
 }
 
 extension JSONSchema: Equatable {

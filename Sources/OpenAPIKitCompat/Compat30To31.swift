@@ -514,7 +514,8 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: [example].compactMap { $0 }
+            examples: [example].compactMap { $0 },
+            _inferred: inferred
         )
     }
 }
@@ -533,7 +534,8 @@ extension OpenAPIKit30.JSONSchema.CoreContext where Format == OpenAPIKit30.JSONT
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: [example].compactMap { $0 }
+            examples: [example].compactMap { $0 },
+            _inferred: inferred
         )
     }
 }
