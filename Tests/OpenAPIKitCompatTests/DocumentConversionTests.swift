@@ -770,7 +770,51 @@ final class DocumentConversionTests: XCTestCase {
     }
 
     func test_Parameter() throws {
-        // TODO: write test
+        let parameter1 = OpenAPIKit30.OpenAPI.Parameter(
+            name: "hello",
+            context: .query,
+            schemaOrContent: .a(OpenAPIKit30.OpenAPI.Parameter.SchemaContext(
+                .object,
+                style: .simple
+            ))
+        )
+
+        let parameter2 = OpenAPIKit30.OpenAPI.Parameter(
+            name: "hello",
+            context: .query,
+            schemaOrContent: .a(OpenAPIKit30.OpenAPI.Parameter.SchemaContext(
+                .object,
+                style: .form,
+                explode: false,
+                allowReserved: true,
+                example: "hi=hello"
+            )),
+            description: "described",
+            deprecated: true,
+            vendorExtensions: [ "x-hello": "hi" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                parameters: [
+                    "param1": parameter1,
+                    "param2": parameter2
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc,oldDoc)
+
+        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"])
+        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"])
+
+        try assertEqualNewToOld(newParameter1, parameter1)
+        try assertEqualNewToOld(newParameter2, parameter2)
     }
 
     // TODO: more tests
@@ -866,7 +910,7 @@ fileprivate func assertEqualNewToOld(_ newServer: OpenAPIKit.OpenAPI.Server?, _ 
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Parameter.Array, _ oldParamArray: OpenAPIKit30.OpenAPI.Parameter.Array) {
+fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Parameter.Array, _ oldParamArray: OpenAPIKit30.OpenAPI.Parameter.Array) throws {
     for (newParameter, oldParameter) in zip(newParamArray, oldParamArray) {
         switch (newParameter, oldParameter) {
         case (.a(let ref), .a(let ref2)):
@@ -874,7 +918,7 @@ fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Paramet
             XCTAssertNil(ref.description)
             XCTAssertEqual(ref.jsonReference.absoluteString, ref2.absoluteString)
         case (.b(let param), .b(let param2)):
-            assertEqualNewToOld(param, param2)
+            try assertEqualNewToOld(param, param2)
         default:
             XCTFail("Parameters are not equal because one is a reference and the other is not: \(newParameter)  / \(oldParameter)")
         }
@@ -896,7 +940,7 @@ fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem?
             try assertEqualNewToOld(newServer, oldServer)
         }
     }
-    assertEqualNewToOld(newPathItem.parameters, oldPathItem.parameters)
+    try assertEqualNewToOld(newPathItem.parameters, oldPathItem.parameters)
     try assertEqualNewToOld(newPathItem.get, oldPathItem.get)
     try assertEqualNewToOld(newPathItem.put, oldPathItem.put)
     try assertEqualNewToOld(newPathItem.post, oldPathItem.post)
@@ -909,9 +953,17 @@ fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem?
     XCTAssertEqual(newPathItem.vendorExtensions, oldPathItem.vendorExtensions)
 }
 
-fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) {
+fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) throws {
     XCTAssertEqual(newParam.name, oldParam.name)
     assertEqualNewToOld(newParam.context, oldParam.context)
+    switch (newParam.schemaOrContent, oldParam.schemaOrContent) {
+        case (.a(let newSchema), .a(let oldSchema)):
+            try assertEqualNewToOld(newSchema, oldSchema)
+        case (.b(let newContent), .b(let oldContent)):
+            try assertEqualNewToOld(newContent, oldContent)
+        default:
+            XCTFail("Parameter schemaOrContent are not equal. \(newParam.schemaOrContent)  /   \(oldParam.schemaOrContent)")
+    }
     XCTAssertEqual(newParam.description, oldParam.description)
     XCTAssertEqual(newParam.deprecated, oldParam.deprecated)
     XCTAssertEqual(newParam.vendorExtensions, oldParam.vendorExtensions)
@@ -943,7 +995,7 @@ fileprivate func assertEqualNewToOld(_ newOperation: OpenAPIKit.OpenAPI.Operatio
         XCTAssertEqual(newOp.description, oldOp.description)
         try assertEqualNewToOld(newOp.externalDocs, oldOp.externalDocs)
         XCTAssertEqual(newOp.operationId, oldOp.operationId)
-        assertEqualNewToOld(newOp.parameters, oldOp.parameters)
+        try assertEqualNewToOld(newOp.parameters, oldOp.parameters)
         if let newRequest = newOp.requestBody {
             let oldRequest = try XCTUnwrap(oldOp.requestBody)
             switch (newRequest, oldRequest) {
@@ -1407,7 +1459,7 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
     }
     for (key, newParameter) in newComponents.parameters {
         let oldParameter = try XCTUnwrap(oldComponents.parameters[key])
-        assertEqualNewToOld(newParameter, oldParameter)
+        try assertEqualNewToOld(newParameter, oldParameter)
     }
     for (key, newExample) in newComponents.examples {
         let oldExample = try XCTUnwrap(oldComponents.examples[key])
