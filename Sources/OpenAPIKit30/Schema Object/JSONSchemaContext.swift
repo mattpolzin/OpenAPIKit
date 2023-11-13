@@ -95,6 +95,23 @@ public protocol JSONSchemaContext {
     /// Get an example, if specified. If unspecified, returns `nil`.
     var example: AnyCodable? { get }
 
+    /// A schema is "inferred" if it was not actually parsed as a JSON Schema but rather
+    /// inferred to exist based on surroundings.
+    ///
+    /// The only currently known case of this is when we parse a `requried` entry in an
+    /// object and that object has no property with the same name as the requirement.
+    /// We _infer_ that there is a property by that name (even if only when combined with
+    /// another schema elsewhere via e.g. `allOf`). This inferred schema has no properties
+    /// except for being required; it can be differentiated from a schema that was explicitly
+    /// given in the parsed JSON Schema to have no properties via this internal `_inferred`
+    /// boolean.
+    ///
+    /// This is a non-breaking way to tracking such properties, but a breaking change in the
+    /// future might very well represent this more elegantly. For example, maybe a requirement
+    /// without a property definition is not a .fragment schema but rather a new case in that
+    /// enum.
+    var inferred: Bool { get }
+
     /// `true` if this schema can only be read from and is therefore
     /// unsupported for request data.
     var readOnly: Bool { get }
@@ -132,6 +149,23 @@ extension JSONSchema {
 
         public let example: AnyCodable?
 
+        /// A schema is "inferred" if it was not actually parsed as a JSON Schema but rather
+        /// inferred to exist based on surroundings.
+        ///
+        /// The only currently known case of this is when we parse a `requried` entry in an
+        /// object and that object has no property with the same name as the requirement.
+        /// We _infer_ that there is a property by that name (even if only when combined with
+        /// another schema elsewhere via e.g. `allOf`). This inferred schema has no properties
+        /// except for being required; it can be differentiated from a schema that was explicitly
+        /// given in the parsed JSON Schema to have no properties via this internal `_inferred`
+        /// boolean.
+        ///
+        /// This is a non-breaking way to tracking such properties, but a breaking change in the
+        /// future might very well represent this more elegantly. For example, maybe a requirement
+        /// without a property definition is not a .fragment schema but rather a new case in that
+        /// enum.
+        public let inferred: Bool
+
         public var nullable: Bool { _nullable ?? false }
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
@@ -167,7 +201,8 @@ extension JSONSchema {
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
-            example: AnyCodable? = nil
+            example: AnyCodable? = nil,
+            _inferred: Bool = false
         ) {
             self.format = format
             self.required = required
@@ -181,6 +216,7 @@ extension JSONSchema {
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.example = example
+            self.inferred = _inferred
         }
 
         public init(
@@ -209,6 +245,7 @@ extension JSONSchema {
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.example = AnyCodable(example)
+            self.inferred = false
         }
     }
 }
@@ -741,6 +778,7 @@ extension JSONSchema.CoreContext: Decodable {
 
         _deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated)
         example = try container.decodeIfPresent(AnyCodable.self, forKey: .example)
+        inferred = false
     }
 }
 
@@ -979,7 +1017,7 @@ extension JSONSchema.ObjectContext: Decodable {
         required
             .filter { !properties.keys.contains($0) }
             .forEach { propertyName in
-                properties[propertyName] = .fragment(.init(required: true))
+                properties[propertyName] = .fragment(.init(required: true, _inferred: true))
             }
 
         return properties
