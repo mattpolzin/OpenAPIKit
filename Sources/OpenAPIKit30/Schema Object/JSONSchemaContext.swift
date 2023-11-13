@@ -124,6 +124,12 @@ public protocol JSONSchemaContext {
     var deprecated: Bool { get }
 }
 
+extension JSONSchemaContext {
+    // Default implementation to make addition of this new property which is only
+    // supposed to be set internally a non-breaking addition.
+    public var inferred: Bool { false }
+}
+
 extension JSONSchema {
     /// The context that applies to all schemas.
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
