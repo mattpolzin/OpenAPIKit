@@ -225,6 +225,11 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
     public var examples: [AnyCodable] {
         return coreContext.examples
     }
+
+    // See `JSONSchemaContext`
+    public var inferred: Bool {
+        return coreContext.inferred
+    }
 }
 
 extension JSONSchema: Equatable {

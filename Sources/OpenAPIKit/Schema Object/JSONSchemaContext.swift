@@ -214,7 +214,8 @@ extension JSONSchema {
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
             examples: [AnyCodable] = [],
-            vendorExtensions: [String: AnyCodable] = [:]
+            vendorExtensions: [String: AnyCodable] = [:],
+            _inferred: Bool = false
         ) {
             self.format = format
             self.required = required
@@ -229,7 +230,7 @@ extension JSONSchema {
             self.defaultValue = defaultValue
             self.examples = examples
             self.vendorExtensions = vendorExtensions
-            self.inferred = false
+            self.inferred = _inferred
         }
 
         public init(
@@ -261,39 +262,6 @@ extension JSONSchema {
             self.examples = examples.map(AnyCodable.init)
             self.vendorExtensions = vendorExtensions
             self.inferred = false
-        }
-
-        /// Create a context for a potentially inferred schema.
-        internal init(
-            format: Format = .unspecified,
-            required: Bool = true,
-            nullable: Bool = false,
-            permissions: Permissions? = nil,
-            deprecated: Bool? = nil,
-            title: String? = nil,
-            description: String? = nil,
-            discriminator: OpenAPI.Discriminator? = nil,
-            externalDocs: OpenAPI.ExternalDocumentation? = nil,
-            allowedValues: [AnyCodable]? = nil,
-            defaultValue: AnyCodable? = nil,
-            examples: [AnyCodable] = [],
-            vendorExtensions: [String: AnyCodable] = [:],
-            inferred: Bool
-        ) {
-            self.format = format
-            self.required = required
-            self.nullable = nullable
-            self._permissions = permissions
-            self._deprecated = deprecated
-            self.title = title
-            self.description = description
-            self.discriminator = discriminator
-            self.externalDocs = externalDocs
-            self.allowedValues = allowedValues
-            self.defaultValue = defaultValue
-            self.examples = examples
-            self.vendorExtensions = vendorExtensions
-            self.inferred = inferred
         }
     }
 }
@@ -1187,7 +1155,7 @@ extension JSONSchema.ObjectContext: Decodable {
         required
             .filter { !properties.keys.contains($0) }
             .forEach { propertyName in
-                properties[propertyName] = .fragment(.init(required: true, inferred: true))
+                properties[propertyName] = .fragment(.init(required: true, _inferred: true))
             }
 
         return properties
