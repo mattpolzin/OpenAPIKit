@@ -201,6 +201,12 @@ extension JSONSchema {
                 && _permissions == nil
         }
 
+        /// Create a schema core context.
+        ///
+        /// NOTE that the `_inferred` parameter has semantics specific to
+        ///      decoding schemas and you almost certaintly do not want
+        ///      to set it unless you are carrying forward the `inferred`
+        ///      property of another core context.
         public init(
             format: Format = .unspecified,
             required: Bool = true,
