@@ -95,6 +95,23 @@ public protocol JSONSchemaContext {
     /// Get examples of values fitting the schema.
     var examples: [AnyCodable] { get }
 
+    /// A schema is "inferred" if it was not actually parsed as a JSON Schema but rather
+    /// inferred to exist based on surroundings.
+    ///
+    /// The only currently known case of this is when we parse a `requried` entry in an
+    /// object and that object has no property with the same name as the requirement.
+    /// We _infer_ that there is a property by that name (even if only when combined with
+    /// another schema elsewhere via e.g. `allOf`). This inferred schema has no properties
+    /// except for being required; it can be differentiated from a schema that was explicitly
+    /// given in the parsed JSON Schema to have no properties via this internal `_inferred`
+    /// boolean.
+    ///
+    /// This is a non-breaking way to tracking such properties, but a breaking change in the
+    /// future might very well represent this more elegantly. For example, maybe a requirement
+    /// without a property definition is not a .fragment schema but rather a new case in that
+    /// enum.
+    var inferred: Bool { get }
+
     /// `true` if this schema can only be read from and is therefore
     /// unsupported for request data.
     var readOnly: Bool { get }
@@ -108,6 +125,12 @@ public protocol JSONSchemaContext {
 
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
+}
+
+extension JSONSchemaContext {
+    // Default implementation to make addition of this new property which is only
+    // supposed to be set internally a non-breaking addition.
+    public var inferred: Bool { false }
 }
 
 extension JSONSchema {
@@ -146,6 +169,23 @@ extension JSONSchema {
         /// where the values are anything codable.
         public var vendorExtensions: [String : AnyCodable]
 
+        /// A schema is "inferred" if it was not actually parsed as a JSON Schema but rather
+        /// inferred to exist based on surroundings.
+        ///
+        /// The only currently known case of this is when we parse a `requried` entry in an
+        /// object and that object has no property with the same name as the requirement.
+        /// We _infer_ that there is a property by that name (even if only when combined with
+        /// another schema elsewhere via e.g. `allOf`). This inferred schema has no properties
+        /// except for being required; it can be differentiated from a schema that was explicitly
+        /// given in the parsed JSON Schema to have no properties via this internal `_inferred`
+        /// boolean.
+        ///
+        /// This is a non-breaking way to tracking such properties, but a breaking change in the
+        /// future might very well represent this more elegantly. For example, maybe a requirement
+        /// without a property definition is not a .fragment schema but rather a new case in that
+        /// enum.
+        public let inferred: Bool
+
         public var permissions: Permissions { _permissions ?? .readWrite}
         public var deprecated: Bool { _deprecated ?? false }
 
@@ -167,6 +207,12 @@ extension JSONSchema {
                 && _permissions == nil
         }
 
+        /// Create a schema core context.
+        ///
+        /// NOTE that the `_inferred` parameter has semantics specific to
+        ///      decoding schemas and you almost certaintly do not want
+        ///      to set it unless you are carrying forward the `inferred`
+        ///      property of another core context.
         public init(
             format: Format = .unspecified,
             required: Bool = true,
@@ -180,7 +226,8 @@ extension JSONSchema {
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
             examples: [AnyCodable] = [],
-            vendorExtensions: [String: AnyCodable] = [:]
+            vendorExtensions: [String: AnyCodable] = [:],
+            _inferred: Bool = false
         ) {
             self.format = format
             self.required = required
@@ -195,6 +242,7 @@ extension JSONSchema {
             self.defaultValue = defaultValue
             self.examples = examples
             self.vendorExtensions = vendorExtensions
+            self.inferred = _inferred
         }
 
         public init(
@@ -225,6 +273,7 @@ extension JSONSchema {
             self.defaultValue = defaultValue
             self.examples = examples.map(AnyCodable.init)
             self.vendorExtensions = vendorExtensions
+            self.inferred = false
         }
     }
 }
@@ -853,6 +902,7 @@ extension JSONSchema.CoreContext: Decodable {
         // apply to all schemas (core context) they are more accurately in the context of the
         // full JSON Schema.
         vendorExtensions = [:]
+        inferred = false
     }
 
     /// Support both `enum` and `const` when decoding allowed values for the schema.
@@ -1117,7 +1167,7 @@ extension JSONSchema.ObjectContext: Decodable {
         required
             .filter { !properties.keys.contains($0) }
             .forEach { propertyName in
-                properties[propertyName] = .fragment(.init(required: true))
+                properties[propertyName] = .fragment(.init(required: true, _inferred: true))
             }
 
         return properties

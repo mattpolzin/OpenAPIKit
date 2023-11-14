@@ -176,6 +176,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
                     style: style,
+                    explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
                 )
@@ -183,6 +184,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
                     style: style,
+                    explode: explode,
                     allowReserved: allowReserved,
                     example: example
                 )
@@ -192,6 +194,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
                     style: style,
+                    explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
                 )
@@ -199,6 +202,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
                     style: style,
+                    explode: explode,
                     allowReserved: allowReserved,
                     example: example
                 )
@@ -510,7 +514,8 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: [example].compactMap { $0 }
+            examples: [example].compactMap { $0 },
+            _inferred: inferred
         )
     }
 }
@@ -529,7 +534,8 @@ extension OpenAPIKit30.JSONSchema.CoreContext where Format == OpenAPIKit30.JSONT
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: [example].compactMap { $0 }
+            examples: [example].compactMap { $0 },
+            _inferred: inferred
         )
     }
 }
