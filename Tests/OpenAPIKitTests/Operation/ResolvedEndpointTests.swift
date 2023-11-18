@@ -47,11 +47,11 @@ final class ResolvedEndpointTests: XCTestCase {
 
         XCTAssertEqual(endpoints.first?.routeSummary, "routeSummary")
         XCTAssertEqual(endpoints.first?.routeDescription, "routeDescription")
-        XCTAssertEqual(endpoints.first?.routeVendorExtensions["test"]?.value as? String, "route")
+        XCTAssertEqual(endpoints.first?.routeVendorExtensions["test"], "route")
         XCTAssertEqual(endpoints.first?.tags, ["a", "b"])
         XCTAssertEqual(endpoints.first?.endpointSummary, "endpointSummary")
         XCTAssertEqual(endpoints.first?.endpointDescription, "endpointDescription")
-        XCTAssertEqual(endpoints.first?.endpointVendorExtensions["test"]?.value as? String, "endpoint")
+        XCTAssertEqual(endpoints.first?.endpointVendorExtensions["test"], "endpoint")
         XCTAssertEqual(endpoints.first?.operationId, "hi there")
         XCTAssertEqual(endpoints.first?.externalDocs, .init(url: URL(string: "http://website.com")!))
         XCTAssertEqual(endpoints.first?.method, .get)

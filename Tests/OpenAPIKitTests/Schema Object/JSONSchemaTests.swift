@@ -1230,7 +1230,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(null.allowedValues?[0].description, "nil")
         XCTAssertEqual(boolean.allowedValues, [false])
         XCTAssertEqual(object.allowedValues, [[:]])
-        XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(array.allowedValues?[0], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
         XCTAssertEqual(string.allowedValues, ["hello"])
@@ -1268,7 +1268,7 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(null.allowedValues, [nil])
         XCTAssertEqual(boolean.allowedValues, [false])
         XCTAssertEqual(object.allowedValues, [AnyCodable.object([:])])
-        XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(array.allowedValues?[0], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
         XCTAssertEqual(string.allowedValues, ["hello"])
@@ -1358,12 +1358,12 @@ final class SchemaObjectTests: XCTestCase {
         let not = JSONSchema.not(.string)
         let ref = JSONSchema.reference(.external(URL(string: "hello.yml")!))
 
-        XCTAssertEqual(object.examples[0].value as? [String:String], [:])
+        XCTAssertEqual(object.examples[0], [:])
         XCTAssertEqual(object.examples.count, 1)
-        XCTAssertEqual(fragment.examples[0].value as? String, "hi")
+        XCTAssertEqual(fragment.examples[0], "hi")
         XCTAssertEqual(fragment.examples.count, 1)
         XCTAssertEqual(null.examples.count, 1)
-        XCTAssertEqual(null.examples[0].value as? String, "null")
+        XCTAssertEqual(null.examples[0], "null")
 
         XCTAssertTrue(all.examples.isEmpty)
         XCTAssertTrue(one.examples.isEmpty)
@@ -1400,31 +1400,31 @@ final class SchemaObjectTests: XCTestCase {
         let reference = try JSONSchema.reference(.external(URL(string: "hello/world.json#/hello")!),.init()).with(example: "hi")
 
         XCTAssertEqual(null.examples[0].description, "nil")
-        XCTAssertEqual(object.examples[0].value as? [String: String], [:])
+        XCTAssertEqual(object.examples[0], [:])
         XCTAssertEqual(object.examples.count, 1)
-        XCTAssertEqual(array.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(array.examples[0], ["hello"])
         XCTAssertEqual(array.examples.count, 1)
 
-        XCTAssertEqual(boolean.examples[0].value as? Bool, true)
+        XCTAssertEqual(boolean.examples[0], true)
         XCTAssertEqual(boolean.examples.count, 1)
-        XCTAssertEqual(double.examples[0].value as? Double, 10.5)
+        XCTAssertEqual(double.examples[0], 10.5)
         XCTAssertEqual(double.examples.count, 1)
-        XCTAssertEqual(integer.examples[0].value as? Int, 3)
+        XCTAssertEqual(integer.examples[0], 3)
         XCTAssertEqual(integer.examples.count, 1)
-        XCTAssertEqual(string.examples[0].value as? String, "hello world")
+        XCTAssertEqual(string.examples[0], "hello world")
         XCTAssertEqual(string.examples.count, 1)
 
-        XCTAssertEqual(allOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(allOf.examples[0], ["hello"])
         XCTAssertEqual(allOf.examples.count, 1)
-        XCTAssertEqual(anyOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(anyOf.examples[0], ["hello"])
         XCTAssertEqual(anyOf.examples.count, 1)
-        XCTAssertEqual(oneOf.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(oneOf.examples[0], ["hello"])
         XCTAssertEqual(oneOf.examples.count, 1)
-        XCTAssertEqual(not.examples[0].value as? [String], ["hello"])
+        XCTAssertEqual(not.examples[0], ["hello"])
         XCTAssertEqual(not.examples.count, 1)
-        XCTAssertEqual(fragment.examples[0].value as? String, "hi")
+        XCTAssertEqual(fragment.examples[0], "hi")
         XCTAssertEqual(fragment.examples.count, 1)
-        XCTAssertEqual(reference.examples[0].value as? String, "hi")
+        XCTAssertEqual(reference.examples[0], "hi")
         XCTAssertEqual(reference.examples.count, 1)
     }
 
@@ -2167,8 +2167,8 @@ extension SchemaObjectTests {
         XCTAssertEqual(readOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .readOnly), .init(properties: [:])))
         XCTAssertEqual(writeOnlyObject, JSONSchema.object(.init(format: .generic, permissions: .writeOnly), .init(properties: [:])))
         XCTAssertEqual(deprecatedObject, JSONSchema.object(.init(format: .generic, deprecated: true), .init(properties: [:])))
-        XCTAssertEqual(constValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(constValueObject.allowedValues?[0], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(defaultValueObject.defaultValue, ["hello": false])
         XCTAssertEqual(discriminatorObject, JSONSchema.object(discriminator: .init(propertyName: "hello")))
@@ -2296,7 +2296,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, title: "hello"), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, title: "hello"), .init(properties: [:])))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.title, "hello")
 
@@ -2403,7 +2403,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, description: "hello"), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, description: "hello"), .init(properties: [:])))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.description, "hello")
 
@@ -2518,7 +2518,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, externalDocs: .init(url: URL(string: "http://google.com")!)), .init(properties: [:])))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.externalDocs, .init(url: URL(string: "http://google.com")!))
 
@@ -2625,7 +2625,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], maxProperties: 1)))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], maxProperties: 1)))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
         guard case let .object(_, contextB) = allowedValueObject.value else {
@@ -2731,7 +2731,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], minProperties: 1)))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], minProperties: 1)))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
         guard case let .object(_, contextB) = allowedValueObject.value else {
@@ -2837,7 +2837,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(true))))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(true))))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
         guard case let .object(_, contextB) = allowedValueObject.value else {
@@ -2952,7 +2952,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:], additionalProperties: .init(.string))))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:], additionalProperties: .init(.string))))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
         guard case let .object(_, contextB) = allowedValueObject.value else {
@@ -3215,7 +3215,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(string, JSONSchema.string(.init(format: .unspecified, examples: ["hello"]), .init()))
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic, examples: [AnyCodable(["hello": true])]), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true, examples: [AnyCodable(["hello": true])]), .init(properties: [:])))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
         XCTAssertEqual(allowedValueObject.examples, [["hello" : true]])
 
@@ -3424,7 +3424,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: ["hello": .boolean(.init(format: .generic))])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: ["hello": .boolean(.init(format: .generic))])))
-        XCTAssertEqual(allowedValueObject.allowedValues?[0].value as! [String: Bool], ["hello": false])
+        XCTAssertEqual(allowedValueObject.allowedValues?[0], ["hello": false])
         XCTAssertEqual(allowedValueObject.jsonTypeFormat, .object(.generic))
 
         guard case let .object(_, contextB) = allowedValueObject.value else {
@@ -3656,7 +3656,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(readOnlyArray, JSONSchema.array(.init(format: .generic, permissions: .readOnly), .init()))
         XCTAssertEqual(writeOnlyArray, JSONSchema.array(.init(format: .generic, permissions: .writeOnly), .init()))
         XCTAssertEqual(deprecatedArray, JSONSchema.array(.init(format: .generic, deprecated: true), .init()))
-        XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(allowedValueArray.allowedValues?[0], [false])
         XCTAssertEqual(defaultValueArray.defaultValue, [false])
         XCTAssertEqual(discriminatorArray, JSONSchema.array(discriminator: .init(propertyName: "hello")))
 
@@ -3741,7 +3741,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init(items: .boolean(.init(format: .generic)))))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(items: .boolean(.init(format: .generic)))))
-        XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(allowedValueArray.allowedValues?[0], [false])
 
         guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
@@ -3819,7 +3819,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init(uniqueItems: true)))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(uniqueItems: true)))
-        XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(allowedValueArray.allowedValues?[0], [false])
 
         XCTAssertEqual(array.arrayContext?.uniqueItems, true)
         XCTAssertEqual(nullableArray.arrayContext?.uniqueItems, true)
@@ -3881,7 +3881,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init(maxItems: 3)))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(maxItems: 3)))
-        XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(allowedValueArray.allowedValues?[0], [false])
 
         guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")
@@ -3939,7 +3939,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init(minItems: 2)))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init(minItems: 2)))
-        XCTAssertEqual(allowedValueArray.allowedValues?[0].value as! [Bool], [false])
+        XCTAssertEqual(allowedValueArray.allowedValues?[0], [false])
 
         guard case let .array(_, contextB) = allowedValueArray.value else {
             XCTFail("expected array")

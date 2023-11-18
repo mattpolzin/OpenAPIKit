@@ -21,7 +21,7 @@ final class ExampleTests: XCTestCase {
         XCTAssertEqual(full1.summary, "hello")
         XCTAssertEqual(full1.description, "world")
         XCTAssertEqual(full1.value, .init(URL(string: "https://google.com")!))
-        XCTAssertEqual(full1.vendorExtensions["hello"]?.value as? String, "world")
+        XCTAssertEqual(full1.vendorExtensions["hello"], "world")
 
         let full2 = OpenAPI.Example(
             summary: "hello",
@@ -33,7 +33,7 @@ final class ExampleTests: XCTestCase {
         XCTAssertEqual(full2.summary, "hello")
         XCTAssertEqual(full2.description, "world")
         XCTAssertEqual(full2.value, .init("hello"))
-        XCTAssertEqual(full2.vendorExtensions["hello"]?.value as? String, "world")
+        XCTAssertEqual(full2.vendorExtensions["hello"], "world")
 
         let small = OpenAPI.Example(value: .init("hello"))
         XCTAssertNil(small.summary)

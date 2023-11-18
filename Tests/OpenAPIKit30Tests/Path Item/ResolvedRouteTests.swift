@@ -65,7 +65,7 @@ final class ResolvedRouteTests: XCTestCase {
 
         XCTAssertEqual(routes.first?.summary, "routeSummary")
         XCTAssertEqual(routes.first?.description, "routeDescription")
-        XCTAssertEqual(routes.first?.vendorExtensions["test"]?.value as? String, "route")
+        XCTAssertEqual(routes.first?.vendorExtensions["test"], "route")
         XCTAssertEqual(routes.first?.path, "/hello/world/{id}")
         XCTAssertEqual(routes.first?.parameters.map { $0.name }, ["id"])
         XCTAssertEqual(routes.first?.get?.endpointSummary, "get")

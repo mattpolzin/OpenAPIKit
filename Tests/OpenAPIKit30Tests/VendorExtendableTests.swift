@@ -26,14 +26,14 @@ final class VendorExtendableTests: XCTestCase {
         let test = try orderUnstableDecode(TestStruct.self, from: data)
         XCTAssertEqual(test.vendorExtensions.count, 3)
 
-        XCTAssertEqual(test.vendorExtensions["x-tension"]?.value as? String, "hello")
+        XCTAssertEqual(test.vendorExtensions["x-tension"], "hello")
 
-        XCTAssert((test.vendorExtensions["x-two"]?.value as? [String])!.contains("cool"))
-        XCTAssert((test.vendorExtensions["x-two"]?.value as? [String])!.contains("beans"))
-        XCTAssertEqual((test.vendorExtensions["x-two"]?.value as? [String])?.count, 2)
+        XCTAssert(test.vendorExtensions["x-two"]!.array!.contains("cool"))
+        XCTAssert(test.vendorExtensions["x-two"]!.array!.contains("beans"))
+        XCTAssertEqual(test.vendorExtensions["x-two"]?.array?.count, 2)
 
-        XCTAssertEqual((test.vendorExtensions["x-three"]?.value as? [String: Int])?.count, 1)
-        XCTAssertEqual((test.vendorExtensions["x-three"]?.value as? [String: Int])?["nested"], 10)
+        XCTAssertEqual(test.vendorExtensions["x-three"]?.object?.count, 1)
+        XCTAssertEqual(test.vendorExtensions["x-three"]?.object?["nested"], 10)
     }
 
     func test_encodeSuccess() throws {

@@ -44,7 +44,7 @@ final class ContentTests: XCTestCase {
         XCTAssertNotNil(withExamples.examples)
         // we expect the example to be the first example where ordering
         // is the order in which the examples are given:
-        XCTAssertEqual(withExamples.example?.value as? String, "world")
+        XCTAssertEqual(withExamples.example, "world")
         XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
 
         let t4 = OpenAPI.Content(
@@ -255,7 +255,7 @@ extension ContentTests {
 
         XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
-        XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.example, [ "hello": "world" ])
     }
 
     func test_examplesAndSchemaContent_encode() {
@@ -318,8 +318,8 @@ extension ContentTests {
 
         XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
-        XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.codableValue?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.example, [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.codableValue, [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {
@@ -475,7 +475,7 @@ extension ContentTests {
         // created from code with a semantically equivalent AnyCodable from Data.
         XCTAssertEqual(content.schema, contentToMatch.schema)
         XCTAssertEqual(content.vendorExtensions.keys, contentToMatch.vendorExtensions.keys)
-        XCTAssertEqual(content.vendorExtensions["x-hello"]?.value as? [String: Int], contentToMatch.vendorExtensions["x-hello"]?.value as? [String: Int]?)
+        XCTAssertEqual(content.vendorExtensions["x-hello"]?.array, contentToMatch.vendorExtensions["x-hello"]?.array)
     }
 
     func test_nonStringKeyNonesenseDecodeFailure() {

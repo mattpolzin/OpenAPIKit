@@ -25,7 +25,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertEqual(t1.style, .form)
         XCTAssertFalse(t1.explode)
         XCTAssertTrue(t1.allowReserved)
-        XCTAssertEqual(t1.example?.value as? String, "hello")
+        XCTAssertEqual(t1.example, "hello")
         XCTAssertNil(t1.examples)
 
         // init with defaults
@@ -110,9 +110,9 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertFalse(t7.explode)
         XCTAssertFalse(t7.allowReserved)
         XCTAssertNotNil(t7.example)
-        XCTAssertEqual(t7.example?.value as? String, "hello")
+        XCTAssertEqual(t7.example, "hello")
         XCTAssertNotNil(t7.examples)
-        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.codableValue, "world")
 
         // straight to schema override explode multiple examples
         let t8 = Schema(
@@ -130,9 +130,9 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertTrue(t8.explode)
         XCTAssertFalse(t8.allowReserved)
         XCTAssertNotNil(t8.example)
-        XCTAssertEqual(t8.example?.value as? String, "hello")
+        XCTAssertEqual(t8.example, "hello")
         XCTAssertNotNil(t8.examples)
-        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.codableValue, "world")
 
         // schema reference multiple examples
         let t9 = Schema(
@@ -149,7 +149,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertFalse(t9.explode)
         XCTAssertFalse(t9.allowReserved)
         XCTAssertNotNil(t9.example)
-        XCTAssertEqual(t9.example?.value as? String, "hello")
+        XCTAssertEqual(t9.example, "hello")
         XCTAssertNotNil(t9.examples)
         XCTAssertEqual(t9.examples?["two"]?.reference, .external(URL(string: "world.yml")!))
 
@@ -169,7 +169,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertTrue(t10.explode)
         XCTAssertFalse(t10.allowReserved)
         XCTAssertNotNil(t10.example)
-        XCTAssertEqual(t10.example?.value as? String, "hello")
+        XCTAssertEqual(t10.example, "hello")
         XCTAssertNotNil(t10.examples)
         XCTAssertEqual(t10.examples?["two"]?.reference, .external(URL(string: "world.yml")!))
     }
