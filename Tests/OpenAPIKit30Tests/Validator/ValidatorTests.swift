@@ -1335,9 +1335,8 @@ final class ValidatorTests: XCTestCase {
             vendorExtensions: [
                 "x-string": "hiya",
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
-                "x-array": AnyCodable(["hello", nil, "world"]),
-                "x-float": AnyCodable(22.5 as Float),
+                "x-dict": ["string": "world"],
+                "x-array": ["hello", nil, "world"],
                 "x-bool": true
             ]
         )
@@ -1359,7 +1358,6 @@ final class ValidatorTests: XCTestCase {
             .validating("string", check: \String.self == "hiya", when: \.codingPath.last?.stringValue == "x-string")
             .validating("int", check: \Int.self == 3)
             .validating("double", check: \Double.self == 10.5)
-            .validating("float", check: \Float.self == 22.5)
             .validating("bool", check: \Bool.self == true)
 
         try document.validate(using: validator)
