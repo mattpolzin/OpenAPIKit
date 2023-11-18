@@ -148,9 +148,9 @@ extension AnyCodable {
     }
 }
 
-// MARK: Backward compatibility
 extension AnyCodable {
 
+    @available(*, deprecated, message: "`value` doesn't present the value was wrapped anymore, use typed vars or switch instead")
     public var value: Any {
         switch self {
         case .string(let string):
@@ -168,6 +168,55 @@ extension AnyCodable {
         case .null:
             return Optional<Any>.none as Any
         }
+    }
+    
+    public var string: String? {
+        if case let .string(string) = self {
+            return string
+        }
+        return nil
+    }
+    
+    public var bool: Bool? {
+        if case let .bool(bool) = self {
+            return bool
+        }
+        return nil
+    }
+    
+    public var int: Int? {
+        if case let .int(int) = self {
+            return int
+        }
+        return nil
+    }
+    
+    public var double: Double? {
+        if case let .double(double) = self {
+            return double
+        }
+        return nil
+    }
+    
+    public var object: [String: AnyCodable]? {
+        if case let .object(object) = self {
+            return object
+        }
+        return nil
+    }
+    
+    public var array: [AnyCodable]? {
+        if case let .array(array) = self {
+            return array
+        }
+        return nil
+    }
+    
+    public var isNull: Bool {
+        if case .null = self {
+            return true
+        }
+        return false
     }
     
     public init(_ value: Any?) {
