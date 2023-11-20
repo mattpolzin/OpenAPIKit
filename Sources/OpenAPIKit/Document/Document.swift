@@ -460,6 +460,7 @@ extension OpenAPI.Document {
     internal enum CodingKeys: ExtendableCodingKey {
         case openAPIVersion
         case info
+        case jsonSchemaDialect // TODO: implement parsing (https://github.com/mattpolzin/OpenAPIKit/issues/202)
         case servers
         case paths
         case webhooks
@@ -473,6 +474,7 @@ extension OpenAPI.Document {
             return [
                 .openAPIVersion,
                 .info,
+                .jsonSchemaDialect,
                 .servers,
                 .paths,
                 .webhooks,
@@ -493,6 +495,8 @@ extension OpenAPI.Document {
                 self = .openAPIVersion
             case "info":
                 self = .info
+            case "jsonSchemaDialect":
+                self = .jsonSchemaDialect
             case "servers":
                 self = .servers
             case "paths":
@@ -518,6 +522,8 @@ extension OpenAPI.Document {
                 return "openapi"
             case .info:
                 return "info"
+            case .jsonSchemaDialect:
+                return "jsonSchemaDialect"
             case .servers:
                 return "servers"
             case .paths:

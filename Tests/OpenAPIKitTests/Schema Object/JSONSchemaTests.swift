@@ -1673,6 +1673,20 @@ extension SchemaObjectTests {
         XCTAssertEqual(warnResult.value, .object(.init(), .init(properties: [:])))
     }
 
+    func test_decodeAllowsSchemaKeyword() {
+        // a weak check that things at least don't fail when a valid $schema property exists.
+        let schemaSchema = """
+        {
+            "$schema" : "http://json-schema.org/draft/2020-12/schema"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: schemaSchema),
+            .fragment(.init())
+        )
+    }
+
     func test_decodeExampleFragment() throws {
         // This way of specifying an example is deprecated in favor of
         // the examples property (so the encoding of this does not turn
