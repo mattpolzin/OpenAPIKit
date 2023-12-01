@@ -878,6 +878,42 @@ extension DocumentTests {
             )
         )
     }
+
+    func test_jsonSchemaDialect_encode() throws {
+        // TODO: once implemented (https://github.com/mattpolzin/OpenAPIKit/issues/202)
+    }
+
+    func test_jsonSchemaDialect_decode() throws {
+        let documentData =
+        """
+        {
+          "externalDocs" : {
+            "url" : "http:\\/\\/google.com"
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.0",
+          "paths" : {
+
+          },
+          "jsonSchemaDialect" : "http://json-schema.org/draft/2020-12/schema"
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents,
+                externalDocs: .init(url: URL(string: "http://google.com")!)
+            )
+        )
+    }
 }
 
 // MARK: - Webhooks
