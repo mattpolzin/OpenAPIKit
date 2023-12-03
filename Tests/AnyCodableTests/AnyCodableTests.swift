@@ -41,8 +41,83 @@ class AnyCodableTests: XCTestCase {
         XCTAssertNotEqual(AnyCodable(()), AnyCodable(true))
     }
 
+    func testEqualityFromJSON() throws {
+        let json = """
+        {
+            "boolean": true,
+                "integer": 1,
+                "string": "string",
+                "array": [1, 2, 3],
+                "nested": {
+                    "a": "alpha",
+                    "b": "bravo",
+                    "c": "charlie"
+                }
+        }
+        """.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        let anyCodable0 = try decoder.decode(AnyCodable.self, from: json)
+        let anyCodable1 = try decoder.decode(AnyCodable.self, from: json)
+        XCTAssertEqual(anyCodable0, anyCodable1)
+    }
+
+    struct CustomEncodable: Encodable {
+        let value1: String
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode("hi hi hi " + value1)
+        }
+    }
+
+    func test_encodable() throws {
+        let value = CustomEncodable(value1: "hello")
+        let anyCodable = AnyCodable(value)
+        let thing = try JSONEncoder().encode(anyCodable)
+        XCTAssertEqual(String(data: thing, encoding: .utf8)!, "\"hi hi hi hello\"")
+    }
+
     func testVoidDescription() {
         XCTAssertEqual(String(describing: AnyCodable(Void())), "nil")
+    }
+
+    func test_encodedDecodedURL() throws {
+        let value = URL(string: "https://www.google.com")
+        let anyCodable = AnyCodable(value)
+        
+        // URL's absoluteString compares as equal to the wrapped any codable description.
+        XCTAssertEqual(value?.absoluteString, anyCodable.description)
+        
+        let encodedValue = try JSONEncoder().encode(value)
+        let encodedAnyCodable = try JSONEncoder().encode(anyCodable)
+        // the URL and the wrapped any codable encode as equals.
+        XCTAssertEqual(encodedValue, encodedAnyCodable)
+        
+        let decodedFromValue = try JSONDecoder().decode(AnyCodable.self, from: encodedValue)
+        // the URL decoded as any codable has the same description as the original any codable wrapper.
+        XCTAssertEqual(anyCodable.description, decodedFromValue.description)
+        
+        let decodedFromAnyCodable = try JSONDecoder().decode(AnyCodable.self, from: encodedAnyCodable)
+        // the decoded any codable has the same description as the original any codable wrapper.
+        XCTAssertEqual(anyCodable.description, decodedFromAnyCodable.description)
+
+        func roundTripEqual<A: Codable, B: Codable>(_ a: A, _ b: B) throws -> Bool {
+            let a = try JSONDecoder().decode(AnyCodable.self, 
+                                             from: JSONEncoder().encode(a))
+            let b = try JSONDecoder().decode(AnyCodable.self, 
+                                             from: JSONEncoder().encode(b))
+            return a == b
+        }
+        // if you encode/decode both, the URL and its AnyCodable wrapper are equal.
+        try XCTAssert(roundTripEqual(anyCodable, value))
+
+        func encodedEqual<A: Codable, B: Codable>(_ a: A, _ b: B) throws -> Bool {
+            let a = try JSONEncoder().encode(a)
+            let b = try JSONEncoder().encode(b)
+            return a == b
+        }
+        // if you just compare the encoded data, the URL and its AnyCodable wrapper are equal.
+        try XCTAssert(encodedEqual(anyCodable, value))
     }
 
     func testJSONDecoding() throws {
