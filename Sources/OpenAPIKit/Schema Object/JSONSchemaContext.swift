@@ -296,7 +296,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -315,7 +316,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -334,7 +336,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -353,7 +356,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -372,7 +376,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -391,7 +396,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: [example],
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -410,7 +416,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -429,7 +436,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -448,7 +456,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 
@@ -467,7 +476,8 @@ extension JSONSchema.CoreContext {
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
-            vendorExtensions: vendorExtensions
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
         )
     }
 }
