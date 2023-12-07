@@ -273,7 +273,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -291,7 +292,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -309,7 +311,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -327,7 +330,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -345,7 +349,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -363,7 +368,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 
@@ -381,7 +387,8 @@ extension JSONSchema.CoreContext {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            example: example
+            example: example,
+            _inferred: inferred
         )
     }
 }

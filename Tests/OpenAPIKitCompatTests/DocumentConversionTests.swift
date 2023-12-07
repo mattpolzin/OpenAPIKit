@@ -762,7 +762,28 @@ final class DocumentConversionTests: XCTestCase {
     }
 
     func test_JSONSchemaFragment() throws {
-        // TODO: write test
+        let inferredFragment = OpenAPIKit30.JSONSchema.fragment(.init(_inferred: true))
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": inferredFragment,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newInferredFragment = try XCTUnwrap(newDoc.components.schemas["schema1"])
+
+        try assertEqualNewToOld(newInferredFragment, inferredFragment)
+
+        // TODO: write more tests
     }
 
     func test_Operation() throws {
@@ -1192,6 +1213,7 @@ fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaCont
     XCTAssertEqual(newCoreContext.readOnly, oldCoreContext.readOnly)
     XCTAssertEqual(newCoreContext.writeOnly, oldCoreContext.writeOnly)
     XCTAssertEqual(newCoreContext.deprecated, oldCoreContext.deprecated)
+    XCTAssertEqual(newCoreContext.inferred, oldCoreContext.inferred)
 }
 
 fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.StringContext, _ oldStringContext: OpenAPIKit30.JSONSchema.StringContext) {
