@@ -51,7 +51,7 @@ public struct DereferencedResponse: Equatable {
         }
 
         var response = response
-        if let name = name {
+        if let name {
             response.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 

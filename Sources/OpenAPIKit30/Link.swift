@@ -263,7 +263,7 @@ extension OpenAPI.Link: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.Link {
         var vendorExtensions = self.vendorExtensions
-        if let name = name {
+        if let name {
             vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
