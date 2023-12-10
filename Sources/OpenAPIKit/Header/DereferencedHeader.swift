@@ -57,7 +57,7 @@ public struct DereferencedHeader: Equatable {
         }
 
         var header = header
-        if let name = name {
+        if let name {
             header.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
