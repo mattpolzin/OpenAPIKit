@@ -768,6 +768,7 @@ extension JSONSchema {
     // not nested because Context is a generic type
     internal enum ContextCodingKeys: String, CodingKey {
         case type
+        case nullable
         case format
         case title
         case description
@@ -928,6 +929,9 @@ extension JSONSchema.CoreContext: Decodable {
 
     /// Decode whether or not this is a nullable JSONSchema.
     private static func decodeNullable(from container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> Bool {
+        if let nullable = try? container.decodeIfPresent(Bool.self, forKey: .nullable), nullable {
+            return true
+        }
         if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
             return types.contains(JSONType.null)
         }
