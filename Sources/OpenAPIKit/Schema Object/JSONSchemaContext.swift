@@ -135,7 +135,9 @@ extension JSONSchemaContext {
 
 extension JSONSchema {
     /// The context that applies to all schemas.
-    public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, Equatable {
+    public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, HasWarnings {
+        public let warnings: [OpenAPI.Warning]
+
         public let format: Format
         public let required: Bool // default true
         public let nullable: Bool // default false
@@ -229,6 +231,7 @@ extension JSONSchema {
             vendorExtensions: [String: AnyCodable] = [:],
             _inferred: Bool = false
         ) {
+            self.warnings = []
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -260,6 +263,7 @@ extension JSONSchema {
             examples: [String],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
+            self.warnings = []
             self.format = format
             self.required = required
             self.nullable = nullable
@@ -275,6 +279,24 @@ extension JSONSchema {
             self.vendorExtensions = vendorExtensions
             self.inferred = false
         }
+    }
+}
+
+extension JSONSchema.CoreContext: Equatable {
+    public static func == (lhs: JSONSchema.CoreContext<Format>, rhs: JSONSchema.CoreContext<Format>) -> Bool {
+        lhs.format == rhs.format
+        && lhs.required == rhs.required
+        && lhs.nullable == rhs.nullable
+        && lhs._permissions == rhs._permissions
+        && lhs._deprecated == rhs._deprecated
+        && lhs.title == rhs.title
+        && lhs.description == rhs.description
+        && lhs.externalDocs == rhs.externalDocs
+        && lhs.discriminator == rhs.discriminator
+        && lhs.allowedValues == rhs.allowedValues
+        && lhs.defaultValue == rhs.defaultValue
+        && lhs.vendorExtensions == rhs.vendorExtensions
+        && lhs.inferred == rhs.inferred
     }
 }
 
@@ -850,12 +872,15 @@ extension JSONSchema.CoreContext: Encodable {
 
 extension JSONSchema.CoreContext: Decodable {
     public init(from decoder: Decoder) throws {
+        var warnings: [OpenAPI.Warning] = []
+
         let container = try decoder.container(keyedBy: JSONSchema.ContextCodingKeys.self)
 
         format = try container.decodeIfPresent(Format.self, forKey: .format) ?? .unspecified
 
-        let nullable = try Self.decodeNullable(from: container)
+        let (nullable, nullableWarnings) = try Self.decodeNullable(from: container)
         self.nullable = nullable
+        warnings += nullableWarnings
 
         // default to `true` at decoding site.
         // It is the responsibility of decoders farther upstream
@@ -914,6 +939,8 @@ extension JSONSchema.CoreContext: Decodable {
         // full JSON Schema.
         vendorExtensions = [:]
         inferred = false
+
+        self.warnings = warnings
     }
 
     /// Support both `enum` and `const` when decoding allowed values for the schema.
@@ -928,17 +955,32 @@ extension JSONSchema.CoreContext: Decodable {
     }
 
     /// Decode whether or not this is a nullable JSONSchema.
-    private static func decodeNullable(from container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> Bool {
-        if let nullable = try? container.decodeIfPresent(Bool.self, forKey: .nullable), nullable {
-            return true
+    private static func decodeNullable(from container: KeyedDecodingContainer<JSONSchema.ContextCodingKeys>) throws -> (Bool, [OpenAPI.Warning]) {
+        let nullable: Bool
+        var warnings: [OpenAPI.Warning] = []
+
+        if let _nullable = try? container.decodeIfPresent(Bool.self, forKey: .nullable) {
+            nullable = _nullable
+            warnings.append(
+                .underlyingError(
+                      InconsistencyError(
+                          subjectName: "OpenAPI Schema",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          codingPath: container.codingPath
+                      )
+                  )
+            )
+            
         }
-        if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
-            return types.contains(JSONType.null)
+        else if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
+            nullable = types.contains(JSONType.null)
         }
-        if let type = try? container.decodeIfPresent(JSONType.self, forKey: .type) {
-            return type == JSONType.null
+        else if let type = try? container.decodeIfPresent(JSONType.self, forKey: .type) {
+            nullable = type == JSONType.null
+        } else {
+          nullable = false
         }
-        return false
+        return (nullable, warnings)
     }
 }
 
