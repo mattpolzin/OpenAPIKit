@@ -1807,16 +1807,20 @@ extension JSONSchema: Decodable {
 
         if let ref = try? JSONReference<JSONSchema>(from: decoder) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
-            self = .reference(ref, coreContext)
+            self = .init(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
             return
         }
 
         let container = try decoder.container(keyedBy: SubschemaCodingKeys.self)
 
         if container.contains(.allOf) {
-            var schema: JSONSchema = .all(
-                of: try container.decode([JSONSchema].self, forKey: .allOf),
-                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            var schema: JSONSchema = .init(
+                warnings: coreContext.warnings,
+                schema: .all(
+                    of: try container.decode([JSONSchema].self, forKey: .allOf),
+                    core: coreContext
+                )
             )
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
@@ -1827,9 +1831,13 @@ extension JSONSchema: Decodable {
         }
 
         if container.contains(.anyOf) {
-            var schema: JSONSchema = .any(
-                of: try container.decode([JSONSchema].self, forKey: .anyOf),
-                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            var schema: JSONSchema = .init(
+                warnings: coreContext.warnings,
+                schema: .any(
+                    of: try container.decode([JSONSchema].self, forKey: .anyOf),
+                    core: coreContext
+                )
             )
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
@@ -1840,9 +1848,12 @@ extension JSONSchema: Decodable {
         }
 
         if container.contains(.oneOf) {
-            var schema: JSONSchema = .one(
-                of: try container.decode([JSONSchema].self, forKey: .oneOf),
-                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            var schema: JSONSchema = .init(warnings: coreContext.warnings,
+                schema: .one(
+                    of: try container.decode([JSONSchema].self, forKey: .oneOf),
+                    core: coreContext
+                )
             )
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
@@ -1853,9 +1864,12 @@ extension JSONSchema: Decodable {
         }
 
         if container.contains(.not) {
-            let schema: JSONSchema = .not(
-                try container.decode(JSONSchema.self, forKey: .not),
-                core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            let schema: JSONSchema = .init(warnings: coreContext.warnings,
+                schema: .not(
+                    try container.decode(JSONSchema.self, forKey: .not),
+                    core: coreContext
+                )
             )
             
             self = schema
@@ -1915,34 +1929,48 @@ extension JSONSchema: Decodable {
         let value: Schema
         if typeHint == .null {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            _warnings += coreContext.warnings
             value = .null(coreContext)
 
         } else if typeHint == .integer || typeHint == .number || (typeHint == nil && !numericOrIntegerContainer.allKeys.isEmpty) {
             if typeHint == .integer {
-                value = .integer(try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder),
+                let coreContext = try CoreContext<JSONTypeFormat.IntegerFormat>(from: decoder)
+                _warnings += coreContext.warnings
+                value = .integer(coreContext,
                                 try IntegerContext(from: decoder))
             } else {
-                value = .number(try CoreContext<JSONTypeFormat.NumberFormat>(from: decoder),
+                let coreContext = try CoreContext<JSONTypeFormat.NumberFormat>(from: decoder)
+                _warnings += coreContext.warnings
+                value = .number(coreContext,
                                try NumericContext(from: decoder))
             }
 
         } else if typeHint == .string || (typeHint == nil && !stringContainer.allKeys.isEmpty) {
-            value = .string(try CoreContext<JSONTypeFormat.StringFormat>(from: decoder),
+            let coreContext = try CoreContext<JSONTypeFormat.StringFormat>(from: decoder)
+            _warnings += coreContext.warnings
+            value = .string(coreContext,
                            try StringContext(from: decoder))
 
         } else if typeHint == .array || (typeHint == nil && !arrayContainer.allKeys.isEmpty) {
-            value = .array(try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder),
+            let coreContext = try CoreContext<JSONTypeFormat.ArrayFormat>(from: decoder)
+            _warnings += coreContext.warnings
+            value = .array(coreContext,
                           try ArrayContext(from: decoder))
 
         } else if typeHint == .object || (typeHint == nil && !objectContainer.allKeys.isEmpty) {
-            value = .object(try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder),
+            let coreContext = try CoreContext<JSONTypeFormat.ObjectFormat>(from: decoder)
+            _warnings += coreContext.warnings
+            value = .object(coreContext,
                            try ObjectContext(from: decoder))
 
         } else if typeHint == .boolean {
-            value = .boolean(try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder))
+            let coreContext = try CoreContext<JSONTypeFormat.BooleanFormat>(from: decoder)
+            _warnings += coreContext.warnings
+            value = .boolean(coreContext)
 
         } else {
             let fragmentContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            _warnings += fragmentContext.warnings
             if fragmentContext.isEmpty && hintContainerCount > 0 {
                 _warnings.append(
                     .underlyingError(

@@ -1933,7 +1933,8 @@ extension SchemaObjectTests {
 
     func test_decodeBoolean() throws {
         let booleanData = #"{"type": "boolean"}"#.data(using: .utf8)!
-        let nullableBooleanData = #"{"type": ["boolean", "null"]}"#.data(using: .utf8)!
+        let booleanOrNullData = #"{"type": ["boolean", "null"]}"#.data(using: .utf8)!
+        let nullableBooleanData = #"{"type": "boolean", "nullable": true}"#.data(using: .utf8)!
         let readOnlyBooleanData = #"{"type": "boolean", "readOnly": true}"#.data(using: .utf8)!
         let writeOnlyBooleanData = #"{"type": "boolean", "writeOnly": true}"#.data(using: .utf8)!
         let deprecatedBooleanData = #"{"type": "boolean", "deprecated": true}"#.data(using: .utf8)!
@@ -1943,6 +1944,7 @@ extension SchemaObjectTests {
         let discriminatorBooleanData = #"{"type": "boolean", "discriminator": { "propertyName": "hello" }}"#.data(using: .utf8)!
 
         let boolean = try orderUnstableDecode(JSONSchema.self, from: booleanData)
+        let booleanOrNull = try orderUnstableDecode(JSONSchema.self, from: booleanOrNullData)
         let nullableBoolean = try orderUnstableDecode(JSONSchema.self, from: nullableBooleanData)
         let readOnlyBoolean = try orderUnstableDecode(JSONSchema.self, from: readOnlyBooleanData)
         let writeOnlyBoolean = try orderUnstableDecode(JSONSchema.self, from: writeOnlyBooleanData)
@@ -1953,6 +1955,7 @@ extension SchemaObjectTests {
         let discriminatorBoolean = try orderUnstableDecode(JSONSchema.self, from: discriminatorBooleanData)
 
         XCTAssertEqual(boolean, JSONSchema.boolean(.init(format: .generic)))
+        XCTAssertEqual(booleanOrNull, JSONSchema.boolean(.init(format: .generic, nullable: true)))
         XCTAssertEqual(nullableBoolean, JSONSchema.boolean(.init(format: .generic, nullable: true)))
         XCTAssertEqual(readOnlyBoolean, JSONSchema.boolean(.init(format: .generic, permissions: .readOnly)))
         XCTAssertEqual(writeOnlyBoolean, JSONSchema.boolean(.init(format: .generic, permissions: .writeOnly)))
