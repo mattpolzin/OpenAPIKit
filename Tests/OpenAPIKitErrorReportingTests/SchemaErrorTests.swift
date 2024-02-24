@@ -48,4 +48,46 @@ final class SchemaErrorTests: XCTestCase {
             ])
         }
     }
+
+    func test_nullablePropertyInsteadOfNullType() throws {
+        let documentYML =
+        """
+        openapi: "3.1.0"
+        info:
+            title: test
+            version: 1.0
+        paths:
+            /hello/world:
+                get:
+                    responses:
+                        '200':
+                            description: hello
+                            content:
+                                'application/json':
+                                    schema:
+                                        type: integer
+                                        nullable: true
+        """
+
+        let document = try testDecoder.decode(OpenAPI.Document.self, from: documentYML)
+        XCTAssertThrowsError(try document.validate()) { error in
+
+            let openAPIError = OpenAPI.Error(from: error)
+
+            XCTAssertEqual(openAPIError.localizedDescription,
+            """
+            Inconsistency encountered when parsing `OpenAPI Schema`: Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: ["null", ...]'.. at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema
+            """)
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
+                "paths",
+                "/hello/world",
+                "get",
+                "responses",
+                "200",
+                "content",
+                "application/json",
+                "schema"
+            ])
+        }
+    }
 }
