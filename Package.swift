@@ -20,6 +20,7 @@ let package = Package(
             targets: ["OpenAPIKitCompat"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", "4.0.0"..<"6.0.0") // just for tests
     ],
     targets: [
