@@ -424,4 +424,4 @@ Please see [Security](./SECURITY.md) for information on how to report vulnerabil
 **Please do not report security vulnerabilities via GitHub issues.**
 
 ## Specification Coverage & Type Reference
-For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
+For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit).
