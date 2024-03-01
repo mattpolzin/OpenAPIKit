@@ -130,10 +130,6 @@ extension OpenAPI.Error.Decoding.Path {
     }
 
     internal init(_ eitherError: EitherDecodeNoTypesMatchedError) {
-        if let eitherBranchToDigInto = Self.eitherBranchToDigInto(eitherError) {
-            self = Self(unwrapping: eitherBranchToDigInto)
-            return
-        }
 
         var codingPath = eitherError.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
@@ -141,19 +137,5 @@ extension OpenAPI.Error.Decoding.Path {
         path = route
         context = .neither(eitherError)
         relativeCodingPath = Array(codingPath)
-    }
-}
-
-extension OpenAPI.Error.Decoding.Path: DiggingError {
-    public init(unwrapping error: Swift.DecodingError) {
-        if let decodingError = error.underlyingError as? Swift.DecodingError {
-            self = Self(unwrapping: decodingError)
-        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
-            self = Self(inconsistencyError)
-        } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
-            self = Self(eitherError)
-        } else {
-            self = Self(error)
-        }
     }
 }

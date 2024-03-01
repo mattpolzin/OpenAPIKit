@@ -44,6 +44,15 @@ public struct Error: Swift.Error, CustomStringConvertible {
                 codingPath = wrappedError.codingPath
             }
 
+        } else if let errorCollection = underlyingError as? ErrorCollection {
+            localizedDescription = errorCollection.localizedDescription
+            if errorCollection.pathContextErrors.count == 1,
+               let error = errorCollection.pathContextErrors.first {
+                codingPath = error.codingPath
+            } else {
+                codingPath = []
+            }
+
         } else {
             localizedDescription = underlyingError.localizedDescription
             codingPath = []

@@ -1084,6 +1084,8 @@ final class ValidatorTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    /// This test confirms the last example in the validation documentation file (documentation/validation.md)
+    /// functions as-written.
     func test_requestBodySchemaValidationFails() {
         // should fail in three ways:
         // 1. No `name` in request schema
@@ -1214,6 +1216,8 @@ final class ValidatorTests: XCTestCase {
         }
     }
 
+    /// This test confirms the last example in the validation documentation file (documentation/validation.md)
+    /// functions as-written.
     func test_requestBodySchemaValidationSucceeds() throws {
         let createRequest = OpenAPI.Request(
             content: [

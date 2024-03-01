@@ -40,11 +40,11 @@ class SwiftPrimitiveTypesTests: XCTestCase {
     }
 
     func test_urlSchema() {
-        XCTAssertEqual(URL.openAPISchema, .string(format: .extended(.uri)))
+        XCTAssertEqual(URL.openAPISchema, .string(format: .uri))
     }
 
     func test_uuidSchema() {
-        XCTAssertEqual(UUID.openAPISchema, .string(format: .extended(.uuid)))
+        XCTAssertEqual(UUID.openAPISchema, .string(format: .uuid))
     }
 
     func test_ArraySchema() {
@@ -62,9 +62,9 @@ class SwiftPrimitiveTypesTests: XCTestCase {
 
         XCTAssertEqual([Int64].openAPISchema, .array(items: .integer(format: .int64)))
 
-        XCTAssertEqual([URL].openAPISchema, .array(items: .string(format: .extended(.uri))))
+        XCTAssertEqual([URL].openAPISchema, .array(items: .string(format: .uri)))
 
-        XCTAssertEqual([UUID].openAPISchema, .array(items: .string(format: .extended(.uuid))))
+        XCTAssertEqual([UUID].openAPISchema, .array(items: .string(format: .uuid)))
 
         XCTAssertEqual([String?].openAPISchema, .array(items: .string(required: false)))
     }
@@ -84,9 +84,9 @@ class SwiftPrimitiveTypesTests: XCTestCase {
 
         XCTAssertEqual(Int64?.openAPISchema, .integer(format: .int64, required: false))
 
-        XCTAssertEqual(URL?.openAPISchema, .string(format: .extended(.uri), required: false))
+        XCTAssertEqual(URL?.openAPISchema, .string(format: .uri, required: false))
 
-        XCTAssertEqual(UUID?.openAPISchema, .string(format: .extended(.uuid), required: false))
+        XCTAssertEqual(UUID?.openAPISchema, .string(format: .uuid, required: false))
 
         XCTAssertEqual([String]?.openAPISchema, .array(required: false, items: .string))
 
@@ -108,9 +108,9 @@ class SwiftPrimitiveTypesTests: XCTestCase {
 
         XCTAssertEqual([String: Int64].openAPISchema, .object(additionalProperties: .schema(.integer(format: .int64))))
 
-        XCTAssertEqual([String: URL].openAPISchema, .object(additionalProperties: .schema(.string(format: .extended(.uri)))))
+        XCTAssertEqual([String: URL].openAPISchema, .object(additionalProperties: .schema(.string(format: .uri))))
 
-        XCTAssertEqual([String: UUID].openAPISchema, .object(additionalProperties: .schema(.string(format: .extended(.uuid)))))
+        XCTAssertEqual([String: UUID].openAPISchema, .object(additionalProperties: .schema(.string(format: .uuid))))
 
         XCTAssertEqual([String: String?].openAPISchema, .object(additionalProperties: .schema(.string(required: false))))
     }

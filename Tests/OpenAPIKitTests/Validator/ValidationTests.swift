@@ -15,7 +15,7 @@ final class ValidationTests: XCTestCase {
         let check = AnyValidation(validation)
 
         let errors = check.apply(to: "hello", at: [], in: testDocument)
-        XCTAssertEqual(errors.map { $0.description }, [ "because at path: " ])
+        XCTAssertEqual(errors.map { $0.description }, [ "because at root of document" ])
 
         let string: String? = "hello"
         let errors2 = check.apply(to: string as Any, at: [], in: testDocument)

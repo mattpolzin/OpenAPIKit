@@ -24,24 +24,11 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc, oldDoc)
         XCTAssertEqual(newDoc.openAPIVersion, .v3_1_0)
+
+        try newDoc.validate()
     }
 
-    func test_vendorExtensionsOnDoc() throws {
-        let oldDoc = OpenAPIKit30.OpenAPI.Document(
-            openAPIVersion: .v3_0_3,
-            info: .init(title: "Hello World", version: "1.0.1"),
-            servers: [],
-            paths: [:],
-            components: .noComponents,
-            vendorExtensions: ["x-doc": "document"]
-        )
-
-        let newDoc = oldDoc.convert(to: .v3_1_0)
-
-        try assertEqualNewToOld(newDoc, oldDoc)
-    }
-
-    func test_fullInfo() throws {
+    func test_documentInfo() throws {
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(
                 title: "Hello World",
@@ -60,7 +47,27 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
+
+    func test_documentVendorExtensions() throws {
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            openAPIVersion: .v3_0_3,
+            info: .init(title: "Hello World", version: "1.0.1"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            vendorExtensions: ["x-doc": "document"]
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
+    }
+
 
     func test_servers() throws {
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
@@ -77,6 +84,13 @@ final class DocumentConversionTests: XCTestCase {
                     description: "hi",
                     variables: ["hello": .init(enum: ["1"], default: "1", description: "described", vendorExtensions: ["x-hi": "hello"])],
                     vendorExtensions: ["x-test": 2]
+                ),
+                .init(
+                    urlTemplate: try .init(templateString: "{protocol}://{hostname}/api/v3"),
+                    variables: [
+                        "protocol": .init(default: "http", description: "protocol"),
+                        "hostname": .init(default: "HOSTNAME", description: "host name")
+                    ]
                 )
             ],
             paths: [:],
@@ -86,6 +100,8 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
     func test_paths() throws {
@@ -132,23 +148,25 @@ final class DocumentConversionTests: XCTestCase {
             .component(named: "security"): ["hello"]
         ]
 
-        let operation = OpenAPIKit30.OpenAPI.Operation(
-            tags: ["hello"],
-            summary: "sum",
-            description: "described",
-            externalDocs: externalDocs,
-            operationId: "ident",
-            parameters: params,
-            requestBody: .request(request),
-            responses: [200: .b(response)],
-            callbacks: [
-                "callback": .b(callbacks),
-                "other_callback": .a(.component(named: "other_callback"))],
-            deprecated: true,
-            security: [securityRequirement],
-            servers: [server],
-            vendorExtensions: ["x-hello": 101]
-        )
+        let operation = (0...7).map { idx in 
+            OpenAPIKit30.OpenAPI.Operation(
+                tags: ["hello"],
+                summary: "sum",
+                description: "described",
+                externalDocs: externalDocs,
+                operationId: "ident\(idx)",
+                parameters: params,
+                requestBody: .request(request),
+                responses: [200: .b(response)],
+                callbacks: [
+                    "callback": .b(callbacks),
+                    "other_callback": .a(.component(named: "other_callback"))],
+                deprecated: true,
+                security: [securityRequirement],
+                servers: [server],
+                vendorExtensions: ["x-hello": 101]
+            )
+        }
 
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
@@ -170,40 +188,36 @@ final class DocumentConversionTests: XCTestCase {
                         .a(.internal(.component(name: "test"))),
                         .parameter(.init(name: "test", context: .query, schema: .string))
                     ],
-                    get: operation,
-                    put: operation,
-                    post: operation,
-                    delete: operation,
-                    options: operation,
-                    head: operation,
-                    patch: operation,
-                    trace: operation,
+                    get: operation[0],
+                    put: operation[1],
+                    post: operation[2],
+                    delete: operation[3],
+                    options: operation[4],
+                    head: operation[5],
+                    patch: operation[6],
+                    trace: operation[7],
                     vendorExtensions: ["x-test": 123]
                 )
             ],
-            components: .noComponents
+            components: .init(
+                parameters: [
+                    "test": .init(name: "referencedParam", context: .query, schema: .string)
+                ]
+            )
         )
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
-    func testJSONSchemas() throws {
-        // TODO: write test
-    }
-
-    func testComponents() throws {
+    func test_componentsObject() throws {
         let param: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test", context: .query, schema: .string)
         let param2: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test2", context: .cookie, content: [.anyFont: .init(schema: .reference(.external(URL(string: "https://website.com")!)), examples: ["good_example": .example(.init(value: .b("my-font")))])])
         let param3: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test3", context: .header, schemaReference: .component(named: "test3_param"))
         let param4: OpenAPIKit30.OpenAPI.Parameter = .init(name: "test4", context: .path, schemaOrContent: .schema(.header(.boolean)))
-
-        let externalDocs = OpenAPIKit30.OpenAPI.ExternalDocumentation(
-            description: "hello",
-            url: URL(string: "https://website.com")!,
-            vendorExtensions: ["x-hi": 3]
-        )
 
         let request = OpenAPIKit30.OpenAPI.Request(
             description: "describble",
@@ -227,7 +241,8 @@ final class DocumentConversionTests: XCTestCase {
 
         let components = OpenAPIKit30.OpenAPI.Components(
             schemas: [
-                "schema1": .string
+                "schema1": .string,
+                "test3_param": .integer(format: .int32, required: false)
             ],
             responses: [
                 "response1": response
@@ -293,9 +308,11 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        try newDoc.validate()
     }
 
-    func testSecurity() throws {
+    func test_documentSecurity() throws {
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
             servers: [],
@@ -323,9 +340,12 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc2 = oldDoc2.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc2, oldDoc2)
+
+        try newDoc.validate()
+        try newDoc2.validate()
     }
 
-    func testTags() throws {
+    func test_documentTags() throws {
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
             servers: [],
@@ -364,9 +384,13 @@ final class DocumentConversionTests: XCTestCase {
         let newDoc3 = oldDoc3.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc3, oldDoc3)
+
+        try newDoc.validate()
+        try newDoc2.validate()
+        try newDoc3.validate()
     }
 
-    func testExternalDocs() throws {
+    func test_documentExternalDocs() throws {
         let externalDocs = OpenAPIKit30.OpenAPI.ExternalDocumentation(
             description: "hello",
             url: URL(string: "https://website.com")!,
@@ -386,18 +410,432 @@ final class DocumentConversionTests: XCTestCase {
         try assertEqualNewToOld(newDoc, oldDoc)
     }
 
-    func testVendorExtensions() throws {
+    func test_JSONSchemaBooleans() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.boolean
+
+        let schema2 = OpenAPIKit30.JSONSchema.boolean(
+            format: .generic,
+            required: false,
+            nullable: true,
+            permissions: .writeOnly,
+            deprecated: true,
+            title: "hi",
+            description: "hello",
+            discriminator: .init(propertyName: "hi", mapping: ["hi": "hello"]),
+            externalDocs: .init(description: "description", url: URL(string: "https://website.com")!, vendorExtensions: ["x-extend": "extended"]),
+            allowedValues: [true, false],
+            defaultValue: true,
+            example: false
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            .boolean,
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
         let oldDoc = OpenAPIKit30.OpenAPI.Document(
             info: .init(title: "Hello", version: "1.0.0"),
             servers: [],
             paths: [:],
-            components: .noComponents,
-            vendorExtensions: ["x-doc-extension" : "noice"]
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
         )
 
         let newDoc = oldDoc.convert(to: .v3_1_0)
 
         try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaNumbers() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.number
+
+        let schema2 = OpenAPIKit30.JSONSchema.number(
+            format: .double,
+            required: false,
+            nullable: true,
+            permissions: .writeOnly,
+            deprecated: true,
+            title: "hi",
+            description: "hello",
+            discriminator: .init(propertyName: "hi", mapping: ["hi": "hello"]),
+            externalDocs: .init(description: "description", url: URL(string: "https://website.com")!, vendorExtensions: ["x-extend": "extended"]),
+            multipleOf: 2,
+            maximum: (100, exclusive: false),
+            minimum: (10, exclusive: false),
+            allowedValues: [10, 20, 44, 100],
+            defaultValue: 20,
+            example: 44
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            .number,
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaIntegers() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.integer
+
+        let schema2 = OpenAPIKit30.JSONSchema.integer(
+            format: .int64,
+            required: false,
+            nullable: true,
+            permissions: .writeOnly,
+            deprecated: true,
+            title: "hi",
+            description: "hello",
+            discriminator: .init(propertyName: "hi", mapping: ["hi": "hello"]),
+            externalDocs: .init(description: "description", url: URL(string: "https://website.com")!, vendorExtensions: ["x-extend": "extended"]),
+            multipleOf: 2,
+            maximum: (100, exclusive: false),
+            minimum: (10, exclusive: false),
+            allowedValues: [10, 20, 44, 100],
+            defaultValue: 20,
+            example: 44
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            .integer,
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaStrings() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.string
+
+        let schema2 = OpenAPIKit30.JSONSchema.string(
+            format: .date,
+            required: false,
+            nullable: true,
+            permissions: .writeOnly,
+            deprecated: true,
+            title: "hi",
+            description: "hello",
+            discriminator: .init(propertyName: "hi", mapping: ["hi": "hello"]),
+            externalDocs: .init(description: "description", url: URL(string: "https://website.com")!, vendorExtensions: ["x-extend": "extended"]),
+            minLength: 1,
+            maxLength: 10,
+            pattern: "he.*llo",
+            allowedValues: ["hello", "heeeello"],
+            defaultValue: "hello",
+            example: "hello"
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            .string,
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaObjects() throws {
+        // TODO: write test
+    }
+
+    func test_JSONSchemaArrays() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.array
+
+        let schema2 = OpenAPIKit30.JSONSchema.array(
+            required: false,
+            nullable: true,
+            permissions: .readOnly,
+            deprecated: true,
+            title: "hello",
+            description: "description",
+            discriminator: .init(propertyName: "hi", mapping: ["hi": "hello"]),
+            externalDocs: .init(url: URL(string: "https://website.com")!),
+            minItems: 2,
+            maxItems: 5,
+            uniqueItems: true,
+            items: .integer,
+            allowedValues: [2, 3, 4],
+            defaultValue: 3,
+            example: 3
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            schema: .array(.init(), .init(items: .string)),
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaAllOf() throws {
+        // TODO: write test
+    }
+
+    func test_JSONSchemaOneOf() throws {
+        // TODO: write test
+    }
+
+    func test_JSONSchemaAnyOf() throws {
+        // TODO: write test
+    }
+
+    func test_JSONSchemaNot() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.not(.string)
+
+        let schema2 = OpenAPIKit30.JSONSchema.not(
+            .boolean,
+            required: false,
+            title: "hi",
+            description: "hello",
+            discriminator: .init(propertyName: "prop", mapping: ["prop": "hi"])
+        )
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            schema: .not(.string, core: .init()),
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaReference() throws {
+        let schema1 = OpenAPIKit30.JSONSchema.reference(.component(named: "schema2"))
+
+        let schema2 = OpenAPIKit30.JSONSchema.reference(.external(URL(string: "https://website.com")!), required: false)
+
+        let schema3 = OpenAPIKit30.JSONSchema(
+            .reference(.component(named: "schema2")),
+            vendorExtensions: [ "x-schema-extra": "hello world" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": schema1,
+                    "schema2": schema2,
+                    "schema3": schema3,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newSchema1 = try XCTUnwrap(newDoc.components.schemas["schema1"])
+        let newSchema2 = try XCTUnwrap(newDoc.components.schemas["schema2"])
+        let newSchema3 = try XCTUnwrap(newDoc.components.schemas["schema3"])
+
+        try assertEqualNewToOld(newSchema1, schema1)
+        try assertEqualNewToOld(newSchema2, schema2)
+        try assertEqualNewToOld(newSchema3, schema3)
+    }
+
+    func test_JSONSchemaFragment() throws {
+        let inferredFragment = OpenAPIKit30.JSONSchema.fragment(.init(_inferred: true))
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "Hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: [
+                    "schema1": inferredFragment,
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+
+        let newInferredFragment = try XCTUnwrap(newDoc.components.schemas["schema1"])
+
+        try assertEqualNewToOld(newInferredFragment, inferredFragment)
+
+        // TODO: write more tests
+    }
+
+    func test_Operation() throws {
+        // TODO: write test
+    }
+
+    func test_Parameter() throws {
+        let parameter1 = OpenAPIKit30.OpenAPI.Parameter(
+            name: "hello",
+            context: .query,
+            schemaOrContent: .a(OpenAPIKit30.OpenAPI.Parameter.SchemaContext(
+                .object,
+                style: .simple
+            ))
+        )
+
+        let parameter2 = OpenAPIKit30.OpenAPI.Parameter(
+            name: "hello",
+            context: .query,
+            schemaOrContent: .a(OpenAPIKit30.OpenAPI.Parameter.SchemaContext(
+                .object,
+                style: .form,
+                explode: false,
+                allowReserved: true,
+                example: "hi=hello"
+            )),
+            description: "described",
+            deprecated: true,
+            vendorExtensions: [ "x-hello": "hi" ]
+        )
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "hello", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                parameters: [
+                    "param1": parameter1,
+                    "param2": parameter2
+                ]
+            )
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_1_0)
+
+        try assertEqualNewToOld(newDoc,oldDoc)
+
+        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"])
+        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"])
+
+        try assertEqualNewToOld(newParameter1, parameter1)
+        try assertEqualNewToOld(newParameter2, parameter2)
     }
 
     // TODO: more tests
@@ -479,16 +917,21 @@ fileprivate func assertEqualNewToOld(_ newServer: OpenAPIKit.OpenAPI.Server?, _ 
     XCTAssertEqual(newServer.urlTemplate, oldServer.urlTemplate)
     XCTAssertEqual(newServer.description, oldServer.description)
     XCTAssertEqual(newServer.vendorExtensions, oldServer.vendorExtensions)
+    XCTAssertEqual(newServer.variables.count, oldServer.variables.count)
     for (key, newVariable) in newServer.variables {
         let oldVariable = oldServer.variables[key]
         XCTAssertEqual(newVariable.description, oldVariable?.description)
-        XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        if (oldVariable?.enum ?? []).isEmpty {
+            XCTAssertNil(newVariable.`enum`)
+        } else {
+            XCTAssertEqual(newVariable.`enum`, oldVariable?.`enum`)
+        }
         XCTAssertEqual(newVariable.`default`, oldVariable?.`default`)
         XCTAssertEqual(newVariable.vendorExtensions, oldVariable?.vendorExtensions)
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Parameter.Array, _ oldParamArray: OpenAPIKit30.OpenAPI.Parameter.Array) {
+fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Parameter.Array, _ oldParamArray: OpenAPIKit30.OpenAPI.Parameter.Array) throws {
     for (newParameter, oldParameter) in zip(newParamArray, oldParamArray) {
         switch (newParameter, oldParameter) {
         case (.a(let ref), .a(let ref2)):
@@ -496,7 +939,7 @@ fileprivate func assertEqualNewToOld(_ newParamArray: OpenAPIKit.OpenAPI.Paramet
             XCTAssertNil(ref.description)
             XCTAssertEqual(ref.jsonReference.absoluteString, ref2.absoluteString)
         case (.b(let param), .b(let param2)):
-            assertEqualNewToOld(param, param2)
+            try assertEqualNewToOld(param, param2)
         default:
             XCTFail("Parameters are not equal because one is a reference and the other is not: \(newParameter)  / \(oldParameter)")
         }
@@ -518,7 +961,7 @@ fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem?
             try assertEqualNewToOld(newServer, oldServer)
         }
     }
-    assertEqualNewToOld(newPathItem.parameters, oldPathItem.parameters)
+    try assertEqualNewToOld(newPathItem.parameters, oldPathItem.parameters)
     try assertEqualNewToOld(newPathItem.get, oldPathItem.get)
     try assertEqualNewToOld(newPathItem.put, oldPathItem.put)
     try assertEqualNewToOld(newPathItem.post, oldPathItem.post)
@@ -531,9 +974,17 @@ fileprivate func assertEqualNewToOld(_ newPathItem: OpenAPIKit.OpenAPI.PathItem?
     XCTAssertEqual(newPathItem.vendorExtensions, oldPathItem.vendorExtensions)
 }
 
-fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) {
+fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _ oldParam: OpenAPIKit30.OpenAPI.Parameter) throws {
     XCTAssertEqual(newParam.name, oldParam.name)
     assertEqualNewToOld(newParam.context, oldParam.context)
+    switch (newParam.schemaOrContent, oldParam.schemaOrContent) {
+        case (.a(let newSchema), .a(let oldSchema)):
+            try assertEqualNewToOld(newSchema, oldSchema)
+        case (.b(let newContent), .b(let oldContent)):
+            try assertEqualNewToOld(newContent, oldContent)
+        default:
+            XCTFail("Parameter schemaOrContent are not equal. \(newParam.schemaOrContent)  /   \(oldParam.schemaOrContent)")
+    }
     XCTAssertEqual(newParam.description, oldParam.description)
     XCTAssertEqual(newParam.deprecated, oldParam.deprecated)
     XCTAssertEqual(newParam.vendorExtensions, oldParam.vendorExtensions)
@@ -565,7 +1016,7 @@ fileprivate func assertEqualNewToOld(_ newOperation: OpenAPIKit.OpenAPI.Operatio
         XCTAssertEqual(newOp.description, oldOp.description)
         try assertEqualNewToOld(newOp.externalDocs, oldOp.externalDocs)
         XCTAssertEqual(newOp.operationId, oldOp.operationId)
-        assertEqualNewToOld(newOp.parameters, oldOp.parameters)
+        try assertEqualNewToOld(newOp.parameters, oldOp.parameters)
         if let newRequest = newOp.requestBody {
             let oldRequest = try XCTUnwrap(oldOp.requestBody)
             switch (newRequest, oldRequest) {
@@ -636,7 +1087,7 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
         case (.a(let ref1), .a(let ref2)):
             XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
         case (.b(let schema1), .b(let schema2)):
-            assertEqualNewToOld(schema1, schema2)
+            try assertEqualNewToOld(schema1, schema2)
         default:
             XCTFail("Found one reference and one schema. \(String(describing: newContent.schema))   /   \(String(describing: oldContent.schema))")
         }
@@ -670,8 +1121,108 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
     }
 }
 
-fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSchema: OpenAPIKit30.JSONSchema) {
-        // TODO
+fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSchema: OpenAPIKit30.JSONSchema) throws {
+    XCTAssertEqual(newSchema.vendorExtensions, oldSchema.vendorExtensions)
+
+    let newCoreContext = newSchema.coreContext
+
+    switch oldSchema.value {
+        case .boolean(let coreContext):
+            XCTAssertTrue(newSchema.isBoolean)
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .number(let coreContext, let numericContext):
+            let newNumericContext = try XCTUnwrap(newSchema.numberContext)
+            // TODO: compare number contexts
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .integer(let coreContext, let integerContext):
+            let newIntegerContext = try XCTUnwrap(newSchema.integerContext)
+            // TODO: compare integer contexts
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .string(let coreContext, let stringContext):
+            let newStringContext = try XCTUnwrap(newSchema.stringContext)
+            assertEqualNewToOld(newStringContext, stringContext)
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .object(let coreContext, let objectContext):
+            let newObjectContext = try XCTUnwrap(newSchema.objectContext)
+            // TODO: compare object contexts
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .array(let coreContext, let arrayContext):
+            let newArrayContext = try XCTUnwrap(newSchema.arrayContext)
+            // TODO: compare array contexts
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .all(of: let schemas, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            XCTAssertEqual(newSchemas.count, schemas.count)
+            for (newSchema, oldSchema) in zip(newSchemas, schemas) {
+                try assertEqualNewToOld(newSchema, oldSchema)
+            }
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .one(of: let schemas, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            XCTAssertEqual(newSchemas.count, schemas.count)
+            for (newSchema, oldSchema) in zip(newSchemas, schemas) {
+                try assertEqualNewToOld(newSchema, oldSchema)
+            }
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .any(of: let schemas, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            XCTAssertEqual(newSchemas.count, schemas.count)
+            for (newSchema, oldSchema) in zip(newSchemas, schemas) {
+                try assertEqualNewToOld(newSchema, oldSchema)
+            }
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .not(let schema, core: let coreContext):
+            let newSchemas = try XCTUnwrap(newSchema.subschemas)
+            try assertEqualNewToOld(newSchemas.first!, schema)
+            try assertEqualNewToOld(newCoreContext, coreContext)
+
+        case .reference(let reference, let referenceContext):
+            guard case .reference(let newReference, _) = newSchema.value else {
+                XCTFail("Expected new schema to be a reference but it was not.")
+                return
+            }
+            XCTAssertEqual(newReference.absoluteString, reference.absoluteString)
+            XCTAssertEqual(newSchema.required, referenceContext.required)
+
+        case .fragment(let coreContext):
+            XCTAssertTrue(newSchema.isFragment)
+            try assertEqualNewToOld(newCoreContext, coreContext)
+    }
+}
+
+fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaContext, _ oldCoreContext: OpenAPIKit30.JSONSchemaContext) throws {
+    XCTAssertEqual(newCoreContext.formatString, oldCoreContext.formatString)
+    XCTAssertEqual(newCoreContext.required, oldCoreContext.required)
+    XCTAssertEqual(newCoreContext.nullable, oldCoreContext.nullable)
+    XCTAssertEqual(newCoreContext.title, oldCoreContext.title)
+    XCTAssertEqual(newCoreContext.description, oldCoreContext.description)
+    XCTAssertEqual(newCoreContext.discriminator, oldCoreContext.discriminator)
+    try assertEqualNewToOld(newCoreContext.externalDocs, oldCoreContext.externalDocs)
+    XCTAssertEqual(newCoreContext.allowedValues, oldCoreContext.allowedValues)
+    XCTAssertEqual(newCoreContext.defaultValue, oldCoreContext.defaultValue)
+    XCTAssertEqual(newCoreContext.examples, [oldCoreContext.example].compactMap { $0 })
+    XCTAssertEqual(newCoreContext.readOnly, oldCoreContext.readOnly)
+    XCTAssertEqual(newCoreContext.writeOnly, oldCoreContext.writeOnly)
+    XCTAssertEqual(newCoreContext.deprecated, oldCoreContext.deprecated)
+    XCTAssertEqual(newCoreContext.inferred, oldCoreContext.inferred)
+}
+
+fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.StringContext, _ oldStringContext: OpenAPIKit30.JSONSchema.StringContext) {
+    XCTAssertEqual(newStringContext.pattern, oldStringContext.pattern)
+    XCTAssertEqual(newStringContext.maxLength, oldStringContext.maxLength)
+    XCTAssertEqual(newStringContext.minLength, oldStringContext.minLength)
+    XCTAssertEqual(OpenAPIKit.JSONSchema.StringContext._minLength(newStringContext), OpenAPIKit30.JSONSchema.StringContext._minLength(oldStringContext))
+    XCTAssertNil(newStringContext.contentEncoding)
+    XCTAssertNil(newStringContext.contentMediaType)
 }
 
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
@@ -727,7 +1278,7 @@ fileprivate func assertEqualNewToOld(_ newSchemaContext: OpenAPIKit.OpenAPI.Para
     case (.a(let ref1), .a(let ref2)):
         XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
     case (.b(let schema1), .b(let schema2)):
-        assertEqualNewToOld(schema1, schema2)
+        try assertEqualNewToOld(schema1, schema2)
     default:
         XCTFail("Found one reference and one schema. \(newSchemaContext.schema)  /  \(oldSchemaContext.schema)")
     }
@@ -922,7 +1473,7 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
 
     for (key, newSchema) in newComponents.schemas {
         let oldSchema = try XCTUnwrap(oldComponents.schemas[key])
-        assertEqualNewToOld(newSchema, oldSchema)
+        try assertEqualNewToOld(newSchema, oldSchema)
     }
     for (key, newResponse) in newComponents.responses {
         let oldResponse = try XCTUnwrap(oldComponents.responses[key])
@@ -930,7 +1481,7 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
     }
     for (key, newParameter) in newComponents.parameters {
         let oldParameter = try XCTUnwrap(oldComponents.parameters[key])
-        assertEqualNewToOld(newParameter, oldParameter)
+        try assertEqualNewToOld(newParameter, oldParameter)
     }
     for (key, newExample) in newComponents.examples {
         let oldExample = try XCTUnwrap(oldComponents.examples[key])

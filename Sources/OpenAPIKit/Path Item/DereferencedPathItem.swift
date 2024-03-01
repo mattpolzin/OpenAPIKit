@@ -49,10 +49,11 @@ public struct DereferencedPathItem: Equatable {
     internal init(
         _ pathItem: OpenAPI.PathItem,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         self.parameters = try pathItem.parameters.map { parameter in
-            try parameter._dereferenced(in: components, following: references)
+            try parameter._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.get = try pathItem.get.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
@@ -63,6 +64,11 @@ public struct DereferencedPathItem: Equatable {
         self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+
+        var pathItem = pathItem
+        if let name = name {
+            pathItem.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
 
         self.underlyingPathItem = pathItem
     }
@@ -124,8 +130,12 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedPathItem {
-        return try DereferencedPathItem(self, resolvingIn: components, following: references)
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedPathItem {
+        return try DereferencedPathItem(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self {

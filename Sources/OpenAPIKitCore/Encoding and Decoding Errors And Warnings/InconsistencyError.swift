@@ -12,6 +12,7 @@ public struct InconsistencyError: Swift.Error, CustomStringConvertible, OpenAPIE
     public let subjectName: String
     public let details: String
     public let codingPath: [CodingKey]
+    public let pathIncludesSubject: Bool
 
     public var contextString: String { "" }
     public var errorCategory: ErrorCategory { .inconsistency(details: details) }
@@ -20,9 +21,10 @@ public struct InconsistencyError: Swift.Error, CustomStringConvertible, OpenAPIE
 
     public var description: String { localizedDescription }
 
-    public init(subjectName: String, details: String, codingPath: [CodingKey]) {
+    public init(subjectName: String, details: String, codingPath: [CodingKey], pathIncludesSubject: Bool = true) {
         self.subjectName = subjectName
         self.details = details
         self.codingPath = codingPath
+        self.pathIncludesSubject = pathIncludesSubject
     }
 }

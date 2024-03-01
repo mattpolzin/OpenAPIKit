@@ -21,9 +21,14 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.documentContainsPaths)
 
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
-            let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
-            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Document contains at least one path")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.map { $0.stringValue }, ["paths"])
+            XCTAssertEqual(errorCollection?.values.count, 1)
+
+            let openAPIError = OpenAPI.Error(from: error)
+            XCTAssertEqual(openAPIError.localizedDescription, "Failed to satisfy: Document contains at least one path at path: .paths")
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["paths"])
         }
     }
 
@@ -57,6 +62,7 @@ final class BuiltinValidationTests: XCTestCase {
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Paths contain at least one operation")
             XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, ["paths", "/hello/world"])
+            XCTAssertEqual(error?.values.count, 1)
         }
     }
 
@@ -700,7 +706,10 @@ final class BuiltinValidationTests: XCTestCase {
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
                         ],
-                        links: ["linky": .reference(.component(named: "link1"))]
+                        links: [
+                            "linky": .reference(.component(named: "link1")),
+                            "linky2": .reference(.external(URL(string: "https://linky.com")!))
+                        ]
                     )
                 ]
             )

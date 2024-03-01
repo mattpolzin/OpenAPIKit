@@ -9,6 +9,16 @@
 /// underlying context to attempt to pull out a more granular reason for the
 /// failure.
 ///
+/// In practice (currently) such digging only occurs when there is an `Either`
+/// that fails to decode and that presents an opportunity to do one of three things:
+/// 1. Present the error that neither of two things decoded successfully.
+/// 2. Present the error that thing 1 failed to decode.
+/// 3. Present the error that thing 2 failed to decode.
+/// The reason it ever makes sense to only present an error from one of the two
+/// branches is that sometimes we can heuristically determine that it was exceedingly
+/// unlikely the user intended to represent the thing from the other branch. This error
+/// protocol is all about determining whether that is the case or not.
+///
 /// This is a relevant concept with respect to `DecodingError`s in particular
 /// because they often have underlying causes.
 ///

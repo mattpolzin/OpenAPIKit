@@ -32,11 +32,7 @@ extension OpenAPI.Document {
         let validator = _Validator(document: self, validations: validator.validations)
         var container = validator.singleValueContainer()
 
-        // we kick things off by applying validations to the root (OpenAPI.Document)
-        // and then encoding with the single value container.
-        // After this, validations are only applied by keyed/unkeyed containers and
-        // by the leaf node methods of the single value container.
-        validator.applyValidations(to: self)
+        // Validation is accomplished via "encoding"
         try container.encode(self)
 
         let errors: [ValidationError]
@@ -170,7 +166,6 @@ public final class Validator {
     /// `Validator.blank`.
     ///
     /// The default validations are
-    /// - Operations must contain at least one response.
     /// - Document-level tag names are unique.
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
@@ -184,7 +179,6 @@ public final class Validator {
     ///
     public convenience init() {
         self.init(validations: [
-            .init(.operationsContainResponses),
             .init(.documentTagNamesAreUnique),
             .init(.pathItemParametersAreUnique),
             .init(.operationParametersAreUnique),

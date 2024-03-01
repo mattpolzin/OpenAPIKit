@@ -11,10 +11,10 @@ extension Shared {
     /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
     public struct Discriminator: Equatable {
         public let propertyName: String
-        public let mapping: [String: String]?
+        public let mapping: OrderedDictionary<String, String>?
 
         public init(propertyName: String,
-                    mapping: [String: String]? = nil) {
+                    mapping: OrderedDictionary<String, String>? = nil) {
             self.propertyName = propertyName
             self.mapping = mapping
         }
@@ -37,7 +37,7 @@ extension Shared.Discriminator: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         propertyName = try container.decode(String.self, forKey: .propertyName)
-        mapping = try container.decodeIfPresent([String: String].self, forKey: .mapping)
+        mapping = try container.decodeIfPresent(OrderedDictionary<String, String>.self, forKey: .mapping)
     }
 }
 

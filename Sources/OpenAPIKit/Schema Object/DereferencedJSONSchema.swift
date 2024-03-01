@@ -16,7 +16,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public typealias IntegerContext = JSONSchema.IntegerContext
     public typealias StringContext = JSONSchema.StringContext
 
-    case null
+    case null(CoreContext<JSONTypeFormat.AnyFormat>)
     case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
     case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
     case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -43,8 +43,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     /// not true.
     public var jsonSchema: JSONSchema {
         switch self {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext)
         case .boolean(let context):
             return .boolean(context)
         case .object(let coreContext, let objectContext):
@@ -72,8 +72,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     func optionalSchemaObject() -> DereferencedJSONSchema {
         switch self {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(coreContext.optionalContext())
         case .boolean(let context):
             return .boolean(context.optionalContext())
         case .object(let contextA, let contextB):
@@ -135,6 +135,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var examples: [AnyCodable] { jsonSchema.examples }
 
     // See `JSONSchemaContext`
+    public var inferred: Bool { jsonSchema.inferred }
+
+    // See `JSONSchemaContext`
     public var readOnly: Bool { jsonSchema.readOnly }
 
     // See `JSONSchemaContext`
@@ -142,6 +145,98 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var deprecated: Bool { jsonSchema.deprecated }
+
+    // See `JSONSchemaContext`
+    public var vendorExtensions: [String : AnyCodable] {
+        // NOTE: this doesnot just do `jsonSchema.vendorExtensions` because of some wild
+        //       Swift bug that I don't have time to think through at the moment.
+        switch self {
+        case .null(let context):
+            return context.vendorExtensions
+        case .boolean(let context):
+            return context.vendorExtensions
+        case .number(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .integer(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .string(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .object(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .array(let coreContext, _):
+            return coreContext.vendorExtensions
+        case .all(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .one(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .any(of: _, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .not(_, core: let coreContext):
+            return coreContext.vendorExtensions
+        case .fragment(let context):
+            return context.vendorExtensions
+        }
+    }
+
+    /// Returns a version of this `DereferencedJSONSchema` that has the given description.
+    public func with(description: String) -> DereferencedJSONSchema {
+        switch self {
+        case .null(let coreContext):
+            return .null(coreContext.with(description: description))
+        case .boolean(let context):
+            return .boolean(context.with(description: description))
+        case .object(let coreContext, let objectContext):
+            return .object(coreContext.with(description: description), objectContext)
+        case .array(let coreContext, let arrayContext):
+            return .array(coreContext.with(description: description), arrayContext)
+        case .number(let coreContext, let numberContext):
+            return .number(coreContext.with(description: description), numberContext)
+        case .integer(let coreContext, let integerContext):
+            return .integer(coreContext.with(description: description), integerContext)
+        case .string(let coreContext, let stringContext):
+            return .string(coreContext.with(description: description), stringContext)
+        case .all(of: let schemas, core: let coreContext):
+            return .all(of: schemas, core: coreContext.with(description: description))
+        case .one(of: let schemas, core: let coreContext):
+            return .one(of: schemas, core: coreContext.with(description: description))
+        case .any(of: let schemas, core: let coreContext):
+            return .any(of: schemas, core: coreContext.with(description: description))
+        case .not(let schema, core: let coreContext):
+            return .not(schema, core: coreContext.with(description: description))
+        case .fragment(let context):
+            return .fragment(context.with(description: description))
+        }
+    }
+
+    /// Returns a version of this `DereferencedJSONSchema` that has the given vendor extensions.
+    public func with(vendorExtensions: [String: AnyCodable]) -> DereferencedJSONSchema {
+        switch self {
+        case .null(let coreContext):
+            return .null(coreContext.with(vendorExtensions: vendorExtensions))
+        case .boolean(let context):
+            return .boolean(context.with(vendorExtensions: vendorExtensions))
+        case .object(let coreContext, let objectContext):
+            return .object(coreContext.with(vendorExtensions: vendorExtensions), objectContext)
+        case .array(let coreContext, let arrayContext):
+            return .array(coreContext.with(vendorExtensions: vendorExtensions), arrayContext)
+        case .number(let coreContext, let numberContext):
+            return .number(coreContext.with(vendorExtensions: vendorExtensions), numberContext)
+        case .integer(let coreContext, let integerContext):
+            return .integer(coreContext.with(vendorExtensions: vendorExtensions), integerContext)
+        case .string(let coreContext, let stringContext):
+            return .string(coreContext.with(vendorExtensions: vendorExtensions), stringContext)
+        case .all(of: let schemas, core: let coreContext):
+            return .all(of: schemas, core: coreContext.with(vendorExtensions: vendorExtensions))
+        case .one(of: let schemas, core: let coreContext):
+            return .one(of: schemas, core: coreContext.with(vendorExtensions: vendorExtensions))
+        case .any(of: let schemas, core: let coreContext):
+            return .any(of: schemas, core: coreContext.with(vendorExtensions: vendorExtensions))
+        case .not(let schema, core: let coreContext):
+            return .not(schema, core: coreContext.with(vendorExtensions: vendorExtensions))
+        case .fragment(let context):
+            return .fragment(context.with(vendorExtensions: vendorExtensions))
+        }
+    }
 }
 
 extension DereferencedJSONSchema {
@@ -203,7 +298,7 @@ extension DereferencedJSONSchema {
             resolvingIn components: OpenAPI.Components,
             following references: Set<AnyHashable>
         ) throws {
-            items = try arrayContext.items.map { try $0._dereferenced(in: components, following: references) }
+            items = try arrayContext.items.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
             maxItems = arrayContext.maxItems
             _minItems = arrayContext._minItems
             _uniqueItems = arrayContext._uniqueItems
@@ -289,14 +384,14 @@ extension DereferencedJSONSchema {
             resolvingIn components: OpenAPI.Components,
             following references: Set<AnyHashable>
         ) throws {
-            properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references) }
+            properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                additionalProperties = .b(try schema._dereferenced(in: components, following: references))
+                additionalProperties = .b(try schema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil))
             case nil:
                 additionalProperties = nil
             }
@@ -355,47 +450,72 @@ extension JSONSchema: LocallyDereferenceable {
     ///     `ReferenceError.missingOnLookup(name:key:)` depending
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedJSONSchema {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedJSONSchema {
+        func addComponentNameExtension<T>(to context: CoreContext<T>) -> CoreContext<T> {
+            var extensions = context.vendorExtensions
+            if let name = name {
+                extensions[OpenAPI.Components.componentNameExtension] = .init(name)
+            }
+            return context.with(vendorExtensions: extensions)
+        }
+
         switch value {
-        case .null:
-            return .null
+        case .null(let coreContext):
+            return .null(addComponentNameExtension(to: coreContext))
         case .reference(let reference, let context):
-            var dereferenced = try reference._dereferenced(in: components, following: references)
+            var dereferenced = try reference
+                ._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+
             if !context.required {
                 dereferenced = dereferenced.optionalSchemaObject()
             }
+            if let refDescription = context.description {
+                dereferenced = dereferenced.with(description: refDescription)
+            }
+            // TODO: consider which other core context properties to override here as with description ^
+
+            var extensions = dereferenced.vendorExtensions
+            if let name = name {
+                extensions[OpenAPI.Components.componentNameExtension] = .init(name)
+            }
+            dereferenced = dereferenced.with(vendorExtensions: vendorExtensions)
+
             return dereferenced
         case .boolean(let context):
-            return .boolean(context)
+            return .boolean(addComponentNameExtension(to: context))
         case .object(let coreContext, let objectContext):
             return try .object(
-                coreContext,
+                addComponentNameExtension(to: coreContext),
                 DereferencedJSONSchema.ObjectContext(objectContext, resolvingIn: components, following: references)
             )
         case .array(let coreContext, let arrayContext):
             return try .array(
-                coreContext,
+                addComponentNameExtension(to: coreContext),
                 DereferencedJSONSchema.ArrayContext(arrayContext, resolvingIn: components, following: references)
             )
         case .number(let coreContext, let numberContext):
-            return .number(coreContext, numberContext)
+            return .number(addComponentNameExtension(to: coreContext), numberContext)
         case .integer(let coreContext, let integerContext):
-            return .integer(coreContext, integerContext)
+            return .integer(addComponentNameExtension(to: coreContext), integerContext)
         case .string(let coreContext, let stringContext):
-            return .string(coreContext, stringContext)
+            return .string(addComponentNameExtension(to: coreContext), stringContext)
         case .all(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references) }
-            return .all(of: schemas, core: coreContext)
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            return .all(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .one(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references) }
-            return .one(of: schemas, core: coreContext)
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            return .one(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .any(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references) }
-            return .any(of: schemas, core: coreContext)
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            return .any(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .not(let jsonSchema, core: let coreContext):
-            return .not(try jsonSchema._dereferenced(in: components, following: references), core: coreContext)
+            return .not(try jsonSchema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil), core: addComponentNameExtension(to: coreContext))
         case .fragment(let context):
-            return .fragment(context)
+            return .fragment(addComponentNameExtension(to: context))
         }
     }
 

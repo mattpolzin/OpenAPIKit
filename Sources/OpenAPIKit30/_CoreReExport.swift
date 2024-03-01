@@ -44,8 +44,6 @@ public extension OpenAPI.Response {
 
 public extension JSONSchema {
     typealias Permissions = OpenAPIKitCore.Shared.JSONSchemaPermissions
-    typealias StringContext = OpenAPIKitCore.Shared.StringContext
-    typealias ReferenceContext = OpenAPIKitCore.Shared.ReferenceContext
 }
 
 public extension JSONTypeFormat {
@@ -55,5 +53,4 @@ public extension JSONTypeFormat {
     typealias ArrayFormat = OpenAPIKitCore.Shared.ArrayFormat
     typealias NumberFormat = OpenAPIKitCore.Shared.NumberFormat
     typealias IntegerFormat = OpenAPIKitCore.Shared.IntegerFormat
-    typealias StringFormat = OpenAPIKitCore.Shared.StringFormat
 }

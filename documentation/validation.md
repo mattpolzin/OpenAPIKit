@@ -14,6 +14,7 @@
     - [A Valid OpenAPI Document](#a-valid-openapi-document)
     - [An Invalid OpenAPI Document](#an-invalid-openapi-document)
     - [Validation Code](#validation-code)
+- [Tips and Quirks](#tips-and-quirks)
 
 ### Executing Validations
 
@@ -25,6 +26,8 @@ try document.validate()
 
 If validation fails, `document.validate()` will throw a `ValidationErrorCollection` value. `ValidationErrorCollection` is a `Swift.Error` that holds all of the validation errors that occurred. You can access the individual validation errors with its `values` property.
 
+By default, validation is "strict" in that any warnings produced when parsing the OpenAPI document will produce errors when validating. If you would like to handle these warnings differently, you can use `document.validate(strict: false)` which will not throw errors for warnings but instead returns those warnings.
+
 Each element of the `ValdiationErrorCollection` `values` property is a `ValidationError`. Each `ValidationError` in turn offers you a `reason` (`String`) for the failure and the `codingPath` (`[CodingKey]`) where the failure occurred. 
 
 You can also get a `codingPathString` if you want a convenient string representation of the coding path.
@@ -33,8 +36,8 @@ You can also get a `codingPathString` if you want a convenient string representa
 let document = OpenAPI.Document(...)
 do {
     try document.validate()
-} catch let errors as ValidationErrors {
-    for error in errors {
+} catch let errors as ValidationErrorCollection {
+    for error in errors.values {
         print(error.reason)
         print("occurred at \(error.codingPathString)")
     }
@@ -544,3 +547,50 @@ let validator = Validator()
 
 try document.validate(using: validator)
 ```
+
+### Tips and Quirks
+This section contains tips for using the validation framework and quirks of the framework that could cause some confusion.
+
+#### Validation of empty Arrays & Maps
+The validation framework is tied to the process of encoding an OpenAPI document. This generally
+provides some really nice benefits for free (like tracking the path under which a validation is
+being run).
+
+One place where this can cause confusion is where certain values within an OpenAPIKit type are omitted from encoding
+when they are empty. Because of this, using those types as the `Context` for a validation will only work if the type is
+not empty and cannot be used to assert that the type is or is not empty.
+
+A concrete example of this quirk is the `Response.Map` under a `PathItem`. If this map is empty, the `OpenAPIKit` module
+(but not `OpenAPIKit30`) will omit the `responses` key from encoding. If you want to check that the responses are not 
+empty as is done in the built-in validation `operationsContainResponses` you need your validation context to be the whole 
+`Operation` not just the `Response.Map`.
+
+Here's a table of Array/Map types for which this quirk is relevant and which modules the quirk applies to:
+
+  | Property                             | Type                    | OpenAPIKit30 | OpenAPIKit |
+  |--------------------------------------|-------------------------|--------------|------------|
+  | `OpenAPI.Components.callbacks`       | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.examples`        | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.headers`         | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.links`           | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.parameters`      | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.pathItems`       | `ComponentDictionary`   |              | x          |
+  | `OpenAPI.Components.requestBodies`   | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.responses`       | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.schemas`         | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Components.securitySchemes` | `ComponentDictionary`   | x            | x          |
+  | `OpenAPI.Document.components`        | `Components`            | x            | x          |
+  | `OpenAPI.Document.security`          | `[SecurityRequirement]` | x            | x          |
+  | `OpenAPI.Document.paths`             | `PathItem.Map`          |              | x          |
+  | `OpenAPI.Document.servers`           | `[Server]`              | x            | x          |
+  | `OpenAPI.Document.webhooks`          | `OrderedDictionary`     |              | x          |
+  | `OpenAPI.Link.parameters`            | `OrderedDictionary`     | x            | x          |
+  | `OpenAPI.Operation.callbacks`        | `CallbacksMap`          | x            | x          |
+  | `OpenAPI.Operation.parameters`       | `Parameter.Array`       | x            | x          |
+  | `OpenAPI.Operation.responses`        | `Response.Map`          |              | x          |
+  | `OpenAPI.PathItem.parameters`        | `Parameter.Array`       | x            | x          |
+  | `OpenAPI.PathItem.responses`         | `Response.Map`          | x            | x          |
+  | `OpenAPI.Response.content`           | `Content.Map`           | x            | x          |
+  | `OpenAPI.Response.links`             | `Link.Map`              | x            | x          |
+  | `OpenAPI.Server.Variable.enum`       | `[String]`              | x            | x          |
+

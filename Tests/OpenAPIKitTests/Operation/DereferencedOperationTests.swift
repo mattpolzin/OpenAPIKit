@@ -62,7 +62,8 @@ final class DereferencedOperationTests: XCTestCase {
             .init(
                 name: "test",
                 context: .header,
-                schema: .string
+                schema: .string,
+                vendorExtensions: ["x-component-name": "test"]
             )
         )
     }
@@ -90,7 +91,13 @@ final class DereferencedOperationTests: XCTestCase {
                 200: .response(description: "test")
             ]
         ).dereferenced(in: components)
-        XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .init(schema: .string)]))
+        XCTAssertEqual(
+            t1.requestBody?.underlyingRequest,
+            OpenAPI.Request(
+                content: [.json: .init(schema: .string)],
+                vendorExtensions: ["x-component-name": "test"]
+            )
+        )
     }
 
     func test_requestReferenceMissing() {
@@ -117,7 +124,10 @@ final class DereferencedOperationTests: XCTestCase {
         ).dereferenced(in: components)
         XCTAssertEqual(
             t1.responses[status: 200]?.underlyingResponse,
-            .init(description: "test")
+            .init(
+                description: "test",
+                vendorExtensions: ["x-component-name": "test"]
+            )
         )
     }
 
@@ -150,6 +160,43 @@ final class DereferencedOperationTests: XCTestCase {
                 responses: [:],
                 security: [
                     [.component(named: "requirement"): []]
+                ]
+            ).dereferenced(in: .noComponents)
+        )
+    }
+
+    func test_dereferencedCallback() throws {
+        let components = OpenAPI.Components(
+            callbacks: [
+                "callback": [
+                    OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(
+                        .init(
+                            description: "Example of pathItem",
+                            post: .init(tags: "op callback", responses: [:])
+                        )
+                    )
+                ]
+            ]
+        )
+
+        let t1 = try OpenAPI.Operation(
+            responses: [:],
+            callbacks: [
+                "callback": .reference(.component(named: "callback"))
+            ]
+        ).dereferenced(in: components)
+        XCTAssertEqual(t1.callbacks.count, 1)
+        XCTAssertEqual(t1.callbacks["callback"]?.keys[0], OpenAPI.CallbackURL(rawValue: "{$url}"))
+        XCTAssertEqual(t1.callbacks["callback"]?.values[0].description, "Example of pathItem")
+        XCTAssertEqual(t1.callbacks["callback"]?.values[0][.post]?.tags, ["op callback"])
+    }
+
+    func test_callbackReferenceMissing() throws {
+        XCTAssertThrowsError(
+            try OpenAPI.Operation(
+                responses: [:],
+                callbacks: [
+                    "callback": .reference(.component(named: "callback"))
                 ]
             ).dereferenced(in: .noComponents)
         )

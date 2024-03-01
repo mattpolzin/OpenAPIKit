@@ -42,8 +42,9 @@ public struct DereferencedSchemaContext: Equatable {
         resolvingIn components: OpenAPI.Components,
         following references: Set<AnyHashable>
     ) throws {
-        self.schema = try schemaContext.schema._dereferenced(in: components, following: references)
-        let examples = try schemaContext.examples?.mapValues { try components.lookup($0) }
+        self.schema = try schemaContext.schema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+        let examples = try schemaContext.examples?
+            .mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
         self.examples = examples
 
         self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
@@ -60,7 +61,11 @@ extension OpenAPI.Parameter.SchemaContext: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedSchemaContext {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedSchemaContext {
         return try DereferencedSchemaContext(self, resolvingIn: components, following: references)
     }
 

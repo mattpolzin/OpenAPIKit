@@ -511,6 +511,67 @@ extension HeaderTests {
         )
     }
 
+    func test_header_withStyleAndExplode_encode() throws {
+        let header = OpenAPI.Header(
+            schema: .init(
+                .array(items: .string),
+                style: .form,
+                explode: false
+            ),
+            required: true
+        )
+
+        let encodedHeader = try orderUnstableTestStringFromEncoding(of: header)
+
+        assertJSONEquivalent(
+            encodedHeader,
+            """
+            {
+              "explode" : false,
+              "required" : true,
+              "schema" : {
+                "items" : {
+                  "type" : "string"
+                },
+                "type" : "array"
+              },
+              "style" : "form"
+            }
+            """
+        )
+    }
+
+    func test_header_withStyleAndExplode_decode() throws {
+        let headerData =
+        """
+        {
+          "explode" : false,
+          "required" : true,
+          "schema" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "style" : "form"
+        }
+        """.data(using: .utf8)!
+
+        let header = try orderUnstableDecode(OpenAPI.Header.self, from: headerData)
+
+        XCTAssertEqual(
+            header,
+            OpenAPI.Header(
+                schema: .init(
+                    .array(items: .string),
+                    style: .form,
+                    explode: false
+                ),
+                required: true
+            )
+        )
+    }
+
     func test_header_errorForBothContentAndSchema_decode() {
         let headerData =
         """

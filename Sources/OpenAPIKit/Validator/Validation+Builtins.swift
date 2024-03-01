@@ -15,14 +15,14 @@ extension Validation {
     ///
     /// The OpenAPI Specifcation does not require that the document
     /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
-    /// but documentation that is public in nature might only ever have
-    /// an empty `PathItem.Map` in error.
+    /// or even because it only contains webhooks, but authors may still
+    /// want to protect against an empty `PathItem.Map` in some cases.
     ///
     /// - Important: This is not an included validation by default.
-    public static var documentContainsPaths: Validation<OpenAPI.PathItem.Map> {
+    public static var documentContainsPaths: Validation<OpenAPI.Document> {
         .init(
             description: "Document contains at least one path",
-            check: \.count > 0
+            check: \.paths.count > 0
         )
     }
 
@@ -157,23 +157,25 @@ extension Validation {
         )
     }
 
-    // MARK: - Included with `Validator()` by default
-
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
-    /// The OpenAPI Specifcation requires that Responses Objects
-    /// contain [at least one response](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#responses-object).
-    /// The specification recommends that if there is only one response then
-    /// it be a successful response.
+    /// The OpenAPI Specifcation does not require that Responses Objects
+    /// contain at least one response but you may wish to validate that all 
+    /// operations contain at least one response in your own API.
     ///
-    /// - Important: This is included in validation by default.
-    public static var operationsContainResponses: Validation<OpenAPI.Response.Map> {
+    /// The specification recommends that if there is only one response then
+    /// it be a successful response but this validation does not require that.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var operationsContainResponses: Validation<OpenAPI.Operation> {
         .init(
             description: "Operations contain at least one response",
-            check: \.count > 0
+            check: \.responses.count > 0
         )
     }
+
+    // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
     // by calling `Validator.blank`.

@@ -18,6 +18,8 @@ public struct DereferencedResponse: Equatable {
     public let headers: DereferencedHeader.Map?
     /// The map of dereferenced content for this response.
     public let content: DereferencedContent.Map
+    /// The map of dereferenced links for this response.
+    public let links: OrderedDictionary<String, OpenAPI.Link>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Response, T>) -> T {
         return underlyingResponse[keyPath: path]
@@ -33,14 +35,24 @@ public struct DereferencedResponse: Equatable {
     internal init(
         _ response: OpenAPI.Response,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         self.headers = try response.headers?.mapValues { header in
-            try header._dereferenced(in: components, following: references)
+            try header._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.content = try response.content.mapValues { content in
-            try content._dereferenced(in: components, following: references)
+            try content._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+        }
+
+        self.links = try response.links.mapValues { link in 
+            try link._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+        }
+
+        var response = response
+        if let name = name {
+            response.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
         self.underlyingResponse = response
@@ -56,7 +68,11 @@ extension OpenAPI.Response: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedResponse {
-        return try DereferencedResponse(self, resolvingIn: components, following: references)
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedResponse {
+        return try DereferencedResponse(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }

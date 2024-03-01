@@ -261,8 +261,16 @@ extension OpenAPI.SecurityScheme {
 extension OpenAPI.SecurityScheme: LocallyDereferenceable {
     /// Security Schemes do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.SecurityScheme {
-        return self
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.SecurityScheme {
+        var ret = self
+        if let name = name {
+            ret.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+        return ret
     }
 
     public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.SecurityScheme where Context : ExternalLoaderContext {

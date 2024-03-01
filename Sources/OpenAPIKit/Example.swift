@@ -15,9 +15,10 @@ extension OpenAPI {
     public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?
+
         /// Represents the OpenAPI `externalValue` as a URL _or_
         /// the OpenAPI `value` as `AnyCodable`.
-        public let value: Either<URL, AnyCodable>
+        public let value: Either<URL, AnyCodable>?
 
         /// Dictionary of vendor extensions.
         ///
@@ -29,7 +30,7 @@ extension OpenAPI {
         public init(
             summary: String? = nil,
             description: String? = nil,
-            value: Either<URL, AnyCodable>,
+            value: Either<URL, AnyCodable>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.summary = summary
@@ -50,7 +51,7 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Example>, B == OpenAPI.Exa
     public static func example(
         summary: String? = nil,
         description: String? = nil,
-        value: Either<URL, AnyCodable>,
+        value: Either<URL, AnyCodable>? = nil,
         vendorExtensions: [String: AnyCodable] = [:]
     ) -> Self {
         return .b(
@@ -101,6 +102,8 @@ extension OpenAPI.Example: Encodable {
             try container.encode(url.absoluteURL, forKey: .externalValue)
         case .b(let example):
             try container.encode(example, forKey: .value)
+        case nil:
+            break
         }
 
         try encodeExtensions(to: &container)
@@ -119,13 +122,16 @@ extension OpenAPI.Example: Decodable {
             )
         }
 
-        let externalValue = try container.decodeURLAsStringIfPresent(forKey: .externalValue)
+        if let externalValue = try container.decodeURLAsStringIfPresent(forKey: .externalValue) {
+            value = .a(externalValue)
+        } else if let internalValue = try container.decodeIfPresent(AnyCodable.self, forKey: .value) {
+            value = .b(internalValue)
+        } else {
+            value = nil
+        }
 
         summary = try container.decodeIfPresent(String.self, forKey: .summary)
         description = try container.decodeIfPresent(String.self, forKey: .description)
-
-        value = try externalValue.map(Either.init)
-            ?? .init( container.decode(AnyCodable.self, forKey: .value))
 
         vendorExtensions = try Self.extensions(from: decoder)
     }
@@ -183,8 +189,22 @@ extension OpenAPI.Example {
 extension OpenAPI.Example: LocallyDereferenceable {
     /// Examples do not contain any references but for convenience
     /// they can be "dereferenced" to themselves.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> OpenAPI.Example {
-        return self
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> OpenAPI.Example{
+        var vendorExtensions = self.vendorExtensions
+        if let name = name {
+            vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
+        return .init(
+            summary: self.summary,
+            description: self.description,
+            value: self.value,
+            vendorExtensions: vendorExtensions
+        )
     }
 
     public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Example where Context : ExternalLoaderContext {

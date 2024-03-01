@@ -34,7 +34,8 @@ public struct DereferencedParameter: Equatable {
     internal init(
         _ parameter: OpenAPI.Parameter,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         switch parameter.schemaOrContent {
         case .a(let schemaContext):
@@ -57,6 +58,11 @@ public struct DereferencedParameter: Equatable {
             )
         }
 
+        var parameter = parameter
+        if let name = name {
+            parameter.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
         self.underlyingParameter = parameter
     }
 }
@@ -68,8 +74,12 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedParameter {
-        return try DereferencedParameter(self, resolvingIn: components, following: references)
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedParameter {
+        return try DereferencedParameter(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self {

@@ -385,6 +385,16 @@ extension OpenAPI {
     }
 }
 
+public extension JSONReference {
+    /// Create an OpenAPI.Reference from the given JSONReference.
+    func openAPIReference(withDescription description: String? = nil) -> OpenAPI.Reference<ReferenceType> {
+        OpenAPI.Reference(
+            self,
+            description: description
+        )
+    }
+}
+
 /// `SummaryOverridable` exists to provide a parent protocol to `OpenAPIDescribable`
 /// and `OpenAPISummarizable`. The structure is designed to provide default no-op
 /// implementations of both the members of this protocol to all types that implement either
@@ -510,8 +520,11 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     ///
     /// If you just want to look the reference up, use the `subscript` or the
     /// `lookup()` method on `Components`.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> ReferenceType.DereferencedSelf {
-
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> ReferenceType.DereferencedSelf {
         var newReferences = references
         let (inserted, _) = newReferences.insert(self)
         guard inserted else {
@@ -520,7 +533,7 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
 
         return try components
             .lookup(self)
-            ._dereferenced(in: components, following: newReferences)
+            ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
     }
 
     public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
@@ -547,7 +560,11 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
     ///
     /// If you just want to look the reference up, use the `subscript` or the
     /// `lookup()` method on `Components`.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> ReferenceType.DereferencedSelf {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> ReferenceType.DereferencedSelf {
 
         var newReferences = references
         let (inserted, _) = newReferences.insert(self)
@@ -557,7 +574,7 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
 
         return try components
             .lookup(self)
-            ._dereferenced(in: components, following: newReferences)
+            ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
     }
 
     public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {

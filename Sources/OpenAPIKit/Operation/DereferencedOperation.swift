@@ -20,6 +20,9 @@ public struct DereferencedOperation: Equatable {
     public let requestBody: DereferencedRequest?
     /// A dereferenced map of responses.
     public let responses: DereferencedResponse.Map
+    /// A dereferenced map of callbacks.
+    public let callbacks: OpenAPI.DereferencedCallbacksMap
+    
     /// An array of dereferenced security requirements.
     ///
     /// If defined, overrides the security requirements in the
@@ -52,15 +55,15 @@ public struct DereferencedOperation: Equatable {
         following references: Set<AnyHashable>
     ) throws {
         self.parameters = try operation.parameters.map { parameter in
-            try parameter._dereferenced(in: components, following: references)
+            try parameter._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.requestBody = try operation.requestBody.map { request in
-            try request._dereferenced(in: components, following: references)
+            try request._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.responses = try operation.responses.mapValues { response in
-            try response._dereferenced(in: components, following: references)
+            try response._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         }
 
         self.security = try operation.security?.map {
@@ -69,6 +72,12 @@ public struct DereferencedOperation: Equatable {
                 resolvingIn: components,
                 following: references
             )
+        }
+
+        self.callbacks = try operation.callbacks.mapValues { callback in
+            try callback._dereferenced(in: components,
+                                       following: references,
+                                       dereferencedFromComponentNamed: nil)
         }
 
         self.underlyingOperation = operation
@@ -107,7 +116,11 @@ extension OpenAPI.Operation: LocallyDereferenceable {
     /// For all external-use, see `dereferenced(in:)` (provided by the `LocallyDereferenceable` protocol).
     /// All types that provide a `_dereferenced(in:following:)` implementation have a `dereferenced(in:)`
     /// implementation for free.
-    public func _dereferenced(in components: OpenAPI.Components, following references: Set<AnyHashable>) throws -> DereferencedOperation {
+    public func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
+    ) throws -> DereferencedOperation {
         return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
 
