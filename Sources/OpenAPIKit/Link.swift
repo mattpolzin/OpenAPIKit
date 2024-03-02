@@ -287,6 +287,14 @@ extension OpenAPI.Link: LocallyDereferenceable {
             vendorExtensions: vendorExtensions
         )
     }
+
+    public func externallyDereferenced<Context>(
+      with loader: inout ExternalLoader<Context>
+    ) throws -> Self where Context : ExternalLoaderContext {
+        // TODO: externally dereference security, responses, requestBody, and parameters
+#warning("externally dereference security, responses, requestBody, and parameters")
+        return self
+    }
 }
 
 extension OpenAPI.Link: Validatable {}

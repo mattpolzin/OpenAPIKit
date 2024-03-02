@@ -31,6 +31,16 @@ extension Shared {
             self.rawValue = rawValue
         }
 
+        public static func forceInit(rawValue: String?) throws -> ComponentKey {
+            guard let rawValue = rawValue else {
+                throw InvalidComponentKey()
+            }
+            guard let value = ComponentKey(rawValue: rawValue) else {
+                throw InvalidComponentKey(Self.problem(with: rawValue), rawValue: rawValue)
+            }
+            return value
+        }
+
         public static func problem(with proposedString: String) -> String? {
             if Self(rawValue: proposedString) == nil {
                 return "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(proposedString)' does not.."
@@ -64,6 +74,19 @@ extension Shared {
             }
 
             try container.encode(rawValue)
+        }
+    }
+
+    public struct InvalidComponentKey: Swift.Error {
+        public let description: String
+
+        internal init() { 
+            description = "Failed to create a ComponentKey"
+        }
+
+        internal init(_ message: String?, rawValue: String) {
+            description = message
+               ?? "Failed to create a ComponentKey from \(rawValue)"
         }
     }
 }

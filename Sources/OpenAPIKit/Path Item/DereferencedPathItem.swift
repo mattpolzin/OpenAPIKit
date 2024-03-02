@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 /// An `OpenAPI.PathItem` type that guarantees
 /// its `parameters` and operations are inlined instead of
@@ -136,4 +137,22 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
     ) throws -> DereferencedPathItem {
         return try DereferencedPathItem(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
+
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self {
+        var pathItem = self
+       
+        var newParameters = OpenAPI.Parameter.Array()
+        for parameterRef in pathItem.parameters {
+            newParameters.append(
+                try parameterRef.externallyDereferenced(with: &loader)
+            )
+        }
+
+        pathItem.parameters = newParameters
+
+        // TODO: load external references for entire PathItem object
+
+        return pathItem
+    }
 }
+

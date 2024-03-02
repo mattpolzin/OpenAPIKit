@@ -427,7 +427,12 @@ extension JSONSchema: VendorExtendable {
     /// `[ "x-extensionKey": <anything>]`
     /// where the values are anything codable.
     public var vendorExtensions: VendorExtensions {
-        coreContext.vendorExtensions
+        get {
+          coreContext.vendorExtensions
+        }
+        set {
+          #warning("implement me")
+        }
     }
 
     public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {

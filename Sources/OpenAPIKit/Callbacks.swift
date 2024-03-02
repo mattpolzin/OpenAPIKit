@@ -35,5 +35,13 @@ extension OpenAPI.CallbackURL: LocallyDereferenceable {
     ) throws -> OpenAPI.CallbackURL {
         self
     }
+
+    public func externallyDereferenced<Context>(
+      with loader: inout ExternalLoader<Context>
+    ) throws -> Self where Context : ExternalLoaderContext {
+        // TODO: externally dereference security, responses, requestBody, and parameters
+#warning("externally dereference security, responses, requestBody, and parameters")
+        return self
+    }
 }
 

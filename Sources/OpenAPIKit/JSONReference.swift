@@ -511,7 +511,7 @@ extension OpenAPI.Reference: Decodable {
 }
 
 // MARK: - LocallyDereferenceable
-extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
+extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable & Decodable & Equatable {
     /// Look up the component this reference points to and then
     /// dereference it.
     ///
@@ -535,9 +535,23 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
             .lookup(self)
             ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
     }
+
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
+        switch self {
+        case .internal(let ref):
+           let value = try loader.components.lookup(self)
+               .externallyDereferenced(with: &loader)
+           let key = try OpenAPI.ComponentKey.forceInit(rawValue: ref.name) 
+           loader.components[keyPath: ReferenceType.openAPIComponentsKeyPath][key] =
+               value 
+           return self
+        case .external(let url):
+            return try loader.store(type: ReferenceType.self, from: url).jsonReference
+        }
+    }
 }
 
-extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
+extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable & Decodable & Equatable {
     /// Look up the component this reference points to and then
     /// dereference it.
     ///
@@ -561,6 +575,10 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
         return try components
             .lookup(self)
             ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
+    }
+
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
+        return .init(try jsonReference.externallyDereferenced(with: &loader))
     }
 }
 
