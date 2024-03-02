@@ -16,7 +16,7 @@ public protocol ExternalLoaderContext {
     /// the only real responsibility of a `load` function is to locate and load the given
     /// `URL` and pass its `Data` or `String` (depending on the decoder) to an appropriate
     /// `Decoder` for the given file type.
-    static func load<T>(_: URL) throws -> T where T: Decodable
+    static func load<T>(_: URL) async throws -> T where T: Decodable
 
     /// Determine the next Component Key (where to store something in the 
     /// Components Object) for a new object of the given type that was loaded
@@ -49,10 +49,10 @@ public struct ExternalLoader<Context: ExternalLoaderContext> {
 
     internal var context: Context
 
-    internal mutating func store<T>(type: T.Type, from url: URL) throws -> OpenAPI.Reference<T> where T: ComponentDictionaryLocatable & Equatable & Decodable & LocallyDereferenceable {
+    internal mutating func store<T>(type: T.Type, from url: URL) async throws -> OpenAPI.Reference<T> where T: ComponentDictionaryLocatable & Equatable & Decodable & LocallyDereferenceable {
         let key = try context.nextComponentKey(type: type, at: url, given: components)
-        let value: T = try Context.load(url)
-        components[keyPath: T.openAPIComponentsKeyPath][key] = try value.externallyDereferenced(with: &self)
+        let value: T = try await Context.load(url)
+        components[keyPath: T.openAPIComponentsKeyPath][key] = try await value.externallyDereferenced(with: &self)
         return try components.reference(named: key.rawValue, ofType: T.self)
     }
 }

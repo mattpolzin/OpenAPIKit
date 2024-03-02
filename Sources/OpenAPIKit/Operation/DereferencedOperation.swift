@@ -124,7 +124,7 @@ extension OpenAPI.Operation: LocallyDereferenceable {
         return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
 
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Operation where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) async throws -> OpenAPI.Operation where Context : ExternalLoaderContext {
         // TODO: externally dereference security, responses, requestBody, and parameters
 #warning("externally dereference security, responses, requestBody, and parameters")
         return self

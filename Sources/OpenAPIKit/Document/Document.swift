@@ -351,11 +351,12 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
-    public mutating func externallyDereference<Context>(in context: Context) throws where Context: ExternalLoaderContext {
-        var loader: ExternalLoader<Context> = try components.externallyDereference(in: context)
+    public mutating func externallyDereference<Context>(in context: Context) async throws where Context: ExternalLoaderContext {
+        var loader: ExternalLoader<Context> = 
+          try await components.externallyDereference(in: context)
 
-        paths = try paths.externallyDereferenced(with: &loader)
-        webhooks = try webhooks.externallyDereferenced(with: &loader) 
+        paths = try await paths.externallyDereferenced(with: &loader)
+        webhooks = try await webhooks.externallyDereferenced(with: &loader) 
 
         components = loader.components
     }

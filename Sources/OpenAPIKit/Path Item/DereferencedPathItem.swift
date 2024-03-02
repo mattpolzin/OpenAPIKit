@@ -138,13 +138,13 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
         return try DereferencedPathItem(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) throws -> Self {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) async throws -> Self {
         var pathItem = self
        
         var newParameters = OpenAPI.Parameter.Array()
         for parameterRef in pathItem.parameters {
             newParameters.append(
-                try parameterRef.externallyDereferenced(with: &loader)
+                try await parameterRef.externallyDereferenced(with: &loader)
             )
         }
 

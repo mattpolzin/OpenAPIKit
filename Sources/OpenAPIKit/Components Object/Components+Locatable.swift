@@ -101,7 +101,7 @@ public protocol LocallyDereferenceable {
 
     func externallyDereferenced<Context: ExternalLoaderContext>(
       with loader: inout ExternalLoader<Context>
-    ) throws -> Self
+    ) async throws -> Self
 }
 
 extension LocallyDereferenceable {
