@@ -1175,14 +1175,14 @@ extension DocumentTests {
 // MARK: - External Dereferencing
 extension DocumentTests {
     // temporarily test with an example of the new interface
-    func test_example() throws {
+    func test_example() async throws {
 
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
         struct ExampleLoaderContext: ExternalLoaderContext {
-            static func load<T>(_ url: URL) throws -> T where T : Decodable {
+            static func load<T>(_ url: URL) async throws -> T where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the example:
-                let data = mockParameterData(url)
+                let data = await mockParameterData(url)
 
                 let decoded = try JSONDecoder().decode(T.self, from: data)
                 let finished: T
@@ -1203,7 +1203,7 @@ extension DocumentTests {
             }
 
             /// Mock up some data, just for the example. 
-            static func mockParameterData(_ url: URL) -> Data {
+            static func mockParameterData(_ url: URL) async -> Data {
                 return """
                 {
                     "name": "name",
@@ -1259,7 +1259,7 @@ extension DocumentTests {
        */
 
        let context = ExampleLoaderContext()
-       try document.externallyDereference(in: context)
+       try await document.externallyDereference(in: context)
 
        // - MARK: After
        print(

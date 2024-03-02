@@ -451,7 +451,7 @@ extension PathItemTests {
         }
     }
 
-    func test_tmp() throws {
+    func test_tmp() async throws {
         let components = OpenAPI.Components(
            parameters: [
                "already-internal":
@@ -482,7 +482,7 @@ extension PathItemTests {
         print("------")
         let context = MockLoad()
         var loader = ExternalLoader(components: components, context: context) 
-        let x = try pathItem.externallyDereferenced(with: &loader)
+        let x = try await pathItem.externallyDereferenced(with: &loader)
         print(x.parameters.debugDescription)
         print("=======")
         print(loader.components.parameters)
