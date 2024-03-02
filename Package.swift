@@ -1,11 +1,11 @@
-// swift-tools-version:5.1
+// swift-tools-version: 5.8
 
 import PackageDescription
 
 let package = Package(
     name: "OpenAPIKit",
     platforms: [
-        .macOS(.v10_10),
+        .macOS(.v10_13),
         .iOS(.v11)
     ],
     products: [
@@ -25,7 +25,8 @@ let package = Package(
     targets: [
         .target(
             name: "OpenAPIKitCore",
-            dependencies: []),
+            dependencies: [],
+            exclude: ["AnyCodable/README.md"]),
         .testTarget(
             name: "OpenAPIKitCoreTests",
             dependencies: ["OpenAPIKitCore"]),

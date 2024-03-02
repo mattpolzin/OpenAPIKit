@@ -1916,7 +1916,7 @@ extension JSONSchema: Decodable {
         // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
         let typeHint = typeHints.first
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(

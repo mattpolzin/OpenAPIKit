@@ -578,7 +578,7 @@ extension JSONSchema.CoreContext {
 extension JSONSchema.IntegerContext {
     internal func validatedContext() throws -> JSONSchema.IntegerContext {
         let validatedMinimum: Bound?
-        if let minimum = minimum {
+        if let minimum {
             guard minimum.value >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(minimum.value) cannot be below 0"))
             }
@@ -603,7 +603,7 @@ extension JSONSchema.IntegerContext {
 extension JSONSchema.NumericContext {
     internal func validatedContext() throws -> JSONSchema.NumericContext {
         let validatedMinimum: Bound?
-        if let minimum = minimum {
+        if let minimum {
             guard minimum.value >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(minimum.value) cannot be below 0"))
             }

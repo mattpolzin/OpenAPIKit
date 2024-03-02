@@ -288,6 +288,9 @@ Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/
 
 You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
 
+#### AnyCodable
+OpenAPIKit uses the `AnyCodable` type for vendor extensions and constructing examples for JSON Schemas. OpenAPIKit's `AnyCodable` type is an adaptation of the Flight School library that can be found [here](https://github.com/Flight-School/AnyCodable).
+
 `AnyCodable` can be constructed from literals or explicitly. The following are all valid.
 
 ```swift
@@ -298,6 +301,25 @@ document.vendorExtensions["x-specialProperty2"] = "hello world"
 document.vendorExtensions["x-specialProperty3"] = ["hello", "world"]
 document.vendorExtensions["x-specialProperty4"] = ["hello": "world"]
 document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
+```
+
+It is important to note that `AnyCodable` wraps Swift types in a way that keeps track of the Swift type used to construct it as much as possible, but if you encode an `AnyCodable` and then decode that result, the decoded value may not always be the same as the pre-encoded value started out. This is because many Swift types will encode to "stringy" values and then decode as simply `String` values. There are two ways to cope with this:
+  1. When adding stringy values to structures that will be passed to `AnyCodable`, you can explicitly turn them into `String`s. For example, you can use `URL(...).absoluteString` both to specify you want the absolute value of the URL encoded and also to turn it into a `String` up front.
+  2. When comparing `AnyCodable` values that have passed through a full encode/decode cycle, you can compare the `description` of the two `AnyCodable` values. This stringy result is _more likely_ to compare equivalently.
+
+Keep in mind, this issue only occurs when you are comparing value `a` and value `b` for equality given that `b` is `a` after being encoded and then subsequently decoded.
+
+The other sure-fire way to handle this (if you need encode-decode equality, not just equivalence) is to make sure you run both values being compared through encoding. For example, you might use the following function which doesn't even care if the input is `AnyCodable` or not:
+```swift
+func encodedEqual<A: Codable, B: Codable>(_ a: A, _ b: B) throws -> Bool {
+    let a = try JSONEncoder().encode(a)
+    let b = try JSONEncoder().encode(b)
+    return a == b
+}
+```
+For example, the result of the following is `true`:
+```swift
+try encodeEqual(URL(string: "https://website.com"), AnyCodable(URL(string: "https://website.com")))
 ```
 
 ### Dereferencing & Resolving

@@ -66,7 +66,7 @@ public struct DereferencedPathItem: Equatable {
         self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
 
         var pathItem = pathItem
-        if let name = name {
+        if let name {
             pathItem.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 

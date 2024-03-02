@@ -457,7 +457,7 @@ extension JSONSchema: LocallyDereferenceable {
     ) throws -> DereferencedJSONSchema {
         func addComponentNameExtension<T>(to context: CoreContext<T>) -> CoreContext<T> {
             var extensions = context.vendorExtensions
-            if let name = name {
+            if let name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
             return context.with(vendorExtensions: extensions)
@@ -479,7 +479,7 @@ extension JSONSchema: LocallyDereferenceable {
             // TODO: consider which other core context properties to override here as with description ^
 
             var extensions = dereferenced.vendorExtensions
-            if let name = name {
+            if let name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
             dereferenced = dereferenced.with(vendorExtensions: vendorExtensions)
