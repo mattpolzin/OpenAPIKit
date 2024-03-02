@@ -8,7 +8,7 @@
 import OpenAPIKitCore
 
 extension OrderedDictionary where Value: LocallyDereferenceable {
-    internal func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context: ExternalLoaderContext {
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context: ExternalLoaderContext {
         var newDict = Self()
         for (key, value) in self {
             let newRef = try value.externallyDereferenced(with: &loader)
