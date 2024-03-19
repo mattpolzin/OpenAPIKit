@@ -227,6 +227,17 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
     }
 
     // See `JSONSchemaContext`
+    public var anchor: String? {
+        return coreContext.anchor
+    }
+
+    // See `JSONSchemaContext`
+    public var dynamicAnchor: String? {
+        return coreContext.dynamicAnchor
+
+    }
+
+    // See `JSONSchemaContext`
     public var inferred: Bool {
         return coreContext.inferred
     }
