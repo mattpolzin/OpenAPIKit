@@ -393,6 +393,11 @@ public extension JSONReference {
             description: description
         )
     }
+
+    /// Create a dynamic JSON Reference from the given JSONReference.
+    var dynamicReference: JSONDynamicReference {
+      JSONDynamicReference(self)
+    }
 }
 
 /// `SummaryOverridable` exists to provide a parent protocol to `OpenAPIDescribable`
