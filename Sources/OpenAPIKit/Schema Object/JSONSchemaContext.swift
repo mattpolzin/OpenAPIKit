@@ -316,22 +316,25 @@ extension JSONSchema {
 
 extension JSONSchema.CoreContext: Equatable {
     public static func == (lhs: JSONSchema.CoreContext<Format>, rhs: JSONSchema.CoreContext<Format>) -> Bool {
-        lhs.format == rhs.format
-        && lhs.required == rhs.required
-        && lhs.nullable == rhs.nullable
-        && lhs._permissions == rhs._permissions
-        && lhs._deprecated == rhs._deprecated
-        && lhs.title == rhs.title
-        && lhs.description == rhs.description
-        && lhs.externalDocs == rhs.externalDocs
-        && lhs.discriminator == rhs.discriminator
-        && lhs.allowedValues == rhs.allowedValues
-        && lhs.defaultValue == rhs.defaultValue
-        && lhs.examples == rhs.examples
-        && lhs.anchor == rhs.anchor
-        && lhs.dynamicAnchor == rhs.dynamicAnchor
-        && lhs.vendorExtensions == rhs.vendorExtensions
-        && lhs.inferred == rhs.inferred
+      // Split the conditionals up for the sake of the Swift 5.4 compiler.
+      let step1 = lhs.format == rhs.format
+          && lhs.required == rhs.required
+          && lhs.nullable == rhs.nullable
+          && lhs._permissions == rhs._permissions
+          && lhs._deprecated == rhs._deprecated
+          && lhs.title == rhs.title
+          && lhs.description == rhs.description
+          && lhs.externalDocs == rhs.externalDocs
+          && lhs.discriminator == rhs.discriminator
+
+      return step1 
+          && lhs.allowedValues == rhs.allowedValues
+          && lhs.defaultValue == rhs.defaultValue
+          && lhs.examples == rhs.examples
+          && lhs.anchor == rhs.anchor
+          && lhs.dynamicAnchor == rhs.dynamicAnchor
+          && lhs.vendorExtensions == rhs.vendorExtensions
+          && lhs.inferred == rhs.inferred
     }
 }
 
