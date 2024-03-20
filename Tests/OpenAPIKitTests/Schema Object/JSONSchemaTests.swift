@@ -6577,7 +6577,9 @@ extension SchemaObjectTests {
             allowedValues: [
                 true,
                 false
-            ]
+            ],
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
 
         let t1 = JSONSchema.boolean(format: .generic)
@@ -6599,7 +6601,9 @@ extension SchemaObjectTests {
             allowedValues: [
                 true,
                 false
-            ]
+            ],
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
 
         let t1 = JSONSchema.fragment(format: .generic)
@@ -6631,7 +6635,9 @@ extension SchemaObjectTests {
         )
         let _ = JSONSchema.number(
             format: .double,
-            allowedValues: 5.5
+            allowedValues: 5.5,
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
 
         let t3 = JSONSchema.number(format: .generic)
@@ -6659,7 +6665,9 @@ extension SchemaObjectTests {
         )
         let _ = JSONSchema.integer(
             required: true,
-            allowedValues: 1, 2, 3
+            allowedValues: 1, 2, 3,
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
 
         let t1 = JSONSchema.integer(format: .extended(.uint32))
@@ -6678,7 +6686,9 @@ extension SchemaObjectTests {
         let _: JSONSchema = .string
         let _ = JSONSchema.string(
             required: true,
-            nullable: true
+            nullable: true,
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
         let _ = JSONSchema.string(
             required: false,
@@ -6716,7 +6726,9 @@ extension SchemaObjectTests {
             allowedValues: [
                 [ "hello": true],
                 [ "hello": false]
-            ]
+            ],
+            anchor: "test",
+            dynamicAnchor: "test2"
         )
         let addProp1 = JSONSchema.object(
             additionalProperties: .init(true)
@@ -6758,6 +6770,11 @@ extension SchemaObjectTests {
 
     func test_array() {
 
+        let _ = JSONSchema.array(
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1 = JSONSchema.array(format: .generic)
         XCTAssertEqual(t1, JSONSchema.array(format: .init(rawValue: "")))
 
@@ -6766,6 +6783,12 @@ extension SchemaObjectTests {
     }
 
     func test_allOf() {
+        let _ = JSONSchema.all(
+            of: .string, .integer,
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1: JSONSchema = .all(of:
             .object(.init(), .init(properties: ["hello": .string])),
             .object(.init(), .init(properties: ["world": .boolean]))
@@ -6781,6 +6804,12 @@ extension SchemaObjectTests {
     }
 
     func test_oneOf() {
+        let _ = JSONSchema.one(
+            of: .string, .integer,
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1: JSONSchema = .one(of:
             .object(properties: ["hello": .string]),
             .object(properties: ["world": .boolean])
@@ -6795,6 +6824,12 @@ extension SchemaObjectTests {
     }
 
     func test_anyOf() {
+        let _ = JSONSchema.any(
+            of: .string, .integer,
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1: JSONSchema = .any(of:
             .object(properties: ["hello": .string]),
             .object(properties: ["world": .boolean])
@@ -6809,6 +6844,12 @@ extension SchemaObjectTests {
     }
 
     func test_not() {
+        let _ = JSONSchema.not(
+            .string,
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1: JSONSchema = .not(.string)
         let t2: JSONSchema = .not(.string, core: .init())
 
@@ -6816,6 +6857,12 @@ extension SchemaObjectTests {
     }
 
     func test_reference() {
+        let _ = JSONSchema.reference(
+            .component(named: "test"),
+            anchor: "test",
+            dynamicAnchor: "test2"
+        )
+
         let t1: JSONSchema = .reference(.internal(.component(name: "test")), .init(required: true))
         let t2: JSONSchema = .reference(.internal(.component(name: "test")), required: true)
 
