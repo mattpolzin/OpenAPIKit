@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 @dynamicMemberLookup
 public struct JSONDynamicReference: Equatable, Hashable {
@@ -30,7 +31,7 @@ public struct JSONDynamicReference: Equatable, Hashable {
     ///     // encoded string: "#/components/schemas/greetings"
     ///     // Swift: `document.components.schemas["greetings"]`
     public static func component(named name: String) -> Self {
-      return .init(.internal(.component(name: name)), summary: summary, description: description)
+      return .init(.internal(.component(name: name)))
     }
 
     /// Reference a path internal to this file but not within the Components Object
@@ -39,7 +40,7 @@ public struct JSONDynamicReference: Equatable, Hashable {
     ///
     /// - Important: The path does not contain a leading '#'. Start with the root '/'.
     public static func `internal`(path: JSONReference<JSONSchema>.Path, summary: String? = nil, description: String? = nil) -> Self {
-      return .init(.internal(.path(path)), summary: summary, description: description)
+      return .init(.internal(.path(path)))
     }
 
     /// Reference an external URL.
@@ -104,14 +105,14 @@ extension JSONDynamicReference: Decodable {
         }
 
         if referenceString.first == "#" {
-            guard let internalReference = InternalReference(rawValue: referenceString) else {
+            guard let internalReference = JSONReference<JSONSchema>.InternalReference(rawValue: referenceString) else {
                 throw InconsistencyError(
                     subjectName: "JSON Dynamic Reference",
                     details: "Failed to parse a JSON Dynamic Reference from '\(referenceString)'",
                     codingPath: container.codingPath
                 )
             }
-            self = .internal(internalReference)
+            self = .init(.internal(internalReference))
         } else {
             guard let externalReference = URL(string: referenceString) else {
                 throw InconsistencyError(
@@ -120,7 +121,7 @@ extension JSONDynamicReference: Decodable {
                     codingPath: container.codingPath
                 )
             }
-            self = .external(externalReference)
+            self = .init(.external(externalReference))
         }
     }
 }

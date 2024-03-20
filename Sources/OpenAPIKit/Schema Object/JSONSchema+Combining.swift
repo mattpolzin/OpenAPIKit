@@ -173,6 +173,8 @@ internal struct FragmentCombiner {
             self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
         case (.fragment(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+        case (.fragment(let leftCoreContext), .dynamicReference(let reference, let rightCoreContext)):
+            self.combinedFragment = .dynamicReference(reference, try leftCoreContext.combined(with: rightCoreContext))
 
         case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
@@ -208,7 +210,8 @@ internal struct FragmentCombiner {
              (.string, _),
              (.array, _),
              (.object, _),
-             (.null, _):
+             (.null, _),
+             (.dynamicReference, _):
             throw (
                 zip(combinedFragment.jsonType, fragment.jsonType).map {
                     JSONSchemaResolutionError(.typeConflict(original: $0, new: $1))
@@ -258,6 +261,8 @@ internal struct FragmentCombiner {
             jsonSchema = try .any(of: schemas, core: coreContext.validatedContext())
         case .one(of: let schemas, core: let coreContext):
             jsonSchema = try .one(of: schemas, core: coreContext.validatedContext())
+        case .dynamicReference(let reference, let coreContext):
+            jsonSchema = try .dynamicReference(reference, coreContext.validatedContext())
         case .not:
             throw JSONSchemaResolutionError(.unsupported(because: "`.not` is not yet supported for schema simplification"))
         }

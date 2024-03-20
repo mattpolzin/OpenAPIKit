@@ -393,7 +393,9 @@ public extension JSONReference {
             description: description
         )
     }
+}
 
+public extension JSONReference where ReferenceType == JSONSchema {
     /// Create a dynamic JSON Reference from the given JSONReference.
     var dynamicReference: JSONDynamicReference {
       JSONDynamicReference(self)
