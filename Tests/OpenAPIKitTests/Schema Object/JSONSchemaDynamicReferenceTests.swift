@@ -13,11 +13,17 @@ final class SchemaObjectDynamicReferenceTests: XCTestCase {
     func test_tmp() throws {
         let testComponents = OpenAPI.Components(
             schemas: [
-                "T": .all(of: [], dynamicAnchor: "T"),
                 "genericList": .array(
                     items: .dynamicReference(.internal("T"))
+                    defs: [
+                      "T": .all(of: [], dynamicAnchor: "T")
+                    ]
                 ),
-                "intList": .init(
+                "intList": .reference(
+                    .component(named: "genericList"), 
+                    defs: [
+                        "T": .string(dynamicAnchor: "T")
+                    ]
                 )
             ]
         )
