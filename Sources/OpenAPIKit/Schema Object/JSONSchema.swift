@@ -238,6 +238,11 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
     }
 
     // See `JSONSchemaContext`
+    public var defs: OrderedDictionary<String, JSONSchema> {
+        return coreContext.defs
+    }
+
+    // See `JSONSchemaContext`
     public var inferred: Bool {
         return coreContext.inferred
     }

@@ -131,6 +131,10 @@ public protocol JSONSchemaContext {
     /// See [Dynamic References with "$dynamicRef"](https://json-schema.org/draft/2020-12/json-schema-core#name-dynamic-references-with-dyn)
     var dynamicAnchor: String? { get }
 
+    /// A list of definitions local to this schema (as opposed to the Components of an OpenAPI Document
+    /// which are global to the whole Document).
+    var defs: OrderedDictionary<String, JSONSchema> { get }
+
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
 }
@@ -149,6 +153,9 @@ extension JSONSchemaContext {
 
     // Default implementation to make addition non-breaking
     public var dynamicAnchor: String? { nil }
+
+    // Default implementation to make addition non-breaking
+//    public var defs: OrderedDictionary<String, JSONSchema> { [:] }
 }
 
 extension JSONSchema {
@@ -187,6 +194,9 @@ extension JSONSchema {
 
         /// A dynamic anchor, if the schema defines one.
         public let dynamicAnchor: String?
+
+        /// A list of schema-local definitions.
+        public let defs: OrderedDictionary<String, JSONSchema>
 
         /// Dictionary of vendor extensions.
         ///
@@ -254,6 +264,7 @@ extension JSONSchema {
             examples: [AnyCodable] = [],
             anchor: String? = nil,
             dynamicAnchor: String? = nil,
+            defs: OrderedDictionary<String, JSONSchema> = [:],
             vendorExtensions: [String: AnyCodable] = [:],
             _inferred: Bool = false
         ) {
@@ -272,6 +283,7 @@ extension JSONSchema {
             self.examples = examples
             self.anchor = anchor
             self.dynamicAnchor = dynamicAnchor
+            self.defs = defs
             self.vendorExtensions = vendorExtensions
             self.inferred = _inferred
         }
@@ -291,6 +303,7 @@ extension JSONSchema {
             examples: [String],
             anchor: String? = nil,
             dynamicAnchor: String? = nil,
+            defs: OrderedDictionary<String, JSONSchema> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.warnings = []
@@ -308,6 +321,7 @@ extension JSONSchema {
             self.examples = examples.map(AnyCodable.init)
             self.anchor = anchor
             self.dynamicAnchor = dynamicAnchor
+            self.defs = defs
             self.vendorExtensions = vendorExtensions
             self.inferred = false
         }
@@ -333,6 +347,7 @@ extension JSONSchema.CoreContext: Equatable {
           && lhs.examples == rhs.examples
           && lhs.anchor == rhs.anchor
           && lhs.dynamicAnchor == rhs.dynamicAnchor
+          && lhs.defs == rhs.defs
           && lhs.vendorExtensions == rhs.vendorExtensions
           && lhs.inferred == rhs.inferred
     }
@@ -358,6 +373,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -380,6 +396,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -402,6 +419,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -424,6 +442,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -446,6 +465,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -468,6 +488,7 @@ extension JSONSchema.CoreContext {
             examples: [example],
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -490,6 +511,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -512,6 +534,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -534,6 +557,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -556,6 +580,7 @@ extension JSONSchema.CoreContext {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
+            defs: defs,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -861,6 +886,7 @@ extension JSONSchema {
         case examples
         case anchor = "$anchor"
         case dynamicAnchor = "$dynamicAnchor"
+        case defs = "$defs"
         case readOnly
         case writeOnly
         case deprecated
@@ -893,6 +919,9 @@ extension JSONSchema.CoreContext: Encodable {
         }
         try container.encodeIfPresent(anchor, forKey: .anchor)
         try container.encodeIfPresent(dynamicAnchor, forKey: .dynamicAnchor)
+        if !defs.isEmpty {
+            try container.encode(defs, forKey: .defs)
+        }
 
         // deprecated is false if omitted
         if deprecated {
@@ -997,6 +1026,7 @@ extension JSONSchema.CoreContext: Decodable {
         }
         anchor = try container.decodeIfPresent(String.self, forKey: .anchor)
         dynamicAnchor = try container.decodeIfPresent(String.self, forKey: .dynamicAnchor)
+        defs = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .defs) ?? [:]
         // vendor extensions get decoded by the JSONSchema because although vendor extensions
         // apply to all schemas (core context) they are more accurately in the context of the
         // full JSON Schema.
