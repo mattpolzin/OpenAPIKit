@@ -145,6 +145,12 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     // See `JSONSchemaContext`
     public var dynamicAnchor: String? { jsonSchema.dynamicAnchor }
 
+    // TODO: It's not great that non-dereferenced JSONSchema leaks in here
+    //       just because I want DereferencedJSONSchema to conform to
+    //       JSONSchemaContext...
+    // See `JSONSchemaContext`
+    public var defs: OrderedDictionary<String, JSONSchema> { jsonSchema.defs }
+
     // See `JSONSchemaContext`
     public var inferred: Bool { jsonSchema.inferred }
 
