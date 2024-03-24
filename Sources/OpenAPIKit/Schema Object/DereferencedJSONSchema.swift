@@ -27,6 +27,7 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     indirect case one(of: [DereferencedJSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
     indirect case any(of: [DereferencedJSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
     indirect case not(DereferencedJSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
+    case dynamicReference(JSONDynamicReference, CoreContext<JSONTypeFormat.AnyFormat>)
     /// Schemas without a `type`.
     case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This is the "{}" case where not even a type constraint is given.
 
@@ -65,6 +66,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .any(of: schemas.map { $0.jsonSchema }, core: coreContext)
         case .not(let schema, core: let coreContext):
             return .not(schema.jsonSchema, core: coreContext)
+        case .dynamicReference(let reference, let coreContext):
+            return .dynamicReference(reference, coreContext)
         case .fragment(let context):
             return .fragment(context)
         }
@@ -96,6 +99,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .any(of: schemas, core: core.optionalContext())
         case .not(let schema, core: let core):
             return .not(schema, core: core.optionalContext())
+        case .dynamicReference(let reference, let core):
+            return .dynamicReference(reference, core.optionalContext())
         }
     }
 
@@ -133,6 +138,18 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
 
     // See `JSONSchemaContext`
     public var examples: [AnyCodable] { jsonSchema.examples }
+
+    // See `JSONSchemaContext`
+    public var anchor: String? { jsonSchema.anchor }
+
+    // See `JSONSchemaContext`
+    public var dynamicAnchor: String? { jsonSchema.dynamicAnchor }
+
+    // TODO: It's not great that non-dereferenced JSONSchema leaks in here
+    //       just because I want DereferencedJSONSchema to conform to
+    //       JSONSchemaContext...
+    // See `JSONSchemaContext`
+    public var defs: OrderedDictionary<String, JSONSchema> { jsonSchema.defs }
 
     // See `JSONSchemaContext`
     public var inferred: Bool { jsonSchema.inferred }
@@ -173,6 +190,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return coreContext.vendorExtensions
         case .not(_, core: let coreContext):
             return coreContext.vendorExtensions
+        case .dynamicReference(_, let coreContext):
+            return coreContext.vendorExtensions
         case .fragment(let context):
             return context.vendorExtensions
         }
@@ -203,6 +222,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .any(of: schemas, core: coreContext.with(description: description))
         case .not(let schema, core: let coreContext):
             return .not(schema, core: coreContext.with(description: description))
+        case .dynamicReference(let reference, let coreContext):
+            return .dynamicReference(reference, coreContext.with(description: description))
         case .fragment(let context):
             return .fragment(context.with(description: description))
         }
@@ -233,6 +254,8 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
             return .any(of: schemas, core: coreContext.with(vendorExtensions: vendorExtensions))
         case .not(let schema, core: let coreContext):
             return .not(schema, core: coreContext.with(vendorExtensions: vendorExtensions))
+        case .dynamicReference(let reference, let coreContext):
+            return .dynamicReference(reference, coreContext.with(vendorExtensions: vendorExtensions))
         case .fragment(let context):
             return .fragment(context.with(vendorExtensions: vendorExtensions))
         }
@@ -514,6 +537,8 @@ extension JSONSchema: LocallyDereferenceable {
             return .any(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .not(let jsonSchema, core: let coreContext):
             return .not(try jsonSchema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil), core: addComponentNameExtension(to: coreContext))
+        case .dynamicReference(let reference, let coreContext):
+            return .dynamicReference(reference, addComponentNameExtension(to: coreContext))
         case .fragment(let context):
             return .fragment(addComponentNameExtension(to: context))
         }
