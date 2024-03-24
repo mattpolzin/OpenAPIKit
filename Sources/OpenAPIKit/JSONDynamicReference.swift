@@ -34,13 +34,11 @@ public struct JSONDynamicReference: Equatable, Hashable {
       return .init(.internal(.component(name: name)))
     }
 
-    /// Reference a path internal to this file but not within the Components Object
-    /// This is likely not what you are looking for. It is advisable to store reusable components
-    /// in the Components Object.
+    /// Reference a dynamic anchor local to this file.
     ///
-    /// - Important: The path does not contain a leading '#'. Start with the root '/'.
-    public static func `internal`(path: JSONReference<JSONSchema>.Path, summary: String? = nil, description: String? = nil) -> Self {
-      return .init(.internal(.path(path)))
+    /// - Important: The anchor does not contain a leading '#'.
+    public static func anchor(_ anchor: String) -> Self {
+      return .init(.internal(.anchor(anchor)))
     }
 
     /// Reference an external URL.
