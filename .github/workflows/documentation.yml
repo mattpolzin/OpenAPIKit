@@ -3,7 +3,8 @@ name: Documentation
 on:
   push:
     branches:
-      - main
+      - release/4_0
+      # ^ for now, we only want to use the v4.0 release branch.
 
 jobs:
   build:
@@ -11,6 +12,25 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Build Docs
+        run: |
+          mkdir -p ./gh-pages
+          swift package --allow-writing-to-directory ./gh-pages/docs \
+            generate-documentation --include-extended-types \
+                                   --disable-indexing \
+                                   --output-path ./gh-pages/docs \
+                                   --transform-for-static-hosting \
+                                   --hosting-base-path OpenAPIKit \
+                                   --target OpenAPIKit
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          folder: gh-pages
+          branch: gh-pages
+
+            
         # TODO: replace the documentation generator with something that is still maintained.
 
 #      - name: Generate Documentation
