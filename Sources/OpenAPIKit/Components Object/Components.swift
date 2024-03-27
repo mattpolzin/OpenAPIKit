@@ -268,4 +268,30 @@ extension OpenAPI.Components {
     }
 }
 
+extension OpenAPI.Components {
+    private mutating func externallyDereference<Context, T>(dictionary: OpenAPI.ComponentDictionary<T>, with loader: inout ExternalLoader<Context>) async throws -> OpenAPI.ComponentDictionary<T> where Context: ExternalLoaderContext, T: LocallyDereferenceable {
+        var newValues = OpenAPI.ComponentDictionary<T>()
+        for (key, value) in dictionary {
+            newValues[key] = try await value.externallyDereferenced(with: &loader)
+        }
+        return newValues
+    }
+
+    internal mutating func externallyDereference<Context>(in context: Context) async throws -> ExternalLoader<Context> where Context: ExternalLoaderContext {
+        var loader = ExternalLoader<Context>(components: self, context: context)
+
+        schemas = try await externallyDereference(dictionary: schemas, with: &loader)
+        responses = try await externallyDereference(dictionary: responses, with: &loader)
+        parameters = try await externallyDereference(dictionary: parameters, with: &loader)
+        examples = try await externallyDereference(dictionary: examples, with: &loader)
+        requestBodies = try await externallyDereference(dictionary: requestBodies, with: &loader)
+        headers = try await externallyDereference(dictionary: headers, with: &loader)
+        securitySchemes = try await externallyDereference(dictionary: securitySchemes, with: &loader)
+
+        callbacks = try await callbacks.externallyDereferenced(with: &loader)
+
+        return loader
+    }
+}
+
 extension OpenAPI.Components: Validatable {}

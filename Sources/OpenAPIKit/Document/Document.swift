@@ -350,6 +350,16 @@ extension OpenAPI.Document {
     public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(self)
     }
+
+    public mutating func externallyDereference<Context>(in context: Context) async throws where Context: ExternalLoaderContext {
+        var loader: ExternalLoader<Context> = 
+          try await components.externallyDereference(in: context)
+
+        paths = try await paths.externallyDereferenced(with: &loader)
+        webhooks = try await webhooks.externallyDereferenced(with: &loader) 
+
+        components = loader.components
+    }
 }
 
 extension OpenAPI {

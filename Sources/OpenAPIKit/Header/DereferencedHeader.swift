@@ -81,4 +81,10 @@ extension OpenAPI.Header: LocallyDereferenceable {
     ) throws -> DereferencedHeader {
         return try DereferencedHeader(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
+
+    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Header where Context : ExternalLoaderContext {
+        // TODO: externally dereference the schemaOrContent
+#warning("externally dereference the schemaOrContent")
+        return self
+    }
 }
