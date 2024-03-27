@@ -135,6 +135,12 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
     public var examples: [AnyCodable] { jsonSchema.examples }
 
     // See `JSONSchemaContext`
+    public var anchor: String? { jsonSchema.anchor }
+
+    // See `JSONSchemaContext`
+    public var dynamicAnchor: String? { jsonSchema.dynamicAnchor }
+
+    // See `JSONSchemaContext`
     public var inferred: Bool { jsonSchema.inferred }
 
     // See `JSONSchemaContext`

@@ -227,6 +227,17 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
     }
 
     // See `JSONSchemaContext`
+    public var anchor: String? {
+        return coreContext.anchor
+    }
+
+    // See `JSONSchemaContext`
+    public var dynamicAnchor: String? {
+        return coreContext.dynamicAnchor
+
+    }
+
+    // See `JSONSchemaContext`
     public var inferred: Bool {
         return coreContext.inferred
     }
@@ -1073,7 +1084,9 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>(
             format: format,
@@ -1087,7 +1100,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         return .boolean(context)
     }
@@ -1106,7 +1121,9 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .boolean(
             format: format,
@@ -1120,7 +1137,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
     }
 
@@ -1143,7 +1162,9 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
             format: format,
@@ -1157,7 +1178,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         return .fragment(context)
     }
@@ -1176,7 +1199,9 @@ extension JSONSchema {
         externalDocs: OpenAPI.ExternalDocumentation? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .fragment(
             format: format,
@@ -1190,7 +1215,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
     }
 
@@ -1221,7 +1248,9 @@ extension JSONSchema {
         contentEncoding: OpenAPI.ContentEncoding? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(
             format: format,
@@ -1235,7 +1264,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         let stringContext = JSONSchema.StringContext(
             maxLength: maxLength,
@@ -1266,7 +1297,9 @@ extension JSONSchema {
         contentEncoding: OpenAPI.ContentEncoding? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .string(
             format: format,
@@ -1285,7 +1318,9 @@ extension JSONSchema {
             contentEncoding: contentEncoding,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
     }
 
@@ -1311,7 +1346,9 @@ extension JSONSchema {
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(
             format: format,
@@ -1325,7 +1362,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         let numbericContext = JSONSchema.NumericContext(
             multipleOf: multipleOf,
@@ -1352,7 +1391,9 @@ extension JSONSchema {
         minimum: (Double, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .number(
             format: format,
@@ -1369,7 +1410,9 @@ extension JSONSchema {
             minimum: minimum,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
     }
 
@@ -1395,7 +1438,9 @@ extension JSONSchema {
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(
             format: format,
@@ -1409,7 +1454,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         let integerContext = JSONSchema.IntegerContext(
             multipleOf: multipleOf,
@@ -1436,7 +1483,9 @@ extension JSONSchema {
         minimum: (Int, exclusive: Bool)? = nil,
         allowedValues: AnyCodable...,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .integer(
             format: format,
@@ -1453,7 +1502,9 @@ extension JSONSchema {
             minimum: minimum,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
     }
 
@@ -1480,7 +1531,9 @@ extension JSONSchema {
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
             format: format,
@@ -1494,7 +1547,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
         let objectContext = JSONSchema.ObjectContext(
             properties: properties,
@@ -1528,7 +1583,9 @@ extension JSONSchema {
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
-        examples: [AnyCodable] = []
+        examples: [AnyCodable] = [],
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(
             format: format,
@@ -1542,7 +1599,9 @@ extension JSONSchema {
             externalDocs: externalDocs,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
-            examples: examples
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor
         )
 
         let arrayContext = JSONSchema.ArrayContext(
@@ -1574,7 +1633,9 @@ extension JSONSchema {
         required: Bool = true,
         title: String? = nil,
         description: String? = nil,
-        discriminator: OpenAPI.Discriminator? = nil
+        discriminator: OpenAPI.Discriminator? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .all(
             of: schemas,
@@ -1582,7 +1643,9 @@ extension JSONSchema {
                 required: required,
                 title: title,
                 description: description,
-                discriminator: discriminator
+                discriminator: discriminator,
+                anchor: anchor,
+                dynamicAnchor: dynamicAnchor
             )
         )
     }
@@ -1602,7 +1665,9 @@ extension JSONSchema {
         required: Bool = true,
         title: String? = nil,
         description: String? = nil,
-        discriminator: OpenAPI.Discriminator? = nil
+        discriminator: OpenAPI.Discriminator? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .one(
             of: schemas,
@@ -1610,7 +1675,9 @@ extension JSONSchema {
                 required: required,
                 title: title,
                 description: description,
-                discriminator: discriminator
+                discriminator: discriminator,
+                anchor: anchor,
+                dynamicAnchor: dynamicAnchor
             )
         )
     }
@@ -1630,7 +1697,9 @@ extension JSONSchema {
         required: Bool = true,
         title: String? = nil,
         description: String? = nil,
-        discriminator: OpenAPI.Discriminator? = nil
+        discriminator: OpenAPI.Discriminator? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .any(
             of: schemas,
@@ -1638,7 +1707,9 @@ extension JSONSchema {
                 required: required,
                 title: title,
                 description: description,
-                discriminator: discriminator
+                discriminator: discriminator,
+                anchor: anchor,
+                dynamicAnchor: dynamicAnchor
             )
         )
     }
@@ -1655,7 +1726,9 @@ extension JSONSchema {
         required: Bool = true,
         title: String? = nil,
         description: String? = nil,
-        discriminator: OpenAPI.Discriminator? = nil
+        discriminator: OpenAPI.Discriminator? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
         return .not(
             schema,
@@ -1663,7 +1736,9 @@ extension JSONSchema {
                 required: required,
                 title: title,
                 description: description,
-                discriminator: discriminator
+                discriminator: discriminator,
+                anchor: anchor,
+                dynamicAnchor: dynamicAnchor
             )
         )
     }
@@ -1673,9 +1748,14 @@ extension JSONSchema {
         _ reference: JSONReference<JSONSchema>,
         required: Bool = true,
         title: String? = nil,
-        description: String? = nil
+        description: String? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
     ) -> JSONSchema {
-        return .reference(reference, .init(required: required, title: title, description: description))
+        return .reference(
+            reference,
+            .init(required: required, title: title, description: description, anchor: anchor, dynamicAnchor: dynamicAnchor)
+        )
     }
 }
 
