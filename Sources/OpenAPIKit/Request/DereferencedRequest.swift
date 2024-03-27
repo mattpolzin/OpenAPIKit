@@ -38,7 +38,7 @@ public struct DereferencedRequest: Equatable {
         }
 
         var request = request
-        if let name = name {
+        if let name {
             request.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 

@@ -87,6 +87,8 @@ extension AnyCodable: Encodable {
             try container.encode(array.map { AnyCodable($0) })
         case let dictionary as [String: Any?]:
             try container.encode(dictionary.mapValues { AnyCodable($0) })
+        case let encodableValue as Encodable:
+            try container.encode(encodableValue)
         default:
             let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded")
             throw EncodingError.invalidValue(value, context)
@@ -196,6 +198,8 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as [String: AnyCodable], rhs as [String: AnyCodable]):
             return lhs == rhs
+        case let (lhs as [String: Any], rhs as [String: Any]):
+            return lhs.mapValues(AnyCodable.init) == rhs.mapValues(AnyCodable.init)
         case let (lhs as [String], rhs as [String]):
             return lhs == rhs
         case let (lhs as [Int], rhs as [Int]):
@@ -206,6 +210,8 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as [AnyCodable], rhs as [AnyCodable]):
             return lhs == rhs
+        case let (lhs as [Any], rhs as [Any]):
+            return lhs.map(AnyCodable.init) == rhs.map(AnyCodable.init)
         default:
             return false
         }

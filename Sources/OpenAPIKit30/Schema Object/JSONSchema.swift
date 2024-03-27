@@ -1831,7 +1831,7 @@ extension JSONSchema: Decodable {
             )
         }
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(

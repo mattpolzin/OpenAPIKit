@@ -59,7 +59,7 @@ public struct DereferencedParameter: Equatable {
         }
 
         var parameter = parameter
-        if let name = name {
+        if let name {
             parameter.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 

@@ -267,7 +267,7 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.SecurityScheme {
         var ret = self
-        if let name = name {
+        if let name {
             ret.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
         return ret
