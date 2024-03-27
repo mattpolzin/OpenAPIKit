@@ -431,7 +431,7 @@ extension JSONSchema: VendorExtendable {
           coreContext.vendorExtensions
         }
         set {
-          #warning("implement me")
+          coreContext.vendorExtensions
         }
     }
 
