@@ -288,11 +288,7 @@ extension OpenAPI.Components {
         headers = try await externallyDereference(dictionary: headers, with: &loader)
         securitySchemes = try await externallyDereference(dictionary: securitySchemes, with: &loader)
 
-        var newCallbacks = OpenAPI.ComponentDictionary<OpenAPI.Callbacks>()
-        for (key, value) in callbacks {
-            newCallbacks[key] = try await value.externallyDereferenced(with: &loader)
-        }
-        callbacks = newCallbacks
+        callbacks = try await callbacks.externallyDereferenced(with: &loader)
 
         return loader
     }
