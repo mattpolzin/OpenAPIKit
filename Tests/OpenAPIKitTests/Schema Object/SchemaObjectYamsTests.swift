@@ -53,4 +53,14 @@ final class SchemaObjectYamsTests: XCTestCase {
             XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `minimum`: Expected an Integer literal but found a floating point value (1.1).")
         }
     }
+
+    func test_decodeNullType() throws {
+        let nullTypeData = """
+        type: 'null'
+        """.data(using: .utf8)!
+
+        let decoded = try orderStableDecode(JSONSchema.self, from: nullTypeData)
+
+        XCTAssertEqual(decoded, .null())
+    }
 }
