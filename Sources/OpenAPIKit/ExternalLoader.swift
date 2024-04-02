@@ -26,33 +26,9 @@ public protocol ExternalLoaderContext {
     ///    but the same key for all equal objects. In practice, this probably means that any
     ///    time the same type and URL pair are passed in the same `ComponentKey` should be 
     ///    returned.
-    mutating func nextComponentKey<T>(type: T.Type, at: URL, given components: OpenAPI.Components) throws -> OpenAPI.ComponentKey
+    static func componentKey<T>(type: T.Type, at: URL) throws -> OpenAPI.ComponentKey
 }
 
-public struct ExternalLoader<Context: ExternalLoaderContext> {
-    public init(components: OpenAPI.Components, context: Context) {
-        self.components = components
-        self.context = context
-    }
-
-    /// External references are loaded into this Components Object. This allows for
-    /// loading external references into a single Document but also retaining the
-    /// identity of those refernces; that is, if three parts of a Document refer to 
-    /// the same external reference, the external object will be loaded into this 
-    /// Components Object and the three locations will still refer to the same 
-    /// object (these are now internal references).
-    ///
-    /// In the most common use-cases, the starting place for this `components` property
-    /// should be the existing `Components` for some OpenAPI `Document`. This allows local 
-    /// references to be followed while external references are loaded.
-    public internal(set) var components: OpenAPI.Components
-
-    internal var context: Context
-
-    internal mutating func store<T>(type: T.Type, from url: URL) async throws -> OpenAPI.Reference<T> where T: ComponentDictionaryLocatable & Equatable & Decodable & LocallyDereferenceable {
-        let key = try context.nextComponentKey(type: type, at: url, given: components)
-        let value: T = try await Context.load(url)
-        components[keyPath: T.openAPIComponentsKeyPath][key] = try await value.externallyDereferenced(with: &self)
-        return try components.reference(named: key.rawValue, ofType: T.self)
-    }
+public protocol ExternallyDereferenceable {
+    func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components)
 }

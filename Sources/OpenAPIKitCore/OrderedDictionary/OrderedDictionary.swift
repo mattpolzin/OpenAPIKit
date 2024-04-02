@@ -205,6 +205,18 @@ extension OrderedDictionary: Collection {
     }
 }
 
+extension OrderedDictionary {
+    public mutating func merge(_ other: OrderedDictionary, uniquingKeysWith resolve: (Value, Value) throws -> Value) rethrows {
+        for (key, value) in other {
+            if let conflict = self[key] {
+                self[key] = try resolve(conflict, value)
+            } else {
+                self[key] = value
+            }
+        }
+    }
+}
+
 // MARK: - Iterator
 extension OrderedDictionary {
     public struct Iterator: Sequence, IteratorProtocol {
@@ -239,7 +251,6 @@ extension OrderedDictionary: Equatable where Value: Equatable {
 }
 
 // MARK: - Codable
-
 public struct AnyCodingKey: CodingKey {
 
     public let stringValue: String

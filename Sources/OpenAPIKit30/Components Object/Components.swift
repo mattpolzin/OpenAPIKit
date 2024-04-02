@@ -260,4 +260,25 @@ extension OpenAPI.Components {
     }
 }
 
+public extension OpenAPI.Components {
+    struct ValueCollision<T>: Swift.Error {
+        let value1: T
+        let value2: T
+    }
+
+    mutating func merge(_ components: OpenAPI.Components) throws {
+        try schemas.merge(components.schemas, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try responses.merge(components.responses, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try parameters.merge(components.parameters, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try examples.merge(components.examples, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try requestBodies.merge(components.requestBodies, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try headers.merge(components.headers, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try securitySchemes.merge(components.securitySchemes, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try links.merge(components.links, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try callbacks.merge(components.callbacks, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try pathItems.merge(components.pathItems, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        try vendorExtensions.merge(components.vendorExtensions, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+    }
+}
+
 extension OpenAPI.Components: Validatable {}

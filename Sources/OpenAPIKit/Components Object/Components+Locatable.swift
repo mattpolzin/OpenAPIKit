@@ -98,10 +98,6 @@ public protocol LocallyDereferenceable {
         following references: Set<AnyHashable>,
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedSelf
-
-    func externallyDereferenced<Context: ExternalLoaderContext>(
-      with loader: inout ExternalLoader<Context>
-    ) async throws -> Self
 }
 
 extension LocallyDereferenceable {
