@@ -1195,7 +1195,7 @@ extension DocumentTests {
                 return finished
             }
 
-            mutating func nextComponentKey<T>(type: T.Type, at url: URL, given components: OpenAPIKit.OpenAPI.Components) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+            static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
                 // do anything you want here to determine what key the new component should be stored at.
                 // for the example, we will just transform the URL into a valid components key:
                 let urlString = url.pathComponents.dropFirst().joined(separator: "_").replacingOccurrences(of: ".", with: "_")
@@ -1258,8 +1258,7 @@ extension DocumentTests {
         }
        */
 
-       let context = ExampleLoaderContext()
-       try await document.externallyDereference(in: context)
+       try await document.externallyDereference(in: ExampleLoaderContext.self)
 
        // - MARK: After
        print(

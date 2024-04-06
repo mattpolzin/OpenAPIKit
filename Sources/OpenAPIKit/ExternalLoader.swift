@@ -26,7 +26,7 @@ public protocol ExternalLoaderContext {
     ///    but the same key for all equal objects. In practice, this probably means that any
     ///    time the same type and URL pair are passed in the same `ComponentKey` should be 
     ///    returned.
-    static func componentKey<T>(type: T.Type, at: URL) throws -> OpenAPI.ComponentKey
+    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey
 }
 
 public protocol ExternallyDereferenceable {
