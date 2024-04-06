@@ -72,6 +72,28 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Components {
+    public struct ComponentCollision: Swift.Error {
+        public let componentType: String
+        public let existingComponent: String
+        public let newComponent: String
+    }
+
+    public mutating func merge(_ other: OpenAPI.Components) throws {
+        try schemas.merge(other.schemas, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "schema", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try responses.merge(other.responses, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "responses", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try parameters.merge(other.parameters, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "parameters", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try examples.merge(other.examples, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "examples", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try requestBodies.merge(other.requestBodies, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "requestBodies", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try headers.merge(other.headers, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "headers", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "securitySchemes", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try links.merge(other.links, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "links", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try callbacks.merge(other.callbacks, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "callbacks", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try pathItems.merge(other.pathItems, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "pathItems", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "vendorExtensions", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+    }
+}
+
+extension OpenAPI.Components {
     /// The extension name used to store a Components Object name (the key something is stored under
     /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
     /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
@@ -269,28 +291,44 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    private mutating func externallyDereference<Context, T>(dictionary: OpenAPI.ComponentDictionary<T>, with loader: inout ExternalLoader<Context>) async throws -> OpenAPI.ComponentDictionary<T> where Context: ExternalLoaderContext, T: LocallyDereferenceable {
-        var newValues = OpenAPI.ComponentDictionary<T>()
-        for (key, value) in dictionary {
-            newValues[key] = try await value.externallyDereferenced(with: &loader)
-        }
-        return newValues
-    }
+    internal mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+        let oldSchemas = schemas
+        let oldResponses = responses
+        let oldParameters = parameters
+        let oldExamples = examples
+        let oldRequestBodies = requestBodies
+        let oldHeaders = headers
+        let oldSecuritySchemes = securitySchemes
 
-    internal mutating func externallyDereference<Context>(in context: Context) async throws -> ExternalLoader<Context> where Context: ExternalLoaderContext {
-        var loader = ExternalLoader<Context>(components: self, context: context)
+        let oldCallbacks = callbacks
 
-        schemas = try await externallyDereference(dictionary: schemas, with: &loader)
-        responses = try await externallyDereference(dictionary: responses, with: &loader)
-        parameters = try await externallyDereference(dictionary: parameters, with: &loader)
-        examples = try await externallyDereference(dictionary: examples, with: &loader)
-        requestBodies = try await externallyDereference(dictionary: requestBodies, with: &loader)
-        headers = try await externallyDereference(dictionary: headers, with: &loader)
-        securitySchemes = try await externallyDereference(dictionary: securitySchemes, with: &loader)
+        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
+        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
+        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: context)
+        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: context)
+        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
+        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
+        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
 
-        callbacks = try await callbacks.externallyDereferenced(with: &loader)
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
 
-        return loader
+        schemas = try await newSchemas
+        responses = try await newResponses
+        parameters = try await newParameters
+        examples = try await newExamples
+        requestBodies = try await newRequestBodies
+        headers = try await newHeaders
+        securitySchemes = try await newSecuritySchemes
+
+        callbacks = try await newCallbacks
+
+        try merge(c1)
+        try merge(c2)
+        try merge(c3)
+        try merge(c4)
+        try merge(c5)
+        try merge(c6)
+        try merge(c7)
     }
 }
 

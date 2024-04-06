@@ -68,10 +68,12 @@ extension OpenAPI.Parameter.SchemaContext: LocallyDereferenceable {
     ) throws -> DereferencedSchemaContext {
         return try DereferencedSchemaContext(self, resolvingIn: components, following: references)
     }
+}
 
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) async throws -> OpenAPI.Parameter.SchemaContext where Context : ExternalLoaderContext {
+extension OpenAPI.Parameter.SchemaContext: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         // TODO: externally dereference schema, examples, and example
 #warning("externally dereference schema, examples, and example")
-        return self
+        return (self, .init())
     }
 }

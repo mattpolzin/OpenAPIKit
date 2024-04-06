@@ -272,8 +272,10 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         }
         return ret
     }
+}
 
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.SecurityScheme where Context : ExternalLoaderContext {
-        return self
+extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        return (self, .init())
     }
 }

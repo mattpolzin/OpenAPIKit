@@ -78,11 +78,26 @@ extension OpenAPI.Response: LocallyDereferenceable {
 }
 
 extension OpenAPI.Response: ExternallyDereferenceable {
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) async throws -> OpenAPI.Response where Context : ExternalLoaderContext {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) {
+        let oldContent = content
+        let oldLinks = links
+
+        async let (newContent, c1) = oldContent.externallyDereferenced(with: loader)
+        async let (newLinks, c2) = oldLinks.externallyDereferenced(with: loader)
+
         var response = self
-        response.headers = try await headers?.externallyDereferenced(with: &loader)
-        response.content = try await content.externallyDereferenced(with: &loader)
-        response.links = try await links.externallyDereferenced(with: &loader)
-        return response
+        response.content = try await newContent
+        response.links = try await newLinks
+
+        var components = try await c1
+        try await components.merge(c2)
+
+        if let oldHeaders = headers {
+            let (newHeaders, c3) = try await oldHeaders.externallyDereferenced(with: loader)
+            response.headers = newHeaders
+            try components.merge(c3)
+        }
+
+        return (response, components)
     }
 }

@@ -81,13 +81,13 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
     ) throws -> DereferencedParameter {
         return try DereferencedParameter(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
+}
 
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: inout ExternalLoader<Context>) async throws -> Self {
-        var parameter = self
+extension OpenAPI.Parameter: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         
         // TODO: externallyDerefence the schemaOrContent
 #warning("need to externally dereference the schemaOrContent here")
-
-        return parameter
+        return (self, .init())
     }
 }

@@ -533,10 +533,12 @@ extension JSONSchema: LocallyDereferenceable {
     public func dereferenced() -> DereferencedJSONSchema? {
         return try? dereferenced(in: .noComponents)
     }
+}
 
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> Self where Context : ExternalLoaderContext {
+extension JSONSchema: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         // TODO: externally dereference this schema 
 #warning("need to externally dereference json schemas")
-        return self
+        return (self, .init())
     }
 }

@@ -206,9 +206,11 @@ extension OpenAPI.Example: LocallyDereferenceable {
             vendorExtensions: vendorExtensions
         )
     }
+}
 
-    public func externallyDereferenced<Context>(with loader: inout ExternalLoader<Context>) throws -> OpenAPI.Example where Context : ExternalLoaderContext {
-        return self
+extension OpenAPI.Example: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        return (self, .init())
     }
 }
 
