@@ -141,21 +141,29 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
 
 extension OpenAPI.PathItem: ExternallyDereferenceable {
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
-        var pathItem = self
-       
-        // TODO: Make the following into an async task list for parallel execution.
-        var newParameters = OpenAPI.Parameter.Array()
-        var newComponents = OpenAPI.Components()
-        for parameterRef in pathItem.parameters {
-            let (newParameter, newComponent) = try await parameterRef.externallyDereferenced(with: loader)
-            newParameters.append(newParameter)
-            try newComponents.merge(newComponent)
+        let (newParameters, newComponents) = try await withThrowingTaskGroup(of: (OpenAPI.Parameter.Array.Element, OpenAPI.Components).self) { group in
+          for elem in parameters {
+              group.addTask {
+                  return try await elem.externallyDereferenced(with: loader)
+              }
+          }
+
+          var newParameters = OpenAPI.Parameter.Array()
+          var newComponents = OpenAPI.Components()
+
+          for try await (elem, components) in group {
+              newParameters.append(elem)
+              try newComponents.merge(components)
+          }
+          return (newParameters, newComponents)
         }
 
+        var pathItem = self
         pathItem.parameters = newParameters
 
         // TODO: load external references for entire PathItem object
+        // also merge components before returning newComponents!
 
-        return (pathItem, .init())
+        return (pathItem, newComponents)
     }
 }
