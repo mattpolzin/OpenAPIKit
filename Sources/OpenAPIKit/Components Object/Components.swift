@@ -310,7 +310,14 @@ extension OpenAPI.Components {
         async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
         async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
 
-        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
+//        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
+        var c8 = OpenAPI.Components()
+        var newCallbacks = oldCallbacks
+        for (key, callback) in oldCallbacks {
+            let (newCallback, components) = try await callback.externallyDereferenced(with: context)
+            newCallbacks[key] = newCallback
+            try c8.merge(components)
+        }
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -320,15 +327,17 @@ extension OpenAPI.Components {
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
 
-        callbacks = try await newCallbacks
+        callbacks = newCallbacks
 
-        try merge(c1)
-        try merge(c2)
-        try merge(c3)
-        try merge(c4)
-        try merge(c5)
-        try merge(c6)
-        try merge(c7)
+        try await merge(c1)
+        try await merge(c2)
+        try await merge(c3)
+        try await merge(c4)
+        try await merge(c5)
+        try await merge(c6)
+        try await merge(c7)
+
+        try merge(c8)
     }
 }
 
