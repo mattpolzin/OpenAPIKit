@@ -259,5 +259,11 @@ extension OpenAPI.Server.Variable {
     }
 }
 
+extension OpenAPI.Server: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        return (self, .init())
+    }
+}
+
 extension OpenAPI.Server: Validatable {}
 extension OpenAPI.Server.Variable: Validatable {}
