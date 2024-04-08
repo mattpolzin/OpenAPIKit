@@ -127,8 +127,28 @@ extension OpenAPI.Operation: LocallyDereferenceable {
 
 extension OpenAPI.Operation: ExternallyDereferenceable {
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
-        // TODO: externally dereference security, responses, requestBody, and parameters
-#warning("externally dereference security, responses, requestBody, and parameters")
-        return (self, .init())
+        let oldParameters = parameters
+        let oldRequestBody = requestBody
+        let oldResponses = responses
+
+        async let (newParameters, c1) = oldParameters.externallyDereferenced(with: loader)
+        async let (newRequestBody, c2) = oldRequestBody.externallyDereferenced(with: loader)
+        async let (newResponses, c3) = oldResponses.externallyDereferenced(with: loader)
+//        let (newCallbacks, c4) = try await callbacks.externallyDereferenced(with: loader)
+//        let (newSecurtiy, c5) = try await security.externallyDereferenced(with: loader)
+//        let (newServers, c6) = try await servers.externallyDereferenced(with: loader)
+
+        var newOperation = self
+        var newComponents = try await c1
+
+        newOperation.parameters = try await newParameters
+        newOperation.requestBody = try await newRequestBody
+        try await newComponents.merge(c2)
+        newOperation.responses = try await newResponses
+        try await newComponents.merge(c3)
+        
+        // TODO: externally dereference servers, callbacks, and security
+#warning("externally dereference servers, callbacks, and security")
+        return (newOperation, newComponents)
     }
 }
