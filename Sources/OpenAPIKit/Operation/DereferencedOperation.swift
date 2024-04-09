@@ -147,8 +147,51 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         newOperation.responses = try await newResponses
         try await newComponents.merge(c3)
         
-        // TODO: externally dereference servers, callbacks, and security
-#warning("externally dereference servers, callbacks, and security")
+        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
+        var newCallbacks = OpenAPI.CallbacksMap()
+        for (key, value) in callbacks {
+            switch value {
+            case .a(let callbackReference): 
+                let oldJsonReference = callbackReference.jsonReference
+
+                let (newJsonReference, components) = try await oldJsonReference.externallyDereferenced(with: loader)
+                try newComponents.merge(components)
+
+                let newCallbackReference = OpenAPI.Reference(
+                    newJsonReference,
+                    summary: callbackReference.summary,
+                    description: callbackReference.description
+                )
+
+                newCallbacks[key] = .a(newCallbackReference)
+            case .b(let callback): 
+                let (newCallback, components) = try await callback.externallyDereferenced(with: loader)
+                newCallbacks[key] = .b(newCallback)
+                try newComponents.merge(components)
+            }
+        }
+        newOperation.callbacks = newCallbacks
+
+        if let oldServers = servers {
+            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
+            newOperation.servers = newServers
+            try newComponents.merge(c6)
+        }
+
+        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
+        if let oldRequestBody = requestBody {
+            let (newRequestBody, c5) = try await oldRequestBody.externallyDereferenced(with: loader)
+            newOperation.requestBody = newRequestBody
+            try newComponents.merge(c5)
+        }
+        
+        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
+        if let oldServers = servers {
+            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
+            newOperation.servers = newServers
+            try newComponents.merge(c6)
+        }
+
         return (newOperation, newComponents)
     }
 }

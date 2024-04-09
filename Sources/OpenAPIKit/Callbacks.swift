@@ -39,8 +39,13 @@ extension OpenAPI.CallbackURL: LocallyDereferenceable {
 
 extension OpenAPI.CallbackURL: ExternallyDereferenceable {
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
-        // TODO: externally dereference security, responses, requestBody, and parameters
-#warning("externally dereference security, responses, requestBody, and parameters")
         return (self, .init())
     }
 }
+
+// The following conformance is theoretically unnecessary but the compiler is
+// only able to find the conformance if we explicitly declare it here, though
+// it is apparently able to determine the conformance is already satisfied here
+// at least.
+extension OpenAPI.Callbacks: ExternallyDereferenceable { }
+
