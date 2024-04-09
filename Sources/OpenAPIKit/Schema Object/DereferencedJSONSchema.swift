@@ -537,8 +537,100 @@ extension JSONSchema: LocallyDereferenceable {
 
 extension JSONSchema: ExternallyDereferenceable {
     public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
-        // TODO: externally dereference this schema 
-#warning("need to externally dereference json schemas")
-        return (self, .init())
+        let newSchema: JSONSchema
+        let newComponents: OpenAPI.Components
+
+        switch value {
+        case .null(_): 
+            newComponents = .noComponents
+            newSchema = self
+        case .boolean(_): 
+            newComponents = .noComponents
+            newSchema = self
+        case .number(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+        case .integer(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+        case .string(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+        case .object(let core, let object): 
+            var components = OpenAPI.Components()
+
+            let (newProperties, c1) = try await object.properties.externallyDereferenced(with: loader)
+            try components.merge(c1)
+
+            let newAdditionalProperties: Either<Bool, JSONSchema>?
+            if case .b(let schema) = object.additionalProperties {
+                let (additionalProperties, c2) = try await schema.externallyDereferenced(with: loader)
+                try components.merge(c2)
+                newAdditionalProperties = .b(additionalProperties)
+            } else {
+                newAdditionalProperties = object.additionalProperties
+            }
+            newComponents = components
+            newSchema = .init(
+                schema: .object(
+                    core, 
+                    .init(
+                        properties: newProperties, 
+                        additionalProperties: newAdditionalProperties, 
+                        maxProperties: object.maxProperties, 
+                        minProperties: object._minProperties
+                    )
+                )
+            )
+        case .array(let core, let array): 
+            let (newItems, components) = try await array.items.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .array(
+                    core,
+                    .init(
+                        items: newItems, 
+                        maxItems: array.maxItems,
+                        minItems: array._minItems,
+                        uniqueItems: array._uniqueItems
+                    )
+                )
+            )
+        case .all(let schema, let core): 
+            let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .all(of: newSubschemas, core: core)
+            )
+        case .one(let schema, let core): 
+            let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .one(of: newSubschemas, core: core)
+            )
+        case .any(let schema, let core): 
+            let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .any(of: newSubschemas, core: core)
+            )
+        case .not(let schema, let core): 
+            let (newSubschema, components) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .not(newSubschema, core: core)
+            )
+        case .reference(let reference, let core): 
+            let (newReference, components) = try await reference.externallyDereferenced(with: loader)
+            newComponents = components
+            newSchema = .init(
+                schema: .reference(newReference, core)
+            )
+        case .fragment(_): 
+            newComponents = .noComponents
+            newSchema = self
+        }
+
+        return (newSchema, newComponents)
     }
 }
