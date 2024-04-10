@@ -134,8 +134,7 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         async let (newParameters, c1) = oldParameters.externallyDereferenced(with: loader)
         async let (newRequestBody, c2) = oldRequestBody.externallyDereferenced(with: loader)
         async let (newResponses, c3) = oldResponses.externallyDereferenced(with: loader)
-//        let (newCallbacks, c4) = try await callbacks.externallyDereferenced(with: loader)
-//        let (newSecurtiy, c5) = try await security.externallyDereferenced(with: loader)
+        async let (newCallbacks, c4) = callbacks.externallyDereferenced(with: loader)
 //        let (newServers, c6) = try await servers.externallyDereferenced(with: loader)
 
         var newOperation = self
@@ -146,43 +145,13 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         try await newComponents.merge(c2)
         newOperation.responses = try await newResponses
         try await newComponents.merge(c3)
-        
-        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
-        var newCallbacks = OpenAPI.CallbacksMap()
-        for (key, value) in callbacks {
-            switch value {
-            case .a(let callbackReference): 
-                let oldJsonReference = callbackReference.jsonReference
-
-                let (newJsonReference, components) = try await oldJsonReference.externallyDereferenced(with: loader)
-                try newComponents.merge(components)
-
-                let newCallbackReference = OpenAPI.Reference(
-                    newJsonReference,
-                    summary: callbackReference.summary,
-                    description: callbackReference.description
-                )
-
-                newCallbacks[key] = .a(newCallbackReference)
-            case .b(let callback): 
-                let (newCallback, components) = try await callback.externallyDereferenced(with: loader)
-                newCallbacks[key] = .b(newCallback)
-                try newComponents.merge(components)
-            }
-        }
-        newOperation.callbacks = newCallbacks
+        newOperation.callbacks = try await newCallbacks
+        try await newComponents.merge(c4)
 
         if let oldServers = servers {
             let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
             newOperation.servers = newServers
             try newComponents.merge(c6)
-        }
-
-        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
-        if let oldRequestBody = requestBody {
-            let (newRequestBody, c5) = try await oldRequestBody.externallyDereferenced(with: loader)
-            newOperation.requestBody = newRequestBody
-            try newComponents.merge(c5)
         }
         
         // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:

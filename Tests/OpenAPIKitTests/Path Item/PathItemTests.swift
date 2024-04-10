@@ -7,6 +7,7 @@
 
 import XCTest
 import OpenAPIKit
+import Foundation
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {
@@ -436,8 +437,10 @@ extension PathItemTests {
 // MARK: External Dereferencing Tests
 extension PathItemTests {
     struct MockLoad: ExternalLoaderContext {
-        static func componentKey<T>(type: T.Type, at url: URL) -> OpenAPI.ComponentKey {
-           "hello-world" 
+        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+            let urlString = url.pathComponents.dropFirst().joined(separator: "_").replacingOccurrences(of: ".", with: "_")
+
+            return try .forceInit(rawValue: urlString)
         }
 
         static func load<T>(_: URL) throws -> T where T : Decodable {
@@ -460,9 +463,9 @@ extension PathItemTests {
             parameters: [
                 .parameter(name: "hello", context: .query, schema: .string),
                 .reference(.component(named: "already-internal")),
-                .reference(.external(URL(string: "https://some-param.com")!))
+                .reference(.external(URL(string: "https://some-param.com/param")!))
             ],
-            get: .init(requestBody: .reference(.external(URL(string: "https://website.com")!)), responses: [:]),
+            get: .init(requestBody: .reference(.external(URL(string: "https://website.com/request")!)), responses: [:]),
             put: op,
             post: op,
             delete: op,
