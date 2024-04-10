@@ -334,6 +334,17 @@ extension OpenAPI.Document {
     public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(self)
     }
+
+    public mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+        let oldPaths = paths
+
+        try await components.externallyDereference(in: context)
+
+        async let (newPaths, c1) = oldPaths.externallyDereferenced(with: context)
+
+        paths = try await newPaths
+        try await components.merge(c1)
+    }
 }
 
 extension OpenAPI {

@@ -76,7 +76,7 @@ extension OpenAPI {
         /// The key is a unique identifier for the Callback Object. Each value in the
         /// map is a Callback Object that describes a request that may be initiated
         /// by the API provider and the expected responses.
-        public let callbacks: OpenAPI.CallbacksMap
+        public var callbacks: OpenAPI.CallbacksMap
 
         /// Indicates that the operation is deprecated or not.
         ///

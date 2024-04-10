@@ -72,6 +72,28 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Components {
+    public struct ComponentCollision: Swift.Error {
+        public let componentType: String
+        public let existingComponent: String
+        public let newComponent: String
+    }
+
+    public mutating func merge(_ other: OpenAPI.Components) throws {
+        try schemas.merge(other.schemas, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "schema", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try responses.merge(other.responses, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "responses", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try parameters.merge(other.parameters, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "parameters", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try examples.merge(other.examples, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "examples", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try requestBodies.merge(other.requestBodies, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "requestBodies", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try headers.merge(other.headers, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "headers", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "securitySchemes", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try links.merge(other.links, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "links", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try callbacks.merge(other.callbacks, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "callbacks", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try pathItems.merge(other.pathItems, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "pathItems", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "vendorExtensions", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+    }
+}
+
+extension OpenAPI.Components {
     /// The extension name used to store a Components Object name (the key something is stored under
     /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
     /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
@@ -260,24 +282,54 @@ extension OpenAPI.Components {
     }
 }
 
-public extension OpenAPI.Components {
-    struct ValueCollision<T>: Swift.Error {
-        let value1: T
-        let value2: T
-    }
+extension OpenAPI.Components {
+    internal mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+        let oldSchemas = schemas
+        let oldResponses = responses
+        let oldParameters = parameters
+        let oldExamples = examples
+        let oldRequestBodies = requestBodies
+        let oldHeaders = headers
+        let oldSecuritySchemes = securitySchemes
 
-    mutating func merge(_ components: OpenAPI.Components) throws {
-        try schemas.merge(components.schemas, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try responses.merge(components.responses, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try parameters.merge(components.parameters, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try examples.merge(components.examples, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try requestBodies.merge(components.requestBodies, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try headers.merge(components.headers, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try securitySchemes.merge(components.securitySchemes, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try links.merge(components.links, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try callbacks.merge(components.callbacks, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try pathItems.merge(components.pathItems, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try vendorExtensions.merge(components.vendorExtensions, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        let oldCallbacks = callbacks
+
+        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
+        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
+        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: context)
+        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: context)
+        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
+        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
+        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
+
+//        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
+        var c8 = OpenAPI.Components()
+        var newCallbacks = oldCallbacks
+        for (key, callback) in oldCallbacks {
+            let (newCallback, components) = try await callback.externallyDereferenced(with: context)
+            newCallbacks[key] = newCallback
+            try c8.merge(components)
+        }
+
+        schemas = try await newSchemas
+        responses = try await newResponses
+        parameters = try await newParameters
+        examples = try await newExamples
+        requestBodies = try await newRequestBodies
+        headers = try await newHeaders
+        securitySchemes = try await newSecuritySchemes
+
+        callbacks = newCallbacks
+
+        try await merge(c1)
+        try await merge(c2)
+        try await merge(c3)
+        try await merge(c4)
+        try await merge(c5)
+        try await merge(c6)
+        try await merge(c7)
+
+        try merge(c8)
     }
 }
 
