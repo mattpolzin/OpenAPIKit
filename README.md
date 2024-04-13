@@ -108,7 +108,7 @@ let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 ### Validating OpenAPI Documents
 Thanks to Swift's type system, the vast majority of the OpenAPI Specification is represented by the types of OpenAPIKit -- you cannot create bad OpenAPI docuements in the first place and decoding a document will fail with generally useful errors.
 
-That being said, there are a small number of additional checks that you can perform to really put any concerns to bed.
+That being said, there are a small number of additional checks that you can perform to really put any concerns to rest.
 
 ```swift
 let openAPIDoc: OpenAPI.Document = ...
