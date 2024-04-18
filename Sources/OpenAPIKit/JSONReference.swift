@@ -511,7 +511,7 @@ extension OpenAPI.Reference: Decodable {
 }
 
 // MARK: - LocallyDereferenceable
-extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable & Decodable & Equatable {
+extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
     /// dereference it.
     ///
@@ -552,7 +552,7 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
     }
 }
 
-extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable & Decodable & Equatable {
+extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
     /// dereference it.
     ///
