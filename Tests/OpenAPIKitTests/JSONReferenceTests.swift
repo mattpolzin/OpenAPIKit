@@ -379,7 +379,32 @@ extension JSONReferenceTests {
 
 // MARK: - External Dereferencing
 extension JSONReferenceTests {
-  
+    func test_externalDerefNoFragment() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json")!)
+
+        let (newReference, components) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json": .string]))
+    }
+
+    func test_externalDerefFragment() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json#/test")!)
+
+        let (newReference, components) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json__test"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json__test": .string]))
+    }
+
+    func test_externalDerefExternalComponents() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json#/components/schemas/test")!)
+
+        let (newReference, components) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json__components_schemas_test"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json__components_schemas_test": .string]))
+    }
 }
 
 // MARK: - Test Types
@@ -394,6 +419,10 @@ extension JSONReferenceTests {
         }
 
         static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+            return try .forceInit(rawValue: url.absoluteString
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "#", with: "_")
+                .replacingOccurrences(of: ".", with: "_"))
         }
     }
 }
