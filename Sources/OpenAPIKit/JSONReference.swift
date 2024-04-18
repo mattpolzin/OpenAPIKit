@@ -538,7 +538,7 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
 }
 
 extension JSONReference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         switch self {
         case .internal(let ref):
             return (.internal(ref), .init())
@@ -580,7 +580,7 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
 }
 
 extension OpenAPI.Reference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         let (newRef, components) = try await jsonReference.externallyDereferenced(with: loader)
         return (.init(newRef), components)
     }

@@ -291,7 +291,7 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+    internal mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type) async throws {
         let oldSchemas = schemas
         let oldResponses = responses
         let oldParameters = parameters

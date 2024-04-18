@@ -8,10 +8,10 @@
 import OpenAPIKitCore
 import Foundation
 
-/// An `ExternalLoaderContext` enables `OpenAPIKit` to load external references 
+/// An `ExternalLoader` enables `OpenAPIKit` to load external references 
 /// without knowing the details of what decoder is being used or how new internal 
 /// references should be named.
-public protocol ExternalLoaderContext {
+public protocol ExternalLoader {
     /// Load the given URL and decode it as Type `T`. All Types `T` are `Decodable`, so
     /// the only real responsibility of a `load` function is to locate and load the given
     /// `URL` and pass its `Data` or `String` (depending on the decoder) to an appropriate
@@ -30,5 +30,5 @@ public protocol ExternalLoaderContext {
 }
 
 public protocol ExternallyDereferenceable {
-    func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components)
+    func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components)
 }

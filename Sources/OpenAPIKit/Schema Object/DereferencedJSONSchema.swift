@@ -536,7 +536,7 @@ extension JSONSchema: LocallyDereferenceable {
 }
 
 extension JSONSchema: ExternallyDereferenceable {
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         let newSchema: JSONSchema
         let newComponents: OpenAPI.Components
 

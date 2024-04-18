@@ -10,7 +10,7 @@ import OpenAPIKitCore
 // MARK: - ExternallyDereferenceable
 extension Either: ExternallyDereferenceable where A: ExternallyDereferenceable, B: ExternallyDereferenceable {
 
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         switch self {
         case .a(let a):
            let (newA, components) = try await a.externallyDereferenced(with: loader)

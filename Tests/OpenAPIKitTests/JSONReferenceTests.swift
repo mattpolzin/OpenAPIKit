@@ -377,9 +377,23 @@ extension JSONReferenceTests {
     }
 }
 
+// MARK: - External Dereferencing
+extension JSONReferenceTests {
+  
+}
+
 // MARK: - Test Types
 extension JSONReferenceTests {
     struct ReferenceWrapper: Codable, Equatable {
         let reference: JSONReference<JSONSchema>
+    }
+
+    struct SchemaLoader: ExternalLoader {
+        static func load<T>(_ url: URL) -> T where T: Decodable {
+            return JSONSchema.string as! T
+        }
+
+        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+        }
     }
 }

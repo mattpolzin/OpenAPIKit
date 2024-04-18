@@ -58,7 +58,7 @@ extension OpenAPI.Content.Encoding: LocallyDereferenceable {
 }
 
 extension OpenAPI.Content.Encoding: ExternallyDereferenceable {
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
         let newHeaders: OpenAPI.Header.Map?
         let newComponents: OpenAPI.Components
 

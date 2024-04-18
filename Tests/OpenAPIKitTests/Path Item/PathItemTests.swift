@@ -436,7 +436,7 @@ extension PathItemTests {
 
 // MARK: External Dereferencing Tests
 extension PathItemTests {
-    struct MockLoad: ExternalLoaderContext {
+    struct MockLoad: ExternalLoader {
         static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
             let urlString = url.pathComponents.dropFirst().joined(separator: "_").replacingOccurrences(of: ".", with: "_")
 

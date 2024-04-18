@@ -1179,7 +1179,7 @@ extension DocumentTests {
 
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
-        struct ExampleLoaderContext: ExternalLoaderContext {
+        struct ExampleLoaderContext: ExternalLoader {
             static func load<T>(_ url: URL) async throws -> T where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the example:
                 let data = await mockParameterData(url)

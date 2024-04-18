@@ -351,7 +351,7 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
-    public mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+    public mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type) async throws {
         let oldPaths = paths
         let oldWebhooks = webhooks
 
