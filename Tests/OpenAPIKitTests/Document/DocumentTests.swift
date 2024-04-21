@@ -1264,7 +1264,11 @@ extension DocumentTests {
         var docCopy2 = document
         try await docCopy2.externallyDereference(in: ExampleLoader.self, depth: 2)
 
-        XCTAssertEqual(String(describing: docCopy1), String(describing: docCopy2))
+        var docCopy3 = document
+        try await docCopy3.externallyDereference(in: ExampleLoader.self, depth: .full)
+
+        XCTAssertEqual(docCopy1, docCopy2)
+        XCTAssertEqual(docCopy2, docCopy3)
 
        // - MARK: After
        print(

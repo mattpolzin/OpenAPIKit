@@ -298,7 +298,12 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type) async throws {
+    internal mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return
+        }
+
         let oldSchemas = schemas
         let oldResponses = responses
         let oldParameters = parameters
@@ -336,15 +341,43 @@ extension OpenAPI.Components {
 
         callbacks = newCallbacks
 
-        try await merge(c1)
-        try await merge(c2)
-        try await merge(c3)
-        try await merge(c4)
-        try await merge(c5)
-        try await merge(c6)
-        try await merge(c7)
+        let c1Resolved = try await c1
+        let c2Resolved = try await c2
+        let c3Resolved = try await c3
+        let c4Resolved = try await c4
+        let c5Resolved = try await c5
+        let c6Resolved = try await c6
+        let c7Resolved = try await c7
+        let c8Resolved = c8
 
-        try merge(c8)
+        let noNewComponents =
+            c1Resolved.isEmpty
+            && c2Resolved.isEmpty
+            && c3Resolved.isEmpty
+            && c4Resolved.isEmpty
+            && c5Resolved.isEmpty
+            && c6Resolved.isEmpty
+            && c7Resolved.isEmpty
+            && c8Resolved.isEmpty
+
+        if noNewComponents { return }
+
+        try merge(c1Resolved)
+        try merge(c2Resolved)
+        try merge(c3Resolved)
+        try merge(c4Resolved)
+        try merge(c5Resolved)
+        try merge(c6Resolved)
+        try merge(c7Resolved)
+
+        try merge(c8Resolved)
+        
+        switch depth {
+            case .iterations(let number):
+                try await externallyDereference(in: context, depth: .iterations(number - 1))
+            case .full:
+                try await externallyDereference(in: context, depth: .full)
+        }
     }
 }
 
