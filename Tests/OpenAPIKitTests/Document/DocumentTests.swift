@@ -1233,7 +1233,7 @@ extension DocumentTests {
             ].mapValues { $0.data(using: .utf8)! }
         }
 
-        var document = OpenAPI.Document(
+        let document = OpenAPI.Document(
            info: .init(title: "test document", version: "1.0.0"),
            servers: [],
            paths: [
@@ -1254,66 +1254,66 @@ extension DocumentTests {
            )
         )
 
-       let encoder = JSONEncoder()
-       encoder.outputFormatting = .prettyPrinted
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
 
-       // - MARK: Before 
-       print(
-           String(data: try encoder.encode(document), encoding: .utf8)!
-       )
-       /*
-        {
-          "openapi": "3.1.0",
-          "info": {
-            "title": "test document",
-            "version": "1.0.0"
-          },
-          "paths": {
-            "\/hello\/{name}": {
-              "parameters": [
-                {
-                  "$ref": "file:\/\/.\/params\/name.json"
-                }
-              ]
-            }
-          }
-        }
-       */
+        var docCopy1 = document
+        try await docCopy1.externallyDereference(in: ExampleLoader.self)
+        try await docCopy1.externallyDereference(in: ExampleLoader.self)
 
-       try await document.externallyDereference(in: ExampleLoader.self)
+        var docCopy2 = document
+        try await docCopy2.externallyDereference(in: ExampleLoader.self, depth: 2)
+
+        XCTAssertEqual(String(describing: docCopy1), String(describing: docCopy2))
 
        // - MARK: After
        print(
-           String(data: try encoder.encode(document), encoding: .utf8)!
+           String(data: try encoder.encode(docCopy1), encoding: .utf8)!
+       )
+       print(
+           String(data: try encoder.encode(docCopy2), encoding: .utf8)!
        )
        /*
         {
-          "paths": {
-            "\/hello\/{name}": {
-              "parameters": [
+          "info" : {
+            "version" : "1.0.0",
+            "title" : "test document"
+          },
+          "openapi" : "3.1.0",
+          "paths" : {
+            "\/goodbye\/{name}" : {
+              "parameters" : [
                 {
-                  "$ref": "#\/components\/parameters\/params_name_json"
+                  "$ref" : "#\/components\/parameters\/params_name_json"
+                }
+              ]
+            },
+            "\/hello\/{name}" : {
+              "parameters" : [
+                {
+                  "$ref" : "#\/components\/parameters\/params_name_json"
                 }
               ]
             }
           },
-          "components": {
-            "parameters": {
-              "params_name_json": {
-                "x-source-url": "file:\/\/.\/params\/name.json",
-                "in": "path",
-                "name": "name",
-                "required": true,
-                "schema": {
-                  "type": "string"
+          "components" : {
+            "parameters" : {
+              "params_name_json" : {
+                "description" : "a lonely parameter",
+                "in" : "path",
+                "name" : "name",
+                "x-source-url" : "file:\/\/.\/params\/name.json",
+                "required" : true,
+                "schema" : {
+                  "$ref" : "#\/components\/schemas\/schemas_name_param_json"
                 }
               }
+            },
+            "schemas" : {
+              "schemas_name_param_json" : {
+                "type" : "string"
+              }
             }
-          },
-          "openapi": "3.1.0",
-          "info": {
-            "title": "test document",
-            "version": "1.0.0"
           }
         }
        */

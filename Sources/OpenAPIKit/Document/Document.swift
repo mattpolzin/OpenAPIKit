@@ -351,7 +351,9 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
-    public mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type) async throws {
+    public mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type, depth: Int = 1) async throws {
+        guard depth > 0 else { return }
+
         let oldPaths = paths
         let oldWebhooks = webhooks
 
@@ -364,6 +366,8 @@ extension OpenAPI.Document {
         webhooks = try await newWebhooks
         try await components.merge(c1)
         try await components.merge(c2)
+
+        try await externallyDereference(in: context, depth: depth - 1)
     }
 }
 
