@@ -25,6 +25,9 @@ extension OrderedDictionary where Value: ExternallyDereferenceable {
               newDict[key] = newRef
               try newComponents.merge(components)
           }
+          // things may come in out of order because of concurrency
+          // so we reorder after completing all entries.
+          try newDict.applyOrder(self)
           return (newDict, newComponents)
         }
     }

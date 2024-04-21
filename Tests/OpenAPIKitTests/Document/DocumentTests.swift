@@ -1274,9 +1274,6 @@ extension DocumentTests {
        print(
            String(data: try encoder.encode(docCopy1), encoding: .utf8)!
        )
-       print(
-           String(data: try encoder.encode(docCopy2), encoding: .utf8)!
-       )
        /*
         {
           "info" : {
