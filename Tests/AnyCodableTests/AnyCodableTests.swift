@@ -29,6 +29,7 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(AnyCodable(Float(2)), AnyCodable(Float(2)))
         XCTAssertEqual(AnyCodable(Double(2)), AnyCodable(Double(2)))
         XCTAssertEqual(AnyCodable("hi"), AnyCodable("hi"))
+        XCTAssertEqual(AnyCodable(URL(string: "file://./params/name.json")), AnyCodable(URL(string: "file://./params/name.json")))
         XCTAssertEqual(AnyCodable(["hi": AnyCodable(2)]), AnyCodable(["hi": AnyCodable(2)]))
         XCTAssertEqual(AnyCodable([AnyCodable("hi"), AnyCodable("there")]), AnyCodable([AnyCodable("hi"), AnyCodable("there")]))
         XCTAssertEqual(AnyCodable(["hi":1]), AnyCodable(["hi":1]))
