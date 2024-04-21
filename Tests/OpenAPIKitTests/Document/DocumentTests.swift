@@ -1179,13 +1179,16 @@ extension DocumentTests {
 
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
-        struct ExampleLoaderContext: ExternalLoader {
+        struct ExampleLoader: ExternalLoader {
             static func load<T>(_ url: URL) async throws -> T where T : Decodable {
-                // load data from file, perhaps. we will just mock that up for the example:
-                let data = await mockParameterData(url)
+                // load data from file, perhaps. we will just mock that up for the test:
+                let data = try await mockData(componentKey(type: T.self, at: url))
 
                 let decoded = try JSONDecoder().decode(T.self, from: data)
                 let finished: T
+                // while unnecessary, a loader may likely want to attatch some extra info
+                // to keep track of where a reference was loaded from. This test makes sure
+                // the following strategy of using vendor extensions works.
                 if var extendable = decoded as? VendorExtendable {
                     extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
                     finished = extendable as! T
@@ -1198,29 +1201,48 @@ extension DocumentTests {
             static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
                 // do anything you want here to determine what key the new component should be stored at.
                 // for the example, we will just transform the URL into a valid components key:
-                let urlString = url.pathComponents.dropFirst().joined(separator: "_").replacingOccurrences(of: ".", with: "_")
+                let urlString = url.pathComponents.dropFirst()
+                  .joined(separator: "_")
+                  .replacingOccurrences(of: ".", with: "_")
                 return try .forceInit(rawValue: urlString)
             }
 
             /// Mock up some data, just for the example. 
-            static func mockParameterData(_ url: URL) async -> Data {
-                return """
+            static func mockData(_ key: OpenAPIKit.OpenAPI.ComponentKey) async throws -> Data {
+                print("looking up \(key.rawValue)")
+                return try XCTUnwrap(files[key.rawValue])
+            }
+
+            static let files: [String: Data] = [
+                "params_name_json": """
                 {
                     "name": "name",
+                    "description": "a lonely parameter",
                     "in": "path",
-                    "schema": { "type": "string" },
-                    "required": true
+                    "required": true,
+                    "schema": {
+                        "$ref": "file://./schemas/name_param.json#"
+                    }
                 }
-                """.data(using: .utf8)!
-            }
+                """,
+                "schemas_name_param_json": """
+                {
+                    "type": "string"
+                }
+                """
+            ].mapValues { $0.data(using: .utf8)! }
         }
-
 
         var document = OpenAPI.Document(
            info: .init(title: "test document", version: "1.0.0"),
            servers: [],
            paths: [
                "/hello/{name}": .init(
+                   parameters: [
+                       .reference(.external(URL(string: "file://./params/name.json")!))
+                   ]
+               ),
+               "/goodbye/{name}": .init(
                    parameters: [
                        .reference(.external(URL(string: "file://./params/name.json")!))
                    ]
@@ -1258,7 +1280,7 @@ extension DocumentTests {
         }
        */
 
-       try await document.externallyDereference(in: ExampleLoaderContext.self)
+       try await document.externallyDereference(in: ExampleLoader.self)
 
        // - MARK: After
        print(
