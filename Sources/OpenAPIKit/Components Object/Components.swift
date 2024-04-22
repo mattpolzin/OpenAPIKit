@@ -98,6 +98,20 @@ extension OpenAPI.Components {
         try pathItems.merge(other.pathItems, uniquingKeysWith: detectCollision(type: "pathItems"))
         try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: detectCollision(type: "vendorExtensions"))
     }
+
+    /// Sort the components within each type by the component key.
+    public mutating func sort() {
+        schemas.sortKeys()
+        responses.sortKeys()
+        parameters.sortKeys()
+        examples.sortKeys()
+        requestBodies.sortKeys()
+        headers.sortKeys()
+        securitySchemes.sortKeys()
+        links.sortKeys()
+        callbacks.sortKeys()
+        pathItems.sortKeys()
+    }
 }
 
 extension OpenAPI.Components {

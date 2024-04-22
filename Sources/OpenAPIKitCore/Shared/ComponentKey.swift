@@ -90,3 +90,9 @@ extension Shared {
         }
     }
 }
+
+extension Shared.ComponentKey: Comparable {
+    public static func < (lhs: Shared.ComponentKey, rhs: Shared.ComponentKey) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}

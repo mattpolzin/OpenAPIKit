@@ -173,6 +173,16 @@ public struct OrderedDictionary<Key, Value>: HasWarnings where Key: Hashable {
 
         orderedKeys = other.orderedKeys
     }
+
+    public mutating func sortKeys(by sort: (Key, Key) throws -> Bool) rethrows {
+        try orderedKeys.sort(by: sort)
+    }
+}
+
+extension OrderedDictionary where Key: Comparable {
+    public mutating func sortKeys() {
+        orderedKeys.sort()
+    }
 }
 
 // MARK: - Dictionary Literal
