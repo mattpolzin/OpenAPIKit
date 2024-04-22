@@ -311,8 +311,8 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
-
         let oldCallbacks = callbacks
+        let oldPathItems = pathItems
 
         async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
         async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
@@ -321,6 +321,7 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
         async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
         async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
+        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: context)
 
 //        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
         var c8 = OpenAPI.Components()
@@ -338,8 +339,8 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-
         callbacks = newCallbacks
+        pathItems = try await newPathItems
 
         let c1Resolved = try await c1
         let c2Resolved = try await c2
@@ -349,6 +350,7 @@ extension OpenAPI.Components {
         let c6Resolved = try await c6
         let c7Resolved = try await c7
         let c8Resolved = c8
+        let c9Resolved = try await c9
 
         let noNewComponents =
             c1Resolved.isEmpty
@@ -359,6 +361,7 @@ extension OpenAPI.Components {
             && c6Resolved.isEmpty
             && c7Resolved.isEmpty
             && c8Resolved.isEmpty
+            && c9Resolved.isEmpty
 
         if noNewComponents { return }
 
@@ -369,8 +372,8 @@ extension OpenAPI.Components {
         try merge(c5Resolved)
         try merge(c6Resolved)
         try merge(c7Resolved)
-
         try merge(c8Resolved)
+        try merge(c9Resolved)
         
         switch depth {
             case .iterations(let number):
