@@ -55,13 +55,21 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     "in": "path",
                     "required": true,
                     "schema": {
-                        "$ref": "file://./schemas/name_param.json#"
+                        "$ref": "file://./schemas/string_param.json#"
                     }
                 }
                 """,
-                "schemas_name_param_json": """
+                "schemas_string_param_json": """
                 {
-                    "type": "string"
+                    "oneOf": [
+                        { "type": "string" },
+                        { "$ref": "file://./schemas/basic_object.json" }
+                    ]
+                }
+                """,
+                "schemas_basic_object_json": """
+                {
+                    "type": "object"
                 }
                 """,
                 "paths_webhook_json": """
@@ -87,7 +95,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                                 "type": "object",
                                 "properties": {
                                     "body": {
-                                        "type": "string"
+                                        "$ref": "file://./schemas/string_param.json"
                                     }
                                 }
                             },
@@ -129,7 +137,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 "headers_webhook_json": """
                 {
                     "schema": {
-                        "$ref": "file://./schemas/name_param.json"
+                        "$ref": "file://./schemas/string_param.json"
                     }
                 }
                 """,
@@ -205,7 +213,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
            ],
            components: .init(
                schemas: [
-                   "name_param": .reference(.external(URL(string: "file://./schemas/name_param.json")!))
+                   "name_param": .reference(.external(URL(string: "file://./schemas/string_param.json")!))
                ],
                // just to show, no parameters defined within document components :
                parameters: [:]

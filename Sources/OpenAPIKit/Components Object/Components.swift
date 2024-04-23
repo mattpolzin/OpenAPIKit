@@ -80,8 +80,16 @@ extension OpenAPI.Components {
 
     private func detectCollision<T: Equatable>(type: String) throws -> (_ old: T, _ new: T) throws -> T {
         return { old, new in
-            if(old == new) { return old }
-            throw ComponentCollision(componentType: type, existingComponent: String(describing:old), newComponent: String(describing:new))
+            // theoretically we can detect collisions here, but we would need to compare
+            // for equality up-to but not including the difference between an external and
+            // internal reference which is not supported yet.
+//            if(old == new) { return old }
+//            throw ComponentCollision(componentType: type, existingComponent: String(describing:old), newComponent: String(describing:new))
+
+            // Given we aren't ensuring there are no collisions, the old version is going to be
+            // the one more likely to have been _further_ dereferenced than the new record, so
+            // we keep that version.
+            return old
         }
     }
 
