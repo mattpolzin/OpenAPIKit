@@ -103,6 +103,15 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                                 "good": {
                                     "$ref": "file://./examples/good.json"
                                 }
+                            },
+                            "encoding": {
+                                "enc1": {
+                                    "headers": {
+                                        "head1": {
+                                            "$ref": "file://./headers/webhook.json"
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
