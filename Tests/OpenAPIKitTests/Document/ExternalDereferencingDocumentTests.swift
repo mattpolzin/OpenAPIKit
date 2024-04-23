@@ -158,10 +158,20 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                                             "type": "object"
                                         }
                                     }
+                                },
+                                "links": {
+                                    "link1": {
+                                        "$ref": "file://./links/first.json"
+                                    }
                                 }
                             }
                         }
                     }
+                }
+                """,
+                "links_first_json": """
+                {
+                    "operationId": "helloOp"
                 }
                 """
             ].mapValues { $0.data(using: .utf8)! }
@@ -176,6 +186,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                        .reference(.external(URL(string: "file://./params/name.json")!))
                    ],
                    get: .init(
+                      operationId: "helloOp",
                       responses: [:],
                       callbacks: [
                           "callback1": .reference(.external(URL(string: "file://./callbacks/one.json")!))
