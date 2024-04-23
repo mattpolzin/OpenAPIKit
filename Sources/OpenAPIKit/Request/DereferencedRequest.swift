@@ -61,3 +61,14 @@ extension OpenAPI.Request: LocallyDereferenceable {
         return try DereferencedRequest(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }
+
+extension OpenAPI.Request: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        var newRequest = self
+
+        let (newContent, components) = try await content.externallyDereferenced(with: loader)
+
+        newRequest.content = newContent
+        return (newRequest, components)
+    }
+}

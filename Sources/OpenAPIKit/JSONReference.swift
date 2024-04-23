@@ -537,6 +537,21 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     }
 }
 
+extension JSONReference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        switch self {
+        case .internal(let ref):
+            return (.internal(ref), .init())
+        case .external(let url):
+            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
+            let component: ReferenceType = try await loader.load(url)
+            var components = OpenAPI.Components()
+            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
+            return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self).jsonReference, components)
+        }
+    }
+}
+
 extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
     /// dereference it.
@@ -561,6 +576,13 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
         return try components
             .lookup(self)
             ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
+    }
+}
+
+extension OpenAPI.Reference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+        let (newRef, components) = try await jsonReference.externallyDereferenced(with: loader)
+        return (.init(newRef), components)
     }
 }
 

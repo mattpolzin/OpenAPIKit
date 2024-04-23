@@ -82,3 +82,36 @@ extension OpenAPI.Header: LocallyDereferenceable {
         return try DereferencedHeader(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }
+
+extension OpenAPI.Header: ExternallyDereferenceable {
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+
+        // if not for a Swift bug, this whole next bit would just be the
+        // next line:
+//        let (newSchemaOrContent, components) = try await schemaOrContent.externallyDereferenced(with: loader)
+
+        let newSchemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        let newComponents: OpenAPI.Components
+
+        switch schemaOrContent {
+        case .a(let schemaContext):
+            let (context, components) = try await schemaContext.externallyDereferenced(with: loader)
+            newSchemaOrContent = .a(context)
+            newComponents = components
+        case .b(let contentMap):
+            let (map, components) = try await contentMap.externallyDereferenced(with: loader)
+            newSchemaOrContent = .b(map)
+            newComponents = components
+        }
+
+        let newHeader = OpenAPI.Header(
+            schemaOrContent: newSchemaOrContent,
+            description: description,
+            required: required,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+
+        return (newHeader, newComponents)
+    }
+}
