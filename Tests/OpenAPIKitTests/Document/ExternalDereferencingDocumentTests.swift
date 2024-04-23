@@ -246,39 +246,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         try await docCopy3.externallyDereference(in: ExampleLoader.self, depth: .full)
         docCopy3.components.sort()
 
-//        print("-----")
-//        print(docCopy2 == docCopy3)
-//        print(docCopy2.components == docCopy3.components)
-//        print("+++++")
-//        print(docCopy2.components.schemas == docCopy3.components.schemas)
-//        print(docCopy2.components.responses == docCopy3.components.responses)
-//        print(docCopy2.components.parameters == docCopy3.components.parameters)
-//        print(docCopy2.components.examples == docCopy3.components.examples)
-//        print(docCopy2.components.requestBodies == docCopy3.components.requestBodies)
-//        print(docCopy2.components.headers == docCopy3.components.headers)
-//        print(docCopy2.components.securitySchemes == docCopy3.components.securitySchemes)
-//        print(docCopy2.components.links == docCopy3.components.links)
-//        print(docCopy2.components.callbacks == docCopy3.components.callbacks)
-//        print(docCopy2.components.pathItems == docCopy3.components.pathItems)
-//        print("=====")
-//        print(docCopy2.components.responses)
-//        print("&&&&&")
-//        print(docCopy3.components.responses)
-//        print("$$$$$")
-
         XCTAssertEqual(docCopy1, docCopy2)
         XCTAssertEqual(docCopy2, docCopy3)
-//        XCTAssertEqual(String(describing: docCopy2), String(describing: docCopy3))
-
-       // - MARK: After
-//       print(
-//           String(data: try encoder.encode(docCopy1), encoding: .utf8)!
-//       )
-//       print(
-//           String(data: try encoder.encode(docCopy2), encoding: .utf8)!
-//       )
-//       print(
-//           String(data: try encoder.encode(docCopy3), encoding: .utf8)!
-//       )
     }
 }
