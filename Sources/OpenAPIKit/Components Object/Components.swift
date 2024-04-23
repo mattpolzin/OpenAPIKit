@@ -343,16 +343,8 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
         async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
         async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
         async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: context)
-
-//        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
-        var c8 = OpenAPI.Components()
-        var newCallbacks = oldCallbacks
-        for (key, callback) in oldCallbacks {
-            let (newCallback, components) = try await callback.externallyDereferenced(with: context)
-            newCallbacks[key] = newCallback
-            try c8.merge(components)
-        }
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -361,7 +353,7 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-        callbacks = newCallbacks
+        callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
         let c1Resolved = try await c1
@@ -371,7 +363,7 @@ extension OpenAPI.Components {
         let c5Resolved = try await c5
         let c6Resolved = try await c6
         let c7Resolved = try await c7
-        let c8Resolved = c8
+        let c8Resolved = try await c8
         let c9Resolved = try await c9
 
         let noNewComponents =
