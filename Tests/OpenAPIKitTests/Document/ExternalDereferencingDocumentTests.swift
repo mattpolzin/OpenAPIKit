@@ -137,6 +137,32 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 {
                     "value": "{\\"body\\": \\"request me\\"}"
                 }
+                """,
+                "callbacks_one_json": """
+                {
+                    "https://callback.site.com/callback": {
+                        "$ref": "file://./paths/callback.json"
+                    }
+                }
+                """,
+                "paths_callback_json": """
+                {
+                    "summary": "just a callback",
+                    "get": {
+                        "responses": {
+                            "200": {
+                                "description": "callback response",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 """
             ].mapValues { $0.data(using: .utf8)! }
         }
@@ -148,7 +174,13 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                "/hello/{name}": .init(
                    parameters: [
                        .reference(.external(URL(string: "file://./params/name.json")!))
-                   ]
+                   ],
+                   get: .init(
+                      responses: [:],
+                      callbacks: [
+                          "callback1": .reference(.external(URL(string: "file://./callbacks/one.json")!))
+                      ]
+                   )
                ),
                "/goodbye/{name}": .init(
                    parameters: [
