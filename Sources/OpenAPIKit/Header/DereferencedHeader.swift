@@ -84,7 +84,7 @@ extension OpenAPI.Header: LocallyDereferenceable {
 }
 
 extension OpenAPI.Header: ExternallyDereferenceable {
-    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
 
         // if not for a Swift bug, this whole next bit would just be the
         // next line:
@@ -92,16 +92,19 @@ extension OpenAPI.Header: ExternallyDereferenceable {
 
         let newSchemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
         let newComponents: OpenAPI.Components
+        let newMessages: [Loader.Message]
 
         switch schemaOrContent {
         case .a(let schemaContext):
-            let (context, components) = try await schemaContext.externallyDereferenced(with: loader)
+            let (context, components, messages) = try await schemaContext.externallyDereferenced(with: loader)
             newSchemaOrContent = .a(context)
             newComponents = components
+            newMessages = messages
         case .b(let contentMap):
-            let (map, components) = try await contentMap.externallyDereferenced(with: loader)
+            let (map, components, messages) = try await contentMap.externallyDereferenced(with: loader)
             newSchemaOrContent = .b(map)
             newComponents = components
+            newMessages = messages
         }
 
         let newHeader = OpenAPI.Header(
@@ -112,6 +115,6 @@ extension OpenAPI.Header: ExternallyDereferenceable {
             vendorExtensions: vendorExtensions
         )
 
-        return (newHeader, newComponents)
+        return (newHeader, newComponents, newMessages)
     }
 }
