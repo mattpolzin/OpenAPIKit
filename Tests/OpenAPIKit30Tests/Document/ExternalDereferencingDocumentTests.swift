@@ -25,9 +25,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 // to keep track of where a reference was loaded from. This test makes sure
                 // the following strategy of using vendor extensions works.
                 if var extendable = decoded as? VendorExtendable {
-                    //TODO: revisit vendor extensions mutability
-#warning("revisit vendor extensions mutability")
-//                    extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
+                    extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
                     finished = extendable as! T
                 } else {
                     finished = decoded 

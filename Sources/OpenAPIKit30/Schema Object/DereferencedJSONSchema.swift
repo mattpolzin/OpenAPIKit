@@ -451,7 +451,8 @@ extension JSONSchema: ExternallyDereferenceable {
                         maxProperties: object.maxProperties, 
                         minProperties: object._minProperties
                     )
-                )
+                ),
+                vendorExtensions: vendorExtensions
             )
         case .array(let core, let array): 
             let (newItems, components) = try await array.items.externallyDereferenced(with: loader)
@@ -465,37 +466,43 @@ extension JSONSchema: ExternallyDereferenceable {
                         minItems: array._minItems,
                         uniqueItems: array._uniqueItems
                     )
-                )
+                ),
+                vendorExtensions: vendorExtensions
             )
         case .all(let schema, let core): 
             let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
             newComponents = components
             newSchema = .init(
-                schema: .all(of: newSubschemas, core: core)
+                schema: .all(of: newSubschemas, core: core),
+                vendorExtensions: vendorExtensions
             )
         case .one(let schema, let core): 
             let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
             newComponents = components
             newSchema = .init(
-                schema: .one(of: newSubschemas, core: core)
+                schema: .one(of: newSubschemas, core: core),
+                vendorExtensions: vendorExtensions
             )
         case .any(let schema, let core): 
             let (newSubschemas, components) = try await schema.externallyDereferenced(with: loader)
             newComponents = components
             newSchema = .init(
-                schema: .any(of: newSubschemas, core: core)
+                schema: .any(of: newSubschemas, core: core),
+                vendorExtensions: vendorExtensions
             )
         case .not(let schema, let core): 
             let (newSubschema, components) = try await schema.externallyDereferenced(with: loader)
             newComponents = components
             newSchema = .init(
-                schema: .not(newSubschema, core: core)
+                schema: .not(newSubschema, core: core),
+                vendorExtensions: vendorExtensions
             )
         case .reference(let reference, let core): 
             let (newReference, components) = try await reference.externallyDereferenced(with: loader)
             newComponents = components
             newSchema = .init(
-                schema: .reference(newReference, core)
+                schema: .reference(newReference, core),
+                vendorExtensions: vendorExtensions
             )
         case .fragment(_): 
             newComponents = .noComponents
