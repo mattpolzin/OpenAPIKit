@@ -72,6 +72,57 @@ extension OpenAPI {
 }
 
 extension OpenAPI.Components {
+    public struct ComponentCollision: Swift.Error {
+        public let componentType: String
+        public let existingComponent: String
+        public let newComponent: String
+    }
+
+    private func detectCollision<T: Equatable>(type: String) throws -> (_ old: T, _ new: T) throws -> T {
+        return { old, new in
+            // theoretically we can detect collisions here, but we would need to compare
+            // for equality up-to but not including the difference between an external and
+            // internal reference which is not supported yet.
+//            if(old == new) { return old }
+//            throw ComponentCollision(componentType: type, existingComponent: String(describing:old), newComponent: String(describing:new))
+
+            // Given we aren't ensuring there are no collisions, the old version is going to be
+            // the one more likely to have been _further_ dereferenced than the new record, so
+            // we keep that version.
+            return old
+        }
+    }
+
+    public mutating func merge(_ other: OpenAPI.Components) throws {
+        try schemas.merge(other.schemas, uniquingKeysWith: detectCollision(type: "schema"))
+        try responses.merge(other.responses, uniquingKeysWith: detectCollision(type: "responses"))
+        try parameters.merge(other.parameters, uniquingKeysWith: detectCollision(type: "parameters"))
+        try examples.merge(other.examples, uniquingKeysWith: detectCollision(type: "examples"))
+        try requestBodies.merge(other.requestBodies, uniquingKeysWith: detectCollision(type: "requestBodies"))
+        try headers.merge(other.headers, uniquingKeysWith: detectCollision(type: "headers"))
+        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: detectCollision(type: "securitySchemes"))
+        try links.merge(other.links, uniquingKeysWith: detectCollision(type: "links"))
+        try callbacks.merge(other.callbacks, uniquingKeysWith: detectCollision(type: "callbacks"))
+        try pathItems.merge(other.pathItems, uniquingKeysWith: detectCollision(type: "pathItems"))
+        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: detectCollision(type: "vendorExtensions"))
+    }
+
+    /// Sort the components within each type by the component key.
+    public mutating func sort() {
+        schemas.sortKeys()
+        responses.sortKeys()
+        parameters.sortKeys()
+        examples.sortKeys()
+        requestBodies.sortKeys()
+        headers.sortKeys()
+        securitySchemes.sortKeys()
+        links.sortKeys()
+        callbacks.sortKeys()
+        pathItems.sortKeys()
+    }
+}
+
+extension OpenAPI.Components {
     /// The extension name used to store a Components Object name (the key something is stored under
     /// within the Components Object). This is used by OpenAPIKit to store the previous Component name 
     /// of an OpenAPI Object that has been dereferenced (pulled out of the Components and stored inline
@@ -260,24 +311,82 @@ extension OpenAPI.Components {
     }
 }
 
-public extension OpenAPI.Components {
-    struct ValueCollision<T>: Swift.Error {
-        let value1: T
-        let value2: T
-    }
+extension OpenAPI.Components {
+    internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return
+        }
 
-    mutating func merge(_ components: OpenAPI.Components) throws {
-        try schemas.merge(components.schemas, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try responses.merge(components.responses, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try parameters.merge(components.parameters, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try examples.merge(components.examples, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try requestBodies.merge(components.requestBodies, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try headers.merge(components.headers, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try securitySchemes.merge(components.securitySchemes, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try links.merge(components.links, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try callbacks.merge(components.callbacks, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try pathItems.merge(components.pathItems, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
-        try vendorExtensions.merge(components.vendorExtensions, uniquingKeysWith: { (v1, v2) in throw OpenAPI.Components.ValueCollision(value1: v1, value2: v2) })
+        let oldSchemas = schemas
+        let oldResponses = responses
+        let oldParameters = parameters
+        let oldExamples = examples
+        let oldRequestBodies = requestBodies
+        let oldHeaders = headers
+        let oldSecuritySchemes = securitySchemes
+        let oldCallbacks = callbacks
+        let oldPathItems = pathItems
+
+        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: loader)
+        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: loader)
+        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: loader)
+        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: loader)
+        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: loader)
+        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: loader)
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: loader)
+        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: loader)
+
+        schemas = try await newSchemas
+        responses = try await newResponses
+        parameters = try await newParameters
+        examples = try await newExamples
+        requestBodies = try await newRequestBodies
+        headers = try await newHeaders
+        securitySchemes = try await newSecuritySchemes
+        callbacks = try await newCallbacks
+        pathItems = try await newPathItems
+
+        let c1Resolved = try await c1
+        let c2Resolved = try await c2
+        let c3Resolved = try await c3
+        let c4Resolved = try await c4
+        let c5Resolved = try await c5
+        let c6Resolved = try await c6
+        let c7Resolved = try await c7
+        let c8Resolved = try await c8
+        let c9Resolved = try await c9
+
+        let noNewComponents =
+            c1Resolved.isEmpty
+            && c2Resolved.isEmpty
+            && c3Resolved.isEmpty
+            && c4Resolved.isEmpty
+            && c5Resolved.isEmpty
+            && c6Resolved.isEmpty
+            && c7Resolved.isEmpty
+            && c8Resolved.isEmpty
+            && c9Resolved.isEmpty
+
+        if noNewComponents { return }
+
+        try merge(c1Resolved)
+        try merge(c2Resolved)
+        try merge(c3Resolved)
+        try merge(c4Resolved)
+        try merge(c5Resolved)
+        try merge(c6Resolved)
+        try merge(c7Resolved)
+        try merge(c8Resolved)
+        try merge(c9Resolved)
+        
+        switch depth {
+            case .iterations(let number):
+                try await externallyDereference(with: loader, depth: .iterations(number - 1))
+            case .full:
+                try await externallyDereference(with: loader, depth: .full)
+        }
     }
 }
 

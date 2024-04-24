@@ -84,7 +84,7 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
 }
 
 extension OpenAPI.Parameter: ExternallyDereferenceable {
-    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
 
         // if not for a Swift bug, this whole function would just be the
         // next line:

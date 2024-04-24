@@ -124,3 +124,43 @@ extension OpenAPI.Operation: LocallyDereferenceable {
         return try DereferencedOperation(self, resolvingIn: components, following: references)
     }
 }
+
+extension OpenAPI.Operation: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+        let oldParameters = parameters
+        let oldRequestBody = requestBody
+        let oldResponses = responses
+
+        async let (newParameters, c1) = oldParameters.externallyDereferenced(with: loader)
+        async let (newRequestBody, c2) = oldRequestBody.externallyDereferenced(with: loader)
+        async let (newResponses, c3) = oldResponses.externallyDereferenced(with: loader)
+        async let (newCallbacks, c4) = callbacks.externallyDereferenced(with: loader)
+//        let (newServers, c6) = try await servers.externallyDereferenced(with: loader)
+
+        var newOperation = self
+        var newComponents = try await c1
+
+        newOperation.parameters = try await newParameters
+        newOperation.requestBody = try await newRequestBody
+        try await newComponents.merge(c2)
+        newOperation.responses = try await newResponses
+        try await newComponents.merge(c3)
+        newOperation.callbacks = try await newCallbacks
+        try await newComponents.merge(c4)
+
+        if let oldServers = servers {
+            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
+            newOperation.servers = newServers
+            try newComponents.merge(c6)
+        }
+
+        // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
+        if let oldServers = servers {
+            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
+            newOperation.servers = newServers
+            try newComponents.merge(c6)
+        }
+
+        return (newOperation, newComponents)
+    }
+}

@@ -13,7 +13,7 @@ import OpenAPIKitCore
 public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     public let warnings: [OpenAPI.Warning]
-    public let value: Schema
+    public var value: Schema
 
     internal init(warnings: [OpenAPI.Warning], schema: Schema) {
         self.warnings = warnings
@@ -441,8 +441,8 @@ extension JSONSchema: VendorExtendable {
         get {
           coreContext.vendorExtensions
         }
-        set {
-          coreContext.vendorExtensions
+        set(extensions) {
+          self.value = value.with(vendorExtensions: extensions)
         }
     }
 

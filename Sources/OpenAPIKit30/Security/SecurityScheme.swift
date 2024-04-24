@@ -251,4 +251,10 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
     }
 }
 
+extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+        return (self, .init())
+    }
+}
+
 extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}

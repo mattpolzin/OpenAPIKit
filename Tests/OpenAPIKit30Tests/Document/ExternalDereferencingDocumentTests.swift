@@ -4,7 +4,7 @@
 
 import Foundation
 import Yams
-import OpenAPIKit
+import OpenAPIKit30
 import XCTest
 
 final class ExternalDereferencingDocumentTests: XCTestCase {
@@ -33,7 +33,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 return finished
             }
 
-            static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+            static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit30.OpenAPI.ComponentKey {
                 // do anything you want here to determine what key the new component should be stored at.
                 // for the example, we will just transform the URL into a valid components key:
                 let urlString = url.pathComponents.dropFirst()
@@ -43,7 +43,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
             }
 
             /// Mock up some data, just for the example. 
-            static func mockData(_ key: OpenAPIKit.OpenAPI.ComponentKey) async throws -> Data {
+            static func mockData(_ key: OpenAPIKit30.OpenAPI.ComponentKey) async throws -> Data {
                 return try XCTUnwrap(files[key.rawValue])
             }
 
@@ -158,7 +158,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 "callbacks_one_json": """
                 {
                     "https://callback.site.com/callback": {
-                        "$ref": "file://./paths/callback.json"
+                        "summary": "just a callback"
                     }
                 }
                 """,
@@ -217,9 +217,6 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                ),
                "/webhook": .reference(.external(URL(string: "file://./paths/webhook.json")!))
             ],
-           webhooks: [
-                "webhook": .reference(.external(URL(string: "file://./paths/webhook.json")!))
-           ],
            components: .init(
                schemas: [
                    "name_param": .reference(.external(URL(string: "file://./schemas/string_param.json")!))

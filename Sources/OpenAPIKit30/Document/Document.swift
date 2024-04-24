@@ -308,6 +308,17 @@ extension OpenAPI.Document {
     }
 }
 
+public enum ExternalDereferenceDepth {
+    case iterations(Int)
+    case full
+}
+
+extension ExternalDereferenceDepth: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .iterations(value)
+    }
+}
+
 extension OpenAPI.Document {
     /// Create a locally-dereferenced OpenAPI
     /// Document.
@@ -333,6 +344,22 @@ extension OpenAPI.Document {
     ///     component in the same file that cannot be found in the Components Object.
     public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(self)
+    }
+
+    public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return
+        }
+
+        let oldPaths = paths
+
+        async let (newPaths, c1) = oldPaths.externallyDereferenced(with: loader)
+
+        paths = try await newPaths
+        try await components.merge(c1)
+
+        try await components.externallyDereference(with: loader, depth: depth)
     }
 }
 

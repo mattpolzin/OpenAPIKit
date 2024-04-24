@@ -373,4 +373,20 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     }
 }
 
+// MARK: - ExternallyDereferenceable
+extension JSONReference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+        switch self {
+        case .internal(let ref):
+            return (.internal(ref), .init())
+        case .external(let url):
+            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
+            let component: ReferenceType = try await loader.load(url)
+            var components = OpenAPI.Components()
+            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
+            return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self), components)
+        }
+    }
+}
+
 extension JSONReference: Validatable where ReferenceType: Validatable {}
