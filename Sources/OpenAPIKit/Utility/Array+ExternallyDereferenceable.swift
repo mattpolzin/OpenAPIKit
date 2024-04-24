@@ -6,7 +6,7 @@ import OpenAPIKitCore
 
 extension Array where Element: ExternallyDereferenceable {
 
-    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) {
         try await withThrowingTaskGroup(of: (Int, (Element, OpenAPI.Components)).self) { group in
             for (idx, elem) in zip(self.indices, self) {
                 group.addTask {

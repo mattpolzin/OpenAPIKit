@@ -140,7 +140,7 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
 }
 
 extension OpenAPI.PathItem: ExternallyDereferenceable {
-    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
         let oldParameters = parameters
         let oldServers = servers
         let oldGet = get
