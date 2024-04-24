@@ -160,7 +160,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 "callbacks_one_json": """
                 {
                     "https://callback.site.com/callback": {
-                        "$ref": "file://./paths/callback.json"
+                        "summary": "just a callback"
                     }
                 }
                 """,
