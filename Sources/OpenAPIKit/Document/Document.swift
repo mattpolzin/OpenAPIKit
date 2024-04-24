@@ -362,6 +362,7 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
+    @discardableResult
     public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
         if case let .iterations(number) = depth,
            number <= 0 {
