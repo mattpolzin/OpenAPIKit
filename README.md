@@ -108,7 +108,7 @@ let encodedOpenAPIDoc = try encoder.encode(openAPIDoc)
 ### Validating OpenAPI Documents
 Thanks to Swift's type system, the vast majority of the OpenAPI Specification is represented by the types of OpenAPIKit -- you cannot create bad OpenAPI docuements in the first place and decoding a document will fail with generally useful errors.
 
-That being said, there are a small number of additional checks that you can perform to really put any concerns to bed.
+That being said, there are a small number of additional checks that you can perform to really put any concerns to rest.
 
 ```swift
 let openAPIDoc: OpenAPI.Document = ...
@@ -220,7 +220,7 @@ You can create an external reference with `JSONReference.external(URL)`. Interna
 
 You can check whether a given `JSONReference` exists in the Components Object with `document.components.contains()`. You can access a referenced object in the Components Object with `document.components[reference]`.
 
-You can create references from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
+References can be created from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
 
 You can use `document.components.lookup()` or the `Components` type's `subscript` to turn an `Either` containing either a reference or a component into an optional value of that component's type (having either pulled it out of the `Either` or looked it up in the Components Object). The `lookup()` method throws when it can't find an item whereas `subscript` returns `nil`.
 
@@ -284,7 +284,7 @@ let document = OpenAPI.Document(
 ```
 
 #### Specification Extensions
-Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
+Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
 
 You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
 
@@ -323,11 +323,51 @@ try encodeEqual(URL(string: "https://website.com"), AnyCodable(URL(string: "http
 ```
 
 ### Dereferencing & Resolving
+#### External References
+This is currently only available for OAS 3.1 documents (supported by the `OpenAPIKit` module (as opposed to the `OpenAPIKit30` moudle). External dereferencing does not resolve any local (internal) references, it just loads external references into the Document. It does this by storing any loaded externally referenced objects in the Components Object and transforming the reference being resolved from an external reference to an internal one. That way, you can always run internal dereferencing as a second step if you want a fully dereferenced document, but if you simply wanted to load additional referenced files then you can stop after external dereferencing.
+
+OpenAPIKit leaves it to you to decide how to load external files and where to store the results in the Components Object. It does this by requiring that you provide an implementation of the `ExternalLoader` protocol. You provide a `load` function and a `componentKey` function, both of which accept as input the `URL` to load. A simple mock example implementation from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader` can be set up:
+
+```swift
+struct ExampleLoader: ExternalLoader {
+    static func load<T>(_ url: URL) async throws -> T where T : Decodable {
+        // load data from file, perhaps. we will just mock that up for the test:
+        let data = try await mockData(componentKey(type: T.self, at: url))
+
+        // We use the YAML decoder mostly for order-stability in this case but it is
+        // also nice that it will handle both YAML and JSON data.
+        let decoded = try YAMLDecoder().decode(T.self, from: data)
+        let finished: T
+        // while unnecessary, a loader may likely want to attatch some extra info
+        // to keep track of where a reference was loaded from.
+        if var extendable = decoded as? VendorExtendable {
+            extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
+            finished = extendable as! T
+        } else {
+            finished = decoded 
+        }
+        return finished
+    }
+
+    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+        // do anything you want here to determine what key the new component should be stored at.
+        // for the example, we will just transform the URL path into a valid components key:
+        let urlString = url.pathComponents
+          .joined(separator: "_")
+          .replacingOccurrences(of: ".", with: "_")
+        return try .forceInit(rawValue: urlString)
+    }
+}
+```
+
+Once you have an `ExternalLoader`, you can call an `OpenAPI.Document`'s `externallyDereference()` method to externally dereference it. You get to choose whether to only load references to a certain depth or to fully resolve references until you run out of them; any given referenced document may itself contain references and these references may point back to things loaded into the Document previously so dereferencing is done recursively up to a given depth (or until fully dereferenced if you use the `.full` depth).
+
+#### Internal References
 In addition to looking something up in the `Components` object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
 
 You use a value's `dereferenced(in:)` method to fully dereference it.
 
-You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object.
+You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object. External dereferencing is done as a separeate step, but you can first dereference externally and then dereference internally if you'd like to perform both.
 
 Unlike what happens when you lookup an individual component using the `lookup()` method on `Components`, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
 

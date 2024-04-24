@@ -159,6 +159,30 @@ public struct OrderedDictionary<Key, Value>: HasWarnings where Key: Hashable {
         }
         return ret
     }
+
+    struct KeysDontMatch : Swift.Error {}
+
+    /// Given two ordered dictionaries with the exact same keys,
+    /// apply the ordering of one to the other. This will throw if
+    /// the dictionary keys are not the same.
+    public mutating func applyOrder(_ other: Self) throws {
+        guard other.orderedKeys.count == orderedKeys.count,
+              other.orderedKeys.allSatisfy({ orderedKeys.contains($0) }) else {
+            throw KeysDontMatch()
+        }
+
+        orderedKeys = other.orderedKeys
+    }
+
+    public mutating func sortKeys(by sort: (Key, Key) throws -> Bool) rethrows {
+        try orderedKeys.sort(by: sort)
+    }
+}
+
+extension OrderedDictionary where Key: Comparable {
+    public mutating func sortKeys() {
+        orderedKeys.sort()
+    }
 }
 
 // MARK: - Dictionary Literal

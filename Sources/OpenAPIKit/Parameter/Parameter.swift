@@ -21,6 +21,8 @@ extension OpenAPI {
         /// parameters in the given location.
         public var context: Context
         public var description: String?
+        /// Whether or not the parameter is deprecated. Defaults to false
+        /// if unspecified and only gets encoded if true.
         public var deprecated: Bool // default is false
 
         /// OpenAPI Spec "content" or "schema" properties.

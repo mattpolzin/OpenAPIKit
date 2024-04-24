@@ -78,18 +78,47 @@ extension OpenAPI.Components {
         public let newComponent: String
     }
 
+    private func detectCollision<T: Equatable>(type: String) throws -> (_ old: T, _ new: T) throws -> T {
+        return { old, new in
+            // theoretically we can detect collisions here, but we would need to compare
+            // for equality up-to but not including the difference between an external and
+            // internal reference which is not supported yet.
+//            if(old == new) { return old }
+//            throw ComponentCollision(componentType: type, existingComponent: String(describing:old), newComponent: String(describing:new))
+
+            // Given we aren't ensuring there are no collisions, the old version is going to be
+            // the one more likely to have been _further_ dereferenced than the new record, so
+            // we keep that version.
+            return old
+        }
+    }
+
     public mutating func merge(_ other: OpenAPI.Components) throws {
-        try schemas.merge(other.schemas, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "schema", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try responses.merge(other.responses, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "responses", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try parameters.merge(other.parameters, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "parameters", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try examples.merge(other.examples, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "examples", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try requestBodies.merge(other.requestBodies, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "requestBodies", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try headers.merge(other.headers, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "headers", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "securitySchemes", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try links.merge(other.links, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "links", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try callbacks.merge(other.callbacks, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "callbacks", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try pathItems.merge(other.pathItems, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "pathItems", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "vendorExtensions", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try schemas.merge(other.schemas, uniquingKeysWith: detectCollision(type: "schema"))
+        try responses.merge(other.responses, uniquingKeysWith: detectCollision(type: "responses"))
+        try parameters.merge(other.parameters, uniquingKeysWith: detectCollision(type: "parameters"))
+        try examples.merge(other.examples, uniquingKeysWith: detectCollision(type: "examples"))
+        try requestBodies.merge(other.requestBodies, uniquingKeysWith: detectCollision(type: "requestBodies"))
+        try headers.merge(other.headers, uniquingKeysWith: detectCollision(type: "headers"))
+        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: detectCollision(type: "securitySchemes"))
+        try links.merge(other.links, uniquingKeysWith: detectCollision(type: "links"))
+        try callbacks.merge(other.callbacks, uniquingKeysWith: detectCollision(type: "callbacks"))
+        try pathItems.merge(other.pathItems, uniquingKeysWith: detectCollision(type: "pathItems"))
+        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: detectCollision(type: "vendorExtensions"))
+    }
+
+    /// Sort the components within each type by the component key.
+    public mutating func sort() {
+        schemas.sortKeys()
+        responses.sortKeys()
+        parameters.sortKeys()
+        examples.sortKeys()
+        requestBodies.sortKeys()
+        headers.sortKeys()
+        securitySchemes.sortKeys()
+        links.sortKeys()
+        callbacks.sortKeys()
+        pathItems.sortKeys()
     }
 }
 
@@ -291,7 +320,12 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+    internal mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return
+        }
+
         let oldSchemas = schemas
         let oldResponses = responses
         let oldParameters = parameters
@@ -299,8 +333,8 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
-
         let oldCallbacks = callbacks
+        let oldPathItems = pathItems
 
         async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
         async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
@@ -309,15 +343,8 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
         async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
         async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
-
-//        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
-        var c8 = OpenAPI.Components()
-        var newCallbacks = oldCallbacks
-        for (key, callback) in oldCallbacks {
-            let (newCallback, components) = try await callback.externallyDereferenced(with: context)
-            newCallbacks[key] = newCallback
-            try c8.merge(components)
-        }
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
+        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: context)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -326,18 +353,48 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
+        callbacks = try await newCallbacks
+        pathItems = try await newPathItems
 
-        callbacks = newCallbacks
+        let c1Resolved = try await c1
+        let c2Resolved = try await c2
+        let c3Resolved = try await c3
+        let c4Resolved = try await c4
+        let c5Resolved = try await c5
+        let c6Resolved = try await c6
+        let c7Resolved = try await c7
+        let c8Resolved = try await c8
+        let c9Resolved = try await c9
 
-        try await merge(c1)
-        try await merge(c2)
-        try await merge(c3)
-        try await merge(c4)
-        try await merge(c5)
-        try await merge(c6)
-        try await merge(c7)
+        let noNewComponents =
+            c1Resolved.isEmpty
+            && c2Resolved.isEmpty
+            && c3Resolved.isEmpty
+            && c4Resolved.isEmpty
+            && c5Resolved.isEmpty
+            && c6Resolved.isEmpty
+            && c7Resolved.isEmpty
+            && c8Resolved.isEmpty
+            && c9Resolved.isEmpty
 
-        try merge(c8)
+        if noNewComponents { return }
+
+        try merge(c1Resolved)
+        try merge(c2Resolved)
+        try merge(c3Resolved)
+        try merge(c4Resolved)
+        try merge(c5Resolved)
+        try merge(c6Resolved)
+        try merge(c7Resolved)
+        try merge(c8Resolved)
+        try merge(c9Resolved)
+        
+        switch depth {
+            case .iterations(let number):
+                try await externallyDereference(in: context, depth: .iterations(number - 1))
+            case .full:
+                try await externallyDereference(in: context, depth: .full)
+        }
     }
 }
 

@@ -9,7 +9,7 @@ import OpenAPIKitCore
 
 extension OrderedDictionary where Value: ExternallyDereferenceable {
 
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) {
+    public func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) {
         try await withThrowingTaskGroup(of: (Key, Value, OpenAPI.Components).self) { group in
           for (key, value) in self {
               group.addTask {
@@ -25,6 +25,9 @@ extension OrderedDictionary where Value: ExternallyDereferenceable {
               newDict[key] = newRef
               try newComponents.merge(components)
           }
+          // things may come in out of order because of concurrency
+          // so we reorder after completing all entries.
+          try newDict.applyOrder(self)
           return (newDict, newComponents)
         }
     }
