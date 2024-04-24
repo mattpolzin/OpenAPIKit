@@ -283,7 +283,12 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Context: ExternalLoaderContext>(in context: Context.Type) async throws {
+    internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return
+        }
+
         let oldSchemas = schemas
         let oldResponses = responses
         let oldParameters = parameters
@@ -291,25 +296,18 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
-
         let oldCallbacks = callbacks
+        let oldPathItems = pathItems
 
-        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
-        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
-        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: context)
-        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: context)
-        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
-        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
-        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
-
-//        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
-        var c8 = OpenAPI.Components()
-        var newCallbacks = oldCallbacks
-        for (key, callback) in oldCallbacks {
-            let (newCallback, components) = try await callback.externallyDereferenced(with: context)
-            newCallbacks[key] = newCallback
-            try c8.merge(components)
-        }
+        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: loader)
+        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: loader)
+        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: loader)
+        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: loader)
+        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: loader)
+        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: loader)
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: loader)
+        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -318,18 +316,48 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
+        callbacks = try await newCallbacks
+        pathItems = try await newPathItems
 
-        callbacks = newCallbacks
+        let c1Resolved = try await c1
+        let c2Resolved = try await c2
+        let c3Resolved = try await c3
+        let c4Resolved = try await c4
+        let c5Resolved = try await c5
+        let c6Resolved = try await c6
+        let c7Resolved = try await c7
+        let c8Resolved = try await c8
+        let c9Resolved = try await c9
 
-        try await merge(c1)
-        try await merge(c2)
-        try await merge(c3)
-        try await merge(c4)
-        try await merge(c5)
-        try await merge(c6)
-        try await merge(c7)
+        let noNewComponents =
+            c1Resolved.isEmpty
+            && c2Resolved.isEmpty
+            && c3Resolved.isEmpty
+            && c4Resolved.isEmpty
+            && c5Resolved.isEmpty
+            && c6Resolved.isEmpty
+            && c7Resolved.isEmpty
+            && c8Resolved.isEmpty
+            && c9Resolved.isEmpty
 
-        try merge(c8)
+        if noNewComponents { return }
+
+        try merge(c1Resolved)
+        try merge(c2Resolved)
+        try merge(c3Resolved)
+        try merge(c4Resolved)
+        try merge(c5Resolved)
+        try merge(c6Resolved)
+        try merge(c7Resolved)
+        try merge(c8Resolved)
+        try merge(c9Resolved)
+        
+        switch depth {
+            case .iterations(let number):
+                try await externallyDereference(with: loader, depth: .iterations(number - 1))
+            case .full:
+                try await externallyDereference(with: loader, depth: .full)
+        }
     }
 }
 

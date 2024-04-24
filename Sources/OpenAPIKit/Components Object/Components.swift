@@ -320,7 +320,7 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Context: ExternalLoader>(in context: Context.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+    internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
         if case let .iterations(number) = depth,
            number <= 0 {
             return
@@ -336,15 +336,15 @@ extension OpenAPI.Components {
         let oldCallbacks = callbacks
         let oldPathItems = pathItems
 
-        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: context)
-        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: context)
-        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: context)
-        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: context)
-        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: context)
-        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: context)
-        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: context)
-        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: context)
-        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: context)
+        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: loader)
+        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: loader)
+        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: loader)
+        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: loader)
+        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: loader)
+        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: loader)
+        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: loader)
+        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -391,9 +391,9 @@ extension OpenAPI.Components {
         
         switch depth {
             case .iterations(let number):
-                try await externallyDereference(in: context, depth: .iterations(number - 1))
+                try await externallyDereference(with: loader, depth: .iterations(number - 1))
             case .full:
-                try await externallyDereference(in: context, depth: .full)
+                try await externallyDereference(with: loader, depth: .full)
         }
     }
 }

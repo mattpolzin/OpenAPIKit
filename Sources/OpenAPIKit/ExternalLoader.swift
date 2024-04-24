@@ -30,5 +30,5 @@ public protocol ExternalLoader {
 }
 
 public protocol ExternallyDereferenceable {
-    func externallyDereferenced<Context: ExternalLoader>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components)
+    func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components)
 }

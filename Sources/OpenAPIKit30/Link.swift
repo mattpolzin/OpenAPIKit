@@ -279,7 +279,7 @@ extension OpenAPI.Link: LocallyDereferenceable {
 }
 
 extension OpenAPI.Link: ExternallyDereferenceable {
-    public func externallyDereferenced<Context: ExternalLoaderContext>(with loader: Context.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
         let (newServer, newComponents) = try await server.externallyDereferenced(with: loader)
 
         var newLink = self
