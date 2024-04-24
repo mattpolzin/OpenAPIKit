@@ -233,17 +233,17 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         encoder.outputFormatting = .prettyPrinted
 
         var docCopy1 = document
-        try await docCopy1.externallyDereference(in: ExampleLoader.self)
-        try await docCopy1.externallyDereference(in: ExampleLoader.self)
-        try await docCopy1.externallyDereference(in: ExampleLoader.self)
+        try await docCopy1.externallyDereference(with: ExampleLoader.self)
+        try await docCopy1.externallyDereference(with: ExampleLoader.self)
+        try await docCopy1.externallyDereference(with: ExampleLoader.self)
         docCopy1.components.sort()
 
         var docCopy2 = document
-        try await docCopy2.externallyDereference(in: ExampleLoader.self, depth: 3)
+        try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 3)
         docCopy2.components.sort()
 
         var docCopy3 = document
-        try await docCopy3.externallyDereference(in: ExampleLoader.self, depth: .full)
+        try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
         docCopy3.components.sort()
 
         XCTAssertEqual(docCopy1, docCopy2)

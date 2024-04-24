@@ -339,6 +339,19 @@ extension JSONReferenceTests {
     struct ReferenceWrapper: Codable, Equatable {
         let reference: JSONReference<JSONSchema>
     }
+
+    struct SchemaLoader: ExternalLoader {
+        static func load<T>(_ url: URL) -> T where T: Decodable {
+            return JSONSchema.string as! T
+        }
+
+        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+            return try .forceInit(rawValue: url.absoluteString
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "#", with: "_")
+                .replacingOccurrences(of: ".", with: "_"))
+        }
+    }
 }
 
 // MARK: - External Dereferencing
@@ -368,25 +381,5 @@ extension JSONReferenceTests {
         
         XCTAssertEqual(newReference, .component(named: "__schema_json__components_schemas_test"))
         XCTAssertEqual(components, .init(schemas: ["__schema_json__components_schemas_test": .string]))
-    }
-}
-
-// MARK: - Test Types
-extension JSONReferenceTests {
-    struct ReferenceWrapper: Codable, Equatable {
-        let reference: JSONReference<JSONSchema>
-    }
-
-    struct SchemaLoader: ExternalLoader {
-        static func load<T>(_ url: URL) -> T where T: Decodable {
-            return JSONSchema.string as! T
-        }
-
-        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
-            return try .forceInit(rawValue: url.absoluteString
-                .replacingOccurrences(of: "/", with: "_")
-                .replacingOccurrences(of: "#", with: "_")
-                .replacingOccurrences(of: ".", with: "_"))
-        }
     }
 }

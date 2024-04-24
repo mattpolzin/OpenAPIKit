@@ -78,18 +78,47 @@ extension OpenAPI.Components {
         public let newComponent: String
     }
 
+    private func detectCollision<T: Equatable>(type: String) throws -> (_ old: T, _ new: T) throws -> T {
+        return { old, new in
+            // theoretically we can detect collisions here, but we would need to compare
+            // for equality up-to but not including the difference between an external and
+            // internal reference which is not supported yet.
+//            if(old == new) { return old }
+//            throw ComponentCollision(componentType: type, existingComponent: String(describing:old), newComponent: String(describing:new))
+
+            // Given we aren't ensuring there are no collisions, the old version is going to be
+            // the one more likely to have been _further_ dereferenced than the new record, so
+            // we keep that version.
+            return old
+        }
+    }
+
     public mutating func merge(_ other: OpenAPI.Components) throws {
-        try schemas.merge(other.schemas, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "schema", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try responses.merge(other.responses, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "responses", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try parameters.merge(other.parameters, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "parameters", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try examples.merge(other.examples, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "examples", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try requestBodies.merge(other.requestBodies, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "requestBodies", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try headers.merge(other.headers, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "headers", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "securitySchemes", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try links.merge(other.links, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "links", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try callbacks.merge(other.callbacks, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "callbacks", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try pathItems.merge(other.pathItems, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "pathItems", existingComponent: String(describing: a), newComponent: String(describing: b)) })
-        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: { a, b in throw ComponentCollision(componentType: "vendorExtensions", existingComponent: String(describing: a), newComponent: String(describing: b)) })
+        try schemas.merge(other.schemas, uniquingKeysWith: detectCollision(type: "schema"))
+        try responses.merge(other.responses, uniquingKeysWith: detectCollision(type: "responses"))
+        try parameters.merge(other.parameters, uniquingKeysWith: detectCollision(type: "parameters"))
+        try examples.merge(other.examples, uniquingKeysWith: detectCollision(type: "examples"))
+        try requestBodies.merge(other.requestBodies, uniquingKeysWith: detectCollision(type: "requestBodies"))
+        try headers.merge(other.headers, uniquingKeysWith: detectCollision(type: "headers"))
+        try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: detectCollision(type: "securitySchemes"))
+        try links.merge(other.links, uniquingKeysWith: detectCollision(type: "links"))
+        try callbacks.merge(other.callbacks, uniquingKeysWith: detectCollision(type: "callbacks"))
+        try pathItems.merge(other.pathItems, uniquingKeysWith: detectCollision(type: "pathItems"))
+        try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: detectCollision(type: "vendorExtensions"))
+    }
+
+    /// Sort the components within each type by the component key.
+    public mutating func sort() {
+        schemas.sortKeys()
+        responses.sortKeys()
+        parameters.sortKeys()
+        examples.sortKeys()
+        requestBodies.sortKeys()
+        headers.sortKeys()
+        securitySchemes.sortKeys()
+        links.sortKeys()
+        callbacks.sortKeys()
+        pathItems.sortKeys()
     }
 }
 
