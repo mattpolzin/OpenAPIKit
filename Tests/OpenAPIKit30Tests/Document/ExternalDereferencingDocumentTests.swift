@@ -14,7 +14,9 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
         struct ExampleLoader: ExternalLoader {
-            static func load<T>(_ url: URL) async throws -> T where T : Decodable {
+            typealias Message = Void
+
+            static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the test:
                 let data = try await mockData(componentKey(type: T.self, at: url))
 
@@ -30,7 +32,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 } else {
                     finished = decoded 
                 }
-                return finished
+                return (finished, [])
             }
 
             static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit30.OpenAPI.ComponentKey {
