@@ -130,12 +130,14 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         let oldParameters = parameters
         let oldRequestBody = requestBody
         let oldResponses = responses
+        let oldCallbacks = callbacks
+        let oldServers = servers
 
         async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
         async let (newRequestBody, c2, m2) = oldRequestBody.externallyDereferenced(with: loader)
         async let (newResponses, c3, m3) = oldResponses.externallyDereferenced(with: loader)
-        async let (newCallbacks, c4, m4) = callbacks.externallyDereferenced(with: loader)
-//        let (newServers, c5, m5) = try await servers.externallyDereferenced(with: loader)
+        async let (newCallbacks, c4, m4) = oldCallbacks.externallyDereferenced(with: loader)
+//        let (newServers, c5, m5) = try await oldServers.externallyDereferenced(with: loader)
 
         var newOperation = self
         var newComponents = try await c1
@@ -153,7 +155,7 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         try await newMessages += m4
 
         // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
-        if let oldServers = servers {
+        if let oldServers {
             let (newServers, c5, m5) = try await oldServers.externallyDereferenced(with: loader)
             newOperation.servers = newServers
             try newComponents.merge(c5)

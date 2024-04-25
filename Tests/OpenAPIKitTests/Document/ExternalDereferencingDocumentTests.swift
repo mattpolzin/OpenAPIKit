@@ -14,7 +14,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
         struct ExampleLoader: ExternalLoader {
-            typealias Message = Void
+            typealias Message = String
 
             static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the test:
@@ -32,7 +32,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 } else {
                     finished = decoded 
                 }
-                return (finished, [])
+                return (finished, [url.absoluteString])
             }
 
             static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
@@ -245,10 +245,31 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         docCopy2.components.sort()
 
         var docCopy3 = document
-        try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
+        let messages = try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
         docCopy3.components.sort()
 
         XCTAssertEqual(docCopy1, docCopy2)
         XCTAssertEqual(docCopy2, docCopy3)
+
+        XCTAssertEqual(
+            messages.sorted(),
+            ["file://./callbacks/one.json",
+						 "file://./examples/good.json",
+						 "file://./headers/webhook.json",
+						 "file://./headers/webhook.json",
+						 "file://./links/first.json",
+						 "file://./params/name.json",
+						 "file://./params/name.json",
+						 "file://./paths/callback.json",
+						 "file://./paths/webhook.json",
+						 "file://./paths/webhook.json",
+						 "file://./requests/webhook.json",
+						 "file://./responses/webhook.json",
+						 "file://./schemas/basic_object.json",
+						 "file://./schemas/string_param.json",
+						 "file://./schemas/string_param.json",
+						 "file://./schemas/string_param.json",
+						 "file://./schemas/string_param.json#"]
+        )
     }
 }
