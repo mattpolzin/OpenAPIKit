@@ -333,6 +333,7 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
+        let oldLinks = links
         let oldCallbacks = callbacks
         let oldPathItems = pathItems
 
@@ -343,8 +344,9 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
         async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
         async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
-        async let (newCallbacks, c8, m8) = oldCallbacks.externallyDereferenced(with: loader)
-        async let (newPathItems, c9, m9) = oldPathItems.externallyDereferenced(with: loader)
+        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
+        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
+        async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -353,6 +355,7 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
+        links = try await newLinks
         callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
@@ -365,6 +368,7 @@ extension OpenAPI.Components {
         let c7Resolved = try await c7
         let c8Resolved = try await c8
         let c9Resolved = try await c9
+        let c10Resolved = try await c10
 
         let noNewComponents =
             c1Resolved.isEmpty
@@ -376,8 +380,9 @@ extension OpenAPI.Components {
             && c7Resolved.isEmpty
             && c8Resolved.isEmpty
             && c9Resolved.isEmpty
+            && c10Resolved.isEmpty
 
-        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9
+        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10
 
         if noNewComponents { return newMessages }
 
@@ -390,7 +395,8 @@ extension OpenAPI.Components {
         try merge(c7Resolved)
         try merge(c8Resolved)
         try merge(c9Resolved)
-        
+        try merge(c10Resolved)
+
         switch depth {
             case .iterations(let number):
                 return try await externallyDereference(with: loader, depth: .iterations(number - 1), context: newMessages)
