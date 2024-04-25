@@ -330,23 +330,25 @@ OpenAPIKit leaves it to you to decide how to load external files and where to st
 
 ```swift
 struct ExampleLoader: ExternalLoader {
-    static func load<T>(_ url: URL) async throws -> T where T : Decodable {
+    typealias Message = Void
+
+    static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
         // load data from file, perhaps. we will just mock that up for the test:
         let data = try await mockData(componentKey(type: T.self, at: url))
 
-        // We use the YAML decoder mostly for order-stability in this case but it is
-        // also nice that it will handle both YAML and JSON data.
+        // We use the YAML decoder purely for order-stability.
         let decoded = try YAMLDecoder().decode(T.self, from: data)
         let finished: T
         // while unnecessary, a loader may likely want to attatch some extra info
-        // to keep track of where a reference was loaded from.
+        // to keep track of where a reference was loaded from. This test makes sure
+        // the following strategy of using vendor extensions works.
         if var extendable = decoded as? VendorExtendable {
             extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
             finished = extendable as! T
         } else {
             finished = decoded 
         }
-        return finished
+        return (finished, [])
     }
 
     static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
@@ -361,6 +363,8 @@ struct ExampleLoader: ExternalLoader {
 ```
 
 Once you have an `ExternalLoader`, you can call an `OpenAPI.Document`'s `externallyDereference()` method to externally dereference it. You get to choose whether to only load references to a certain depth or to fully resolve references until you run out of them; any given referenced document may itself contain references and these references may point back to things loaded into the Document previously so dereferencing is done recursively up to a given depth (or until fully dereferenced if you use the `.full` depth).
+
+If you have some information that you want to pass back to yourself from the `load()` function, you can specify any type you want as the `Message` type and return any number of messages from each `load()` function execution. These messages could be warnings, additional information about the files that each newly loaded Component came from, etc. If you want to tie some information about file loading to new Components in your messages, you can use the `componentKey()` function to get the key the new Component will be found under once external dereferencing is complete.
 
 #### Internal References
 In addition to looking something up in the `Components` object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
