@@ -77,28 +77,31 @@ extension OpenAPI.Content: LocallyDereferenceable {
 }
 
 extension OpenAPI.Content: ExternallyDereferenceable {
-    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
-      let oldSchema = schema
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        let oldSchema = schema
 
-      async let (newSchema, c1) = oldSchema.externallyDereferenced(with: loader)
+        async let (newSchema, c1, m1) = oldSchema.externallyDereferenced(with: loader)
 
-      var newContent = self
-      var newComponents = try await c1
+        var newContent = self
+        var newComponents = try await c1
+        var newMessages = try await m1
 
-      newContent.schema = try await newSchema
+        newContent.schema = try await newSchema
 
         if let oldExamples = examples {
-            let (newExamples, c2) = try await oldExamples.externallyDereferenced(with: loader)
+            let (newExamples, c2, m2) = try await oldExamples.externallyDereferenced(with: loader)
             newContent.examples = newExamples
             try newComponents.merge(c2)
+            newMessages += m2
         }
 
         if let oldEncoding = encoding {
-            let (newEncoding, c3) = try await oldEncoding.externallyDereferenced(with: loader)
+            let (newEncoding, c3, m3) = try await oldEncoding.externallyDereferenced(with: loader)
             newContent.encoding = newEncoding
             try newComponents.merge(c3)
+            newMessages += m3
         }
 
-        return (newContent, newComponents)
+        return (newContent, newComponents, newMessages)
     }
 }
