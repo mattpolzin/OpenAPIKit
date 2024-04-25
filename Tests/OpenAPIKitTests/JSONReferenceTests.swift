@@ -17,6 +17,8 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t1, t2)
         XCTAssertTrue(t1.isInternal)
         XCTAssertFalse(t1.isExternal)
+        XCTAssertEqual(t1.internalValue, .init(rawValue: "/hello"))
+        XCTAssertNil(t1.externalValue)
 
         let t3 = JSONReference<JSONSchema>.component(named: "hello")
         let t4 = JSONReference<JSONSchema>.internal(.component(name: "hello"))
@@ -27,6 +29,8 @@ final class JSONReferenceTests: XCTestCase {
         let externalTest = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
         XCTAssertFalse(externalTest.isInternal)
         XCTAssertTrue(externalTest.isExternal)
+        XCTAssertNil(externalTest.internalValue)
+        XCTAssertEqual(externalTest.externalValue, URL(string: "hello.json"))
 
         let t5 = JSONReference<JSONSchema>.InternalReference("#/hello/world")
         let t6 = JSONReference<JSONSchema>.InternalReference(rawValue: "#/hello/world")
@@ -169,6 +173,10 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t7.openAPIReference(withDescription: "hi").description, "hi")
         XCTAssertEqual(t8.openAPIReference(withDescription: "hi").description, "hi")
         XCTAssertEqual(t9.openAPIReference(withDescription: "hi").description, "hi")
+
+        // test dynamic member lookup:
+        XCTAssertEqual(t1.openAPIReference().internalValue, .component(name: "hello"))
+
     }
 }
 

@@ -113,6 +113,9 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                                             "$ref": "file://./headers/webhook.json"
                                         }
                                     }
+                                },
+                                "enc2": {
+                                    "style": "form"
                                 }
                             }
                         }
@@ -140,7 +143,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     },
                     "headers": {
                         "X-Hello": {
-                            "$ref": "file://./headers/webhook.json"
+                            "$ref": "file://./headers/webhook2.json"
                         }
                     }
                 }
@@ -149,6 +152,17 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 {
                     "schema": {
                         "$ref": "file://./schemas/string_param.json"
+                    }
+                }
+                """,
+                "headers_webhook2_json": """
+                {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "file://./schemas/string_param.json"
+                            }
+                        }
                     }
                 }
                 """,
