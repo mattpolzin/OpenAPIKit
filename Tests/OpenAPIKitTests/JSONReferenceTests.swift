@@ -17,7 +17,7 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t1, t2)
         XCTAssertTrue(t1.isInternal)
         XCTAssertFalse(t1.isExternal)
-        XCTAssertEqual(t1.internalValue, .init(rawValue: "/hello"))
+        XCTAssertEqual(t1.internalValue, .init(rawValue: "#/hello"))
         XCTAssertNil(t1.externalValue)
 
         let t3 = JSONReference<JSONSchema>.component(named: "hello")
