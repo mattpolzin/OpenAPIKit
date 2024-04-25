@@ -252,10 +252,11 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
+        try await docCopy1.externallyDereference(with: ExampleLoader.self)
         docCopy1.components.sort()
 
         var docCopy2 = document
-        try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 3)
+        try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 4)
         docCopy2.components.sort()
 
         var docCopy3 = document
@@ -268,22 +269,22 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         XCTAssertEqual(
             messages.sorted(),
             ["file://./callbacks/one.json",
-						 "file://./examples/good.json",
-						 "file://./headers/webhook.json",
-						 "file://./headers/webhook.json",
-						 "file://./links/first.json",
-						 "file://./params/name.json",
-						 "file://./params/name.json",
-						 "file://./paths/callback.json",
-						 "file://./paths/webhook.json",
-						 "file://./paths/webhook.json",
-						 "file://./requests/webhook.json",
-						 "file://./responses/webhook.json",
-						 "file://./schemas/basic_object.json",
-						 "file://./schemas/string_param.json",
-						 "file://./schemas/string_param.json",
-						 "file://./schemas/string_param.json",
-						 "file://./schemas/string_param.json#"]
+             "file://./examples/good.json",
+             "file://./headers/webhook.json",
+             "file://./headers/webhook.json",
+             "file://./links/first.json",
+             "file://./params/name.json",
+             "file://./params/name.json",
+             "file://./paths/callback.json",
+             "file://./paths/webhook.json",
+             "file://./paths/webhook.json",
+             "file://./requests/webhook.json",
+             "file://./responses/webhook.json",
+             "file://./schemas/basic_object.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json#"]
         )
     }
 }
