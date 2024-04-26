@@ -6,17 +6,19 @@
 
 A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) and [OpenAPI 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) Documents and their components.
 
-The single most confusing thing you will grapple with out of the gate is explained by the following grid of what OpenAPIKit versions support which OpenAPI specification versions.
+OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specificaiton does not. The following chart shows which OpenAPI specification versions and key features are supported by which OpenAPIKit versions.
 
-| OpenAPIKit  | OpenAPI v3.0  | OpenAPI v3.1 |
-|-------------|---------------|--------------|
-| v2.x        | ✅            | ❌           |
-| v3.x        | ✅            | ✅           |
+| OpenAPIKit | Swift | OpenAPI v3.0 | OpenAPI v3.1 | External Dereferencing |
+|------------|-------|--------------|--------------|------------------------|
+| v2.x       | 5.1+  | ✅           | ❌           | ❌                     |
+| v3.x       | 5.1+  | ✅           | ✅           | ❌                     |
+| v4.x       | 5.8+  | ✅           | ✅           | ✅                     |
 
 - [Usage](#usage)
   - [Migration](#migration)
     - [1.x to 2.x](#1.x-to-2.x)
     - [2.x to 3.x](#2.x-to-3.x)
+    - [3.x to 4.x](#3.x-to-4.x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
@@ -72,6 +74,9 @@ import OpenAPIKit
 ```
 
 It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-30x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
+
+#### 3.x to 4.x
+This section has not been written yet. Stay tuned!
 
 ### Decoding OpenAPI Documents
 
