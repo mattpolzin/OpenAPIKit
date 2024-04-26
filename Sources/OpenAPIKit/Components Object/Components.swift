@@ -333,7 +333,7 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
-//        let oldLinks = links
+        let oldLinks = links
         let oldCallbacks = callbacks
         let oldPathItems = pathItems
 
@@ -344,7 +344,7 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
         async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
         async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
-//        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
+        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
         async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
         async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
 
@@ -355,7 +355,7 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-//        links = try await newLinks
+        links = try await newLinks
         callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
@@ -366,7 +366,7 @@ extension OpenAPI.Components {
         let c5Resolved = try await c5
         let c6Resolved = try await c6
         let c7Resolved = try await c7
-//        let c8Resolved = try await c8
+        let c8Resolved = try await c8
         let c9Resolved = try await c9
         let c10Resolved = try await c10
 
