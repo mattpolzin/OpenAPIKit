@@ -326,6 +326,10 @@ extension OpenAPI.Components {
             return context
         }
 
+        // NOTE: The links and callbacks related code commented out below pushes Swift 5.8 and 5.9
+        //       over the edge and you get exit code 137 crashes in CI.
+        //       Swift 5.10 handles it fine.
+
         let oldSchemas = schemas
         let oldResponses = responses
         let oldParameters = parameters
@@ -344,8 +348,8 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
         async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
         async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
-        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
-        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
+//        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
+//        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
         async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
@@ -355,8 +359,8 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-        links = try await newLinks
-        callbacks = try await newCallbacks
+//        links = try await newLinks
+//        callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
         let c1Resolved = try await c1
@@ -366,9 +370,18 @@ extension OpenAPI.Components {
         let c5Resolved = try await c5
         let c6Resolved = try await c6
         let c7Resolved = try await c7
-        let c8Resolved = try await c8
-        let c9Resolved = try await c9
+//        let c8Resolved = try await c8
+//        let c9Resolved = try await c9
         let c10Resolved = try await c10
+
+        // For Swift 5.10+ we can delete the following links and callbacks code and uncomment the
+        // preferred code above.
+        let (newLinks, c8, m8) = try await oldLinks.externallyDereferenced(with: loader)
+        links = newLinks
+        let c8Resolved = c8
+        let (newCallbacks, c9, m9) = try await oldCallbacks.externallyDereferenced(with: loader)
+        callbacks = newCallbacks
+        let c9Resolved = c9
 
         let noNewComponents =
             c1Resolved.isEmpty
@@ -378,11 +391,11 @@ extension OpenAPI.Components {
             && c5Resolved.isEmpty
             && c6Resolved.isEmpty
             && c7Resolved.isEmpty
-//            && c8Resolved.isEmpty
+            && c8Resolved.isEmpty
             && c9Resolved.isEmpty
             && c10Resolved.isEmpty
 
-        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m9 + m10 // + m8
+        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 
 
         if noNewComponents { return newMessages }
 
@@ -393,7 +406,7 @@ extension OpenAPI.Components {
         try merge(c5Resolved)
         try merge(c6Resolved)
         try merge(c7Resolved)
-//        try merge(c8Resolved)
+        try merge(c8Resolved)
         try merge(c9Resolved)
         try merge(c10Resolved)
 
