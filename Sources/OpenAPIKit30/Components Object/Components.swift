@@ -312,11 +312,15 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
-    internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+    internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
         if case let .iterations(number) = depth,
            number <= 0 {
-            return
+            return context
         }
+
+        // NOTE: The links and callbacks related code commented out below pushes Swift 5.8 and 5.9
+        //       over the edge and you get exit code 137 crashes in CI.
+        //       Swift 5.10 handles it fine.
 
         let oldSchemas = schemas
         let oldResponses = responses
@@ -325,18 +329,20 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
+        let oldLinks = links
         let oldCallbacks = callbacks
         let oldPathItems = pathItems
 
-        async let (newSchemas, c1) = oldSchemas.externallyDereferenced(with: loader)
-        async let (newResponses, c2) = oldResponses.externallyDereferenced(with: loader)
-        async let (newParameters, c3) = oldParameters.externallyDereferenced(with: loader)
-        async let (newExamples, c4) = oldExamples.externallyDereferenced(with: loader)
-        async let (newRequestBodies, c5) = oldRequestBodies.externallyDereferenced(with: loader)
-        async let (newHeaders, c6) = oldHeaders.externallyDereferenced(with: loader)
-        async let (newSecuritySchemes, c7) = oldSecuritySchemes.externallyDereferenced(with: loader)
-        async let (newCallbacks, c8) = oldCallbacks.externallyDereferenced(with: loader)
-        async let (newPathItems, c9) = oldPathItems.externallyDereferenced(with: loader)
+        async let (newSchemas, c1, m1) = oldSchemas.externallyDereferenced(with: loader)
+        async let (newResponses, c2, m2) = oldResponses.externallyDereferenced(with: loader)
+        async let (newParameters, c3, m3) = oldParameters.externallyDereferenced(with: loader)
+        async let (newExamples, c4, m4) = oldExamples.externallyDereferenced(with: loader)
+        async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
+        async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
+//        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
+//        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
+        async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -345,7 +351,8 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-        callbacks = try await newCallbacks
+//        links = try await newLinks
+//        callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
         let c1Resolved = try await c1
@@ -355,8 +362,18 @@ extension OpenAPI.Components {
         let c5Resolved = try await c5
         let c6Resolved = try await c6
         let c7Resolved = try await c7
-        let c8Resolved = try await c8
-        let c9Resolved = try await c9
+//        let c8Resolved = try await c8
+//        let c9Resolved = try await c9
+        let c10Resolved = try await c10
+
+        // For Swift 5.10+ we can delete the following links and callbacks code and uncomment the
+        // preferred code above.
+        let (newLinks, c8, m8) = try await oldLinks.externallyDereferenced(with: loader)
+        links = newLinks
+        let c8Resolved = c8
+        let (newCallbacks, c9, m9) = try await oldCallbacks.externallyDereferenced(with: loader)
+        callbacks = newCallbacks
+        let c9Resolved = c9
 
         let noNewComponents =
             c1Resolved.isEmpty
@@ -368,8 +385,11 @@ extension OpenAPI.Components {
             && c7Resolved.isEmpty
             && c8Resolved.isEmpty
             && c9Resolved.isEmpty
+            && c10Resolved.isEmpty
 
-        if noNewComponents { return }
+        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10
+
+        if noNewComponents { return newMessages }
 
         try merge(c1Resolved)
         try merge(c2Resolved)
@@ -380,12 +400,13 @@ extension OpenAPI.Components {
         try merge(c7Resolved)
         try merge(c8Resolved)
         try merge(c9Resolved)
-        
+        try merge(c10Resolved)
+
         switch depth {
             case .iterations(let number):
-                try await externallyDereference(with: loader, depth: .iterations(number - 1))
+                return try await externallyDereference(with: loader, depth: .iterations(number - 1), context: newMessages)
             case .full:
-                try await externallyDereference(with: loader, depth: .full)
+                return try await externallyDereference(with: loader, depth: .full, context: newMessages)
         }
     }
 }

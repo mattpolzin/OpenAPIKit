@@ -71,22 +71,24 @@ extension OpenAPI.Parameter.SchemaContext: LocallyDereferenceable {
 }
 
 extension OpenAPI.Parameter.SchemaContext: ExternallyDereferenceable {
-    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let oldSchema = schema
 
-        async let (newSchema, c1) = oldSchema.externallyDereferenced(with: loader)
+        async let (newSchema, c1, m1) = oldSchema.externallyDereferenced(with: loader)
 
         var newSchemaContext = self
         var newComponents = try await c1
+        var newMessages = try await m1
 
         newSchemaContext.schema = try await newSchema
 
         if let oldExamples = examples {
-            let (newExamples, c2) = try await oldExamples.externallyDereferenced(with: loader)
+            let (newExamples, c2, m2) = try await oldExamples.externallyDereferenced(with: loader)
             newSchemaContext.examples = newExamples
             try newComponents.merge(c2)
+            newMessages += m2
         }
 
-        return (newSchemaContext, newComponents)
+        return (newSchemaContext, newComponents, newMessages)
     }
 }

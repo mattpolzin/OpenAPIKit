@@ -14,7 +14,9 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         /// An example of implementing a loader context for loading external references
         /// into an OpenAPI document.
         struct ExampleLoader: ExternalLoader {
-            static func load<T>(_ url: URL) async throws -> T where T : Decodable {
+            typealias Message = String
+
+            static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the test:
                 let data = try await mockData(componentKey(type: T.self, at: url))
 
@@ -30,7 +32,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 } else {
                     finished = decoded 
                 }
-                return finished
+                return (finished, [url.absoluteString])
             }
 
             static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
@@ -111,6 +113,9 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                                             "$ref": "file://./headers/webhook.json"
                                         }
                                     }
+                                },
+                                "enc2": {
+                                    "style": "form"
                                 }
                             }
                         }
@@ -138,7 +143,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     },
                     "headers": {
                         "X-Hello": {
-                            "$ref": "file://./headers/webhook.json"
+                            "$ref": "file://./headers/webhook2.json"
                         }
                     }
                 }
@@ -147,6 +152,17 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 {
                     "schema": {
                         "$ref": "file://./schemas/string_param.json"
+                    }
+                }
+                """,
+                "headers_webhook2_json": """
+                {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "file://./schemas/string_param.json"
+                            }
+                        }
                     }
                 }
                 """,
@@ -236,17 +252,40 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
+        try await docCopy1.externallyDereference(with: ExampleLoader.self)
         docCopy1.components.sort()
 
         var docCopy2 = document
-        try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 3)
+        try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 4)
         docCopy2.components.sort()
 
         var docCopy3 = document
-        try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
+        let messages = try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
         docCopy3.components.sort()
 
         XCTAssertEqual(docCopy1, docCopy2)
         XCTAssertEqual(docCopy2, docCopy3)
+
+        XCTAssertEqual(
+            messages.sorted(),
+            ["file://./callbacks/one.json",
+             "file://./examples/good.json",
+             "file://./headers/webhook.json",
+             "file://./headers/webhook2.json",
+             "file://./links/first.json",
+             "file://./params/name.json",
+             "file://./params/name.json",
+             "file://./paths/callback.json",
+             "file://./paths/webhook.json",
+             "file://./paths/webhook.json",
+             "file://./requests/webhook.json",
+             "file://./responses/webhook.json",
+             "file://./schemas/basic_object.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json#"]
+        )
     }
 }

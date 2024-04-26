@@ -78,28 +78,31 @@ extension OpenAPI.Response: LocallyDereferenceable {
 }
 
 extension OpenAPI.Response: ExternallyDereferenceable {
-    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         let oldContent = content
         let oldLinks = links
         let oldHeaders = headers
 
-        async let (newContent, c1) = oldContent.externallyDereferenced(with: loader)
-        async let (newLinks, c2) = oldLinks.externallyDereferenced(with: loader)
-//        async let (newHeaders, c3) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newContent, c1, m1) = oldContent.externallyDereferenced(with: loader)
+        async let (newLinks, c2, m2) = oldLinks.externallyDereferenced(with: loader)
+//        async let (newHeaders, c3, m3) = oldHeaders.externallyDereferenced(with: loader)
 
         var response = self
+        var messages = try await m1
         response.content = try await newContent
         response.links = try await newLinks
 
         var components = try await c1
         try await components.merge(c2)
+        try await messages += m2
 
         if let oldHeaders {
-            let (newHeaders, c3) = try await oldHeaders.externallyDereferenced(with: loader)
+            let (newHeaders, c3, m3) = try await oldHeaders.externallyDereferenced(with: loader)
             response.headers = newHeaders
             try components.merge(c3)
+            messages += m3
         }
 
-        return (response, components)
+        return (response, components, messages)
     }
 }

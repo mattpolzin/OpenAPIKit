@@ -362,24 +362,44 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
-    public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1)) async throws {
+    /// Load all remote references into the document. A remote reference is one
+    /// that points to another file rather than a location within the
+    /// same file.
+    ///
+    /// This function will load remote references into the Components object
+    /// and replace the remote reference with a local reference to that component.
+    /// No local references are modified or resolved by this function. You can
+    /// call `locallyDereferenced()` on the externally dereferenced document if
+    /// you want to also remove local references by inlining all of them.
+    ///
+    /// Externally dereferencing a document requires that you provide both a
+    /// function that produces a `OpenAPI.ComponentKey` for any given remote
+    /// file URI and also a function that loads and decodes the data found in
+    /// that remote file. The latter is less work than it may sound like because
+    /// the function is told what Decodable thing it wants, so you really just
+    /// need to decide what decoder to use and provide the file data to that
+    /// decoder. See `ExternalLoader` documentation for details.
+    @discardableResult
+    public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
         if case let .iterations(number) = depth,
            number <= 0 {
-            return
+            return context
         }
 
         let oldPaths = paths
         let oldWebhooks = webhooks
 
-        async let (newPaths, c1) = oldPaths.externallyDereferenced(with: loader)
-        async let (newWebhooks, c2) = oldWebhooks.externallyDereferenced(with: loader) 
+        async let (newPaths, c1, m1) = oldPaths.externallyDereferenced(with: loader)
+        async let (newWebhooks, c2, m2) = oldWebhooks.externallyDereferenced(with: loader) 
 
         paths = try await newPaths
         webhooks = try await newWebhooks
         try await components.merge(c1)
         try await components.merge(c2)
 
-        try await components.externallyDereference(with: loader, depth: depth)
+        let m3 = try await components.externallyDereference(with: loader, depth: depth, context: context)
+
+        return try await context + m1 + m2 + m3
     }
 }
 

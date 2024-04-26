@@ -126,41 +126,42 @@ extension OpenAPI.Operation: LocallyDereferenceable {
 }
 
 extension OpenAPI.Operation: ExternallyDereferenceable {
-    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components) { 
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let oldParameters = parameters
         let oldRequestBody = requestBody
         let oldResponses = responses
+        let oldCallbacks = callbacks
+        let oldServers = servers
 
-        async let (newParameters, c1) = oldParameters.externallyDereferenced(with: loader)
-        async let (newRequestBody, c2) = oldRequestBody.externallyDereferenced(with: loader)
-        async let (newResponses, c3) = oldResponses.externallyDereferenced(with: loader)
-        async let (newCallbacks, c4) = callbacks.externallyDereferenced(with: loader)
-//        let (newServers, c6) = try await servers.externallyDereferenced(with: loader)
+        async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
+        async let (newRequestBody, c2, m2) = oldRequestBody.externallyDereferenced(with: loader)
+        async let (newResponses, c3, m3) = oldResponses.externallyDereferenced(with: loader)
+        async let (newCallbacks, c4, m4) = oldCallbacks.externallyDereferenced(with: loader)
+//        let (newServers, c5, m5) = try await oldServers.externallyDereferenced(with: loader)
 
         var newOperation = self
         var newComponents = try await c1
+        var newMessages = try await m1
 
         newOperation.parameters = try await newParameters
         newOperation.requestBody = try await newRequestBody
         try await newComponents.merge(c2)
+        try await newMessages += m2
         newOperation.responses = try await newResponses
         try await newComponents.merge(c3)
+        try await newMessages += m3
         newOperation.callbacks = try await newCallbacks
         try await newComponents.merge(c4)
-
-        if let oldServers = servers {
-            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
-            newOperation.servers = newServers
-            try newComponents.merge(c6)
-        }
+        try await newMessages += m4
 
         // should not be necessary but current Swift compiler can't figure out conformance of ExternallyDereferenceable:
-        if let oldServers = servers {
-            let (newServers, c6) = try await oldServers.externallyDereferenced(with: loader)
+        if let oldServers {
+            let (newServers, c5, m5) = try await oldServers.externallyDereferenced(with: loader)
             newOperation.servers = newServers
-            try newComponents.merge(c6)
+            try newComponents.merge(c5)
+            newMessages += m5
         }
 
-        return (newOperation, newComponents)
+        return (newOperation, newComponents, newMessages)
     }
 }
