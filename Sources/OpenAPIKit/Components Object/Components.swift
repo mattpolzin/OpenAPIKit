@@ -333,7 +333,7 @@ extension OpenAPI.Components {
         let oldRequestBodies = requestBodies
         let oldHeaders = headers
         let oldSecuritySchemes = securitySchemes
-        let oldLinks = links
+//        let oldLinks = links
         let oldCallbacks = callbacks
         let oldPathItems = pathItems
 
@@ -344,7 +344,7 @@ extension OpenAPI.Components {
         async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
         async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
         async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
-        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
+//        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
         async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
         async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
 
@@ -355,7 +355,7 @@ extension OpenAPI.Components {
         requestBodies = try await newRequestBodies
         headers = try await newHeaders
         securitySchemes = try await newSecuritySchemes
-        links = try await newLinks
+//        links = try await newLinks
         callbacks = try await newCallbacks
         pathItems = try await newPathItems
 
@@ -366,7 +366,7 @@ extension OpenAPI.Components {
         let c5Resolved = try await c5
         let c6Resolved = try await c6
         let c7Resolved = try await c7
-        let c8Resolved = try await c8
+//        let c8Resolved = try await c8
         let c9Resolved = try await c9
         let c10Resolved = try await c10
 
@@ -378,11 +378,11 @@ extension OpenAPI.Components {
             && c5Resolved.isEmpty
             && c6Resolved.isEmpty
             && c7Resolved.isEmpty
-            && c8Resolved.isEmpty
+//            && c8Resolved.isEmpty
             && c9Resolved.isEmpty
             && c10Resolved.isEmpty
 
-        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10
+        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m9 + m10 // + m8
 
         if noNewComponents { return newMessages }
 
@@ -393,7 +393,7 @@ extension OpenAPI.Components {
         try merge(c5Resolved)
         try merge(c6Resolved)
         try merge(c7Resolved)
-        try merge(c8Resolved)
+//        try merge(c8Resolved)
         try merge(c9Resolved)
         try merge(c10Resolved)
 
