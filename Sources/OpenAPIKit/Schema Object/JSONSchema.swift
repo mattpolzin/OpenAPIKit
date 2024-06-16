@@ -63,6 +63,9 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
     public static func reference(_ reference: JSONReference<JSONSchema>, _ context: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
         .init(schema: .reference(reference, context))
     }
+    public static func dynamicReference(_ reference: JSONDynamicReference, _ context: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
+        .init(schema: .dynamicReference(reference, context))
+    }
     /// Schemas without a `type`.
     public static func fragment(_ core: CoreContext<JSONTypeFormat.AnyFormat>) -> Self {
         .init(schema: .fragment(core))
@@ -83,6 +86,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
         indirect case any(of: [JSONSchema], core: CoreContext<JSONTypeFormat.AnyFormat>)
         indirect case not(JSONSchema, core: CoreContext<JSONTypeFormat.AnyFormat>)
         case reference(JSONReference<JSONSchema>, CoreContext<JSONTypeFormat.AnyFormat>)
+        case dynamicReference(JSONDynamicReference, CoreContext<JSONTypeFormat.AnyFormat>)
         /// Schemas without a `type`.
         case fragment(CoreContext<JSONTypeFormat.AnyFormat>) // This allows for the "{}" case and also fragments of schemas that will later be combined with `all(of:)`.
     }
@@ -104,7 +108,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
             return .integer(context.format)
         case .string(let context, _):
             return .string(context.format)
-        case .all, .one, .any, .not, .reference, .fragment:
+        case .all, .one, .any, .not, .reference, .dynamicReference, .fragment:
             return nil
         }
     }
@@ -145,7 +149,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
              .any(of: _, core: let context),
              .not(_, core: let context):
             return context.format.rawValue
-        case .reference, .null:
+        case .reference, .dynamicReference, .null:
             return nil
         }
     }
@@ -176,7 +180,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext):
             return context.discriminator
-        case .reference:
+        case .reference, .dynamicReference:
             return nil
         }
     }
@@ -354,7 +358,17 @@ extension JSONSchema {
     }
 
     /// Check if a schema is a `.reference`.
+    ///
+    /// This returns `false` if the schema is a
+    /// `.dynamicReference` even though a
+    /// "dynamic reference" is a "reference".
     public var isReference: Bool {
+        guard case .reference = value else { return false }
+        return true
+    }
+
+    /// Check if a schema is a `.dynamicReference`.
+    public var isDynamicReference: Bool {
         guard case .reference = value else { return false }
         return true
     }
@@ -379,7 +393,8 @@ extension JSONSchema {
              .one(of: _, core: let context as JSONSchemaContext),
              .any(of: _, core: let context as JSONSchemaContext),
              .not(_, core: let context as JSONSchemaContext),
-             .reference(_, let context as JSONSchemaContext):
+             .reference(_, let context as JSONSchemaContext),
+             .dynamicReference(_, let context as JSONSchemaContext):
             return context
         }
     }
@@ -513,6 +528,8 @@ extension JSONSchema.Schema {
             return .not(of, core: core.with(vendorExtensions: vendorExtensions))
         case .reference(let context, let coreContext):
             return .reference(context, coreContext.with(vendorExtensions: vendorExtensions))
+        case .dynamicReference(let context, let coreContext):
+            return .dynamicReference(context, coreContext.with(vendorExtensions: vendorExtensions))
         case .fragment(let context):
             return .fragment(context.with(vendorExtensions: vendorExtensions))
         }
@@ -583,6 +600,11 @@ extension JSONSchema {
             return .init(
                 warnings: warnings,
                 schema: .reference(reference, context.optionalContext())
+            )
+        case .dynamicReference(let reference, let context):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(reference, context.optionalContext())
             )
         case .null(let context):
             return .init(
@@ -655,6 +677,11 @@ extension JSONSchema {
                 warnings: warnings,
                 schema: .reference(reference, context.requiredContext())
             )
+        case .dynamicReference(let reference, let context):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(reference, context.requiredContext())
+            )
         case .null(let context):
             return .init(
                 warnings: warnings,
@@ -721,7 +748,7 @@ extension JSONSchema {
                 warnings: warnings,
                 schema: .not(schema, core: core.nullableContext())
             )
-        case .reference, .null:
+        case .reference, .dynamicReference, .null:
             return self
         }
     }
@@ -789,6 +816,11 @@ extension JSONSchema {
             return .init(
                 warnings: warnings,
                 schema: .reference(schema, core.with(allowedValues: allowedValues))
+            )
+        case .dynamicReference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(schema, core.with(allowedValues: allowedValues))
             )
         case .null(let core):
             return .init(
@@ -860,6 +892,11 @@ extension JSONSchema {
             return .init(
                 warnings: warnings,
                 schema: .reference(schema, core.with(defaultValue: defaultValue))
+            )
+        case .dynamicReference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(schema, core.with(defaultValue: defaultValue))
             )
         case .null(let core):
             return .init(
@@ -939,6 +976,11 @@ extension JSONSchema {
                 warnings: warnings,
                 schema: .reference(schema, core.with(examples: examples))
             )
+        case .dynamicReference(let schema, let core):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(schema, core.with(examples: examples))
+            )
         case .null(let core):
             return .init(
                 warnings: warnings,
@@ -1005,7 +1047,7 @@ extension JSONSchema {
                 warnings: warnings,
                 schema: .not(schema, core: core.with(discriminator: discriminator))
             )
-        case .reference, .null:
+        case .reference, .dynamicReference, .null:
             return self
         }
     }
@@ -1072,6 +1114,11 @@ extension JSONSchema {
             return .init(
                 warnings: warnings,
                 schema: .reference(ref, referenceContext.with(description: description))
+            )
+        case .dynamicReference(let ref, let referenceContext):
+            return .init(
+                warnings: warnings,
+                schema: .dynamicReference(ref, referenceContext.with(description: description))
             )
         case .null(let referenceContext):
             return .init(
@@ -1827,6 +1874,21 @@ extension JSONSchema {
             .init(required: required, title: title, description: description, anchor: anchor, dynamicAnchor: dynamicAnchor, defs: defs)
         )
     }
+
+    /// Construct a dynamic reference schema
+    public static func dynamicReference(
+        _ reference: JSONDynamicReference,
+        required: Bool = true,
+        title: String? = nil,
+        description: String? = nil,
+        anchor: String? = nil,
+        dynamicAnchor: String? = nil
+    ) -> JSONSchema {
+        return .dynamicReference(
+            reference,
+            .init(required: required, title: title, description: description, anchor: anchor, dynamicAnchor: dynamicAnchor)
+        )
+    }
 }
 
 // MARK: - Describable
@@ -1922,6 +1984,10 @@ extension JSONSchema: Encodable {
             try core.encode(to: encoder)
             try reference.encode(to: encoder)
 
+        case .dynamicReference(let reference, let core):
+            try core.encode(to: encoder)
+            try reference.encode(to: encoder)
+
         case .fragment(let context):
             var container = encoder.singleValueContainer()
 
@@ -1958,6 +2024,11 @@ extension JSONSchema: Decodable {
         if let ref = try? JSONReference<JSONSchema>(from: decoder) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             self = .init(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
+            return
+        }
+        if let dynamicRef = try? JSONDynamicReference(from: decoder) {
+            let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
+            self = .init(warnings: coreContext.warnings, schema: .dynamicReference(dynamicRef, coreContext))
             return
         }
 
