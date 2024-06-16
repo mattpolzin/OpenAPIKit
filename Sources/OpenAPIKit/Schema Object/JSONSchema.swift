@@ -239,7 +239,34 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     // See `JSONSchemaContext`
     public var defs: OrderedDictionary<String, JSONSchema> {
-        return coreContext.defs
+        switch value {
+        case .null(let core):
+            return core.defs
+        case .boolean(let core):
+            return core.defs
+        case .number(let core, _):
+            return core.defs
+        case .integer(let core, _):
+            return core.defs
+        case .string(let core, _):
+            return core.defs
+        case .object(let core, _):
+            return core.defs
+        case .array(let core, _):
+            return core.defs
+        case .all(of: _, core: let core):
+            return core.defs
+        case .one(of: _, core: let core):
+            return core.defs
+        case .any(of: _, core: let core):
+            return core.defs
+        case .not(_, core: let core):
+            return core.defs
+        case .reference(_, let core):
+            return core.defs
+        case .fragment(let core):
+            return core.defs
+        }
     }
 
     // See `JSONSchemaContext`

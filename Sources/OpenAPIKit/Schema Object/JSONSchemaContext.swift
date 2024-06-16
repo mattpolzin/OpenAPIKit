@@ -131,10 +131,6 @@ public protocol JSONSchemaContext {
     /// See [Dynamic References with "$dynamicRef"](https://json-schema.org/draft/2020-12/json-schema-core#name-dynamic-references-with-dyn)
     var dynamicAnchor: String? { get }
 
-    /// A list of definitions local to this schema (as opposed to the Components of an OpenAPI Document
-    /// which are global to the whole Document).
-    var defs: OrderedDictionary<String, JSONSchema> { get }
-
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
 }
@@ -153,9 +149,6 @@ extension JSONSchemaContext {
 
     // Default implementation to make addition non-breaking
     public var dynamicAnchor: String? { nil }
-
-    // Default implementation to make addition non-breaking
-//    public var defs: OrderedDictionary<String, JSONSchema> { [:] }
 }
 
 extension JSONSchema {
