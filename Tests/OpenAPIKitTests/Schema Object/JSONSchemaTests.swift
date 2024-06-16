@@ -886,6 +886,39 @@ final class SchemaObjectTests: XCTestCase {
         XCTAssertEqual(reference.dynamicAnchor, "test")
     }
 
+    func test_defs() throws {
+        let null = JSONSchema.null(.init(defs: ["test": .null()]))
+        let object = JSONSchema.object(.init(defs: ["test": .null()]), .init(properties: [:]))
+        let array = JSONSchema.array(.init(defs: ["test": .null()]), .init())
+
+        let boolean = JSONSchema.boolean(.init(defs: ["test": .null()]))
+        let number = JSONSchema.number(.init(defs: ["test": .null()]), .init())
+        let integer = JSONSchema.integer(.init(defs: ["test": .null()]), .init())
+        let string = JSONSchema.string(.init(defs: ["test": .null()]), .init())
+        let fragment = JSONSchema.fragment(.init(defs: ["test": .null()]))
+        let all = JSONSchema.all(of: [.string], core: .init(defs: ["test": .null()]))
+        let one = JSONSchema.one(of: [.string], core: .init(defs: ["test": .null()]))
+        let any = JSONSchema.any(of: [.string], core: .init(defs: ["test": .null()]))
+        let not = JSONSchema.not(.string, core: .init(defs: ["test": .null()]))
+        let reference = JSONSchema.reference(.component(named: "test"), .init(defs: ["test": .null()]))
+
+        XCTAssertEqual(null.defs, ["test": .null()])
+        XCTAssertEqual(object.defs, ["test": .null()])
+        XCTAssertEqual(array.defs, ["test": .null()])
+
+        XCTAssertEqual(boolean.defs, ["test": .null()])
+        XCTAssertEqual(number.defs, ["test": .null()])
+        XCTAssertEqual(integer.defs, ["test": .null()])
+        XCTAssertEqual(string.defs, ["test": .null()])
+        XCTAssertEqual(fragment.defs, ["test": .null()])
+
+        XCTAssertEqual(all.defs, ["test": .null()])
+        XCTAssertEqual(one.defs, ["test": .null()])
+        XCTAssertEqual(any.defs, ["test": .null()])
+        XCTAssertEqual(not.defs, ["test": .null()])
+        XCTAssertEqual(reference.defs, ["test": .null()])
+    }
+
     func test_coreContextAccessor() {
         let null = JSONSchema.null()
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
@@ -2011,6 +2044,7 @@ extension SchemaObjectTests {
         let discriminatorBooleanData = #"{"type": "boolean", "discriminator": { "propertyName": "hello" }}"#.data(using: .utf8)!
         let anchorBooleanData = #"{"type": "boolean", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorBooleanData = #"{"type": "boolean", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsBooleanData = #"{"type": "boolean", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let boolean = try orderUnstableDecode(JSONSchema.self, from: booleanData)
         let booleanOrNull = try orderUnstableDecode(JSONSchema.self, from: booleanOrNullData)
@@ -2024,6 +2058,7 @@ extension SchemaObjectTests {
         let discriminatorBoolean = try orderUnstableDecode(JSONSchema.self, from: discriminatorBooleanData)
         let anchorBoolean = try orderUnstableDecode(JSONSchema.self, from: anchorBooleanData)
         let dynamicAnchorBoolean = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorBooleanData)
+        let defsBoolean = try orderUnstableDecode(JSONSchema.self, from: defsBooleanData)
 
         XCTAssertEqual(boolean, JSONSchema.boolean(.init(format: .generic)))
         XCTAssertEqual(booleanOrNull, JSONSchema.boolean(.init(format: .generic, nullable: true)))
@@ -2037,6 +2072,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(discriminatorBoolean, JSONSchema.boolean(.init(format: .generic, discriminator: .init(propertyName: "hello"))))
         XCTAssertEqual(anchorBoolean, JSONSchema.boolean(.init(format: .generic, anchor: "test")))
         XCTAssertEqual(dynamicAnchorBoolean, JSONSchema.boolean(.init(format: .generic, dynamicAnchor: "test")))
+        XCTAssertEqual(defsBoolean, JSONSchema.boolean(.init(format: .generic, defs: ["test": .null()])))
     }
 
     func test_encodeObject() {
@@ -2069,6 +2105,15 @@ extension SchemaObjectTests {
         ]))
             .with(defaultValue: AnyCodable(["hello": false]))
         let discriminatorObject = JSONSchema.object(.init(format: .unspecified, required: true, discriminator: .init(propertyName: "hello")), .init(properties: [:]))
+        let anchorObject = JSONSchema.object(.init(format: .unspecified, anchor: "test"), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let dynamicAnchorObject = JSONSchema.object(.init(format: .unspecified, dynamicAnchor: "test"), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
+        let defsObject = JSONSchema.object(.init(format: .unspecified, defs: ["test": .null()]), .init(properties: [
+            "hello": .boolean(.init(format: .unspecified, required: false))
+        ]))
 
         testEncodingPropertyLines(
             entity: requiredObject,
@@ -2187,6 +2232,49 @@ extension SchemaObjectTests {
                 "\"type\" : \"object\""
             ]
         )
+
+        testEncodingPropertyLines(
+            entity: anchorObject,
+            propertyLines: [
+                "\"$anchor\" : \"test\",",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: dynamicAnchorObject,
+            propertyLines: [
+                "\"$dynamicAnchor\" : \"test\",",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
+
+        testEncodingPropertyLines(
+            entity: defsObject,
+            propertyLines: [
+                "\"$defs\" : {",
+                "  \"test\" : {",
+                "    \"type\" : \"null\"",
+                "  }",
+                "},",
+                "\"properties\" : {",
+                "  \"hello\" : {",
+                "    \"type\" : \"boolean\"",
+                "  }",
+                "},",
+                "\"type\" : \"object\""
+            ]
+        )
     }
 
     func test_decodeObject() throws {
@@ -2247,6 +2335,7 @@ extension SchemaObjectTests {
         """.data(using: .utf8)!
         let anchorObjectData = #"{"type": "object", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorObjectData = #"{"type": "object", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsObjectData = #"{"type": "object", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let object = try orderUnstableDecode(JSONSchema.self, from: objectData)
         let nullableObject = try orderUnstableDecode(JSONSchema.self, from: nullableObjectData)
@@ -2259,6 +2348,7 @@ extension SchemaObjectTests {
         let discriminatorObject = try orderUnstableDecode(JSONSchema.self, from: discriminatorObjectData)
         let anchorObject = try orderUnstableDecode(JSONSchema.self, from: anchorObjectData)
         let dynamicAnchorObject = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorObjectData)
+        let defsObject = try orderUnstableDecode(JSONSchema.self, from: defsObjectData)
 
         XCTAssertEqual(object, JSONSchema.object(.init(format: .generic), .init(properties: [:])))
         XCTAssertEqual(nullableObject, JSONSchema.object(.init(format: .generic, nullable: true), .init(properties: [:])))
@@ -2278,6 +2368,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))]))
         XCTAssertEqual(anchorObject, JSONSchema.object(.init(format: .generic, anchor: "test"), .init(properties: [:])))
         XCTAssertEqual(dynamicAnchorObject, JSONSchema.object(.init(format: .generic, dynamicAnchor: "test"), .init(properties: [:])))
+        XCTAssertEqual(defsObject, JSONSchema.object(.init(format: .generic, defs: ["test": .null()]), .init(properties: [:])))
     }
 
     func test_decodeObjectWithTypeInferred() throws {
@@ -3743,6 +3834,7 @@ extension SchemaObjectTests {
         let discriminatorArrayData = #"{"type": "array", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
         let anchorArrayData = #"{"type": "array", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorArrayData = #"{"type": "array", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsArrayData = #"{"type": "array", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let array = try orderUnstableDecode(JSONSchema.self, from: arrayData)
         let nullableArray = try orderUnstableDecode(JSONSchema.self, from: nullableArrayData)
@@ -3754,6 +3846,7 @@ extension SchemaObjectTests {
         let discriminatorArray = try orderUnstableDecode(JSONSchema.self, from: discriminatorArrayData)
         let anchorArray = try orderUnstableDecode(JSONSchema.self, from: anchorArrayData)
         let dynamicAnchorArray = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorArrayData)
+        let defsArray = try orderUnstableDecode(JSONSchema.self, from: defsArrayData)
 
         XCTAssertEqual(array, JSONSchema.array(.init(format: .generic), .init()))
         XCTAssertEqual(nullableArray, JSONSchema.array(.init(format: .generic, nullable: true), .init()))
@@ -3771,6 +3864,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(contextB, .init(items: .boolean(.init(format: .generic))))
         XCTAssertEqual(anchorArray, JSONSchema.array(.init(format: .generic, anchor: "test"), .init()))
         XCTAssertEqual(dynamicAnchorArray, JSONSchema.array(.init(format: .generic, dynamicAnchor: "test"), .init()))
+        XCTAssertEqual(defsArray, JSONSchema.array(.init(format: .generic, defs: ["test": .null()]), .init()))
     }
 
     func test_decodeArrayWithTypeInferred() throws {
@@ -4101,6 +4195,7 @@ extension SchemaObjectTests {
         let discriminatorNumberData = #"{"type": "number", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
         let anchorNumberData = #"{"type": "number", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorNumberData = #"{"type": "number", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsNumberData = #"{"type": "number", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let number = try orderUnstableDecode(JSONSchema.self, from: numberData)
         let nullableNumber = try orderUnstableDecode(JSONSchema.self, from: nullableNumberData)
@@ -4112,6 +4207,7 @@ extension SchemaObjectTests {
         let discriminatorNumber = try orderUnstableDecode(JSONSchema.self, from: discriminatorNumberData)
         let anchorNumber = try orderUnstableDecode(JSONSchema.self, from: anchorNumberData)
         let dynamicAnchorNumber = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorNumberData)
+        let defsNumber = try orderUnstableDecode(JSONSchema.self, from: defsNumberData)
 
         XCTAssertEqual(number, JSONSchema.number(.init(format: .generic), .init()))
         XCTAssertEqual(nullableNumber, JSONSchema.number(.init(format: .generic, nullable: true), .init()))
@@ -4123,6 +4219,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(discriminatorNumber, JSONSchema.number(discriminator: .init(propertyName: "hello")))
         XCTAssertEqual(anchorNumber, JSONSchema.number(.init(format: .generic, anchor: "test"), .init()))
         XCTAssertEqual(dynamicAnchorNumber, JSONSchema.number(.init(format: .generic, dynamicAnchor: "test"), .init()))
+        XCTAssertEqual(defsNumber, JSONSchema.number(.init(format: .generic, defs: ["test": .null()]), .init()))
     }
 
     func test_decodeNumberWithTypeInferred() throws {
@@ -4516,6 +4613,7 @@ extension SchemaObjectTests {
         let discriminatorIntegerData = #"{"type": "integer", "discriminator": {"propertyName": "hello"}}"#.data(using: .utf8)!
         let anchorIntegerData = #"{"type": "integer", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorIntegerData = #"{"type": "integer", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsIntegerData = #"{"type": "integer", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let integer = try orderUnstableDecode(JSONSchema.self, from: integerData)
         let nullableInteger = try orderUnstableDecode(JSONSchema.self, from: nullableIntegerData)
@@ -4527,6 +4625,7 @@ extension SchemaObjectTests {
         let discriminatorInteger = try orderUnstableDecode(JSONSchema.self, from: discriminatorIntegerData)
         let anchorInteger = try orderUnstableDecode(JSONSchema.self, from: anchorIntegerData)
         let dynamicAnchorInteger = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorIntegerData)
+        let defsInteger = try orderUnstableDecode(JSONSchema.self, from: defsIntegerData)
 
         XCTAssertEqual(integer, JSONSchema.integer(.init(format: .generic), .init()))
         XCTAssertEqual(nullableInteger, JSONSchema.integer(.init(format: .generic, nullable: true), .init()))
@@ -4538,6 +4637,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(discriminatorInteger, JSONSchema.integer(discriminator: .init(propertyName: "hello")))
         XCTAssertEqual(anchorInteger, JSONSchema.integer(.init(format: .generic, anchor: "test"), .init()))
         XCTAssertEqual(dynamicAnchorInteger, JSONSchema.integer(.init(format: .generic, dynamicAnchor: "test"), .init()))
+        XCTAssertEqual(defsInteger, JSONSchema.integer(.init(format: .generic, defs: ["test": .null()]), .init()))
     }
 
     func test_encode32bitInteger() {
@@ -4931,6 +5031,7 @@ extension SchemaObjectTests {
         let nullableStringWithAllowedValuesData = #"{"type": ["string", "null"], "enum": ["hello", null]}"#.data(using: .utf8)!
         let anchorStringData = #"{"type": "string", "$anchor": "test"}"#.data(using: .utf8)!
         let dynamicAnchorStringData = #"{"type": "string", "$dynamicAnchor": "test"}"#.data(using: .utf8)!
+        let defsStringData = #"{"type": "string", "$defs": {"test": {"type": "null"}}}"#.data(using: .utf8)!
 
         let string = try orderUnstableDecode(JSONSchema.self, from: stringData)
         let nullableString = try orderUnstableDecode(JSONSchema.self, from: nullableStringData)
@@ -4942,6 +5043,7 @@ extension SchemaObjectTests {
         let nullableStringWithAllowedValues = try orderUnstableDecode(JSONSchema.self, from: nullableStringWithAllowedValuesData)
         let anchorString = try orderUnstableDecode(JSONSchema.self, from: anchorStringData)
         let dynamicAnchorString = try orderUnstableDecode(JSONSchema.self, from: dynamicAnchorStringData)
+        let defsString = try orderUnstableDecode(JSONSchema.self, from: defsStringData)
 
         XCTAssertEqual(string, JSONSchema.string(.init(format: .generic), .init()))
         XCTAssertEqual(nullableString, JSONSchema.string(.init(format: .generic, nullable: true), .init()))
@@ -4953,6 +5055,7 @@ extension SchemaObjectTests {
         XCTAssertEqual(nullableStringWithAllowedValues, JSONSchema.string(nullable: true, allowedValues: ["hello", nil]))
         XCTAssertEqual(anchorString, JSONSchema.string(.init(format: .generic, anchor: "test"), .init()))
         XCTAssertEqual(dynamicAnchorString, JSONSchema.string(.init(format: .generic, dynamicAnchor: "test"), .init()))
+        XCTAssertEqual(defsString, JSONSchema.string(.init(format: .generic, defs: ["test": .null()]), .init()))
     }
 
     func test_decodeStringWithTypeInferred() throws {
@@ -6579,7 +6682,8 @@ extension SchemaObjectTests {
                 false
             ],
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1 = JSONSchema.boolean(format: .generic)
@@ -6603,7 +6707,8 @@ extension SchemaObjectTests {
                 false
             ],
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1 = JSONSchema.fragment(format: .generic)
@@ -6637,7 +6742,8 @@ extension SchemaObjectTests {
             format: .double,
             allowedValues: 5.5,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t3 = JSONSchema.number(format: .generic)
@@ -6667,7 +6773,8 @@ extension SchemaObjectTests {
             required: true,
             allowedValues: 1, 2, 3,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1 = JSONSchema.integer(format: .extended(.uint32))
@@ -6688,7 +6795,8 @@ extension SchemaObjectTests {
             required: true,
             nullable: true,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
         let _ = JSONSchema.string(
             required: false,
@@ -6728,7 +6836,8 @@ extension SchemaObjectTests {
                 [ "hello": false]
             ],
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
         let addProp1 = JSONSchema.object(
             additionalProperties: .init(true)
@@ -6772,7 +6881,8 @@ extension SchemaObjectTests {
 
         let _ = JSONSchema.array(
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1 = JSONSchema.array(format: .generic)
@@ -6786,7 +6896,8 @@ extension SchemaObjectTests {
         let _ = JSONSchema.all(
             of: .string, .integer,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1: JSONSchema = .all(of:
@@ -6807,7 +6918,8 @@ extension SchemaObjectTests {
         let _ = JSONSchema.one(
             of: .string, .integer,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1: JSONSchema = .one(of:
@@ -6827,7 +6939,8 @@ extension SchemaObjectTests {
         let _ = JSONSchema.any(
             of: .string, .integer,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1: JSONSchema = .any(of:
@@ -6847,7 +6960,8 @@ extension SchemaObjectTests {
         let _ = JSONSchema.not(
             .string,
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1: JSONSchema = .not(.string)
@@ -6860,7 +6974,8 @@ extension SchemaObjectTests {
         let _ = JSONSchema.reference(
             .component(named: "test"),
             anchor: "test",
-            dynamicAnchor: "test2"
+            dynamicAnchor: "test2",
+            defs: ["test": .null()]
         )
 
         let t1: JSONSchema = .reference(.internal(.component(name: "test")), .init(required: true))
