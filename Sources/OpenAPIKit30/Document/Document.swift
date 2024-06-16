@@ -308,9 +308,25 @@ extension OpenAPI.Document {
     }
 }
 
+public enum ExternalDereferenceDepth {
+    case iterations(Int)
+    case full
+}
+
+extension ExternalDereferenceDepth: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .iterations(value)
+    }
+}
+
 extension OpenAPI.Document {
     /// Create a locally-dereferenced OpenAPI
     /// Document.
+    ///
+    /// This function assumes all references are
+    /// local to the same file. If you want to resolve
+    /// remote references as well, call `externallyDereference()`
+    /// first and then locally dereference the result.
     ///
     /// A dereferenced document contains no
     /// `JSONReferences`. All components have been
@@ -333,6 +349,42 @@ extension OpenAPI.Document {
     ///     component in the same file that cannot be found in the Components Object.
     public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(self)
+    }
+
+    /// Load all remote references into the document. A remote reference is one
+    /// that points to another file rather than a location within the
+    /// same file.
+    ///
+    /// This function will load remote references into the Components object
+    /// and replace the remote reference with a local reference to that component.
+    /// No local references are modified or resolved by this function. You can
+    /// call `locallyDereferenced()` on the externally dereferenced document if
+    /// you want to also remove local references by inlining all of them.
+    ///
+    /// Externally dereferencing a document requires that you provide both a
+    /// function that produces a `OpenAPI.ComponentKey` for any given remote
+    /// file URI and also a function that loads and decodes the data found in
+    /// that remote file. The latter is less work than it may sound like because
+    /// the function is told what Decodable thing it wants, so you really just
+    /// need to decide what decoder to use and provide the file data to that
+    /// decoder. See `ExternalLoader` documentation for details.
+    @discardableResult
+    public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return context
+        }
+
+        let oldPaths = paths
+
+        async let (newPaths, c1, m1) = oldPaths.externallyDereferenced(with: loader)
+
+        paths = try await newPaths
+        try await components.merge(c1)
+
+        let m2 = try await components.externallyDereference(with: loader, depth: depth)
+
+        return try await context + m1 + m2
     }
 }
 

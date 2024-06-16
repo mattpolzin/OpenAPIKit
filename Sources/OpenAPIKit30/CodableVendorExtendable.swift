@@ -18,7 +18,7 @@ public protocol VendorExtendable {
     /// These should be of the form:
     /// `[ "x-extensionKey": <anything>]`
     /// where the values are anything codable.
-    var vendorExtensions: VendorExtensions { get }
+    var vendorExtensions: VendorExtensions { get set }
 }
 
 public enum VendorExtensionsConfiguration {
