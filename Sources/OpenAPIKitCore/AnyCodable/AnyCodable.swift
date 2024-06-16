@@ -186,6 +186,8 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as String, rhs as String):
             return lhs == rhs
+        case let (lhs as URL, rhs as URL):
+            return lhs == rhs
         case let (lhs as [String: String], rhs as [String: String]):
             return lhs == rhs
         case let (lhs as [String: Int], rhs as [String: Int]):

@@ -28,7 +28,7 @@ public struct DereferencedOperation: Equatable {
     /// If defined, overrides the security requirements in the
     /// root document `security` array.
     ///
-    /// Each secutity requirement in this array is an alternative, only
+    /// Each security requirement in this array is an alternative, only
     /// one of which must be met for the request to be authorized.
     ///
     /// By contrast, all entries in an individual `DereferencedSecurityRequirement`
