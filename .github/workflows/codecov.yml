@@ -8,7 +8,7 @@ jobs:
       image: swift:5.8
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: swift test --enable-test-discovery --enable-code-coverage
     - id: analysis
       uses: mattpolzin/swift-codecov-action@0.7.5
