@@ -13,22 +13,12 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:5.1-xenial
-          - swift:5.1-bionic
-          - swift:5.2-xenial
-          - swift:5.2-bionic
           - swift:5.2-focal
           - swift:5.2-centos8
-          - swift:5.2-amazonlinux2
-          - swift:5.3-xenial
-          - swift:5.3-bionic
           - swift:5.3-focal
           - swift:5.3-centos8
-          - swift:5.3-amazonlinux2
           # see below for 5.4, 5.5, etc.
     container: ${{ matrix.image }}
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -42,14 +32,9 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:5.4-xenial
-          - swift:5.4-bionic
           - swift:5.4-focal
           - swift:5.4-centos8
-          - swift:5.4-amazonlinux2
     container: ${{ matrix.image }}
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -61,35 +46,20 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:5.5-xenial
-          - swift:5.5-bionic
           - swift:5.5-focal
           - swift:5.5-centos8
-          - swift:5.5-amazonlinux2
-          - swift:5.6-bionic
           - swift:5.6-focal
-          - swift:5.6-amazonlinux2
-          - swift:5.7-bionic
           - swift:5.7-focal
           - swift:5.7-jammy
-          - swift:5.7-amazonlinux2
-          - swift:5.8-bionic
           - swift:5.8-focal
           - swift:5.8-jammy
-          - swift:5.8-amazonlinux2
           - swift:5.9-focal
           - swift:5.9-jammy
-          - swift:5.9-amazonlinux2
           - swift:5.10-focal
           - swift:5.10-jammy
-          - swift:5.10-amazonlinux2
-          - swiftlang/swift:nightly-bionic
           - swiftlang/swift:nightly-focal
           - swiftlang/swift:nightly-jammy
-          - swiftlang/swift:nightly-amazonlinux2
     container: ${{ matrix.image }}
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
