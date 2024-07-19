@@ -27,9 +27,11 @@ jobs:
           - swift:5.3-amazonlinux2
           # see below for 5.4, 5.5, etc.
     container: ${{ matrix.image }}
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests
       run: swift test --enable-test-discovery
   # 5.4 is separate because there was a bug in the compiler that caused
@@ -46,9 +48,11 @@ jobs:
           - swift:5.4-centos8
           - swift:5.4-amazonlinux2
     container: ${{ matrix.image }}
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests (without test discovery flag)
       run: swift test -Xswiftc -Xfrontend -Xswiftc -sil-verify-none
   linux-5_5-plus:
@@ -84,9 +88,11 @@ jobs:
           - swiftlang/swift:nightly-jammy
           - swiftlang/swift:nightly-amazonlinux2
     container: ${{ matrix.image }}
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Run tests
       run: swift test
   osx:
@@ -97,6 +103,6 @@ jobs:
         with:
           xcode-version: latest
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run tests
         run: swift test --enable-test-discovery
