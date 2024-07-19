@@ -14,33 +14,54 @@ extension OpenAPI.Content {
     public struct Encoding: Equatable {
         public typealias Style = OpenAPI.Parameter.SchemaContext.Style
 
-        public let contentType: OpenAPI.ContentType?
+        /// If an encoding object only contains 1 content type, it will be populated here.
+        /// Two or more content types will result in a null value here but the `contentTypes`
+        /// (plural) property will contain all content types specified.
+        ///
+        /// The singular `contentType` property is only provided for backwards compatibility and
+        /// using the plural `contentTypes` property should be preferred.
+        @available(*, deprecated, message: "use contentTypes instead")
+        public var contentType: OpenAPI.ContentType? {
+            guard let contentType = contentTypes.first,
+                  contentTypes.count == 1 else {
+                return nil
+            }
+            return contentType
+        }
+
+        public let contentTypes: [OpenAPI.ContentType]
         public let headers: OpenAPI.Header.Map?
         public let style: Style
         public let explode: Bool
         public let allowReserved: Bool
 
+        /// The singular `contentType` argument is only provided for backwards compatibility and
+        /// using the plural `contentTypes` argument should be preferred.
         public init(
             contentType: OpenAPI.ContentType? = nil,
+            contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             allowReserved: Bool = false
         ) {
-            self.contentType = contentType
+            self.contentTypes = contentTypes + [contentType].compactMap { $0 }
             self.headers = headers
             self.style = style
             self.explode = style.defaultExplode
             self.allowReserved = allowReserved
         }
 
+        /// The singular `contentType` argument is only provided for backwards compatibility and
+        /// using the plural `contentTypes` argument should be preferred.
         public init(
             contentType: OpenAPI.ContentType? = nil,
+            contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             explode: Bool,
             allowReserved: Bool = false
         ) {
-            self.contentType = contentType
+            self.contentTypes = contentTypes + [contentType].compactMap { $0 }
             self.headers = headers
             self.style = style
             self.explode = explode
@@ -56,7 +77,12 @@ extension OpenAPI.Content.Encoding: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encodeIfPresent(contentType, forKey: .contentType)
+        if contentTypes.count > 0 {
+            let contentTypesString = contentTypes
+                .map(\.rawValue)
+                .joined(separator: ", ")
+            try container.encode(contentTypesString, forKey: .contentType)
+        }
         try container.encodeIfPresent(headers, forKey: .headers)
 
         if style != Self.defaultStyle {
@@ -77,7 +103,16 @@ extension OpenAPI.Content.Encoding: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        contentType = try container.decodeIfPresent(OpenAPI.ContentType.self, forKey: .contentType)
+        let contentTypesString = try container.decodeIfPresent(String.self, forKey: .contentType)
+        if let contentTypesString = contentTypesString {
+            contentTypes = contentTypesString
+                .split(separator: ",")
+                .compactMap { string in
+                    OpenAPI.ContentType.init(rawValue: string.trimmingCharacters(in: .whitespaces))
+                }
+        } else {
+            contentTypes = []
+        }
 
         headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
 

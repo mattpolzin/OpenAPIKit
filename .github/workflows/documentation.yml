@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build Docs
         run: |
@@ -30,18 +30,3 @@ jobs:
           folder: gh-pages
           branch: gh-pages
 
-            
-        # TODO: replace the documentation generator with something that is still maintained.
-
-#      - name: Generate Documentation
-#        uses: SwiftDocOrg/swift-doc@master
-#        with:
-#          inputs: Sources
-#          module-name: OpenAPIKit
-#          output: Documentation
-#      - name: Upload Documentation to Wiki
-#        uses: SwiftDocOrg/github-wiki-publish-action@v1
-#        with:
-#          path: Documentation
-#        env:
-#          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}

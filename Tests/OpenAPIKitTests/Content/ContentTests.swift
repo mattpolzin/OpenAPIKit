@@ -570,6 +570,33 @@ extension ContentTests {
         XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentType: .csv))
     }
 
+    func test_encoding_multiple_contentTypes_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(contentTypes: [.csv, .json])
+
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
+
+        assertJSONEquivalent(
+            encodedEncoding,
+            """
+            {
+              "contentType" : "text\\/csv, application\\/json"
+            }
+            """
+        )
+    }
+
+    func test_encoding_multiple_contentTypes_decode() throws {
+        let encodingData =
+        """
+        {
+            "contentType": "text/csv, application/json"
+        }
+        """.data(using: .utf8)!
+        let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentTypes: [.csv, .json]))
+    }
+
     func test_encoding_headers_encode() throws {
         let encoding = OpenAPI.Content.Encoding(headers: [
             "X-CustomThing": .init(OpenAPI.Header(schema: .string))
