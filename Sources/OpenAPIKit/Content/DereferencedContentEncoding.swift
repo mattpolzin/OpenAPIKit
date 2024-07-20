@@ -72,7 +72,7 @@ extension OpenAPI.Content.Encoding: ExternallyDereferenceable {
         }
 
         let newEncoding = OpenAPI.Content.Encoding(
-            contentType: contentType,
+            contentTypes: contentTypes,
             headers: newHeaders,
             style: style,
             explode: explode,
