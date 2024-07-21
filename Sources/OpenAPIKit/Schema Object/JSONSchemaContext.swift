@@ -135,22 +135,6 @@ public protocol JSONSchemaContext {
     var vendorExtensions: [String: AnyCodable] { get }
 }
 
-extension JSONSchemaContext {
-
-    // TODO: Remove the default implementations of the following in v4 of OpenAPIKit.
-    //       They are only here to make their addition non-breaking.
-
-    // Default implementation to make addition of this new property which is only
-    // supposed to be set internally a non-breaking addition.
-    public var inferred: Bool { false }
-
-    // Default implementation to make addition non-breaking
-    public var anchor: String? { nil }
-
-    // Default implementation to make addition non-breaking
-    public var dynamicAnchor: String? { nil }
-}
-
 extension JSONSchema {
     /// The context that applies to all schemas.
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, HasWarnings {
