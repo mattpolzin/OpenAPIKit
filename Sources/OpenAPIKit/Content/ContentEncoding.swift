@@ -20,8 +20,6 @@ extension OpenAPI.Content {
         public let explode: Bool
         public let allowReserved: Bool
 
-        /// The singular `contentType` argument is only provided for backwards compatibility and
-        /// using the plural `contentTypes` argument should be preferred.
         public init(
             contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
@@ -35,8 +33,6 @@ extension OpenAPI.Content {
             self.allowReserved = allowReserved
         }
 
-        /// The singular `contentType` argument is only provided for backwards compatibility and
-        /// using the plural `contentTypes` argument should be preferred.
         public init(
             contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
