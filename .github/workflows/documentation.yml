@@ -3,7 +3,8 @@ name: Documentation
 on:
   push:
     branches:
-      - main
+      - release/4_0
+      # ^ for now, we only want to use the v4.0 release branch.
 
 jobs:
   build:
@@ -11,17 +12,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        # TODO: replace the documentation generator with something that is still maintained.
 
-#      - name: Generate Documentation
-#        uses: SwiftDocOrg/swift-doc@master
-#        with:
-#          inputs: Sources
-#          module-name: OpenAPIKit
-#          output: Documentation
-#      - name: Upload Documentation to Wiki
-#        uses: SwiftDocOrg/github-wiki-publish-action@v1
-#        with:
-#          path: Documentation
-#        env:
-#          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+      - name: Build Docs
+        run: |
+          mkdir -p ./gh-pages
+          swift package --allow-writing-to-directory ./gh-pages/docs \
+            generate-documentation --include-extended-types \
+                                   --disable-indexing \
+                                   --output-path ./gh-pages/docs \
+                                   --transform-for-static-hosting \
+                                   --hosting-base-path OpenAPIKit \
+                                   --target OpenAPIKit
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          folder: gh-pages
+          branch: gh-pages
+

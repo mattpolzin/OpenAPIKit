@@ -145,7 +145,7 @@ private struct TestStruct: Codable, CodableVendorExtendable {
         }
     }
 
-    public let vendorExtensions: Self.VendorExtensions
+    public var vendorExtensions: Self.VendorExtensions
 
     init(vendorExtensions: Self.VendorExtensions) {
         self.vendorExtensions = vendorExtensions

@@ -13,13 +13,13 @@ extension OpenAPI.Parameter {
     /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object)
     /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#style-values).
     public struct SchemaContext: Equatable {
-        public let style: Style
-        public let explode: Bool
-        public let allowReserved: Bool //defaults to false
-        public let schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
+        public var style: Style
+        public var explode: Bool
+        public var allowReserved: Bool //defaults to false
+        public var schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
 
-        public let example: AnyCodable?
-        public let examples: OpenAPI.Example.Map?
+        public var example: AnyCodable?
+        public var examples: OpenAPI.Example.Map?
 
         public init(_ schema: JSONSchema,
                     style: Style,

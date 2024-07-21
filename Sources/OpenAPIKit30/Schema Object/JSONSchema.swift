@@ -14,7 +14,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
     public let warnings: [OpenAPI.Warning]
     public let value: Schema
 
-    public let vendorExtensions: [String: AnyCodable]
+    public var vendorExtensions: [String: AnyCodable]
 
     internal init(warnings: [OpenAPI.Warning], schema: Schema, vendorExtensions: [String: AnyCodable]) {
         self.warnings = warnings
@@ -1831,7 +1831,7 @@ extension JSONSchema: Decodable {
             )
         }
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(
