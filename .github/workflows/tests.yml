@@ -19,6 +19,9 @@ jobs:
           - swift:5.9-jammy
           - swift:5.10-focal
           - swift:5.10-jammy
+          - swift:6.0-focal
+          - swift:6.0-jammy
+          - swift:6.0-noble
           - swiftlang/swift:nightly-focal
           - swiftlang/swift:nightly-jammy
     container: ${{ matrix.image }}
@@ -28,7 +31,13 @@ jobs:
     - name: Run tests
       run: swift test
   osx:
-    runs-on: macOS-13
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-14
+          - macos-15
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Select latest available Xcode
         uses: maxim-lobanov/setup-xcode@v1

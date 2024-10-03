@@ -31,7 +31,10 @@ final class TomTomAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_successfullyParsedDocument() {
+    func test_successfullyParsedDocument() throws {
+        #if os(Linux) && compiler(>=6.0)
+        throw XCTSkip("Swift bug causes CI failure currently (line 43): failed - The operation could not be completed. The file doesn’t exist.")
+        #endif
         switch tomtomAPI {
         case nil:
             XCTFail("Did not attempt to pull TomTom API documentation like expected.")

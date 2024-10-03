@@ -318,7 +318,7 @@ final class ValidationConvenienceTests: XCTestCase {
         )
     }
 
-    func test_subject_unwrapAndlookup() {
+    func test_subject_unwrapAndlookup() throws {
         let v = Validation<OpenAPI.Parameter>(
             description: "parameter is named test",
             check: \.name == "test"
@@ -358,6 +358,13 @@ final class ValidationConvenienceTests: XCTestCase {
         XCTAssertFalse(
             unwrapAndLookup(\OpenAPI.Document.paths["/test"]?.pathItemValue?.parameters[2], thenApply: v)(context).isEmpty
         )
+        #if os(macOS)
+        if #available(macOS 15.0, *) {
+            // this is just here because if #unavailable inside this block causes a compilation failure prior to Swift 5.6 on Linux :/
+        } else {
+            throw XCTSkip("Skipping due to Swift/macOS bug resulting in error (line 368): throwing \"std::bad_alloc: std::bad_alloc\"")
+        }
+        #endif
         // nil keypath
         XCTAssertFalse(
             unwrapAndLookup(\OpenAPI.Document.paths["/test2"]?.pathItemValue?.parameters.first, thenApply: v)(context).isEmpty
