@@ -333,19 +333,19 @@ extension JSONReference: Decodable {
             }
             self = .internal(internalReference)
         } else {
-            let externalReferenceCandidate: URL?
-#if canImport(FoundationEssentials)
-            externalReferenceCandidate = URL(string: referenceString, encodingInvalidCharacters: false)
-#elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+            let externalReference: URL?
+            #if canImport(FoundationEssentials)
+            externalReference = URL(string: referenceString, encodingInvalidCharacters: false)
+            #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
             if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-                externalReferenceCandidate = URL(string: referenceString, encodingInvalidCharacters: false)
+                externalReference = URL(string: referenceString, encodingInvalidCharacters: false)
             } else {
-                externalReferenceCandidate = URL(string: referenceString)
+                externalReference = URL(string: referenceString)
             }
-#else
-            externalReferenceCandidate = URL(string: referenceString)
-#endif
-            guard let externalReference = externalReferenceCandidate else {
+            #else
+            externalReference = URL(string: referenceString)
+            #endif
+            guard let externalReference else {
                 throw InconsistencyError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a valid URI for a JSON Reference from '\(referenceString)'",
