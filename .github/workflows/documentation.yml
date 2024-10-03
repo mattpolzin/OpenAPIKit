@@ -9,10 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: 
+      image: swift:5.10
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Build Docs
         run: |
           mkdir -p ./gh-pages
@@ -23,9 +24,11 @@ jobs:
                                    --transform-for-static-hosting \
                                    --hosting-base-path OpenAPIKit \
                                    --target OpenAPIKit
-
+      - name: Install rsync
+        run: |
+          apt-get update && apt-get install -y rsync
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        uses: JamesIves/github-pages-deploy-action@v4.6.8
         with:
           folder: gh-pages
           branch: gh-pages
