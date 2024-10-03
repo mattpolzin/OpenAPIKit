@@ -74,7 +74,19 @@ public struct URLTemplate: Hashable, RawRepresentable {
     /// Templated URLs with variables in them will not be valid URLs
     /// and are therefore guaranteed to return `nil`.
     public var url: URL? {
-        return URL(string: rawValue)
+        let urlCandidate: URL?
+#if canImport(FoundationEssentials)
+        urlCandidate = URL(string: rawValue, encodingInvalidCharacters: false)
+#elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+        if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
+            urlCandidate = URL(string: rawValue, encodingInvalidCharacters: false)
+        } else {
+            urlCandidate = URL(string: rawValue)
+        }
+#else
+        urlCandidate = URL(string: rawValue)
+#endif
+        return urlCandidate
     }
 
     /// Get the names of all variables in the URL Template.
