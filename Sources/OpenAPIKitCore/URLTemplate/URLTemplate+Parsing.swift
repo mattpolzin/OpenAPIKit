@@ -7,64 +7,55 @@
 
 extension URLTemplate {
     internal static func scan(
-        _ string: String,
-        partialToken: PartialToken?,
-        from remainder: Substring,
-        addingTo tokens: [Component]
+        _ string: String
     ) throws -> [Component] {
-        guard let next = remainder.first else {
-            guard partialToken == nil || partialToken?.type == .constant else {
-                throw ParsingError.unterminatedVariable(name: String(partialToken?.string ?? ""))
+        var tokens = [Component]()
+        var remainder = string[...]
+        var partialToken: PartialToken? = nil
+        
+        while let next = remainder.first {
+            let nextFirstIndex = remainder.index(remainder.startIndex, offsetBy: 1, limitedBy: remainder.endIndex)
+
+            switch (partialToken?.type, next) {
+            case (nil, "{"),
+                (.constant, "{"):
+                guard let newFirstIndex = nextFirstIndex else {
+                    throw ParsingError.unterminatedVariable(name: "")
+                }
+                tokens += tokenArray(from: partialToken)
+                partialToken = .init(type: .variable, string: remainder[newFirstIndex..<newFirstIndex])
+                remainder = remainder.dropFirst()
+
+            case (.variable, "}"):
+                tokens += tokenArray(from: partialToken)
+                partialToken = nil
+                remainder = remainder.dropFirst()
+
+            case (nil, "}"),
+                (.constant, "}"):
+                throw ParsingError.variableEndedWithoutStarting(name: partialToken.map { String($0.string) } ?? "")
+
+            case (.variable, "{"):
+                throw ParsingError.variableStartedWithinVariable(name: partialToken.map { String($0.string) } ?? "")
+
+            case (nil, _):
+                partialToken = .init(type: .constant, string: remainder[remainder.startIndex...remainder.startIndex])
+                remainder = remainder.dropFirst()
+
+            case (.constant, _),
+                (.variable, _):
+                guard nextFirstIndex != nil, let reifiedPartialToken = partialToken else {
+                    tokens += tokenArray(from: partialToken)
+                    continue
+                }
+                    partialToken = reifiedPartialToken.advancingStringByOne(within: string)
+                    remainder = remainder.dropFirst()
             }
-            return tokens + tokenArray(from: partialToken)
         }
-        let nextFirstIndex = remainder.index(remainder.startIndex, offsetBy: 1, limitedBy: remainder.endIndex)
-
-        switch (partialToken?.type, next) {
-        case (nil, "{"),
-             (.constant, "{"):
-            guard let newFirstIndex = nextFirstIndex else {
-                throw ParsingError.unterminatedVariable(name: "")
-            }
-            let newTokens = tokens + tokenArray(from: partialToken)
-            return try scan(
-                string,
-                partialToken: .init(type: .variable, string: remainder[newFirstIndex..<newFirstIndex]),
-                from: remainder.dropFirst(),
-                addingTo: newTokens
-            )
-
-        case (.variable, "}"):
-            let newTokens = tokens + tokenArray(from: partialToken)
-            return try scan(string, partialToken: nil, from: remainder.dropFirst(), addingTo: newTokens)
-
-        case (nil, "}"),
-             (.constant, "}"):
-            throw ParsingError.variableEndedWithoutStarting(name: partialToken.map { String($0.string) } ?? "")
-
-        case (.variable, "{"):
-            throw ParsingError.variableStartedWithinVariable(name: partialToken.map { String($0.string) } ?? "")
-
-        case (nil, _):
-            return try scan(
-                string,
-                partialToken: .init(type: .constant, string: remainder[remainder.startIndex...remainder.startIndex]),
-                from: remainder.dropFirst(),
-                addingTo: tokens
-            )
-
-        case (.constant, _),
-             (.variable, _):
-            guard nextFirstIndex != nil, let reifiedPartialToken = partialToken else {
-                return tokens + tokenArray(from: partialToken)
-            }
-            return try scan(
-                string,
-                partialToken: reifiedPartialToken.advancingStringByOne(within: string),
-                from: remainder.dropFirst(),
-                addingTo: tokens
-            )
+        guard partialToken == nil || partialToken?.type == .constant else {
+            throw ParsingError.unterminatedVariable(name: String(partialToken?.string ?? ""))
         }
+        return tokens + tokenArray(from: partialToken)
     }
 
     internal static func tokenArray(from partial: PartialToken?) -> [Component] {
