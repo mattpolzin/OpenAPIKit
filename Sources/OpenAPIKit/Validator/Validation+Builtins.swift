@@ -435,7 +435,7 @@ extension Validation {
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
+    public static var serverVariableEnumIsValid: Validation<OpenAPI.Server.Variable> {
         .init(
             description: "Server Variable's enum is either not defined or is non-empty (if defined).",
             check: { context in
@@ -450,7 +450,7 @@ extension Validation {
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
+    public static var serverVariableDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
         .init(
             description: "Server Variable's default must exist in enum, if enum is defined.",
             check: { context in

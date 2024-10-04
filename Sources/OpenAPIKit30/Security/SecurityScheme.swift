@@ -244,10 +244,16 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.SecurityScheme {
         var ret = self
-        if let name = name {
+        if let name {
             ret.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
         return ret
+    }
+}
+
+extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

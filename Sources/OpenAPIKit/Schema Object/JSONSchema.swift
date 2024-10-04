@@ -13,7 +13,7 @@ import OpenAPIKitCore
 public struct JSONSchema: JSONSchemaContext, HasWarnings {
 
     public let warnings: [OpenAPI.Warning]
-    public let value: Schema
+    public var value: Schema
 
     internal init(warnings: [OpenAPI.Warning], schema: Schema) {
         self.warnings = warnings
@@ -470,7 +470,12 @@ extension JSONSchema: VendorExtendable {
     /// `[ "x-extensionKey": <anything>]`
     /// where the values are anything codable.
     public var vendorExtensions: VendorExtensions {
-        coreContext.vendorExtensions
+        get {
+          coreContext.vendorExtensions
+        }
+        set(extensions) {
+          self.value = value.with(vendorExtensions: extensions)
+        }
     }
 
     public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {
@@ -2056,7 +2061,7 @@ extension JSONSchema: Decodable {
         // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
         let typeHint = typeHints.first
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(

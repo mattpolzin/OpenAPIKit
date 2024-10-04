@@ -7,6 +7,7 @@
 
 import XCTest
 import OpenAPIKit
+import Foundation
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {
