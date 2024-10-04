@@ -111,10 +111,7 @@ public struct URLTemplate: Hashable, RawRepresentable {
     public init(templateString: String) throws {
         rawValue = templateString
         components = try URLTemplate.scan(
-            templateString,
-            partialToken: nil,
-            from: templateString[...],
-            addingTo: []
+            templateString
         )
     }
 
