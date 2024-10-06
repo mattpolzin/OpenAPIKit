@@ -123,7 +123,7 @@ extension OpenAPI.Document {
 /// `where` clause both examine the same type (i.e. `OpenAPI.Document.Info`
 /// from the previous example and `OpenAPI.Document` from the next example).
 ///
-/// The next example also uses `take()`  in its `where` caluse. This allows you to
+/// The next example also uses `take()` in its `where` clause. This allows you to
 /// dig into a value based on its KeyPath just like the previous example but you can
 /// use it for more complicated criteria than equality/inequality.
 ///
@@ -191,8 +191,8 @@ public final class Validator {
             .init(.headerReferencesAreValid),
             .init(.linkReferencesAreValid),
             .init(.pathItemReferencesAreValid),
-            .init(.serverVarialbeEnumIsValid),
-            .init(.serverVarialbeDefaultExistsInEnum)
+            .init(.serverVariableEnumIsValid),
+            .init(.serverVariableDefaultExistsInEnum)
         ])
     }
 
