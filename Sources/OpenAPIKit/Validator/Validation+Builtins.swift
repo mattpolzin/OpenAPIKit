@@ -13,7 +13,7 @@ extension Validation {
     /// Validate the OpenAPI Document has at least one path in its
     /// `PathItem.Map`.
     ///
-    /// The OpenAPI Specifcation does not require that the document
+    /// The OpenAPI Specification does not require that the document
     /// contain any paths for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
     /// or even because it only contains webhooks, but authors may still
     /// want to protect against an empty `PathItem.Map` in some cases.
@@ -29,7 +29,7 @@ extension Validation {
     /// Validate the OpenAPI Document's `PathItems` all have at least
     /// one operation.
     ///
-    /// The OpenAPI Specifcation does not require that path items
+    /// The OpenAPI Specification does not require that path items
     /// contain any operations for [security reasons](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// a `PathItem` with no operations in error.
@@ -45,7 +45,7 @@ extension Validation {
     /// Validate the OpenAPI Document's `JSONSchemas` all have at least
     /// one defining characteristic.
     ///
-    /// The JSON Schema Specifcation does not require that components
+    /// The JSON Schema Specification does not require that components
     /// have any defining characteristics. An "empty" schema component can
     /// be written as follows:
     ///
@@ -160,7 +160,7 @@ extension Validation {
     /// Validate the OpenAPI Document's `Operations` all have at least
     /// one response.
     ///
-    /// The OpenAPI Specifcation does not require that Responses Objects
+    /// The OpenAPI Specification does not require that Responses Objects
     /// contain at least one response but you may wish to validate that all 
     /// operations contain at least one response in your own API.
     ///
@@ -182,7 +182,7 @@ extension Validation {
 
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
-    /// The OpenAPI Specifcation requires that tag names on the Document
+    /// The OpenAPI Specification requires that tag names on the Document
     /// [are unique](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#openapi-object).
     ///
     /// - Important: This is included in validation by default.
@@ -435,7 +435,7 @@ extension Validation {
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
+    public static var serverVariableEnumIsValid: Validation<OpenAPI.Server.Variable> {
         .init(
             description: "Server Variable's enum is either not defined or is non-empty (if defined).",
             check: { context in
@@ -445,12 +445,22 @@ extension Validation {
         )
     }
     
+    /// Validate that `enum` must not be empty in the document's
+    /// Server Variable.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    @available(*, deprecated, renamed: "serverVariableEnumIsValid")
+    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
+        return serverVariableEnumIsValid
+    }
+
     /// Validate that `default` must exist in the enum values in the document's
     /// Server Variable, if such values (enum) are defined.
     ///
     /// - Important: This is included in validation by default.
     ///
-    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
+    public static var serverVariableDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
         .init(
             description: "Server Variable's default must exist in enum, if enum is defined.",
             check: { context in
@@ -458,6 +468,16 @@ extension Validation {
                 return `enum`.contains(context.subject.`default`)
             }
         )
+    }
+
+    /// Validate that `default` must exist in the enum values in the document's
+    /// Server Variable, if such values (enum) are defined.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    @available(*, deprecated, renamed: "serverVariableDefaultExistsInEnum")
+    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
+        return serverVariableDefaultExistsInEnum
     }
 }
 
