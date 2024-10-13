@@ -444,16 +444,6 @@ extension Validation {
             }
         )
     }
-    
-    /// Validate that `enum` must not be empty in the document's
-    /// Server Variable.
-    ///
-    /// - Important: This is included in validation by default.
-    ///
-    @available(*, deprecated, renamed: "serverVariableEnumIsValid")
-    public static var serverVarialbeEnumIsValid: Validation<OpenAPI.Server.Variable> {
-        return serverVariableEnumIsValid
-    }
 
     /// Validate that `default` must exist in the enum values in the document's
     /// Server Variable, if such values (enum) are defined.
@@ -468,16 +458,6 @@ extension Validation {
                 return `enum`.contains(context.subject.`default`)
             }
         )
-    }
-
-    /// Validate that `default` must exist in the enum values in the document's
-    /// Server Variable, if such values (enum) are defined.
-    ///
-    /// - Important: This is included in validation by default.
-    ///
-    @available(*, deprecated, renamed: "serverVariableDefaultExistsInEnum")
-    public static var serverVarialbeDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
-        return serverVariableDefaultExistsInEnum
     }
 }
 

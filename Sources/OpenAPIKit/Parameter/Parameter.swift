@@ -21,6 +21,8 @@ extension OpenAPI {
         /// parameters in the given location.
         public var context: Context
         public var description: String?
+        /// Whether or not the parameter is deprecated. Defaults to false
+        /// if unspecified and only gets encoded if true.
         public var deprecated: Bool // default is false
 
         /// OpenAPI Spec "content" or "schema" properties.
@@ -46,7 +48,10 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Whether or not this parameter is required. See the context
+        /// which determines whether the parameter is required or not.
         public var required: Bool { context.required }
+
         /// The location (e.g. "query") of the parameter.
         ///
         /// See the `context` property for more details on the

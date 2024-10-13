@@ -25,7 +25,7 @@ extension OpenAPI {
         /// These should be of the form:
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
-        public let vendorExtensions: [String: AnyCodable]
+        public var vendorExtensions: [String: AnyCodable]
 
         public init(
             summary: String? = nil,
@@ -195,7 +195,7 @@ extension OpenAPI.Example: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.Example{
         var vendorExtensions = self.vendorExtensions
-        if let name = name {
+        if let name {
             vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -205,6 +205,12 @@ extension OpenAPI.Example: LocallyDereferenceable {
             value: self.value,
             vendorExtensions: vendorExtensions
         )
+    }
+}
+
+extension OpenAPI.Example: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

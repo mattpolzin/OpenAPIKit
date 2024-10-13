@@ -172,7 +172,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
         let newExamples = examples?.mapValues(eitherRefTo31)
         switch schema {
         case .a(let ref):
-            if let newExamples = newExamples {
+            if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
                     style: style,
@@ -190,7 +190,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
                 )
             }
         case .b(let schema):
-            if let newExamples = newExamples {
+            if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
                     style: style,
@@ -214,7 +214,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
 extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
         OpenAPIKit.OpenAPI.Content.Encoding(
-            contentType: contentType,
+            contentTypes: [contentType].compactMap { $0 },
             headers: headers?.mapValues(eitherRefTo31),
             style: style,
             explode: explode,

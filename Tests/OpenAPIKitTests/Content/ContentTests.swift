@@ -66,7 +66,7 @@ final class ContentTests: XCTestCase {
             example: nil,
             encoding: [
                 "hello": .init(
-                    contentType: .json,
+                    contentTypes: [.json],
                     headers: [
                         "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
                     ],
@@ -355,7 +355,7 @@ extension ContentTests {
     func test_encodingAndSchema_encode() {
         let content = OpenAPI.Content(
             schema: .init(.string),
-            encoding: ["json": .init(contentType: .json)]
+            encoding: ["json": .init(contentTypes: [.json])]
         )
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
@@ -397,7 +397,7 @@ extension ContentTests {
             content,
             OpenAPI.Content(
                 schema: .init(.string),
-                encoding: ["json": .init(contentType: .json)]
+                encoding: ["json": .init(contentTypes: [.json])]
             )
         )
     }
@@ -500,18 +500,18 @@ extension ContentTests {
     func test_encodingInit() {
         let _ = OpenAPI.Content.Encoding()
 
-        let _ = OpenAPI.Content.Encoding(contentType: .json)
+        let _ = OpenAPI.Content.Encoding(contentTypes: [.json])
 
         let _ = OpenAPI.Content.Encoding(headers: ["special": .a(.external(URL(string: "hello.yml")!))])
 
         let _ = OpenAPI.Content.Encoding(allowReserved: true)
 
-        let _ = OpenAPI.Content.Encoding(contentType: .form,
+        let _ = OpenAPI.Content.Encoding(contentTypes: [.form],
                                          headers: ["special": .a(.external(URL(string: "hello.yml")!))],
                                          allowReserved: true)
-        let _ = OpenAPI.Content.Encoding(contentType: .json,
+        let _ = OpenAPI.Content.Encoding(contentTypes: [.json],
                                          style: .form)
-        let _ = OpenAPI.Content.Encoding(contentType: .json,
+        let _ = OpenAPI.Content.Encoding(contentTypes: [.json],
                                          style: .form,
                                          explode: true)
     }
@@ -544,7 +544,7 @@ extension ContentTests {
     }
 
     func test_encoding_contentType_encode() throws {
-        let encoding = OpenAPI.Content.Encoding(contentType: .csv)
+        let encoding = OpenAPI.Content.Encoding(contentTypes: [.csv])
 
         let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
 
@@ -567,7 +567,7 @@ extension ContentTests {
         """.data(using: .utf8)!
         let encoding = try! orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
-        XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentType: .csv))
+        XCTAssertEqual(encoding, OpenAPI.Content.Encoding(contentTypes: [.csv]))
     }
 
     func test_encoding_multiple_contentTypes_encode() throws {
