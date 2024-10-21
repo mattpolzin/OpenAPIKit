@@ -558,7 +558,7 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
             let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
             let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
             var components = OpenAPI.Components()
-            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
+            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = .b(component)
             return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self).jsonReference, components, messages)
         }
     }

@@ -563,6 +563,12 @@ extension ComponentsTests {
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Components.self, from: t1))
     }
+
+    func test_encodeReference() {
+    }
+
+    func test_decodeReference() {
+    }
 }
 
 // MARK: PathItems

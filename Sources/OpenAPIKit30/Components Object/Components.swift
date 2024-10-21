@@ -17,6 +17,12 @@ extension OpenAPI {
     /// be referenced from other parts of the spec.
     public struct Components: Equatable, CodableVendorExtendable {
 
+        // All component dictionaries allow references except for schemas.
+        // OpenAPIKit code (and code using OpenAPIKit) is much simpler if all
+        // component dictionaries are the same shape, so we store schemas as if
+        // they could be references as with all other component types. we leave
+        // it to a builtin default-on validation to check that schema
+        // components are not references.
         public var schemas: ComponentDictionary<JSONSchema>
         public var responses: ComponentDictionary<Response>
         public var parameters: ComponentDictionary<Parameter>
@@ -132,7 +138,7 @@ extension OpenAPI.Components {
 
 extension OpenAPI {
 
-    public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
+    public typealias ComponentDictionary<T: ComponentDictionaryLocatable> = OrderedDictionary<ComponentKey, Either<JSONReference<T>, T>>
 }
 
 // MARK: - Codable

@@ -87,6 +87,15 @@ extension OpenAPI.Components {
         return reference.name
             .flatMap(OpenAPI.ComponentKey.init(rawValue:))
             .flatMap { self[keyPath: ReferenceType.openAPIComponentsKeyPath][$0] }
+            .flatMap { maybeReference in
+                switch maybeReference {
+                case .a(let reference):
+                  return self[reference]
+
+                case .b(let component):
+                    return component
+                }
+            }
     }
 
     /// Pass a reference to a component.
