@@ -8,7 +8,7 @@
 extension Shared {
         /// An HTTP Status code or status code range.
         ///
-        /// OpenAPI supports one of the following as a key in the [Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responses-object):
+        /// OpenAPI supports one of the following as a key in the [Responses Object](https://spec.openapis.org/oas/v3.0.4.html#responses-object):
         /// - A `default` entry.
         /// - A specific status code.
         /// - A status code range.

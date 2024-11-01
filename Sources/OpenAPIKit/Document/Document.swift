@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// The root of an OpenAPI 3.1 document.
     /// 
-    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md).
+    /// See [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html).
     ///
     /// An OpenAPI Document can say a _lot_ about the API it describes.
     /// A read-through of the specification is highly recommended because
@@ -100,7 +100,7 @@ extension OpenAPI {
         ///
         /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
         /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
-        /// See [OpenAPI Webhook Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#fixed-fields)
+        /// See [OpenAPI Webhook Object](https://spec.openapis.org/oas/v3.1.1.html#fixed-fields)
         public var webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>
         
         /// A declaration of which security mechanisms can be used across the API.
@@ -142,7 +142,7 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            openAPIVersion: Version = .v3_1_0,
+            openAPIVersion: Version = .v3_1_1,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -229,7 +229,7 @@ extension OpenAPI.Document {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.1.1.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values
@@ -413,7 +413,7 @@ extension OpenAPI {
     /// Multiple entries in this dictionary indicate all schemes named are
     /// required on the same request.
     ///
-    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#security-requirement-object).
+    /// See [OpenAPI Security Requirement Object](https://spec.openapis.org/oas/v3.1.1.html#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 

@@ -20,7 +20,7 @@ private protocol To31 {
 }
 
 extension OpenAPIKit30.OpenAPI.Document {
-    fileprivate func to31(version: OpenAPIKit.OpenAPI.Document.Version = .v3_1_0) -> OpenAPIKit.OpenAPI.Document {
+    fileprivate func to31(version: OpenAPIKit.OpenAPI.Document.Version = .v3_1_1) -> OpenAPIKit.OpenAPI.Document {
         OpenAPIKit.OpenAPI.Document(
             openAPIVersion: version,
             info: info.to31(),

@@ -15,7 +15,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Link Object"
     ///
-    /// See [OpenAPI Link Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object).
+    /// See [OpenAPI Link Object](https://spec.openapis.org/oas/v3.1.1.html#link-object).
     public struct Link: Equatable, CodableVendorExtendable {
         /// The **OpenAPI**` `operationRef` or `operationId` field, depending on whether
         /// a `URL` of a remote or local Operation Object or a `operationId` (String) of an
@@ -24,7 +24,7 @@ extension OpenAPI {
         /// A map from parameter names to either runtime expressions that evaluate to values or
         /// constant values (`AnyCodable`).
         ///
-        /// See the docuemntation for the [OpenAPI Link Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object) for more details.
+        /// See the docuemntation for the [OpenAPI Link Object](https://spec.openapis.org/oas/v3.1.1.html#link-object) for more details.
         ///
         /// Empty dictionaries will be omitted from encoding.
         public var parameters: OrderedDictionary<String, Either<RuntimeExpression, AnyCodable>>

@@ -9,7 +9,7 @@ extension Shared {
     /// Represents the HTTP methods supported by the
     /// OpenAPI Specification.
     ///
-    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object) because the supported
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.0.4.html#path-item-object) because the supported
     /// HTTP methods are enumerated as properties on that
     /// object.
     public enum HttpMethod: String, CaseIterable {

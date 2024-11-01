@@ -60,7 +60,7 @@ public protocol JSONSchemaContext {
     /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
     /// or `oneOf`) as a way to reduce redundancy.
     ///
-    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#discriminator-object).
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.1.1.html#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.
@@ -1035,7 +1035,7 @@ extension JSONSchema.CoreContext: Decodable {
                 .underlyingError(
                       InconsistencyError(
                           subjectName: "OpenAPI Schema",
-                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
                           codingPath: container.codingPath
                       )
                   )
