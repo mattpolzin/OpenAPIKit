@@ -10,10 +10,7 @@ import OpenAPIKit30
 
 public extension OpenAPIKit30.OpenAPI.Document {
     func `convert`(to version: OpenAPIKit.OpenAPI.Document.Version) -> OpenAPIKit.OpenAPI.Document {
-        switch version {
-        case .v3_1_0:
-            return self.to31()
-        }
+        return self.to31(version: version)
     }
 }
 
@@ -22,10 +19,10 @@ private protocol To31 {
     func to31() -> Destination
 }
 
-extension OpenAPIKit30.OpenAPI.Document: To31 {
-    fileprivate func to31() -> OpenAPIKit.OpenAPI.Document {
+extension OpenAPIKit30.OpenAPI.Document {
+    fileprivate func to31(version: OpenAPIKit.OpenAPI.Document.Version = .v3_1_0) -> OpenAPIKit.OpenAPI.Document {
         OpenAPIKit.OpenAPI.Document(
-            openAPIVersion: .v3_1_0,
+            openAPIVersion: version,
             info: info.to31(),
             servers: servers.map { $0.to31() },
             paths: paths.mapValues { eitherRefTo31($0) },
