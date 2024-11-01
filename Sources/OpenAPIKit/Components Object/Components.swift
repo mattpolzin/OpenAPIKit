@@ -180,7 +180,9 @@ extension OpenAPI.Components: Encodable {
             try container.encode(pathItems, forKey: .pathItems)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

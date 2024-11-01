@@ -106,7 +106,9 @@ extension OpenAPI.Example: Encodable {
             break
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

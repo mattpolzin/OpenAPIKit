@@ -118,7 +118,9 @@ extension OpenAPI.Server: Encodable {
             try container.encode(variables, forKey: .variables)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -194,7 +196,9 @@ extension OpenAPI.Server.Variable: Encodable {
 
         try container.encodeIfPresent(description, forKey: .description)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

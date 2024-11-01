@@ -174,7 +174,9 @@ extension OpenAPI.Link: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(server, forKey: .server)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
