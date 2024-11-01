@@ -57,7 +57,9 @@ extension OpenAPI.ExternalDocumentation: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encode(url.absoluteString, forKey: .url)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

@@ -168,7 +168,9 @@ extension OpenAPI.Response: Encodable {
             try container.encode(links, forKey: .links)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

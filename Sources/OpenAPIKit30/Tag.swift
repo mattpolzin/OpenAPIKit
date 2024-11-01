@@ -55,7 +55,9 @@ extension OpenAPI.Tag: Encodable {
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

@@ -104,7 +104,9 @@ extension OpenAPI.SecurityScheme: Encodable {
             try container.encode(flows, forKey: .flows)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

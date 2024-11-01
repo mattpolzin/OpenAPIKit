@@ -125,7 +125,9 @@ extension OpenAPI.SecurityScheme: Encodable {
             try container.encode(SecurityType.Name.mutualTLS, forKey: .type)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

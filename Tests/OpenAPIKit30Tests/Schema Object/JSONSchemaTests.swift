@@ -1373,6 +1373,28 @@ extension SchemaObjectTests {
         XCTAssertThrowsError(try orderUnstableDecode(JSONSchema.self, from: readOnlyWriteOnlyData))
     }
 
+    func test_decodingWithVendorExtensionsTurnedOff() throws {
+        let vendorExtendedData = """
+        {
+            "type": "object",
+            "x-hello": "hi"
+        }
+        """.data(using: .utf8)!
+
+        let nonVendorExtendedData = """
+        {
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+
+        let config = [VendorExtensionsConfiguration.enabledKey: false]
+
+        let vendorExtended = try orderUnstableDecode(JSONSchema.self, from: vendorExtendedData, userInfo: config)
+        let nonVendorExtended = try orderUnstableDecode(JSONSchema.self, from: nonVendorExtendedData, userInfo: config)
+
+        XCTAssertEqual(vendorExtended, nonVendorExtended)
+    }
+
     func test_decodingWarnsForTypeAndPropertyConflict() throws {
         // has type "object" but "items" property that belongs with the "array" type.
         let badSchema = """

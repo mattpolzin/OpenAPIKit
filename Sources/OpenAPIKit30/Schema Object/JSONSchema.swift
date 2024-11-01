@@ -264,7 +264,8 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
 extension JSONSchema: Equatable {
     public static func == (lhs: JSONSchema, rhs: JSONSchema) -> Bool {
-        lhs.value == rhs.value
+        lhs.value == rhs.value &&
+        lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
@@ -1718,7 +1719,7 @@ extension JSONSchema: Encodable {
 
         // Ad-hoc vendor extension encoding because keys are done differently for
         // JSONSchema
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: encoder) else {
             return
         }
         var container = encoder.container(keyedBy: VendorExtensionKeys.self)
@@ -1889,7 +1890,7 @@ extension JSONSchema: Decodable {
         self.warnings = _warnings
 
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             self.vendorExtensions = [:]
             return
         }

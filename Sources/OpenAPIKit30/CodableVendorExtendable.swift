@@ -21,8 +21,21 @@ public protocol VendorExtendable {
     var vendorExtensions: VendorExtensions { get set }
 }
 
+/// OpenAPIKit supports some additional Encoder/Decoder configuration above and beyond
+/// what the Encoder or Decoder support out of box.
+///
+/// To _disable_ encoding or decoding of Vendor Extensions (by default these are _enabled),
+/// set `userInfo[VendorExtensionsConfiguration.enabledKey] = false` for your encoder or decoder.
 public enum VendorExtensionsConfiguration {
-    public static var isEnabled = true
+    public static let enabledKey: CodingUserInfoKey = .init(rawValue: "vendor-extensions-enabled")!
+
+    static func isEnabled(for decoder: Decoder) -> Bool {
+        decoder.userInfo[enabledKey] as? Bool ?? true
+    }
+
+    static func isEnabled(for encoder: Encoder) -> Bool {
+        encoder.userInfo[enabledKey] as? Bool ?? true
+    }
 }
 
 internal protocol ExtendableCodingKey: CodingKey, Equatable {
@@ -75,7 +88,7 @@ internal enum VendorExtensionDecodingError: Swift.Error, CustomStringConvertible
 extension CodableVendorExtendable {
 
     internal static func extensions(from decoder: Decoder) throws -> VendorExtensions {
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             return [:]
         }
 
@@ -109,9 +122,6 @@ extension CodableVendorExtendable {
     }
 
     internal func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {
-        guard VendorExtensionsConfiguration.isEnabled else {
-            return
-        }
         for (key, value) in vendorExtensions {
             let xKey = key.starts(with: "x-") ? key : "x-\(key)"
             try container.encode(value, forKey: .extendedKey(for: xKey))

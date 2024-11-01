@@ -159,6 +159,9 @@ private struct TestStruct: Codable, CodableVendorExtendable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode("world", forKey: .one)
         try container.encode("!", forKey: .two)
-        try encodeExtensions(to: &container)
+
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }

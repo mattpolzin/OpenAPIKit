@@ -1930,7 +1930,7 @@ extension JSONSchema: Encodable {
 
         // Ad-hoc vendor extension encoding because keys are done differently for
         // JSONSchema
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: encoder) else {
             return
         }
         var container = encoder.container(keyedBy: VendorExtensionKeys.self)
@@ -2140,7 +2140,7 @@ extension JSONSchema: Decodable {
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
         let extensions: [String: AnyCodable]
 
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             self.value = value
             return
         }

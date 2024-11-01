@@ -289,7 +289,9 @@ extension OpenAPI.Header: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

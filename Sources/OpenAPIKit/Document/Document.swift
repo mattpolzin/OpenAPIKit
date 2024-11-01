@@ -456,7 +456,9 @@ extension OpenAPI.Document: Encodable {
             try container.encode(paths, forKey: .paths)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
 
         if !components.isEmpty {
             try container.encode(components, forKey: .components)

@@ -161,7 +161,9 @@ extension OpenAPI.Content: Encodable {
 
         try container.encodeIfPresent(encoding, forKey: .encoding)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

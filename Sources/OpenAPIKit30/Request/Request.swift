@@ -97,7 +97,9 @@ extension OpenAPI.Request: Encodable {
             try container.encode(required, forKey: .required)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
