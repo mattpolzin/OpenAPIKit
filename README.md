@@ -149,7 +149,7 @@ let newDoc: OpenAPIKit.OpenAPI.Document
 
 oldDoc = try? JSONDecoder().decode(OpenAPI.Document.self, from: someFileData)
 
-newDoc = oldDoc?.convert(to: .v3_1_0) ??
+newDoc = oldDoc?.convert(to: .v3_1_1) ??
   (try! JSONDecoder().decode(OpenAPI.Document.self, from: someFileData))
 // ^ Here we simply fall-back to 3.1.x if loading as 3.0.x failed. You could do a more
 //   graceful job of this by determining up front which version to attempt to load or by 
@@ -165,7 +165,7 @@ If retaining order is important for your use-case, I recommend the [**Yams**](ht
 The Foundation JSON encoding and decoding will be the most stable and battle-tested option with Yams as a pretty well established and stable option as well. FineJSON is lesser used (to my knowledge) but I have had success with it in the past.
 
 ### OpenAPI Document structure
-The types used by this library largely mirror the object definitions found in the OpenAPI specification [version 3.1.0](https://spec.openapis.org/oas/v3.1.1.html) (`OpenAPIKit` module) and [version 3.0.3](https://spec.openapis.org/oas/v3.0.4.html) (`OpenAPIKit30` module). The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library. The project status page currently focuses on OpenAPI 3.1.x but for the purposes of determining what things are named and what is supported you can mostly infer the status of the OpenAPI 3.0.x support as well.
+The types used by this library largely mirror the object definitions found in the OpenAPI specification [version 3.1.1](https://spec.openapis.org/oas/v3.1.1.html) (`OpenAPIKit` module) and [version 3.0.4](https://spec.openapis.org/oas/v3.0.4.html) (`OpenAPIKit30` module). The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library. The project status page currently focuses on OpenAPI 3.1.x but for the purposes of determining what things are named and what is supported you can mostly infer the status of the OpenAPI 3.0.x support as well.
 
 #### Document Root
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences` and `OpenAPI.References`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).

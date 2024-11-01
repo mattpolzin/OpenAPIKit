@@ -1035,7 +1035,7 @@ extension JSONSchema.CoreContext: Decodable {
                 .underlyingError(
                       InconsistencyError(
                           subjectName: "OpenAPI Schema",
-                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
                           codingPath: container.codingPath
                       )
                   )
