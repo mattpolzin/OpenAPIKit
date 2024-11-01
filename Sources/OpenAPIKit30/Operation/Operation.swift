@@ -271,7 +271,9 @@ extension OpenAPI.Operation: Encodable {
 
         try container.encodeIfPresent(servers, forKey: .servers)
         
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

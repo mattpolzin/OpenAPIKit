@@ -293,6 +293,16 @@ Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/
 
 You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
 
+If you wish to disable decoding/encoding of vendor extensions for performance reasons, you can configure the Encoder and Decoder using their `userInfo`:
+```swift
+let userInfo = [VendorExtensionsConfiguration.enabledKey: false]
+let encoder = JSONEncoder()
+encoder.userInfo = userInfo
+
+let decoder = JSONDecoder()
+decoder.userInfo = userInfo
+```
+
 #### AnyCodable
 OpenAPIKit uses the `AnyCodable` type for vendor extensions and constructing examples for JSON Schemas. OpenAPIKit's `AnyCodable` type is an adaptation of the Flight School library that can be found [here](https://github.com/Flight-School/AnyCodable).
 

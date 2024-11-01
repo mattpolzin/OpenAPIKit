@@ -257,7 +257,9 @@ extension OpenAPI.PathItem: Encodable {
         try container.encodeIfPresent(patch, forKey: .patch)
         try container.encodeIfPresent(trace, forKey: .trace)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

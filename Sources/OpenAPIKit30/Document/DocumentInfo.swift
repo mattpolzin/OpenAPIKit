@@ -128,7 +128,9 @@ extension OpenAPI.Document.Info.License: Encodable {
         try container.encode(name, forKey: .name)
         try container.encodeIfPresent(url?.absoluteString, forKey: .url)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -194,7 +196,9 @@ extension OpenAPI.Document.Info.Contact: Encodable {
         try container.encodeIfPresent(url?.absoluteString, forKey: .url)
         try container.encodeIfPresent(email, forKey: .email)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -269,7 +273,9 @@ extension OpenAPI.Document.Info: Encodable {
         try container.encodeIfPresent(license, forKey: .license)
         try container.encode(version, forKey: .version)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

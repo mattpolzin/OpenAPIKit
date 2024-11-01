@@ -176,7 +176,9 @@ extension OpenAPI.Components: Encodable {
             try container.encode(callbacks, forKey: .callbacks)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
