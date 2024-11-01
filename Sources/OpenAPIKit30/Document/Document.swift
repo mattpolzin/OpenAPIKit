@@ -135,7 +135,7 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            openAPIVersion: Version = .v3_0_0,
+            openAPIVersion: Version = .v3_0_4,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
