@@ -9,7 +9,7 @@ import OpenAPIKitCore
 
 /// OpenAPI "Schema Object"
 /// 
-/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
+/// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.0.4.html#schema-object).
 public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
     public let warnings: [OpenAPI.Warning]
     public let value: Schema

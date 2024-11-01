@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object)
-    /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values).
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.0.4.html#parameter-object)
+    /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.0.4.html#style-values).
     public struct SchemaContext: Equatable {
         public var style: Style
         public var explode: Bool
@@ -133,7 +133,7 @@ extension OpenAPI.Parameter.SchemaContext.Style {
     /// per the OpenAPI Specification.
     ///
     /// See the `style` fixed field under
-    /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.0.4.html#parameter-object).
     public static func `default`(for location: OpenAPI.Parameter.Context) -> Self {
         switch location {
         case .query:

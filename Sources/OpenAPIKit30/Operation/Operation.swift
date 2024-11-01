@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
-    /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
+    /// See [OpenAPI Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object).
     public struct Operation: Equatable, CodableVendorExtendable {
         public var tags: [String]?
         public var summary: String?

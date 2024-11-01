@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
-    /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
+    /// See [OpenAPI Server Object](https://spec.openapis.org/oas/v3.0.4.html#server-object).
     ///
     public struct Server: Equatable, CodableVendorExtendable {
         /// OpenAPI Server URLs can have variable placeholders in them.
@@ -63,7 +63,7 @@ extension OpenAPI {
 extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
-    /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
+    /// See [OpenAPI Server Variable Object](https://spec.openapis.org/oas/v3.0.4.html#server-variable-object).
     ///
     public struct Variable: Equatable, CodableVendorExtendable {
         public var `enum`: [String]

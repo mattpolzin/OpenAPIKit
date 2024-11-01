@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
-    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
+    /// See [OpenAPI Specification](https://spec.openapis.org/oas/v3.0.4.html).
     ///
     /// An OpenAPI Document can say a _lot_ about the API it describes.
     /// A read-through of the specification is highly recommended because
@@ -213,7 +213,7 @@ extension OpenAPI.Document {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values
@@ -398,7 +398,7 @@ extension OpenAPI {
     /// Multiple entries in this dictionary indicate all schemes named are
     /// required on the same request.
     ///
-    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
+    /// See [OpenAPI Security Requirement Object](https://spec.openapis.org/oas/v3.0.4.html#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 

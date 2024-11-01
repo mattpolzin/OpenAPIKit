@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
-    /// See [OpenAPI Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#response-object).
+    /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.0.4.html#response-object).
     public struct Response: Equatable, CodableVendorExtendable {
         public var description: String
         public var headers: Header.Map?

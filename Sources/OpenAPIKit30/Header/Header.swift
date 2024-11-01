@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
-    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
+    /// See [OpenAPI Header Object](https://spec.openapis.org/oas/v3.0.4.html#header-object).
     public struct Header: Equatable, CodableVendorExtendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
