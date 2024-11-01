@@ -425,6 +425,7 @@ extension OpenAPI.Document {
     /// OpenAPIKit to a certain extent.
     public enum Version: String, Codable {
         case v3_1_0 = "3.1.0"
+        case v3_1_1 = "3.1.1"
     }
 }
 
