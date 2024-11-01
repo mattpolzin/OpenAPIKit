@@ -361,6 +361,7 @@ extension OpenAPI.Document {
         case v3_0_1 = "3.0.1"
         case v3_0_2 = "3.0.2"
         case v3_0_3 = "3.0.3"
+        case v3_0_4 = "3.0.4"
     }
 }
 
