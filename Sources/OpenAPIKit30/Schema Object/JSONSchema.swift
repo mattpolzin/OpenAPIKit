@@ -9,12 +9,12 @@ import OpenAPIKitCore
 
 /// OpenAPI "Schema Object"
 /// 
-/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object).
+/// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.0.4.html#schema-object).
 public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
     public let warnings: [OpenAPI.Warning]
     public let value: Schema
 
-    public let vendorExtensions: [String: AnyCodable]
+    public var vendorExtensions: [String: AnyCodable]
 
     internal init(warnings: [OpenAPI.Warning], schema: Schema, vendorExtensions: [String: AnyCodable]) {
         self.warnings = warnings
@@ -264,7 +264,8 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
 
 extension JSONSchema: Equatable {
     public static func == (lhs: JSONSchema, rhs: JSONSchema) -> Bool {
-        lhs.value == rhs.value
+        lhs.value == rhs.value &&
+        lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
@@ -1718,7 +1719,7 @@ extension JSONSchema: Encodable {
 
         // Ad-hoc vendor extension encoding because keys are done differently for
         // JSONSchema
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: encoder) else {
             return
         }
         var container = encoder.container(keyedBy: VendorExtensionKeys.self)
@@ -1831,7 +1832,7 @@ extension JSONSchema: Decodable {
             )
         }
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(
@@ -1889,7 +1890,7 @@ extension JSONSchema: Decodable {
         self.warnings = _warnings
 
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             self.vendorExtensions = [:]
             return
         }

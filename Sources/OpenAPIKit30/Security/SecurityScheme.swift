@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
-    /// See [OpenAPI Security Scheme Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-scheme-object).
+    /// See [OpenAPI Security Scheme Object](https://spec.openapis.org/oas/v3.0.4.html#security-scheme-object).
     public struct SecurityScheme: Equatable, CodableVendorExtendable {
         public var type: SecurityType
         public var description: String?
@@ -104,7 +104,9 @@ extension OpenAPI.SecurityScheme: Encodable {
             try container.encode(flows, forKey: .flows)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -244,10 +246,16 @@ extension OpenAPI.SecurityScheme: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.SecurityScheme {
         var ret = self
-        if let name = name {
+        if let name {
             ret.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
         return ret
+    }
+}
+
+extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

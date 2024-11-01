@@ -10,7 +10,7 @@ import Foundation
 extension Shared {
     /// OpenAPI Spec "Oauth Flows Object"
     ///
-    /// See [OpenAPI Oauth Flows Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#oauth-flows-object).
+    /// See [OpenAPI Oauth Flows Object](https://spec.openapis.org/oas/v3.0.4.html#oauth-flows-object).
     public struct OAuthFlows: Equatable {
         public let implicit: Implicit?
         public let password: Password?

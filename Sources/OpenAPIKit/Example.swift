@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
-    /// See [OpenAPI Example Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#example-object).
+    /// See [OpenAPI Example Object](https://spec.openapis.org/oas/v3.1.1.html#example-object).
     public struct Example: Equatable, CodableVendorExtendable {
         public let summary: String?
         public let description: String?
@@ -25,7 +25,7 @@ extension OpenAPI {
         /// These should be of the form:
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
-        public let vendorExtensions: [String: AnyCodable]
+        public var vendorExtensions: [String: AnyCodable]
 
         public init(
             summary: String? = nil,
@@ -106,7 +106,9 @@ extension OpenAPI.Example: Encodable {
             break
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -195,7 +197,7 @@ extension OpenAPI.Example: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.Example{
         var vendorExtensions = self.vendorExtensions
-        if let name = name {
+        if let name {
             vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -205,6 +207,12 @@ extension OpenAPI.Example: LocallyDereferenceable {
             value: self.value,
             vendorExtensions: vendorExtensions
         )
+    }
+}
+
+extension OpenAPI.Example: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

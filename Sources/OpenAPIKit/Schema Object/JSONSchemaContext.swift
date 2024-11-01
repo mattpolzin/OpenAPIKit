@@ -60,7 +60,7 @@ public protocol JSONSchemaContext {
     /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
     /// or `oneOf`) as a way to reduce redundancy.
     ///
-    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#discriminator-object).
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.1.1.html#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.
@@ -133,22 +133,6 @@ public protocol JSONSchemaContext {
 
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
-}
-
-extension JSONSchemaContext {
-
-    // TODO: Remove the default implementations of the following in v4 of OpenAPIKit.
-    //       They are only here to make their addition non-breaking.
-
-    // Default implementation to make addition of this new property which is only
-    // supposed to be set internally a non-breaking addition.
-    public var inferred: Bool { false }
-
-    // Default implementation to make addition non-breaking
-    public var anchor: String? { nil }
-
-    // Default implementation to make addition non-breaking
-    public var dynamicAnchor: String? { nil }
 }
 
 extension JSONSchema {
@@ -1051,7 +1035,7 @@ extension JSONSchema.CoreContext: Decodable {
                 .underlyingError(
                       InconsistencyError(
                           subjectName: "OpenAPI Schema",
-                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
                           codingPath: container.codingPath
                       )
                   )

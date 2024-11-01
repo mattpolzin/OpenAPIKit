@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
-    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.0.4.html#path-item-object).
     ///
     /// In addition to parameters that apply to all endpoints under the current path,
     /// this type offers access to each possible endpoint operation under properties
@@ -257,7 +257,9 @@ extension OpenAPI.PathItem: Encodable {
         try container.encodeIfPresent(patch, forKey: .patch)
         try container.encodeIfPresent(trace, forKey: .trace)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

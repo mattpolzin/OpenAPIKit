@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
-    /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#request-body-object).
+    /// See [OpenAPI Request Body Object](https://spec.openapis.org/oas/v3.1.1.html#request-body-object).
     public struct Request: Equatable, CodableVendorExtendable {
         public var description: String?
         public var content: Content.Map
@@ -107,7 +107,9 @@ extension OpenAPI.Request: Encodable {
             try container.encode(required, forKey: .required)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

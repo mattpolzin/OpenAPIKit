@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
-    /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-locations).
+    /// See [OpenAPI Parameter Locations](https://spec.openapis.org/oas/v3.0.4.html#parameter-locations).
     ///
     /// Query, Header, and Cookie parameters are
     /// all optional by default unless you pass

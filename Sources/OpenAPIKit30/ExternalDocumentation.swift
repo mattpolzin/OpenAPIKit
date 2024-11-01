@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "External Documentation Object"
     /// 
-    /// See [OpenAPI External Documentation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#external-documentation-object).
+    /// See [OpenAPI External Documentation Object](https://spec.openapis.org/oas/v3.0.4.html#external-documentation-object).
     public struct ExternalDocumentation: Equatable, CodableVendorExtendable {
         public var description: String?
         public var url: URL
@@ -44,7 +44,9 @@ extension OpenAPI.ExternalDocumentation: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encode(url.absoluteString, forKey: .url)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

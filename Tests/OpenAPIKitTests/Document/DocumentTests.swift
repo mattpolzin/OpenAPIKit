@@ -356,7 +356,7 @@ final class DocumentTests: XCTestCase {
         let docData =
         """
         {
-            "openapi": "3.1.0",
+            "openapi": "3.1.1",
             "info": {
                 "title": "test",
                 "version": "1.0"
@@ -401,7 +401,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0"
+              "openapi" : "3.1.1"
             }
             """
         )
@@ -415,7 +415,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           }
@@ -503,7 +503,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
+              "openapi" : "3.1.1",
               "servers" : [
                 {
                   "url" : "http:\\/\\/google.com"
@@ -522,7 +522,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           },
@@ -563,7 +563,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
+              "openapi" : "3.1.1",
               "paths" : {
                 "\\/test" : {
                   "summary" : "hi"
@@ -582,7 +582,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
             "\\/test" : {
               "summary" : "hi"
@@ -632,7 +632,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
+              "openapi" : "3.1.1",
               "security" : [
                 {
                   "security" : [
@@ -662,7 +662,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           },
@@ -709,7 +709,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
+              "openapi" : "3.1.1",
               "tags" : [
                 {
                   "name" : "hi"
@@ -728,7 +728,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           },
@@ -774,7 +774,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0"
+              "openapi" : "3.1.1"
             }
             """
         )
@@ -791,7 +791,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           }
@@ -833,7 +833,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.0",
+              "openapi" : "3.1.1",
               "x-specialFeature" : [
                 "hello",
                 "world"
@@ -854,7 +854,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           },
@@ -894,7 +894,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "paths" : {
 
           },
@@ -946,7 +946,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
@@ -1014,7 +1014,7 @@ extension DocumentTests {
           "title": "API",
           "version": "1.0"
         },
-        "openapi": "3.1.0",
+        "openapi": "3.1.1",
         "paths": {
         },
         "webhooks": {
@@ -1084,7 +1084,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.0",
+          "openapi" : "3.1.1",
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
@@ -1130,7 +1130,7 @@ extension DocumentTests {
           "title": "API",
           "version": "1.0"
         },
-        "openapi": "3.1.0",
+        "openapi": "3.1.1",
         "webhooks": {
           "webhook-test": {
             "delete": {

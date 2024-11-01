@@ -1741,14 +1741,12 @@ extension SchemaObjectTests {
         }
         """.data(using: .utf8)!
 
-        VendorExtensionsConfiguration.isEnabled = false
+        let config = [VendorExtensionsConfiguration.enabledKey: false]
 
-        let vendorExtended = try orderUnstableDecode(JSONSchema.self, from: vendorExtendedData)
-        let nonVendorExtended = try orderUnstableDecode(JSONSchema.self, from: nonVendorExtendedData)
+        let vendorExtended = try orderUnstableDecode(JSONSchema.self, from: vendorExtendedData, userInfo: config)
+        let nonVendorExtended = try orderUnstableDecode(JSONSchema.self, from: nonVendorExtendedData, userInfo: config)
 
         XCTAssertEqual(vendorExtended, nonVendorExtended)
-
-        VendorExtensionsConfiguration.isEnabled = true
     }
 
     func test_decodingWarnsForTypeAndPropertyConflict() throws {

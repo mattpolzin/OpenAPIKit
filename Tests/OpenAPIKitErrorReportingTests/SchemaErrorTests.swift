@@ -76,7 +76,7 @@ final class SchemaErrorTests: XCTestCase {
 
             XCTAssertEqual(openAPIError.localizedDescription,
             """
-            Inconsistency encountered when parsing `OpenAPI Schema`: Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: ["null", ...]'.. at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema
+            Inconsistency encountered when parsing `OpenAPI Schema`: Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: ["null", ...]'.. at path: .paths['/hello/world'].get.responses.200.content['application/json'].schema
             """)
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",

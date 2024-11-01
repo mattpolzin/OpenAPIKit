@@ -40,8 +40,9 @@ func orderStableYAMLEncode<T: Encodable>(_ value: T) throws -> String {
     return try yamsTestEncoder.encode(value)
 }
 
-fileprivate let foundationTestDecoder = { () -> JSONDecoder in
+fileprivate func buildFoundationTestDecoder(_ userInfo: [CodingUserInfoKey: Any] = [:]) -> JSONDecoder {
     let decoder = JSONDecoder()
+    decoder.userInfo = userInfo
     if #available(macOS 10.12, *) {
         decoder.dateDecodingStrategy = .iso8601
         decoder.keyDecodingStrategy = .useDefaultKeys
@@ -51,10 +52,12 @@ fileprivate let foundationTestDecoder = { () -> JSONDecoder in
     decoder.keyDecodingStrategy = .useDefaultKeys
     #endif
     return decoder
-}()
+}
 
-func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-    return try foundationTestDecoder.decode(T.self, from: data)
+fileprivate let foundationTestDecoder = { () -> JSONDecoder in buildFoundationTestDecoder() }()
+
+func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data, userInfo : [CodingUserInfoKey: Any] = [:]) throws -> T {
+    return try buildFoundationTestDecoder(userInfo).decode(T.self, from: data)
 }
 
 fileprivate let yamsTestDecoder = { () -> YAMLDecoder in

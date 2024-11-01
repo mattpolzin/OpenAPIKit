@@ -377,7 +377,6 @@ fileprivate struct TemplatedURLWrapper: Codable {
 }
 
 // MARK: - Stack Overflow Regression Test
-#if swift(>=5.5)
 import Dispatch
 
 extension URLTemplateTests {
@@ -408,4 +407,3 @@ extension URLTemplateTests {
         }
     }
 }
-#endif

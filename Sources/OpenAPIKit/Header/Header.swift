@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
-    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#header-object).
+    /// See [OpenAPI Header Object](https://spec.openapis.org/oas/v3.1.1.html#header-object).
     public struct Header: Equatable, CodableVendorExtendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
@@ -289,7 +289,9 @@ extension OpenAPI.Header: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

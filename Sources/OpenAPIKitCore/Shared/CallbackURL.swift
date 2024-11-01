@@ -11,7 +11,7 @@ extension Shared {
     /// A URL template where the placeholders are OpenAPI **Runtime Expressions** instead
     /// of named variables.
     ///
-    /// See [OpenAPI Callback Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#callback-object) and [OpenAPI Runtime Expression](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#runtime-expressions) for more.
+    /// See [OpenAPI Callback Object](https://spec.openapis.org/oas/v3.0.4.html#callback-object) and [OpenAPI Runtime Expression](https://spec.openapis.org/oas/v3.0.4.html#runtime-expressions) for more.
     ///
     public struct CallbackURL: Hashable, RawRepresentable {
         public let template: URLTemplate
