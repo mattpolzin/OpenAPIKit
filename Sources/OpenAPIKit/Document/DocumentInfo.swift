@@ -13,13 +13,13 @@ extension OpenAPI.Document {
     ///
     /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.1.1.html#info-object).
     public struct Info: Equatable, CodableVendorExtendable {
-        public let title: String
-        public let summary: String?
-        public let description: String?
-        public let termsOfService: URL?
-        public let contact: Contact?
-        public let license: License?
-        public let version: String
+        public var title: String
+        public var summary: String?
+        public var description: String?
+        public var termsOfService: URL?
+        public var contact: Contact?
+        public var license: License?
+        public var version: String
 
         /// Dictionary of vendor extensions.
         ///
