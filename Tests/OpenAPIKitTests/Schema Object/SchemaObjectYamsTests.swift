@@ -13,7 +13,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class SchemaObjectYamsTests: XCTestCase {
     func test_nullTypeDecode() throws {

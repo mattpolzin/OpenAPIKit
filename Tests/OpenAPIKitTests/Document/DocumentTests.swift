@@ -818,7 +818,7 @@ extension DocumentTests {
             paths: [:],
             components: .noComponents,
             externalDocs: .init(url: URL(string: "http://google.com")!),
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
@@ -874,7 +874,7 @@ extension DocumentTests {
                 paths: [:],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!),
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }

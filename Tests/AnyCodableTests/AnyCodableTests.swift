@@ -9,8 +9,8 @@ class AnyCodableTests: XCTestCase {
         let _: AnyCodable = 10
         let _: AnyCodable = 3.4
         let _: AnyCodable = "hello"
-        let _: AnyCodable = ["hi", "there"]
-        let _: AnyCodable = ["hi": "there"]
+        let _: AnyCodable = .init(["hi", "there"])
+        let _: AnyCodable = .init(["hi": "there"])
     }
 
     func testEquality() throws {
@@ -153,12 +153,12 @@ class AnyCodableTests: XCTestCase {
             "boolean": true,
             "integer": 1,
             "string": "string",
-            "array": [1, 2, 3],
-            "nested": [
+            "array": .init([1, 2, 3]),
+            "nested": .init([
                 "a": "alpha",
                 "b": "bravo",
                 "c": "charlie",
-            ],
+            ]),
         ]
 
         let result = try testStringFromEncoding(of: dictionary)
