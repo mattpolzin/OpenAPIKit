@@ -14,7 +14,12 @@ class AnyCodableTests: XCTestCase {
     }
 
     func testEquality() throws {
-        XCTAssertEqual(AnyCodable(()), AnyCodable(()))
+        // nil, NSNull(), and Void() all encode as "null" and
+        // compare equally.
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(nil))
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(NSNull()))
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(()))
+
         XCTAssertEqual(AnyCodable(true), AnyCodable(true))
         XCTAssertEqual(AnyCodable(2), AnyCodable(2))
         XCTAssertEqual(AnyCodable(Int8(2)), AnyCodable(Int8(2)))
@@ -53,7 +58,8 @@ class AnyCodableTests: XCTestCase {
                     "a": "alpha",
                     "b": "bravo",
                     "c": "charlie"
-                }
+                },
+                "null": null
         }
         """.data(using: .utf8)!
         let decoder = JSONDecoder()
@@ -133,7 +139,8 @@ class AnyCodableTests: XCTestCase {
                 "a": "alpha",
                 "b": "bravo",
                 "c": "charlie"
-            }
+            },
+            "null": null
         }
         """.data(using: .utf8)!
 
@@ -146,6 +153,7 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(dictionary["string"]?.value as! String, "string")
         XCTAssertEqual(dictionary["array"]?.value as! [Int], [1, 2, 3])
         XCTAssertEqual(dictionary["nested"]?.value as! [String: String], ["a": "alpha", "b": "bravo", "c": "charlie"])
+        XCTAssertEqual(dictionary["null"], AnyCodable(nil))
     }
 
     func testJSONEncoding() throws {
@@ -159,6 +167,9 @@ class AnyCodableTests: XCTestCase {
                 "b": "bravo",
                 "c": "charlie",
             ]),
+            "null": nil,
+            "void": .init(Void()),
+            "nsnull": .init(NSNull())
         ]
 
         let result = try testStringFromEncoding(of: dictionary)
@@ -179,7 +190,10 @@ class AnyCodableTests: XCTestCase {
                 "b" : "bravo",
                 "c" : "charlie"
               },
-              "string" : "string"
+              "nsnull" : null,
+              "null" : null,
+              "string" : "string",
+              "void" : null
             }
             """
         )

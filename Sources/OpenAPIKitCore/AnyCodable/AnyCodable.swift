@@ -31,6 +31,13 @@ import Foundation
  You can encode or decode mixed-type values in dictionaries
  and other collections that require `Encodable` or `Decodable` conformance
  by declaring their contained type to be `AnyCodable`.
+
+ Note that there are some caveats related to the fact that this type centers around
+ encoding/decoding values. For example, some technically distinct nil-like types
+ are all encoded as `nil` and compare equally under the `AnyCodable` type:
+   - `nil`
+   - `NSNull()`
+   - `Void()`
  */
 public struct AnyCodable: @unchecked Sendable {
     // IMPORTANT: 
@@ -54,7 +61,11 @@ protocol _Optional {
 }
 
 extension Optional: _Optional {
-    var isNil: Bool { return self == nil }
+    var isNil: Bool { self == nil }
+}
+
+extension NSNull: _Optional {
+    var isNil: Bool { true }
 }
 
 extension AnyCodable: Encodable {
@@ -178,8 +189,28 @@ extension AnyCodable: Decodable {
     }
 }
 
+func isNilEquivalent(value: AnyCodable) -> Bool {
+    let valueIsNil: Bool
+
+    if let optionalValue = value.value as? _Optional,
+           optionalValue.isNil {
+        valueIsNil = true
+    } else if let _ = value.value as? Void {
+        valueIsNil = true
+    } else {
+        valueIsNil = false
+    }
+
+    return valueIsNil
+}
+
 extension AnyCodable: Equatable {
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
+        // special case for nil
+        if isNilEquivalent(value: lhs) && isNilEquivalent(value: rhs) {
+            return true
+        }
+
         switch (lhs.value, rhs.value) {
         case is (Void, Void):
             return true
