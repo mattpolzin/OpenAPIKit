@@ -49,9 +49,23 @@ public struct AnyCodable: @unchecked Sendable {
     }
 }
 
+protocol _Optional {
+    var isNil: Bool { get }
+}
+
+extension Optional: _Optional {
+    var isNil: Bool { return self == nil }
+}
+
 extension AnyCodable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
+
+        // special nil case
+        if let optionalValue = value as? _Optional, optionalValue.isNil {
+          try container.encodeNil()
+          return
+        }
 
         switch value {
             #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)

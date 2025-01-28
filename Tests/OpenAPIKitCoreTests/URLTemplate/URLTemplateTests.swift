@@ -391,7 +391,7 @@ extension URLTemplateTests {
     }
 
     """.utf8)
-        let document = try JSONDecoder().decode(
+        let _ = try JSONDecoder().decode(
             StackFoo.self,
             from: data
         )
