@@ -395,7 +395,6 @@ extension URLTemplateTests {
             StackFoo.self,
             from: data
         )
-        print(document)
     }
 
     func test_avoid_stack_overflow() async throws {
