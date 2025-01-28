@@ -32,11 +32,20 @@ import Foundation
  and other collections that require `Encodable` or `Decodable` conformance
  by declaring their contained type to be `AnyCodable`.
  */
-public struct AnyCodable {
+public struct AnyCodable: @unchecked Sendable {
+    // IMPORTANT: 
+    //  We rely on the fact that AnyCodable can only be constructed with an initializer that knows
+    //  the type of its argument to be Sendable in order to confidently state that AnyCodable itself
+    //  is @unchecked Sendable.
     public let value: Any
 
-    public init<T>(_ value: T?) {
+    public init<T: Sendable>(_ value: T?) {
         self.value = value ?? ()
+    }
+
+    // Dangerous, but we use this below where we must transform AnyCodable by e.g. mapping on its value
+    fileprivate init(trusted value: Any) {
+        self.value = value
     }
 }
 
@@ -83,9 +92,9 @@ extension AnyCodable: Encodable {
             try container.encode(date)
         case let url as URL:
             try container.encode(url)
-        case let array as [Any?]:
+        case let array as [(any Sendable)?]:
             try container.encode(array.map { AnyCodable($0) })
-        case let dictionary as [String: Any?]:
+        case let dictionary as [String: (any Sendable)?]:
             try container.encode(dictionary.mapValues { AnyCodable($0) })
         case let encodableValue as Encodable:
             try container.encode(encodableValue)
@@ -146,9 +155,9 @@ extension AnyCodable: Decodable {
         } else if let string = try? container.decode(String.self) {
             self.init(string)
         } else if let array = try? container.decode([AnyCodable].self) {
-            self.init(array.map { $0.value })
+            self.init(trusted: array.map { $0.value })
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
-            self.init(dictionary.mapValues { $0.value })
+            self.init(trusted: dictionary.mapValues { $0.value })
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
         }
@@ -249,12 +258,10 @@ extension AnyCodable: ExpressibleByBooleanLiteral {}
 extension AnyCodable: ExpressibleByIntegerLiteral {}
 extension AnyCodable: ExpressibleByFloatLiteral {}
 extension AnyCodable: ExpressibleByStringLiteral {}
-extension AnyCodable: ExpressibleByArrayLiteral {}
-extension AnyCodable: ExpressibleByDictionaryLiteral {}
 
 extension AnyCodable {
     public init(nilLiteral _: ()) {
-        self.init(nil as Any?)
+        self.init(trusted: (nil as Any?) as Any)
     }
 
     public init(booleanLiteral value: Bool) {
@@ -271,13 +278,5 @@ extension AnyCodable {
 
     public init(stringLiteral value: String) {
         self.init(value)
-    }
-
-    public init(arrayLiteral elements: Any...) {
-        self.init(elements)
-    }
-
-    public init(dictionaryLiteral elements: (AnyHashable, Any)...) {
-        self.init([AnyHashable: Any](elements, uniquingKeysWith: { first, _ in first }))
     }
 }

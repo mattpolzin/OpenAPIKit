@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 
     /// See [OpenAPI Media Type Object](https://spec.openapis.org/oas/v3.0.4.html#media-type-object).
-    public struct Content: Equatable, CodableVendorExtendable {
+    public struct Content: Equatable, CodableVendorExtendable, Sendable {
         public var schema: Either<JSONReference<JSONSchema>, JSONSchema>?
         public var example: AnyCodable?
         public var examples: Example.Map?

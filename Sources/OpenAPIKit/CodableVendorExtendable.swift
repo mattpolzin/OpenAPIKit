@@ -98,7 +98,7 @@ extension CodableVendorExtendable {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
 
-        guard let decodedAny = decoded as? [String: Any] else {
+        guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 

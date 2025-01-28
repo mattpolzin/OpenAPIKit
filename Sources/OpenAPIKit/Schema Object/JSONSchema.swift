@@ -10,7 +10,7 @@ import OpenAPIKitCore
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.1.1.html#schema-object).
-public struct JSONSchema: JSONSchemaContext, HasWarnings {
+public struct JSONSchema: JSONSchemaContext, HasWarnings, Sendable {
 
     public let warnings: [OpenAPI.Warning]
     public var value: Schema
@@ -68,7 +68,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
         .init(schema: .fragment(core))
     }
 
-    public enum Schema: Equatable {
+    public enum Schema: Equatable, Sendable {
         /// The null type, which replaces the functionality of the `nullable` property from
         /// previous versions of the OpenAPI specification.
         case null(CoreContext<JSONTypeFormat.AnyFormat>)
@@ -2151,7 +2151,7 @@ extension JSONSchema: Decodable {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
 
-        guard let decodedAny = decoded as? [String: Any] else {
+        guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 

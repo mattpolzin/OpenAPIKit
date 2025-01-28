@@ -16,7 +16,7 @@ extension OpenAPI.Parameter {
     /// all optional by default unless you pass
     /// `required: true` to the context construction.
     /// Path parameters are always required.
-    public enum Context: Equatable {
+    public enum Context: Equatable, Sendable {
         case query(required: Bool, allowEmptyValue: Bool)
         case header(required: Bool)
         case path

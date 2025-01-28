@@ -62,7 +62,7 @@ public func ~=(lhs: JSONSchemaResolutionError, rhs: JSONSchemaResolutionError) -
 /// I expect this to be an area where I may want to make fixes and add
 /// errors without breaknig changes, so this annoying workaround for
 /// the absense of a "non-frozen" enum is a must.
-internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
+internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable, Sendable {
     case unsupported(because: String)
     case typeConflict(original: JSONType, new: JSONType)
     case formatConflict(original: String, new: String)

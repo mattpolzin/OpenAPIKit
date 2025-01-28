@@ -10,7 +10,7 @@ extension Shared {
         ///
         /// See [OpenAPI Paths Object](https://spec.openapis.org/oas/v3.0.4.html#paths-object)
         /// and [OpenAPI Patterned Fields](https://spec.openapis.org/oas/v3.0.4.html#patterned-fields).
-    public struct Path: RawRepresentable, Equatable, Hashable {
+    public struct Path: RawRepresentable, Equatable, Hashable, Sendable {
         public let components: [String]
         public let trailingSlash: Bool
 

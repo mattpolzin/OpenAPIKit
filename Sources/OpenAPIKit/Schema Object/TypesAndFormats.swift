@@ -27,7 +27,7 @@ public protocol SwiftTyped {
 /// - number
 /// - integer
 /// - string
-public enum JSONType: String, Codable {
+public enum JSONType: String, Codable, Sendable {
     case null = "null"
     case boolean = "boolean"
     case object = "object"
@@ -55,7 +55,7 @@ public enum JSONType: String, Codable {
 /// You can also find information on types and
 /// formats in the OpenAPI Specification's
 /// section on [data types](https://spec.openapis.org/oas/v3.1.1.html#data-types).
-public enum JSONTypeFormat: Equatable {
+public enum JSONTypeFormat: Equatable, Sendable {
     case null
     case boolean(BooleanFormat)
     case object(ObjectFormat)
@@ -115,7 +115,7 @@ public enum JSONTypeFormat: Equatable {
 ///
 /// See "formats" under the OpenAPI [data type](https://spec.openapis.org/oas/v3.1.1.html#data-types)
 /// documentation.
-public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable where RawValue == String {
+public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable, Sendable where RawValue == String {
     static var unspecified: Self { get }
 
     var jsonType: JSONType { get }

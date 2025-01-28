@@ -4,7 +4,7 @@
 
 import OpenAPIKitCore
 
-extension Array where Element: ExternallyDereferenceable {
+extension Array where Element: ExternallyDereferenceable & Sendable {
 
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         try await withThrowingTaskGroup(of: (Int, (Element, OpenAPI.Components, [Loader.Message])).self) { group in

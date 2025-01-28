@@ -12,7 +12,7 @@ import OpenAPIKitCore
 /// A schema context stores information about a schema.
 /// All schemas can have the contextual information in
 /// this protocol.
-public protocol JSONSchemaContext {
+public protocol JSONSchemaContext: Sendable {
     /// The format of the schema as a string value.
     ///
     /// This can be set even when a schema type has
@@ -574,8 +574,8 @@ extension JSONSchema {
     /// `IntegerContext` _can_ be asked for the
     /// `NumericContext` that would describe it via its
     /// `numericContext` property.
-    public struct NumericContext: Equatable {
-        public struct Bound: Equatable {
+    public struct NumericContext: Equatable, Sendable {
+        public struct Bound: Equatable, Sendable {
             public let value: Double
             public let exclusive: Bool
 
@@ -610,8 +610,8 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.integer` schemas.
-    public struct IntegerContext: Equatable {
-        public struct Bound: Equatable {
+    public struct IntegerContext: Equatable, Sendable {
+        public struct Bound: Equatable, Sendable {
             public let value: Int
             public let exclusive: Bool
 
@@ -696,7 +696,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.array` schemas.
-    public struct ArrayContext: Equatable {
+    public struct ArrayContext: Equatable, Sendable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
         public let items: JSONSchema?
@@ -729,7 +729,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.object` schemas.
-    public struct ObjectContext: Equatable {
+    public struct ObjectContext: Equatable, Sendable {
         /// The maximum number of properties the object
         /// is allowed to have.
         public let maxProperties: Int?
@@ -796,7 +796,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.string` schemas.
-    public struct StringContext: Equatable {
+    public struct StringContext: Equatable, Sendable {
         public let maxLength: Int?
         let _minLength: Int?
 
@@ -833,7 +833,7 @@ extension JSONSchema {
 
 extension OpenAPI {
     /// An encoding, as specified in RFC 2045, part 6.1 and RFC 4648.
-    public enum ContentEncoding: String, Codable {
+    public enum ContentEncoding: String, Codable, Sendable {
         case _7bit = "7bit"
         case _8bit = "8bit"
         case binary

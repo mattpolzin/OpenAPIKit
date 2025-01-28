@@ -13,7 +13,7 @@ extension Shared {
     ///
     /// See [OpenAPI Callback Object](https://spec.openapis.org/oas/v3.0.4.html#callback-object) and [OpenAPI Runtime Expression](https://spec.openapis.org/oas/v3.0.4.html#runtime-expressions) for more.
     ///
-    public struct CallbackURL: Hashable, RawRepresentable {
+    public struct CallbackURL: Hashable, RawRepresentable, Sendable {
         public let template: URLTemplate
 
         /// The string value of the URL without variable replacement.

@@ -274,6 +274,10 @@ extension OrderedDictionary: Equatable where Value: Equatable {
     }
 }
 
+// MARK: - Sendable
+
+extension OrderedDictionary: Sendable where Key: Sendable, Value: Sendable {}
+
 // MARK: - Codable
 public struct AnyCodingKey: CodingKey {
 

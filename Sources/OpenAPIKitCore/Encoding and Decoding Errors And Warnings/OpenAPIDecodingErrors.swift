@@ -37,7 +37,7 @@ public protocol PathContextError {
     var codingPath: [CodingKey] { get }
 }
 
-public protocol OpenAPIError: Swift.Error, CustomStringConvertible, PathContextError {
+public protocol OpenAPIError: Swift.Error, CustomStringConvertible, PathContextError, Sendable {
     /// The subject of the error (i.e. the thing being worked with
     ///     when the error occurred).
     ///

@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
     /// See [OpenAPI Header Object](https://spec.openapis.org/oas/v3.0.4.html#header-object).
-    public struct Header: Equatable, CodableVendorExtendable {
+    public struct Header: Equatable, CodableVendorExtendable, Sendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
         public let description: String?

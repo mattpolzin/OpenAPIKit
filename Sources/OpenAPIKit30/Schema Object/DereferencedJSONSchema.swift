@@ -162,7 +162,7 @@ extension DereferencedJSONSchema {
     }
 
     /// The context that only applies to `.array` schemas.
-    public struct ArrayContext: Equatable {
+    public struct ArrayContext: Equatable, Sendable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
         public let items: DereferencedJSONSchema?
@@ -230,7 +230,7 @@ extension DereferencedJSONSchema {
     }
 
     /// The context that only applies to `.object` schemas.
-    public struct ObjectContext: Equatable {
+    public struct ObjectContext: Equatable, Sendable {
         public let maxProperties: Int?
         let _minProperties: Int?
         public let properties: OrderedDictionary<String, DereferencedJSONSchema>
