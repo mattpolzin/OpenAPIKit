@@ -20,6 +20,7 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(AnyCodable(nil), AnyCodable(NSNull()))
         XCTAssertEqual(AnyCodable(nil), AnyCodable(()))
 
+        XCTAssertEqual(AnyCodable(()), AnyCodable(()))
         XCTAssertEqual(AnyCodable(true), AnyCodable(true))
         XCTAssertEqual(AnyCodable(2), AnyCodable(2))
         XCTAssertEqual(AnyCodable(Int8(2)), AnyCodable(Int8(2)))
@@ -39,10 +40,17 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(AnyCodable([AnyCodable("hi"), AnyCodable("there")]), AnyCodable([AnyCodable("hi"), AnyCodable("there")]))
         XCTAssertEqual(AnyCodable(["hi":1]), AnyCodable(["hi":1]))
         XCTAssertEqual(AnyCodable(["hi":1.2]), AnyCodable(["hi":1.2]))
+        XCTAssertEqual(AnyCodable(["hi":true]), AnyCodable(["hi":true]))
         XCTAssertEqual(AnyCodable(["hi"]), AnyCodable(["hi"]))
         XCTAssertEqual(AnyCodable([1]), AnyCodable([1]))
         XCTAssertEqual(AnyCodable([1.2]), AnyCodable([1.2]))
         XCTAssertEqual(AnyCodable([true]), AnyCodable([true]))
+
+        // force the array of Any branch:
+        XCTAssertEqual(AnyCodable([StringThing(value: "hi")]), AnyCodable([StringThing(value: "hi")]))
+
+        // force the dictionary of Any branch:
+        XCTAssertEqual(AnyCodable(["hi": StringThing(value: "hi")]), AnyCodable(["hi": StringThing(value: "hi")]))
 
         XCTAssertNotEqual(AnyCodable(()), AnyCodable(true))
     }
@@ -86,6 +94,7 @@ class AnyCodableTests: XCTestCase {
 
     func testVoidDescription() {
         XCTAssertEqual(String(describing: AnyCodable(Void())), "nil")
+        XCTAssertEqual(AnyCodable(Void()).debugDescription, "AnyCodable(nil)")
     }
 
     func test_encodedDecodedURL() throws {
@@ -269,6 +278,10 @@ class AnyCodableTests: XCTestCase {
     }
 }
 
-fileprivate struct Wrapper: Codable {
+fileprivate struct Wrapper: Codable, Equatable {
     let value: AnyCodable
+}
+
+fileprivate struct StringThing: Codable, Equatable {
+    let value: String
 }

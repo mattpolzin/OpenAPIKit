@@ -212,8 +212,6 @@ extension AnyCodable: Equatable {
         }
 
         switch (lhs.value, rhs.value) {
-        case is (Void, Void):
-            return true
         case let (lhs as Bool, rhs as Bool):
             return lhs == rhs
         case let (lhs as Int, rhs as Int):
@@ -268,6 +266,21 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as [Any], rhs as [Any]):
             return lhs.map(AnyCodable.init) == rhs.map(AnyCodable.init)
+        case let (lhs as Encodable, rhs as Encodable):
+            let encoder = JSONEncoder()
+            let lhsData: Data
+            do {
+              lhsData = try encoder.encode(lhs)
+            } catch {
+              return false
+            }
+            let rhsData: Data
+            do {
+              rhsData = try encoder.encode(rhs)
+            } catch {
+              return false
+            }
+            return lhsData == rhsData
         default:
             return false
         }
