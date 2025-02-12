@@ -217,12 +217,13 @@ extension OpenAPI.Document {
         }
     }
 
-    /// Retrieve an array of all locally defined Operation Ids defined by
-    /// this API. These Ids are guaranteed to be unique by
+    /// Retrieve an array of all Operation Ids defined by locally
+    /// by this API. These Ids are guaranteed to be unique by
     /// the OpenAPI Specification.
     ///
-    /// PathItems will be looked up in the components, but any remote references
-    /// or path items missing from the components will be ignored.
+    /// `PathItems` from `paths` and `webhooks` will be looked
+    /// up in the components, but any remote references or path items
+    /// missing from the components will be ignored.
     ///
     /// The ordering is not necessarily significant, but it will
     /// be the order in which each operation is occurred within
@@ -232,10 +233,10 @@ extension OpenAPI.Document {
     /// See [Operation Object](https://spec.openapis.org/oas/v3.1.1.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
-        return paths.values
-            .compactMap { components[$0] }
-            .flatMap { $0.endpoints }
-            .compactMap { $0.operation.operationId }
+      return (paths.values + webhooks.values)
+        .compactMap { components[$0] }
+        .flatMap { $0.endpoints }
+        .compactMap { $0.operation.operationId }
     }
 
     /// All servers referenced anywhere in the whole document.
@@ -296,7 +297,7 @@ extension OpenAPI.Document {
             }
         }
 
-        for pathItem in paths.values {
+        for pathItem in (paths.values + webhooks.values) {
             let pathItemServers = components[pathItem]?.servers ?? []
             pathItemServers.forEach(insertUniquely)
 
@@ -317,7 +318,7 @@ extension OpenAPI.Document {
     public var allTags: Set<String> {
         return Set(
             (tags ?? []).map { $0.name }
-            + paths.values.compactMap { components[$0] }
+            + (paths.values + webhooks.values).compactMap { components[$0] }
                 .flatMap { $0.endpoints }
                 .flatMap { $0.operation.tags ?? [] }
         )

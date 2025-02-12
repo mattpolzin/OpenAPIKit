@@ -79,6 +79,7 @@ final class DocumentTests: XCTestCase {
     }
 
     func test_getAllOperationIds() {
+        // paths, no operation ids, no components, no webhooks
         let t1 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
@@ -93,6 +94,7 @@ final class DocumentTests: XCTestCase {
 
         XCTAssertEqual(t1.allOperationIds, [])
 
+        // paths, one operation id (second one nil), no components, no webhooks
         let t2 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
@@ -107,6 +109,7 @@ final class DocumentTests: XCTestCase {
 
         XCTAssertEqual(t2.allOperationIds, ["test"])
 
+        // paths, multiple operation ids, no components, no webhooks
         let t3 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
@@ -121,6 +124,7 @@ final class DocumentTests: XCTestCase {
 
         XCTAssertEqual(t3.allOperationIds, ["test", "two"])
 
+        // paths, one operation id (first one nil), no components, no webhooks
         let t4 = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
             servers: [],
@@ -134,6 +138,36 @@ final class DocumentTests: XCTestCase {
         )
 
         XCTAssertEqual(t4.allOperationIds, ["two"])
+
+        // paths, one operation id, one component reference, no webhooks
+        let t5 = OpenAPI.Document(
+          info: .init(title: "test", version: "1.0"),
+          servers: [],
+          paths: [
+            "/hello": .init(
+              get: .init(operationId: "test", responses: [:])),
+            "/hello/world": .reference(.component(named: "hello-world"))
+          ],
+          components: .init(
+              pathItems: ["hello-world": .init(put: .init(operationId: "two", responses: [:]))]
+          )
+        )
+
+        XCTAssertEqual(t5.allOperationIds, ["test", "two"])
+
+        // no paths, one webhook with an operation id
+        let t6 = OpenAPI.Document(
+          info: .init(title: "test", version: "1.0"),
+          servers: [],
+          paths: [:],
+          webhooks: [
+            "/hello": .init(
+              get: .init(operationId: "test", responses: [:]))
+          ],
+          components: .noComponents
+        )
+
+        XCTAssertEqual(t6.allOperationIds, ["test"])
     }
 
     func test_allServersEmpty() {
