@@ -251,6 +251,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":false}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable(false))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, "false")
     }
 
     func test_encodeInt() throws {
@@ -259,6 +265,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":2}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable(2))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, "2")
     }
 
     func test_encodeString() throws {
@@ -267,6 +279,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":"hi"}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable("hi"))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, #""hi""#)
     }
 
     func test_encodeURL() throws {
