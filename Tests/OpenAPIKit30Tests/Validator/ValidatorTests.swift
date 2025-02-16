@@ -1444,6 +1444,12 @@ final class ValidatorTests: XCTestCase {
             "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
         )
         XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+        XCTAssertNotNil(warnings.first?.underlyingError)
+        XCTAssertNotNil(warnings.first?.errorCategory)
+        XCTAssertEqual(warnings.first?.subjectName, "")
+        XCTAssertEqual(warnings.first?.contextString, "")
+
+        XCTAssertEqual(warnings.first?.localizedDescription, warnings.first?.description)
     }
 
     func test_collectsContentTypeWarningStrict() throws {

@@ -9,7 +9,7 @@ import OpenAPIKitCore
 import XCTest
 
 final class CallbackURLTests: XCTestCase {
-    func testInit() {
+    func test_init() {
         let plainUrl = Shared.CallbackURL(url: URL(string: "https://hello.com")!)
         XCTAssertEqual(plainUrl.url, URL(string: "https://hello.com")!)
         XCTAssertEqual(plainUrl.template.variables.count, 0)
@@ -19,7 +19,7 @@ final class CallbackURLTests: XCTestCase {
         XCTAssertEqual(templateUrl?.template.variables, ["$request.path.id"])
     }
 
-    func testEncode() throws {
+    func test_encode() throws {
         let url = Shared.CallbackURL(rawValue: "https://hello.com/item/{$request.path.id}")
 
         let result = try orderUnstableTestStringFromEncoding(of: url)
@@ -32,7 +32,7 @@ final class CallbackURLTests: XCTestCase {
         )
     }
 
-    func testDecode() throws {
+    func test_decode() throws {
         let json = #""https://hello.com/item/{$request.path.id}""#
         let data = json.data(using: .utf8)!
 
