@@ -26,6 +26,7 @@ final class DocumentErrorTests: XCTestCase {
             let openAPIError = OpenAPI.Error(from: error)
 
             XCTAssertEqual(openAPIError.localizedDescription, "Expected to find `openapi` key in the root Document object but it is missing.")
+            XCTAssertEqual(openAPIError.localizedDescription, openAPIError.description)
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [])
         }
     }
