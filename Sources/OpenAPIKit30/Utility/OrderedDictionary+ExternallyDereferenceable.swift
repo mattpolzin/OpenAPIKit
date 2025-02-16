@@ -7,7 +7,7 @@
 
 import OpenAPIKitCore
 
-extension OrderedDictionary where Value: ExternallyDereferenceable {
+extension OrderedDictionary where Key: Sendable, Value: ExternallyDereferenceable & Sendable {
 
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         try await withThrowingTaskGroup(of: (Key, Value, OpenAPI.Components, [Loader.Message]).self) { group in

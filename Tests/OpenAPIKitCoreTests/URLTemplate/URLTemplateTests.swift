@@ -391,11 +391,10 @@ extension URLTemplateTests {
     }
 
     """.utf8)
-        let document = try JSONDecoder().decode(
+        let _ = try JSONDecoder().decode(
             StackFoo.self,
             from: data
         )
-        print(document)
     }
 
     func test_avoid_stack_overflow() async throws {

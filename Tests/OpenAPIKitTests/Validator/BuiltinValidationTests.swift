@@ -330,7 +330,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -357,7 +357,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -381,7 +381,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -408,7 +408,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),

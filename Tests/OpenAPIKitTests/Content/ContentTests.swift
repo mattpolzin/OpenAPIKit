@@ -205,7 +205,7 @@ extension ContentTests {
 
     func test_exampleAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
-                                      example: [ "hello": "world" ])
+                                      example: .init([ "hello": "world" ]))
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(
@@ -260,7 +260,7 @@ extension ContentTests {
 
     func test_examplesAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
-                                      examples: ["hello": .b(OpenAPI.Example(value: .init([ "hello": "world" ])))])
+                                      examples: ["hello": .b(OpenAPI.Example(value: .init(.init([ "hello": "world" ]))))])
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(
@@ -405,7 +405,7 @@ extension ContentTests {
     func test_vendorExtensions_encode() {
         let content = OpenAPI.Content(
             schema: .init(.string),
-            vendorExtensions: [ "x-hello": [ "world": 123 ] ]
+            vendorExtensions: [ "x-hello": .init([ "world": 123 ]) ]
         )
 
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
@@ -428,7 +428,7 @@ extension ContentTests {
     func test_vendorExtensions_encode_fixKey() {
         let content = OpenAPI.Content(
             schema: .init(.string),
-            vendorExtensions: [ "hello": [ "world": 123 ] ]
+            vendorExtensions: [ "hello": .init([ "world": 123 ]) ]
         )
 
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)

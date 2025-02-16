@@ -21,7 +21,7 @@ extension OpenAPI {
     ///
     /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
     /// `endpoints` property.
-    public struct PathItem: Equatable, CodableVendorExtendable {
+    public struct PathItem: Equatable, CodableVendorExtendable, Sendable {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?

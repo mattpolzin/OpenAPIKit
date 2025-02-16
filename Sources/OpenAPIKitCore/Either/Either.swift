@@ -56,3 +56,5 @@ public enum Either<A, B> {
 
 extension Either: Equatable where A: Equatable, B: Equatable {}
 
+extension Either: Sendable where A: Sendable, B: Sendable {}
+

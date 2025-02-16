@@ -103,7 +103,7 @@ extension DocumentInfoTests {
         let license = OpenAPI.Document.Info.License(
             name: "MIT",
             url: URL(string: "http://website.com")!,
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encodedLicense = try orderUnstableTestStringFromEncoding(of: license)
@@ -142,7 +142,7 @@ extension DocumentInfoTests {
             OpenAPI.Document.Info.License(
                 name: "MIT",
                 url: URL(string: "http://website.com")!,
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }
@@ -240,7 +240,7 @@ extension DocumentInfoTests {
     func test_contact_vendorExtensions_encode() throws {
         let contact = OpenAPI.Document.Info.Contact(
             email: "email",
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encodedContact = try orderUnstableTestStringFromEncoding(of: contact)
@@ -276,7 +276,7 @@ extension DocumentInfoTests {
             contact,
             .init(
                 email: "email",
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }
@@ -508,7 +508,7 @@ extension DocumentInfoTests {
             title: "title",
             license: .init(name: "license"),
             version: "1.0",
-            vendorExtensions: ["x-speacialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-speacialFeature": .init(["hello", "world"])]
         )
 
         let encodedInfo = try orderUnstableTestStringFromEncoding(of: info)
@@ -554,7 +554,7 @@ extension DocumentInfoTests {
                 title: "title",
                 license: .init(name: "license"),
                 version: "1.0",
-                vendorExtensions: ["x-speacialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-speacialFeature": .init(["hello", "world"])]
             )
         )
     }

@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
     /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.1.1.html#response-object).
-    public struct Response: Equatable, CodableVendorExtendable {
+    public struct Response: Equatable, CodableVendorExtendable, Sendable {
         public var description: String
         public var headers: Header.Map?
         /// An empty Content map will be omitted from encoding.

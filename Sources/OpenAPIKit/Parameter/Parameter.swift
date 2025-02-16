@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
-    public struct Parameter: Equatable, CodableVendorExtendable {
+    public struct Parameter: Equatable, CodableVendorExtendable, Sendable {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.

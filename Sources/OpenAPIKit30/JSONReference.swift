@@ -39,7 +39,7 @@ import Foundation
 /// Components Object will be validated when you call `validate()` on an
 /// `OpenAPI.Document`.
 ///
-public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
+public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference, Sendable {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
     /// The reference refers to another file.
@@ -112,7 +112,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     /// `JSONReference`.
     ///
     /// This reference must start with "#".
-    public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
+    public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable, Sendable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
         /// The reference refers to some path outside the Components Object.
@@ -190,7 +190,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     ///
     /// This path does _not_ start with "#". It starts with a forward slash. By contrast, an
     /// `InternalReference` starts with "#" and is followed by the start of a `Path`.
-    public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
+    public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable, Sendable {
 
         /// The Path's components. In the `rawValue`, these components are joined
         /// with forward slashes '/' per the JSON Reference specification.

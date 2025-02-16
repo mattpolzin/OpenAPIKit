@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Yams
+@preconcurrency import Yams
 import XCTest
 
 fileprivate let foundationTestEncoder = { () -> JSONEncoder in

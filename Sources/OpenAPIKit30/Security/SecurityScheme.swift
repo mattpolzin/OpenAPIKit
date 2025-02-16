@@ -12,7 +12,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
     /// See [OpenAPI Security Scheme Object](https://spec.openapis.org/oas/v3.0.4.html#security-scheme-object).
-    public struct SecurityScheme: Equatable, CodableVendorExtendable {
+    public struct SecurityScheme: Equatable, CodableVendorExtendable, Sendable {
         public var type: SecurityType
         public var description: String?
 
@@ -49,7 +49,7 @@ extension OpenAPI {
             return .init(type: .openIdConnect(openIdConnectUrl: url), description: description)
         }
 
-        public enum SecurityType: Equatable {
+        public enum SecurityType: Equatable, Sendable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
             case oauth2(flows: OAuthFlows)

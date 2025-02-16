@@ -12,7 +12,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
     /// See [OpenAPI Example Object](https://spec.openapis.org/oas/v3.0.4.html#example-object).
-    public struct Example: Equatable, CodableVendorExtendable {
+    public struct Example: Equatable, CodableVendorExtendable, Sendable {
         public let summary: String?
         public let description: String?
 

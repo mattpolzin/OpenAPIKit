@@ -10,7 +10,7 @@ import OpenAPIKitCore
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.0.4.html#schema-object).
-public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
+public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable, Sendable {
     public let warnings: [OpenAPI.Warning]
     public let value: Schema
 
@@ -74,7 +74,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, VendorExtendable {
         .init(schema: .fragment(core))
     }
 
-    public enum Schema: Equatable {
+    public enum Schema: Equatable, Sendable {
         case boolean(CoreContext<JSONTypeFormat.BooleanFormat>)
         case number(CoreContext<JSONTypeFormat.NumberFormat>, NumericContext)
         case integer(CoreContext<JSONTypeFormat.IntegerFormat>, IntegerContext)
@@ -1901,7 +1901,7 @@ extension JSONSchema: Decodable {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
 
-        guard let decodedAny = decoded as? [String: Any] else {
+        guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 

@@ -319,7 +319,7 @@ extension ComponentsTests {
             pathItems: [
                 "ten": .init(get: .init(responses: [200: .response(description: "response")]))
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encoded = try orderUnstableTestStringFromEncoding(of: t1)
@@ -541,7 +541,7 @@ extension ComponentsTests {
                 pathItems: [
                     "ten": .init(get: .init(responses: [200: .response(description: "response")]))
                 ],
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }

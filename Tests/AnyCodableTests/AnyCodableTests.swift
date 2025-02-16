@@ -9,11 +9,17 @@ class AnyCodableTests: XCTestCase {
         let _: AnyCodable = 10
         let _: AnyCodable = 3.4
         let _: AnyCodable = "hello"
-        let _: AnyCodable = ["hi", "there"]
-        let _: AnyCodable = ["hi": "there"]
+        let _: AnyCodable = .init(["hi", "there"])
+        let _: AnyCodable = .init(["hi": "there"])
     }
 
     func testEquality() throws {
+        // nil, NSNull(), and Void() all encode as "null" and
+        // compare equally.
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(nil))
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(NSNull()))
+        XCTAssertEqual(AnyCodable(nil), AnyCodable(()))
+
         XCTAssertEqual(AnyCodable(()), AnyCodable(()))
         XCTAssertEqual(AnyCodable(true), AnyCodable(true))
         XCTAssertEqual(AnyCodable(2), AnyCodable(2))
@@ -34,10 +40,17 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(AnyCodable([AnyCodable("hi"), AnyCodable("there")]), AnyCodable([AnyCodable("hi"), AnyCodable("there")]))
         XCTAssertEqual(AnyCodable(["hi":1]), AnyCodable(["hi":1]))
         XCTAssertEqual(AnyCodable(["hi":1.2]), AnyCodable(["hi":1.2]))
+        XCTAssertEqual(AnyCodable(["hi":true]), AnyCodable(["hi":true]))
         XCTAssertEqual(AnyCodable(["hi"]), AnyCodable(["hi"]))
         XCTAssertEqual(AnyCodable([1]), AnyCodable([1]))
         XCTAssertEqual(AnyCodable([1.2]), AnyCodable([1.2]))
         XCTAssertEqual(AnyCodable([true]), AnyCodable([true]))
+
+        // force the array of Any branch:
+        XCTAssertEqual(AnyCodable([StringThing(value: "hi")]), AnyCodable([StringThing(value: "hi")]))
+
+        // force the dictionary of Any branch:
+        XCTAssertEqual(AnyCodable(["hi": StringThing(value: "hi")]), AnyCodable(["hi": StringThing(value: "hi")]))
 
         XCTAssertNotEqual(AnyCodable(()), AnyCodable(true))
     }
@@ -53,7 +66,8 @@ class AnyCodableTests: XCTestCase {
                     "a": "alpha",
                     "b": "bravo",
                     "c": "charlie"
-                }
+                },
+                "null": null
         }
         """.data(using: .utf8)!
         let decoder = JSONDecoder()
@@ -80,6 +94,7 @@ class AnyCodableTests: XCTestCase {
 
     func testVoidDescription() {
         XCTAssertEqual(String(describing: AnyCodable(Void())), "nil")
+        XCTAssertEqual(AnyCodable(Void()).debugDescription, "AnyCodable(nil)")
     }
 
     func test_encodedDecodedURL() throws {
@@ -133,7 +148,8 @@ class AnyCodableTests: XCTestCase {
                 "a": "alpha",
                 "b": "bravo",
                 "c": "charlie"
-            }
+            },
+            "null": null
         }
         """.data(using: .utf8)!
 
@@ -146,6 +162,7 @@ class AnyCodableTests: XCTestCase {
         XCTAssertEqual(dictionary["string"]?.value as! String, "string")
         XCTAssertEqual(dictionary["array"]?.value as! [Int], [1, 2, 3])
         XCTAssertEqual(dictionary["nested"]?.value as! [String: String], ["a": "alpha", "b": "bravo", "c": "charlie"])
+        XCTAssertEqual(dictionary["null"], AnyCodable(nil))
     }
 
     func testJSONEncoding() throws {
@@ -153,12 +170,15 @@ class AnyCodableTests: XCTestCase {
             "boolean": true,
             "integer": 1,
             "string": "string",
-            "array": [1, 2, 3],
-            "nested": [
+            "array": .init([1, 2, 3]),
+            "nested": .init([
                 "a": "alpha",
                 "b": "bravo",
                 "c": "charlie",
-            ],
+            ]),
+            "null": nil,
+            "void": .init(Void()),
+            "nsnull": .init(NSNull())
         ]
 
         let result = try testStringFromEncoding(of: dictionary)
@@ -179,7 +199,10 @@ class AnyCodableTests: XCTestCase {
                 "b" : "bravo",
                 "c" : "charlie"
               },
-              "string" : "string"
+              "nsnull" : null,
+              "null" : null,
+              "string" : "string",
+              "void" : null
             }
             """
         )
@@ -228,6 +251,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":false}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable(false))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, "false")
     }
 
     func test_encodeInt() throws {
@@ -236,6 +265,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":2}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable(2))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, "2")
     }
 
     func test_encodeString() throws {
@@ -244,6 +279,12 @@ class AnyCodableTests: XCTestCase {
         let string = String(data: data, encoding: .utf8)
 
         XCTAssertEqual(string, #"{"value":"hi"}"#)
+
+        let data2 = try JSONEncoder().encode(AnyCodable("hi"))
+
+        let string2 = String(data: data2, encoding: .utf8)
+
+        XCTAssertEqual(string2, #""hi""#)
     }
 
     func test_encodeURL() throws {
@@ -255,6 +296,10 @@ class AnyCodableTests: XCTestCase {
     }
 }
 
-fileprivate struct Wrapper: Codable {
+fileprivate struct Wrapper: Codable, Equatable {
     let value: AnyCodable
+}
+
+fileprivate struct StringThing: Codable, Equatable {
+    let value: String
 }

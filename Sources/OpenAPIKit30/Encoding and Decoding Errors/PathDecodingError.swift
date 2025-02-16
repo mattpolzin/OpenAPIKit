@@ -13,7 +13,7 @@ extension OpenAPI.Error.Decoding {
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
-        public enum Context {
+        public enum Context: Sendable {
             case endpoint(Operation)
             case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)

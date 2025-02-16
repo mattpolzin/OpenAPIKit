@@ -15,7 +15,7 @@ extension OpenAPI {
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
-    public struct Components: Equatable, CodableVendorExtendable {
+    public struct Components: Equatable, CodableVendorExtendable, Sendable {
 
         public var schemas: ComponentDictionary<JSONSchema>
         public var responses: ComponentDictionary<Response>

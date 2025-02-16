@@ -12,7 +12,7 @@ extension Shared {
     ///
     /// These keys must match the regex
     /// `^[a-zA-Z0-9\.\-_]+$`.
-    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable, StringConvertibleHintProvider {
+    public struct ComponentKey: RawRepresentable, ExpressibleByStringLiteral, Codable, Equatable, Hashable, StringConvertibleHintProvider, Sendable {
         public let rawValue: String
 
         public init(stringLiteral value: StringLiteralType) {

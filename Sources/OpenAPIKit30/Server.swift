@@ -13,7 +13,7 @@ extension OpenAPI {
     ///
     /// See [OpenAPI Server Object](https://spec.openapis.org/oas/v3.0.4.html#server-object).
     ///
-    public struct Server: Equatable, CodableVendorExtendable {
+    public struct Server: Equatable, CodableVendorExtendable, Sendable {
         /// OpenAPI Server URLs can have variable placeholders in them.
         /// The `urlTemplate` can be asked for a well-formed Foundation
         /// `URL` if all variables in it have been replaced by constant values.
@@ -65,7 +65,7 @@ extension OpenAPI.Server {
     ///
     /// See [OpenAPI Server Variable Object](https://spec.openapis.org/oas/v3.0.4.html#server-variable-object).
     ///
-    public struct Variable: Equatable, CodableVendorExtendable {
+    public struct Variable: Equatable, CodableVendorExtendable, Sendable {
         public var `enum`: [String]
         public var `default`: String
         public var description: String?

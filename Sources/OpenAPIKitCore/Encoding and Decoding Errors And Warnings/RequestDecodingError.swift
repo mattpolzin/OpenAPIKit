@@ -6,11 +6,11 @@
 //
 
 extension Error.Decoding {
-    public struct Request: OpenAPIError {
+    public struct Request: OpenAPIError, Sendable {
         public let context: Context
         internal let relativeCodingPath: [CodingKey]
 
-        public enum Context {
+        public enum Context: Sendable {
             case inconsistency(InconsistencyError)
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)

@@ -41,7 +41,7 @@ import Foundation
 /// into the template. You can also choose to only replace some of the variables this
 /// way.
 ///
-public struct URLTemplate: Hashable, RawRepresentable {
+public struct URLTemplate: Hashable, RawRepresentable, Sendable {
 
     /// The string value of the URL.
     ///
@@ -126,7 +126,7 @@ extension URLTemplate {
     /// URL Template components are either variables that can take on
     /// different values depending on the context or they are constant
     /// unchanging parts of the URL.
-    public enum Component: Hashable, RawRepresentable {
+    public enum Component: Hashable, RawRepresentable, Sendable {
         case variable(name: String)
         case constant(String)
 

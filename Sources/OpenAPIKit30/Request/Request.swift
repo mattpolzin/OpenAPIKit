@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
     /// See [OpenAPI Request Body Object](https://spec.openapis.org/oas/v3.0.4.html#request-body-object).
-    public struct Request: Equatable, CodableVendorExtendable {
+    public struct Request: Equatable, CodableVendorExtendable, Sendable {
         public var description: String?
         public var content: Content.Map
         public var required: Bool

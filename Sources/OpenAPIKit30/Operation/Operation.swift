@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
     /// See [OpenAPI Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object).
-    public struct Operation: Equatable, CodableVendorExtendable {
+    public struct Operation: Equatable, CodableVendorExtendable, Sendable {
         public var tags: [String]?
         public var summary: String?
         public var description: String?

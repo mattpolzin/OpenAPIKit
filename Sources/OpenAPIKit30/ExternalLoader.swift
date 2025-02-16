@@ -11,7 +11,7 @@ import Foundation
 /// An `ExternalLoader` enables `OpenAPIKit` to load external references 
 /// without knowing the details of what decoder is being used or how new internal 
 /// references should be named.
-public protocol ExternalLoader {
+public protocol ExternalLoader where Message: Sendable {
     /// This can be anything that an implementor of this protocol wants to pass back from
     /// the `load()` function and have available after all external loading has been done.
     ///

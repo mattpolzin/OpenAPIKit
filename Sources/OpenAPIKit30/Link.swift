@@ -16,7 +16,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Link Object"
     ///
     /// See [OpenAPI Link Object](https://spec.openapis.org/oas/v3.1.1.html#link-object).
-    public struct Link: Equatable, CodableVendorExtendable {
+    public struct Link: Equatable, CodableVendorExtendable, Sendable {
         /// The **OpenAPI**` `operationRef` or `operationId` field, depending on whether
         /// a `URL` of a remote or local Operation Object or a `operationId` (String) of an
         /// operation defined in the same document is given.

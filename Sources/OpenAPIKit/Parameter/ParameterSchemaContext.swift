@@ -12,7 +12,7 @@ extension OpenAPI.Parameter {
     ///
     /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object)
     /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.1.1.html#style-values).
-    public struct SchemaContext: Equatable {
+    public struct SchemaContext: Equatable, Sendable {
         public var style: Style
         public var explode: Bool
         public var allowReserved: Bool //defaults to false

@@ -18,7 +18,7 @@ extension Shared {
         /// You can use integer literals to specify an exact status code.
         ///
         /// Status code ranges are named in the `StatusCode.Range` enum. For example, the "1XX" range (100-199) can be written as either `.range(.information)` or as `.range(.init(rawValue: "1XX"))`.
-    public struct ResponseStatusCode: RawRepresentable, Equatable, Hashable, HasWarnings {
+    public struct ResponseStatusCode: RawRepresentable, Equatable, Hashable, HasWarnings, Sendable {
         public typealias RawValue = String
 
         public let warnings: [Warning]
@@ -34,13 +34,13 @@ extension Shared {
         public static func range(_ range: Range) -> Self { .init(value: .range(range)) }
         public static func status(code: Int) -> Self { .init(value: .status(code: code)) }
 
-        public enum Code: Equatable, Hashable {
+        public enum Code: Equatable, Hashable, Sendable {
             case `default`
             case range(Range)
             case status(code: Int)
         }
 
-        public enum Range: String {
+        public enum Range: String, Sendable {
                 /// Status Code `100-199`
             case information = "1XX"
                 /// Status Code `200-299`

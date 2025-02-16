@@ -7,7 +7,7 @@
 
 extension Shared {
     /// The Content Type of an API request or response body.
-    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings {
+    public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings, Sendable {
         internal let underlyingType: Builtin
         public let warnings: [Warning]
 

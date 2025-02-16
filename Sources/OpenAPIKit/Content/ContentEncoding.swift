@@ -11,7 +11,7 @@ extension OpenAPI.Content {
     /// OpenAPI Spec "Encoding Object"
     /// 
     /// See [OpenAPI Encoding Object](https://spec.openapis.org/oas/v3.1.1.html#encoding-object).
-    public struct Encoding: Equatable {
+    public struct Encoding: Equatable, Sendable {
         public typealias Style = OpenAPI.Parameter.SchemaContext.Style
 
         public let contentTypes: [OpenAPI.ContentType]
