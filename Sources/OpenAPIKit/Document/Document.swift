@@ -424,6 +424,12 @@ extension OpenAPI.Document {
     /// OpenAPIKit only explicitly supports versions that can be found in
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
+    ///
+    ///**IMPORTANT**: Although the `v3_1_x` case supports arbitrary
+    /// patch versions, only _known_ patch versions are decodable. That is, if the OpenAPI
+    /// specification releases a new patch version, OpenAPIKit will see a patch version release
+    /// explicitly supports decoding documents of that new patch version before said version will
+    /// succesfully decode as the `v3_1_x` case.
     public enum Version: RawRepresentable, Equatable, Codable {
         case v3_1_0
         case v3_1_1
@@ -442,6 +448,12 @@ extension OpenAPI.Document {
                   return nil
               }
               guard let patchVersion = Int(components[2], radix: 10) else {
+                  return nil
+              }
+              // to support newer versions released in the future without a breaking
+              // change to the enumeration, bump the upper limit here to e.g. 2 or 3
+              // or 6:
+              guard patchVersion > 1 && patchVersion <= 1 else {
                   return nil
               }
               self = .v3_1_x(x: patchVersion)
