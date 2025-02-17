@@ -20,10 +20,16 @@ is now required.
 Only relevant when compiling OpenAPIKit on macOS: Now v10_15+ is required.
 
 ### OpenAPI Specification Versions
-The `OpenAPIKit.Document.Version` enum gained `v3_1_1` and the
-`OpenAPIKit30.Document.Version` enum gained `v3_0_4`. If you have exhaustive
-switches over values of those types then your switch statements will need to be
-updated.
+The OpenAPIKit module's `OpenAPI.Document.Version` enum gained `v3_1_1` and the
+OpenAPIKit30 module's `OpenAPI.Document.Version` enum gained `v3_0_4`.
+
+The `OpenAPI.Document.Version` enum in both modules gained a new case
+(`v3_0_x(x: Int)` and `v3_1_x(x: Int)` respectively) that represents future OAS
+versions not released at the time of the given OpenAPIKit release. This allows
+non-breaking addition of support for those new versions.
+
+If you have exhaustive switches over values of those types then your switch
+statements will need to be updated.
 
 ### Typo corrections
 The following typo corrections were made to OpenAPIKit code. These amount to
