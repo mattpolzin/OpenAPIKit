@@ -511,6 +511,33 @@ extension DocumentTests {
         )
     }
 
+    func test_specifyUknownOpenAPIVersion_encode() throws {
+        let document = OpenAPI.Document(
+            openAPIVersion: .v3_0_x(x: 9),
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        assertJSONEquivalent(
+          encodedDocument,
+                """
+                {
+                  "info" : {
+                    "title" : "API",
+                    "version" : "1.0"
+                  },
+                  "openapi" : "3.0.9",
+                  "paths" : {
+                
+                  }
+                }
+                """
+        )
+    }
+
     func test_specifyOpenAPIVersion_decode() throws {
         let documentData =
         """
@@ -537,6 +564,23 @@ extension DocumentTests {
                 components: .noComponents
             )
         )
+    }
+
+    func test_specifyUnknownOpenAPIVersion_decode() throws {
+        let documentData =
+            """
+            {
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.0.9",
+              "paths" : {
+            
+              }
+            }
+            """.data(using: .utf8)!
+      XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Document.self, from: documentData)) { error in XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value 3.0.9.") }
     }
 
     func test_specifyServers_encode() throws {
