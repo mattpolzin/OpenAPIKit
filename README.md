@@ -1,4 +1,4 @@
-[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 5.1+](http://img.shields.io/badge/Swift-5.1+-blue.svg)](https://swift.org)
+[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 5.8+](http://img.shields.io/badge/Swift-5.8+-blue.svg)](https://swift.org)
 
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT) ![Tests](https://github.com/mattpolzin/OpenAPIKit/workflows/Tests/badge.svg)
 
@@ -10,8 +10,8 @@ OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specifi
 
 | OpenAPIKit | Swift | OpenAPI v3.0 | OpenAPI v3.1 | External Dereferencing |
 |------------|-------|--------------|--------------|------------------------|
-| v2.x       | 5.1+  | ✅           | ❌           | ❌                     |
-| v3.x       | 5.1+  | ✅           | ✅           | ❌                     |
+| v2.x       | 5.1+  | ✅           |              |                        |
+| v3.x       | 5.1+  | ✅           | ✅           |                        |
 | v4.x       | 5.8+  | ✅           | ✅           | ✅                     |
 
 - [Usage](#usage)
@@ -76,7 +76,7 @@ import OpenAPIKit
 It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-30x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
 
 #### 3.x to 4.x
-This section has not been written yet. Stay tuned!
+If you are migrating from OpenAPIKit 3.x to OpenAPIKit 4.x, check out the [v4 migration guide](./documentation/v4_migration_guide.md).
 
 ### Decoding OpenAPI Documents
 
