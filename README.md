@@ -177,7 +177,7 @@ Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of thi
 Each endpoint on a route is defined by an `OpenAPI.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
 
 #### Request/Response Bodies
-Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the `JSONSchema` type for such schema definitions.
+Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the [`JSONSchema`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/jsonschema) type for such schema definitions.
 
 #### Schemas
 **Fundamental types** are specified as `JSONSchema.integer`, `JSONSchema.string`, `JSONSchema.boolean`, etc.
@@ -214,12 +214,12 @@ JSONSchema.object(
 Take a look at the [OpenAPIKit Schema Object](./documentation/schema_object.md) documentation for more information.
 
 #### OpenAPI References
-The `OpenAPI.Reference` type represents the OpenAPI specification's reference support that is essentially just JSON Reference specification compliant but with the ability to override summaries and descriptions at the reference site where appropriate.
+The [`OpenAPI.Reference`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/reference) type represents the OpenAPI specification's reference support that is essentially just JSON Reference specification compliant but with the ability to override summaries and descriptions at the reference site where appropriate.
 
 For details on the underlying reference support, see the next section on the `JSONReference` type.
 
 #### JSON References
-The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
+The [`JSONReference`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/jsonreference) type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
 
 You can create an external reference with `JSONReference.external(URL)`. Internal references usually refer to an object in the Components Object dictionary and are constructed with `JSONReference.component(named:)`. If you need to refer to something in the current file but not in the Components Object, you can use `JSONReference.internal(path:)`.
 
@@ -242,7 +242,7 @@ Note that this looks a component up in the Components Object but it does not tra
 #### Security Requirements
 In the OpenAPI specifcation, a security requirement (like can be found on the root Document or on Operations) is a dictionary where each key is the name of a security scheme found in the Components Object and each value is an array of applicable scopes (which is of course only a non-empty array when the security scheme type is one for which "scopes" are relevant).
 
-OpenAPIKit defines the `SecurityRequirement` typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
+OpenAPIKit defines the [`SecurityRequirement`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/securityrequirement) typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
 
 To give an example, let's say you want to describe OAuth 2.0 authentication via the implicit flow. First, define a Security Scheme:
 ```swift
@@ -291,7 +291,7 @@ let document = OpenAPI.Document(
 #### Specification Extensions
 Many OpenAPIKit types support [Specification Extensions](https://spec.openapis.org/oas/v3.1.1.html#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
 
-You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
+You can get or set specification extensions via the [`vendorExtensions`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/vendorextendable/vendorextensions-swift.property) property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
 
 If you wish to disable decoding/encoding of vendor extensions for performance reasons, you can configure the Encoder and Decoder using their `userInfo`:
 ```swift
@@ -341,7 +341,7 @@ try encodeEqual(URL(string: "https://website.com"), AnyCodable(URL(string: "http
 #### External References
 External dereferencing does not resolve any local (internal) references, it just loads external references into the Document. It does this by storing any loaded externally referenced objects in the Components Object and transforming the reference being resolved from an external reference to an internal one. That way, you can always run internal dereferencing as a second step if you want a fully dereferenced document, but if you simply wanted to load additional referenced files then you can stop after external dereferencing.
 
-OpenAPIKit leaves it to you to decide how to load external files and where to store the results in the Components Object. It does this by requiring that you provide an implementation of the `ExternalLoader` protocol. You provide a `load` function and a `componentKey` function, both of which accept as input the `URL` to load. A simple mock example implementation from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader` can be set up:
+OpenAPIKit leaves it to you to decide how to load external files and where to store the results in the Components Object. It does this by requiring that you provide an implementation of the [`ExternalLoader`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/externalloader) protocol. You provide a `load` function and a `componentKey` function, both of which accept as input the `URL` to load. A simple mock example implementation from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader` can be set up:
 
 ```swift
 struct ExampleLoader: ExternalLoader {
@@ -382,9 +382,9 @@ Once you have an `ExternalLoader`, you can call an `OpenAPI.Document`'s `externa
 If you have some information that you want to pass back to yourself from the `load()` function, you can specify any type you want as the `Message` type and return any number of messages from each `load()` function execution. These messages could be warnings, additional information about the files that each newly loaded Component came from, etc. If you want to tie some information about file loading to new Components in your messages, you can use the `componentKey()` function to get the key the new Component will be found under once external dereferencing is complete.
 
 #### Internal References
-In addition to looking something up in the `Components` object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
+In addition to looking something up in the [`Components`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/components) object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
 
-You use a value's `dereferenced(in:)` method to fully dereference it.
+You use a value's [`dereferenced(in:)`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/locallydereferenceable) method to fully dereference it.
 
 You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object. External dereferencing is done as a separeate step, but you can first dereference externally and then dereference internally if you'd like to perform both.
 
