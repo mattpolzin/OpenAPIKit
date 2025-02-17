@@ -7,4 +7,4 @@
 
 import OpenAPIKitCore
 
-extension AnyCodable: Validatable {}
+extension AnyCodable: @retroactive Validatable {}

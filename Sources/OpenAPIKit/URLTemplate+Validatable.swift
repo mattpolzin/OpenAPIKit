@@ -7,4 +7,4 @@
 
 import OpenAPIKitCore
 
-extension URLTemplate: Validatable {}
+extension URLTemplate: @retroactive Validatable {}
