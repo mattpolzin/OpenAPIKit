@@ -41,6 +41,26 @@ final class DocumentTests: XCTestCase {
         )
     }
 
+    func test_initOASVersions() {
+        let t1 = OpenAPI.Document.Version.v3_1_0
+        XCTAssertEqual(t1.rawValue, "3.1.0")
+
+        let t2 = OpenAPI.Document.Version.v3_1_1
+        XCTAssertEqual(t2.rawValue, "3.1.1")
+
+        let t3 = OpenAPI.Document.Version.v3_1_x(x: 8)
+        XCTAssertEqual(t3.rawValue, "3.1.8")
+
+        let t4 = OpenAPI.Document.Version(rawValue: "3.1.0")
+        XCTAssertEqual(t4, .v3_1_0)
+
+        let t5 = OpenAPI.Document.Version(rawValue: "3.1.1")
+        XCTAssertEqual(t5, .v3_1_1)
+
+        let t6 = OpenAPI.Document.Version(rawValue: "3.1.8")
+        XCTAssertEqual(t6, .v3_1_x(x: 8))
+    }
+
     func test_getRoutes() {
         let pi1 = OpenAPI.PathItem(
             parameters: [],

@@ -408,12 +408,46 @@ extension OpenAPI.Document {
     /// OpenAPIKit only explicitly supports versions that can be found in
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
-    public enum Version: String, Codable {
-        case v3_0_0 = "3.0.0"
-        case v3_0_1 = "3.0.1"
-        case v3_0_2 = "3.0.2"
-        case v3_0_3 = "3.0.3"
-        case v3_0_4 = "3.0.4"
+    public enum Version: RawRepresentable, Equatable, Codable {
+        case v3_0_0
+        case v3_0_1
+        case v3_0_2
+        case v3_0_3
+        case v3_0_4
+        case v3_0_x(x: Int)
+
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "3.0.0": self = .v3_0_0
+            case "3.0.1": self = .v3_0_1
+            case "3.0.2": self = .v3_0_2
+            case "3.0.3": self = .v3_0_3
+            case "3.0.4": self = .v3_0_4
+            default:
+                let components = rawValue.split(separator: ".")
+                guard components.count == 3 else {
+                    return nil
+                }
+                guard components[0] == "3", components[1] == "0" else {
+                    return nil
+                }
+                guard let patchVersion = Int(components[2], radix: 10) else {
+                    return nil
+                }
+                self = .v3_0_x(x: patchVersion)
+            }
+        }
+
+        public var rawValue: String {
+            switch self {
+            case .v3_0_0: return "3.0.0"
+            case .v3_0_1: return "3.0.1"
+            case .v3_0_2: return "3.0.2"
+            case .v3_0_3: return "3.0.3"
+            case .v3_0_4: return "3.0.4"
+            case .v3_0_x(x: let x): return "3.0.\(x)"
+            }
+        }
     }
 }
 
