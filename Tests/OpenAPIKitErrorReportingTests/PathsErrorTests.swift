@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class PathsErrorTests: XCTestCase {
     func test_badPathReference() {

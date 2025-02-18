@@ -6,7 +6,7 @@
 //
 
 extension Shared {
-    public enum ParameterSchemaContextStyle: String, CaseIterable, Codable {
+    public enum ParameterSchemaContextStyle: String, CaseIterable, Codable, Sendable {
         case form
         case simple
         case matrix

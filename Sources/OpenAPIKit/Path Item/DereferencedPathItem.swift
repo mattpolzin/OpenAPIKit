@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 /// An `OpenAPI.PathItem` type that guarantees
 /// its `parameters` and operations are inlined instead of
@@ -65,7 +66,7 @@ public struct DereferencedPathItem: Equatable {
         self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
 
         var pathItem = pathItem
-        if let name = name {
+        if let name {
             pathItem.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -135,5 +136,75 @@ extension OpenAPI.PathItem: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedPathItem {
         return try DereferencedPathItem(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
+    }
+}
+
+extension OpenAPI.PathItem: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        let oldParameters = parameters
+        let oldServers = servers
+        let oldGet = get
+        let oldPut = put
+        let oldPost = post
+        let oldDelete = delete
+        let oldOptions = options
+        let oldHead = head
+        let oldPatch = patch
+        let oldTrace = trace
+
+        async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
+//        async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
+        async let (newGet, c3, m3) = oldGet.externallyDereferenced(with: loader)
+        async let (newPut, c4, m4) = oldPut.externallyDereferenced(with: loader)
+        async let (newPost, c5, m5) = oldPost.externallyDereferenced(with: loader)
+        async let (newDelete, c6, m6) = oldDelete.externallyDereferenced(with: loader)
+        async let (newOptions, c7, m7) = oldOptions.externallyDereferenced(with: loader)
+        async let (newHead, c8, m8) = oldHead.externallyDereferenced(with: loader)
+        async let (newPatch, c9, m9) = oldPatch.externallyDereferenced(with: loader)
+        async let (newTrace, c10, m10) = oldTrace.externallyDereferenced(with: loader)
+
+        var pathItem = self
+        var newComponents = try await c1
+        var newMessages = try await m1
+
+        // ideally we would async let all of the props above and then set them here,
+        // but for now since there seems to be some sort of compiler bug we will do
+        // newServers in an if let below
+        pathItem.parameters = try await newParameters
+        pathItem.get = try await newGet
+        pathItem.put = try await newPut
+        pathItem.post = try await newPost
+        pathItem.delete = try await newDelete
+        pathItem.options = try await newOptions
+        pathItem.head = try await newHead
+        pathItem.patch = try await newPatch
+        pathItem.trace = try await newTrace
+
+        try await newComponents.merge(c3)
+        try await newComponents.merge(c4)
+        try await newComponents.merge(c5)
+        try await newComponents.merge(c6)
+        try await newComponents.merge(c7)
+        try await newComponents.merge(c8)
+        try await newComponents.merge(c9)
+        try await newComponents.merge(c10)
+
+        try await newMessages += m3
+        try await newMessages += m4
+        try await newMessages += m5
+        try await newMessages += m6
+        try await newMessages += m7
+        try await newMessages += m8
+        try await newMessages += m9
+        try await newMessages += m10
+
+        if let oldServers {
+            async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
+            pathItem.servers = try await newServers
+            try await newComponents.merge(c2)
+            try await newMessages += m2
+        }
+
+        return (pathItem, newComponents, newMessages)
     }
 }

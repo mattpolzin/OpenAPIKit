@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "XML Object"
     ///
-    /// See [OpenAPI XML Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#xml-object).
+    /// See [OpenAPI XML Object](https://spec.openapis.org/oas/v3.0.4.html#xml-object).
     public struct XML: Equatable {
         public let name: String?
         public let namespace: URL?

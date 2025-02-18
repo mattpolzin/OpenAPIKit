@@ -10,24 +10,9 @@ import OpenAPIKitCore
 extension OpenAPI.Content {
     /// OpenAPI Spec "Encoding Object"
     /// 
-    /// See [OpenAPI Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#encoding-object).
-    public struct Encoding: Equatable {
+    /// See [OpenAPI Encoding Object](https://spec.openapis.org/oas/v3.1.1.html#encoding-object).
+    public struct Encoding: Equatable, Sendable {
         public typealias Style = OpenAPI.Parameter.SchemaContext.Style
-
-        /// If an encoding object only contains 1 content type, it will be populated here.
-        /// Two or more content types will result in a null value here but the `contentTypes`
-        /// (plural) property will contain all content types specified.
-        ///
-        /// The singular `contentType` property is only provided for backwards compatibility and
-        /// using the plural `contentTypes` property should be preferred.
-        @available(*, deprecated, message: "use contentTypes instead")
-        public var contentType: OpenAPI.ContentType? {
-            guard let contentType = contentTypes.first,
-                  contentTypes.count == 1 else {
-                return nil
-            }
-            return contentType
-        }
 
         public let contentTypes: [OpenAPI.ContentType]
         public let headers: OpenAPI.Header.Map?
@@ -35,33 +20,27 @@ extension OpenAPI.Content {
         public let explode: Bool
         public let allowReserved: Bool
 
-        /// The singular `contentType` argument is only provided for backwards compatibility and
-        /// using the plural `contentTypes` argument should be preferred.
         public init(
-            contentType: OpenAPI.ContentType? = nil,
             contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             allowReserved: Bool = false
         ) {
-            self.contentTypes = contentTypes + [contentType].compactMap { $0 }
+            self.contentTypes = contentTypes
             self.headers = headers
             self.style = style
             self.explode = style.defaultExplode
             self.allowReserved = allowReserved
         }
 
-        /// The singular `contentType` argument is only provided for backwards compatibility and
-        /// using the plural `contentTypes` argument should be preferred.
         public init(
-            contentType: OpenAPI.ContentType? = nil,
             contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             explode: Bool,
             allowReserved: Bool = false
         ) {
-            self.contentTypes = contentTypes + [contentType].compactMap { $0 }
+            self.contentTypes = contentTypes
             self.headers = headers
             self.style = style
             self.explode = explode
@@ -104,7 +83,7 @@ extension OpenAPI.Content.Encoding: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let contentTypesString = try container.decodeIfPresent(String.self, forKey: .contentType)
-        if let contentTypesString = contentTypesString {
+        if let contentTypesString {
             contentTypes = contentTypesString
                 .split(separator: ",")
                 .compactMap { string in
