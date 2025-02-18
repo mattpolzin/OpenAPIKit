@@ -218,24 +218,6 @@ extension OpenAPI.PathItem {
 
 // MARK: - Codable
 
-extension OpenAPI.Path: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        try container.encode(rawValue)
-    }
-}
-
-extension OpenAPI.Path: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-
-        let rawValue = try container.decode(String.self)
-
-        self.init(rawValue: rawValue)
-    }
-}
-
 extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)

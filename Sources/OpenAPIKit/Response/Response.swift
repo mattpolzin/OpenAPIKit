@@ -199,30 +199,4 @@ extension OpenAPI.Response: Decodable {
     }
 }
 
-extension OpenAPI.Response.StatusCode: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        try container.encode(self.rawValue)
-    }
-}
-
-extension OpenAPI.Response.StatusCode: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let strVal = try container.decode(String.self)
-        let val = OpenAPI.Response.StatusCode(rawValue: strVal)
-
-        guard let value = val else {
-            throw InconsistencyError(
-                subjectName: "status code",
-                details: "Expected the status code to be either an Int, a range like '1XX', or 'default' but found \(strVal) instead",
-                codingPath: decoder.codingPath
-            )
-        }
-
-        self = value
-    }
-}
-
 extension OpenAPI.Response: Validatable {}
