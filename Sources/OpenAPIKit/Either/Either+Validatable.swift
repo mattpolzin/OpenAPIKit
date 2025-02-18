@@ -7,4 +7,4 @@
 
 import OpenAPIKitCore
 
-extension Either: @retroactive Validatable where A: Validatable, B: Validatable {}
+extension Either: Validatable where A: Validatable, B: Validatable {}

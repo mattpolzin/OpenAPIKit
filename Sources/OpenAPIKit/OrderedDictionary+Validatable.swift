@@ -7,4 +7,4 @@
 
 import OpenAPIKitCore
 
-extension OrderedDictionary: @retroactive Validatable where Value: Validatable {}
+extension OrderedDictionary: Validatable where Value: Validatable {}

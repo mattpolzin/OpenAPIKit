@@ -220,4 +220,4 @@ extension OpenAPI.Parameter.SchemaContext {
     }
 }
 
-extension OpenAPI.Parameter.SchemaContext.Style: @retroactive Validatable {}
+extension OpenAPI.Parameter.SchemaContext.Style: Validatable {}
