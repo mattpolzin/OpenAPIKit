@@ -18,7 +18,8 @@ final class PathItemTests: XCTestCase {
         let t5: OpenAPI.Path = "hello/world"
         let t6: OpenAPI.Path = "hello/world/"
         let t7 = OpenAPI.Path(["hello", "world"], trailingSlash: true)
-
+        let t8 = OpenAPI.Path(rawValue: "/")
+        
         XCTAssertEqual(t1, t2)
         XCTAssertEqual(t2, t3)
         XCTAssertEqual(t3, t4)
@@ -32,6 +33,7 @@ final class PathItemTests: XCTestCase {
         XCTAssertEqual(t4.rawValue, "/hello/world")
         XCTAssertEqual(t5.rawValue, "/hello/world")
         XCTAssertEqual(t6.rawValue, "/hello/world/")
+        XCTAssertEqual(t8.rawValue, "/")
     }
 
     func test_initializePathItem() {
