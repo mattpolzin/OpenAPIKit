@@ -10,8 +10,8 @@ import Foundation
 extension Shared {
     /// OpenAPI Spec "Oauth Flows Object"
     ///
-    /// See [OpenAPI Oauth Flows Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#oauth-flows-object).
-    public struct OAuthFlows: Equatable {
+    /// See [OpenAPI Oauth Flows Object](https://spec.openapis.org/oas/v3.0.4.html#oauth-flows-object).
+    public struct OAuthFlows: Equatable, Sendable {
         public let implicit: Implicit?
         public let password: Password?
         public let clientCredentials: ClientCredentials?
@@ -35,13 +35,13 @@ extension Shared.OAuthFlows {
     public typealias Scope = String
     public typealias ScopeDescription = String
 
-    public struct CommonFields: Equatable {
+    public struct CommonFields: Equatable, Sendable {
         public let refreshUrl: URL?
         public let scopes: OrderedDictionary<Scope, ScopeDescription>
     }
 
     @dynamicMemberLookup
-    public struct Implicit: Equatable {
+    public struct Implicit: Equatable, Sendable {
         private let common: CommonFields
         public let authorizationUrl: URL
 
@@ -56,7 +56,7 @@ extension Shared.OAuthFlows {
     }
 
     @dynamicMemberLookup
-    public struct Password: Equatable {
+    public struct Password: Equatable, Sendable {
         private let common: CommonFields
         public let tokenUrl: URL
 
@@ -71,7 +71,7 @@ extension Shared.OAuthFlows {
     }
 
     @dynamicMemberLookup
-    public struct ClientCredentials: Equatable {
+    public struct ClientCredentials: Equatable, Sendable {
         private let common: CommonFields
         public let tokenUrl: URL
 
@@ -86,7 +86,7 @@ extension Shared.OAuthFlows {
     }
 
     @dynamicMemberLookup
-    public struct AuthorizationCode: Equatable {
+    public struct AuthorizationCode: Equatable, Sendable {
         private let common: CommonFields
         public let authorizationUrl: URL
         public let tokenUrl: URL

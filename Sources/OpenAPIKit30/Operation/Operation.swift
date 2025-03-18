@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Operation Object"
     /// 
-    /// See [OpenAPI Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object).
-    public struct Operation: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object).
+    public struct Operation: Equatable, CodableVendorExtendable, Sendable {
         public var tags: [String]?
         public var summary: String?
         public var description: String?
@@ -76,7 +76,7 @@ extension OpenAPI {
         /// The key is a unique identifier for the Callback Object. Each value in the
         /// map is a Callback Object that describes a request that may be initiated
         /// by the API provider and the expected responses.
-        public let callbacks: OpenAPI.CallbacksMap
+        public var callbacks: OpenAPI.CallbacksMap
 
         /// Indicates that the operation is deprecated or not.
         ///
@@ -271,7 +271,9 @@ extension OpenAPI.Operation: Encodable {
 
         try container.encodeIfPresent(servers, forKey: .servers)
         
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

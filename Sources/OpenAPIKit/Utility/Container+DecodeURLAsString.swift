@@ -11,19 +11,19 @@ import Foundation
 extension KeyedDecodingContainerProtocol {
     internal func decodeURLAsString(forKey key: Self.Key) throws -> URL {
         let string = try decode(String.self, forKey: key)
-        let urlCandidate: URL?
-#if canImport(FoundationEssentials)
-        urlCandidate = URL(string: string, encodingInvalidCharacters: false)
-#elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+        let url: URL?
+        #if canImport(FoundationEssentials)
+        url = URL(string: string, encodingInvalidCharacters: false)
+        #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
         if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-            urlCandidate = URL(string: string, encodingInvalidCharacters: false)
+            url = URL(string: string, encodingInvalidCharacters: false)
         } else {
-            urlCandidate = URL(string: string)
+            url = URL(string: string)
         }
-#else
-        urlCandidate = URL(string: string)
-#endif
-        guard let url = urlCandidate else {
+        #else
+        url = URL(string: string)
+        #endif
+        guard let url else {
             throw InconsistencyError(
                 subjectName: key.stringValue,
                 details: "If specified, must be a valid URL",
@@ -38,19 +38,19 @@ extension KeyedDecodingContainerProtocol {
             return nil
         }
 
-        let urlCandidate: URL?
-#if canImport(FoundationEssentials)
-        urlCandidate = URL(string: string, encodingInvalidCharacters: false)
-#elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+        let url: URL?
+        #if canImport(FoundationEssentials)
+        url = URL(string: string, encodingInvalidCharacters: false)
+        #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
         if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-            urlCandidate = URL(string: string, encodingInvalidCharacters: false)
+            url = URL(string: string, encodingInvalidCharacters: false)
         } else {
-            urlCandidate = URL(string: string)
+            url = URL(string: string)
         }
-#else
-        urlCandidate = URL(string: string)
+        #else
+        url = URL(string: string)
 #endif
-        guard let url = urlCandidate else {
+        guard let url else {
             throw InconsistencyError(
                 subjectName: key.stringValue,
                 details: "If specified, must be a valid URL",

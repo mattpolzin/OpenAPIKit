@@ -59,7 +59,7 @@ public struct DereferencedParameter: Equatable {
         }
 
         var parameter = parameter
-        if let name = name {
+        if let name {
             parameter.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -80,5 +80,36 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedParameter {
         return try DereferencedParameter(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
+    }
+}
+
+extension OpenAPI.Parameter: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+
+        // if not for a Swift bug, this whole function would just be the
+        // next line:
+//        let (newSchemaOrContent, components) = try await schemaOrContent.externallyDereferenced(with: loader)
+
+        let newSchemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        let newComponents: OpenAPI.Components
+        let newMessages: [Loader.Message]
+
+        switch schemaOrContent {
+        case .a(let schemaContext):
+            let (context, components, messages) = try await schemaContext.externallyDereferenced(with: loader)
+            newSchemaOrContent = .a(context)
+            newComponents = components
+            newMessages = messages
+        case .b(let contentMap):
+            let (map, components, messages) = try await contentMap.externallyDereferenced(with: loader)
+            newSchemaOrContent = .b(map)
+            newComponents = components
+            newMessages = messages
+        }
+
+        var newParameter = self
+        newParameter.schemaOrContent = newSchemaOrContent
+
+        return (newParameter, newComponents, newMessages)
     }
 }

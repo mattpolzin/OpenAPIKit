@@ -330,7 +330,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -338,7 +338,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents
         )
-        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        let validator = Validator.blank.validating(.serverVariableEnumIsValid)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's enum is either not defined or is non-empty (if defined).")
@@ -357,7 +357,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -365,7 +365,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents
         )
-        let validator = Validator.blank.validating(.serverVarialbeEnumIsValid)
+        let validator = Validator.blank.validating(.serverVariableEnumIsValid)
         try document.validate(using: validator)
     }
     
@@ -381,7 +381,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -389,7 +389,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents
         )
-        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        let validator = Validator.blank.validating(.serverVariableDefaultExistsInEnum)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: Server Variable's default must exist in enum, if enum is defined.")
@@ -408,7 +408,7 @@ final class BuiltinValidationTests: XCTestCase {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -416,7 +416,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [:],
             components: .noComponents
         )
-        let validator = Validator.blank.validating(.serverVarialbeDefaultExistsInEnum)
+        let validator = Validator.blank.validating(.serverVariableDefaultExistsInEnum)
         try document.validate(using: validator)
     }
 
@@ -755,7 +755,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        // NOTE this is part of default validation
+        // NOTE these are part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(error?.values.count, 8)

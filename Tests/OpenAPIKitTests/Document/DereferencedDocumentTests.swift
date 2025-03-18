@@ -28,14 +28,17 @@ final class DereferencedDocumentTests: XCTestCase {
             servers: [.init(url: URL(string: "http://website.com")!)],
             paths: [
                 "/hello/world": .init(
+                  servers: [.init(urlTemplate: URLTemplate(rawValue: "http://{domain}.com")!, variables: ["domain": .init(default: "other")])],
                     get: .init(
+                        operationId: "hi",
                         responses: [
                             200: .response(description: "success")
                         ]
                     )
                 )
             ],
-            components: .noComponents
+            components: .noComponents,
+            tags: ["hi"]
         ).locallyDereferenced()
 
         XCTAssertEqual(t1.paths.count, 1)
@@ -51,6 +54,13 @@ final class DereferencedDocumentTests: XCTestCase {
             t1.resolvedEndpointsByPath().keys,
             ["/hello/world"]
         )
+
+        XCTAssertEqual(t1.allOperationIds, ["hi"])
+        XCTAssertEqual(t1.allServers, [
+            .init(url: URL(string: "http://website.com")!),
+            .init(urlTemplate: URLTemplate(rawValue: "http://{domain}.com")!, variables: ["domain": .init(default: "other")]),
+        ])
+        XCTAssertEqual(t1.allTags, ["hi"])
     }
 
     func test_noSecurityReferencedResponseInPath() throws {

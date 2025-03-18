@@ -1233,7 +1233,7 @@ fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _
 }
 
 fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.Encoding, _ oldEncoding: OpenAPIKit30.OpenAPI.Content.Encoding) throws {
-    XCTAssertEqual(newEncoding.contentType, oldEncoding.contentType)
+    XCTAssertEqual(newEncoding.contentTypes.first, oldEncoding.contentType)
     if let newEncodingHeaders = newEncoding.headers {
         let oldEncodingHeaders = try XCTUnwrap(oldEncoding.headers)
         for ((newKey, newHeader), (oldKey, oldHeader)) in zip(newEncodingHeaders, oldEncodingHeaders) {
