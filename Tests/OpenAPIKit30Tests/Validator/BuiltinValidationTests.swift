@@ -749,4 +749,86 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE this is part of default validation
         try document.validate()
     }
+
+    func test_securityRequirementComponentsExist_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            security: [
+                [.component(named: "oauth"): ["scope2"]]
+            ]
+        )
+
+        XCTAssertThrowsError(try document.validate()) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Security Requirement security scheme can be found in components/securitySchemes")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.map { $0.stringValue }, ["security"])
+            XCTAssertEqual(errorCollection?.values.count, 1)
+
+            let openAPIError = OpenAPI.Error(from: error)
+            XCTAssertEqual(openAPIError.localizedDescription, "Failed to satisfy: Security Requirement security scheme can be found in components/securitySchemes at path: .security")
+            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["security"])
+        }
+    }
+    
+    func test_linkOperationsExist_validates() throws {
+        // Create a link with an operationId that exists in the document
+        let link = OpenAPI.Link(operationId: "testOperation")
+        
+        // Create a document with an operation using that ID
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .init(
+                links: [
+                    "testLink": link
+                ]
+            )
+        )
+        
+        let validator = Validator.blank.validating(.linkOperationsExist)
+        try document.validate(using: validator)
+    }
+    
+    func test_linkOperationsExist_fails() throws {
+        // Create a link with an operationId that doesn't exist in the document
+        let link = OpenAPI.Link(operationId: "nonExistentOperation")
+        
+        // Create a document with an operation using a different ID
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .init(
+                links: [
+                    "testLink": link
+                ]
+            )
+        )
+        
+        let validator = Validator.blank.validating(.linkOperationsExist)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Links with operationIds have corresponding Operations")
+            XCTAssertTrue((errorCollection?.values.first?.codingPath.map { $0.stringValue }.joined(separator: ".") ?? "").contains("testLink"))
+        }
+    }
 }

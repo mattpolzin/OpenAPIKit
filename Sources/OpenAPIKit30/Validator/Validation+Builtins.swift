@@ -396,6 +396,33 @@ extension Validation {
             }
         )
     }
+
+    /// Validate the OpenAPI Document's `Links` with operationIds refer to
+    /// Operations that exist in the document.
+    ///
+    /// This validation ensures that Link Objects using operationIds have corresponding
+    /// Operations in the document that have those IDs.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var linkOperationsExist: Validation<OpenAPI.Link> {
+        .init(
+            description: "Links with operationIds have corresponding Operations",
+            check: { context in
+                guard case let .b(operationId) = context.subject.operation else {
+                    // don't make assertions about Links that don't have operationIds
+                    return true
+                }
+                
+                // Collect all operation IDs from the document
+                let operationIds = context.document.paths.values
+                    .compactMap { context.document.components[$0] }
+                    .flatMap { $0.endpoints }
+                    .compactMap { $0.operation.operationId }
+                
+                return operationIds.contains(operationId)
+            }
+        )
+    }
 }
 
 /// Used by both the Path Item parameter check and the
