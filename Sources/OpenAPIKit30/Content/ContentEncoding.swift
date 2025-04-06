@@ -75,6 +75,8 @@ extension OpenAPI.Content.Encoding: Encodable {
         if allowReserved != false {
             try container.encode(allowReserved, forKey: .allowReserved)
         }
+
+        try encodeExtensions(to: &container)
     }
 }
 
