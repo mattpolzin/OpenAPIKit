@@ -707,4 +707,50 @@ extension ContentTests {
             OpenAPI.Content.Encoding(allowReserved: true)
         )
     }
+
+    func test_encoding_vendorExtensions_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(
+            vendorExtensions: [
+              "x-vendorExtension1": ["test": 222],
+              "x-vendorExtension2": ["test": "a string"],
+            ]
+        )
+        let encodedEncoding = try! orderUnstableTestStringFromEncoding(of: encoding)
+
+        assertJSONEquivalent(
+            encodedEncoding,
+            """
+            {
+              "x-vendorExtension1" : {
+                "test" : 222
+              },
+              "x-vendorExtension2" : {
+                "test" : "a string"
+              }
+            }
+            """
+        )
+    }
+
+    func test_encoding_vendorExtensions_decode() throws {
+      let encodingData =
+      """
+      {
+        "x-vendorExtension1" : {
+          "test" : 222
+        },
+        "x-vendorExtension2" : {
+          "test" : "a string"
+        }
+      }
+      """.data(using: .utf8)!
+      let encoding = try orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+      XCTAssertEqual(
+          encoding,
+          OpenAPI.Content.Encoding(
+              vendorExtensions: ["x-vendorExtension1": ["test": 222], "x-vendorExtension2": ["test": "a string"]]
+          )
+      )
+    }
 }
