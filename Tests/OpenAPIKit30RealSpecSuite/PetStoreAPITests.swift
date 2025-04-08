@@ -70,7 +70,7 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         // server is specified
         XCTAssertNotNil(apiDoc.servers.first)
         XCTAssertNotNil(apiDoc.servers.first?.urlTemplate.url)
-        XCTAssertEqual(apiDoc.servers.first?.urlTemplate.url!.path, "/v3")
+        XCTAssertEqual(apiDoc.servers.first?.urlTemplate.url!.path, "/api/v3")
     }
 
     func test_successfullyParsedTags() throws {
@@ -107,12 +107,12 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         guard let apiDoc = apiDoc else { return }
 
         // check for known schema
-        XCTAssertNotNil(apiDoc.components.schemas["Customer"])
-        guard case .object(_, let objectContext) = apiDoc.components[JSONReference<JSONSchema>.component(named: "Customer")]?.value else {
-            XCTFail("Expected customer schema to be an object")
+        XCTAssertNotNil(apiDoc.components.schemas["User"])
+        guard case .object(_, let objectContext) = apiDoc.components[JSONReference<JSONSchema>.component(named: "User")]?.value else {
+            XCTFail("Expected User schema to be an object")
             return
         }
-        XCTAssertEqual(objectContext.properties["username"], .string(required: false, example: "fehguy"))
+        XCTAssertEqual(objectContext.properties["username"], .string(required: false, example: "theUser"))
 
         // check for known security scheme
         XCTAssertNotNil(apiDoc.components.securitySchemes["api_key"])
