@@ -413,11 +413,8 @@ extension Validation {
                     return true
                 }
                 
-                // Collect all operation IDs from the document
-                let operationIds = context.document.paths.values
-                    .compactMap { context.document.components[$0] }
-                    .flatMap { $0.endpoints }
-                    .compactMap { $0.operation.operationId }
+                // Use the allOperationIds helper to get all operation IDs from the document
+                let operationIds = context.document.allOperationIds
                 
                 return operationIds.contains(operationId)
             }

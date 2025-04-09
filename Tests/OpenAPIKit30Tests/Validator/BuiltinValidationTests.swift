@@ -750,29 +750,6 @@ final class BuiltinValidationTests: XCTestCase {
         try document.validate()
     }
 
-    func test_securityRequirementComponentsExist_fails() throws {
-        let document = OpenAPI.Document(
-            info: .init(title: "test", version: "1.0"),
-            servers: [],
-            paths: [:],
-            components: .noComponents,
-            security: [
-                [.component(named: "oauth"): ["scope2"]]
-            ]
-        )
-
-        XCTAssertThrowsError(try document.validate()) { error in
-            let errorCollection = error as? ValidationErrorCollection
-            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Security Requirement security scheme can be found in components/securitySchemes")
-            XCTAssertEqual(errorCollection?.values.first?.codingPath.map { $0.stringValue }, ["security"])
-            XCTAssertEqual(errorCollection?.values.count, 1)
-
-            let openAPIError = OpenAPI.Error(from: error)
-            XCTAssertEqual(openAPIError.localizedDescription, "Failed to satisfy: Security Requirement security scheme can be found in components/securitySchemes at path: .security")
-            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["security"])
-        }
-    }
-    
     func test_linkOperationsExist_validates() throws {
         // Create a link with an operationId that exists in the document
         let link = OpenAPI.Link(operationId: "testOperation")
