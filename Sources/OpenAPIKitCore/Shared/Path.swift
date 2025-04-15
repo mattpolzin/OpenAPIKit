@@ -28,6 +28,10 @@ extension Shared {
         }
 
         public var rawValue: String {
+            if components.isEmpty {
+                        return "/"
+            }
+
             let path =
                 "/\(components.joined(separator: "/"))"
 
