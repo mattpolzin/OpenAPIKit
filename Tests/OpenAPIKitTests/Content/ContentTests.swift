@@ -515,9 +515,7 @@ extension ContentTests {
                                          style: .form,
                                          explode: true)
     }
-}
 
-extension ContentTests {
     func test_encoding_minimal_encode() throws {
         let encoding = OpenAPI.Content.Encoding()
 
@@ -733,5 +731,48 @@ extension ContentTests {
             encoding,
             OpenAPI.Content.Encoding(allowReserved: true)
         )
+    }
+
+    func test_encoding_vendorExtensions_encode() throws {
+        let encoding = OpenAPI.Content.Encoding(
+            contentType: .json,
+            vendorExtensions: [
+                "x-custom": "value",
+                "x-nested": ["key": 123]
+            ]
+        )
+
+        let encodedEncoding = try orderUnstableTestStringFromEncoding(of: encoding)
+
+        assertJSONEquivalent(
+            encodedEncoding,
+            """
+            {
+              "contentType" : "application\\/json",
+              "x-custom" : "value",
+              "x-nested" : {
+                "key" : 123
+              }
+            }
+            """
+        )
+    }
+
+    func test_encoding_vendorExtensions_decode() throws {
+        let encodingData =
+        """
+        {
+            "contentType": "application/json",
+            "x-custom": "value",
+            "x-nested": {
+                "key": 123
+            }
+        }
+        """.data(using: .utf8)!
+        let encoding = try orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
+
+        XCTAssertEqual(encoding.contentType, .json)
+        XCTAssertEqual(encoding.vendorExtensions["x-custom"]?.value as? String, "value")
+        XCTAssertEqual((encoding.vendorExtensions["x-nested"]?.value as? [String: Int])?["key"], 123)
     }
 }
