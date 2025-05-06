@@ -735,10 +735,10 @@ extension ContentTests {
 
     func test_encoding_vendorExtensions_encode() throws {
         let encoding = OpenAPI.Content.Encoding(
-            contentType: .json,
+            contentTypes: [.json],
             vendorExtensions: [
                 "x-custom": "value",
-                "x-nested": ["key": 123]
+                "x-nested": .init(["key": 123])
             ]
         )
 
@@ -771,7 +771,7 @@ extension ContentTests {
         """.data(using: .utf8)!
         let encoding = try orderUnstableDecode(OpenAPI.Content.Encoding.self, from: encodingData)
 
-        XCTAssertEqual(encoding.contentType, .json)
+        XCTAssertEqual(encoding.contentTypes, [.json])
         XCTAssertEqual(encoding.vendorExtensions["x-custom"]?.value as? String, "value")
         XCTAssertEqual((encoding.vendorExtensions["x-nested"]?.value as? [String: Int])?["key"], 123)
     }

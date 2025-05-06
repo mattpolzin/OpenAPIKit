@@ -711,7 +711,7 @@ extension ContentTests {
             contentType: .json,
             vendorExtensions: [
                 "x-custom": "value",
-                "x-nested": ["key": 123]
+                "x-nested": .init(["key": 123])
             ]
         )
 
