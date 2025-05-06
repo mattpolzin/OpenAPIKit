@@ -100,7 +100,7 @@ extension DereferencedDocument {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values

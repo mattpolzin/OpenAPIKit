@@ -339,4 +339,52 @@ extension JSONReferenceTests {
     struct ReferenceWrapper: Codable, Equatable {
         let reference: JSONReference<JSONSchema>
     }
+
+    struct SchemaLoader: ExternalLoader {
+        typealias Message = String
+
+        static func load<T>(_ url: URL) -> (T, [Message]) where T: Decodable {
+            return (JSONSchema.string as! T, [url.absoluteString])
+        }
+
+        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+            return try .forceInit(rawValue: url.absoluteString
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "#", with: "_")
+                .replacingOccurrences(of: ".", with: "_"))
+        }
+    }
+}
+
+// MARK: - External Dereferencing
+extension JSONReferenceTests {
+    func test_externalDerefNoFragment() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json")!)
+
+        let (newReference, components, messages) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json": .string]))
+        XCTAssertEqual(messages, ["./schema.json"])
+    }
+
+    func test_externalDerefFragment() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json#/test")!)
+
+        let (newReference, components, messages) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json__test"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json__test": .string]))
+        XCTAssertEqual(messages, ["./schema.json#/test"])
+    }
+
+    func test_externalDerefExternalComponents() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json#/components/schemas/test")!)
+
+        let (newReference, components, messages) = try await reference.externallyDereferenced(with: SchemaLoader.self)
+        
+        XCTAssertEqual(newReference, .component(named: "__schema_json__components_schemas_test"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json__components_schemas_test": .string]))
+        XCTAssertEqual(messages, ["./schema.json#/components/schemas/test"])
+    }
 }

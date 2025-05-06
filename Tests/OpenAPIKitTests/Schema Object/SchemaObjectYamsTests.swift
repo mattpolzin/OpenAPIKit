@@ -13,9 +13,23 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class SchemaObjectYamsTests: XCTestCase {
+    func test_nullTypeDecode() throws {
+        let nullString =
+        """
+        type: 'null'
+        """
+
+        let null = try YAMLDecoder().decode(JSONSchema.self, from: nullString)
+
+        XCTAssertEqual(
+            null,
+            JSONSchema.null()
+        )
+    }
+
     func test_floatingPointWholeNumberIntegerDecode() throws {
         let integerString =
         """

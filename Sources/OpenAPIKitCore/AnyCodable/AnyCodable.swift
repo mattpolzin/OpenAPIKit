@@ -31,18 +31,52 @@ import Foundation
  You can encode or decode mixed-type values in dictionaries
  and other collections that require `Encodable` or `Decodable` conformance
  by declaring their contained type to be `AnyCodable`.
+
+ Note that there are some caveats related to the fact that this type centers around
+ encoding/decoding values. For example, some technically distinct nil-like types
+ are all encoded as `nil` and compare equally under the `AnyCodable` type:
+   - `nil`
+   - `NSNull()`
+   - `Void()`
  */
-public struct AnyCodable {
+public struct AnyCodable: @unchecked Sendable {
+    // IMPORTANT: 
+    //  We rely on the fact that AnyCodable can only be constructed with an initializer that knows
+    //  the type of its argument to be Sendable in order to confidently state that AnyCodable itself
+    //  is @unchecked Sendable.
     public let value: Any
 
-    public init<T>(_ value: T?) {
+    public init<T: Sendable>(_ value: T?) {
         self.value = value ?? ()
     }
+
+    // Dangerous, but we use this below where we must transform AnyCodable by e.g. mapping on its value
+    fileprivate init(trusted value: Any) {
+        self.value = value
+    }
+}
+
+protocol _Optional {
+    var isNil: Bool { get }
+}
+
+extension Optional: _Optional {
+    var isNil: Bool { self == nil }
+}
+
+extension NSNull: _Optional {
+    var isNil: Bool { true }
 }
 
 extension AnyCodable: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
+
+        // special nil case
+        if let optionalValue = value as? _Optional, optionalValue.isNil {
+          try container.encodeNil()
+          return
+        }
 
         switch value {
             #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
@@ -83,10 +117,12 @@ extension AnyCodable: Encodable {
             try container.encode(date)
         case let url as URL:
             try container.encode(url)
-        case let array as [Any?]:
+        case let array as [(any Sendable)?]:
             try container.encode(array.map { AnyCodable($0) })
-        case let dictionary as [String: Any?]:
+        case let dictionary as [String: (any Sendable)?]:
             try container.encode(dictionary.mapValues { AnyCodable($0) })
+        case let encodableValue as Encodable:
+            try container.encode(encodableValue)
         default:
             let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded")
             throw EncodingError.invalidValue(value, context)
@@ -144,20 +180,38 @@ extension AnyCodable: Decodable {
         } else if let string = try? container.decode(String.self) {
             self.init(string)
         } else if let array = try? container.decode([AnyCodable].self) {
-            self.init(array.map { $0.value })
+            self.init(trusted: array.map { $0.value })
         } else if let dictionary = try? container.decode([String: AnyCodable].self) {
-            self.init(dictionary.mapValues { $0.value })
+            self.init(trusted: dictionary.mapValues { $0.value })
         } else {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
         }
     }
 }
 
+func isNilEquivalent(value: AnyCodable) -> Bool {
+    let valueIsNil: Bool
+
+    if let optionalValue = value.value as? _Optional,
+           optionalValue.isNil {
+        valueIsNil = true
+    } else if let _ = value.value as? Void {
+        valueIsNil = true
+    } else {
+        valueIsNil = false
+    }
+
+    return valueIsNil
+}
+
 extension AnyCodable: Equatable {
     public static func == (lhs: AnyCodable, rhs: AnyCodable) -> Bool {
-        switch (lhs.value, rhs.value) {
-        case is (Void, Void):
+        // special case for nil
+        if isNilEquivalent(value: lhs) && isNilEquivalent(value: rhs) {
             return true
+        }
+
+        switch (lhs.value, rhs.value) {
         case let (lhs as Bool, rhs as Bool):
             return lhs == rhs
         case let (lhs as Int, rhs as Int):
@@ -198,6 +252,8 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as [String: AnyCodable], rhs as [String: AnyCodable]):
             return lhs == rhs
+        case let (lhs as [String: Any], rhs as [String: Any]):
+            return lhs.mapValues(AnyCodable.init) == rhs.mapValues(AnyCodable.init)
         case let (lhs as [String], rhs as [String]):
             return lhs == rhs
         case let (lhs as [Int], rhs as [Int]):
@@ -208,6 +264,23 @@ extension AnyCodable: Equatable {
             return lhs == rhs
         case let (lhs as [AnyCodable], rhs as [AnyCodable]):
             return lhs == rhs
+        case let (lhs as [Any], rhs as [Any]):
+            return lhs.map(AnyCodable.init) == rhs.map(AnyCodable.init)
+        case let (lhs as Encodable, rhs as Encodable):
+            let encoder = JSONEncoder()
+            let lhsData: Data
+            do {
+              lhsData = try encoder.encode(lhs)
+            } catch {
+              return false
+            }
+            let rhsData: Data
+            do {
+              rhsData = try encoder.encode(rhs)
+            } catch {
+              return false
+            }
+            return lhsData == rhsData
         default:
             return false
         }
@@ -243,12 +316,10 @@ extension AnyCodable: ExpressibleByBooleanLiteral {}
 extension AnyCodable: ExpressibleByIntegerLiteral {}
 extension AnyCodable: ExpressibleByFloatLiteral {}
 extension AnyCodable: ExpressibleByStringLiteral {}
-extension AnyCodable: ExpressibleByArrayLiteral {}
-extension AnyCodable: ExpressibleByDictionaryLiteral {}
 
 extension AnyCodable {
     public init(nilLiteral _: ()) {
-        self.init(nil as Any?)
+        self.init(trusted: (nil as Any?) as Any)
     }
 
     public init(booleanLiteral value: Bool) {
@@ -265,13 +336,5 @@ extension AnyCodable {
 
     public init(stringLiteral value: String) {
         self.init(value)
-    }
-
-    public init(arrayLiteral elements: Any...) {
-        self.init(elements)
-    }
-
-    public init(dictionaryLiteral elements: (AnyHashable, Any)...) {
-        self.init([AnyHashable: Any](elements, uniquingKeysWith: { first, _ in first }))
     }
 }

@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class ResponseErrorTests: XCTestCase {
     func test_headerWithContentAndSchema() {

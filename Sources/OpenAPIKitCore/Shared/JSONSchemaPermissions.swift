@@ -6,7 +6,7 @@
 //
 
 extension Shared {
-    public enum JSONSchemaPermissions: String, Codable {
+    public enum JSONSchemaPermissions: String, Codable, Sendable {
         case readOnly
         case writeOnly
         case readWrite
