@@ -1,5 +1,5 @@
 //
-//  InconsistencyErrorTests.swift
+//  GenericErrorTests.swift
 //  
 //
 //  Created by Mathew Polzin on 7/2/20.
@@ -8,8 +8,8 @@
 @testable import OpenAPIKitCore
 import XCTest
 
-final class InconsistencyErrorTests: XCTestCase {
-    let error = InconsistencyError(
+final class GenericErrorTests: XCTestCase {
+    let error = GenericError(
         subjectName: "subject",
         details: "details",
         codingPath: []

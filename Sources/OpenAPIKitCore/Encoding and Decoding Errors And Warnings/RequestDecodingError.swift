@@ -11,7 +11,7 @@ extension Error.Decoding {
         internal let relativeCodingPath: [CodingKey]
 
         public enum Context: Sendable {
-            case inconsistency(InconsistencyError)
+            case inconsistency(GenericError)
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)
         }
@@ -70,7 +70,7 @@ extension Error.Decoding.Request {
         return Array(path.dropFirst(responsesIndex.advanced(by: 1)))
     }
 
-    public init(_ error: InconsistencyError) {
+    public init(_ error: GenericError) {
         context = .inconsistency(error)
         relativeCodingPath = Self.relativePath(from: error.codingPath)
     }
@@ -95,7 +95,7 @@ extension Error.Decoding.Request: DiggingError {
     public init(unwrapping error: Swift.DecodingError) {
         if let decodingError = error.underlyingError as? Swift.DecodingError {
             self = Self(unwrapping: decodingError)
-        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
+        } else if let inconsistencyError = error.underlyingError as? GenericError {
             self = Self(inconsistencyError)
         } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
             self = Self(eitherError)

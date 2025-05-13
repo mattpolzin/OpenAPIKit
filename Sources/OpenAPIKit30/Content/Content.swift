@@ -172,7 +172,7 @@ extension OpenAPI.Content: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.examples) && container.contains(.example)) else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Example and Examples",
                 details: "Only one of `example` and `examples` is allowed in the Media Type Object (`OpenAPI.Content`).",
                 codingPath: container.codingPath

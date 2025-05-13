@@ -113,7 +113,7 @@ extension OpenAPI.Request: Decodable {
             required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
 
             vendorExtensions = try Self.extensions(from: decoder)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Request(error)
         } catch let error as Swift.DecodingError {
