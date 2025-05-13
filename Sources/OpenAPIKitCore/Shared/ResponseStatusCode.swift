@@ -122,7 +122,7 @@ extension Shared.ResponseStatusCode: Decodable {
         let val = Shared.ResponseStatusCode(rawValue: strVal)
 
         guard let value = val else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "status code",
                 details: "Expected the status code to be either an Int, a range like '1XX', or 'default' but found \(strVal) instead",
                 codingPath: decoder.codingPath

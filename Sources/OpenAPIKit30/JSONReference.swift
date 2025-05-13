@@ -325,7 +325,7 @@ extension JSONReference: Decodable {
 
         if referenceString.first == "#" {
             guard let internalReference = InternalReference(rawValue: referenceString) else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a JSON Reference from '\(referenceString)'",
                     codingPath: container.codingPath
@@ -346,7 +346,7 @@ extension JSONReference: Decodable {
             externalReference = URL(string: referenceString)
             #endif
             guard let externalReference else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a valid URI for a JSON Reference from '\(referenceString)'",
                     codingPath: container.codingPath

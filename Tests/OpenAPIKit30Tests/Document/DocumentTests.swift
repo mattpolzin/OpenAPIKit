@@ -580,7 +580,7 @@ extension DocumentTests {
               }
             }
             """.data(using: .utf8)!
-      XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Document.self, from: documentData)) { error in XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value 3.0.9.") }
+      XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Document.self, from: documentData)) { error in XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value 3.0.9.") }
     }
 
     func test_specifyServers_encode() throws {

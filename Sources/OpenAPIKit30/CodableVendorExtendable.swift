@@ -111,7 +111,7 @@ extension CodableVendorExtendable {
         let invalidKeys = extensions.keys.filter { !$0.lowercased().starts(with: "x-") }
         if !invalidKeys.isEmpty {
             let invalidKeysList = "[ " + invalidKeys.joined(separator: ", ") + " ]"
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Vendor Extension",
                 details: "Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: \(invalidKeysList)",
                 codingPath: decoder.codingPath

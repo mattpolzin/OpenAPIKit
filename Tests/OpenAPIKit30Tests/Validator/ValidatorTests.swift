@@ -1441,7 +1441,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertEqual(warnings.count, 1)
         XCTAssertEqual(
             warnings.first?.localizedDescription,
-            "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
+            "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
         )
         XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
         XCTAssertNotNil(warnings.first?.underlyingError)
@@ -1486,7 +1486,7 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 1)
             XCTAssertEqual(
                 errors?.localizedDescription,
-                "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
             )
             XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
         }

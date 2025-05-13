@@ -522,7 +522,7 @@ extension OpenAPI.Document: Decodable {
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Document(error)
         } catch let error as DecodingError {
@@ -651,7 +651,7 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
                     return (try? components.contains(ref)) ?? false
                 }
                 guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
-                    throw InconsistencyError(
+                    throw GenericError(
                         subjectName: key.stringValue,
                         details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
                         codingPath: container.codingPath + [key]
@@ -700,7 +700,7 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
             ]
             .map(AnyCodingKey.init(stringValue:))
 
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: schemeKey,
                 details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
                 codingPath: keys

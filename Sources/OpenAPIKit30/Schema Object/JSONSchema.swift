@@ -1823,7 +1823,7 @@ extension JSONSchema: Decodable {
         if keysFrom.count > 1 {
             _warnings.append(
                 .underlyingError(
-                    InconsistencyError(
+                    GenericError(
                         subjectName: "Schema",
                         details: "A schema contains properties for multiple types of schemas, namely: \(keysFrom).",
                         codingPath: decoder.codingPath
@@ -1837,7 +1837,7 @@ extension JSONSchema: Decodable {
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(
                     .underlyingError(
-                        InconsistencyError(
+                        GenericError(
                             subjectName: "OpenAPI Schema",
                             details: "Found schema attributes not consistent with the type specified: \(typeHint). Specifically, attributes for these other types: \(keysFromElsewhere)",
                             codingPath: decoder.codingPath
@@ -1876,7 +1876,7 @@ extension JSONSchema: Decodable {
             if fragmentContext.isEmpty && hintContainerCount > 0 {
                 _warnings.append(
                     .underlyingError(
-                        InconsistencyError(
+                        GenericError(
                             subjectName: "OpenAPI Schema",
                             details: "Found nothing but unsupported attributes.",
                             codingPath: decoder.codingPath

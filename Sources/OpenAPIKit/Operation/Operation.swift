@@ -336,7 +336,7 @@ extension OpenAPI.Operation: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Operation(unwrapping: error)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Operation(error)
         } catch let error as EitherDecodeNoTypesMatchedError {

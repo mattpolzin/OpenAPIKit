@@ -51,7 +51,7 @@ extension Shared {
         public init(from decoder: Decoder) throws {
             let rawValue = try decoder.singleValueContainer().decode(String.self)
             guard let key = Self(rawValue: rawValue) else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "Component Key",
                     details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
                     codingPath: decoder.codingPath
@@ -66,7 +66,7 @@ extension Shared {
                 // we check for consistency on encode because a string literal
                 // may result in an invalid component key being constructed.
             guard Self(rawValue: rawValue) != nil else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "Component Key",
                     details: "Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\\.\\-_]+$`. '\(rawValue)' does not..",
                     codingPath: container.codingPath

@@ -29,7 +29,7 @@ final class SecuritySchemeErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `security` in the root Document object: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Problem encountered when parsing `security` in the root Document object: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "security"
             ])
@@ -61,7 +61,7 @@ final class SecuritySchemeErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `hello` in Document.paths['/hello/world'].get.security: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Problem encountered when parsing `hello` in Document.paths['/hello/world'].get.security: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "paths",
                 "/hello/world",

@@ -40,7 +40,7 @@ final class SchemaObjectYamsTests: XCTestCase {
         """
 
         XCTAssertThrowsError(try YAMLDecoder().decode(JSONSchema.self, from: integerString)) { error in
-            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `maximum`: Expected an Integer literal but found a floating point value (10.2).")
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `maximum`: Expected an Integer literal but found a floating point value (10.2).")
         }
 
         let integerString2 =
@@ -50,7 +50,7 @@ final class SchemaObjectYamsTests: XCTestCase {
         """
 
         XCTAssertThrowsError(try YAMLDecoder().decode(JSONSchema.self, from: integerString2)) { error in
-            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `minimum`: Expected an Integer literal but found a floating point value (1.1).")
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `minimum`: Expected an Integer literal but found a floating point value (1.1).")
         }
     }
 }

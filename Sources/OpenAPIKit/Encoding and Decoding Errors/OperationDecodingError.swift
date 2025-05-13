@@ -16,7 +16,7 @@ extension OpenAPI.Error.Decoding {
         public enum Context: Sendable {
             case request(Request)
             case response(Response)
-            case inconsistency(InconsistencyError)
+            case inconsistency(GenericError)
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)
         }
@@ -95,7 +95,7 @@ extension OpenAPI.Error.Decoding.Operation {
         relativeCodingPath = Array(codingPath)
     }
 
-    internal init(_ error: InconsistencyError) {
+    internal init(_ error: GenericError) {
         var codingPath = error.codingPath.dropFirst(2)
         // this part of the coding path is structurally guaranteed to be an HTTP verb.
         let verb = OpenAPI.HttpMethod(rawValue: codingPath.removeFirst().stringValue.uppercased())!
@@ -139,7 +139,7 @@ extension OpenAPI.Error.Decoding.Operation: DiggingError {
             self = Self(responseError)
         } else if let responseError = error.underlyingError as? OpenAPI.Error.Decoding.Response {
             self = Self(responseError)
-        } else if let inconsistencyError = error.underlyingError as? InconsistencyError {
+        } else if let inconsistencyError = error.underlyingError as? GenericError {
             self = Self(inconsistencyError)
         } else if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {
             self = Self(eitherError)

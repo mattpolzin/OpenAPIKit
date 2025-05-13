@@ -90,7 +90,7 @@ public extension OpenAPIError {
             case .dataCorrupted:
                 return "Could not parse `\(subjectName)`"
             case .inconsistency(details: _):
-                return "Inconsistency encountered when parsing `\(subjectName)`"
+                return "Problem encountered when parsing `\(subjectName)`"
             }
         }()
 

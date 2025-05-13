@@ -298,7 +298,7 @@ extension OpenAPI.Parameter: Decodable {
             context = .header(required: required)
         case .path:
             if !required {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: name,
                     details: "positional path parameters must be explicitly set to required",
                     codingPath: decoder.codingPath
@@ -324,13 +324,13 @@ extension OpenAPI.Parameter: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         case (nil, nil):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify either `content` or `schema`",
                 codingPath: decoder.codingPath
             )
         case (_, _):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath

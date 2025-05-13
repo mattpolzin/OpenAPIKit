@@ -407,7 +407,7 @@ extension DocumentInfoTests {
         }
         """.data(using: .utf8)!
         XCTAssertThrowsError( try orderUnstableDecode(OpenAPI.Document.Info.self, from: infoData)) { error in
-            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `termsOfService`: If specified, must be a valid URL.")
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `termsOfService`: If specified, must be a valid URL.")
         }
     }
 

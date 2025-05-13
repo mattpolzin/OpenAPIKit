@@ -15,7 +15,7 @@ extension OpenAPI.Error.Decoding {
 
         public enum Context: Sendable {
             case endpoint(Operation)
-            case inconsistency(InconsistencyError)
+            case inconsistency(GenericError)
             case other(Swift.DecodingError)
             case neither(EitherDecodeNoTypesMatchedError)
         }
@@ -120,7 +120,7 @@ extension OpenAPI.Error.Decoding.Path {
         relativeCodingPath = Array(codingPath)
     }
 
-    internal init(_ error: InconsistencyError) {
+    internal init(_ error: GenericError) {
         var codingPath = error.codingPath.dropFirst()
         let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
 

@@ -1704,7 +1704,7 @@ extension SchemaObjectTests {
 
         XCTAssertEqual(warnResult.warnings.count, 1)
         // NOTE: not the most informative warnings, would like to do better.
-        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Problem encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
         // we are actually at the root path in this test case so the
         // following should be an empty string!
         XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
@@ -1763,7 +1763,7 @@ extension SchemaObjectTests {
         let warnResult = try orderUnstableDecode(JSONSchema.self, from: badSchema)
 
         XCTAssertEqual(warnResult.warnings.count, 1)
-        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Problem encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
             // we are actually at the root path in this test case so the
             // following should be an empty string!
         XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")

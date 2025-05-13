@@ -781,7 +781,7 @@ extension JSONSchema.CoreContext: Decodable {
             case (true, false):
                 _permissions = .readOnly
             case (true, true):
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSONSchema",
                     details: "Either `readOnly` or `writeOnly` can be true but not both",
                     codingPath: decoder.codingPath
@@ -895,7 +895,7 @@ extension JSONSchema.IntegerContext: Decodable {
         let maximumAttempt = try maximumIntegerAttempt
             ?? maximumDoubleAttempt.map { floatMax in
             guard let integer = Int(exactly: floatMax) else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "maximum",
                     details: "Expected an Integer literal but found a floating point value (\(String(describing: floatMax)))",
                     codingPath: decoder.codingPath,
@@ -910,7 +910,7 @@ extension JSONSchema.IntegerContext: Decodable {
         let minimumAttempt = try minimumIntegerAttempt
             ?? minimumDoubleAttempt.map { floatMin in
             guard let integer = Int(exactly: floatMin) else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "minimum",
                     details: "Expected an Integer literal but found a floating point value (\(String(describing: floatMin)))",
                     codingPath: decoder.codingPath,

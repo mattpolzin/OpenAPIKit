@@ -186,7 +186,7 @@ extension OpenAPI.Response: Decodable {
 
             vendorExtensions = try Self.extensions(from: decoder)
 
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Response(error)
         } catch let error as EitherDecodeNoTypesMatchedError {
