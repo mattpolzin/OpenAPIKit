@@ -1918,6 +1918,57 @@ extension SchemaObjectTests {
             JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
         )
     }
+    
+    func test_decodeAnyOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "anyOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            JSONSchema.any(of: [JSONSchema.string, JSONSchema.number]).with(vendorExtensions: ["x-hello": "hello"])
+        )
+    }
+    
+    func test_decodeAllOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "allOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            JSONSchema.all(of: [JSONSchema.string, JSONSchema.number]).with(vendorExtensions: ["x-hello": "hello"])
+        )
+    }
+    
+    func test_decodeOneOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "oneOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            JSONSchema.one(of: [JSONSchema.string, JSONSchema.number]).with(vendorExtensions: ["x-hello": "hello"])
+        )
+    }
 
     func test_encodeExamplesVendorExtension() throws {
         let fragment = JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])

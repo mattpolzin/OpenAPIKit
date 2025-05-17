@@ -1971,7 +1971,10 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
+            let extensions = try Self.decodeVenderExtensions(from: decoder)
+
+            self = schema.with(vendorExtensions: extensions)
             return
         }
 
@@ -1988,7 +1991,10 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
+            let extensions = try Self.decodeVenderExtensions(from: decoder)
+
+            self = schema.with(vendorExtensions: extensions)
             return
         }
 
@@ -2004,7 +2010,10 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
+            let extensions = try Self.decodeVenderExtensions(from: decoder)
+
+            self = schema.with(vendorExtensions: extensions)
             return
         }
 
@@ -2016,8 +2025,11 @@ extension JSONSchema: Decodable {
                     core: coreContext
                 )
             )
-            
-            self = schema
+
+            // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
+            let extensions = try Self.decodeVenderExtensions(from: decoder)
+
+            self = schema.with(vendorExtensions: extensions)
             return
         }
 
@@ -2132,29 +2144,30 @@ extension JSONSchema: Decodable {
 
         self.warnings = _warnings
 
-        // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
-        let extensions: [String: AnyCodable]
+        // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
+        let extensions = try Self.decodeVenderExtensions(from: decoder)
 
+        self.value = value.with(vendorExtensions: extensions)
+    }
+    
+    private static func decodeVenderExtensions(from decoder: Decoder) throws -> [String: AnyCodable] {
         guard VendorExtensionsConfiguration.isEnabled else {
-            self.value = value
-            return
+            return [:]
         }
-
+        
         let decoded = try AnyCodable(from: decoder).value
-
+        
         guard (decoded as? [Any]) == nil else {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
-
+        
         guard let decodedAny = decoded as? [String: Any] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
-
-        extensions = decodedAny
+        
+        return decodedAny
             .filter { $0.key.lowercased().starts(with: "x-") }
             .mapValues(AnyCodable.init)
-
-        self.value = value.with(vendorExtensions: extensions)
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {
