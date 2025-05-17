@@ -20,7 +20,7 @@ let package = Package(
             targets: ["OpenAPIKitCompat"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/jpsim/Yams.git", "4.0.0"..<"6.0.0") // just for tests
+        .package(url: "https://github.com/jpsim/Yams.git", "4.0.0"..<"7.0.0") // just for tests
     ],
     targets: [
         .target(
