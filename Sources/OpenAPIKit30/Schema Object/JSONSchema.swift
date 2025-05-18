@@ -1761,7 +1761,9 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            self = .init(warnings: schema.warnings,
+                         schema: schema.value,
+                         vendorExtensions: try Self.decodeVenderExtensions(from: decoder))
             return
         }
 
@@ -1774,7 +1776,9 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            self = .init(warnings: schema.warnings,
+                         schema: schema.value,
+                         vendorExtensions: try Self.decodeVenderExtensions(from: decoder))
             return
         }
 
@@ -1787,7 +1791,9 @@ extension JSONSchema: Decodable {
                 schema = schema.nullableSchemaObject()
             }
 
-            self = schema
+            self = .init(warnings: schema.warnings,
+                         schema: schema.value,
+                         vendorExtensions: try Self.decodeVenderExtensions(from: decoder))
             return
         }
 
@@ -1797,7 +1803,9 @@ extension JSONSchema: Decodable {
                 core: try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             )
 
-            self = schema
+            self = .init(warnings: schema.warnings,
+                         schema: schema.value,
+                         vendorExtensions: try Self.decodeVenderExtensions(from: decoder))
             return
         }
 
@@ -1888,25 +1896,27 @@ extension JSONSchema: Decodable {
 
         self.warnings = _warnings
 
-        // Ad-hoc vendor extension support since JSONSchema does coding keys differently. 
+        self.vendorExtensions = try Self.decodeVenderExtensions(from: decoder)
+    }
+
+    private static func decodeVenderExtensions(from decoder: Decoder) throws -> [String: AnyCodable] {
         guard VendorExtensionsConfiguration.isEnabled else {
-            self.vendorExtensions = [:]
-            return
+            return [:]
         }
-
+        
         let decoded = try AnyCodable(from: decoder).value
-
+        
         guard (decoded as? [Any]) == nil else {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
-
+        
         guard let decodedAny = decoded as? [String: Any] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
-
-        let extensions = decodedAny.filter { $0.key.lowercased().starts(with: "x-") }
-
-        self.vendorExtensions = extensions.mapValues(AnyCodable.init)
+        
+        return decodedAny
+            .filter { $0.key.lowercased().starts(with: "x-") }
+            .mapValues(AnyCodable.init)
     }
 }
 

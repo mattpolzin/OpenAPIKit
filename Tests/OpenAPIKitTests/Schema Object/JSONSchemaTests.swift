@@ -1918,6 +1918,24 @@ extension SchemaObjectTests {
             JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
         )
     }
+
+    func test_encodeExamplesVendorExtension() throws {
+        let fragment = JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "examples" : [
+                "hello"
+              ],
+              "x-hello" : "hello"
+            }
+            """
+        )
+    }
     
     func test_decodeAnyOfWithVendorExtension() throws {
         let extensionSchema = """
@@ -1967,24 +1985,6 @@ extension SchemaObjectTests {
         XCTAssertEqual(
             try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
             JSONSchema.one(of: [JSONSchema.string, JSONSchema.number]).with(vendorExtensions: ["x-hello": "hello"])
-        )
-    }
-
-    func test_encodeExamplesVendorExtension() throws {
-        let fragment = JSONSchema.fragment(.init(examples: ["hello"])).with(vendorExtensions: ["x-hello": "hello"])
-
-        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
-
-        assertJSONEquivalent(
-            encoded,
-            """
-            {
-              "examples" : [
-                "hello"
-              ],
-              "x-hello" : "hello"
-            }
-            """
         )
     }
 
