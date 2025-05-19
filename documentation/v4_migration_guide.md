@@ -79,3 +79,11 @@ The default (fallback) implementations of `inferred`, `anchor`, and
 `dynamicAnchor` have been removed. Almost no downstream code will break because
 of this, but if you've implemented the `JSONSchemaContext` protocol yourself
 then this note is for you.
+
+### Errors
+The `InconsistencyError` type has been renaemd to `GenericError` and its message
+has been tweaked to fit the new name. This error has been used to represent many
+errors over time and I would not classify all of them as "inconsistencies."
+
+If you've used the error's type or rely on the exact message, you will need to
+update your code accordingly.

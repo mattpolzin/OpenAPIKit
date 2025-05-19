@@ -117,7 +117,7 @@ extension OpenAPI.Example: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.externalValue) && container.contains(.value)) else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "example value",
                 details: "Found both `value` and `externalValue` keys in an Example. You must specify one or the other.",
                 codingPath: container.codingPath

@@ -24,7 +24,7 @@ extension KeyedDecodingContainerProtocol {
         url = URL(string: string)
         #endif
         guard let url else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: key.stringValue,
                 details: "If specified, must be a valid URL",
                 codingPath: codingPath
@@ -51,7 +51,7 @@ extension KeyedDecodingContainerProtocol {
         url = URL(string: string)
         #endif
         guard let url else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: key.stringValue,
                 details: "If specified, must be a valid URL",
                 codingPath: codingPath

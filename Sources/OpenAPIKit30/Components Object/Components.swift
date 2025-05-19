@@ -218,7 +218,7 @@ extension OpenAPI.Components: Decodable {
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
             if let underlyingError = error.underlyingError as? KeyDecodingError {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: error.subjectName,
                     details: underlyingError.localizedDescription,
                     codingPath: error.codingPath

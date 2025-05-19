@@ -302,13 +302,13 @@ extension OpenAPI.Header: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         case (nil, nil):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Header",
                 details: "A header parameter must specify either `content` or `schema`",
                 codingPath: decoder.codingPath
             )
         case (_, _):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Header",
                 details: "A header must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath

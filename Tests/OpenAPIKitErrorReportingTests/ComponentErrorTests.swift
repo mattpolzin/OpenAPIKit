@@ -30,7 +30,7 @@ final class ComponentErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, #"Inconsistency encountered when parsing `h#llo` in Document.components.schemas: Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\.\-_]+$`. 'h#llo' does not..."#)
+            XCTAssertEqual(openAPIError.localizedDescription, #"Problem encountered when parsing `h#llo` in Document.components.schemas: Keys for components in the Components Object must conform to the regex `^[a-zA-Z0-9\.\-_]+$`. 'h#llo' does not..."#)
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "schemas", "h#llo"])
         }
     }
@@ -57,7 +57,7 @@ final class ComponentErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Header. \n\nHeader could not be decoded because:\nInconsistency encountered when parsing `Header`: A header parameter must specify either `content` or `schema`..")
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Header. \n\nHeader could not be decoded because:\nProblem encountered when parsing `Header`: A header parameter must specify either `content` or `schema`..")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, ["components", "responses", "IllFormed", "headers", "MissingSchemaKey"])
         }
     }

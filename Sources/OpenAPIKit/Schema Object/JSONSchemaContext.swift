@@ -987,7 +987,7 @@ extension JSONSchema.CoreContext: Decodable {
             case (true, false):
                 _permissions = .readOnly
             case (true, true):
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSONSchema",
                     details: "Either `readOnly` or `writeOnly` can be true but not both",
                     codingPath: decoder.codingPath
@@ -1033,7 +1033,7 @@ extension JSONSchema.CoreContext: Decodable {
             nullable = _nullable
             warnings.append(
                 .underlyingError(
-                      InconsistencyError(
+                      GenericError(
                           subjectName: "OpenAPI Schema",
                           details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
                           codingPath: container.codingPath
@@ -1167,7 +1167,7 @@ extension JSONSchema.IntegerContext: Decodable {
             let value = try intAttempt
                 ?? doubleAttempt.map { floatVal in
                 guard let integer = Int(exactly: floatVal) else {
-                    throw InconsistencyError(
+                    throw GenericError(
                         subjectName: max ? "maximum" : "minimum",
                         details: "Expected an Integer literal but found a floating point value (\(String(describing: floatVal)))",
                         codingPath: decoder.codingPath,
