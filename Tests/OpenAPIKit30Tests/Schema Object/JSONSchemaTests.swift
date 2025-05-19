@@ -1508,6 +1508,61 @@ extension SchemaObjectTests {
         )
     }
 
+    func test_decodeAnyOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "anyOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        let desiredSchema = JSONSchema(schema: .any(of: [JSONSchema.string, JSONSchema.number], core: .init()), vendorExtensions: ["x-hello": "hello"])
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            desiredSchema
+        )
+    }
+    
+    func test_decodeAllOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "allOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        let desiredSchema = JSONSchema(schema: .all(of: [JSONSchema.string, JSONSchema.number], core: .init()), vendorExtensions: ["x-hello": "hello"])
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            desiredSchema
+        )
+    }
+    
+    func test_decodeOneOfWithVendorExtension() throws {
+        let extensionSchema = """
+        {
+            "oneOf" : [
+                { "type": "string" },
+                { "type": "number" }
+            ],
+            "x-hello" : "hello"
+        }
+        """.data(using: .utf8)!
+
+        let desiredSchema = JSONSchema(schema: .one(of: [JSONSchema.string, JSONSchema.number], core: .init()), vendorExtensions: ["x-hello": "hello"])
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: extensionSchema),
+            desiredSchema
+        )
+    }
+
+
     func test_encodeBoolean() {
         let requiredBoolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
         let optionalBoolean = JSONSchema.boolean(.init(format: .unspecified, required: false))
