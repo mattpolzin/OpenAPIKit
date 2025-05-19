@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 
-    /// See [OpenAPI Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#media-type-object).
-    public struct Content: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Media Type Object](https://spec.openapis.org/oas/v3.0.4.html#media-type-object).
+    public struct Content: Equatable, CodableVendorExtendable, Sendable {
         public var schema: Either<JSONReference<JSONSchema>, JSONSchema>?
         public var example: AnyCodable?
         public var examples: Example.Map?
@@ -161,7 +161,9 @@ extension OpenAPI.Content: Encodable {
 
         try container.encodeIfPresent(encoding, forKey: .encoding)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -170,7 +172,7 @@ extension OpenAPI.Content: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.examples) && container.contains(.example)) else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Example and Examples",
                 details: "Only one of `example` and `examples` is allowed in the Media Type Object (`OpenAPI.Content`).",
                 codingPath: container.codingPath

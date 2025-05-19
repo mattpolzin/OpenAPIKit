@@ -160,7 +160,7 @@ extension SchemaFragmentTests {
         let warnResult = try orderUnstableDecode(JSONSchema.self, from: t)
 
         XCTAssertEqual(warnResult.warnings.count, 1)
-        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `Schema`: A schema contains properties for multiple types of schemas, namely: [\"array\", \"object\"]..")
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Problem encountered when parsing `Schema`: A schema contains properties for multiple types of schemas, namely: [\"array\", \"object\"]..")
         // we are actually at the root path in this test case so the
         // following should be an empty string!
         XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
@@ -182,7 +182,7 @@ extension SchemaFragmentTests {
         let warnResult = try orderUnstableDecode(JSONSchema.self, from: t)
 
         XCTAssertEqual(warnResult.warnings.count, 1)
-        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
+        XCTAssertEqual(warnResult.warnings.first?.localizedDescription, "Problem encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].")
         // we are actually at the root path in this test case so the
         // following should be an empty string!
         XCTAssertEqual(warnResult.warnings.first?.codingPathString, "")
@@ -222,7 +222,7 @@ extension SchemaFragmentTests {
 
         XCTAssertEqual(warnResult1.warnings.count, 1)
         // NOTE: Not a very informative warning, would like to do better.
-        XCTAssertEqual(warnResult1.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        XCTAssertEqual(warnResult1.warnings.first?.localizedDescription, "Problem encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
         // we are actually at the root path in this test case so the
         // following should be an empty string!
         XCTAssertEqual(warnResult1.warnings.first?.codingPathString, "")
@@ -231,7 +231,7 @@ extension SchemaFragmentTests {
 
         XCTAssertEqual(warnResult2.warnings.count, 1)
         // NOTE: Not a very informative warning, would like to do better.
-        XCTAssertEqual(warnResult2.warnings.first?.localizedDescription, "Inconsistency encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
+        XCTAssertEqual(warnResult2.warnings.first?.localizedDescription, "Problem encountered when parsing `OpenAPI Schema`: Found nothing but unsupported attributes..")
         // we are actually at the root path in this test case so the
         // following should be an empty string!
         XCTAssertEqual(warnResult2.warnings.first?.codingPathString, "")

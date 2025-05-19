@@ -8,7 +8,7 @@
 extension Shared {
         /// An HTTP Status code or status code range.
         ///
-        /// OpenAPI supports one of the following as a key in the [Responses Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responses-object):
+        /// OpenAPI supports one of the following as a key in the [Responses Object](https://spec.openapis.org/oas/v3.0.4.html#responses-object):
         /// - A `default` entry.
         /// - A specific status code.
         /// - A status code range.
@@ -18,7 +18,7 @@ extension Shared {
         /// You can use integer literals to specify an exact status code.
         ///
         /// Status code ranges are named in the `StatusCode.Range` enum. For example, the "1XX" range (100-199) can be written as either `.range(.information)` or as `.range(.init(rawValue: "1XX"))`.
-    public struct ResponseStatusCode: RawRepresentable, Equatable, Hashable, HasWarnings {
+    public struct ResponseStatusCode: RawRepresentable, Equatable, Hashable, HasWarnings, Sendable {
         public typealias RawValue = String
 
         public let warnings: [Warning]
@@ -34,13 +34,13 @@ extension Shared {
         public static func range(_ range: Range) -> Self { .init(value: .range(range)) }
         public static func status(code: Int) -> Self { .init(value: .status(code: code)) }
 
-        public enum Code: Equatable, Hashable {
+        public enum Code: Equatable, Hashable, Sendable {
             case `default`
             case range(Range)
             case status(code: Int)
         }
 
-        public enum Range: String {
+        public enum Range: String, Sendable {
                 /// Status Code `100-199`
             case information = "1XX"
                 /// Status Code `200-299`
@@ -104,5 +104,31 @@ extension Shared.ResponseStatusCode: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self.value = .status(code: value)
         warnings = []
+    }
+}
+
+extension Shared.ResponseStatusCode: Encodable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        try container.encode(self.rawValue)
+    }
+}
+
+extension Shared.ResponseStatusCode: Decodable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let strVal = try container.decode(String.self)
+        let val = Shared.ResponseStatusCode(rawValue: strVal)
+
+        guard let value = val else {
+            throw GenericError(
+                subjectName: "status code",
+                details: "Expected the status code to be either an Int, a range like '1XX', or 'default' but found \(strVal) instead",
+                codingPath: decoder.codingPath
+            )
+        }
+
+        self = value
     }
 }

@@ -1075,7 +1075,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
     }
 
     // MARK: - Inconsistency Failures
-    func test_generalInconsistencyErrors() {
+    func test_generalGenericErrors() {
 
         let fragmentsArray: [[JSONSchema]] = [
             // boolean readOnly/writeOnly, readOnly/readWrite, writeOnly/readWrite
@@ -1166,7 +1166,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
     }
 
-    func test_integerInconsistencyErrors() {
+    func test_integerGenericErrors() {
 
         let minBelowZero = [
             JSONSchema.IntegerContext(minimum: (-1, exclusive: false))
@@ -1193,7 +1193,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
     }
 
-    func test_numberInconsistencyErrors() {
+    func test_numberGenericErrors() {
 
         let minBelowZero = [
             JSONSchema.NumericContext(minimum: (-1, exclusive: false))
@@ -1220,7 +1220,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
     }
 
-    func test_stringInconsistencyErrors() {
+    func test_stringGenericErrors() {
 
         let minBelowZero = [
             JSONSchema.StringContext(minLength: -1)
@@ -1247,7 +1247,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
     }
 
-    func test_arrayInconsistencyErrors() {
+    func test_arrayGenericErrors() {
 
         let minBelowZero = [
             JSONSchema.ArrayContext(minItems: -1)
@@ -1274,7 +1274,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         }
     }
 
-    func test_objectInconsistencyErrors() {
+    func test_objectGenericErrors() {
 
         let minBelowZero = [
             JSONSchema.ObjectContext(properties: [:], minProperties: -1)

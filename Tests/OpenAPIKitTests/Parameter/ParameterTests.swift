@@ -827,7 +827,7 @@ extension ParameterTests {
             context: .path,
             schema: .string,
             description: "world",
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
@@ -880,7 +880,7 @@ extension ParameterTests {
                 context: .path,
                 schema: .string,
                 description: "world",
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }

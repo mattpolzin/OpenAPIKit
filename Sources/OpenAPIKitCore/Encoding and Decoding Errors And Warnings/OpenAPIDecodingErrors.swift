@@ -37,7 +37,7 @@ public protocol PathContextError {
     var codingPath: [CodingKey] { get }
 }
 
-public protocol OpenAPIError: Swift.Error, CustomStringConvertible, PathContextError {
+public protocol OpenAPIError: Swift.Error, CustomStringConvertible, PathContextError, Sendable {
     /// The subject of the error (i.e. the thing being worked with
     ///     when the error occurred).
     ///
@@ -90,7 +90,7 @@ public extension OpenAPIError {
             case .dataCorrupted:
                 return "Could not parse `\(subjectName)`"
             case .inconsistency(details: _):
-                return "Inconsistency encountered when parsing `\(subjectName)`"
+                return "Problem encountered when parsing `\(subjectName)`"
             }
         }()
 
