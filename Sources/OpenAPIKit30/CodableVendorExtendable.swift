@@ -18,11 +18,24 @@ public protocol VendorExtendable {
     /// These should be of the form:
     /// `[ "x-extensionKey": <anything>]`
     /// where the values are anything codable.
-    var vendorExtensions: VendorExtensions { get }
+    var vendorExtensions: VendorExtensions { get set }
 }
 
+/// OpenAPIKit supports some additional Encoder/Decoder configuration above and beyond
+/// what the Encoder or Decoder support out of box.
+///
+/// To _disable_ encoding or decoding of Vendor Extensions (by default these are _enabled),
+/// set `userInfo[VendorExtensionsConfiguration.enabledKey] = false` for your encoder or decoder.
 public enum VendorExtensionsConfiguration {
-    public static var isEnabled = true
+    public static let enabledKey: CodingUserInfoKey = .init(rawValue: "vendor-extensions-enabled")!
+
+    static func isEnabled(for decoder: Decoder) -> Bool {
+        decoder.userInfo[enabledKey] as? Bool ?? true
+    }
+
+    static func isEnabled(for encoder: Encoder) -> Bool {
+        encoder.userInfo[enabledKey] as? Bool ?? true
+    }
 }
 
 internal protocol ExtendableCodingKey: CodingKey, Equatable {
@@ -75,7 +88,7 @@ internal enum VendorExtensionDecodingError: Swift.Error, CustomStringConvertible
 extension CodableVendorExtendable {
 
     internal static func extensions(from decoder: Decoder) throws -> VendorExtensions {
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             return [:]
         }
 
@@ -85,7 +98,7 @@ extension CodableVendorExtendable {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
 
-        guard let decodedAny = decoded as? [String: Any] else {
+        guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
 
@@ -98,7 +111,7 @@ extension CodableVendorExtendable {
         let invalidKeys = extensions.keys.filter { !$0.lowercased().starts(with: "x-") }
         if !invalidKeys.isEmpty {
             let invalidKeysList = "[ " + invalidKeys.joined(separator: ", ") + " ]"
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Vendor Extension",
                 details: "Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: \(invalidKeysList)",
                 codingPath: decoder.codingPath
@@ -109,9 +122,6 @@ extension CodableVendorExtendable {
     }
 
     internal func encodeExtensions<T: KeyedEncodingContainerProtocol>(to container: inout T) throws where T.Key == Self.CodingKeys {
-        guard VendorExtensionsConfiguration.isEnabled else {
-            return
-        }
         for (key, value) in vendorExtensions {
             let xKey = key.starts(with: "x-") ? key : "x-\(key)"
             try container.encode(value, forKey: .extendedKey(for: xKey))

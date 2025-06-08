@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// The root of an OpenAPI 3.0 document.
     /// 
-    /// See [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md).
+    /// See [OpenAPI Specification](https://spec.openapis.org/oas/v3.0.4.html).
     ///
     /// An OpenAPI Document can say a _lot_ about the API it describes.
     /// A read-through of the specification is highly recommended because
@@ -135,7 +135,7 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public init(
-            openAPIVersion: Version = .v3_0_0,
+            openAPIVersion: Version = .v3_0_4,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -213,7 +213,7 @@ extension OpenAPI.Document {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.0.4.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values
@@ -308,9 +308,25 @@ extension OpenAPI.Document {
     }
 }
 
+public enum ExternalDereferenceDepth {
+    case iterations(Int)
+    case full
+}
+
+extension ExternalDereferenceDepth: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .iterations(value)
+    }
+}
+
 extension OpenAPI.Document {
     /// Create a locally-dereferenced OpenAPI
     /// Document.
+    ///
+    /// This function assumes all references are
+    /// local to the same file. If you want to resolve
+    /// remote references as well, call `externallyDereference()`
+    /// first and then locally dereference the result.
     ///
     /// A dereferenced document contains no
     /// `JSONReferences`. All components have been
@@ -334,6 +350,42 @@ extension OpenAPI.Document {
     public func locallyDereferenced() throws -> DereferencedDocument {
         return try DereferencedDocument(self)
     }
+
+    /// Load all remote references into the document. A remote reference is one
+    /// that points to another file rather than a location within the
+    /// same file.
+    ///
+    /// This function will load remote references into the Components object
+    /// and replace the remote reference with a local reference to that component.
+    /// No local references are modified or resolved by this function. You can
+    /// call `locallyDereferenced()` on the externally dereferenced document if
+    /// you want to also remove local references by inlining all of them.
+    ///
+    /// Externally dereferencing a document requires that you provide both a
+    /// function that produces a `OpenAPI.ComponentKey` for any given remote
+    /// file URI and also a function that loads and decodes the data found in
+    /// that remote file. The latter is less work than it may sound like because
+    /// the function is told what Decodable thing it wants, so you really just
+    /// need to decide what decoder to use and provide the file data to that
+    /// decoder. See `ExternalLoader` documentation for details.
+    @discardableResult
+    public mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
+        if case let .iterations(number) = depth,
+           number <= 0 {
+            return context
+        }
+
+        let oldPaths = paths
+
+        async let (newPaths, c1, m1) = oldPaths.externallyDereferenced(with: loader)
+
+        paths = try await newPaths
+        try await components.merge(c1)
+
+        let m2 = try await components.externallyDereference(with: loader, depth: depth)
+
+        return try await context + m1 + m2
+    }
 }
 
 extension OpenAPI {
@@ -346,7 +398,7 @@ extension OpenAPI {
     /// Multiple entries in this dictionary indicate all schemes named are
     /// required on the same request.
     ///
-    /// See [OpenAPI Security Requirement Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#security-requirement-object).
+    /// See [OpenAPI Security Requirement Object](https://spec.openapis.org/oas/v3.0.4.html#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 
@@ -356,12 +408,58 @@ extension OpenAPI.Document {
     /// OpenAPIKit only explicitly supports versions that can be found in
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
-    public enum Version: String, Codable {
-        case v3_0_0 = "3.0.0"
-        case v3_0_1 = "3.0.1"
-        case v3_0_2 = "3.0.2"
-        case v3_0_3 = "3.0.3"
-        case v3_0_4 = "3.0.4"
+    ///
+    ///**IMPORTANT**: Although the `v3_0_x` case supports arbitrary
+    /// patch versions, only _known_ patch versions are decodable. That is, if the OpenAPI
+    /// specification releases a new patch version, OpenAPIKit will see a patch version release
+    /// explicitly supports decoding documents of that new patch version before said version will
+    /// succesfully decode as the `v3_0_x` case.
+  public enum Version: RawRepresentable, Equatable, Codable {
+        case v3_0_0
+        case v3_0_1
+        case v3_0_2
+        case v3_0_3
+        case v3_0_4
+        case v3_0_x(x: Int)
+
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "3.0.0": self = .v3_0_0
+            case "3.0.1": self = .v3_0_1
+            case "3.0.2": self = .v3_0_2
+            case "3.0.3": self = .v3_0_3
+            case "3.0.4": self = .v3_0_4
+            default:
+                let components = rawValue.split(separator: ".")
+                guard components.count == 3 else {
+                    return nil
+                }
+                guard components[0] == "3", components[1] == "0" else {
+                    return nil
+                }
+                guard let patchVersion = Int(components[2], radix: 10) else {
+                    return nil
+                }
+                // to support newer versions released in the future without a breaking
+                // change to the enumeration, bump the upper limit here to e.g. 5 or 6
+                // or 9:
+                guard patchVersion > 4 && patchVersion <= 4 else {
+                  return nil
+                }
+                self = .v3_0_x(x: patchVersion)
+            }
+        }
+
+        public var rawValue: String {
+            switch self {
+            case .v3_0_0: return "3.0.0"
+            case .v3_0_1: return "3.0.1"
+            case .v3_0_2: return "3.0.2"
+            case .v3_0_3: return "3.0.3"
+            case .v3_0_4: return "3.0.4"
+            case .v3_0_x(x: let x): return "3.0.\(x)"
+            }
+        }
     }
 }
 
@@ -390,7 +488,9 @@ extension OpenAPI.Document: Encodable {
 
         try container.encode(paths, forKey: .paths)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
 
         if !components.isEmpty {
             try container.encode(components, forKey: .components)
@@ -422,7 +522,7 @@ extension OpenAPI.Document: Decodable {
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Document(error)
         } catch let error as DecodingError {
@@ -551,7 +651,7 @@ internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: 
                     return (try? components.contains(ref)) ?? false
                 }
                 guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
-                    throw InconsistencyError(
+                    throw GenericError(
                         subjectName: key.stringValue,
                         details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
                         codingPath: container.codingPath + [key]
@@ -600,7 +700,7 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
             ]
             .map(AnyCodingKey.init(stringValue:))
 
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: schemeKey,
                 details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
                 codingPath: keys

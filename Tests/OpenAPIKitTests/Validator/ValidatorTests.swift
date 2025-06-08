@@ -85,7 +85,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -112,7 +112,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -144,7 +144,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -180,7 +180,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -212,7 +212,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -242,7 +242,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -278,7 +278,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -312,7 +312,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -324,7 +324,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -360,7 +360,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -396,7 +396,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -433,7 +433,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -470,7 +470,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -506,7 +506,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -688,7 +688,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -722,7 +722,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hiya",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -818,7 +818,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -869,7 +869,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hello",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -920,7 +920,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hiya",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -958,7 +958,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hiya",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -1002,7 +1002,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hiya",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -1045,7 +1045,7 @@ final class ValidatorTests: XCTestCase {
                 "x-string": "hiya",
                 "x-int": 2244,
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"])
             ]
         )
@@ -1339,7 +1339,7 @@ final class ValidatorTests: XCTestCase {
             vendorExtensions: [
                 "x-string": "hiya",
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"]),
                 "x-float": AnyCodable(22.5 as Float),
                 "x-bool": true
@@ -1377,7 +1377,7 @@ final class ValidatorTests: XCTestCase {
             vendorExtensions: [
                 "x-string": "hiya",
                 "x-double": 10.5,
-                "x-dict": [ "string": "world"],
+                "x-dict": .init([ "string": "world"]),
                 "x-array": AnyCodable(["hello", nil, "world"]),
                 "x-float": AnyCodable(22.5 as Float),
                 "x-bool": true
@@ -1445,7 +1445,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertEqual(warnings.count, 1)
         XCTAssertEqual(
             warnings.first?.localizedDescription,
-            "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
+            "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'."
         )
         XCTAssertEqual(warnings.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
     }
@@ -1484,7 +1484,7 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 1)
             XCTAssertEqual(
                 errors?.localizedDescription,
-                "Inconsistency encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
             )
             XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
         }

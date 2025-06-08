@@ -7,6 +7,7 @@
 
 import XCTest
 import OpenAPIKit
+import Foundation
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {
@@ -177,7 +178,7 @@ extension PathItemTests {
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
             parameters: [.parameter(name: "hello", context: .query, schema: .string)],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
@@ -247,7 +248,7 @@ extension PathItemTests {
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
                 parameters: [.parameter(name: "hello", context: .query, schema: .string)],
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }

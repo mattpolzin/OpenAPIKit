@@ -7,7 +7,7 @@
 
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class OperationTests: XCTestCase {
     func test_init() {
@@ -138,7 +138,7 @@ extension OperationTests {
             deprecated: true,
             security: [[.component(named: "security"): []]],
             servers: [.init(url: URL(string: "https://google.com")!)],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
         let encodedOperation = try orderUnstableTestStringFromEncoding(of: operation)
@@ -312,7 +312,7 @@ extension OperationTests {
                 deprecated: true,
                 security: [[.component(named: "security"): []]],
                 servers: [.init(url: URL(string: "https://google.com")!)],
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
 

@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit30
-import Yams
+@preconcurrency import Yams
 
 final class PathsErrorTests: XCTestCase {
     func test_missingPaths() {
@@ -104,7 +104,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: positional path parameters must be explicitly set to required.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nProblem encountered when parsing `world`: positional path parameters must be explicitly set to required.."
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
@@ -137,7 +137,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A parameter must specify either `content` or `schema`.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nProblem encountered when parsing `world`: A parameter must specify either `content` or `schema`.."
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
@@ -176,7 +176,7 @@ final class PathsErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nInconsistency encountered when parsing `world`: A parameter must specify one but not both `content` and `schema`.."
+            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Parameter in .parameters[0] under the `/hello/world` path. \n\nParameter could not be decoded because:\nProblem encountered when parsing `world`: A parameter must specify one but not both `content` and `schema`.."
             )
             XCTAssertEqual(
                 openAPIError.codingPath.map { $0.stringValue },
@@ -219,7 +219,7 @@ final class PathsErrorTests: XCTestCase {
         XCTAssertEqual(
             openAPIError?.localizedDescription,
                 """
-                Inconsistency encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].
+                Problem encountered when parsing `OpenAPI Schema`: Found schema attributes not consistent with the type specified: object. Specifically, attributes for these other types: [\"array\"].
                 """
         )
         XCTAssertEqual(

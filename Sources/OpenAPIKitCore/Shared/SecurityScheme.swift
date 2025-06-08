@@ -6,7 +6,7 @@
 //
 
 extension Shared {
-    public enum SecuritySchemeLocation: String, Codable, Equatable {
+    public enum SecuritySchemeLocation: String, Codable, Equatable, Sendable {
         case query
         case header
         case cookie

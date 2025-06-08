@@ -8,8 +8,8 @@
 extension Shared {
     /// OpenAPI Spec "Disciminator Object"
     ///
-    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminator-object).
-    public struct Discriminator: Equatable {
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.0.4.html#discriminator-object).
+    public struct Discriminator: Equatable, Sendable {
         public let propertyName: String
         public let mapping: OrderedDictionary<String, String>?
 

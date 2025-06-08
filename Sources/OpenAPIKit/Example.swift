@@ -11,8 +11,8 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
-    /// See [OpenAPI Example Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#example-object).
-    public struct Example: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Example Object](https://spec.openapis.org/oas/v3.1.1.html#example-object).
+    public struct Example: Equatable, CodableVendorExtendable, Sendable {
         public let summary: String?
         public let description: String?
 
@@ -25,7 +25,7 @@ extension OpenAPI {
         /// These should be of the form:
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
-        public let vendorExtensions: [String: AnyCodable]
+        public var vendorExtensions: [String: AnyCodable]
 
         public init(
             summary: String? = nil,
@@ -106,7 +106,9 @@ extension OpenAPI.Example: Encodable {
             break
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -115,7 +117,7 @@ extension OpenAPI.Example: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard !(container.contains(.externalValue) && container.contains(.value)) else {
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "example value",
                 details: "Found both `value` and `externalValue` keys in an Example. You must specify one or the other.",
                 codingPath: container.codingPath
@@ -195,7 +197,7 @@ extension OpenAPI.Example: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.Example{
         var vendorExtensions = self.vendorExtensions
-        if let name = name {
+        if let name {
             vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -205,6 +207,12 @@ extension OpenAPI.Example: LocallyDereferenceable {
             value: self.value,
             vendorExtensions: vendorExtensions
         )
+    }
+}
+
+extension OpenAPI.Example: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

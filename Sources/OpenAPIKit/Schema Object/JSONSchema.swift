@@ -9,11 +9,11 @@ import OpenAPIKitCore
 
 /// OpenAPI "Schema Object"
 /// 
-/// See [OpenAPI Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schema-object).
-public struct JSONSchema: JSONSchemaContext, HasWarnings {
+/// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.1.1.html#schema-object).
+public struct JSONSchema: JSONSchemaContext, HasWarnings, Sendable {
 
     public let warnings: [OpenAPI.Warning]
-    public let value: Schema
+    public var value: Schema
 
     internal init(warnings: [OpenAPI.Warning], schema: Schema) {
         self.warnings = warnings
@@ -68,7 +68,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings {
         .init(schema: .fragment(core))
     }
 
-    public enum Schema: Equatable {
+    public enum Schema: Equatable, Sendable {
         /// The null type, which replaces the functionality of the `nullable` property from
         /// previous versions of the OpenAPI specification.
         case null(CoreContext<JSONTypeFormat.AnyFormat>)
@@ -470,7 +470,12 @@ extension JSONSchema: VendorExtendable {
     /// `[ "x-extensionKey": <anything>]`
     /// where the values are anything codable.
     public var vendorExtensions: VendorExtensions {
-        coreContext.vendorExtensions
+        get {
+          coreContext.vendorExtensions
+        }
+        set(extensions) {
+          self.value = value.with(vendorExtensions: extensions)
+        }
     }
 
     public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {
@@ -1925,7 +1930,7 @@ extension JSONSchema: Encodable {
 
         // Ad-hoc vendor extension encoding because keys are done differently for
         // JSONSchema
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: encoder) else {
             return
         }
         var container = encoder.container(keyedBy: VendorExtensionKeys.self)
@@ -2056,7 +2061,7 @@ extension JSONSchema: Decodable {
         if keysFrom.count > 1 {
             _warnings.append(
                 .underlyingError(
-                    InconsistencyError(
+                    GenericError(
                         subjectName: "Schema",
                         details: "A schema contains properties for multiple types of schemas, namely: \(keysFrom).",
                         codingPath: decoder.codingPath
@@ -2068,12 +2073,12 @@ extension JSONSchema: Decodable {
         // TODO: support multiple types instead of just grabbing the first one (see TODO immediately above as well)
         let typeHint = typeHints.first
 
-        if let typeHint = typeHint {
+        if let typeHint {
             let keysFromElsewhere = keysFrom.filter({ $0 != typeHint.group })
             if !keysFromElsewhere.isEmpty {
                 _warnings.append(
                     .underlyingError(
-                        InconsistencyError(
+                        GenericError(
                             subjectName: "OpenAPI Schema",
                             details: "Found schema attributes not consistent with the type specified: \(typeHint). Specifically, attributes for these other types: \(keysFromElsewhere)",
                             codingPath: decoder.codingPath
@@ -2131,7 +2136,7 @@ extension JSONSchema: Decodable {
             if fragmentContext.isEmpty && hintContainerCount > 0 {
                 _warnings.append(
                     .underlyingError(
-                        InconsistencyError(
+                        GenericError(
                             subjectName: "OpenAPI Schema",
                             details: "Found nothing but unsupported attributes.",
                             codingPath: decoder.codingPath
@@ -2151,7 +2156,7 @@ extension JSONSchema: Decodable {
     }
     
     private static func decodeVenderExtensions(from decoder: Decoder) throws -> [String: AnyCodable] {
-        guard VendorExtensionsConfiguration.isEnabled else {
+        guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             return [:]
         }
         
@@ -2160,8 +2165,8 @@ extension JSONSchema: Decodable {
         guard (decoded as? [Any]) == nil else {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
-        
-        guard let decodedAny = decoded as? [String: Any] else {
+
+        guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
         

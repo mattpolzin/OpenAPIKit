@@ -39,13 +39,13 @@ final class VendorExtendableTests: XCTestCase {
     func test_encodeSuccess() throws {
         let test = TestStruct(vendorExtensions: [
             "x-tension": "hello",
-            "x-two": [
+            "x-two": .init([
                 "cool",
                 "beans"
-            ],
-            "x-three": [
+            ]),
+            "x-three": .init([
                 "nested": 10
-            ]
+            ])
         ])
 
         let _ = try JSONEncoder().encode(test)
@@ -85,13 +85,13 @@ extension VendorExtendableTests {
     func test_encode() throws {
         let test = TestStruct(vendorExtensions: [
             "x-tension": "hello",
-            "x-two": [
+            "x-two": .init([
                 "cool",
                 "beans"
-            ],
-            "x-three": [
+            ]),
+            "x-three": .init([
                 "nested": 10
-            ]
+            ])
         ])
 
         let encoded = try orderUnstableTestStringFromEncoding(of: test)
@@ -145,7 +145,7 @@ private struct TestStruct: Codable, CodableVendorExtendable {
         }
     }
 
-    public let vendorExtensions: Self.VendorExtensions
+    public var vendorExtensions: Self.VendorExtensions
 
     init(vendorExtensions: Self.VendorExtensions) {
         self.vendorExtensions = vendorExtensions
@@ -159,6 +159,9 @@ private struct TestStruct: Codable, CodableVendorExtendable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode("world", forKey: .one)
         try container.encode("!", forKey: .two)
-        try encodeExtensions(to: &container)
+
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }

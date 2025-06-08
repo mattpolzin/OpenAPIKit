@@ -377,7 +377,6 @@ fileprivate struct TemplatedURLWrapper: Codable {
 }
 
 // MARK: - Stack Overflow Regression Test
-#if swift(>=5.5)
 import Dispatch
 
 extension URLTemplateTests {
@@ -392,11 +391,10 @@ extension URLTemplateTests {
     }
 
     """.utf8)
-        let document = try JSONDecoder().decode(
+        let _ = try JSONDecoder().decode(
             StackFoo.self,
             from: data
         )
-        print(document)
     }
 
     func test_avoid_stack_overflow() async throws {
@@ -408,4 +406,3 @@ extension URLTemplateTests {
         }
     }
 }
-#endif

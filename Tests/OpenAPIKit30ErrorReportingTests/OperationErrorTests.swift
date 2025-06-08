@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit30
-import Yams
+@preconcurrency import Yams
 
 final class OperationErrorTests: XCTestCase {
     func test_missingResponses() {

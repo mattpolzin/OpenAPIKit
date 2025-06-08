@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
-    public struct Parameter: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    public struct Parameter: Equatable, CodableVendorExtendable, Sendable {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.
@@ -21,6 +21,8 @@ extension OpenAPI {
         /// parameters in the given location.
         public var context: Context
         public var description: String?
+        /// Whether or not the parameter is deprecated. Defaults to false
+        /// if unspecified and only gets encoded if true.
         public var deprecated: Bool // default is false
 
         /// OpenAPI Spec "content" or "schema" properties.
@@ -46,7 +48,10 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Whether or not this parameter is required. See the context
+        /// which determines whether the parameter is required or not.
         public var required: Bool { context.required }
+
         /// The location (e.g. "query") of the parameter.
         ///
         /// See the `context` property for more details on the
@@ -157,7 +162,7 @@ extension OpenAPI.Parameter {
     /// containing exactly the things that differentiate
     /// one parameter from another, per the specification.
     ///
-    /// See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
+    /// See [Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
     internal struct ParameterIdentity: Hashable {
         let name: String
         let location: Context.Location
@@ -269,7 +274,9 @@ extension OpenAPI.Parameter: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -291,7 +298,7 @@ extension OpenAPI.Parameter: Decodable {
             context = .header(required: required)
         case .path:
             if !required {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: name,
                     details: "positional path parameters must be explicitly set to required",
                     codingPath: decoder.codingPath
@@ -317,13 +324,13 @@ extension OpenAPI.Parameter: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         case (nil, nil):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify either `content` or `schema`",
                 codingPath: decoder.codingPath
             )
         case (_, _):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath
