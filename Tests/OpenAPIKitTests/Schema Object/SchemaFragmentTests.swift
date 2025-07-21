@@ -663,6 +663,30 @@ extension SchemaFragmentTests {
             }
             """
         )
+
+        let t5 = JSONSchema.array(.init(), .init(items: .string, prefixItems: [.integer, .boolean]))
+
+        let encoded5 = try orderUnstableTestStringFromEncoding(of: t5)
+
+        assertJSONEquivalent(
+            encoded5,
+            """
+            {
+              "items" : {
+                "type" : "string"
+              },
+              "prefixItems" : [
+                {
+                  "type" : "integer"
+                },
+                {
+                  "type" : "boolean"
+                }
+              ],
+              "type" : "array"
+            }
+            """
+        )
     }
 
     func test_arrayDecode() throws {
