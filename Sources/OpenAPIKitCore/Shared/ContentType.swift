@@ -1,6 +1,6 @@
 //
 //  ContentType.swift
-//  
+//
 //
 //  Created by Mathew Polzin on 12/29/19.
 //
@@ -111,6 +111,10 @@ public extension Shared.ContentType {
     static let form: Self = .init(.form)
     /// Graphics Interchange Format
     static let gif: Self = .init(.gif)
+    /// geojson as defined in GeoJSON standard (RFC 7946)
+    ///
+    /// see: https://datatracker.ietf.org/doc/html/rfc7946#section-12
+    static let geojson: Self = .init(.geojson)
     static let html: Self = .init(.html)
     static let javascript: Self = .init(.javascript)
     /// JPEG image
@@ -131,9 +135,17 @@ public extension Shared.ContentType {
     /// OpenType font
     static let otf: Self = .init(.otf)
     static let pdf: Self = .init(.pdf)
+    /// PNG image
+    static let png: Self = .init(.png)
+    /// Protocol Buffers
+    ///
+    /// See: https://protobuf.dev/
+    static let protobuf: Self = .init(.protobuf)
     /// RAR archive
     static let rar: Self = .init(.rar)
     static let rtf: Self = .init(.rtf)
+    /// Scalable Vector Graphic (SVG)
+    static let svg: Self = .init(.svg)
     /// Tape Archive (TAR)
     static let tar: Self = .init(.tar)
     /// TIF image
@@ -142,6 +154,8 @@ public extension Shared.ContentType {
     static let ttf: Self = .init(.ttf)
     /// Plaintext
     static let txt: Self = .init(.txt)
+    /// Web Picture format (WEBP)
+    static let webp: Self = .init(.webp)
     /// Web Open Font Format
     static let woff: Self = .init(.woff)
     /// Web Open Font Format
@@ -182,6 +196,10 @@ extension Shared.ContentType {
         case docx
         /// URL-encoded form data. See also: `multipartForm`.
         case form
+        /// geojson as defined in GeoJSON standard (RFC 7946)
+        ///
+        /// see: https://datatracker.ietf.org/doc/html/rfc7946#section-12
+        case geojson
         /// Graphics Interchange Format
         case gif
         case html
@@ -204,9 +222,17 @@ extension Shared.ContentType {
         /// OpenType font
         case otf
         case pdf
+        /// PNG image
+        case png
+        /// Protocol Buffers
+        ///
+        /// See: https://protobuf.dev/
+        case protobuf
         /// RAR archive
         case rar
         case rtf
+        /// Scalable Vector Graphic (SVG)
+        case svg
         /// Tape Archive (TAR)
         case tar
         /// TIF image
@@ -215,6 +241,8 @@ extension Shared.ContentType {
         case ttf
         /// Plaintext
         case txt
+        /// Web Picture format (WEBP)
+        case webp
         /// Web Open Font Format
         case woff
         /// Web Open Font Format
@@ -250,6 +278,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case .doc: return "application/msword"
         case .docx: return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         case .form: return "application/x-www-form-urlencoded"
+        case .geojson: return "application/geo+json"
         case .gif: return "image/gif"
         case .html: return "text/html"
         case .javascript: return "application/javascript"
@@ -263,12 +292,16 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case .multipartForm: return "multipart/form-data"
         case .otf: return "font/otf"
         case .pdf: return "application/pdf"
+        case .png: return "image/png"
+        case .protobuf: return "application/x-protobuf"
         case .rar: return "application/x-rar-compressed"
         case .rtf: return "application/rtf"
+        case .svg: return "image/svg+xml"
         case .tar: return "application/x-tar"
         case .tif: return "image/tiff"
         case .ttf: return "font/ttf"
         case .txt: return "text/plain"
+        case .webp: return "image/webp"
         case .woff: return "font/woff"
         case .woff2: return "font/woff2"
         case .xml: return "application/xml"
@@ -298,6 +331,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case "application/msword": self = .doc
         case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": self = .docx
         case "application/x-www-form-urlencoded": self = .form
+        case "application/geo+json": self = .geojson
         case "image/gif": self = .gif
         case "text/html": self = .html
         case "application/javascript": self = .javascript
@@ -311,12 +345,16 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case "multipart/form-data": self = .multipartForm
         case "font/otf": self = .otf
         case "application/pdf": self = .pdf
+        case "image/png": self = .png
+        case "application/x-protobuf": self = .protobuf
         case "application/x-rar-compressed": self = .rar
         case "application/rtf": self = .rtf
+        case "image/svg+xml": self = .svg
         case "application/x-tar": self = .tar
         case "image/tiff": self = .tif
         case "font/ttf": self = .ttf
         case "text/plain": self = .txt
+        case "image/webp": self = .webp
         case "font/woff": self = .woff
         case "font/woff2": self = .woff2
         case "application/xml": self = .xml
