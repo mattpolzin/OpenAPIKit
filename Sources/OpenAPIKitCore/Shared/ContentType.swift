@@ -144,6 +144,8 @@ public extension Shared.ContentType {
     /// RAR archive
     static let rar: Self = .init(.rar)
     static let rtf: Self = .init(.rtf)
+    /// Scalable Vector Graphic (SVG)
+    static let svg: Self = .init(.svg)
     /// Tape Archive (TAR)
     static let tar: Self = .init(.tar)
     /// TIF image
@@ -152,6 +154,8 @@ public extension Shared.ContentType {
     static let ttf: Self = .init(.ttf)
     /// Plaintext
     static let txt: Self = .init(.txt)
+    /// Web Picture format (WEBP)
+    static let webp: Self = .init(.webp)
     /// Web Open Font Format
     static let woff: Self = .init(.woff)
     /// Web Open Font Format
