@@ -178,6 +178,125 @@ class AnyCodableTests: XCTestCase {
 
         XCTAssertEqual(string, #"{"value":"https:\/\/hello.com"}"#)
     }
+
+    func test_encodeEncodable() throws {
+        struct TestEncodable: Codable {
+            let x: String
+            let y: Int
+            let z: Bool?
+
+            // NOTE: The auto-magically synthesized conformance leaves out `nil` values so we make it explicit
+
+            enum CodingKeys: String, CodingKey {
+                case x
+                case y
+                case z
+            }
+
+            func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+
+                try container.encode(x, forKey: .x)
+                try container.encode(y, forKey: .y)
+                if let z = self.z {
+                    try container.encode(z, forKey: .z)
+                } else {
+                    try container.encodeNil(forKey: .z)
+                }
+            }
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(AnyCodable(TestEncodable(x: "abc", y: 123, z: nil)))
+
+        let string = String(data: data, encoding: .utf8)
+
+        XCTAssertEqual(string, #"{"x":"abc","y":123,"z":null}"#)
+
+        let decoder = JSONDecoder()
+        _ = try decoder.decode(AnyCodable.self, from: data)
+    }
+
+    func test_encodeEncodableNested() throws {
+        struct TestEncodable: Codable {
+            let x: AnyCodable
+            let y: AnyCodable
+            let z: AnyCodable?
+
+            // NOTE: The auto-magically synthesized conformance leaves out `nil` values so we make it explicit
+
+            enum CodingKeys: String, CodingKey {
+                case x
+                case y
+                case z
+            }
+
+            func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+
+                try container.encode(x, forKey: .x)
+                try container.encode(y, forKey: .y)
+                if let z = self.z {
+                    try container.encode(z, forKey: .z)
+                } else {
+                    try container.encodeNil(forKey: .z)
+                }
+            }
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+
+        let data = try encoder.encode(AnyCodable(TestEncodable(x: "abc", y: AnyCodable(TestEncodable(x: "", y: 0, z: true)), z: nil)))
+
+        let string = String(data: data, encoding: .utf8)
+
+        XCTAssertEqual(string, #"{"x":"abc","y":{"x":"","y":0,"z":true},"z":null}"#)
+
+        let decoder = JSONDecoder()
+        _ = try decoder.decode(AnyCodable.self, from: data)
+    }
+
+    func test_encodeEncodableArray() throws {
+        struct TestEncodable: Codable {
+            let x: AnyCodable
+            let y: AnyCodable
+            let z: AnyCodable?
+
+            // NOTE: The auto-magically synthesized conformance leaves out `nil` values so we make it explicit
+
+            enum CodingKeys: String, CodingKey {
+                case x
+                case y
+                case z
+            }
+
+            func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+
+                try container.encode(x, forKey: .x)
+                try container.encode(y, forKey: .y)
+                if let z = self.z {
+                    try container.encode(z, forKey: .z)
+                } else {
+                    try container.encodeNil(forKey: .z)
+                }
+            }
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+
+        let data = try encoder.encode(AnyCodable([TestEncodable(x: "abc", y: 123, z: nil)]))
+
+        let string = String(data: data, encoding: .utf8)
+
+        XCTAssertEqual(string, #"[{"x":"abc","y":123,"z":null}]"#)
+
+        let decoder = JSONDecoder()
+        _ = try decoder.decode(AnyCodable.self, from: data)
+    }
 }
 
 fileprivate struct Wrapper: Codable {
