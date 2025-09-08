@@ -1,6 +1,6 @@
 //
 //  JSONSchemaContext.swift
-//  
+//
 //
 //  Created by Mathew Polzin on 6/22/19.
 //
@@ -318,7 +318,7 @@ extension JSONSchema.CoreContext: Equatable {
           && lhs.externalDocs == rhs.externalDocs
           && lhs.discriminator == rhs.discriminator
 
-      return step1 
+      return step1
           && lhs.allowedValues == rhs.allowedValues
           && lhs.defaultValue == rhs.defaultValue
           && lhs.examples == rhs.examples
@@ -709,6 +709,11 @@ extension JSONSchema {
         /// Defaults to 0.
         public var minItems: Int { _minItems ?? 0 }
 
+        /// Multiple JSON Type Node that describe
+        /// the types of the first few elements in the array.
+        /// Useful for describing tuples.
+        public let prefixItems: [JSONSchema]?
+
         let _uniqueItems: Bool?
         /// Setting to true indicates all
         /// elements of the array are expected
@@ -719,11 +724,13 @@ extension JSONSchema {
             items: JSONSchema? = nil,
             maxItems: Int? = nil,
             minItems: Int? = nil,
+            prefixItems: [JSONSchema]? = nil,
             uniqueItems: Bool? = nil
         ) {
             self.items = items
             self.maxItems = maxItems
             self._minItems = minItems
+            self.prefixItems = prefixItems
             self._uniqueItems = uniqueItems
         }
     }
@@ -1040,7 +1047,6 @@ extension JSONSchema.CoreContext: Decodable {
                       )
                   )
             )
-            
         }
         else if let types = try? container.decodeIfPresent([JSONType].self, forKey: .type) {
             nullable = types.contains(JSONType.null)
@@ -1193,6 +1199,7 @@ extension JSONSchema.ArrayContext {
         case maxItems
         case minItems
         case uniqueItems
+        case prefixItems
     }
 }
 
@@ -1203,6 +1210,7 @@ extension JSONSchema.ArrayContext: Encodable {
         try container.encodeIfPresent(items, forKey: .items)
         try container.encodeIfPresent(maxItems, forKey: .maxItems)
         try container.encodeIfPresent(_minItems, forKey: .minItems)
+        try container.encodeIfPresent(prefixItems, forKey: .prefixItems)
         try container.encodeIfPresent(_uniqueItems, forKey: .uniqueItems)
     }
 }
@@ -1214,6 +1222,7 @@ extension JSONSchema.ArrayContext: Decodable {
         items = try container.decodeIfPresent(JSONSchema.self, forKey: .items)
         maxItems = try container.decodeIfPresent(Int.self, forKey: .maxItems)
         _minItems = try container.decodeIfPresent(Int.self, forKey: .minItems)
+        prefixItems = try container.decodeIfPresent([JSONSchema].self, forKey: .prefixItems)
         _uniqueItems = try container.decodeIfPresent(Bool.self, forKey: .uniqueItems)
     }
 }

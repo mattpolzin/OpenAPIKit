@@ -480,7 +480,7 @@ extension JSONSchema: VendorExtendable {
 
     public func with(vendorExtensions: [String: AnyCodable]) -> JSONSchema {
         .init(
-            warnings: warnings, 
+            warnings: warnings,
             schema: value.with(vendorExtensions: vendorExtensions)
         )
     }
@@ -1639,6 +1639,7 @@ extension JSONSchema {
         minItems: Int? = nil,
         maxItems: Int? = nil,
         uniqueItems: Bool? = nil,
+        prefixItems: [JSONSchema]? = nil,
         items: JSONSchema? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
@@ -1669,6 +1670,7 @@ extension JSONSchema {
             items: items,
             maxItems: maxItems,
             minItems: minItems,
+            prefixItems: prefixItems,
             uniqueItems: uniqueItems
         )
         return .array(coreContext, arrayContext)
@@ -2154,14 +2156,14 @@ extension JSONSchema: Decodable {
 
         self.value = value.with(vendorExtensions: extensions)
     }
-    
+
     private static func decodeVenderExtensions(from decoder: Decoder) throws -> [String: AnyCodable] {
         guard VendorExtensionsConfiguration.isEnabled(for: decoder) else {
             return [:]
         }
-        
+
         let decoded = try AnyCodable(from: decoder).value
-        
+
         guard (decoded as? [Any]) == nil else {
             throw VendorExtensionDecodingError.selfIsArrayNotDict
         }
@@ -2169,7 +2171,7 @@ extension JSONSchema: Decodable {
         guard let decodedAny = decoded as? [String: any Sendable] else {
             throw VendorExtensionDecodingError.foundNonStringKeys
         }
-        
+
         return decodedAny
             .filter { $0.key.lowercased().starts(with: "x-") }
             .mapValues(AnyCodable.init)

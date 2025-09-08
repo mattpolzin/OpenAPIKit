@@ -1,6 +1,6 @@
 //
 //  SchemaFragmentTests.swift
-//  
+//
 //
 //  Created by Mathew Polzin on 4/21/20.
 //
@@ -663,6 +663,30 @@ extension SchemaFragmentTests {
             }
             """
         )
+
+        let t5 = JSONSchema.array(.init(), .init(items: .string, prefixItems: [.integer, .boolean]))
+
+        let encoded5 = try orderUnstableTestStringFromEncoding(of: t5)
+
+        assertJSONEquivalent(
+            encoded5,
+            """
+            {
+              "items" : {
+                "type" : "string"
+              },
+              "prefixItems" : [
+                {
+                  "type" : "integer"
+                },
+                {
+                  "type" : "boolean"
+                }
+              ],
+              "type" : "array"
+            }
+            """
+        )
     }
 
     func test_arrayDecode() throws {
@@ -724,6 +748,24 @@ extension SchemaFragmentTests {
         let decoded5 = try orderUnstableDecode(JSONSchema.self, from: t5)
 
         XCTAssertEqual(decoded5, JSONSchema.array(.init(), .init(items: .string)))
+
+        let t6 =
+        """
+        {
+          "items" : {
+            "type" : "string"
+          },
+          "prefixItems": [
+            {
+              "type" : "integer"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+
+        let decoded6 = try orderUnstableDecode(JSONSchema.self, from: t6)
+
+        XCTAssertEqual(decoded6, JSONSchema.array(.init(), .init(items: .string, prefixItems: [.integer])))
     }
 
     func test_objectEncode() throws {
