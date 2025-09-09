@@ -41,7 +41,7 @@ OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specifi
   - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
 - [Contributing](#contributing)
-- [Security](#security)
+- [Security](#project-security)
 - [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
 ## Usage
@@ -348,15 +348,16 @@ struct ExampleLoader: ExternalLoader {
     typealias Message = Void
 
     static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
-        // load data from file, perhaps. we will just mock that up for the test:
+        // load data from file, perhaps. we will just mock that up for the example:
         let data = try await mockData(componentKey(type: T.self, at: url))
 
         // We use the YAML decoder purely for order-stability.
         let decoded = try YAMLDecoder().decode(T.self, from: data)
         let finished: T
         // while unnecessary, a loader may likely want to attatch some extra info
-        // to keep track of where a reference was loaded from. This test makes sure
-        // the following strategy of using vendor extensions works.
+        // to keep track of where a reference was loaded from. This example
+        shows
+        // the strategy of using vendor extensions.
         if var extendable = decoded as? VendorExtendable {
             extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
             finished = extendable as! T
@@ -368,6 +369,7 @@ struct ExampleLoader: ExternalLoader {
 
     static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
         // do anything you want here to determine what key the new component should be stored at.
+        //
         // for the example, we will just transform the URL path into a valid components key:
         let urlString = url.pathComponents
           .joined(separator: "_")
@@ -386,7 +388,7 @@ In addition to looking something up in the [`Components`](https://mattpolzin.git
 
 You use a value's [`dereferenced(in:)`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/locallydereferenceable) method to fully dereference it.
 
-You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object. External dereferencing is done as a separeate step, but you can first dereference externally and then dereference internally if you'd like to perform both.
+You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that have previously been externally dereferenced (or documents contained within one file) -- that is, all references are "local". Specifically, all references must be located within the document's Components Object. External dereferencing is done as a separeate step, but you can first dereference externally and then dereference internally if you'd like to perform both.
 
 Unlike what happens when you lookup an individual component using the `lookup()` method on `Components`, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
 
@@ -458,7 +460,7 @@ The [**Swift Package Registry API Docs**](https://github.com/mattt/swift-package
 [**OpenAPIDiff**](https://github.com/mattpolzin/OpenAPIDiff) is a library and a CLI that implements semantic diffing; that is, rather than just comparing two OpenAPI documents line-by-line for textual differences, it parses the documents and describes the differences in the two OpenAPI ASTs.
 
 ## Notes
-This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in. You must read OpenAPI documentation into `Data` or `String` (depending on the decoder you want to use) and all references must be internal to the same file to be resolved.
+This library does *not* handle reading files from disk or otherwise. You must read OpenAPI documentation into `Data` or `String` (depending on the decoder you want to use) and then decode using OpenAPIKit's `Decodable` conformances.
 
 This library *is* opinionated about a few defaults when you use the Swift types, however encoding and decoding stays true to the spec. Some key things to note:
 
@@ -475,7 +477,7 @@ Contributions to OpenAPIKit are welcome and appreciated! The project is mostly m
 
 Please see the [Contribution Guidelines](./CONTRIBUTING.md) for a few brief notes on contributing the the project.
 
-## Security
+## Project Security
 The OpenAPIKit project takes code security seriously. As part of the Swift Server Workground incubation program, this project follows a shared set of standards around receiving, reporting, and reacting to security vulnerabilies.
 
 Please see [Security](./SECURITY.md) for information on how to report vulnerabilities to the OpenAPIKit project and what to expect after you do.
