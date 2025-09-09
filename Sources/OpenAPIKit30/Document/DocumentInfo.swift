@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
-    /// See [OpenAPI Info Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#info-object).
+    /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.0.4.html#info-object).
     public struct Info: Equatable, CodableVendorExtendable {
         public let title: String
         public let description: String?
@@ -47,7 +47,7 @@ extension OpenAPI.Document {
 
         /// OpenAPI Spec "Contact Object"
         ///
-        /// See [OpenAPI Contact Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#contact-object).
+        /// See [OpenAPI Contact Object](https://spec.openapis.org/oas/v3.0.4.html#contact-object).
         public struct Contact: Equatable, CodableVendorExtendable {
             public let name: String?
             public let url: URL?
@@ -75,7 +75,7 @@ extension OpenAPI.Document {
 
         /// OpenAPI Spec "License Object"
         ///
-        /// See [OpenAPI License Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#license-object).
+        /// See [OpenAPI License Object](https://spec.openapis.org/oas/v3.0.4.html#license-object).
         public struct License: Equatable, CodableVendorExtendable {
             public let name: String
             public let url: URL?
@@ -128,7 +128,9 @@ extension OpenAPI.Document.Info.License: Encodable {
         try container.encode(name, forKey: .name)
         try container.encodeIfPresent(url?.absoluteString, forKey: .url)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -194,7 +196,9 @@ extension OpenAPI.Document.Info.Contact: Encodable {
         try container.encodeIfPresent(url?.absoluteString, forKey: .url)
         try container.encodeIfPresent(email, forKey: .email)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -269,7 +273,9 @@ extension OpenAPI.Document.Info: Encodable {
         try container.encodeIfPresent(license, forKey: .license)
         try container.encode(version, forKey: .version)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

@@ -18,7 +18,7 @@ public protocol SwiftTyped {
 
 /// The raw types supported by JSON Schema.
 ///
-/// These are the OpenAPI [data types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#data-types)
+/// These are the OpenAPI [data types](https://spec.openapis.org/oas/v3.1.1.html#data-types)
 /// and additionally the `object` and `array`
 /// "compound" data types.
 /// - boolean
@@ -27,7 +27,7 @@ public protocol SwiftTyped {
 /// - number
 /// - integer
 /// - string
-public enum JSONType: String, Codable {
+public enum JSONType: String, Codable, Sendable {
     case null = "null"
     case boolean = "boolean"
     case object = "object"
@@ -54,8 +54,8 @@ public enum JSONType: String, Codable {
 ///
 /// You can also find information on types and
 /// formats in the OpenAPI Specification's
-/// section on [data types](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#data-types).
-public enum JSONTypeFormat: Equatable {
+/// section on [data types](https://spec.openapis.org/oas/v3.1.1.html#data-types).
+public enum JSONTypeFormat: Equatable, Sendable {
     case null
     case boolean(BooleanFormat)
     case object(ObjectFormat)
@@ -113,9 +113,9 @@ public enum JSONTypeFormat: Equatable {
 /// adheres to the [RFC3339](https://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
 /// specification for a "date-time."
 ///
-/// See "formats" under the OpenAPI [data type](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#data-types)
+/// See "formats" under the OpenAPI [data type](https://spec.openapis.org/oas/v3.1.1.html#data-types)
 /// documentation.
-public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable where RawValue == String {
+public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable, Sendable where RawValue == String {
     static var unspecified: Self { get }
 
     var jsonType: JSONType { get }

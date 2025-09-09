@@ -12,7 +12,7 @@ extension OpenAPI {
     /// A map from runtime expressions to path items to be used as
     /// callbacks for the API.
     ///
-    /// See [OpenAPI Callback Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#callback-object).
+    /// See [OpenAPI Callback Object](https://spec.openapis.org/oas/v3.0.4.html#callback-object).
     ///
     public typealias Callbacks = OrderedDictionary<CallbackURL, PathItem>
 
@@ -35,3 +35,9 @@ extension OpenAPI.CallbackURL: LocallyDereferenceable {
         self
     }
 }
+
+// The following conformance is theoretically unnecessary but the compiler is
+// only able to find the conformance if we explicitly declare it here, though
+// it is apparently able to determine the conformance is already satisfied here
+// at least.
+extension OpenAPI.Callbacks: ExternallyDereferenceable { }

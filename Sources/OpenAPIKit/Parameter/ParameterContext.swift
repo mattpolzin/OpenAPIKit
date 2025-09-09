@@ -10,13 +10,13 @@ import OpenAPIKitCore
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" location-specific configuration.
     /// 
-    /// See [OpenAPI Parameter Locations](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-locations).
+    /// See [OpenAPI Parameter Locations](https://spec.openapis.org/oas/v3.1.1.html#parameter-locations).
     ///
     /// Query, Header, and Cookie parameters are
     /// all optional by default unless you pass
     /// `required: true` to the context construction.
     /// Path parameters are always required.
-    public enum Context: Equatable {
+    public enum Context: Equatable, Sendable {
         case query(required: Bool, allowEmptyValue: Bool)
         case header(required: Bool)
         case path

@@ -12,7 +12,7 @@ import OpenAPIKitCore
 /// A schema context stores information about a schema.
 /// All schemas can have the contextual information in
 /// this protocol.
-public protocol JSONSchemaContext {
+public protocol JSONSchemaContext: Sendable {
     /// The format of the schema as a string value.
     ///
     /// This can be set even when a schema type has
@@ -60,7 +60,7 @@ public protocol JSONSchemaContext {
     /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
     /// or `oneOf`) as a way to reduce redundancy.
     ///
-    /// See [OpenAPI Discriminator Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#discriminator-object).
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.1.1.html#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.
@@ -133,22 +133,6 @@ public protocol JSONSchemaContext {
 
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
-}
-
-extension JSONSchemaContext {
-
-    // TODO: Remove the default implementations of the following in v4 of OpenAPIKit.
-    //       They are only here to make their addition non-breaking.
-
-    // Default implementation to make addition of this new property which is only
-    // supposed to be set internally a non-breaking addition.
-    public var inferred: Bool { false }
-
-    // Default implementation to make addition non-breaking
-    public var anchor: String? { nil }
-
-    // Default implementation to make addition non-breaking
-    public var dynamicAnchor: String? { nil }
 }
 
 extension JSONSchema {
@@ -590,8 +574,8 @@ extension JSONSchema {
     /// `IntegerContext` _can_ be asked for the
     /// `NumericContext` that would describe it via its
     /// `numericContext` property.
-    public struct NumericContext: Equatable {
-        public struct Bound: Equatable {
+    public struct NumericContext: Equatable, Sendable {
+        public struct Bound: Equatable, Sendable {
             public let value: Double
             public let exclusive: Bool
 
@@ -626,8 +610,8 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.integer` schemas.
-    public struct IntegerContext: Equatable {
-        public struct Bound: Equatable {
+    public struct IntegerContext: Equatable, Sendable {
+        public struct Bound: Equatable, Sendable {
             public let value: Int
             public let exclusive: Bool
 
@@ -712,7 +696,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.array` schemas.
-    public struct ArrayContext: Equatable {
+    public struct ArrayContext: Equatable, Sendable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
         public let items: JSONSchema?
@@ -752,7 +736,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.object` schemas.
-    public struct ObjectContext: Equatable {
+    public struct ObjectContext: Equatable, Sendable {
         /// The maximum number of properties the object
         /// is allowed to have.
         public let maxProperties: Int?
@@ -819,7 +803,7 @@ extension JSONSchema {
     }
 
     /// The context that only applies to `.string` schemas.
-    public struct StringContext: Equatable {
+    public struct StringContext: Equatable, Sendable {
         public let maxLength: Int?
         let _minLength: Int?
 
@@ -856,7 +840,7 @@ extension JSONSchema {
 
 extension OpenAPI {
     /// An encoding, as specified in RFC 2045, part 6.1 and RFC 4648.
-    public enum ContentEncoding: String, Codable {
+    public enum ContentEncoding: String, Codable, Sendable {
         case _7bit = "7bit"
         case _8bit = "8bit"
         case binary
@@ -1010,7 +994,7 @@ extension JSONSchema.CoreContext: Decodable {
             case (true, false):
                 _permissions = .readOnly
             case (true, true):
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSONSchema",
                     details: "Either `readOnly` or `writeOnly` can be true but not both",
                     codingPath: decoder.codingPath
@@ -1056,9 +1040,9 @@ extension JSONSchema.CoreContext: Decodable {
             nullable = _nullable
             warnings.append(
                 .underlyingError(
-                      InconsistencyError(
+                      GenericError(
                           subjectName: "OpenAPI Schema",
-                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.0. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
                           codingPath: container.codingPath
                       )
                   )
@@ -1189,7 +1173,7 @@ extension JSONSchema.IntegerContext: Decodable {
             let value = try intAttempt
                 ?? doubleAttempt.map { floatVal in
                 guard let integer = Int(exactly: floatVal) else {
-                    throw InconsistencyError(
+                    throw GenericError(
                         subjectName: max ? "maximum" : "minimum",
                         details: "Expected an Integer literal but found a floating point value (\(String(describing: floatVal)))",
                         codingPath: decoder.codingPath,

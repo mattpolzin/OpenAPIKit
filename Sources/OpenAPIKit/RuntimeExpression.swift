@@ -10,9 +10,9 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Runtime Expression"
     ///
-    /// See [OpenAPI Runtime Expression[(https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#runtime-expressions).
+    /// See [OpenAPI Runtime Expression[(https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions).
     ///
-    public enum RuntimeExpression: RawRepresentable, Equatable {
+    public enum RuntimeExpression: RawRepresentable, Equatable, Sendable {
         case url
         case method
         case statusCode
@@ -74,7 +74,7 @@ extension OpenAPI {
             return nil
         }
 
-        public enum Source: RawRepresentable, Equatable {
+        public enum Source: RawRepresentable, Equatable, Sendable {
             /// A reference to one of the header parameters.
             case header(name: String)
             /// A reference to one of the query parameters.

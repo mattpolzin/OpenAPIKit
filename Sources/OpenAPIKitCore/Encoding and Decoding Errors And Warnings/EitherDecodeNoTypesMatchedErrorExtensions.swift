@@ -95,7 +95,7 @@ internal extension EitherDecodeNoTypesMatchedError.IndividualFailure {
         if let decodingError = error.underlyingError as? DecodingError {
             return decodingError.codingPath
         }
-        if let inconsistencyError = error.underlyingError as? InconsistencyError {
+        if let inconsistencyError = error.underlyingError as? GenericError {
             return inconsistencyError.codingPath
         }
         if let eitherError = error.underlyingError as? EitherDecodeNoTypesMatchedError {

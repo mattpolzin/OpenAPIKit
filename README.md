@@ -1,22 +1,24 @@
-[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 5.1+](http://img.shields.io/badge/Swift-5.1+-blue.svg)](https://swift.org)
+[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 5.8+](http://img.shields.io/badge/Swift-5.8+-blue.svg)](https://swift.org)
 
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT) ![Tests](https://github.com/mattpolzin/OpenAPIKit/workflows/Tests/badge.svg)
 
 # OpenAPIKit <!-- omit in toc -->
 
-A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) and [OpenAPI 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) Documents and their components.
+A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x](https://spec.openapis.org/oas/v3.0.4.html) and [OpenAPI 3.1.x](https://spec.openapis.org/oas/v3.1.1.html) Documents and their components.
 
-The single most confusing thing you will grapple with out of the gate is explained by the following grid of what OpenAPIKit versions support which OpenAPI specification versions.
+OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specificaiton does not. The following chart shows which OpenAPI specification versions and key features are supported by which OpenAPIKit versions.
 
-| OpenAPIKit  | OpenAPI v3.0  | OpenAPI v3.1 |
-|-------------|---------------|--------------|
-| v2.x        | ✅            | ❌           |
-| v3.x        | ✅            | ✅           |
+| OpenAPIKit | Swift | OpenAPI v3.0 | OpenAPI v3.1 | External Dereferencing & Sendable |
+|------------|-------|--------------|--------------|-----------------------------------|
+| v2.x       | 5.1+  | ✅           |              |                                   |
+| v3.x       | 5.1+  | ✅           | ✅           |                                   |
+| v4.x       | 5.8+  | ✅           | ✅           | ✅                                |
 
 - [Usage](#usage)
   - [Migration](#migration)
     - [1.x to 2.x](#1.x-to-2.x)
     - [2.x to 3.x](#2.x-to-3.x)
+    - [3.x to 4.x](#3.x-to-4.x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
@@ -39,7 +41,7 @@ The single most confusing thing you will grapple with out of the gate is explain
   - [Semantic Diffing of OpenAPI Documents](#semantic-diffing-of-openapi-documents)
 - [Notes](#notes)
 - [Contributing](#contributing)
-- [Security](#security)
+- [Security](#project-security)
 - [Specification Coverage & Type Reference](#specification-coverage--type-reference)
 
 ## Usage
@@ -72,6 +74,9 @@ import OpenAPIKit
 ```
 
 It is recommended that you build your project against the `OpenAPIKit` module and only use `OpenAPIKit30` to support reading OpenAPI 3.0.x documents in and then [converting them](#supporting-openapi-30x-documents) to OpenAPI 3.1.x documents. The situation not supported yet by this strategy is where you need to write out an OpenAPI 3.0.x document (as opposed to 3.1.x). That is a planned feature but it has not yet been implemented. If your use-case benefits from reading in an OpenAPI 3.0.x document and also writing out an OpenAPI 3.0.x document then you can operate entirely against the `OpenAPIKit30` module.
+
+#### 3.x to 4.x
+If you are migrating from OpenAPIKit 3.x to OpenAPIKit 4.x, check out the [v4 migration guide](./documentation/v4_migration_guide.md).
 
 ### Decoding OpenAPI Documents
 
@@ -144,7 +149,7 @@ let newDoc: OpenAPIKit.OpenAPI.Document
 
 oldDoc = try? JSONDecoder().decode(OpenAPI.Document.self, from: someFileData)
 
-newDoc = oldDoc?.convert(to: .v3_1_0) ??
+newDoc = oldDoc?.convert(to: .v3_1_1) ??
   (try! JSONDecoder().decode(OpenAPI.Document.self, from: someFileData))
 // ^ Here we simply fall-back to 3.1.x if loading as 3.0.x failed. You could do a more
 //   graceful job of this by determining up front which version to attempt to load or by 
@@ -160,7 +165,7 @@ If retaining order is important for your use-case, I recommend the [**Yams**](ht
 The Foundation JSON encoding and decoding will be the most stable and battle-tested option with Yams as a pretty well established and stable option as well. FineJSON is lesser used (to my knowledge) but I have had success with it in the past.
 
 ### OpenAPI Document structure
-The types used by this library largely mirror the object definitions found in the OpenAPI specification [version 3.1.0](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) (`OpenAPIKit` module) and [version 3.0.3](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md) (`OpenAPIKit30` module). The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library. The project status page currently focuses on OpenAPI 3.1.x but for the purposes of determining what things are named and what is supported you can mostly infer the status of the OpenAPI 3.0.x support as well.
+The types used by this library largely mirror the object definitions found in the OpenAPI specification [version 3.1.1](https://spec.openapis.org/oas/v3.1.1.html) (`OpenAPIKit` module) and [version 3.0.4](https://spec.openapis.org/oas/v3.0.4.html) (`OpenAPIKit30` module). The [Project Status](#project-status) lists each object defined by the spec and the name of the respective type in this library. The project status page currently focuses on OpenAPI 3.1.x but for the purposes of determining what things are named and what is supported you can mostly infer the status of the OpenAPI 3.0.x support as well.
 
 #### Document Root
 At the root there is an `OpenAPI.Document`. In addition to some information that applies to the entire API, the document contains `OpenAPI.Components` (essentially a dictionary of reusable components that can be referenced with `JSONReferences` and `OpenAPI.References`) and an `OpenAPI.PathItem.Map` (a dictionary of routes your API defines).
@@ -172,7 +177,7 @@ Each route is an entry in the document's `OpenAPI.PathItem.Map`. The keys of thi
 Each endpoint on a route is defined by an `OpenAPI.Operation`. Among other things, this operation can specify the parameters (path, query, header, etc.), request body, and response bodies/codes supported by the given endpoint.
 
 #### Request/Response Bodies
-Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the `JSONSchema` type for such schema definitions.
+Request and response bodies can be defined in great detail using OpenAPI's derivative of the JSON Schema specification. This library uses the [`JSONSchema`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/jsonschema) type for such schema definitions.
 
 #### Schemas
 **Fundamental types** are specified as `JSONSchema.integer`, `JSONSchema.string`, `JSONSchema.boolean`, etc.
@@ -209,18 +214,18 @@ JSONSchema.object(
 Take a look at the [OpenAPIKit Schema Object](./documentation/schema_object.md) documentation for more information.
 
 #### OpenAPI References
-The `OpenAPI.Reference` type represents the OpenAPI specification's reference support that is essentially just JSON Reference specification compliant but with the ability to override summaries and descriptions at the reference site where appropriate.
+The [`OpenAPI.Reference`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/reference) type represents the OpenAPI specification's reference support that is essentially just JSON Reference specification compliant but with the ability to override summaries and descriptions at the reference site where appropriate.
 
 For details on the underlying reference support, see the next section on the `JSONReference` type.
 
 #### JSON References
-The `JSONReference` type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
+The [`JSONReference`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/jsonreference) type allows you to work with OpenAPIDocuments that store some of their information in the shared Components Object dictionary or even external files. Only documents where all references point to the Components Object can be dereferenced currently, but you can encode and decode all references.
 
 You can create an external reference with `JSONReference.external(URL)`. Internal references usually refer to an object in the Components Object dictionary and are constructed with `JSONReference.component(named:)`. If you need to refer to something in the current file but not in the Components Object, you can use `JSONReference.internal(path:)`.
 
 You can check whether a given `JSONReference` exists in the Components Object with `document.components.contains()`. You can access a referenced object in the Components Object with `document.components[reference]`.
 
-You can create references from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
+References can be created from the Components Object with `document.components.reference(named:ofType:)`. This method will throw an error if the given component does not exist in the ComponentsObject.
 
 You can use `document.components.lookup()` or the `Components` type's `subscript` to turn an `Either` containing either a reference or a component into an optional value of that component's type (having either pulled it out of the `Either` or looked it up in the Components Object). The `lookup()` method throws when it can't find an item whereas `subscript` returns `nil`.
 
@@ -237,7 +242,7 @@ Note that this looks a component up in the Components Object but it does not tra
 #### Security Requirements
 In the OpenAPI specifcation, a security requirement (like can be found on the root Document or on Operations) is a dictionary where each key is the name of a security scheme found in the Components Object and each value is an array of applicable scopes (which is of course only a non-empty array when the security scheme type is one for which "scopes" are relevant).
 
-OpenAPIKit defines the `SecurityRequirement` typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
+OpenAPIKit defines the [`SecurityRequirement`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/securityrequirement) typealias as a dictionary with `JSONReference` keys; These references point to the Components Object and provide a slightly stronger contract than the String values required by the OpenAPI specification. Naturally, these are encoded to JSON/YAML as String values rather than JSON References to maintain compliance with the OpenAPI Specification.
 
 To give an example, let's say you want to describe OAuth 2.0 authentication via the implicit flow. First, define a Security Scheme:
 ```swift
@@ -284,28 +289,106 @@ let document = OpenAPI.Document(
 ```
 
 #### Specification Extensions
-Many OpenAPIKit types support [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
+Many OpenAPIKit types support [Specification Extensions](https://spec.openapis.org/oas/v3.1.1.html#specification-extensions). As described in the OpenAPI Specification, these extensions must be objects that are keyed with the prefix "x-". For example, a property named "specialProperty" on the root OpenAPI Object (`OpenAPI.Document`) is invalid but the property "x-specialProperty" is a valid specification extension.
 
-You can get or set specification extensions via the `vendorExtensions` property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
+You can get or set specification extensions via the [`vendorExtensions`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/vendorextendable/vendorextensions-swift.property) property on any object that supports this feature. The keys are `Strings` beginning with the aforementioned "x-" prefix and the values are `AnyCodable`. If you set an extension without using the "x-" prefix, the prefix will be added upon encoding.
 
-`AnyCodable` can be constructed from literals or explicitly. The following are all valid.
+If you wish to disable decoding/encoding of vendor extensions for performance reasons, you can configure the Encoder and Decoder using their `userInfo`:
+```swift
+let userInfo = [VendorExtensionsConfiguration.enabledKey: false]
+let encoder = JSONEncoder()
+encoder.userInfo = userInfo
+
+let decoder = JSONDecoder()
+decoder.userInfo = userInfo
+```
+
+#### AnyCodable
+OpenAPIKit uses the `AnyCodable` type for vendor extensions and constructing examples for JSON Schemas. OpenAPIKit's `AnyCodable` type is an adaptation of the Flight School library that can be found [here](https://github.com/Flight-School/AnyCodable).
+
+`AnyCodable` can be constructed explicitly or from many types of literals. The following are all valid.
 
 ```swift
 var document = OpenAPI.Document(...)
 
 document.vendorExtensions["x-specialProperty1"] = true
 document.vendorExtensions["x-specialProperty2"] = "hello world"
-document.vendorExtensions["x-specialProperty3"] = ["hello", "world"]
-document.vendorExtensions["x-specialProperty4"] = ["hello": "world"]
-document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
+document.vendorExtensions["x-specialProperty3"] = AnyCodable("hello world")
+document.vendorExtensions["x-specialProperty4"] = AnyCodable(["hello", "world"])
+document.vendorExtensions["x-specialProperty5"] = AnyCodable(["hello": "world"])
+```
+
+It is important to note that `AnyCodable` wraps Swift types in a way that keeps track of the Swift type used to construct it as much as possible, but if you encode an `AnyCodable` and then decode that result, the decoded value may not always be the same as the pre-encoded value started out. This is because many Swift types will encode to "stringy" values and then decode as simply `String` values. There are two ways to cope with this:
+  1. When adding stringy values to structures that will be passed to `AnyCodable`, you can explicitly turn them into `String`s. For example, you can use `URL(...).absoluteString` both to specify you want the absolute value of the URL encoded and also to turn it into a `String` up front.
+  2. When comparing `AnyCodable` values that have passed through a full encode/decode cycle, you can compare the `description` of the two `AnyCodable` values. This stringy result is _more likely_ to compare equivalently.
+
+Keep in mind, this issue only occurs when you are comparing value `a` and value `b` for equality given that `b` is `a` after being encoded and then subsequently decoded.
+
+The other sure-fire way to handle this (if you need encode-decode equality, not just equivalence) is to make sure you run both values being compared through encoding. For example, you might use the following function which doesn't even care if the input is `AnyCodable` or not:
+```swift
+func encodedEqual<A: Codable, B: Codable>(_ a: A, _ b: B) throws -> Bool {
+    let a = try JSONEncoder().encode(a)
+    let b = try JSONEncoder().encode(b)
+    return a == b
+}
+```
+For example, the result of the following is `true`:
+```swift
+try encodeEqual(URL(string: "https://website.com"), AnyCodable(URL(string: "https://website.com")))
 ```
 
 ### Dereferencing & Resolving
-In addition to looking something up in the `Components` object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
+#### External References
+External dereferencing does not resolve any local (internal) references, it just loads external references into the Document. It does this by storing any loaded externally referenced objects in the Components Object and transforming the reference being resolved from an external reference to an internal one. That way, you can always run internal dereferencing as a second step if you want a fully dereferenced document, but if you simply wanted to load additional referenced files then you can stop after external dereferencing.
 
-You use a value's `dereferenced(in:)` method to fully dereference it.
+OpenAPIKit leaves it to you to decide how to load external files and where to store the results in the Components Object. It does this by requiring that you provide an implementation of the [`ExternalLoader`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/externalloader) protocol. You provide a `load` function and a `componentKey` function, both of which accept as input the `URL` to load. A simple mock example implementation from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader` can be set up:
 
-You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that are contained within one file (which is another way of saying that all references are "local"). Specifically, all references must be located within the document's Components Object.
+```swift
+struct ExampleLoader: ExternalLoader {
+    typealias Message = Void
+
+    static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
+        // load data from file, perhaps. we will just mock that up for the example:
+        let data = try await mockData(componentKey(type: T.self, at: url))
+
+        // We use the YAML decoder purely for order-stability.
+        let decoded = try YAMLDecoder().decode(T.self, from: data)
+        let finished: T
+        // while unnecessary, a loader may likely want to attatch some extra info
+        // to keep track of where a reference was loaded from. This example
+        shows
+        // the strategy of using vendor extensions.
+        if var extendable = decoded as? VendorExtendable {
+            extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
+            finished = extendable as! T
+        } else {
+            finished = decoded 
+        }
+        return (finished, [])
+    }
+
+    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+        // do anything you want here to determine what key the new component should be stored at.
+        //
+        // for the example, we will just transform the URL path into a valid components key:
+        let urlString = url.pathComponents
+          .joined(separator: "_")
+          .replacingOccurrences(of: ".", with: "_")
+        return try .forceInit(rawValue: urlString)
+    }
+}
+```
+
+Once you have an `ExternalLoader`, you can call an `OpenAPI.Document`'s `externallyDereference()` method to externally dereference it. You get to choose whether to only load references to a certain depth or to fully resolve references until you run out of them; any given referenced document may itself contain references and these references may point back to things loaded into the Document previously so dereferencing is done recursively up to a given depth (or until fully dereferenced if you use the `.full` depth).
+
+If you have some information that you want to pass back to yourself from the `load()` function, you can specify any type you want as the `Message` type and return any number of messages from each `load()` function execution. These messages could be warnings, additional information about the files that each newly loaded Component came from, etc. If you want to tie some information about file loading to new Components in your messages, you can use the `componentKey()` function to get the key the new Component will be found under once external dereferencing is complete.
+
+#### Internal References
+In addition to looking something up in the [`Components`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/openapi/components) object, you can entirely derefererence many OpenAPIKit types. A dereferenced type has had all of its references looked up (and all of its properties' references, all the way down).
+
+You use a value's [`dereferenced(in:)`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/locallydereferenceable) method to fully dereference it.
+
+You can even dereference the whole document with the `OpenAPI.Document` `locallyDereferenced()` method. As the name implies, you can only derefence whole documents that have previously been externally dereferenced (or documents contained within one file) -- that is, all references are "local". Specifically, all references must be located within the document's Components Object. External dereferencing is done as a separeate step, but you can first dereference externally and then dereference internally if you'd like to perform both.
 
 Unlike what happens when you lookup an individual component using the `lookup()` method on `Components`, dereferencing a whole `OpenAPI.Document` will result in type-level changes that guarantee all references are removed. `OpenAPI.Document`'s `locallyDereferenced()` method returns a `DereferencedDocument` which exposes `DereferencedPathItem`s which have `DereferencedParameter`s and `DereferencedOperation`s and so on.
 
@@ -377,7 +460,7 @@ The [**Swift Package Registry API Docs**](https://github.com/mattt/swift-package
 [**OpenAPIDiff**](https://github.com/mattpolzin/OpenAPIDiff) is a library and a CLI that implements semantic diffing; that is, rather than just comparing two OpenAPI documents line-by-line for textual differences, it parses the documents and describes the differences in the two OpenAPI ASTs.
 
 ## Notes
-This library does *not* currently support file reading at all muchless following `$ref`s to other files and loading them in. You must read OpenAPI documentation into `Data` or `String` (depending on the decoder you want to use) and all references must be internal to the same file to be resolved.
+This library does *not* handle reading files from disk or otherwise. You must read OpenAPI documentation into `Data` or `String` (depending on the decoder you want to use) and then decode using OpenAPIKit's `Decodable` conformances.
 
 This library *is* opinionated about a few defaults when you use the Swift types, however encoding and decoding stays true to the spec. Some key things to note:
 
@@ -394,7 +477,7 @@ Contributions to OpenAPIKit are welcome and appreciated! The project is mostly m
 
 Please see the [Contribution Guidelines](./CONTRIBUTING.md) for a few brief notes on contributing the the project.
 
-## Security
+## Project Security
 The OpenAPIKit project takes code security seriously. As part of the Swift Server Workground incubation program, this project follows a shared set of standards around receiving, reporting, and reacting to security vulnerabilies.
 
 Please see [Security](./SECURITY.md) for information on how to report vulnerabilities to the OpenAPIKit project and what to expect after you do.
@@ -402,4 +485,4 @@ Please see [Security](./SECURITY.md) for information on how to report vulnerabil
 **Please do not report security vulnerabilities via GitHub issues.**
 
 ## Specification Coverage & Type Reference
-For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
+For a full list of OpenAPI Specification types annotated with whether OpenAPIKit supports them and relevant translations to OpenAPIKit types, see the [Specification Coverage](./documentation/specification_coverage.md) documentation. For detailed information on the OpenAPIKit types, see the [full type documentation](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit).

@@ -15,23 +15,23 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Link Object"
     ///
-    /// See [OpenAPI Link Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object).
-    public struct Link: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Link Object](https://spec.openapis.org/oas/v3.1.1.html#link-object).
+    public struct Link: Equatable, CodableVendorExtendable, Sendable {
         /// The **OpenAPI**` `operationRef` or `operationId` field, depending on whether
         /// a `URL` of a remote or local Operation Object or a `operationId` (String) of an
         /// operation defined in the same document is given.
-        public let operation: Either<URL, String>
+        public var operation: Either<URL, String>
         /// A map from parameter names to either runtime expressions that evaluate to values or
         /// constant values (`AnyCodable`).
         ///
-        /// See the docuemntation for the [OpenAPI Link Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object) for more details.
+        /// See the docuemntation for the [OpenAPI Link Object](https://spec.openapis.org/oas/v3.1.1.html#link-object) for more details.
         ///
         /// Empty dictionaries will be omitted from encoding.
-        public let parameters: OrderedDictionary<String, Either<RuntimeExpression, AnyCodable>>
+        public var parameters: OrderedDictionary<String, Either<RuntimeExpression, AnyCodable>>
         /// A literal value or expression to use as a request body when calling the target operation.
-        public let requestBody: Either<RuntimeExpression, AnyCodable>?
+        public var requestBody: Either<RuntimeExpression, AnyCodable>?
         public var description: String?
-        public let server: Server?
+        public var server: Server?
 
         /// Dictionary of vendor extensions.
         ///
@@ -174,7 +174,9 @@ extension OpenAPI.Link: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(server, forKey: .server)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -274,7 +276,7 @@ extension OpenAPI.Link: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> OpenAPI.Link {
         var vendorExtensions = self.vendorExtensions
-        if let name = name {
+        if let name {
             vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -286,6 +288,17 @@ extension OpenAPI.Link: LocallyDereferenceable {
             server: server,
             vendorExtensions: vendorExtensions
         )
+    }
+}
+
+extension OpenAPI.Link: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        let (newServer, newComponents, newMessages) = try await server.externallyDereferenced(with: loader)
+
+        var newLink = self
+        newLink.server = newServer
+
+        return (newLink, newComponents, newMessages)
     }
 }
 

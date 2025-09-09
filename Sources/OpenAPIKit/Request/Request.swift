@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
-    /// See [OpenAPI Request Body Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#request-body-object).
-    public struct Request: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Request Body Object](https://spec.openapis.org/oas/v3.1.1.html#request-body-object).
+    public struct Request: Equatable, CodableVendorExtendable, Sendable {
         public var description: String?
         public var content: Content.Map
         public var required: Bool
@@ -107,7 +107,9 @@ extension OpenAPI.Request: Encodable {
             try container.encode(required, forKey: .required)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -121,7 +123,7 @@ extension OpenAPI.Request: Decodable {
             required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
 
             vendorExtensions = try Self.extensions(from: decoder)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Request(error)
         } catch let error as Swift.DecodingError {

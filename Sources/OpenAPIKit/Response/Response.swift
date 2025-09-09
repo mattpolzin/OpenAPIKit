@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
-    /// See [OpenAPI Response Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#response-object).
-    public struct Response: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.1.1.html#response-object).
+    public struct Response: Equatable, CodableVendorExtendable, Sendable {
         public var description: String
         public var headers: Header.Map?
         /// An empty Content map will be omitted from encoding.
@@ -168,7 +168,9 @@ extension OpenAPI.Response: Encodable {
             try container.encode(links, forKey: .links)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -184,7 +186,7 @@ extension OpenAPI.Response: Decodable {
 
             vendorExtensions = try Self.extensions(from: decoder)
 
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Response(error)
         } catch let error as EitherDecodeNoTypesMatchedError {
@@ -194,32 +196,6 @@ extension OpenAPI.Response: Decodable {
 
             throw OpenAPI.Error.Decoding.Response(error)
         }
-    }
-}
-
-extension OpenAPI.Response.StatusCode: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        try container.encode(self.rawValue)
-    }
-}
-
-extension OpenAPI.Response.StatusCode: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let strVal = try container.decode(String.self)
-        let val = OpenAPI.Response.StatusCode(rawValue: strVal)
-
-        guard let value = val else {
-            throw InconsistencyError(
-                subjectName: "status code",
-                details: "Expected the status code to be either an Int, a range like '1XX', or 'default' but found \(strVal) instead",
-                codingPath: decoder.codingPath
-            )
-        }
-
-        self = value
     }
 }
 

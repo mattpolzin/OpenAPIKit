@@ -5,10 +5,10 @@ on: [pull_request]
 jobs:
   codecov:
     container: 
-      image: swift:5.8
+      image: swift:5.10
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - run: swift test --enable-test-discovery --enable-code-coverage
     - id: analysis
       uses: mattpolzin/swift-codecov-action@0.7.5

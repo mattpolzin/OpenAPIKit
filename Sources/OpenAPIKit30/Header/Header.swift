@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Header Object"
     ///
-    /// See [OpenAPI Header Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#header-object).
-    public struct Header: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Header Object](https://spec.openapis.org/oas/v3.0.4.html#header-object).
+    public struct Header: Equatable, CodableVendorExtendable, Sendable {
         public typealias SchemaContext = Parameter.SchemaContext
 
         public let description: String?
@@ -275,7 +275,9 @@ extension OpenAPI.Header: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -300,13 +302,13 @@ extension OpenAPI.Header: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         case (nil, nil):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Header",
                 details: "A header parameter must specify either `content` or `schema`",
                 codingPath: decoder.codingPath
             )
         case (_, _):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: "Header",
                 details: "A header must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath

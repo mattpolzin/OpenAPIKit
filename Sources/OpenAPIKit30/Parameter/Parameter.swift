@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
-    public struct Parameter: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.0.4.html#parameter-object).
+    public struct Parameter: Equatable, CodableVendorExtendable, Sendable {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.
@@ -157,7 +157,7 @@ extension OpenAPI.Parameter {
     /// containing exactly the things that differentiate
     /// one parameter from another, per the specification.
     ///
-    /// See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object).
+    /// See [Parameter Object](https://spec.openapis.org/oas/v3.0.4.html#parameter-object).
     internal struct ParameterIdentity: Hashable {
         let name: String
         let location: Context.Location
@@ -258,7 +258,9 @@ extension OpenAPI.Parameter: Encodable {
             try container.encode(deprecated, forKey: .deprecated)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -280,7 +282,7 @@ extension OpenAPI.Parameter: Decodable {
             context = .header(required: required)
         case .path:
             if !required {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: name,
                     details: "positional path parameters must be explicitly set to required",
                     codingPath: decoder.codingPath
@@ -306,13 +308,13 @@ extension OpenAPI.Parameter: Decodable {
         case (nil, let schema?):
             schemaOrContent = .init(schema)
         case (nil, nil):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify either `content` or `schema`",
                 codingPath: decoder.codingPath
             )
         case (_, _):
-            throw InconsistencyError(
+            throw GenericError(
                 subjectName: name,
                 details: "A parameter must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath

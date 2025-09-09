@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Path Item Object"
     /// 
-    /// See [OpenAPI Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object).
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.0.4.html#path-item-object).
     ///
     /// In addition to parameters that apply to all endpoints under the current path,
     /// this type offers access to each possible endpoint operation under properties
@@ -21,7 +21,7 @@ extension OpenAPI {
     ///
     /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
     /// `endpoints` property.
-    public struct PathItem: Equatable, CodableVendorExtendable {
+    public struct PathItem: Equatable, CodableVendorExtendable, Sendable {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?
@@ -218,24 +218,6 @@ extension OpenAPI.PathItem {
 
 // MARK: - Codable
 
-extension OpenAPI.Path: Encodable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-
-        try container.encode(rawValue)
-    }
-}
-
-extension OpenAPI.Path: Decodable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-
-        let rawValue = try container.decode(String.self)
-
-        self.init(rawValue: rawValue)
-    }
-}
-
 extension OpenAPI.PathItem: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -257,7 +239,9 @@ extension OpenAPI.PathItem: Encodable {
         try container.encodeIfPresent(patch, forKey: .patch)
         try container.encodeIfPresent(trace, forKey: .trace)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -284,7 +268,7 @@ extension OpenAPI.PathItem: Decodable {
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Path(error)
-        } catch let error as InconsistencyError {
+        } catch let error as GenericError {
 
             throw OpenAPI.Error.Decoding.Path(error)
         } catch let error as OpenAPI.Error.Decoding.Operation {

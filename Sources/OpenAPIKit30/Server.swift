@@ -11,9 +11,9 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
-    /// See [OpenAPI Server Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-object).
+    /// See [OpenAPI Server Object](https://spec.openapis.org/oas/v3.0.4.html#server-object).
     ///
-    public struct Server: Equatable, CodableVendorExtendable {
+    public struct Server: Equatable, CodableVendorExtendable, Sendable {
         /// OpenAPI Server URLs can have variable placeholders in them.
         /// The `urlTemplate` can be asked for a well-formed Foundation
         /// `URL` if all variables in it have been replaced by constant values.
@@ -63,9 +63,9 @@ extension OpenAPI {
 extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
-    /// See [OpenAPI Server Variable Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#server-variable-object).
+    /// See [OpenAPI Server Variable Object](https://spec.openapis.org/oas/v3.0.4.html#server-variable-object).
     ///
-    public struct Variable: Equatable, CodableVendorExtendable {
+    public struct Variable: Equatable, CodableVendorExtendable, Sendable {
         public var `enum`: [String]
         public var `default`: String
         public var description: String?
@@ -104,7 +104,9 @@ extension OpenAPI.Server: Encodable {
             try container.encode(variables, forKey: .variables)
         }
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -180,7 +182,9 @@ extension OpenAPI.Server.Variable: Encodable {
 
         try container.encodeIfPresent(description, forKey: .description)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 
@@ -242,6 +246,12 @@ extension OpenAPI.Server.Variable {
                 return key
             }
         }
+    }
+}
+
+extension OpenAPI.Server: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        return (self, .init(), [])
     }
 }
 

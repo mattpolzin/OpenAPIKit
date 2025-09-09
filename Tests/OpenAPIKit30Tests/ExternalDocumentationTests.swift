@@ -140,7 +140,7 @@ extension ExternalDocumentationTests {
         """.data(using: .utf8)!
 
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.ExternalDocumentation.self, from: externalDocsData)) { error in
-            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Inconsistency encountered when parsing `url`: If specified, must be a valid URL.")
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `url`: If specified, must be a valid URL.")
         }
     }
 }

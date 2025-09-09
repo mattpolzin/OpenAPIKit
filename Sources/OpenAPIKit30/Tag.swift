@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
-    /// See [OpenAPI Tag Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#tag-object).
+    /// See [OpenAPI Tag Object](https://spec.openapis.org/oas/v3.0.4.html#tag-object).
     public struct Tag: Equatable, CodableVendorExtendable {
         public let name: String
         public let description: String?
@@ -55,7 +55,9 @@ extension OpenAPI.Tag: Encodable {
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
 
-        try encodeExtensions(to: &container)
+        if VendorExtensionsConfiguration.isEnabled(for: encoder) {
+            try encodeExtensions(to: &container)
+        }
     }
 }
 

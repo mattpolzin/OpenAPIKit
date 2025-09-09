@@ -13,7 +13,7 @@ extension Shared {
     /// type, but it is still important to be able to specify a format without
     /// a type. This can come into play when writing fragments of schemas
     /// to be combined later.
-    public enum AnyFormat: RawRepresentable, Equatable {
+    public enum AnyFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case other(String)
 
@@ -40,7 +40,7 @@ extension Shared {
     }
 
     /// The allowed "format" properties for `.boolean` schemas.
-    public enum BooleanFormat: RawRepresentable, Equatable {
+    public enum BooleanFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case other(String)
 
@@ -67,7 +67,7 @@ extension Shared {
     }
 
     /// The allowed "format" properties for `.object` schemas.
-    public enum ObjectFormat: RawRepresentable, Equatable {
+    public enum ObjectFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case other(String)
 
@@ -94,7 +94,7 @@ extension Shared {
     }
 
     /// The allowed "format" properties for `.array` schemas.
-    public enum ArrayFormat: RawRepresentable, Equatable {
+    public enum ArrayFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case other(String)
 
@@ -121,7 +121,7 @@ extension Shared {
     }
 
     /// The allowed "format" properties for `.number` schemas.
-    public enum NumberFormat: RawRepresentable, Equatable {
+    public enum NumberFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case float
         case double
@@ -154,7 +154,7 @@ extension Shared {
     }
 
     /// The allowed "format" properties for `.integer` schemas.
-    public enum IntegerFormat: RawRepresentable, Equatable {
+    public enum IntegerFormat: RawRepresentable, Equatable, Sendable {
         case generic
         case int32
         case int64

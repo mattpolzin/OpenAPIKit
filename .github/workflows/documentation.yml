@@ -8,20 +8,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: 
+      image: swift:5.10
 
     steps:
-      - uses: actions/checkout@v4
-        # TODO: replace the documentation generator with something that is still maintained.
+      - uses: actions/checkout@v5
+      - name: Build Docs
+        run: |
+          mkdir -p ./gh-pages
+          swift package --allow-writing-to-directory ./gh-pages/docs \
+            generate-documentation --include-extended-types \
+                                   --disable-indexing \
+                                   --output-path ./gh-pages/docs \
+                                   --transform-for-static-hosting \
+                                   --hosting-base-path OpenAPIKit \
+                                   --target OpenAPIKit
+      - name: Install rsync
+        run: |
+          apt-get update && apt-get install -y rsync
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        with:
+          folder: gh-pages
+          branch: gh-pages
 
-#      - name: Generate Documentation
-#        uses: SwiftDocOrg/swift-doc@master
-#        with:
-#          inputs: Sources
-#          module-name: OpenAPIKit
-#          output: Documentation
-#      - name: Upload Documentation to Wiki
-#        uses: SwiftDocOrg/github-wiki-publish-action@v1
-#        with:
-#          path: Documentation
-#        env:
-#          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}

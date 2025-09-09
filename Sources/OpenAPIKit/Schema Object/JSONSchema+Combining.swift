@@ -62,7 +62,7 @@ public func ~=(lhs: JSONSchemaResolutionError, rhs: JSONSchemaResolutionError) -
 /// I expect this to be an area where I may want to make fixes and add
 /// errors without breaknig changes, so this annoying workaround for
 /// the absense of a "non-frozen" enum is a must.
-internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable {
+internal enum _JSONSchemaResolutionError: CustomStringConvertible, Equatable, Sendable {
     case unsupported(because: String)
     case typeConflict(original: JSONType, new: JSONType)
     case formatConflict(original: String, new: String)
@@ -608,7 +608,7 @@ extension JSONSchema.CoreContext {
 extension JSONSchema.IntegerContext {
     internal func validatedContext() throws -> JSONSchema.IntegerContext {
         let validatedMinimum: Bound?
-        if let minimum = minimum {
+        if let minimum {
             guard minimum.value >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("Integer minimum (\(minimum.value) cannot be below 0"))
             }
@@ -633,7 +633,7 @@ extension JSONSchema.IntegerContext {
 extension JSONSchema.NumericContext {
     internal func validatedContext() throws -> JSONSchema.NumericContext {
         let validatedMinimum: Bound?
-        if let minimum = minimum {
+        if let minimum {
             guard minimum.value >= 0 else {
                 throw JSONSchemaResolutionError(.inconsistency("Number minimum (\(minimum.value) cannot be below 0"))
             }

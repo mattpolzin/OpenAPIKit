@@ -38,7 +38,7 @@ public struct DereferencedRequest: Equatable {
         }
 
         var request = request
-        if let name = name {
+        if let name {
             request.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -59,5 +59,16 @@ extension OpenAPI.Request: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedRequest {
         return try DereferencedRequest(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
+    }
+}
+
+extension OpenAPI.Request: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        var newRequest = self
+
+        let (newContent, components, messages) = try await content.externallyDereferenced(with: loader)
+
+        newRequest.content = newContent
+        return (newRequest, components, messages)
     }
 }

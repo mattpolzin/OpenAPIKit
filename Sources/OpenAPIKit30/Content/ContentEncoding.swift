@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI.Content {
     /// OpenAPI Spec "Encoding Object"
     /// 
-    /// See [OpenAPI Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#encoding-object).
-    public struct Encoding: Equatable, CodableVendorExtendable {
+    /// See [OpenAPI Encoding Object](https://spec.openapis.org/oas/v3.0.4.html#encoding-object).
+    public struct Encoding: Equatable, CodableVendorExtendable, Sendable {
         public typealias Style = OpenAPI.Parameter.SchemaContext.Style
 
         public let contentType: OpenAPI.ContentType?

@@ -39,7 +39,7 @@ import Foundation
 /// Components Object will be validated when you call `validate()` on an
 /// `OpenAPI.Document`.
 ///
-public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
+public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference, Sendable {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
     /// The reference refers to another file.
@@ -124,7 +124,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     /// `JSONReference`.
     ///
     /// This reference must start with "#".
-    public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
+    public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable, Sendable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
         /// The reference refers to some path outside the Components Object.
@@ -202,7 +202,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     ///
     /// This path does _not_ start with "#". It starts with a forward slash. By contrast, an
     /// `InternalReference` starts with "#" and is followed by the start of a `Path`.
-    public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable {
+    public struct Path: ExpressibleByArrayLiteral, ExpressibleByStringLiteral, LosslessStringConvertible, RawRepresentable, Equatable, Hashable, Sendable {
 
         /// The Path's components. In the `rawValue`, these components are joined
         /// with forward slashes '/' per the JSON Reference specification.
@@ -312,7 +312,7 @@ extension OpenAPI {
     /// Per the specification, these summary and description overrides are irrelevant
     /// if the referenced component does not support the given attribute.
     @dynamicMemberLookup
-    public struct Reference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference {
+    public struct Reference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference, Sendable {
         public let jsonReference: JSONReference<ReferenceType>
         public let summary: String?
         public let description: String?
@@ -461,7 +461,7 @@ extension JSONReference: Decodable {
 
         if referenceString.first == "#" {
             guard let internalReference = InternalReference(rawValue: referenceString) else {
-                throw InconsistencyError(
+                throw GenericError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a JSON Reference from '\(referenceString)'",
                     codingPath: container.codingPath
@@ -469,20 +469,20 @@ extension JSONReference: Decodable {
             }
             self = .internal(internalReference)
         } else {
-            let externalReferenceCandidate: URL?
+            let externalReference: URL?
             #if canImport(FoundationEssentials)
-            externalReferenceCandidate = URL(string: referenceString, encodingInvalidCharacters: false)
+            externalReference = URL(string: referenceString, encodingInvalidCharacters: false)
             #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
             if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-                externalReferenceCandidate = URL(string: referenceString, encodingInvalidCharacters: false)
+                externalReference = URL(string: referenceString, encodingInvalidCharacters: false)
             } else {
-                externalReferenceCandidate = URL(string: referenceString)
+                externalReference = URL(string: referenceString)
             }
             #else
-            externalReferenceCandidate = URL(string: referenceString)
+            externalReference = URL(string: referenceString)
             #endif
-            guard let externalReference = externalReferenceCandidate else {
-                throw InconsistencyError(
+            guard let externalReference else {
+                throw GenericError(
                     subjectName: "JSON Reference",
                     details: "Failed to parse a valid URI for a JSON Reference from '\(referenceString)'",
                     codingPath: container.codingPath
@@ -549,6 +549,21 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
     }
 }
 
+extension JSONReference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        switch self {
+        case .internal(let ref):
+            return (.internal(ref), .init(), [])
+        case .external(let url):
+            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
+            let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
+            var components = OpenAPI.Components()
+            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
+            return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self).jsonReference, components, messages)
+        }
+    }
+}
+
 extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
     /// Look up the component this reference points to and then
     /// dereference it.
@@ -573,6 +588,13 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
         return try components
             .lookup(self)
             ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
+    }
+}
+
+extension OpenAPI.Reference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        let (newRef, components, messages) = try await jsonReference.externallyDereferenced(with: loader)
+        return (.init(newRef), components, messages)
     }
 }
 

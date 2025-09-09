@@ -170,7 +170,7 @@ extension ServerTests {
                         vendorExtensions: [ "x-otherThing": 1234 ]
                     )
                 ],
-                vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )
     }
@@ -187,7 +187,7 @@ extension ServerTests {
                     vendorExtensions: [ "x-otherThing": 1234 ]
                 )
             ],
-            vendorExtensions: ["x-specialFeature": ["hello", "world"]]
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
         let encodedServer = try orderUnstableTestStringFromEncoding(of: server)
 

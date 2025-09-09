@@ -1,6 +1,6 @@
 
 ## Specification Coverage <!-- omit in toc -->
-The list below is organized like the [OpenAPI Specification 3.1.x](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
+The list below is organized like the [OpenAPI Specification 3.1.x](https://spec.openapis.org/oas/v3.1.1.html) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
 
 For more information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
 

@@ -6,6 +6,6 @@
 //
 
 import Foundation
-import Yams
+@preconcurrency import Yams
 
 let testDecoder = YAMLDecoder()

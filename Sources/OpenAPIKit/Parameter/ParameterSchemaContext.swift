@@ -10,16 +10,16 @@ import OpenAPIKitCore
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///
-    /// See [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object)
-    /// and [OpenAPI Style Values](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#style-values).
-    public struct SchemaContext: Equatable {
-        public let style: Style
-        public let explode: Bool
-        public let allowReserved: Bool //defaults to false
-        public let schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object)
+    /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.1.1.html#style-values).
+    public struct SchemaContext: Equatable, Sendable {
+        public var style: Style
+        public var explode: Bool
+        public var allowReserved: Bool //defaults to false
+        public var schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>
 
-        public let example: AnyCodable?
-        public let examples: OpenAPI.Example.Map?
+        public var example: AnyCodable?
+        public var examples: OpenAPI.Example.Map?
 
         public init(_ schema: JSONSchema,
                     style: Style,
@@ -132,7 +132,7 @@ extension OpenAPI.Parameter.SchemaContext.Style {
     /// per the OpenAPI Specification.
     ///
     /// See the `style` fixed field under
-    /// [OpenAPI Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#parameter-object).
+    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
     public static func `default`(for location: OpenAPI.Parameter.Context) -> Self {
         switch location {
         case .query:

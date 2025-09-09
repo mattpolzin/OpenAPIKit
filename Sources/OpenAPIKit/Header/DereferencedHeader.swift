@@ -57,7 +57,7 @@ public struct DereferencedHeader: Equatable {
         }
 
         var header = header
-        if let name = name {
+        if let name {
             header.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
@@ -80,5 +80,41 @@ extension OpenAPI.Header: LocallyDereferenceable {
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedHeader {
         return try DereferencedHeader(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
+    }
+}
+
+extension OpenAPI.Header: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+
+        // if not for a Swift bug, this whole next bit would just be the
+        // next line:
+//        let (newSchemaOrContent, components) = try await schemaOrContent.externallyDereferenced(with: loader)
+
+        let newSchemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        let newComponents: OpenAPI.Components
+        let newMessages: [Loader.Message]
+
+        switch schemaOrContent {
+        case .a(let schemaContext):
+            let (context, components, messages) = try await schemaContext.externallyDereferenced(with: loader)
+            newSchemaOrContent = .a(context)
+            newComponents = components
+            newMessages = messages
+        case .b(let contentMap):
+            let (map, components, messages) = try await contentMap.externallyDereferenced(with: loader)
+            newSchemaOrContent = .b(map)
+            newComponents = components
+            newMessages = messages
+        }
+
+        let newHeader = OpenAPI.Header(
+            schemaOrContent: newSchemaOrContent,
+            description: description,
+            required: required,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+
+        return (newHeader, newComponents, newMessages)
     }
 }

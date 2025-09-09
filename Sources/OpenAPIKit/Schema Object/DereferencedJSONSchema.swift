@@ -10,7 +10,7 @@ import OpenAPIKitCore
 /// A `JSONSchema` type that guarantees none of its
 /// nodes are references.
 @dynamicMemberLookup
-public enum DereferencedJSONSchema: Equatable, JSONSchemaContext {
+public enum DereferencedJSONSchema: Equatable, JSONSchemaContext, Sendable {
     public typealias CoreContext<Format: OpenAPIFormat> = JSONSchema.CoreContext<Format>
     public typealias NumericContext = JSONSchema.NumericContext
     public typealias IntegerContext = JSONSchema.IntegerContext
@@ -265,7 +265,7 @@ extension DereferencedJSONSchema {
     }
 
     /// The context that only applies to `.array` schemas.
-    public struct ArrayContext: Equatable {
+    public struct ArrayContext: Equatable, Sendable {
         /// A JSON Type Node that describes
         /// the type of each element in the array.
         public let items: DereferencedJSONSchema?
@@ -333,7 +333,7 @@ extension DereferencedJSONSchema {
     }
 
     /// The context that only applies to `.object` schemas.
-    public struct ObjectContext: Equatable {
+    public struct ObjectContext: Equatable, Sendable {
         public let maxProperties: Int?
         let _minProperties: Int?
         public let properties: OrderedDictionary<String, DereferencedJSONSchema>
@@ -463,7 +463,7 @@ extension JSONSchema: LocallyDereferenceable {
     ) throws -> DereferencedJSONSchema {
         func addComponentNameExtension<T>(to context: CoreContext<T>) -> CoreContext<T> {
             var extensions = context.vendorExtensions
-            if let name = name {
+            if let name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
             return context.with(vendorExtensions: extensions)
@@ -485,7 +485,7 @@ extension JSONSchema: LocallyDereferenceable {
             // TODO: consider which other core context properties to override here as with description ^
 
             var extensions = dereferenced.vendorExtensions
-            if let name = name {
+            if let name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
             dereferenced = dereferenced.with(vendorExtensions: vendorExtensions)
@@ -532,5 +532,122 @@ extension JSONSchema: LocallyDereferenceable {
     /// that does have references, use `dereferenced(in:)`.
     public func dereferenced() -> DereferencedJSONSchema? {
         return try? dereferenced(in: .noComponents)
+    }
+}
+
+extension JSONSchema: ExternallyDereferenceable {
+    public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
+        let newSchema: JSONSchema
+        let newComponents: OpenAPI.Components
+        let newMessages: [Loader.Message]
+
+        switch value {
+        case .null(_): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        case .boolean(_): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        case .number(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        case .integer(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        case .string(_, _): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        case .object(let core, let object): 
+            var components = OpenAPI.Components()
+            var messages = [Loader.Message]()
+
+            let (newProperties, c1, m1) = try await object.properties.externallyDereferenced(with: loader)
+            try components.merge(c1)
+            messages += m1
+
+            let newAdditionalProperties: Either<Bool, JSONSchema>?
+            if case .b(let schema) = object.additionalProperties {
+                let (additionalProperties, c2, m2) = try await schema.externallyDereferenced(with: loader)
+                try components.merge(c2)
+                messages += m2
+                newAdditionalProperties = .b(additionalProperties)
+            } else {
+                newAdditionalProperties = object.additionalProperties
+            }
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .object(
+                    core, 
+                    .init(
+                        properties: newProperties, 
+                        additionalProperties: newAdditionalProperties, 
+                        maxProperties: object.maxProperties, 
+                        minProperties: object._minProperties
+                    )
+                )
+            )
+        case .array(let core, let array): 
+            let (newItems, components, messages) = try await array.items.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .array(
+                    core,
+                    .init(
+                        items: newItems, 
+                        maxItems: array.maxItems,
+                        minItems: array._minItems,
+                        uniqueItems: array._uniqueItems
+                    )
+                )
+            )
+        case .all(let schema, let core): 
+            let (newSubschemas, components, messages) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .all(of: newSubschemas, core: core)
+            )
+        case .one(let schema, let core): 
+            let (newSubschemas, components, messages) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .one(of: newSubschemas, core: core)
+            )
+        case .any(let schema, let core): 
+            let (newSubschemas, components, messages) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .any(of: newSubschemas, core: core)
+            )
+        case .not(let schema, let core): 
+            let (newSubschema, components, messages) = try await schema.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .not(newSubschema, core: core)
+            )
+        case .reference(let reference, let core): 
+            let (newReference, components, messages) = try await reference.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(
+                schema: .reference(newReference, core)
+            )
+        case .fragment(_): 
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
+        }
+
+        return (newSchema, newComponents, newMessages)
     }
 }

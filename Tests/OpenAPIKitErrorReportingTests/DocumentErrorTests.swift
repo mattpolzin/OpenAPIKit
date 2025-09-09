@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-import Yams
+@preconcurrency import Yams
 
 final class DocumentErrorTests: XCTestCase {
 
@@ -44,7 +44,7 @@ final class DocumentErrorTests: XCTestCase {
 
             let openAPIError = OpenAPI.Error(from: error)
 
-            XCTAssertEqual(openAPIError.localizedDescription, "Inconsistency encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value null.")
+            XCTAssertEqual(openAPIError.localizedDescription, "Problem encountered when parsing `openapi` in the root Document object: Cannot initialize Version from invalid String value null.")
             XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
                 "openapi"
             ])
