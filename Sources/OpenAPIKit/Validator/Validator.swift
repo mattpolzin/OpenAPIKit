@@ -190,6 +190,7 @@ public final class Validator {
             .init(.requestReferencesAreValid),
             .init(.headerReferencesAreValid),
             .init(.linkReferencesAreValid),
+            .init(.callbacksReferencesAreValid),
             .init(.pathItemReferencesAreValid),
             .init(.serverVariableEnumIsValid),
             .init(.serverVariableDefaultExistsInEnum)
