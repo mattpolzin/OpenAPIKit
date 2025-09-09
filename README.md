@@ -8,11 +8,11 @@ A library containing Swift types that encode to- and decode from [OpenAPI 3.0.x]
 
 OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specificaiton does not. The following chart shows which OpenAPI specification versions and key features are supported by which OpenAPIKit versions.
 
-| OpenAPIKit | Swift | OpenAPI v3.0 | OpenAPI v3.1 | External Dereferencing |
-|------------|-------|--------------|--------------|------------------------|
-| v2.x       | 5.1+  | ✅           |              |                        |
-| v3.x       | 5.1+  | ✅           | ✅           |                        |
-| v4.x       | 5.8+  | ✅           | ✅           | ✅                     |
+| OpenAPIKit | Swift | OpenAPI v3.0 | OpenAPI v3.1 | External Dereferencing & Sendable |
+|------------|-------|--------------|--------------|-----------------------------------|
+| v2.x       | 5.1+  | ✅           |              |                                   |
+| v3.x       | 5.1+  | ✅           | ✅           |                                   |
+| v4.x       | 5.8+  | ✅           | ✅           | ✅                                |
 
 - [Usage](#usage)
   - [Migration](#migration)
