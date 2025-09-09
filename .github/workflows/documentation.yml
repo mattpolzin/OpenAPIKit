@@ -3,8 +3,7 @@ name: Documentation
 on:
   push:
     branches:
-      - release/4_0
-      # ^ for now, we only want to use the v4.0 release branch.
+      - main
 
 jobs:
   build:
@@ -28,7 +27,7 @@ jobs:
         run: |
           apt-get update && apt-get install -y rsync
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.6.8
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           folder: gh-pages
           branch: gh-pages
