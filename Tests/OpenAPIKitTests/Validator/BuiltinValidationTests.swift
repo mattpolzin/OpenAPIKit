@@ -741,6 +741,9 @@ final class BuiltinValidationTests: XCTestCase {
                         ],
                         links: ["linky": .reference(.component(named: "link1"))]
                     )
+                ],
+                callbacks: [
+                  "callbacks1": .reference(.component(named: "callbacks1"))
                 ]
             )
         )
@@ -758,7 +761,7 @@ final class BuiltinValidationTests: XCTestCase {
         // NOTE these are part of default validation
         XCTAssertThrowsError(try document.validate()) { error in
             let error = error as? ValidationErrorCollection
-            XCTAssertEqual(error?.values.count, 8)
+            XCTAssertEqual(error?.values.count, 9)
             XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Parameter reference can be found in components/parameters")
             XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].get.parameters[0]")
             XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Request reference can be found in components/requestBodies")
@@ -773,8 +776,10 @@ final class BuiltinValidationTests: XCTestCase {
             XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].get.responses.404.content['application/xml'].schema")
             XCTAssertEqual(error?.values[6].reason, "Failed to satisfy: Link reference can be found in components/links")
             XCTAssertEqual(error?.values[6].codingPathString, ".paths['/hello'].get.responses.404.links.linky")
-            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: PathItem reference can be found in components/pathItems")
-            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/world']")
+            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: Callbacks reference can be found in components/callbacks")
+            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/hello'].get.callbacks.callbacks1")
+            XCTAssertEqual(error?.values[8].reason, "Failed to satisfy: PathItem reference can be found in components/pathItems")
+            XCTAssertEqual(error?.values[8].codingPathString, ".paths['/world']")
         }
     }
 
@@ -817,6 +822,9 @@ final class BuiltinValidationTests: XCTestCase {
                             "linky2": .reference(.external(URL(string: "https://linky.com")!))
                         ]
                     )
+                ],
+                callbacks: [
+                  "callbacks1": .reference(.component(named: "callbacks1"))
                 ]
             )
         )
@@ -850,6 +858,9 @@ final class BuiltinValidationTests: XCTestCase {
                 ],
                 links: [
                     "link1": .init(operationId: "op 1")
+                ],
+                callbacks: [
+                  "callbacks1": .init()
                 ],
                 pathItems: [
                     "path1": .init()
