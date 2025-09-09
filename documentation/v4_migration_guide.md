@@ -81,7 +81,7 @@ of this, but if you've implemented the `JSONSchemaContext` protocol yourself
 then this note is for you.
 
 ### Errors
-The `InconsistencyError` type has been renaemd to `GenericError` and its message
+The `InconsistencyError` type has been renamed to `GenericError` and its message
 has been tweaked to fit the new name. This error has been used to represent many
 errors over time and I would not classify all of them as "inconsistencies."
 
