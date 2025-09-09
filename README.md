@@ -306,16 +306,16 @@ decoder.userInfo = userInfo
 #### AnyCodable
 OpenAPIKit uses the `AnyCodable` type for vendor extensions and constructing examples for JSON Schemas. OpenAPIKit's `AnyCodable` type is an adaptation of the Flight School library that can be found [here](https://github.com/Flight-School/AnyCodable).
 
-`AnyCodable` can be constructed from literals or explicitly. The following are all valid.
+`AnyCodable` can be constructed explicitly or from many types of literals. The following are all valid.
 
 ```swift
 var document = OpenAPI.Document(...)
 
 document.vendorExtensions["x-specialProperty1"] = true
 document.vendorExtensions["x-specialProperty2"] = "hello world"
-document.vendorExtensions["x-specialProperty3"] = ["hello", "world"]
-document.vendorExtensions["x-specialProperty4"] = ["hello": "world"]
-document.vendorExtensions["x-specialProperty5"] = AnyCodable("hello world")
+document.vendorExtensions["x-specialProperty3"] = AnyCodable("hello world")
+document.vendorExtensions["x-specialProperty4"] = AnyCodable(["hello", "world"])
+document.vendorExtensions["x-specialProperty5"] = AnyCodable(["hello": "world"])
 ```
 
 It is important to note that `AnyCodable` wraps Swift types in a way that keeps track of the Swift type used to construct it as much as possible, but if you encode an `AnyCodable` and then decode that result, the decoded value may not always be the same as the pre-encoded value started out. This is because many Swift types will encode to "stringy" values and then decode as simply `String` values. There are two ways to cope with this:
