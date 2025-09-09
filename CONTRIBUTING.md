@@ -2,7 +2,7 @@ Thank you for considering contributing to OpenAPIKit!
 
 Take a look at the [Code of Conduct](https://github.com/mattpolzin/OpenAPIKit/blob/master/CODE_OF_CONDUCT.md) and note the [MIT license](https://github.com/mattpolzin/OpenAPIKit/blob/master/LICENSE.txt) associated with this project.
 
-If you are preparing a change for the current release of OpenAPIKit (major version 3), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 2 of OpenAPIKit, branch off of the `release/2_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version 4), branch off of the `release/4_0` branch of this repository.
+If you are preparing a change for the current release of OpenAPIKit (major version 4), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 3 of OpenAPIKit, branch off of the `release/3_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version `5`), branch off of the `release/5_0` branch of this repository.
 
 Please do the following in the course of preparing a branch and pull request for this project.
 
@@ -13,17 +13,15 @@ Please do the following in the course of preparing a branch and pull request for
 
 ### Goals for each currently maintained major version
 
-`2.x`: Non-breaking changes that fix bugs for working with OpenAPI 3.0.x.
-`3.x`: Non-breaking changes that fix bugs or add improvements to the support of either OpenAPI 3.0.x or OpenAPI 3.1.x.
+`3.x`: Non-breaking changes that fix bugs or add improvements to the support of either OpenAPI Spec v3.0.x or OpenAPI Spec v3.1.x.
+`4.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, external dereferencing, or Swift concurrency.
 
 #### Goals for the Next/unreleased version
-The next major version will be `4.0`.
+The next major version will be `5.0`.
 
-This release will prioritize code-rewriting and project configuration updates that modernize the Swift used in this project.
+Priorities for this release have not been settled on yet.
 
-**Please create GitHub issues** to propose any specific code refactoring you would like to do as I am opinionated about the degree to which I want to refactor; in other words, I aim to adopt more modern Swift, but avoid structural changes motivated by a difference in opinion rather than common Swift coding practices.
-
-An example of a change I would love to see (albeit an especially trivial one) is the replacement of `if let something = something` with `if let something` (i.e. code that rebinds an optional to the same name within the following conditional scope). There are other trivial syntax transformations like this that I would very much appreciate.
+**Please create GitHub issues** to propose any specific code refactoring or breaking changes you would like to see as I am opinionated about the degree to which I want to refactor and breaking changes should be well motivated; in other words, I aim to adopt more modern Swift, but avoid structural changes motivated by a difference in opinion rather than common Swift coding practices.
 
 An example of a change I am open to but has slightly more potential for disruption would be refactoring generic code to use new `any`/`some` keywords. I would want to think through the specific suggestion and discuss in a GitHub ticket prior to seeing the Pull Request.
 
