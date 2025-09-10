@@ -397,6 +397,28 @@ extension Validation {
         )
     }
 
+    /// Validate that all non-external Callbacks references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var callbacksReferencesAreValid: Validation<JSONReference<OpenAPI.Callbacks>> {
+        .init(
+            description: "Callbacks reference can be found in components/callbacks",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject,
+                      case .component = internalReference else {
+                        // don't make assertions about external references
+                        // TODO: could make a stronger assertion including
+                        // internal references outside of components given
+                        // some way to resolve those references.
+                        return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
     /// Validate the OpenAPI Document's `Links` with operationIds refer to
     /// Operations that exist in the document.
     ///
