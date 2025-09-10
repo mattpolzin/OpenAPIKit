@@ -202,6 +202,9 @@ final class DocumentConversionTests: XCTestCase {
             components: .init(
                 parameters: [
                     "test": .init(name: "referencedParam", context: .query, schema: .string)
+                ],
+                callbacks: [
+                  "other_callback": callbacks
                 ]
             )
         )
