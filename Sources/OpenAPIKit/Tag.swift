@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
     /// See [OpenAPI Tag Object](https://spec.openapis.org/oas/v3.1.1.html#tag-object).
-    public struct Tag: Equatable, CodableVendorExtendable {
+    public struct Tag: Equatable, CodableVendorExtendable, Sendable {
         public let name: String
         public let description: String?
         public let externalDocs: ExternalDocumentation?

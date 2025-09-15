@@ -12,7 +12,7 @@ extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
     /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.0.4.html#info-object).
-    public struct Info: Equatable, CodableVendorExtendable {
+    public struct Info: Equatable, CodableVendorExtendable, Sendable {
         public let title: String
         public let description: String?
         public let termsOfService: URL?
@@ -48,7 +48,7 @@ extension OpenAPI.Document {
         /// OpenAPI Spec "Contact Object"
         ///
         /// See [OpenAPI Contact Object](https://spec.openapis.org/oas/v3.0.4.html#contact-object).
-        public struct Contact: Equatable, CodableVendorExtendable {
+        public struct Contact: Equatable, CodableVendorExtendable, Sendable {
             public let name: String?
             public let url: URL?
             public let email: String?
@@ -76,7 +76,7 @@ extension OpenAPI.Document {
         /// OpenAPI Spec "License Object"
         ///
         /// See [OpenAPI License Object](https://spec.openapis.org/oas/v3.0.4.html#license-object).
-        public struct License: Equatable, CodableVendorExtendable {
+        public struct License: Equatable, CodableVendorExtendable, Sendable {
             public let name: String
             public let url: URL?
 

@@ -12,7 +12,7 @@ extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
     /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.1.1.html#info-object).
-    public struct Info: Equatable, CodableVendorExtendable {
+    public struct Info: Equatable, CodableVendorExtendable, Sendable {
         public var title: String
         public var summary: String?
         public var description: String?
@@ -51,7 +51,7 @@ extension OpenAPI.Document {
         /// OpenAPI Spec "Contact Object"
         ///
         /// See [OpenAPI Contact Object](https://spec.openapis.org/oas/v3.1.1.html#contact-object).
-        public struct Contact: Equatable, CodableVendorExtendable {
+        public struct Contact: Equatable, CodableVendorExtendable, Sendable {
             public let name: String?
             public let url: URL?
             public let email: String?
@@ -79,7 +79,7 @@ extension OpenAPI.Document {
         /// OpenAPI Spec "License Object"
         ///
         /// See [OpenAPI License Object](https://spec.openapis.org/oas/v3.1.1.html#license-object).
-        public struct License: Equatable, CodableVendorExtendable {
+        public struct License: Equatable, CodableVendorExtendable, Sendable {
             public let name: String
             public let identifier: Identifier?
 
@@ -115,7 +115,7 @@ extension OpenAPI.Document {
 
             /// The `identifier`/`url` property of the OpenAPI Spec "License Object"
             /// that can be either a URL or an SPDX identifier.
-            public enum Identifier: Equatable {
+            public enum Identifier: Equatable, Sendable {
                 case url(URL)
                 /// See https://spdx.dev/spdx-specification-21-web-version/#h.jxpfx0ykyb60
                 /// for more on SPDX.

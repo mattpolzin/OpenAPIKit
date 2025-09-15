@@ -45,7 +45,7 @@ extension OpenAPI {
     ///
     /// See the documentation on `DereferencedDocument.resolved()` for more.
     ///
-    public struct Document: Equatable, CodableVendorExtendable {
+    public struct Document: Equatable, CodableVendorExtendable, Sendable {
         /// OpenAPI Spec "openapi" field.
         ///
         /// OpenAPIKit only explicitly supports versions that can be found in
@@ -430,7 +430,7 @@ extension OpenAPI.Document {
     /// specification releases a new patch version, OpenAPIKit will see a patch version release
     /// explicitly supports decoding documents of that new patch version before said version will
     /// succesfully decode as the `v3_1_x` case.
-    public enum Version: RawRepresentable, Equatable, Codable {
+    public enum Version: RawRepresentable, Equatable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
         case v3_1_x(x: Int)
