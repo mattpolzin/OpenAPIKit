@@ -433,12 +433,14 @@ extension OpenAPI.Document {
     public enum Version: RawRepresentable, Equatable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
+        case v3_1_2
         case v3_1_x(x: Int)
 
       public init?(rawValue: String) {
           switch rawValue {
           case "3.1.0": self = .v3_1_0
           case "3.1.1": self = .v3_1_1
+          case "3.1.2": self = .v3_1_2
           default:
               let components = rawValue.split(separator: ".")
               guard components.count == 3 else {
@@ -464,6 +466,7 @@ extension OpenAPI.Document {
             switch self {
             case .v3_1_0: return "3.1.0"
             case .v3_1_1: return "3.1.1"
+            case .v3_1_2: return "3.1.2"
             case .v3_1_x(x: let x): return "3.1.\(x)"
             }
         }
