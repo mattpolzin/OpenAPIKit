@@ -48,18 +48,24 @@ final class DocumentTests: XCTestCase {
         let t2 = OpenAPI.Document.Version.v3_1_1
         XCTAssertEqual(t2.rawValue, "3.1.1")
 
-        let t3 = OpenAPI.Document.Version.v3_1_x(x: 8)
-        XCTAssertEqual(t3.rawValue, "3.1.8")
+        let t3 = OpenAPI.Document.Version.v3_1_x(x: 2)
+        XCTAssertEqual(t3.rawValue, "3.1.2")
 
-        let t4 = OpenAPI.Document.Version(rawValue: "3.1.0")
-        XCTAssertEqual(t4, .v3_1_0)
+        let t4 = OpenAPI.Document.Version.v3_1_x(x: 8)
+        XCTAssertEqual(t4.rawValue, "3.1.8")
 
-        let t5 = OpenAPI.Document.Version(rawValue: "3.1.1")
-        XCTAssertEqual(t5, .v3_1_1)
+        let t5 = OpenAPI.Document.Version(rawValue: "3.1.0")
+        XCTAssertEqual(t5, .v3_1_0)
+
+        let t6 = OpenAPI.Document.Version(rawValue: "3.1.1")
+        XCTAssertEqual(t6, .v3_1_1)
+
+        let t7 = OpenAPI.Document.Version(rawValue: "3.1.2")
+        XCTAssertEqual(t7, .v3_1_x(x: 2))
 
         // not a known version:
-        let t6 = OpenAPI.Document.Version(rawValue: "3.1.8")
-        XCTAssertNil(t6)
+        let t8 = OpenAPI.Document.Version(rawValue: "3.1.8")
+        XCTAssertNil(t8)
     }
 
     func test_getRoutes() {

@@ -453,7 +453,7 @@ extension OpenAPI.Document {
               // to support newer versions released in the future without a breaking
               // change to the enumeration, bump the upper limit here to e.g. 2 or 3
               // or 6:
-              guard patchVersion > 1 && patchVersion <= 1 else {
+              guard patchVersion > 1 && patchVersion <= 2 else {
                   return nil
               }
               self = .v3_1_x(x: patchVersion)
