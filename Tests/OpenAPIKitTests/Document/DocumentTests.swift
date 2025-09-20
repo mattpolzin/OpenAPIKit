@@ -48,7 +48,7 @@ final class DocumentTests: XCTestCase {
         let t2 = OpenAPI.Document.Version.v3_1_1
         XCTAssertEqual(t2.rawValue, "3.1.1")
 
-        let t3 = OpenAPI.Document.Version.v3_1_x(x: 2)
+        let t3 = OpenAPI.Document.Version.v3_1_2
         XCTAssertEqual(t3.rawValue, "3.1.2")
 
         let t4 = OpenAPI.Document.Version.v3_1_x(x: 8)
@@ -61,7 +61,7 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(t6, .v3_1_1)
 
         let t7 = OpenAPI.Document.Version(rawValue: "3.1.2")
-        XCTAssertEqual(t7, .v3_1_x(x: 2))
+        XCTAssertEqual(t7, .v3_1_2)
 
         // not a known version:
         let t8 = OpenAPI.Document.Version(rawValue: "3.1.8")
