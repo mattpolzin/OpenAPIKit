@@ -430,23 +430,28 @@ extension OpenAPI.Document {
     /// specification releases a new patch version, OpenAPIKit will see a patch version release
     /// explicitly supports decoding documents of that new patch version before said version will
     /// succesfully decode as the `v3_1_x` case.
-    public enum Version: RawRepresentable, Equatable, Codable, Sendable {
+    public enum Version: RawRepresentable, Equatable, Comparable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
         case v3_1_2
         case v3_1_x(x: Int)
+
+        case v3_2_0
+        case v3_2_x(x: Int)
 
       public init?(rawValue: String) {
           switch rawValue {
           case "3.1.0": self = .v3_1_0
           case "3.1.1": self = .v3_1_1
           case "3.1.2": self = .v3_1_2
+          case "3.2.0": self = .v3_2_0
           default:
               let components = rawValue.split(separator: ".")
               guard components.count == 3 else {
                   return nil
               }
-              guard components[0] == "3", components[1] == "1" else {
+              let minorVersion = components[1]
+              guard components[0] == "3", (minorVersion == "1" || minorVersion == "2") else {
                   return nil
               }
               guard let patchVersion = Int(components[2], radix: 10) else {
@@ -455,10 +460,17 @@ extension OpenAPI.Document {
               // to support newer versions released in the future without a breaking
               // change to the enumeration, bump the upper limit here to e.g. 2 or 3
               // or 6:
-              guard patchVersion > 1 && patchVersion <= 2 else {
-                  return nil
+              if minorVersion == "2" {
+                  guard  patchVersion > 0 && patchVersion <= 0 else {
+                      return nil
+                  }
+                  self = .v3_2_x(x: patchVersion)
+              } else {
+                  guard  patchVersion > 2 && patchVersion <= 2 else {
+                      return nil
+                  }
+                  self = .v3_1_x(x: patchVersion)
               }
-              self = .v3_1_x(x: patchVersion)
           }
       }
 
@@ -468,6 +480,73 @@ extension OpenAPI.Document {
             case .v3_1_1: return "3.1.1"
             case .v3_1_2: return "3.1.2"
             case .v3_1_x(x: let x): return "3.1.\(x)"
+
+            case .v3_2_0: return "3.2.0"
+            case .v3_2_x(x: let x): return "3.2.\(x)"
+            }
+        }
+
+        public static func < (lhs: Self, rhs: Self) -> Bool {
+            switch lhs {
+            case .v3_1_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: true
+                case .v3_1_2: true
+                case .v3_1_x(x: let x): 0 < x
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_1:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: true
+                case .v3_1_x(x: let y): 1 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_2:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: let y): 2 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_x(x: let x):
+                switch rhs {
+                case .v3_1_0: x < 0
+                case .v3_1_1: x < 1
+                case .v3_1_2: x < 2
+                case .v3_1_x(x: let y): x < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_2_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: false
+                case .v3_2_x(x: let y): 0 < y
+                }
+
+            case .v3_2_x(x: let x):
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: x < 0
+                case .v3_2_x(x: let y): x < y
+                }
             }
         }
     }

@@ -11,8 +11,10 @@ extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
     /// See [OpenAPI Tag Object](https://spec.openapis.org/oas/v3.1.1.html#tag-object).
-    public struct Tag: Equatable, CodableVendorExtendable, Sendable {
+    public struct Tag: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public let name: String
+        /// Summary of the tag. Available for OAS 3.2.0 and greater.
+        public let summary: String?
         public let description: String?
         public let externalDocs: ExternalDocumentation?
 
@@ -23,17 +25,45 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        public let conditionalWarnings: [(any Condition, Warning)]
+
         public init(
             name: String,
+            summary: String? = nil,
             description: String? = nil,
             externalDocs: ExternalDocumentation? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.name = name
+            self.summary = summary
             self.description = description
             self.externalDocs = externalDocs
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                // If summary is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Tag \(fieldName) field"
+        )
+    }
+}
+
+extension OpenAPI.Tag: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.name == rhs.name
+          && lhs.summary == rhs.summary
+          && lhs.description == rhs.description
+          && lhs.externalDocs == rhs.externalDocs
+          && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
@@ -43,13 +73,25 @@ extension OpenAPI.Tag: ExpressibleByStringLiteral {
     }
 }
 
-// MARK: - Describable
+// MARK: - Describable & Summarizable
 
-extension OpenAPI.Tag : OpenAPIDescribable {
+extension OpenAPI.Tag : OpenAPISummarizable {
     public func overriddenNonNil(description: String?) -> OpenAPI.Tag {
         guard let description = description else { return self }
         return OpenAPI.Tag(
             name: name,
+            summary: summary,
+            description: description,
+            externalDocs: externalDocs,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Tag {
+        guard let summary = summary else { return self }
+        return OpenAPI.Tag(
+            name: name,
+            summary: summary,
             description: description,
             externalDocs: externalDocs,
             vendorExtensions: vendorExtensions
@@ -64,6 +106,8 @@ extension OpenAPI.Tag: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(name, forKey: .name)
+
+        try container.encodeIfPresent(summary, forKey: .summary)
 
         try container.encodeIfPresent(description, forKey: .description)
 
@@ -81,17 +125,25 @@ extension OpenAPI.Tag: Decodable {
 
         name = try container.decode(String.self, forKey: .name)
 
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        conditionalWarnings = [
+            // If summary is non-nil, the document must be OAS version 3.2.0 or greater
+            nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0)
+        ].compactMap { $0 }
     }
 }
 
 extension OpenAPI.Tag {
     internal enum CodingKeys: ExtendableCodingKey {
         case name
+        case summary
         case description
         case externalDocs
         case extended(String)
@@ -99,6 +151,7 @@ extension OpenAPI.Tag {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .name,
+                .summary,
                 .description,
                 .externalDocs
             ]
@@ -112,6 +165,8 @@ extension OpenAPI.Tag {
             switch stringValue {
             case "name":
                 self = .name
+            case "summary":
+                self = .summary
             case "description":
                 self = .description
             case "externalDocs":
@@ -125,6 +180,8 @@ extension OpenAPI.Tag {
             switch self {
             case .name:
                 return "name"
+            case .summary:
+                return "summary"
             case .description:
                 return "description"
             case .externalDocs:
