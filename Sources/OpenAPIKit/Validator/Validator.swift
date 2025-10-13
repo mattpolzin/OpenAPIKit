@@ -545,9 +545,15 @@ extension _Validator: SingleValueEncodingContainer {
 
     fileprivate func collectWarnings(from value: Encodable, atKey key: CodingKey? = nil) {
         let pathTail = key.map { [$0] } ?? []
+        var localWarnings = [Warning]()
         if let warnable = value as? HasWarnings {
-            warnings += warnable.warnings.map(contextualize(at: codingPath + pathTail))
+            localWarnings += warnable.warnings
         }
+        if let conditionalWarnable = value as? HasConditionalWarnings {
+            localWarnings += conditionalWarnable.applicableConditionalWarnings(for: document)
+        }
+
+        warnings += localWarnings.map(contextualize(at: codingPath + pathTail))
     }
 }
 
