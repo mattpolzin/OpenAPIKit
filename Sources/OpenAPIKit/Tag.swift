@@ -17,6 +17,8 @@ extension OpenAPI {
         public let summary: String?
         public let description: String?
         public let externalDocs: ExternalDocumentation?
+        /// The tag this tag is nested under.
+        public let parent: String?
 
         /// Dictionary of vendor extensions.
         ///
@@ -32,17 +34,21 @@ extension OpenAPI {
             summary: String? = nil,
             description: String? = nil,
             externalDocs: ExternalDocumentation? = nil,
+            parent: String? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.name = name
             self.summary = summary
             self.description = description
             self.externalDocs = externalDocs
+            self.parent = parent
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
                 // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0)
+                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                // If parent is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
@@ -63,6 +69,7 @@ extension OpenAPI.Tag: Equatable {
           && lhs.summary == rhs.summary
           && lhs.description == rhs.description
           && lhs.externalDocs == rhs.externalDocs
+          && lhs.parent == rhs.parent
           && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
@@ -83,6 +90,7 @@ extension OpenAPI.Tag : OpenAPISummarizable {
             summary: summary,
             description: description,
             externalDocs: externalDocs,
+            parent: parent,
             vendorExtensions: vendorExtensions
         )
     }
@@ -94,6 +102,7 @@ extension OpenAPI.Tag : OpenAPISummarizable {
             summary: summary,
             description: description,
             externalDocs: externalDocs,
+            parent: parent,
             vendorExtensions: vendorExtensions
         )
     }
@@ -113,6 +122,8 @@ extension OpenAPI.Tag: Encodable {
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
 
+        try container.encodeIfPresent(parent, forKey: .parent)
+
         if VendorExtensionsConfiguration.isEnabled(for: encoder) {
             try encodeExtensions(to: &container)
         }
@@ -131,11 +142,15 @@ extension OpenAPI.Tag: Decodable {
 
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
 
+        parent = try container.decodeIfPresent(String.self, forKey: .parent)
+
         vendorExtensions = try Self.extensions(from: decoder)
 
         conditionalWarnings = [
             // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-            nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0)
+            nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+            // If parent is non-nil, the document must be OAS version 3.2.0 or greater
+            nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }
@@ -146,6 +161,7 @@ extension OpenAPI.Tag {
         case summary
         case description
         case externalDocs
+        case parent
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
@@ -153,7 +169,8 @@ extension OpenAPI.Tag {
                 .name,
                 .summary,
                 .description,
-                .externalDocs
+                .externalDocs,
+                .parent
             ]
         }
 
@@ -171,6 +188,8 @@ extension OpenAPI.Tag {
                 self = .description
             case "externalDocs":
                 self = .externalDocs
+            case "parent":
+                self = .parent
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -186,6 +205,8 @@ extension OpenAPI.Tag {
                 return "description"
             case .externalDocs:
                 return "externalDocs"
+            case .parent:
+                return "parent"
             case .extended(let key):
                 return key
             }
