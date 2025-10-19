@@ -1484,7 +1484,7 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 1)
             XCTAssertEqual(
                 errors?.localizedDescription,
-                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\' at path: .paths[\'/test\'].get.responses.200.content"
             )
             XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
         }
@@ -1503,7 +1503,7 @@ final class ValidatorTests: XCTestCase {
 
         XCTAssertEqual(
             doc.tags?.first?.applicableConditionalWarnings(for: doc).first?.localizedDescription,
-            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later."
+            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later"
         )
 
         let warnings = try doc.validate(strict: false)
@@ -1511,7 +1511,7 @@ final class ValidatorTests: XCTestCase {
         XCTAssertEqual(warnings.count, 1)
         XCTAssertEqual(
             warnings.first?.localizedDescription,
-            "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later.."
+            "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later."
         )
         XCTAssertEqual(warnings.first?.codingPathString, ".tags[0]")
 
@@ -1535,7 +1535,7 @@ final class ValidatorTests: XCTestCase {
 
         XCTAssertEqual(
             doc.tags?.first?.applicableConditionalWarnings(for: doc).first?.localizedDescription,
-            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later."
+            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later"
         )
 
         XCTAssertThrowsError(try doc.validate(strict: true)) { error in
@@ -1543,7 +1543,7 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 1)
             XCTAssertEqual(
                 errors?.localizedDescription,
-                "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later.. at path: .tags[0]"
+                "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later at path: .tags[0]"
             )
             XCTAssertEqual(errors?.values.first?.codingPathString, ".tags[0]")
         }

@@ -47,7 +47,7 @@ internal struct DocumentVersionCondition: Sendable, Condition {
 internal extension OpenAPI.Document {
     struct ConditionalWarnings {
         static func version(lessThan version: OpenAPI.Document.Version, doesNotSupport subject: String) -> (any Condition, OpenAPI.Warning) {
-            let warning = OpenAPI.Warning.message("\(subject) is only supported for OpenAPI document versions \(version.rawValue) and later.")
+            let warning = OpenAPI.Warning.message("\(subject) is only supported for OpenAPI document versions \(version.rawValue) and later")
 
             return (DocumentVersionCondition(version: version, comparator: .lessThan), warning)
         }
