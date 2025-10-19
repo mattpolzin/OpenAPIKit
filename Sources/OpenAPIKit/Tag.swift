@@ -19,6 +19,12 @@ extension OpenAPI {
         public let externalDocs: ExternalDocumentation?
         /// The tag this tag is nested under.
         public let parent: String?
+        /// A machine-readable string to categorize what sort of tag this is.
+        /// Any string value can be used, but some common options are provided
+        /// on OpenAPIKit's `Tag.Kind` type as static properties and more can
+        /// be found in the public registry:
+        /// https://spec.openapis.org/registry/tag-kind
+        public let kind: Kind?
 
         /// Dictionary of vendor extensions.
         ///
@@ -35,6 +41,7 @@ extension OpenAPI {
             description: String? = nil,
             externalDocs: ExternalDocumentation? = nil,
             parent: String? = nil,
+            kind: Kind? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.name = name
@@ -42,16 +49,49 @@ extension OpenAPI {
             self.description = description
             self.externalDocs = externalDocs
             self.parent = parent
+            self.kind = kind
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
                 // If summary is non-nil, the document must be OAS version 3.2.0 or greater
                 nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
                 // If parent is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0)
+                nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
+                // If kind is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
+}
+
+extension OpenAPI.Tag {
+    public struct Kind : ExpressibleByStringLiteral, Codable, Equatable, Sendable {
+        public let rawValue: String
+
+        public init(stringLiteral: String) {
+            self.rawValue = stringLiteral
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            self.rawValue = try container.decode(String.self)
+        }
+
+      public func encode(to encoder: Encoder) throws {
+          var container = encoder.singleValueContainer()
+
+          try container.encode(rawValue)
+      }
+    }
+}
+
+extension OpenAPI.Tag.Kind {
+    /// See https://spec.openapis.org/registry/tag-kind/audience.html
+    public static let audience: OpenAPI.Tag.Kind = "audience"
+    /// See https://spec.openapis.org/registry/tag-kind/badge.html
+    public static let badge: OpenAPI.Tag.Kind = "badge"
+    /// See https://spec.openapis.org/registry/tag-kind/nav.html
+    public static let nav: OpenAPI.Tag.Kind = "nav"
 }
 
 fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
@@ -70,6 +110,7 @@ extension OpenAPI.Tag: Equatable {
           && lhs.description == rhs.description
           && lhs.externalDocs == rhs.externalDocs
           && lhs.parent == rhs.parent
+          && lhs.kind == rhs.kind
           && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
@@ -91,6 +132,7 @@ extension OpenAPI.Tag : OpenAPISummarizable {
             description: description,
             externalDocs: externalDocs,
             parent: parent,
+            kind: kind,
             vendorExtensions: vendorExtensions
         )
     }
@@ -103,6 +145,7 @@ extension OpenAPI.Tag : OpenAPISummarizable {
             description: description,
             externalDocs: externalDocs,
             parent: parent,
+            kind: kind,
             vendorExtensions: vendorExtensions
         )
     }
@@ -124,6 +167,8 @@ extension OpenAPI.Tag: Encodable {
 
         try container.encodeIfPresent(parent, forKey: .parent)
 
+        try container.encodeIfPresent(kind, forKey: .kind)
+
         if VendorExtensionsConfiguration.isEnabled(for: encoder) {
             try encodeExtensions(to: &container)
         }
@@ -144,13 +189,17 @@ extension OpenAPI.Tag: Decodable {
 
         parent = try container.decodeIfPresent(String.self, forKey: .parent)
 
+        kind = try container.decodeIfPresent(Kind.self, forKey: .kind)
+
         vendorExtensions = try Self.extensions(from: decoder)
 
         conditionalWarnings = [
             // If summary is non-nil, the document must be OAS version 3.2.0 or greater
             nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
             // If parent is non-nil, the document must be OAS version 3.2.0 or greater
-            nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0)
+            nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
+            // If kind is non-nil, the document must be OAS version 3.2.0 or greater
+            nonNilVersionWarning(fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }
@@ -162,6 +211,7 @@ extension OpenAPI.Tag {
         case description
         case externalDocs
         case parent
+        case kind
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
@@ -170,7 +220,8 @@ extension OpenAPI.Tag {
                 .summary,
                 .description,
                 .externalDocs,
-                .parent
+                .parent,
+                .kind
             ]
         }
 
@@ -190,6 +241,8 @@ extension OpenAPI.Tag {
                 self = .externalDocs
             case "parent":
                 self = .parent
+            case "kind":
+                self = .kind
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -207,6 +260,8 @@ extension OpenAPI.Tag {
                 return "externalDocs"
             case .parent:
                 return "parent"
+            case .kind:
+                return "kind"
             case .extended(let key):
                 return key
             }

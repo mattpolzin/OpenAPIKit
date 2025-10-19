@@ -45,6 +45,12 @@ final class TagTests: XCTestCase {
             parent: "otherTag"
         )
         XCTAssertEqual(t5.parent, "otherTag")
+
+        let t6 = OpenAPI.Tag(
+            name: "hello",
+            kind: .nav
+        )
+        XCTAssertEqual(t6.kind, .nav)
     }
 }
 
@@ -177,6 +183,39 @@ extension TagTests {
         XCTAssertEqual(tag.conditionalWarnings.count, 1)
     }
 
+    func test_nameAndKind_encode() throws {
+        let tag = OpenAPI.Tag(
+            name: "hello",
+            kind: .badge
+        )
+        let encodedTag = try orderUnstableTestStringFromEncoding(of: tag)
+
+        assertJSONEquivalent(
+            encodedTag,
+            """
+            {
+              "kind" : "badge",
+              "name" : "hello"
+            }
+            """
+        )
+    }
+
+    func test_nameAndKind_decode() throws {
+        let tagData =
+        """
+        {
+            "name": "hello",
+            "kind": "audience"
+        }
+        """.data(using: .utf8)!
+
+        let tag = try orderUnstableDecode(OpenAPI.Tag.self, from: tagData)
+
+        XCTAssertEqual(tag, OpenAPI.Tag(name: "hello", kind: .audience))
+        XCTAssertEqual(tag.conditionalWarnings.count, 1)
+    }
+
     func test_allFields_encode() throws {
         let tag = OpenAPI.Tag(
             name: "hello",
@@ -186,6 +225,7 @@ extension TagTests {
                 url: URL(string: "http://google.com")!
             ),
             parent: "otherTag",
+            kind: "mytag",
             vendorExtensions: ["x-specialFeature": false]
         )
         let encodedTag = try orderUnstableTestStringFromEncoding(of: tag)
@@ -198,6 +238,7 @@ extension TagTests {
               "externalDocs" : {
                 "url" : "http:\\/\\/google.com"
               },
+              "kind" : "mytag",
               "name" : "hello",
               "parent" : "otherTag",
               "summary" : "sum",
@@ -218,6 +259,7 @@ extension TagTests {
                 "url": "http://google.com"
             },
             "parent": "otherTag",
+            "kind": "mytag",
             "x-specialFeature" : false
         }
         """.data(using: .utf8)!
@@ -232,9 +274,10 @@ extension TagTests {
                 description: "world",
                 externalDocs: .init(url: URL(string: "http://google.com")!),
                 parent: "otherTag",
+                kind: "mytag",
                 vendorExtensions: ["x-specialFeature": false]
             )
         )
-        XCTAssertEqual(tag.conditionalWarnings.count, 2)
+        XCTAssertEqual(tag.conditionalWarnings.count, 3)
     }
 }
