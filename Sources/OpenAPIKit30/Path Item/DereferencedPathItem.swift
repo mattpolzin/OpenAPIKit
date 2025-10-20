@@ -95,6 +95,8 @@ extension DereferencedPathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return nil
         }
     }
 

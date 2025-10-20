@@ -8,7 +8,9 @@
 import OpenAPIKitCore
 
 extension OpenAPI {
-    /// OpenAPI Spec "Path Item Object"
+    /// OpenAPI Spec "Path Item Object" (although in the spec the Path Item
+    /// Object also includes reference support which OpenAPIKit implements via
+    /// the PathItem.Map type)
     /// 
     /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.1.1.html#path-item-object).
     ///
@@ -52,6 +54,8 @@ extension OpenAPI {
         public var patch: Operation?
         /// The `TRACE` endpoint at this path, if one exists.
         public var trace: Operation?
+        /// The `QUERY` endpoint at this path, if one exists.
+        public var query: Operation?
 
         /// Dictionary of vendor extensions.
         ///
@@ -73,6 +77,7 @@ extension OpenAPI {
             head: Operation? = nil,
             patch: Operation? = nil,
             trace: Operation? = nil,
+            query: Operation? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.summary = summary
@@ -88,6 +93,7 @@ extension OpenAPI {
             self.head = head
             self.patch = patch
             self.trace = trace
+            self.query = query
             self.vendorExtensions = vendorExtensions
         }
 
@@ -130,6 +136,11 @@ extension OpenAPI {
         public mutating func trace(_ op: Operation?) {
             trace = op
         }
+
+        /// Set the `QUERY` endpoint operation.
+        public mutating func query(_ op: Operation?) {
+            query = op
+        }
     }
 }
 
@@ -164,6 +175,8 @@ extension OpenAPI.PathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return self.query
         }
     }
 
@@ -186,6 +199,8 @@ extension OpenAPI.PathItem {
             self.put(operation)
         case .trace:
             self.trace(operation)
+        case .query:
+            self.query(operation)
         }
     }
 
@@ -256,6 +271,7 @@ extension OpenAPI.PathItem: Encodable {
         try container.encodeIfPresent(head, forKey: .head)
         try container.encodeIfPresent(patch, forKey: .patch)
         try container.encodeIfPresent(trace, forKey: .trace)
+        try container.encodeIfPresent(query, forKey: .query)
 
         if VendorExtensionsConfiguration.isEnabled(for: encoder) {
             try encodeExtensions(to: &container)
@@ -281,6 +297,7 @@ extension OpenAPI.PathItem: Decodable {
             head = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .head)
             patch = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .patch)
             trace = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .trace)
+            query = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .query)
 
             vendorExtensions = try Self.extensions(from: decoder)
         } catch let error as DecodingError {
@@ -314,6 +331,7 @@ extension OpenAPI.PathItem {
         case head
         case patch
         case trace
+        case query
 
         case extended(String)
 
@@ -331,7 +349,8 @@ extension OpenAPI.PathItem {
                 .options,
                 .head,
                 .patch,
-                .trace
+                .trace,
+                .query
             ]
         }
 
@@ -365,6 +384,8 @@ extension OpenAPI.PathItem {
                 self = .patch
             case "trace":
                 self = .trace
+            case "query":
+                self = .query
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -396,6 +417,8 @@ extension OpenAPI.PathItem {
                 return "patch"
             case .trace:
                 return "trace"
+            case .query:
+                return "query"
             case .extended(let key):
                 return key
             }

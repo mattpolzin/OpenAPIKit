@@ -34,6 +34,8 @@ public struct DereferencedPathItem: Equatable {
     public let patch: DereferencedOperation?
     /// The dereferenced TRACE operation, if defined.
     public let trace: DereferencedOperation?
+    /// The dereferenced QUERY operation, if defined.
+    public let query: DereferencedOperation?
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.PathItem, T>) -> T {
         return underlyingPathItem[keyPath: path]
@@ -64,6 +66,7 @@ public struct DereferencedPathItem: Equatable {
         self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.query = try pathItem.query.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
 
         var pathItem = pathItem
         if let name {
@@ -96,6 +99,8 @@ extension DereferencedPathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return self.query
         }
     }
 
@@ -151,6 +156,7 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         let oldHead = head
         let oldPatch = patch
         let oldTrace = trace
+        let oldQuery = query
 
         async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
 //        async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
@@ -162,6 +168,7 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         async let (newHead, c8, m8) = oldHead.externallyDereferenced(with: loader)
         async let (newPatch, c9, m9) = oldPatch.externallyDereferenced(with: loader)
         async let (newTrace, c10, m10) = oldTrace.externallyDereferenced(with: loader)
+        async let (newQuery, c11, m11) = oldQuery.externallyDereferenced(with: loader)
 
         var pathItem = self
         var newComponents = try await c1
@@ -179,6 +186,7 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         pathItem.head = try await newHead
         pathItem.patch = try await newPatch
         pathItem.trace = try await newTrace
+        pathItem.query = try await newQuery
 
         try await newComponents.merge(c3)
         try await newComponents.merge(c4)
@@ -188,6 +196,7 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         try await newComponents.merge(c8)
         try await newComponents.merge(c9)
         try await newComponents.merge(c10)
+        try await newComponents.merge(c11)
 
         try await newMessages += m3
         try await newMessages += m4
@@ -197,6 +206,7 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         try await newMessages += m8
         try await newMessages += m9
         try await newMessages += m10
+        try await newMessages += m11
 
         if let oldServers {
             async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)

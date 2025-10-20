@@ -164,6 +164,8 @@ extension OpenAPI.PathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return nil
         }
     }
 
@@ -186,6 +188,9 @@ extension OpenAPI.PathItem {
             self.put(operation)
         case .trace:
             self.trace(operation)
+        case .query:
+            // not representable
+            print("The QUERY operation was not directly representable in the OAS standard until version 3.2.0")
         }
     }
 

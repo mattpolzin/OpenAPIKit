@@ -112,6 +112,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] head
 - [x] patch
 - [x] trace
+- [x] query
 - [x] servers
 - [x] parameters
 - [x] specification extensions (`vendorExtensions`)

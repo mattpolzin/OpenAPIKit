@@ -24,6 +24,7 @@ final class DereferencedPathItemTests: XCTestCase {
         XCTAssertNil(t1[.post])
         XCTAssertNil(t1[.put])
         XCTAssertNil(t1[.trace])
+        XCTAssertNil(t1[.query])
 
         // test dynamic member lookup
         XCTAssertEqual(t1.summary, "test")
@@ -41,10 +42,11 @@ final class DereferencedPathItemTests: XCTestCase {
             options: .init(tags: "options op", responses: [:]),
             head: .init(tags: "head op", responses: [:]),
             patch: .init(tags: "patch op", responses: [:]),
-            trace: .init(tags: "trace op", responses: [:])
+            trace: .init(tags: "trace op", responses: [:]),
+            query: .init(tags: "query op", responses: [:])
         ).dereferenced(in: .noComponents)
 
-        XCTAssertEqual(t1.endpoints.count, 8)
+        XCTAssertEqual(t1.endpoints.count, 9)
         XCTAssertEqual(t1.parameters.map { $0.schemaOrContent.schemaValue?.jsonSchema }, [.string])
         XCTAssertEqual(t1[.delete]?.tags, ["delete op"])
         XCTAssertEqual(t1[.get]?.tags, ["get op"])
@@ -54,6 +56,7 @@ final class DereferencedPathItemTests: XCTestCase {
         XCTAssertEqual(t1[.post]?.tags, ["post op"])
         XCTAssertEqual(t1[.put]?.tags, ["put op"])
         XCTAssertEqual(t1[.trace]?.tags, ["trace op"])
+        XCTAssertEqual(t1[.query]?.tags, ["query op"])
     }
 
     func test_referencedParameter() throws {
@@ -101,7 +104,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         let t1 = try OpenAPI.PathItem(
@@ -112,10 +116,11 @@ final class DereferencedPathItemTests: XCTestCase {
             options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
             head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
             patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-            trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+            trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+            query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
         ).dereferenced(in: components)
 
-        XCTAssertEqual(t1.endpoints.count, 8)
+        XCTAssertEqual(t1.endpoints.count, 9)
         XCTAssertEqual(t1[.delete]?.tags, ["delete op"])
         XCTAssertEqual(t1[.delete]?.responses[status: 200]?.description, "delete resp")
         XCTAssertEqual(t1[.get]?.tags, ["get op"])
@@ -132,6 +137,8 @@ final class DereferencedPathItemTests: XCTestCase {
         XCTAssertEqual(t1[.put]?.responses[status: 200]?.description, "put resp")
         XCTAssertEqual(t1[.trace]?.tags, ["trace op"])
         XCTAssertEqual(t1[.trace]?.responses[status: 200]?.description, "trace resp")
+        XCTAssertEqual(t1[.query]?.tags, ["query op"])
+        XCTAssertEqual(t1[.query]?.responses[status: 200]?.description, "query resp")
     }
 
     func test_missingReferencedGetResp() {
@@ -143,7 +150,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -155,7 +163,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -169,7 +178,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -181,7 +191,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -195,7 +206,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -207,7 +219,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -221,7 +234,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -233,7 +247,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -247,7 +262,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "delete": .init(description: "delete resp"),
                 "head": .init(description: "head resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -259,7 +275,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -273,7 +290,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "delete": .init(description: "delete resp"),
                 "options": .init(description: "options resp"),
                 "patch": .init(description: "patch resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -285,7 +303,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -299,7 +318,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "delete": .init(description: "delete resp"),
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
-                "trace": .init(description: "trace resp")
+                "trace": .init(description: "trace resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -311,7 +331,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }
@@ -325,7 +346,8 @@ final class DereferencedPathItemTests: XCTestCase {
                 "delete": .init(description: "delete resp"),
                 "options": .init(description: "options resp"),
                 "head": .init(description: "head resp"),
-                "patch": .init(description: "patch resp")
+                "patch": .init(description: "patch resp"),
+                "query": .init(description: "query resp")
             ]
         )
         XCTAssertThrowsError(
@@ -337,7 +359,36 @@ final class DereferencedPathItemTests: XCTestCase {
                 options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
                 head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
                 patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
-                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))])
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
+            ).dereferenced(in: components)
+        )
+    }
+
+    func test_missingReferencedQueryResp() {
+        let components = OpenAPI.Components(
+            responses: [
+                "get": .init(description: "get resp"),
+                "put": .init(description: "put resp"),
+                "post": .init(description: "post resp"),
+                "delete": .init(description: "delete resp"),
+                "options": .init(description: "options resp"),
+                "head": .init(description: "head resp"),
+                "patch": .init(description: "patch resp"),
+                "trace": .init(description: "trace resp")
+            ]
+        )
+        XCTAssertThrowsError(
+            try OpenAPI.PathItem(
+                get: .init(tags: "get op", responses: [200: .reference(.component(named: "get"))]),
+                put: .init(tags: "put op", responses: [200: .reference(.component(named: "put"))]),
+                post: .init(tags: "post op", responses: [200: .reference(.component(named: "post"))]),
+                delete: .init(tags: "delete op", responses: [200: .reference(.component(named: "delete"))]),
+                options: .init(tags: "options op", responses: [200: .reference(.component(named: "options"))]),
+                head: .init(tags: "head op", responses: [200: .reference(.component(named: "head"))]),
+                patch: .init(tags: "patch op", responses: [200: .reference(.component(named: "patch"))]),
+                trace: .init(tags: "trace op", responses: [200: .reference(.component(named: "trace"))]),
+                query: .init(tags: "query op", responses: [200: .reference(.component(named: "query"))])
             ).dereferenced(in: components)
         )
     }

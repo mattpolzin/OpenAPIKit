@@ -1065,7 +1065,7 @@ extension DocumentTests {
     
     func test_webhooks_encode() throws {
         let op = OpenAPI.Operation(responses: [:])
-        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
         let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
         
         let document = OpenAPI.Document(
@@ -1114,6 +1114,9 @@ extension DocumentTests {
               "put" : {
 
               },
+              "query" : {
+
+              },
               "trace" : {
 
               }
@@ -1127,7 +1130,7 @@ extension DocumentTests {
     
   func test_webhooks_encode_decode() throws {
     let op = OpenAPI.Operation(responses: [:])
-    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op)
+    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op, query: op)
 
       let document = OpenAPI.Document(
         info: .init(title: "API", version: "1.0"),
@@ -1178,6 +1181,8 @@ extension DocumentTests {
             "put": {
             },
             "trace": {
+            },
+            "query": {
             }
           }
         }
@@ -1193,7 +1198,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)
@@ -1203,7 +1208,7 @@ extension DocumentTests {
     
     func test_webhooks_noPaths_encode() throws {
         let op = OpenAPI.Operation(responses: [:])
-        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
         let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
         
         let document = OpenAPI.Document(
@@ -1252,6 +1257,9 @@ extension DocumentTests {
               "put" : {
 
               },
+              "query" : {
+
+              },
               "trace" : {
 
               }
@@ -1292,6 +1300,8 @@ extension DocumentTests {
             "put": {
             },
             "trace": {
+            },
+            "query": {
             }
           }
         }
@@ -1307,7 +1317,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
+                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op))
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)

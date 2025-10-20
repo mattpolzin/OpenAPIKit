@@ -21,5 +21,6 @@ extension Shared {
         case head = "HEAD"
         case options = "OPTIONS"
         case trace = "TRACE"
+        case query = "QUERY"
     }
 }

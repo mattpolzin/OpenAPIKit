@@ -54,7 +54,8 @@ final class PathItemTests: XCTestCase {
             options: op,
             head: op,
             patch: op,
-            trace: op
+            trace: op,
+            query: op
         )
     }
 
@@ -71,6 +72,7 @@ final class PathItemTests: XCTestCase {
         XCTAssertNil(pathItem.head)
         XCTAssertNil(pathItem.patch)
         XCTAssertNil(pathItem.trace)
+        XCTAssertNil(pathItem.query)
 
         pathItem.get(op)
         XCTAssertEqual(pathItem.get, op)
@@ -99,6 +101,9 @@ final class PathItemTests: XCTestCase {
         pathItem.trace(op)
         XCTAssertEqual(pathItem.trace, op)
 
+        pathItem.query(op)
+        XCTAssertEqual(pathItem.query, op)
+
         // for/set/subscript
         pathItem = .init()
         XCTAssertNil(pathItem[.get])
@@ -109,6 +114,7 @@ final class PathItemTests: XCTestCase {
         XCTAssertNil(pathItem[.head])
         XCTAssertNil(pathItem[.patch])
         XCTAssertNil(pathItem[.trace])
+        XCTAssertNil(pathItem[.query])
 
         pathItem[.get] = op
         XCTAssertEqual(pathItem.for(.get), op)
@@ -133,6 +139,9 @@ final class PathItemTests: XCTestCase {
 
         pathItem[.trace] = op
         XCTAssertEqual(pathItem.for(.trace), op)
+
+        pathItem[.query] = op
+        XCTAssertEqual(pathItem.for(.query), op)
     }
 
     func test_initializePathItemMap() {
@@ -264,7 +273,8 @@ extension PathItemTests {
             options: op,
             head: op,
             patch: op,
-            trace: op
+            trace: op,
+            query: op
         )
 
         let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
@@ -294,6 +304,9 @@ extension PathItemTests {
               "put" : {
 
               },
+              "query" : {
+
+              },
               "trace" : {
 
               }
@@ -321,6 +334,8 @@ extension PathItemTests {
           "put" : {
           },
           "trace" : {
+          },
+          "query" : {
           }
         }
         """.data(using: .utf8)!
@@ -339,7 +354,8 @@ extension PathItemTests {
                 options: op,
                 head: op,
                 patch: op,
-                trace: op
+                trace: op,
+                query: op
             )
         )
     }

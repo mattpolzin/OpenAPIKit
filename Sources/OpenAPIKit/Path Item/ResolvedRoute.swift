@@ -64,6 +64,8 @@ public struct ResolvedRoute: Equatable {
     public let patch: ResolvedEndpoint?
     /// The HTTP `TRACE` endpoint at this route.
     public let trace: ResolvedEndpoint?
+    /// The HTTP `QUERY` endpoint at this route.
+    public let query: ResolvedEndpoint?
 
     /// Create a ResolvedRoute.
     ///
@@ -103,6 +105,7 @@ public struct ResolvedRoute: Equatable {
         self.head = endpoints[.head]
         self.patch = endpoints[.patch]
         self.trace = endpoints[.trace]
+        self.query = endpoints[.query]
     }
 
     /// An array of all endpoints at this route.
@@ -115,7 +118,8 @@ public struct ResolvedRoute: Equatable {
             self.options,
             self.head,
             self.patch,
-            self.trace
+            self.trace,
+            self.query
         ].compactMap { $0 }
     }
 
@@ -138,6 +142,8 @@ public struct ResolvedRoute: Equatable {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return self.query
         }
     }
 
