@@ -305,7 +305,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case .woff: return "font/woff"
         case .woff2: return "font/woff2"
         case .xml: return "application/xml"
-        case .yaml: return "application/x-yaml"
+        case .yaml: return "application/yaml"
         case .zip: return "application/zip"
 
         case .anyApplication: return "application/*"
@@ -359,6 +359,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case "font/woff2": self = .woff2
         case "application/xml": self = .xml
         case "application/x-yaml": self = .yaml
+        case "application/yaml": self = .yaml
         case "application/zip": self = .zip
 
         case "application/*": self = .anyApplication
