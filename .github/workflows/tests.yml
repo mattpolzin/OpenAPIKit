@@ -21,6 +21,8 @@ jobs:
           - swift:6.1-focal
           - swift:6.1-jammy
           - swift:6.1-noble
+          - swift:6.2-jammy
+          - swift:6.2-noble
           - swiftlang/swift:nightly-focal
           - swiftlang/swift:nightly-jammy
     container: ${{ matrix.image }}
