@@ -54,18 +54,39 @@ final class DocumentTests: XCTestCase {
         let t4 = OpenAPI.Document.Version.v3_1_x(x: 8)
         XCTAssertEqual(t4.rawValue, "3.1.8")
 
-        let t5 = OpenAPI.Document.Version(rawValue: "3.1.0")
-        XCTAssertEqual(t5, .v3_1_0)
+        let t5 = OpenAPI.Document.Version.v3_2_0
+        XCTAssertEqual(t5.rawValue, "3.2.0")
 
-        let t6 = OpenAPI.Document.Version(rawValue: "3.1.1")
-        XCTAssertEqual(t6, .v3_1_1)
+        let t6 = OpenAPI.Document.Version(rawValue: "3.1.0")
+        XCTAssertEqual(t6, .v3_1_0)
 
-        let t7 = OpenAPI.Document.Version(rawValue: "3.1.2")
-        XCTAssertEqual(t7, .v3_1_2)
+        let t7 = OpenAPI.Document.Version(rawValue: "3.1.1")
+        XCTAssertEqual(t7, .v3_1_1)
+
+        let t8 = OpenAPI.Document.Version(rawValue: "3.1.2")
+        XCTAssertEqual(t8, .v3_1_2)
 
         // not a known version:
-        let t8 = OpenAPI.Document.Version(rawValue: "3.1.8")
-        XCTAssertNil(t8)
+        let t9 = OpenAPI.Document.Version(rawValue: "3.1.8")
+        XCTAssertNil(t9)
+
+        let t10 = OpenAPI.Document.Version(rawValue: "3.2.8")
+        XCTAssertNil(t10)
+    }
+
+    func test_compareOASVersions() {
+        let versions: [OpenAPI.Document.Version] = [
+          .v3_1_0,
+          .v3_1_1,
+          .v3_1_2,
+          .v3_2_0
+        ]
+
+        for v1Idx in 0...(versions.count - 2) {
+            for v2Idx in (v1Idx + 1)...(versions.count - 1) {
+                XCTAssert(versions[v1Idx] < versions[v2Idx])
+            }
+        }
     }
 
     func test_getRoutes() {

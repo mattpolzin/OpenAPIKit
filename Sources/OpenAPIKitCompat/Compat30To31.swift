@@ -430,8 +430,10 @@ extension OpenAPIKit30.OpenAPI.Tag: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Tag {
         OpenAPIKit.OpenAPI.Tag(
             name: name,
+            summary: nil,
             description: description,
             externalDocs: externalDocs?.to31(),
+            parent: nil,
             vendorExtensions: vendorExtensions
         )
     }
