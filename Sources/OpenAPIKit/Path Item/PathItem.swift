@@ -23,7 +23,7 @@ extension OpenAPI {
     ///
     /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
     /// `endpoints` property.
-    public struct PathItem: Equatable, CodableVendorExtendable, Sendable {
+    public struct PathItem: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var summary: String?
         public var description: String?
         public var servers: [OpenAPI.Server]?
@@ -64,6 +64,12 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Warnings that apply conditionally depending on the OpenAPI Document
+        /// the PathItem belongs to.
+        ///
+        /// Check these with the `applicableConditionalWarnings(for:)` method.
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
+
         public init(
             summary: String? = nil,
             description: String? = nil,
@@ -95,6 +101,11 @@ extension OpenAPI {
             self.trace = trace
             self.query = query
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                // If query is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
 
         /// Set the `GET` endpoint operation.
@@ -141,6 +152,34 @@ extension OpenAPI {
         public mutating func query(_ op: Operation?) {
             query = op
         }
+    }
+}
+
+extension OpenAPI.PathItem: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.summary == rhs.summary
+        && lhs.description == rhs.description
+        && lhs.servers == rhs.servers
+        && lhs.parameters == rhs.parameters
+        && lhs.get == rhs.get
+        && lhs.put == rhs.put
+        && lhs.post == rhs.post
+        && lhs.delete == rhs.delete
+        && lhs.options == rhs.options
+        && lhs.head == rhs.head
+        && lhs.patch == rhs.patch
+        && lhs.trace == rhs.trace
+        && lhs.query == rhs.query
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The PathItem \(fieldName) field"
+        )
     }
 }
 
@@ -300,6 +339,11 @@ extension OpenAPI.PathItem: Decodable {
             query = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .query)
 
             vendorExtensions = try Self.extensions(from: decoder)
+
+            self.conditionalWarnings = [
+                // If query is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         } catch let error as DecodingError {
 
             throw OpenAPI.Error.Decoding.Path(error)

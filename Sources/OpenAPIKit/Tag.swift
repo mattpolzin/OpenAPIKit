@@ -33,6 +33,10 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Warnings that apply conditionally depending on the OpenAPI Document
+        /// the Tag belongs to.
+        ///
+        /// Check these with the `applicableConditionalWarnings(for:)` method.
         public let conditionalWarnings: [(any Condition, Warning)]
 
         public init(
