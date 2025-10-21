@@ -55,6 +55,12 @@ final class ResolvedRouteTests: XCTestCase {
                         summary: "query",
                         responses: [200: .response(description: "hello world")]
                     ),
+                    additionalOperations: [
+                        "LINK": .init(
+                            summary: "link",
+                            responses: [200: .response(description: "hello world")]
+                        )
+                    ],
                     vendorExtensions: [
                         "test": "route"
                     ]
@@ -81,8 +87,9 @@ final class ResolvedRouteTests: XCTestCase {
         XCTAssertEqual(routes.first?.patch?.endpointSummary, "patch")
         XCTAssertEqual(routes.first?.trace?.endpointSummary, "trace")
         XCTAssertEqual(routes.first?.query?.endpointSummary, "query")
+        XCTAssertEqual(routes.first?.additionalOperations["LINK"]?.endpointSummary, "link")
 
-        XCTAssertEqual(routes.first?.endpoints.count, 9)
+        XCTAssertEqual(routes.first?.endpoints.count, 10)
 
         XCTAssertEqual(routes.first?.get, routes.first?[.get])
         XCTAssertEqual(routes.first?.put, routes.first?[.put])
@@ -93,6 +100,7 @@ final class ResolvedRouteTests: XCTestCase {
         XCTAssertEqual(routes.first?.patch, routes.first?[.patch])
         XCTAssertEqual(routes.first?.trace, routes.first?[.trace])
         XCTAssertEqual(routes.first?.query, routes.first?[.query])
+        XCTAssertEqual(routes.first?.additionalOperations["LINK"], routes.first?[.other("LINK")])
     }
 
     func test_pathServersTakePrecedence() throws {

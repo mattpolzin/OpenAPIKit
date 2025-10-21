@@ -120,7 +120,7 @@ public struct ResolvedRoute: Equatable {
     }
 
     /// Retrieve the endpoint for the given method, if one exists for this route.
-    public func `for`(_ verb: OpenAPI.HttpMethod) -> ResolvedEndpoint? {
+    public func `for`(_ verb: OpenAPI.BuiltinHttpMethod) -> ResolvedEndpoint? {
         switch verb {
         case .delete:
             return self.delete
@@ -143,7 +143,7 @@ public struct ResolvedRoute: Equatable {
         }
     }
 
-    public subscript(verb: OpenAPI.HttpMethod) -> ResolvedEndpoint? {
+    public subscript(verb: OpenAPI.BuiltinHttpMethod) -> ResolvedEndpoint? {
         get {
             return `for`(verb)
         }

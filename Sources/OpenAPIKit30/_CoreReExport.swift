@@ -15,6 +15,7 @@
 import OpenAPIKitCore
 
 public extension OpenAPI {
+    typealias BuiltinHttpMethod = OpenAPIKitCore.Shared.BuiltinHttpMethod
     typealias HttpMethod = OpenAPIKitCore.Shared.HttpMethod
     typealias ContentType = OpenAPIKitCore.Shared.ContentType
     typealias Error = OpenAPIKitCore.Error

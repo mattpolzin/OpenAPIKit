@@ -57,6 +57,11 @@ extension OpenAPI {
         /// The `QUERY` endpoint at this path, if one exists.
         public var query: Operation?
 
+        /// Additional operations, keyed by all-caps HTTP method names. This
+        /// map MUST NOT contain any entries that can be represented by the
+        /// fixed fields on this type (e.g. `post`, `get`, etc.).
+        public var additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, Operation>
+
         /// Dictionary of vendor extensions.
         ///
         /// These should be of the form:
@@ -84,6 +89,7 @@ extension OpenAPI {
             patch: Operation? = nil,
             trace: Operation? = nil,
             query: Operation? = nil,
+            additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, Operation> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.summary = summary
@@ -100,11 +106,14 @@ extension OpenAPI {
             self.patch = patch
             self.trace = trace
             self.query = query
+            self.additionalOperations = additionalOperations
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
                 // If query is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0)
+                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0),
+                // If there are additionalOperations defiend, the document must be OAS version 3.2.0 or greater
+                nonEmptyVersionWarning(fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
 
@@ -170,6 +179,7 @@ extension OpenAPI.PathItem: Equatable {
         && lhs.patch == rhs.patch
         && lhs.trace == rhs.trace
         && lhs.query == rhs.query
+        && lhs.additionalOperations == rhs.additionalOperations
         && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
@@ -181,6 +191,15 @@ fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject
             doesNotSupport: "The PathItem \(fieldName) field"
         )
     }
+}
+
+fileprivate func nonEmptyVersionWarning<Key,  Value>(fieldName: String, value: OrderedDictionary<Key, Value>, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    if value.isEmpty { return nil }
+
+    return OpenAPI.Document.ConditionalWarnings.version(
+        lessThan: minimumVersion,
+        doesNotSupport: "The PathItem \(fieldName) map"
+    )
 }
 
 extension OpenAPI.PathItem {
@@ -198,48 +217,49 @@ extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
     public func `for`(_ verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
         switch verb {
-        case .delete:
-            return self.delete
-        case .get:
-            return self.get
-        case .head:
-            return self.head
-        case .options:
-            return self.options
-        case .patch:
-            return self.patch
-        case .post:
-            return self.post
-        case .put:
-            return self.put
-        case .trace:
-            return self.trace
-        case .query:
-            return self.query
+        case .builtin(let builtin):
+            switch builtin {
+            case .delete: self.delete
+            case .get: self.get
+            case .head: self.head
+            case .options: self.options
+            case .patch: self.patch
+            case .post: self.post
+            case .put: self.put
+            case .trace: self.trace
+            case .query: self.query
+            }
+        case .other(let other):
+            additionalOperations[.other(other)]
         }
     }
 
     /// Set the operation for the given verb, overwriting any already set operation for the same verb.
     public mutating func set(operation: OpenAPI.Operation?, for verb: OpenAPI.HttpMethod) {
         switch verb {
-        case .delete:
-            self.delete(operation)
-        case .get:
-            self.get(operation)
-        case .head:
-            self.head(operation)
-        case .options:
-            self.options(operation)
-        case .patch:
-            self.patch(operation)
-        case .post:
-            self.post(operation)
-        case .put:
-            self.put(operation)
-        case .trace:
-            self.trace(operation)
-        case .query:
-            self.query(operation)
+        case .builtin(let builtin):
+            switch builtin {
+            case .delete:
+                self.delete(operation)
+            case .get:
+                self.get(operation)
+            case .head:
+                self.head(operation)
+            case .options:
+                self.options(operation)
+            case .patch:
+                self.patch(operation)
+            case .post:
+                self.post(operation)
+            case .put:
+                self.put(operation)
+            case .trace:
+                self.trace(operation)
+            case .query:
+                self.query(operation)
+            }
+        case .other(let other):
+            self.additionalOperations[.other(other)] = operation
         }
     }
 
@@ -264,9 +284,11 @@ extension OpenAPI.PathItem {
     /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
     ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpMethod.allCases.compactMap { method in
-            self.for(method).map { .init(method: method, operation: $0) }
+        let builtins = OpenAPI.BuiltinHttpMethod.allCases.compactMap { method -> Endpoint? in
+            self.for(.builtin(method)).map { .init(method: .builtin(method), operation: $0) }
         }
+
+        return builtins + additionalOperations.map { key, value in .init(method: key, operation: value) }
     }
 }
 
@@ -312,6 +334,10 @@ extension OpenAPI.PathItem: Encodable {
         try container.encodeIfPresent(trace, forKey: .trace)
         try container.encodeIfPresent(query, forKey: .query)
 
+        if !additionalOperations.isEmpty {
+            try container.encode(additionalOperations, forKey: .additionalOperations)
+        }
+
         if VendorExtensionsConfiguration.isEnabled(for: encoder) {
             try encodeExtensions(to: &container)
         }
@@ -338,13 +364,35 @@ extension OpenAPI.PathItem: Decodable {
             trace = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .trace)
             query = try container.decodeIfPresent(OpenAPI.Operation.self, forKey: .query)
 
+            additionalOperations = try container.decodeIfPresent(OrderedDictionary<OpenAPI.HttpMethod, OpenAPI.Operation>.self, forKey: .additionalOperations) ?? [:]
+
+            let disallowedMethods = builtinHttpMethods(in: additionalOperations)
+            if !disallowedMethods.isEmpty {
+                let disallowedMethodsString = disallowedMethods
+                    .map(\.rawValue)
+                    .joined(separator: ", ")
+
+                throw GenericError(subjectName: "additionalOperations", details: "Additional Operations cannot contain operations that can be set directly on the Path Item. Found the following disallowed additional operations: \(disallowedMethodsString)", codingPath: decoder.codingPath, pathIncludesSubject: false)
+            }
+
             vendorExtensions = try Self.extensions(from: decoder)
 
             self.conditionalWarnings = [
                 // If query is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0)
+                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0),
+                // If there are additionalOperations defiend, the document must be OAS version 3.2.0 or greater
+                nonEmptyVersionWarning(fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         } catch let error as DecodingError {
+            if let underlyingError = error.underlyingError as? KeyDecodingError {
+                throw OpenAPI.Error.Decoding.Path(
+                    GenericError(
+                        subjectName: error.subjectName,
+                        details: underlyingError.localizedDescription,
+                        codingPath: decoder.codingPath
+                    )
+                )
+            }
 
             throw OpenAPI.Error.Decoding.Path(error)
         } catch let error as GenericError {
@@ -358,6 +406,13 @@ extension OpenAPI.PathItem: Decodable {
             throw OpenAPI.Error.Decoding.Path(error)
         }
     }
+}
+
+fileprivate func builtinHttpMethods<T>(in map: OrderedDictionary<OpenAPI.HttpMethod, T>) -> [OpenAPI.HttpMethod] {
+    map.keys
+        .filter { 
+            OpenAPI.BuiltinHttpMethod.allCases.map(\.rawValue).contains($0.rawValue.uppercased())
+        }
 }
 
 extension OpenAPI.PathItem {
@@ -377,6 +432,8 @@ extension OpenAPI.PathItem {
         case trace
         case query
 
+        case additionalOperations
+
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
@@ -394,7 +451,9 @@ extension OpenAPI.PathItem {
                 .head,
                 .patch,
                 .trace,
-                .query
+                .query,
+
+                .additionalOperations
             ]
         }
 
@@ -430,6 +489,8 @@ extension OpenAPI.PathItem {
                 self = .trace
             case "query":
                 self = .query
+            case "additionalOperations":
+                self = .additionalOperations
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -463,6 +524,8 @@ extension OpenAPI.PathItem {
                 return "trace"
             case .query:
                 return "query"
+            case .additionalOperations:
+                return "additionalOperations"
             case .extended(let key):
                 return key
             }

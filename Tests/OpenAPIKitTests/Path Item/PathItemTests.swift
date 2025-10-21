@@ -55,7 +55,10 @@ final class PathItemTests: XCTestCase {
             head: op,
             patch: op,
             trace: op,
-            query: op
+            query: op,
+            additionalOperations: [
+                "LINK": op
+            ]
         )
     }
 
@@ -149,6 +152,57 @@ final class PathItemTests: XCTestCase {
             "hello/world": .init(),
         ]
     }
+
+    func test_endpointsAccessor() {
+        let op = OpenAPI.Operation(responses: [:])
+        let pathItem = OpenAPI.PathItem(
+            summary: "summary",
+            description: "description",
+            servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
+            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+            get: op,
+            put: op,
+            post: op,
+            delete: op,
+            options: op,
+            head: op,
+            patch: op,
+            trace: op,
+            query: op,
+            additionalOperations: [
+                "LINK": op
+            ]
+        )
+
+        let expectedEndpoints : [EquatableEndpoint] = [
+            .init(method: .get, operation: op),
+            .init(method: .put, operation: op),
+            .init(method: .post, operation: op),
+            .init(method: .delete, operation: op),
+            .init(method: .options, operation: op),
+            .init(method: .head, operation: op),
+            .init(method: .patch, operation: op),
+            .init(method: .trace, operation: op),
+            .init(method: .query, operation: op),
+            .init(method: "LINK", operation: op)
+        ]
+
+        let actualEndpoints = pathItem.endpoints.map(equatableEndpoint)
+
+        XCTAssertEqual(actualEndpoints.count, expectedEndpoints.count)
+        for endpoint in expectedEndpoints {
+            XCTAssert(actualEndpoints.contains(endpoint))
+        }
+    }
+}
+
+fileprivate struct EquatableEndpoint: Equatable {
+    let method: OpenAPI.HttpMethod
+    let operation: OpenAPI.Operation
+}
+
+fileprivate func equatableEndpoint(_ endpoint: OpenAPI.PathItem.Endpoint) -> EquatableEndpoint {
+    return .init(method: endpoint.method, operation: endpoint.operation)
 }
 
 // MARK: Codable Tests
@@ -274,7 +328,10 @@ extension PathItemTests {
             head: op,
             patch: op,
             trace: op,
-            query: op
+            query: op,
+            additionalOperations: [
+                "LINK": op
+            ]
         )
 
         let encodedPathItem = try orderUnstableTestStringFromEncoding(of: pathItem)
@@ -283,6 +340,11 @@ extension PathItemTests {
             encodedPathItem,
             """
             {
+              "additionalOperations" : {
+                "LINK" : {
+
+                }
+              },
               "delete" : {
 
               },
@@ -336,11 +398,19 @@ extension PathItemTests {
           "trace" : {
           },
           "query" : {
+          },
+          "additionalOperations": {
+            "LINK": {
+            },
+            "CONNECT": {
+            },
+            "unknown_method": {
+            },
           }
         }
         """.data(using: .utf8)!
 
-        let pathItem = try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)
+        let pathItem = try orderStableDecode(OpenAPI.PathItem.self, from: pathItemData)
 
         let op = OpenAPI.Operation(responses: [:])
 
@@ -355,9 +425,82 @@ extension PathItemTests {
                 head: op,
                 patch: op,
                 trace: op,
-                query: op
+                query: op,
+                additionalOperations: [
+                    "LINK": op,
+                    "CONNECT": op,
+                    "unknown_method": op
+                ]
             )
         )
+    }
+
+    func test_disallowedAdditionalOperations_decode() throws {
+        // NOTE the one allowed method in the following is LINK which is there
+        // to ensure allowed methods do not show up in the error output.
+        let pathItemData =
+        """
+        {
+          "additionalOperations": {
+            "LINK": {
+            },
+            "DELETE" : {
+            },
+            "GET" : {
+            },
+            "HEAD" : {
+            },
+            "OPTIONS" : {
+            },
+            "PATCH" : {
+            },
+            "POST" : {
+            },
+            "PUT" : {
+            },
+            "TRACE" : {
+            },
+            "QUERY" : {
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderStableDecode(OpenAPI.PathItem.self, from: pathItemData)) { error in
+             XCTAssertEqual(String(describing: OpenAPI.Error(from: error)), "Problem encountered when parsing `additionalOperations` under the `/` path: Additional Operations cannot contain operations that can be set directly on the Path Item. Found the following disallowed additional operations: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE, QUERY.")
+         } 
+    }
+
+    func test_invalidAdditionalOperation1_decode() throws {
+        let pathItemData =
+        """
+        {
+          "additionalOperations": {
+            "connect": {
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)) { error in
+             XCTAssertEqual(String(describing: OpenAPI.Error(from: error)), "Problem encountered when parsing `connect` under the `/` path: 'connect' must be uppercased.")
+         } 
+    }
+
+    func test_invalidAdditionalOperation2_decode() throws {
+        let pathItemData =
+        """
+        {
+          "additionalOperations": {
+            "link": {
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.PathItem.self, from: pathItemData)) { error in
+             XCTAssertEqual(String(describing: OpenAPI.Error(from: error)), "Problem encountered when parsing `link` under the `/` path: 'link' must be uppercased.")
+         } 
     }
 
     func test_pathComponents_encode() throws {

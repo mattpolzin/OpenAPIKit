@@ -170,6 +170,7 @@ extension Either where B == OpenAPI.PathItem {
         patch: OpenAPI.Operation? = nil,
         trace: OpenAPI.Operation? = nil,
         query: OpenAPI.Operation? = nil,
+        additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, OpenAPI.Operation> = [:],
         vendorExtensions: [String: AnyCodable] = [:]
     ) {
         self = .b(
@@ -187,6 +188,7 @@ extension Either where B == OpenAPI.PathItem {
                 patch: patch,
                 trace: trace,
                 query: query,
+                additionalOperations: additionalOperations,
                 vendorExtensions: vendorExtensions
             )
         )
