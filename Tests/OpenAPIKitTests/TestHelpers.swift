@@ -53,8 +53,10 @@ fileprivate let foundationTestDecoder = { () -> JSONDecoder in
     return decoder
 }()
 
-func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-    return try foundationTestDecoder.decode(T.self, from: data)
+func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data, userInfo: [CodingUserInfoKey: Any] = [:]) throws -> T {
+    let decoder = foundationTestDecoder
+    decoder.userInfo = userInfo
+    return try decoder.decode(T.self, from: data)
 }
 
 fileprivate let yamsTestDecoder = { () -> YAMLDecoder in

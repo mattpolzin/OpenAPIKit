@@ -85,6 +85,28 @@ let decoder = ... // JSONDecoder() or YAMLDecoder()
 let openAPIDoc = try decoder.decode(OpenAPI.Document.self, from: ...)
 ```
 
+#### Decoding Future Versions
+`OpenAPIKit` adds support for new OAS versions when it has support for most or
+all of the features of that OAS version. If you want to parse an OpenAPI
+Document that is written in a newer version than `OpenAPIKit` supports and you
+are asserting that the newer version is possible to parse as if it were the
+pre-existing version, you can tell `OpenAPIKit` to parse the newer version as if
+it were the older version.
+
+You do this with `userInfo` passed into the `Decoder` you are using. For
+example, to decode a hypothetical document version of `"3.100.100"` as if it
+were version `"3.1.1"`, set your decoder up as follows:
+```swift
+let userInfo = [
+  DocumentConfiguration.versionMapKey: ["3.100.100": OpenAPI.Document.Version.v3_1_1]
+]
+
+let decoder = ... // JSONDecoder() or YAMLDecoder()
+decoder.userInfo = userInfo
+
+let openAPIDoc = try decoder.decode(OpenAPI.Document.self, from: ...)
+```
+
 #### Decoding Errors
 You can wrap any error you get back from a decoder in `OpenAPI.Error` to get a friendlier human-readable description from `localizedDescription`.
 

@@ -520,6 +520,27 @@ extension DocumentTests {
         )
     }
 
+    func test_unsupportedButMappedOpenAPIVersion_decode() throws {
+        let documentData =
+                """
+                {
+                  "info" : {
+                    "title" : "API",
+                    "version" : "1.0"
+                  },
+                  "openapi" : "3.100.100",
+                  "paths" : {
+                
+                  }
+                }
+                """.data(using: .utf8)!
+        let userInfo = [
+            DocumentConfiguration.versionMapKey: ["3.100.100": OpenAPI.Document.Version.v3_1_1]
+        ]
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData, userInfo: userInfo)
+        XCTAssertEqual(document.warnings.map { $0.localizedDescription }, ["Document Version 3.100.100 is being decoded as version 3.1.1. Not all features of OAS 3.100.100 will be supported"])
+    }
+
     func test_specifyServers_encode() throws {
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),

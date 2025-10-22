@@ -45,7 +45,7 @@ extension OpenAPI {
     ///
     /// See the documentation on `DereferencedDocument.resolved()` for more.
     ///
-    public struct Document: Equatable, CodableVendorExtendable {
+    public struct Document: HasWarnings, CodableVendorExtendable {
         /// OpenAPI Spec "openapi" field.
         ///
         /// OpenAPIKit only explicitly supports versions that can be found in
@@ -141,6 +141,8 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        public let warnings: [Warning]
+
         public init(
             openAPIVersion: Version = .v3_1_0,
             info: Info,
@@ -163,7 +165,24 @@ extension OpenAPI {
             self.tags = tags
             self.externalDocs = externalDocs
             self.vendorExtensions = vendorExtensions
+
+            self.warnings = []
         }
+    }
+}
+
+extension OpenAPI.Document: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.openAPIVersion == rhs.openAPIVersion
+        && lhs.info == rhs.info
+        && lhs.servers == rhs.servers
+        && lhs.paths == rhs.paths
+        && lhs.components == rhs.components
+        && lhs.webhooks == rhs.webhooks
+        && lhs.security == rhs.security
+        && lhs.tags == rhs.tags
+        && lhs.externalDocs == rhs.externalDocs
+        && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
@@ -380,6 +399,30 @@ extension OpenAPI.Document {
     }
 }
 
+/// OpenAPIKit supports some additional Encoder/Decoder configuration above and beyond
+/// what the Encoder or Decoder support out of box.
+///
+/// To instruct OpenAPIKit to decode OpenAPI Standards versions it does not
+/// natively support, set `userInfo[DocumentConfiguration.versionMapKey] =
+/// ["3.5.0": OpenAPI.Document.Version.v3_1_1]`.
+/// 
+/// That will cause OpenAPIKit to accept OAS v3.5.0 on decode and treat it as
+/// the natively supported v3.1.1. This feature exists to allow OpenAPIKit to
+/// be configured to parse future versions of the OAS standard that are
+/// determined (by you) to be backwards compatible with a previous version
+/// prior to OpenAPIKit gaining official support for the new version and its
+/// features.
+public enum DocumentConfiguration {
+    public static let versionMapKey = CodingUserInfoKey(rawValue: "document-version-map")!
+
+    internal static func version(for decoder: Decoder, versionString: String) -> OpenAPI.Document.Version? {
+        guard let map = decoder.userInfo[versionMapKey] as? [String: OpenAPI.Document.Version]
+            else { return nil }
+
+        return map[versionString]
+    }
+}
+
 // MARK: - Codable
 
 extension OpenAPI.Document: Encodable {
@@ -424,7 +467,26 @@ extension OpenAPI.Document: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {
-            openAPIVersion = try container.decode(OpenAPI.Document.Version.self, forKey: .openAPIVersion)
+            let decodedVersion = try container.decode(String.self, forKey: .openAPIVersion)
+
+            var warnings = [Warning]()
+
+            if let version = OpenAPI.Document.Version(rawValue: decodedVersion) {
+                openAPIVersion = version
+            } else if let version = DocumentConfiguration.version(for: decoder, versionString: decodedVersion) {
+                openAPIVersion = version
+
+                warnings.append(.message(
+                    "Document Version \(decodedVersion) is being decoded as version \(version.rawValue). Not all features of OAS \(decodedVersion) will be supported"
+                ))
+            } else {
+                throw InconsistencyError(
+                    subjectName: OpenAPI.Document.CodingKeys.openAPIVersion.stringValue,
+                    details: "Failed to parse Document Version \(decodedVersion) as one of OpenAPIKit's supported options",
+                    codingPath: container.codingPath + [OpenAPI.Document.CodingKeys.openAPIVersion]
+                )
+            }
+
             info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
@@ -442,6 +504,8 @@ extension OpenAPI.Document: Decodable {
             tags = try container.decodeIfPresent([OpenAPI.Tag].self, forKey: .tags)
             externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
             vendorExtensions = try Self.extensions(from: decoder)
+
+            self.warnings = warnings
 
         } catch let error as OpenAPI.Error.Decoding.Path {
 
