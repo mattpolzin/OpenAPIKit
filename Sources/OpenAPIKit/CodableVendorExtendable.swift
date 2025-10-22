@@ -29,11 +29,11 @@ public protocol VendorExtendable {
 public enum VendorExtensionsConfiguration {
     public static let enabledKey: CodingUserInfoKey = .init(rawValue: "vendor-extensions-enabled")!
 
-    static func isEnabled(for decoder: Decoder) -> Bool {
+    internal static func isEnabled(for decoder: Decoder) -> Bool {
         decoder.userInfo[enabledKey] as? Bool ?? true
     }
 
-    static func isEnabled(for encoder: Encoder) -> Bool {
+    internal static func isEnabled(for encoder: Encoder) -> Bool {
         encoder.userInfo[enabledKey] as? Bool ?? true
     }
 }
