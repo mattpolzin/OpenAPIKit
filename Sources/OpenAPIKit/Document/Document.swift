@@ -173,7 +173,7 @@ extension OpenAPI {
 
 extension OpenAPI.Document: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.openAPIVersion == rhs.openAPIVersion
+        return lhs.openAPIVersion == rhs.openAPIVersion
         && lhs.info == rhs.info
         && lhs.servers == rhs.servers
         && lhs.paths == rhs.paths
@@ -413,7 +413,7 @@ extension OpenAPI.Document {
 /// prior to OpenAPIKit gaining official support for the new version and its
 /// features.
 public enum DocumentConfiguration {
-    public static let versionMapKey: CodingUserInfoKey = .init(rawValue: "document-version-map")!
+    public static let versionMapKey = CodingUserInfoKey(rawValue: "document-version-map")!
 
     internal static func version(for decoder: Decoder, versionString: String) -> OpenAPI.Document.Version? {
         guard let map = decoder.userInfo[versionMapKey] as? [String: OpenAPI.Document.Version]
