@@ -9,8 +9,8 @@ extension Shared {
     /// Represents the HTTP methods supported by the
     /// OpenAPI Specification.
     ///
-    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.0.4.html#path-item-object) because the supported
-    /// HTTP methods are enumerated as properties on that
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.2.0.html#path-item-object)
+    /// because the supported HTTP methods are enumerated as properties on that
     /// object.
     public enum BuiltinHttpMethod: String, CaseIterable, Sendable {
         case get = "GET"
@@ -24,6 +24,17 @@ extension Shared {
         case query = "QUERY"
     }
 
+    /// Represents an HTTP method.
+    ///
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
+    /// 
+    /// Methods are split into builtin methods (those representable as
+    /// properties on a Path Item Object) and other methods (those that can be
+    /// added to the `additionalOperations` of a Path Item Object).
+    ///
+    /// `HttpMethod` is `ExpressibleByStringLiteral` so you can write a
+    /// non-builtin method like "LINK" as:
+    /// `let linkMethod : OpenAPI.HttpMethod = "LINK"`
     public enum HttpMethod: ExpressibleByStringLiteral, RawRepresentable, Equatable, Hashable, Codable, Sendable {
         case builtin(BuiltinHttpMethod)
         case other(String)
