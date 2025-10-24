@@ -64,6 +64,13 @@ public struct ResolvedRoute: Equatable {
     public let patch: ResolvedEndpoint?
     /// The HTTP `TRACE` endpoint at this route.
     public let trace: ResolvedEndpoint?
+    /// The HTTP `QUERY` endpoint at this route.
+    public let query: ResolvedEndpoint?
+
+    /// Additional operations, keyed by all-caps HTTP method names. This
+    /// map MUST NOT contain any entries that can be represented by the
+    /// fixed fields on this type (e.g. `post`, `get`, etc.).
+    public let additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, ResolvedEndpoint>
 
     /// Create a ResolvedRoute.
     ///
@@ -83,10 +90,17 @@ public struct ResolvedRoute: Equatable {
         servers: [OpenAPI.Server],
         endpoints: [ResolvedEndpoint]
     ) {
-        let endpoints = Dictionary(
+        let builtinEndpoints = Dictionary(
             endpoints.map { ($0.method, $0) },
             uniquingKeysWith: { $1 }
         )
+
+        let otherEndpoints = endpoints.compactMap { endpoint -> (key: OpenAPI.HttpMethod, value: ResolvedEndpoint)? in 
+            switch endpoint.method {
+                case .builtin(_): return nil
+                case .other(_): return (key: endpoint.method, value: endpoint)
+            }
+        }
 
         self.summary = summary
         self.description = description
@@ -95,19 +109,22 @@ public struct ResolvedRoute: Equatable {
         self.parameters = parameters
         self.servers = servers
 
-        self.get = endpoints[.get]
-        self.put = endpoints[.put]
-        self.post = endpoints[.post]
-        self.delete = endpoints[.delete]
-        self.options = endpoints[.options]
-        self.head = endpoints[.head]
-        self.patch = endpoints[.patch]
-        self.trace = endpoints[.trace]
+        self.get = builtinEndpoints[.builtin(.get)]
+        self.put = builtinEndpoints[.builtin(.put)]
+        self.post = builtinEndpoints[.builtin(.post)]
+        self.delete = builtinEndpoints[.builtin(.delete)]
+        self.options = builtinEndpoints[.builtin(.options)]
+        self.head = builtinEndpoints[.builtin(.head)]
+        self.patch = builtinEndpoints[.builtin(.patch)]
+        self.trace = builtinEndpoints[.builtin(.trace)]
+        self.query = builtinEndpoints[.builtin(.query)]
+
+        self.additionalOperations = OrderedDictionary(otherEndpoints, uniquingKeysWith: { $1 })
     }
 
     /// An array of all endpoints at this route.
     public var endpoints: [ResolvedEndpoint] {
-        [
+        let builtins = [
             self.get,
             self.put,
             self.post,
@@ -115,29 +132,30 @@ public struct ResolvedRoute: Equatable {
             self.options,
             self.head,
             self.patch,
-            self.trace
+            self.trace,
+            self.query
         ].compactMap { $0 }
+
+        return builtins + additionalOperations.values
     }
 
     /// Retrieve the endpoint for the given method, if one exists for this route.
     public func `for`(_ verb: OpenAPI.HttpMethod) -> ResolvedEndpoint? {
         switch verb {
-        case .delete:
-            return self.delete
-        case .get:
-            return self.get
-        case .head:
-            return self.head
-        case .options:
-            return self.options
-        case .patch:
-            return self.patch
-        case .post:
-            return self.post
-        case .put:
-            return self.put
-        case .trace:
-            return self.trace
+        case .builtin(let builtin):
+            switch builtin {
+            case .delete: self.delete
+            case .get: self.get
+            case .head: self.head
+            case .options: self.options
+            case .patch: self.patch
+            case .post: self.post
+            case .put: self.put
+            case .trace: self.trace
+            case .query: self.query
+            }
+        case .other(let other):
+            self.additionalOperations[.other(other)]
         }
     }
 

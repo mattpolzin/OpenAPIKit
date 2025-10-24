@@ -112,3 +112,11 @@ internal struct DecodingErrorWrapper: OpenAPIError {
 
     var codingPath: [CodingKey] { decodingError.codingPath }
 }
+
+public extension ArraySlice where Element == any CodingKey {
+    mutating func removeFirstPathComponentString() -> String {
+        guard !isEmpty else { return "" }
+
+        return removeFirst().stringValue
+    }
+}

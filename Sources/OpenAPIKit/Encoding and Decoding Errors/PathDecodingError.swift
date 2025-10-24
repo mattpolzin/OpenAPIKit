@@ -104,7 +104,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: DecodingError) {
         var codingPath = error.codingPathWithoutSubject.dropFirst()
-        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirstPathComponentString())
 
         path = route
         context = .other(error)
@@ -113,7 +113,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: OpenAPI.Error.Decoding.Operation) {
         var codingPath = error.codingPath.dropFirst()
-        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirstPathComponentString())
 
         path = route
         context = .endpoint(error)
@@ -122,7 +122,7 @@ extension OpenAPI.Error.Decoding.Path {
 
     internal init(_ error: GenericError) {
         var codingPath = error.codingPath.dropFirst()
-        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirstPathComponentString())
 
         path = route
         context = .inconsistency(error)
@@ -148,7 +148,7 @@ extension OpenAPI.Error.Decoding.Path {
 //        }
 
         var codingPath = eitherError.codingPath.dropFirst()
-        let route = OpenAPI.Path(rawValue: codingPath.removeFirst().stringValue)
+        let route = OpenAPI.Path(rawValue: codingPath.removeFirstPathComponentString())
 
         path = route
         context = .neither(eitherError)

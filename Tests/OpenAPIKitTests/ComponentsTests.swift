@@ -581,7 +581,8 @@ extension ComponentsTests {
             options: op,
             head: op,
             patch: op,
-            trace: op
+            trace: op,
+            query: op
           )
         ]
       )
@@ -615,6 +616,9 @@ extension ComponentsTests {
                 "put" : {
 
                 },
+                "query" : {
+
+                },
                 "trace" : {
 
                 }
@@ -646,6 +650,8 @@ extension ComponentsTests {
                 "put" : {
                 },
                 "trace" : {
+                },
+                "query" : {
                 }
               }
             }
@@ -667,7 +673,8 @@ extension ComponentsTests {
                       options: op,
                       head: op,
                       patch: op,
-                      trace: op
+                      trace: op,
+                      query: op
                     )
                   ]
                 )

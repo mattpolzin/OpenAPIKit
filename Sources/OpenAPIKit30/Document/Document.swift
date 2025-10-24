@@ -685,7 +685,7 @@ internal func validateSecurityRequirements(in paths: OpenAPI.PathItem.Map, again
     }
 }
 
-internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at path: OpenAPI.Path, for verb: OpenAPI.HttpMethod, against components: OpenAPI.Components) throws {
+internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at path: OpenAPI.Path, for verb: OpenAPI.BuiltinHttpMethod, against components: OpenAPI.Components) throws {
     let securitySchemes = securityRequirements.flatMap { $0.keys }
 
     for securityScheme in securitySchemes {

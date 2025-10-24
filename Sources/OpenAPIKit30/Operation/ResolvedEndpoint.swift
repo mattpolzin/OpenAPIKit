@@ -52,7 +52,7 @@ public struct ResolvedEndpoint: Equatable {
     /// The HTTP method of this endpoint.
     ///
     /// e.g. GET, POST, PUT, PATCH, etc.
-    public let method: OpenAPI.HttpMethod
+    public let method: OpenAPI.BuiltinHttpMethod
     /// The path for this endpoint.
     public let path: OpenAPI.Path
     /// The parameters this endpoint accepts.
