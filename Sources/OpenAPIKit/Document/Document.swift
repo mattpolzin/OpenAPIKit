@@ -454,30 +454,32 @@ extension OpenAPI.Document {
         case v3_1_1
         case v3_1_x(x: Int)
 
-      public init?(rawValue: String) {
-          switch rawValue {
-          case "3.1.0": self = .v3_1_0
-          case "3.1.1": self = .v3_1_1
-          default:
-              let components = rawValue.split(separator: ".")
-              guard components.count == 3 else {
-                  return nil
-              }
-              guard components[0] == "3", components[1] == "1" else {
-                  return nil
-              }
-              guard let patchVersion = Int(components[2], radix: 10) else {
-                  return nil
-              }
-              // to support newer versions released in the future without a breaking
-              // change to the enumeration, bump the upper limit here to e.g. 2 or 3
-              // or 6:
-              guard patchVersion > 1 && patchVersion <= 2 else {
-                  return nil
-              }
-              self = .v3_1_x(x: patchVersion)
-          }
-      }
+        public static let v3_1_2 : Self = .v3_1_x(x: 2)
+
+        public init?(rawValue: String) {
+            switch rawValue {
+            case "3.1.0": self = .v3_1_0
+            case "3.1.1": self = .v3_1_1
+            default:
+                let components = rawValue.split(separator: ".")
+                guard components.count == 3 else {
+                    return nil
+                }
+                guard components[0] == "3", components[1] == "1" else {
+                    return nil
+                }
+                guard let patchVersion = Int(components[2], radix: 10) else {
+                    return nil
+                }
+                // to support newer versions released in the future without a breaking
+                // change to the enumeration, bump the upper limit here to e.g. 2 or 3
+                // or 6:
+                guard patchVersion > 1 && patchVersion <= 2 else {
+                    return nil
+                }
+                self = .v3_1_x(x: patchVersion)
+            }
+        }
 
         public var rawValue: String {
             switch self {
