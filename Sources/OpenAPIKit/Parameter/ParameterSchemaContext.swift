@@ -143,6 +143,8 @@ extension OpenAPI.Parameter.SchemaContext.Style {
             return .simple
         case .header:
             return .simple
+        case .querystring:
+            return .simple
         }
     }
 

@@ -254,6 +254,9 @@ extension OpenAPI.Parameter: Encodable {
         case .cookie(required: let req):
             required = req
             location = .cookie
+        case .querystring(required: let req):
+            required = req
+            location = .querystring
         }
         try container.encode(location, forKey: .parameterLocation)
 
@@ -307,6 +310,8 @@ extension OpenAPI.Parameter: Decodable {
             context = .path
         case .cookie:
             context = .cookie(required: required)
+        case .querystring:
+            context = .querystring(required: required)
         }
 
         let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
@@ -316,6 +321,14 @@ extension OpenAPI.Parameter: Decodable {
             maybeSchema = try SchemaContext(from: decoder, for: context)
         } else {
             maybeSchema = nil
+        }
+
+        if location == .querystring && maybeSchema != nil {
+            throw GenericError(
+                subjectName: name,
+                details: "`schema` and `style` are disallowed for `querystring` parameters",
+                codingPath: decoder.codingPath
+            )
         }
 
         switch (maybeContent, maybeSchema) {

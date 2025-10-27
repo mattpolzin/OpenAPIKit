@@ -21,6 +21,7 @@ extension OpenAPI.Parameter {
         case header(required: Bool)
         case path
         case cookie(required: Bool)
+        case querystring(required: Bool)
 
         public static func query(required: Bool) -> Context { return .query(required: required, allowEmptyValue: false) }
 
@@ -35,6 +36,9 @@ extension OpenAPI.Parameter {
 
         /// An optional cookie parameter.
         public static var cookie: Context { return .cookie(required: false) }
+
+        /// An optional querystring parameter.
+        public static var querystring: Context { return .querystring(required: false) }
 
         public var inQuery: Bool {
             guard case .query = self else {
@@ -59,11 +63,19 @@ extension OpenAPI.Parameter {
             return true
         }
 
+        public var inQuerystring: Bool {
+            guard case .querystring = self else {
+                return false
+            }
+            return true
+        }
+
         public var required: Bool {
             switch self {
             case .query(required: let required, allowEmptyValue: _),
                  .header(required: let required),
-                 .cookie(required: let required):
+                 .cookie(required: let required),
+                 .querystring(required: let required):
                 return required
             case .path:
                 return true
@@ -83,6 +95,8 @@ extension OpenAPI.Parameter.Context {
             return .path
         case .cookie:
             return .cookie
+        case .querystring:
+            return .querystring
         }
     }
 }
