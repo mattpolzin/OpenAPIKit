@@ -996,14 +996,14 @@ fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _
 
 fileprivate func assertEqualNewToOld(_ newParamContext: OpenAPIKit.OpenAPI.Parameter.Context, _ oldParamContext: OpenAPIKit30.OpenAPI.Parameter.Context) {
     switch (newParamContext, oldParamContext) {
-    case (.query(required: let req, allowEmptyValue: let empty), .query(required: let req2, allowEmptyValue: let empty2)):
+    case (.query(required: let req, allowEmptyValue: let empty, schemaOrContent: _), .query(required: let req2, allowEmptyValue: let empty2)):
         XCTAssertEqual(req, req2)
         XCTAssertEqual(empty, empty2)
-    case (.header(required: let req), .header(required: let req2)):
+    case (.header(required: let req, schemaOrContent: _), .header(required: let req2)):
         XCTAssertEqual(req, req2)
     case (.path, .path):
         break
-    case (.cookie(required: let req), .cookie(required: let req2)):
+    case (.cookie(required: let req, schemaOrContent: _), .cookie(required: let req2)):
         XCTAssertEqual(req, req2)
     default:
         XCTFail("Parameter contexts are not equal. \(newParamContext)  /   \(oldParamContext)")
@@ -1137,6 +1137,7 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
         case .number(let coreContext, let numericContext):
             let newNumericContext = try XCTUnwrap(newSchema.numberContext)
             // TODO: compare number contexts
+            // try assertEqualNewToOld(newNumericContext, numericContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .integer(let coreContext, let integerContext):

@@ -39,8 +39,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     parameters: [
                         .parameter(
                             name: "param",
-                            context: .path,
-                            schema: .string
+                            context: .path(schema: .string)
                         )
                     ],
                     get: .init(
@@ -51,12 +50,14 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             .reference(.component( named: "filter")),
                             .parameter(
                                 name: "Content-Type",
-                                context: .header(required: false),
-                                schema: .string(
-                                    allowedValues: [
-                                        .init(OpenAPI.ContentType.json.rawValue),
-                                        .init(OpenAPI.ContentType.txt.rawValue)
-                                    ]
+                                context: .header(
+                                    required: false,
+                                    schema: .string(
+                                        allowedValues: [
+                                            .init(OpenAPI.ContentType.json.rawValue),
+                                            .init(OpenAPI.ContentType.txt.rawValue)
+                                        ]
+                                    )
                                 )
                             )
                         ],
@@ -116,16 +117,18 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 parameters: [
                     "filter": .init(
                         name: "filter",
-                        context: .query(required: false),
-                        schema: .init(
-                            .object(
-                                properties: [
-                                    "size": .integer,
-                                    "shape": .string(allowedValues: [ "round", "square" ])
-                                ]
-                            ),
-                            style: .deepObject,
-                            explode: true
+                        context: .query(
+                            required: false,
+                            schemaOrContent: .schema(.init(
+                                .object(
+                                    properties: [
+                                        "size": .integer,
+                                        "shape": .string(allowedValues: [ "round", "square" ])
+                                    ]
+                                ),
+                                style: .deepObject,
+                                explode: true
+                            ))
                         )
                     )
                 ]
@@ -168,12 +171,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 .reference(.component( named: "filter")),
                 .parameter(
                     name: "Content-Type",
-                    context: .header(required: false),
-                    schema: .string(
-                        allowedValues: [
-                            .init(OpenAPI.ContentType.json.rawValue),
-                            .init(OpenAPI.ContentType.txt.rawValue)
-                        ]
+                    context: .header(required: false,
+                        schema: .string(
+                            allowedValues: [
+                                .init(OpenAPI.ContentType.json.rawValue),
+                                .init(OpenAPI.ContentType.txt.rawValue)
+                            ]
+                        )
                     )
                 )
             ],
@@ -232,8 +236,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [
                 .parameter(
                     name: "param",
-                    context: .path,
-                    schema: .string
+                    context: .path(schema: .string)
                 )
             ],
             get: testSHOW_endpoint,
@@ -245,10 +248,10 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 "string_schema": .string
             ],
             parameters: [
-                "filter": .init(
+                "filter": .query(
                     name: "filter",
-                    context: .query(required: false),
-                    schema: .init(
+                    required: false,
+                    schemaOrContent: .schema(.init(
                         .object(
                             properties: [
                                 "size": .integer,
@@ -258,7 +261,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         style: .deepObject,
                         explode: true
                     )
-                )
+                ))
             ]
         )
 
@@ -517,8 +520,7 @@ fileprivate let testDocument =  OpenAPI.Document(
             parameters: [
                 .parameter(
                     name: "id",
-                    context: .path,
-                    schema: .string
+                    context: .path(schema: .string)
                 )
             ],
             get: OpenAPI.Operation(

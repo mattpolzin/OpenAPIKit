@@ -100,16 +100,8 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
 
 extension OpenAPIKit30.OpenAPI.Header: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Header {
-        let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
-        switch schemaOrContent {
-        case .a(let context):
-            newSchemaOrContent = .a(context.to31())
-        case .b(let contentMap):
-            newSchemaOrContent = .b(contentMap.mapValues { $0.to31() })
-        }
-
-        return OpenAPIKit.OpenAPI.Header(
-            schemaOrContent: newSchemaOrContent,
+        OpenAPIKit.OpenAPI.Header(
+            schemaOrContent: schemaOrContent.to31(),
             description: description,
             required: `required`,
             deprecated: deprecated,
@@ -118,17 +110,28 @@ extension OpenAPIKit30.OpenAPI.Header: To31 {
     }
 }
 
-extension OpenAPIKit30.OpenAPI.Parameter.Context: To31 {
-    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.Context {
+extension Either where A == OpenAPIKit30.OpenAPI.Parameter.SchemaContext, B == OpenAPIKit30.OpenAPI.Content.Map {
+    fileprivate func to31() -> Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map> {
+        switch self {
+        case .a(let context):
+            .a(context.to31())
+        case .b(let contentMap):
+            .b(contentMap.mapValues { $0.to31() })
+        }
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Parameter.Context {
+    fileprivate func to31(with schemaOrContent: Either<OpenAPIKit30.OpenAPI.Parameter.SchemaContext, OpenAPIKit30.OpenAPI.Content.Map>) -> OpenAPIKit.OpenAPI.Parameter.Context {
         switch self {
         case .query(required: let required, allowEmptyValue: let allowEmptyValue):
-            return .query(required: required, allowEmptyValue: allowEmptyValue)
+            return .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: schemaOrContent.to31())
         case .header(required: let required):
-            return .header(required: required)
+            return .header(required: required, schemaOrContent: schemaOrContent.to31())
         case .path:
-            return .path
+            return .path(schemaOrContent: schemaOrContent.to31())
         case .cookie(required: let required):
-            return .cookie(required: required)
+            return .cookie(required: required, schemaOrContent: schemaOrContent.to31())
         }
     }
 }
@@ -242,18 +245,9 @@ extension OpenAPIKit30.OpenAPI.Content: To31 {
 
 extension OpenAPIKit30.OpenAPI.Parameter: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter {
-        let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
-        switch schemaOrContent {
-        case .a(let context):
-            newSchemaOrContent = .a(context.to31())
-        case .b(let contentMap):
-            newSchemaOrContent = .b(contentMap.mapValues { $0.to31() })
-        }
-
         return OpenAPIKit.OpenAPI.Parameter(
             name: name,
-            context: context.to31(),
-            schemaOrContent: newSchemaOrContent,
+            context: context.to31(with: schemaOrContent),
             description: description,
             deprecated: deprecated,
             vendorExtensions: vendorExtensions

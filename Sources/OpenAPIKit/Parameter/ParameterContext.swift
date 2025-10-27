@@ -17,28 +17,78 @@ extension OpenAPI.Parameter {
     /// `required: true` to the context construction.
     /// Path parameters are always required.
     public enum Context: Equatable, Sendable {
-        case query(required: Bool, allowEmptyValue: Bool)
-        case header(required: Bool)
-        case path
-        case cookie(required: Bool)
-        case querystring(required: Bool)
+        case query(required: Bool, allowEmptyValue: Bool, schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>)
+        case header(required: Bool, schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>)
+        case path(schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>)
+        case cookie(required: Bool, schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>)
+        case querystring(required: Bool, content: OpenAPI.Content.Map)
 
-        public static func query(required: Bool) -> Context { return .query(required: required, allowEmptyValue: false) }
+        /// A query parameter that does not allow empty values.
+        public static func query(
+            required: Bool = false,
+            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        ) -> Context { return .query(required: required, allowEmptyValue: false, schemaOrContent: schemaOrContent) }
 
-        public static func query(allowEmptyValue: Bool) -> Context { return .query(required: false, allowEmptyValue: allowEmptyValue) }
+        /// A query parameter that is not required.
+        public static func query(
+            allowEmptyValue: Bool,
+            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        ) -> Context { return .query(required: false, allowEmptyValue: allowEmptyValue, schemaOrContent: schemaOrContent) }
 
-        /// An optional query parameter that does not allow
-        /// empty values.
-        public static var query: Context { return .query(required: false, allowEmptyValue: false) }
+        public static func query(
+            required: Bool = false,
+            allowEmptyValue: Bool = false,
+            schema: JSONSchema
+        ) -> Context { return .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: .schema(.init(schema, style: .default(for: .query)))) }
+
+        public static func query(
+            required: Bool = false,
+            allowEmptyValue: Bool = false,
+            content: OpenAPI.Content.Map
+        ) -> Context { return .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: .content(content)) }
 
         /// An optional header parameter.
-        public static var header: Context { return .header(required: false) }
+        public static func header(
+            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        ) -> Context { return .header(required: false, schemaOrContent: schemaOrContent) }
+
+        public static func header(
+            required: Bool = false,
+            schema: JSONSchema
+        ) -> Context { return .header(required: required, schemaOrContent: .schema(.init(schema, style: .default(for: .header)))) }
+
+        public static func header(
+            required: Bool = false,
+            content: OpenAPI.Content.Map
+        ) -> Context { return .header(required: required, schemaOrContent: .content(content)) }
 
         /// An optional cookie parameter.
-        public static var cookie: Context { return .cookie(required: false) }
+        public static func cookie(
+            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        ) ->  Context { return .cookie(required: false, schemaOrContent: schemaOrContent) }
+
+        public static func cookie(
+            required: Bool = false,
+            schema: JSONSchema
+        ) ->  Context { return .cookie(required: required, schemaOrContent: .schema(.init(schema, style: .default(for: .cookie)))) }
+
+        public static func cookie(
+            required: Bool = false,
+            content: OpenAPI.Content.Map
+        ) ->  Context { return .cookie(required: required, schemaOrContent: .content(content)) }
+
+        public static func path(
+            schema: JSONSchema
+        ) -> Context { return .path(schemaOrContent: .schema(.init(schema, style: .default(for: .path)))) }
+
+        public static func path(
+            content: OpenAPI.Content.Map
+        ) -> Context { return .path(schemaOrContent: .content(content)) }
 
         /// An optional querystring parameter.
-        public static var querystring: Context { return .querystring(required: false) }
+        public static func querystring(
+            content: OpenAPI.Content.Map
+        ) ->  Context { return .querystring(required: false, content: content) }
 
         public var inQuery: Bool {
             guard case .query = self else {
@@ -54,7 +104,12 @@ extension OpenAPI.Parameter {
             return true
         }
 
-        public var inPath: Bool { return self == .path }
+        public var inPath: Bool { 
+            guard case .path = self else {
+                return false
+            }
+            return true
+        }
 
         public var inCookie: Bool {
             guard case .cookie = self else {
@@ -72,12 +127,12 @@ extension OpenAPI.Parameter {
 
         public var required: Bool {
             switch self {
-            case .query(required: let required, allowEmptyValue: _),
-                 .header(required: let required),
-                 .cookie(required: let required),
-                 .querystring(required: let required):
+            case .query(required: let required, allowEmptyValue: _, schemaOrContent: _),
+                 .header(required: let required, schemaOrContent: _),
+                 .cookie(required: let required, schemaOrContent: _),
+                 .querystring(required: let required, content: _):
                 return required
-            case .path:
+            case .path(schemaOrContent: _):
                 return true
             }
         }

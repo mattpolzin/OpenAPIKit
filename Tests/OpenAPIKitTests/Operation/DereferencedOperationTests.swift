@@ -25,8 +25,7 @@ final class DereferencedOperationTests: XCTestCase {
             parameters: [
                 .parameter(
                     name: "test",
-                    context: .header,
-                    schema: .string
+                    context: .header(schema: .string)
                 )
             ],
             requestBody: OpenAPI.Request(content: [.json: .init(schema: .string)]),
@@ -44,9 +43,8 @@ final class DereferencedOperationTests: XCTestCase {
     func test_parameterReference() throws {
         let components = OpenAPI.Components(
             parameters: [
-                "test": .init(
+                "test": .header(
                     name: "test",
-                    context: .header,
                     schema: .string
                 )
             ]
@@ -59,9 +57,8 @@ final class DereferencedOperationTests: XCTestCase {
         ).dereferenced(in: components)
         XCTAssertEqual(
             t1.parameters.first?.underlyingParameter,
-            .init(
+            .header(
                 name: "test",
-                context: .header,
                 schema: .string,
                 vendorExtensions: ["x-component-name": "test"]
             )
