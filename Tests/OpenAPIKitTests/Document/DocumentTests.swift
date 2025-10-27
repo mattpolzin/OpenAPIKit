@@ -20,6 +20,7 @@ final class DocumentTests: XCTestCase {
 
         let _ = OpenAPI.Document(
             openAPIVersion: .v3_1_0,
+            selfURI: .init(string: "https://example.com/openapi")!,
             info: .init(title: "hi", version: "1.0"),
             servers: [
                 .init(url: URL(string: "https://google.com")!)
@@ -135,7 +136,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:]))
+                    put: .init(operationId: nil, responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -150,7 +156,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:]))
+                    put: .init(operationId: nil, responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -165,12 +176,17 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:]))
+                    put: .init(operationId: "two", responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: "three", responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t3.allOperationIds, ["test", "two"])
+        XCTAssertEqual(t3.allOperationIds, ["test", "two", "three"])
 
         // paths, one operation id (first one nil), no components, no webhooks
         let t4 = OpenAPI.Document(
@@ -180,7 +196,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:]))
+                    put: .init(operationId: "two", responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -684,6 +705,60 @@ extension DocumentTests {
             OpenAPI.Document(
                 info: .init(title: "API", version: "1.0"),
                 servers: [.init(url: URL(string: "http://google.com")!)],
+                paths: [:],
+                components: .noComponents
+            )
+        )
+    }
+
+    func test_specifySelfURI_encode() throws {
+        let document = OpenAPI.Document(
+            selfURI: .init(string: "https://example.com/openapi")!,
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        assertJSONEquivalent(
+            encodedDocument,
+            """
+            {
+              "$self" : "https:\\/\\/example.com\\/openapi",
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.1.1"
+            }
+            """
+        )
+    }
+
+    func test_specifySelfURI_decode() throws {
+        let documentData =
+        """
+        {
+          "$self": "https://example.com/openapi",
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.1",
+          "paths" : {
+
+          }
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                selfURI: .init(string: "https://example.com/openapi")!,
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
                 paths: [:],
                 components: .noComponents
             )

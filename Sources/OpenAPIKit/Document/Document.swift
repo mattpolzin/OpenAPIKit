@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.1 document.
@@ -45,13 +46,16 @@ extension OpenAPI {
     ///
     /// See the documentation on `DereferencedDocument.resolved()` for more.
     ///
-    public struct Document: HasWarnings, CodableVendorExtendable, Sendable {
+    public struct Document: HasConditionalWarnings, HasWarnings, CodableVendorExtendable, Sendable {
         /// OpenAPI Spec "openapi" field.
         ///
         /// OpenAPIKit only explicitly supports versions that can be found in
         /// the `Version` enum. Other versions may or may not be decodable
         /// by OpenAPIKit to a certain extent.
         public var openAPIVersion: Version
+
+        /// OpenAPI Spec "$self" field.
+        public var selfURI: URL?
 
         /// Information about the API described by this OpenAPI Document.
         ///
@@ -142,9 +146,11 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public let warnings: [Warning]
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
             openAPIVersion: Version = .v3_1_1,
+            selfURI: URL? = nil,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -156,6 +162,7 @@ extension OpenAPI {
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.openAPIVersion = openAPIVersion
+            self.selfURI = selfURI
             self.info = info
             self.servers = servers
             self.paths = paths
@@ -167,13 +174,28 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.warnings = []
+
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
         }
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Document \(fieldName) field"
+        )
     }
 }
 
 extension OpenAPI.Document: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.openAPIVersion == rhs.openAPIVersion
+        && lhs.selfURI == rhs.selfURI
         && lhs.info == rhs.info
         && lhs.servers == rhs.servers
         && lhs.paths == rhs.paths
@@ -602,6 +624,9 @@ extension OpenAPI.Document: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
+
+        try container.encodeIfPresent(selfURI?.absoluteString, forKey: .selfURI)
+
         try container.encode(info, forKey: .info)
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
@@ -661,6 +686,11 @@ extension OpenAPI.Document: Decodable {
                 )
             }
 
+            let selfURIString: String? = try container.decodeIfPresent(String.self, forKey: .selfURI)
+            selfURI = try selfURIString.map { 
+              try decodeURIString($0, forKey: CodingKeys.selfURI, atPath: decoder.codingPath)
+            }
+
             info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
@@ -681,6 +711,11 @@ extension OpenAPI.Document: Decodable {
 
             self.warnings = warnings
 
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
+
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
@@ -697,9 +732,34 @@ extension OpenAPI.Document: Decodable {
     }
 }
 
+fileprivate func decodeURIString(_ str: String, forKey key: CodingKey, atPath path: [CodingKey]) throws -> URL {
+    let uri: URL?
+    #if canImport(FoundationEssentials)
+    uri = URL(string: str, encodingInvalidCharacters: false)
+    #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+    if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
+        uri = URL(string: str, encodingInvalidCharacters: false)
+    } else {
+        uri = URL(string: str)
+    }
+    #else
+    uri = URL(string: str)
+    #endif
+    guard let uri else {
+        throw GenericError(
+            subjectName: key.stringValue,
+            details: "Failed to parse a valid URI from '\(str)'",
+            codingPath: path
+        )
+    }
+
+    return uri
+}
+
 extension OpenAPI.Document {
     internal enum CodingKeys: ExtendableCodingKey {
         case openAPIVersion
+        case selfURI
         case info
         case jsonSchemaDialect // TODO: implement parsing (https://github.com/mattpolzin/OpenAPIKit/issues/202)
         case servers
@@ -714,6 +774,7 @@ extension OpenAPI.Document {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .openAPIVersion,
+                .selfURI,
                 .info,
                 .jsonSchemaDialect,
                 .servers,
@@ -734,6 +795,8 @@ extension OpenAPI.Document {
             switch stringValue {
             case "openapi":
                 self = .openAPIVersion
+            case "$self":
+                self = .selfURI
             case "info":
                 self = .info
             case "jsonSchemaDialect":
@@ -761,6 +824,8 @@ extension OpenAPI.Document {
             switch self {
             case .openAPIVersion:
                 return "openapi"
+            case .selfURI:
+                return "$self"
             case .info:
                 return "info"
             case .jsonSchemaDialect:
