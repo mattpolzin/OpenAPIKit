@@ -66,6 +66,89 @@ builtin methods so the following code _does not need to change_:
 let httpMethod : OpenAPI.HttpMethod = .post
 ```
 
+### Parameters
+There are no breaking changes for the `OpenAPIKit30` module (OAS 3.0.x
+specification).
+
+For the `OpenAPIKit` module (OAS 3.1.x and 3.2.x versions) read on.
+
+An additional parameter location of `querystring` has been added. This is a
+breaking change to code that exhaustively switches on `OpenAPI.Parameter.Context`
+or `OpenAPI.Parameter.Context.Location`.
+
+To support the new `querystring` location, `schemaOrContent` has been moved into
+the `OpenAPI.Parameter.Context` because it only applies to locations other than
+`querystring`. You can still access `schemaOrContent` as a property on the
+`Parameter`. Code that pattern matches on cases of `OpenAPI.Parameter.Context`
+will need to add the new `schemaOrContent` values associated with each case.
+
+```swift
+// BEFORE
+switch parameter.context {
+case .query(required: _)
+}
+
+// AFTER
+switch parameter.context {
+case .query(required: _, schemaOrContent: _)
+}
+```
+
+#### Constructors
+The following only applies if you construct parameters in-code (use Swift to
+build an OpenAPI Document).
+
+Unfortunately, the change that made `schemaOrContent` not apply to all possible
+locations means that the existing convenience constructors and static functions
+that created parameters in-code do not make sense anymore. There were fairly
+substantial changes to what is available with an aim to continue to offer
+simular convenience as before.
+
+Following are a few changes you made need to make with examples.
+
+Code that populates the `parameters` array of the `OpenAPI.Operation` type with the
+`.parameter(name:,context:,schema:)` function needs to be updated. The `schema`
+has moved into the `context` so you change your code in the following way:
+```swift
+// BEFORE
+.parameter(
+  name: "name",
+  context: .header,
+  schema: .string
+)
+
+// AFTER
+.parameter(
+  name: "name",
+  context: .header(schema: .string)
+)
+```
+
+Code that initializes `OpenAPI.Parameter` via one of its `init` functions will
+most likely need to change. Many of the initializers have been removed but you can
+replace `.init(name:,context:,schema:)` or similar initializers with
+`.header(name:,schema:)` (same goes for `query`, `path`, and `cookie`). So you change
+your code in the following way:
+```swift
+// BEFORE
+.init(
+  name: "name",
+  context: .header,
+  schema: .string
+)
+
+// AFTER
+.header(
+  name: "name",
+  schema: .string
+)
+```
+
+Because the `ParameterContext` has taken on the `schemaOrContent` of the
+`Parameter`, convenience constructors like `ParameterContext.header` (and
+similar for the other locations) no longer make sense and have been removed. You
+must also specify the schema or content, e.g. `ParameterContext.header(schema: .string)`.
+
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
 string descriptions of any OpenAPIKit errors, you may need to update the
