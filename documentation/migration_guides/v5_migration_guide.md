@@ -15,6 +15,9 @@ v5.10 and greater).
 Only relevant when compiling OpenAPIKit on iOS: Now v12+ is required.
 
 ### OpenAPI Specification Versions
+There are no breaking changes for the `OpenAPIKit30` module (OAS 3.0.x
+specification) in this section.
+
 The OpenAPIKit module's `OpenAPI.Document.Version` enum gained `v3_1_2`,
 `v3_2_0` and `v3_2_x(x: Int)`.
 
@@ -68,7 +71,7 @@ let httpMethod : OpenAPI.HttpMethod = .post
 
 ### Parameters
 There are no breaking changes for the `OpenAPIKit30` module (OAS 3.0.x
-specification).
+specification) in this section.
 
 For the `OpenAPIKit` module (OAS 3.1.x and 3.2.x versions) read on.
 
@@ -148,6 +151,13 @@ Because the `ParameterContext` has taken on the `schemaOrContent` of the
 `Parameter`, convenience constructors like `ParameterContext.header` (and
 similar for the other locations) no longer make sense and have been removed. You
 must also specify the schema or content, e.g. `ParameterContext.header(schema: .string)`.
+
+### Parameter Styles
+There are no breaking changes for the `OpenAPIKit30` module (OAS 3.0.x
+specification) in this section.
+
+A new `cookie` style has been added. Code that exhaustively switches on the
+`OpenAPI.Parameter.SchemaContext.Style` enum will need to be updated.
 
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
