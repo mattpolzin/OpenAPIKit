@@ -11,8 +11,10 @@ extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
     /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.1.1.html#response-object).
-    public struct Response: Equatable, CodableVendorExtendable, Sendable {
-        public var description: String
+    public struct Response: HasConditionalWarnings, CodableVendorExtendable, Sendable {
+        public var summary: String?
+        public var description: String?
+
         public var headers: Header.Map?
         /// An empty Content map will be omitted from encoding.
         public var content: Content.Map
@@ -26,20 +28,60 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
+
         public init(
-            description: String,
+            summary: String? = nil,
+            description: String? = nil,
             headers: Header.Map? = nil,
             content: Content.Map = [:],
             links: Link.Map = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
+            self.summary = summary
             self.description = description
             self.headers = headers
             self.content = content
             self.links = links
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                // If summary is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                // If description is nil, the document must be OAS version 3.2.0 or greater
+                notOptionalVersionWarning(fieldName: "description", value: description, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
     }
+}
+
+extension OpenAPI.Response: Equatable {
+    public static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        lhs.summary == rhs.summary
+        && lhs.description == rhs.description
+        && lhs.headers == rhs.headers
+        && lhs.content == rhs.content
+        && lhs.links == rhs.links
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Response \(fieldName) field"
+        )
+    }
+}
+
+fileprivate func notOptionalVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    guard value == nil else { return nil }
+
+    return OpenAPI.Document.ConditionalWarnings.version(
+        lessThan: minimumVersion,
+        doesNotAllowOptional: "The Response \(fieldName) field"
+    )
 }
 
 extension OpenAPI.Response {
@@ -72,7 +114,8 @@ extension OrderedDictionary where Key == OpenAPI.Response.StatusCode {
 extension Either where A == OpenAPI.Reference<OpenAPI.Response>, B == OpenAPI.Response {
 
     public static func response(
-        description: String,
+        summary: String? = nil,
+        description: String? = nil,
         headers: OpenAPI.Header.Map? = nil,
         content: OpenAPI.Content.Map = [:],
         links: OpenAPI.Link.Map = [:]
@@ -89,11 +132,18 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Response>, B == OpenAPI.Re
 }
 
 // MARK: - Describable
-extension OpenAPI.Response: OpenAPIDescribable {
+extension OpenAPI.Response: OpenAPISummarizable {
     public func overriddenNonNil(description: String?) -> OpenAPI.Response {
         guard let description = description else { return self }
         var response = self
         response.description = description
+        return response
+    }
+
+    public func overriddenNonNil(summary: String?) -> OpenAPI.Response {
+        guard let summary = summary else { return self }
+        var response = self
+        response.summary = summary
         return response
     }
 }
@@ -102,6 +152,7 @@ extension OpenAPI.Response: OpenAPIDescribable {
 
 extension OpenAPI.Response {
     internal enum CodingKeys: ExtendableCodingKey {
+        case summary
         case description
         case headers
         case content
@@ -110,6 +161,7 @@ extension OpenAPI.Response {
 
         static var allBuiltinKeys: [CodingKeys] {
             return [
+                .summary,
                 .description,
                 .headers,
                 .content,
@@ -123,6 +175,8 @@ extension OpenAPI.Response {
 
         init?(stringValue: String) {
             switch stringValue {
+            case "summary":
+                self = .summary
             case "description":
                 self = .description
             case "headers":
@@ -138,6 +192,8 @@ extension OpenAPI.Response {
 
         var stringValue: String {
             switch self {
+            case .summary:
+                return "summary"
             case .description:
                 return "description"
             case .headers:
@@ -157,7 +213,8 @@ extension OpenAPI.Response: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(description, forKey: .description)
+        try container.encodeIfPresent(summary, forKey: .summary)
+        try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(headers, forKey: .headers)
 
         if !content.isEmpty {
@@ -179,12 +236,20 @@ extension OpenAPI.Response: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         do {
-            description = try container.decode(String.self, forKey: .description)
+            summary = try container.decodeIfPresent(String.self, forKey: .summary)
+            description = try container.decodeIfPresent(String.self, forKey: .description)
             headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
             content = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content) ?? [:]
             links = try container.decodeIfPresent(OpenAPI.Link.Map.self, forKey: .links) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
+
+            conditionalWarnings = [
+                // If summary is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                // If description is nil, the document must be OAS version 3.2.0 or greater
+                notOptionalVersionWarning(fieldName: "description", value: description, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
 
         } catch let error as GenericError {
 

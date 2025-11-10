@@ -51,5 +51,11 @@ internal extension OpenAPI.Document {
 
             return (DocumentVersionCondition(version: version, comparator: .lessThan), warning)
         }
+
+        static func version(lessThan version: OpenAPI.Document.Version, doesNotAllowOptional subject: String) -> (any Condition, OpenAPI.Warning) {
+            let warning = OpenAPI.Warning.message("\(subject) cannot be nil for OpenAPI document versions lower than \(version.rawValue)")
+
+            return (DocumentVersionCondition(version: version, comparator: .lessThan), warning)
+        }
     }
 }
