@@ -73,6 +73,14 @@ extension OpenAPI {
               }
         }
 
+        /// The parameter's schema `style`, if defined. Note that this is
+        /// guaranteed to be nil if the parameter has `content` defined. Use
+        /// the `schemaOrContent` property if you want to switch over the two
+        /// possibilities.
+        public var schemaStyle : SchemaContext.Style? {
+            schemaOrContent.schemaContextValue?.style
+        }
+
         /// Create a parameter.
         public init(
             name: String,

@@ -951,4 +951,260 @@ final class BuiltinValidationTests: XCTestCase {
             XCTAssertTrue((errorCollection?.values.first?.codingPath.map { $0.stringValue }.joined(separator: ".") ?? "").contains("testLink"))
         }
     }
+
+    func test_badMatrixStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .matrix))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the matrix style can only be used for the path location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badLabelStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .label))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the label style can only be used for the path location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badSimpleStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .simple))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the simple style can only be used for the path and header locations")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badFormStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .form))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the form style can only be used for the query and cookie locations")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badSpaceDelimitedStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .spaceDelimited))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the spaceDelimited style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badPipeDelimitedStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .pipeDelimited))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the pipeDelimited style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badDeepObjectStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .deepObject))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the deepObject style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badCookieStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .cookie))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the cookie style can only be used for the cookie location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
 }
