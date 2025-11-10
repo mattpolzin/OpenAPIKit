@@ -170,12 +170,12 @@ public final class Validator {
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
     /// - Operation Ids are unique across the whole Document.
-    /// - All OpenAPI.References that refer to components in this
-    ///     document can be found in the components dictionary.
-    /// - `Enum` must not be empty in the document's
-    ///     Server Variable.
-    /// - `Default` must exist in the enum values in the document's
-    ///     Server Variable.
+    /// - All OpenAPI.References that refer to components in this document can
+    ///     be found in the components dictionary.
+    /// - `Enum` must not be empty in the document's Server Variable.
+    /// - `Default` must exist in the enum values in the document's Server
+    ///     Variable.
+    /// - `Parameter` styles and locations are compatible with each other.
     ///
     public convenience init() {
         self.init(validations: [
@@ -193,7 +193,8 @@ public final class Validator {
             .init(.callbacksReferencesAreValid),
             .init(.pathItemReferencesAreValid),
             .init(.serverVariableEnumIsValid),
-            .init(.serverVariableDefaultExistsInEnum)
+            .init(.serverVariableDefaultExistsInEnum),
+            .init(.parameterStyleAndLocationAreCompatible)
         ])
     }
 

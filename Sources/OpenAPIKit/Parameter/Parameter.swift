@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
     /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
-    public struct Parameter: Equatable, CodableVendorExtendable, Sendable {
+    public struct Parameter: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var name: String
 
         /// OpenAPI Spec "in" property determines the `Context`.
@@ -31,6 +31,8 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
+
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         /// Whether or not this parameter is required. See the context
         /// which determines whether the parameter is required or not.
@@ -71,6 +73,14 @@ extension OpenAPI {
               }
         }
 
+        /// The parameter's schema `style`, if defined. Note that this is
+        /// guaranteed to be nil if the parameter has `content` defined. Use
+        /// the `schemaOrContent` property if you want to switch over the two
+        /// possibilities.
+        public var schemaStyle : SchemaContext.Style? {
+            schemaOrContent.schemaContextValue?.style
+        }
+
         /// Create a parameter.
         public init(
             name: String,
@@ -84,7 +94,35 @@ extension OpenAPI {
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = context.location.conditionalWarnings
         }
+    }
+}
+
+extension OpenAPI.Parameter: Equatable {
+    public static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        lhs.name == rhs.name
+        && lhs.context == rhs.context
+        && lhs.description == rhs.description
+        && lhs.deprecated == rhs.deprecated
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
+extension OpenAPI.Parameter.Context.Location {
+    fileprivate var conditionalWarnings: [(any Condition, OpenAPI.Warning)] {
+        let querystringWarning: (any Condition, OpenAPI.Warning)?
+        if self != .querystring {
+            querystringWarning = nil
+        } else {
+            querystringWarning = OpenAPI.Document.ConditionalWarnings.version(lessThan: .v3_2_0, doesNotSupport: "The querystring parameter location")
+        }
+
+
+        return [
+            querystringWarning
+        ].compactMap { $0 }
     }
 }
 
@@ -595,6 +633,8 @@ extension OpenAPI.Parameter: Decodable {
         deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        conditionalWarnings = context.location.conditionalWarnings
     }
 }
 

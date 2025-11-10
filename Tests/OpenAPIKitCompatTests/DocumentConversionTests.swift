@@ -1254,9 +1254,27 @@ fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.E
     } else {
         XCTAssertNil(oldEncoding.headers)
     }
-    XCTAssertEqual(newEncoding.style, oldEncoding.style)
+    try assertEqualNewToOld(newEncoding.style, oldEncoding.style)
     XCTAssertEqual(newEncoding.explode, oldEncoding.explode)
     XCTAssertEqual(newEncoding.allowReserved, oldEncoding.allowReserved)
+}
+
+fileprivate func assertEqualNewToOld(_ newStyle: OpenAPIKit.OpenAPI.Parameter.SchemaContext.Style, _ oldStyle: OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style) throws {
+    let equal: Bool
+    switch (newStyle, oldStyle) {
+    case (.form, .form): equal = true
+    case (.simple, .simple): equal = true
+    case (.matrix, .matrix): equal = true
+    case (.label, .label): equal = true
+    case (.spaceDelimited, .spaceDelimited): equal = true
+    case (.pipeDelimited, .pipeDelimited): equal = true
+    case (.deepObject, .deepObject): equal = true
+    default: equal = false
+    }
+
+    if !equal {
+        XCTFail("New \(newStyle) is not equivalent to old \(oldStyle)")
+    }
 }
 
 fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ oldHeader: OpenAPIKit30.OpenAPI.Header) throws {
@@ -1275,7 +1293,7 @@ fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ o
 }
 
 fileprivate func assertEqualNewToOld(_ newSchemaContext: OpenAPIKit.OpenAPI.Parameter.SchemaContext, _ oldSchemaContext: OpenAPIKit30.OpenAPI.Parameter.SchemaContext) throws {
-    XCTAssertEqual(newSchemaContext.style, oldSchemaContext.style)
+    try assertEqualNewToOld(newSchemaContext.style, oldSchemaContext.style)
     XCTAssertEqual(newSchemaContext.explode, oldSchemaContext.explode)
     XCTAssertEqual(newSchemaContext.allowReserved, oldSchemaContext.allowReserved)
     switch (newSchemaContext.schema, oldSchemaContext.schema) {
