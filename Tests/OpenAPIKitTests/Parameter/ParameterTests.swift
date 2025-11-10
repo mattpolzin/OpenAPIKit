@@ -95,6 +95,11 @@ final class ParameterTests: XCTestCase {
         XCTAssertEqual(t1[0].parameterValue, OpenAPI.Parameter.cookie(name: "hello", schema: .string))
         XCTAssertEqual(t1[4].reference, .component( named: "hello"))
     }
+
+    func test_querystringLocation() {
+        let t1 = OpenAPI.Parameter.querystring(name: "string", content: [:])
+        XCTAssertEqual(t1.conditionalWarnings.count, 1)
+    }
 }
 
 // MARK: - Codable Tests
