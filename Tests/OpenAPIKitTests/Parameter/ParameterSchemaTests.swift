@@ -531,7 +531,7 @@ fileprivate struct SchemaWrapper: Codable {
     let location: TestLocation
     let schema: OpenAPI.Parameter.SchemaContext
 
-    init(location: OpenAPI.Parameter.Context, schema: OpenAPI.Parameter.SchemaContext) {
+    init(location: OpenAPI.Parameter.Context.Location, schema: OpenAPI.Parameter.SchemaContext) {
         self.location = .init(location)
         self.schema = schema
     }
@@ -546,22 +546,25 @@ fileprivate struct SchemaWrapper: Codable {
         case header
         case path
         case cookie
+        case querystring
 
-        var paramLoc: OpenAPI.Parameter.Context {
+        var paramLoc: OpenAPI.Parameter.Context.Location {
             switch self {
-            case .query: return .query
-            case .header: return .header
-            case .path: return .path
-            case .cookie: return .cookie
+            case .query: .query
+            case .header: .header
+            case .path: .path
+            case .cookie: .cookie
+            case .querystring: .querystring
             }
         }
 
-        init(_ paramLoc: OpenAPI.Parameter.Context) {
+        init(_ paramLoc: OpenAPI.Parameter.Context.Location) {
             switch paramLoc {
             case .query: self = .query
             case .header: self = .header
             case .path: self = .path
             case .cookie: self = .cookie
+            case .querystring: self = .querystring
             }
         }
     }

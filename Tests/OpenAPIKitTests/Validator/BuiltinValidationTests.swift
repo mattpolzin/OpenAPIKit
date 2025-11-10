@@ -207,7 +207,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello/world/{idx}": .init(
                     parameters: [
-                        .parameter(name: "idx", context: .path, schema: .string)
+                        .parameter(name: "idx", context: .path(schema: .string))
                     ],
                     get: .init(
                         responses: [:]
@@ -229,7 +229,7 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello/world/{idx}": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "idx", context: .path, schema: .string)
+                            .parameter(name: "idx", context: .path(schema: .string))
                         ],
                         responses: [:]
                     )
@@ -496,8 +496,8 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "hiya", context: .path, schema: .string),
-                            .parameter(name: "hiya", context: .path, schema: .string)
+                            .parameter(name: "hiya", context: .path(schema: .string)),
+                            .parameter(name: "hiya", context: .path(schema: .string))
                         ],
                         responses: [
                             200: .response(description: "hi")
@@ -524,9 +524,9 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "hiya", context: .query, schema: .string),
-                            .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
-                            .parameter(name: "cool", context: .path, schema: .string)  // changes parameter name but not location
+                            .parameter(name: "hiya", context: .query(schema: .string)),
+                            .parameter(name: "hiya", context: .path(schema: .string)), // changes parameter location but not name
+                            .parameter(name: "cool", context: .path(schema: .string))  // changes parameter name but not location
                         ],
                         responses: [
                             200: .response(description: "hi")
@@ -646,8 +646,8 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     parameters: [
-                        .parameter(name: "hiya", context: .query, schema: .string),
-                        .parameter(name: "hiya", context: .query, schema: .string)
+                        .parameter(name: "hiya", context: .query(schema: .string)),
+                        .parameter(name: "hiya", context: .query(schema: .string))
                     ],
                     get: .init(
                         responses: [
@@ -674,9 +674,9 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     parameters: [
-                        .parameter(name: "hiya", context: .query, schema: .string),
-                        .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
-                        .parameter(name: "cool", context: .path, schema: .string) // changes parameter name but not location
+                        .parameter(name: "hiya", context: .query(schema: .string)),
+                        .parameter(name: "hiya", context: .path(schema: .string)), // changes parameter location but not name
+                        .parameter(name: "cool", context: .path(schema: .string)) // changes parameter name but not location
                     ],
                     get: .init(
                         responses: [
@@ -845,7 +845,7 @@ final class BuiltinValidationTests: XCTestCase {
                     "response1": .init(description: "test")
                 ],
                 parameters: [
-                    "parameter1": .init(name: "test", context: .header, schema: .string)
+                    "parameter1": .init(name: "test", context: .header(schema: .string))
                 ],
                 examples: [
                     "example1": .init(value: .b("hello"))

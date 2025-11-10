@@ -46,7 +46,7 @@ final class PathItemTests: XCTestCase {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+            parameters: [.parameter(name: "hello", context: .query(schema: .string))],
             get: op,
             put: op,
             post: op,
@@ -159,7 +159,7 @@ final class PathItemTests: XCTestCase {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+            parameters: [.parameter(name: "hello", context: .query(schema: .string))],
             get: op,
             put: op,
             post: op,
@@ -240,7 +240,7 @@ extension PathItemTests {
             summary: "summary",
             description: "description",
             servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-            parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+            parameters: [.parameter(name: "hello", context: .query(schema: .string))],
             vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
 
@@ -310,7 +310,7 @@ extension PathItemTests {
                 summary: "summary",
                 description: "description",
                 servers: [OpenAPI.Server(url: URL(string: "http://google.com")!)],
-                parameters: [.parameter(name: "hello", context: .query, schema: .string)],
+                parameters: [.parameter(name: "hello", context: .query(schema: .string))],
                 vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
         )

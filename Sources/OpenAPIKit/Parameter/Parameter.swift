@@ -25,22 +25,6 @@ extension OpenAPI {
         /// if unspecified and only gets encoded if true.
         public var deprecated: Bool // default is false
 
-        /// OpenAPI Spec "content" or "schema" properties.
-        ///
-        /// You can access the schema context (if it is in use for
-        /// this parameter) with `schemaOrContent.schemaContextValue`.
-        /// The schema context contains lots of information detailed in the
-        /// OpenAPI specification under the **Parameter Object** section.
-        ///
-        /// You can directly access the underlying `JSONSchema` with
-        /// `schemaOrContent.schemaValue`. If the schema is a reference
-        /// instead of an inline value, `schemaOrContent.schemaReference`
-        /// will get you the reference.
-        ///
-        /// You can access the content map (if it is in use for
-        /// this parameter) with `schemaOrContent.contentValue`.
-        public var schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
-
         /// Dictionary of vendor extensions.
         ///
         /// These should be of the form:
@@ -58,88 +42,45 @@ extension OpenAPI {
         /// parameter.
         public var location: Context.Location { return context.location }
 
-        /// Create a parameter with an `Either<SchemaContext, OpenAPI.Content.Map>`.
-        public init(
-            name: String,
-            context: Context,
-            schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
-            description: String? = nil,
-            deprecated: Bool = false,
-            vendorExtensions: [String: AnyCodable] = [:]
-        ) {
-            self.name = name
-            self.context = context
-            self.schemaOrContent = schemaOrContent
-            self.description = description
-            self.deprecated = deprecated
-            self.vendorExtensions = vendorExtensions
+        /// OpenAPI Spec "content" or "schema" properties.
+        ///
+        /// You can access the schema context (if it is in use for
+        /// this parameter) with `schemaOrContent.schemaContextValue`.
+        /// The schema context contains lots of information detailed in the
+        /// OpenAPI specification under the **Parameter Object** section.
+        ///
+        /// You can directly access the underlying `JSONSchema` with
+        /// `schemaOrContent.schemaValue`. If the schema is a reference
+        /// instead of an inline value, `schemaOrContent.schemaReference`
+        /// will get you the reference.
+        ///
+        /// You can access the content map (if it is in use for
+        /// this parameter) with `schemaOrContent.contentValue`.
+        public var schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map> {
+              switch context {
+              case .query(required: _, allowEmptyValue: _, schemaOrContent: let schemaOrContent):
+                  return schemaOrContent
+              case .header(required: _, schemaOrContent: let schemaOrContent):
+                  return schemaOrContent
+              case .path(schemaOrContent: let schemaOrContent):
+                  return schemaOrContent
+              case .cookie(required: _, schemaOrContent: let schemaOrContent):
+                  return schemaOrContent
+              case .querystring(required: _, content: let content):
+                  return .content(content)
+              }
         }
 
-        /// Create a parameter with a `SchemaContext`.
+        /// Create a parameter.
         public init(
             name: String,
             context: Context,
-            schema: SchemaContext,
             description: String? = nil,
             deprecated: Bool = false,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.name = name
             self.context = context
-            self.schemaOrContent = .init(schema)
-            self.description = description
-            self.deprecated = deprecated
-            self.vendorExtensions = vendorExtensions
-        }
-
-        /// Create a parameter with a `JSONSchema` and the default
-        /// `style` for the given `Context`.
-        public init(
-            name: String,
-            context: Context,
-            schema: JSONSchema,
-            description: String? = nil,
-            deprecated: Bool = false,
-            vendorExtensions: [String: AnyCodable] = [:]
-        ) {
-            self.name = name
-            self.context = context
-            self.schemaOrContent = .init(SchemaContext(schema, style: .default(for: context)))
-            self.description = description
-            self.deprecated = deprecated
-            self.vendorExtensions = vendorExtensions
-        }
-
-        /// Create a parameter with a reference to a `JSONSchema`
-        /// and the default `style` for the given `Context`.
-        public init(
-            name: String,
-            context: Context,
-            schemaReference: OpenAPI.Reference<JSONSchema>,
-            description: String? = nil,
-            deprecated: Bool = false,
-            vendorExtensions: [String: AnyCodable] = [:]
-        ) {
-            self.name = name
-            self.context = context
-            self.schemaOrContent = .init(SchemaContext(schemaReference: schemaReference, style: .default(for: context)))
-            self.description = description
-            self.deprecated = deprecated
-            self.vendorExtensions = vendorExtensions
-        }
-
-        /// Create a parameter with a `Content.Map`.
-        public init(
-            name: String,
-            context: Context,
-            content: OpenAPI.Content.Map,
-            description: String? = nil,
-            deprecated: Bool = false,
-            vendorExtensions: [String: AnyCodable] = [:]
-        ) {
-            self.name = name
-            self.context = context
-            self.schemaOrContent = .init(content)
             self.description = description
             self.deprecated = deprecated
             self.vendorExtensions = vendorExtensions
@@ -155,6 +96,328 @@ extension OpenAPI.Parameter {
     /// `document.components` to resolve an `Either` to
     /// an `OpenAPI.Parameter`.
     public typealias Array = [Either<OpenAPI.Reference<OpenAPI.Parameter>, OpenAPI.Parameter>]
+}
+
+// MARK: Convenience constructors
+extension OpenAPI.Parameter {
+    public static func cookie(
+        name: String,
+        required: Bool = false,
+        schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .cookie(required: required, schemaOrContent: schemaOrContent),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func cookie(
+        name: String,
+        required: Bool = false,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .cookie(
+                required: required,
+                content: content
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func cookie(
+        name: String,
+        required: Bool = false,
+        schema: JSONSchema,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .cookie(
+                required: required,
+                schema: schema
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func cookie(
+        name: String,
+        required: Bool = false,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .cookie(
+                required: required,
+                schemaOrContent: .schema(.init(schemaReference: schemaReference, style: .default(for: .cookie)))
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func header(
+        name: String,
+        required: Bool = false,
+        schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .header(required: required, schemaOrContent: schemaOrContent),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func header(
+        name: String,
+        required: Bool = false,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .header(
+                required: required, 
+                content: content
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func header(
+        name: String,
+        required: Bool = false,
+        schema: JSONSchema,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .header(
+                required: required, 
+                schema: schema
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func header(
+        name: String,
+        required: Bool = false,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .header(
+                required: required, 
+                schemaOrContent: .schema(.init(schemaReference: schemaReference, style: .default(for: .header)))
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func path(
+        name: String,
+        schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .path(schemaOrContent: schemaOrContent),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func path(
+        name: String,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .path(content: content),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func path(
+        name: String,
+        schema: JSONSchema,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .path(schema: schema),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func path(
+        name: String,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .path(schemaOrContent: .schema(.init(schemaReference: schemaReference, style: .default(for: .path)))),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func query(
+        name: String,
+        required: Bool = false,
+        allowEmptyValue: Bool = false,
+        schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: schemaOrContent),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func query(
+        name: String,
+        required: Bool = false,
+        allowEmptyValue: Bool = false,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .query(
+                required: required,
+                allowEmptyValue: allowEmptyValue,
+                content: content
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func query(
+        name: String,
+        required: Bool = false,
+        allowEmptyValue: Bool = false,
+        schema: JSONSchema,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .query(
+                required: required,
+                allowEmptyValue: allowEmptyValue,
+                schema: schema
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func query(
+        name: String,
+        required: Bool = false,
+        allowEmptyValue: Bool = false,
+        schemaReference: OpenAPI.Reference<JSONSchema>,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .query(
+                required: required,
+                allowEmptyValue: allowEmptyValue,
+                schemaOrContent: .schema(.init(schemaReference: schemaReference, style: .default(for: .query)))
+            ),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
+
+    public static func querystring(
+        name: String,
+        required: Bool = false,
+        content: OpenAPI.Content.Map,
+        description: String? = nil,
+        deprecated: Bool = false,
+        vendorExtensions: [String: AnyCodable] = [:]
+    ) -> Self {
+        .init(
+            name: name,
+            context: .querystring(content: content),
+            description: description,
+            deprecated: deprecated,
+            vendorExtensions: vendorExtensions
+        )
+    }
 }
 
 extension OpenAPI.Parameter {
@@ -173,11 +436,10 @@ extension OpenAPI.Parameter {
 // OpenAPI.PathItem.Array.Element =>
 extension Either where A == OpenAPI.Reference<OpenAPI.Parameter>, B == OpenAPI.Parameter {
 
-    /// Construct a parameter using a `JSONSchema`.
+    /// Construct a parameter.
     public static func parameter(
         name: String,
         context: OpenAPI.Parameter.Context,
-        schema: JSONSchema,
         description: String? = nil,
         deprecated: Bool = false,
         vendorExtensions: [String: AnyCodable] = [:]
@@ -186,28 +448,6 @@ extension Either where A == OpenAPI.Reference<OpenAPI.Parameter>, B == OpenAPI.P
             .init(
                 name: name,
                 context: context,
-                schema: schema,
-                description: description,
-                deprecated: deprecated,
-                vendorExtensions: vendorExtensions
-            )
-        )
-    }
-
-    /// Construct a parameter using a `Content.Map`.
-    public static func parameter(
-        name: String,
-        context: OpenAPI.Parameter.Context,
-        content: OpenAPI.Content.Map,
-        description: String? = nil,
-        deprecated: Bool = false,
-        vendorExtensions: [String: AnyCodable] = [:]
-    ) -> Self {
-        return .b(
-            .init(
-                name: name,
-                context: context,
-                content: content,
                 description: description,
                 deprecated: deprecated,
                 vendorExtensions: vendorExtensions
@@ -238,22 +478,25 @@ extension OpenAPI.Parameter: Encodable {
         let required: Bool
         let location: Context.Location
         switch context {
-        case .query(required: let req, allowEmptyValue: let allowEmptyValue):
+        case .query(required: let req, allowEmptyValue: let allowEmptyValue, schemaOrContent: _):
             required = req
             location = .query
 
             if allowEmptyValue {
                 try container.encode(allowEmptyValue, forKey: .allowEmptyValue)
             }
-        case .header(required: let req):
+        case .header(required: let req, schemaOrContent: _):
             required = req
             location = .header
-        case .path:
+        case .path(schemaOrContent: _):
             required = true
             location = .path
-        case .cookie(required: let req):
+        case .cookie(required: let req, schemaOrContent: _):
             required = req
             location = .cookie
+        case .querystring(required: let req, content: _):
+            required = req
+            location = .querystring
         }
         try container.encode(location, forKey: .parameterLocation)
 
@@ -263,7 +506,7 @@ extension OpenAPI.Parameter: Encodable {
 
         switch schemaOrContent {
         case .a(let schema):
-            try schema.encode(to: encoder, for: context)
+            try schema.encode(to: encoder, for: location)
         case .b(let contentMap):
             try container.encode(contentMap, forKey: .content)
         }
@@ -290,34 +533,16 @@ extension OpenAPI.Parameter: Decodable {
         let required = try container.decodeIfPresent(Bool.self, forKey: .required) ?? false
         let location = try container.decode(Context.Location.self, forKey: .parameterLocation)
 
-        switch location {
-        case .query:
-            let allowEmptyValue = try container.decodeIfPresent(Bool.self, forKey: .allowEmptyValue) ?? false
-            context = .query(required: required, allowEmptyValue: allowEmptyValue)
-        case .header:
-            context = .header(required: required)
-        case .path:
-            if !required {
-                throw GenericError(
-                    subjectName: name,
-                    details: "positional path parameters must be explicitly set to required",
-                    codingPath: decoder.codingPath
-                )
-            }
-            context = .path
-        case .cookie:
-            context = .cookie(required: required)
-        }
-
         let maybeContent = try container.decodeIfPresent(OpenAPI.Content.Map.self, forKey: .content)
 
         let maybeSchema: SchemaContext?
         if container.contains(.schema) {
-            maybeSchema = try SchemaContext(from: decoder, for: context)
+            maybeSchema = try SchemaContext(from: decoder, for: location)
         } else {
             maybeSchema = nil
         }
 
+        let schemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
         switch (maybeContent, maybeSchema) {
         case (let content?, nil):
             schemaOrContent = .init(content)
@@ -335,6 +560,34 @@ extension OpenAPI.Parameter: Decodable {
                 details: "A parameter must specify one but not both `content` and `schema`",
                 codingPath: decoder.codingPath
             )
+        }
+
+        switch location {
+        case .query:
+            let allowEmptyValue = try container.decodeIfPresent(Bool.self, forKey: .allowEmptyValue) ?? false
+            context = .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: schemaOrContent)
+        case .header:
+            context = .header(required: required, schemaOrContent: schemaOrContent)
+        case .path:
+            if !required {
+                throw GenericError(
+                    subjectName: name,
+                    details: "positional path parameters must be explicitly set to required",
+                    codingPath: decoder.codingPath
+                )
+            }
+            context = .path(schemaOrContent: schemaOrContent)
+        case .cookie:
+            context = .cookie(required: required, schemaOrContent: schemaOrContent)
+        case .querystring:
+            guard case .b(let content) = schemaOrContent else {
+                throw GenericError(
+                    subjectName: name,
+                    details: "`schema` and `style` are disallowed for `querystring` parameters",
+                    codingPath: decoder.codingPath
+                )
+            }
+            context = .querystring(required: required, content: content)
         }
 
         description = try container.decodeIfPresent(String.self, forKey: .description)

@@ -31,10 +31,6 @@ public extension OpenAPI.SecurityScheme {
     typealias Location = OpenAPIKitCore.Shared.SecuritySchemeLocation
 }
 
-public extension OpenAPI.Parameter.Context {
-    typealias Location = OpenAPIKitCore.Shared.ParameterContextLocation
-}
-
 public extension OpenAPI.Parameter.SchemaContext {
     typealias Style = OpenAPIKitCore.Shared.ParameterSchemaContextStyle
 }

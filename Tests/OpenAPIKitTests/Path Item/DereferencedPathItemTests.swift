@@ -34,7 +34,7 @@ final class DereferencedPathItemTests: XCTestCase {
     func test_inlinedOperationsAndParameters() throws {
         let t1 = try OpenAPI.PathItem(
             parameters: [
-                .parameter(name: "param", context: .header, schema: .string)
+                .parameter(name: "param", context: .header(schema: .string))
             ],
             get: .init(tags: "get op", responses: [:]),
             put: .init(tags: "put op", responses: [:]),
@@ -67,7 +67,7 @@ final class DereferencedPathItemTests: XCTestCase {
     func test_referencedParameter() throws {
         let components = OpenAPI.Components(
             parameters: [
-                "test": .init(name: "param", context: .header, schema: .string)
+                "test": .init(name: "param", context: .header(schema: .string))
             ]
         )
         let t1 = try OpenAPI.PathItem(

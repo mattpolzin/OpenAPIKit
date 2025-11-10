@@ -18,7 +18,7 @@ final class ResolvedRouteTests: XCTestCase {
                     summary: "routeSummary",
                     description: "routeDescription",
                     servers: [],
-                    parameters: [.parameter(name: "id", context: .path, schema: .integer)],
+                    parameters: [.parameter(name: "id", context: .path(schema: .integer))],
                     get: .init(
                         summary: "get",
                         responses: [200: .response(description: "hello world")]

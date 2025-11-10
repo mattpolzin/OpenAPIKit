@@ -99,7 +99,7 @@ final class ComponentsTests: XCTestCase {
                 "two": .init(description: "hello", content: [:])
             ],
             parameters: [
-                "three": .init(name: "hello", context: .query, schema: .string)
+                "three": .init(name: "hello", context: .query(schema: .string))
             ],
             examples: [
                 "four": .init(value: .init(URL(string: "hello.com/hello")!))
@@ -139,7 +139,7 @@ final class ComponentsTests: XCTestCase {
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
-        XCTAssertEqual(components[ref3], .init(name: "hello", context: .query, schema: .string))
+        XCTAssertEqual(components[ref3], .init(name: "hello", context: .query(schema: .string)))
         XCTAssertEqual(components[ref4], .init(value: .init(URL(string: "hello.com/hello")!)))
         XCTAssertEqual(components[ref5], .init(content: [:]))
         XCTAssertEqual(components[ref6], .init(schema: .string))
@@ -284,7 +284,7 @@ extension ComponentsTests {
                 "two": .init(description: "hello", content: [:])
             ],
             parameters: [
-                "three": .init(name: "hi", context: .query, content: [:])
+                "three": .init(name: "hi", context: .query(content: [:]))
             ],
             examples: [
                 "four": .init(value: .init(URL(string: "http://address.com")!))
@@ -506,7 +506,7 @@ extension ComponentsTests {
                     "two": .init(description: "hello", content: [:])
                 ],
                 parameters: [
-                    "three": .init(name: "hi", context: .query, content: [:])
+                    "three": .init(name: "hi", context: .query(content: [:]))
                 ],
                 examples: [
                     "four": .init(value: .init(URL(string: "http://address.com")!))

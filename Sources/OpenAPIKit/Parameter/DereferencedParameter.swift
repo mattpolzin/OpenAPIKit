@@ -90,26 +90,59 @@ extension OpenAPI.Parameter: ExternallyDereferenceable {
         // next line:
 //        let (newSchemaOrContent, components) = try await schemaOrContent.externallyDereferenced(with: loader)
 
-        let newSchemaOrContent: Either<SchemaContext, OpenAPI.Content.Map>
+        let newContext: OpenAPI.Parameter.Context
         let newComponents: OpenAPI.Components
         let newMessages: [Loader.Message]
 
-        switch schemaOrContent {
-        case .a(let schemaContext):
-            let (context, components, messages) = try await schemaContext.externallyDereferenced(with: loader)
-            newSchemaOrContent = .a(context)
-            newComponents = components
-            newMessages = messages
-        case .b(let contentMap):
-            let (map, components, messages) = try await contentMap.externallyDereferenced(with: loader)
-            newSchemaOrContent = .b(map)
-            newComponents = components
-            newMessages = messages
+        switch context {
+        case .query(required: let required, allowEmptyValue: let allowEmptyValue, schemaOrContent: let schemaOrContent):
+            let newSchemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>
+            (newSchemaOrContent, newComponents, newMessages) = try await externallyDereference(schemaOrContent: schemaOrContent, with: Loader.self)
+
+            newContext = .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: newSchemaOrContent)
+
+        case .header(required: let required, schemaOrContent: let schemaOrContent):
+            let newSchemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>
+            (newSchemaOrContent, newComponents, newMessages) = try await externallyDereference(schemaOrContent: schemaOrContent, with: Loader.self)
+
+            newContext = .header(required: required, schemaOrContent: newSchemaOrContent)
+
+        case .path(schemaOrContent: let schemaOrContent):
+            let newSchemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>
+            (newSchemaOrContent, newComponents, newMessages) = try await externallyDereference(schemaOrContent: schemaOrContent, with: Loader.self)
+
+            newContext = .path(schemaOrContent: newSchemaOrContent)
+
+        case .cookie(required: let required, schemaOrContent: let schemaOrContent):
+            let newSchemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>
+            (newSchemaOrContent, newComponents, newMessages) = try await externallyDereference(schemaOrContent: schemaOrContent, with: Loader.self)
+
+            newContext = .cookie(required: required, schemaOrContent: newSchemaOrContent)
+
+        case .querystring(required: let required, content: let content):
+            let newContent: OpenAPI.Content.Map
+            (newContent, newComponents, newMessages) = try await content.externallyDereferenced(with: Loader.self)
+
+            newContext = .querystring(required: required, content: newContent)
         }
 
         var newParameter = self
-        newParameter.schemaOrContent = newSchemaOrContent
+        newParameter.context = newContext
 
         return (newParameter, newComponents, newMessages)
+    }
+}
+
+fileprivate func externallyDereference<Loader: ExternalLoader>(
+    schemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>,
+    with loader: Loader.Type
+) async throws -> (Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>, OpenAPI.Components, [Loader.Message]) {
+    switch schemaOrContent {
+    case .a(let schemaContext):
+        let (context, components, messages) = try await schemaContext.externallyDereferenced(with: loader)
+        return (.a(context), components, messages)
+    case .b(let contentMap):
+        let (map, components, messages) = try await contentMap.externallyDereferenced(with: loader)
+        return (.b(map), components, messages)
     }
 }

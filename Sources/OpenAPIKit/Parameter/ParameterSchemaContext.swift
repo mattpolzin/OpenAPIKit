@@ -127,13 +127,52 @@ extension OpenAPI.Parameter {
     }
 }
 
+extension OpenAPI.Parameter.SchemaContext {
+    public static func schema(_ schema: JSONSchema,
+                              style: Style,
+                              explode: Bool,
+                              allowReserved: Bool = false,
+                              examples: OpenAPI.Example.Map? = nil) -> Self {
+        .init(schema, style: style, explode: explode, allowReserved: allowReserved, examples: examples)
+    }
+
+    public static func schema(_ schema: JSONSchema,
+                              style: Style,
+                              allowReserved: Bool = false,
+                              examples: OpenAPI.Example.Map? = nil) -> Self {
+        .init(schema, style: style, allowReserved: allowReserved, examples: examples)
+    }
+
+    public static func schemaReference(_ reference: OpenAPI.Reference<JSONSchema>,
+                                       style: Style,
+                                       explode: Bool,
+                                       allowReserved: Bool = false,
+                                       examples: OpenAPI.Example.Map? = nil) -> Self {
+        .init(schemaReference: reference,
+              style: style,
+              explode: explode,
+              allowReserved: allowReserved,
+              examples: examples)
+    }
+
+    public static func schemaReference(_ reference: OpenAPI.Reference<JSONSchema>,
+                                       style: Style,
+                                       allowReserved: Bool = false,
+                                       examples: OpenAPI.Example.Map? = nil) -> Self {
+        .init(schemaReference: reference,
+              style: style,
+              allowReserved: allowReserved,
+              examples: examples)
+    }
+}
+
 extension OpenAPI.Parameter.SchemaContext.Style {
     /// Get the default `Style` for the given location
     /// per the OpenAPI Specification.
     ///
     /// See the `style` fixed field under
     /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
-    public static func `default`(for location: OpenAPI.Parameter.Context) -> Self {
+    public static func `default`(for location: OpenAPI.Parameter.Context.Location) -> Self {
         switch location {
         case .query:
             return .form
@@ -142,6 +181,28 @@ extension OpenAPI.Parameter.SchemaContext.Style {
         case .path:
             return .simple
         case .header:
+            return .simple
+        case .querystring:
+            return .simple
+        }
+    }
+
+    /// Get the default `Style` for the given context
+    /// per the OpenAPI Specification.
+    ///
+    /// See the `style` fixed field under
+    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    public static func `default`(for context: OpenAPI.Parameter.Context) -> Self {
+        switch context {
+        case .query:
+            return .form
+        case .cookie:
+            return .form
+        case .path:
+            return .simple
+        case .header:
+            return .simple
+        case .querystring:
             return .simple
         }
     }
@@ -171,7 +232,7 @@ extension OpenAPI.Parameter.SchemaContext {
 }
 
 extension OpenAPI.Parameter.SchemaContext {
-    public func encode(to encoder: Encoder, for location: OpenAPI.Parameter.Context) throws {
+    public func encode(to encoder: Encoder, for location: OpenAPI.Parameter.Context.Location) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         if style != Style.default(for: location) {
@@ -197,7 +258,7 @@ extension OpenAPI.Parameter.SchemaContext {
 }
 
 extension OpenAPI.Parameter.SchemaContext {
-    public init(from decoder: Decoder, for location: OpenAPI.Parameter.Context) throws {
+    public init(from decoder: Decoder, for location: OpenAPI.Parameter.Context.Location) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         schema = try container.decode(Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.self, forKey: .schema)
