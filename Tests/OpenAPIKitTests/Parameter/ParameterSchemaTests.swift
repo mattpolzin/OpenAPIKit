@@ -210,6 +210,11 @@ final class ParameterSchemaTests: XCTestCase {
         let t7 = Schema(.string, style: .deepObject)
         XCTAssertFalse(t7.explode)
     }
+
+    public func test_cookie_style() {
+        let t1 = Schema(.string, style: .cookie)
+        XCTAssertEqual(t1.conditionalWarnings.count, 1)
+    }
 }
 
 // MARK: - Codable Tests

@@ -12,7 +12,7 @@ extension OpenAPI.Parameter {
     ///
     /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object)
     /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.1.1.html#style-values).
-    public struct SchemaContext: Equatable, Sendable {
+    public struct SchemaContext: HasConditionalWarnings, Sendable {
         public var style: Style
         public var explode: Bool
         public var allowReserved: Bool //defaults to false
@@ -21,6 +21,8 @@ extension OpenAPI.Parameter {
         public var example: AnyCodable?
         public var examples: OpenAPI.Example.Map?
 
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
+
         public init(_ schema: JSONSchema,
                     style: Style,
                     explode: Bool,
@@ -32,6 +34,8 @@ extension OpenAPI.Parameter {
             self.schema = .init(schema)
             self.example = example
             self.examples = nil
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(_ schema: JSONSchema,
@@ -45,6 +49,8 @@ extension OpenAPI.Parameter {
             self.examples = nil
 
             self.explode = style.defaultExplode
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(schemaReference: OpenAPI.Reference<JSONSchema>,
@@ -58,6 +64,8 @@ extension OpenAPI.Parameter {
             self.schema = .init(schemaReference)
             self.example = example
             self.examples = nil
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(schemaReference: OpenAPI.Reference<JSONSchema>,
@@ -71,6 +79,8 @@ extension OpenAPI.Parameter {
             self.examples = nil
 
             self.explode = style.defaultExplode
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(_ schema: JSONSchema,
@@ -84,6 +94,8 @@ extension OpenAPI.Parameter {
             self.schema = .init(schema)
             self.examples = examples
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(_ schema: JSONSchema,
@@ -97,6 +109,8 @@ extension OpenAPI.Parameter {
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
 
             self.explode = style.defaultExplode
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(schemaReference: OpenAPI.Reference<JSONSchema>,
@@ -110,6 +124,8 @@ extension OpenAPI.Parameter {
             self.schema = .init(schemaReference)
             self.examples = examples
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
 
         public init(schemaReference: OpenAPI.Reference<JSONSchema>,
@@ -123,7 +139,36 @@ extension OpenAPI.Parameter {
             self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
 
             self.explode = style.defaultExplode
+
+            self.conditionalWarnings = style.conditionalWarnings
         }
+    }
+}
+
+extension OpenAPI.Parameter.SchemaContext.Style {
+    fileprivate var conditionalWarnings: [(any Condition, OpenAPI.Warning)] {
+        let cookieStyleWarning: (any Condition, OpenAPI.Warning)?
+        if self != .cookie {
+            cookieStyleWarning = nil
+        } else {
+            cookieStyleWarning = OpenAPI.Document.ConditionalWarnings.version(lessThan: .v3_2_0, doesNotSupport: "The cookie style")
+        }
+
+
+        return [
+            cookieStyleWarning
+        ].compactMap { $0 }
+    }
+}
+
+extension OpenAPI.Parameter.SchemaContext: Equatable {
+    public static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        lhs.style == rhs.style
+        && lhs.allowReserved == rhs.allowReserved
+        && lhs.explode == rhs.explode
+        && lhs.schema == rhs.schema
+        && lhs.examples == rhs.examples
+        && lhs.example == rhs.example
     }
 }
 
@@ -278,6 +323,8 @@ extension OpenAPI.Parameter.SchemaContext {
             examples = examplesMap
             example = examplesMap.flatMap(OpenAPI.Content.firstExample(from:))
         }
+
+        self.conditionalWarnings = style.conditionalWarnings
     }
 }
 

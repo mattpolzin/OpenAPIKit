@@ -175,7 +175,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
@@ -183,7 +183,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             } else {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     example: example
@@ -193,7 +193,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
@@ -201,7 +201,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             } else {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     example: example
@@ -211,12 +211,26 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
     }
 }
 
+extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style: To31 {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.SchemaContext.Style {
+        switch self {
+        case .form: .form
+        case .simple: .simple
+        case .matrix: .matrix
+        case .label: .label
+        case .spaceDelimited: .spaceDelimited
+        case .pipeDelimited: .pipeDelimited
+        case .deepObject: .deepObject
+        }
+    }
+}
+
 extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
         OpenAPIKit.OpenAPI.Content.Encoding(
             contentTypes: [contentType].compactMap { $0 },
             headers: headers?.mapValues(eitherRefTo31),
-            style: style,
+            style: style.to31(),
             explode: explode,
             allowReserved: allowReserved
         )
