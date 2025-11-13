@@ -18,14 +18,14 @@ extension OpenAPI {
     public struct Components: Equatable, CodableVendorExtendable, Sendable {
 
         public var schemas: ComponentDictionary<JSONSchema>
-        public var responses: ComponentDictionary<Response>
-        public var parameters: ComponentDictionary<Parameter>
-        public var examples: ComponentDictionary<Example>
-        public var requestBodies: ComponentDictionary<Request>
-        public var headers: ComponentDictionary<Header>
-        public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var links: ComponentDictionary<Link>
-        public var callbacks: ComponentDictionary<Callbacks>
+        public var responses: ComponentReferenceDictionary<Response>
+        public var parameters: ComponentReferenceDictionary<Parameter>
+        public var examples: ComponentReferenceDictionary<Example>
+        public var requestBodies: ComponentReferenceDictionary<Request>
+        public var headers: ComponentReferenceDictionary<Header>
+        public var securitySchemes: ComponentReferenceDictionary<SecurityScheme>
+        public var links: ComponentReferenceDictionary<Link>
+        public var callbacks: ComponentReferenceDictionary<Callbacks>
       
         public var pathItems: ComponentDictionary<PathItem>
 
@@ -38,14 +38,14 @@ extension OpenAPI {
 
         public init(
             schemas: ComponentDictionary<JSONSchema> = [:],
-            responses: ComponentDictionary<Response> = [:],
-            parameters: ComponentDictionary<Parameter> = [:],
-            examples: ComponentDictionary<Example> = [:],
-            requestBodies: ComponentDictionary<Request> = [:],
-            headers: ComponentDictionary<Header> = [:],
-            securitySchemes: ComponentDictionary<SecurityScheme> = [:],
-            links: ComponentDictionary<Link> = [:],
-            callbacks: ComponentDictionary<Callbacks> = [:],
+            responses: ComponentReferenceDictionary<Response> = [:],
+            parameters: ComponentReferenceDictionary<Parameter> = [:],
+            examples: ComponentReferenceDictionary<Example> = [:],
+            requestBodies: ComponentReferenceDictionary<Request> = [:],
+            headers: ComponentReferenceDictionary<Header> = [:],
+            securitySchemes: ComponentReferenceDictionary<SecurityScheme> = [:],
+            links: ComponentReferenceDictionary<Link> = [:],
+            callbacks: ComponentReferenceDictionary<Callbacks> = [:],
             pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
@@ -133,6 +133,7 @@ extension OpenAPI.Components {
 extension OpenAPI {
 
     public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
+    public typealias ComponentReferenceDictionary<T: ComponentDictionaryLocatable> = OrderedDictionary<ComponentKey, Either<OpenAPI.Reference<T>, T>>
 }
 
 // MARK: - Codable
@@ -194,26 +195,26 @@ extension OpenAPI.Components: Decodable {
             schemas = try container.decodeIfPresent(OpenAPI.ComponentDictionary<JSONSchema>.self, forKey: .schemas)
                 ?? [:]
 
-            responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
+            responses = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Response>.self, forKey: .responses)
                 ?? [:]
 
-            parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Parameter>.self, forKey: .parameters)
+            parameters = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Parameter>.self, forKey: .parameters)
             ?? [:]
 
-            examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)
+            examples = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Example>.self, forKey: .examples)
                 ?? [:]
 
-            requestBodies = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
+            requestBodies = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
                 ?? [:]
 
-            headers = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Header>.self, forKey: .headers)
+            headers = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Header>.self, forKey: .headers)
                 ?? [:]
 
-            securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+            securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
 
-            links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
+            links = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
-            callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+            callbacks = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
           
             pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 

@@ -652,14 +652,14 @@ extension OpenAPIKit30.OpenAPI.Components: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Components {
         OpenAPIKit.OpenAPI.Components(
             schemas: schemas.mapValues { $0.to31() },
-            responses: responses.mapValues { $0.to31() },
-            parameters: parameters.mapValues { $0.to31() },
-            examples: examples.mapValues { $0.to31() },
-            requestBodies: requestBodies.mapValues { $0.to31() },
-            headers: headers.mapValues { $0.to31() },
-            securitySchemes: securitySchemes.mapValues { $0.to31() },
-            links: links.mapValues { $0.to31() },
-            callbacks: callbacks.mapValues { $0.to31() },
+            responses: responses.mapValues { .b($0.to31()) },
+            parameters: parameters.mapValues { .b($0.to31()) },
+            examples: examples.mapValues { .b($0.to31()) },
+            requestBodies: requestBodies.mapValues { .b($0.to31()) },
+            headers: headers.mapValues { .b($0.to31()) },
+            securitySchemes: securitySchemes.mapValues { .b($0.to31()) },
+            links: links.mapValues { .b($0.to31()) },
+            callbacks: callbacks.mapValues { .b($0.to31()) },
             vendorExtensions: vendorExtensions
         )
     }
