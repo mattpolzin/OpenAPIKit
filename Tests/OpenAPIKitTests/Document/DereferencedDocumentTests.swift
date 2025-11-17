@@ -64,7 +64,7 @@ final class DereferencedDocumentTests: XCTestCase {
     }
 
     func test_noSecurityReferencedResponseInPath() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "test": .init(description: "success")
             ]
@@ -92,7 +92,7 @@ final class DereferencedDocumentTests: XCTestCase {
     }
 
     func test_securityAndReferencedResponseInPath() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "test": .init(description: "success")
             ],

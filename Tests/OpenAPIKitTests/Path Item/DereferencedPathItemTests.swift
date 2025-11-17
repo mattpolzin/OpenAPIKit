@@ -65,7 +65,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_referencedParameter() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             parameters: [
                 "test": .init(name: "param", context: .header(schema: .string))
             ]
@@ -100,7 +100,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_referencedOperations() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -153,7 +153,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedGetResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "put": .init(description: "put resp"),
                 "post": .init(description: "post resp"),
@@ -181,7 +181,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedPutResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "post": .init(description: "post resp"),
@@ -209,7 +209,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedPostResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -237,7 +237,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedDeleteResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -265,7 +265,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedOptionsResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -293,7 +293,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedHeadResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -321,7 +321,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedPatchResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -349,7 +349,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedTraceResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -377,7 +377,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedQueryResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),
@@ -405,7 +405,7 @@ final class DereferencedPathItemTests: XCTestCase {
     }
 
     func test_missingReferencedAdditionalOperationResp() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "get": .init(description: "get resp"),
                 "put": .init(description: "put resp"),

@@ -41,7 +41,7 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_parameterReference() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             parameters: [
                 "test": .header(
                     name: "test",
@@ -77,7 +77,7 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_requestReference() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             requestBodies: [
                 "test": OpenAPI.Request(content: [.json: .init(schema: .string)])
             ]
@@ -109,7 +109,7 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_responseReference() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             responses: [
                 "test": .init(description: "test")
             ]
@@ -139,7 +139,7 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_securityReference() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             securitySchemes: ["requirement": .apiKey(name: "Api-Key", location: .header)]
         )
         let t1 = try OpenAPI.Operation(
@@ -163,7 +163,7 @@ final class DereferencedOperationTests: XCTestCase {
     }
 
     func test_dereferencedCallback() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             callbacks: [
                 "callback": [
                     OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(

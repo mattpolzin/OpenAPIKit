@@ -837,7 +837,7 @@ final class BuiltinValidationTests: XCTestCase {
                 "/world": .reference(.component(named: "path1")),
                 "/external": .reference(.external(URL(string: "https://other-world.com")!))
             ],
-            components: .init(
+            components: .direct(
                 schemas: [
                     "schema1": .object
                 ],
@@ -909,7 +909,7 @@ final class BuiltinValidationTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 links: [
                     "testLink": link
                 ]
@@ -936,7 +936,7 @@ final class BuiltinValidationTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 links: [
                     "testLink": link
                 ]

@@ -827,7 +827,7 @@ extension DocumentTests {
             info: .init(title: "API", version: "1.0"),
             servers: [],
             paths: [:],
-            components: .init(
+            components: .direct(
                 securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
             ),
             security: [[.component( named: "security"):[]]]
@@ -902,7 +902,7 @@ extension DocumentTests {
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],
-                components: .init(
+                components: .direct(
                     securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
                 ),
                 security: [[.component( named: "security"):[]]]

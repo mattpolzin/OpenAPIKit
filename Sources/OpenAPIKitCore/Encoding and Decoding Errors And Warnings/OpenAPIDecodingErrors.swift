@@ -10,7 +10,7 @@ extension Error {
     public enum Decoding {}
 }
 
-public enum ErrorCategory {
+public enum ErrorCategory: Sendable {
     /// The type with the given name was expected but not found.
     case typeMismatch(expectedTypeName: String)
     /// One of two possible types were expected but neither was found.
@@ -22,7 +22,7 @@ public enum ErrorCategory {
     /// Something inconsistent or disallowed according the OpenAPI Specification was found.
     case inconsistency(details: String)
 
-    public enum KeyValue {
+    public enum KeyValue: Sendable {
         case key
         case value
     }

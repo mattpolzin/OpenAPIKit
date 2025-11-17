@@ -302,7 +302,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -357,7 +357,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -411,7 +411,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -510,7 +510,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(

@@ -110,7 +110,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 schemas: [
                     "string_schema": .string
                 ],
@@ -243,7 +243,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             post: testCREATE_endpoint
         )
 
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             schemas: [
                 "string_schema": .string
             ],
@@ -343,7 +343,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
     }
 
     func test_securityRequirements() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             securitySchemes: [
                 "basic_auth": .init(
                     type: .http(scheme: "basic", bearerFormat: nil),
@@ -491,7 +491,7 @@ fileprivate let testWidgetSchema = JSONSchema.object(
     ]
 )
 
-fileprivate let testComponents = OpenAPI.Components(
+fileprivate let testComponents = OpenAPI.Components.direct(
     schemas: [
         "testWidgetSchema": testWidgetSchema
     ],

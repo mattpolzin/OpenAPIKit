@@ -131,6 +131,16 @@ extension Either where B == OpenAPI.Header {
     public var headerValue: B? { b }
 }
 
+extension Either where B == OpenAPI.Callbacks {
+    /// Retrieve the callbacks if that is what this property contains.
+    public var callbacksValue: B? { b }
+}
+
+extension Either where B == OpenAPI.SecurityScheme {
+    /// Retrieve the security scheme if that is what this property contains.
+    public var securitySchemeValue: B? { b }
+}
+
 // MARK: - Convenience constructors
 extension Either where A == Bool {
     /// Construct a boolean value.
@@ -220,7 +230,22 @@ extension Either where B == OpenAPI.Response {
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
 }
 
+extension Either where B == OpenAPI.Link {
+    /// Construct a link value.
+    public static func link(_ link: OpenAPI.Link) -> Self { .b(link) }
+}
+
 extension Either where B == OpenAPI.Header {
     /// Construct a header value.
     public static func header(_ header: OpenAPI.Header) -> Self { .b(header) }
+}
+
+extension Either where B == OpenAPI.Callbacks {
+    /// Construct a callbacks value.
+    public static func callbacks(_ callbacks: OpenAPI.Callbacks) -> Self { .b(callbacks) }
+}
+
+extension Either where B == OpenAPI.SecurityScheme {
+    /// Construct a security scheme value.
+    public static func securityScheme(_ securityScheme: OpenAPI.SecurityScheme) -> Self { .b(securityScheme) }
 }
