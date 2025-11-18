@@ -16,7 +16,7 @@ final class DereferencedContentTests: XCTestCase {
     }
 
     func test_oneExampleReferenced() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             examples: ["test": .init(value: .init("hello world"))]
         )
         let t1 = try OpenAPI.Content(
@@ -31,7 +31,7 @@ final class DereferencedContentTests: XCTestCase {
     }
 
     func test_multipleExamplesReferenced() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             examples: [
                 "test1": .init(value: .init("hello world")),
                 "test2": .init(value: .a(URL(string: "http://website.com")!))
@@ -130,7 +130,7 @@ final class DereferencedContentTests: XCTestCase {
     }
 
     func test_referencedHeaderInEncoding() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             headers: [
                 "test": OpenAPI.Header(schema: .string)
             ]

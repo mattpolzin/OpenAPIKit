@@ -834,8 +834,8 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc,oldDoc)
 
-        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"])
-        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"])
+        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"]?.b)
+        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"]?.b)
 
         try assertEqualNewToOld(newParameter1, parameter1)
         try assertEqualNewToOld(newParameter2, parameter2)
@@ -1497,36 +1497,68 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
         let oldSchema = try XCTUnwrap(oldComponents.schemas[key])
         try assertEqualNewToOld(newSchema, oldSchema)
     }
-    for (key, newResponse) in newComponents.responses {
+    for (key, maybeNewResponse) in newComponents.responses {
         let oldResponse = try XCTUnwrap(oldComponents.responses[key])
+        guard case let .b(newResponse) = maybeNewResponse else {
+            XCTFail("Found a reference to a response where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newResponse, oldResponse)
     }
-    for (key, newParameter) in newComponents.parameters {
+    for (key, maybeNewParameter) in newComponents.parameters {
         let oldParameter = try XCTUnwrap(oldComponents.parameters[key])
+        guard case let .b(newParameter) = maybeNewParameter else {
+            XCTFail("Found a reference to a parameter where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newParameter, oldParameter)
     }
-    for (key, newExample) in newComponents.examples {
+    for (key, maybeNewExample) in newComponents.examples {
         let oldExample = try XCTUnwrap(oldComponents.examples[key])
+        guard case let .b(newExample) = maybeNewExample else {
+            XCTFail("Found a reference to an example where one was not expected")
+            return
+        }
         assertEqualNewToOld(newExample, oldExample)
     }
-    for (key, newRequest) in newComponents.requestBodies {
+    for (key, maybeNewRequest) in newComponents.requestBodies {
         let oldRequest = try XCTUnwrap(oldComponents.requestBodies[key])
+        guard case let .b(newRequest) = maybeNewRequest else {
+            XCTFail("Found a reference to a request where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newRequest, oldRequest)
     }
-    for (key, newHeader) in newComponents.headers {
+    for (key, maybeNewHeader) in newComponents.headers {
         let oldHeader = try XCTUnwrap(oldComponents.headers[key])
+        guard case let .b(newHeader) = maybeNewHeader else {
+            XCTFail("Found a reference to a header where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newHeader, oldHeader)
     }
-    for (key, newSecurity) in newComponents.securitySchemes {
+    for (key, maybeNewSecurity) in newComponents.securitySchemes {
         let oldSecurity = try XCTUnwrap(oldComponents.securitySchemes[key])
+        guard case let .b(newSecurity) = maybeNewSecurity else {
+            XCTFail("Found a reference to a security scheme where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newSecurity, oldSecurity)
     }
-    for (key, newLink) in newComponents.links {
+    for (key, maybeNewLink) in newComponents.links {
         let oldLink = try XCTUnwrap(oldComponents.links[key])
+        guard case let .b(newLink) = maybeNewLink else {
+            XCTFail("Found a reference to a link where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newLink, oldLink)
     }
-    for (key, newCallbacks) in newComponents.callbacks {
+    for (key, maybeNewCallbacks) in newComponents.callbacks {
         let oldCallbacks = try XCTUnwrap(oldComponents.callbacks[key])
+        guard case let .b(newCallbacks) = maybeNewCallbacks else {
+            XCTFail("Found a reference to a callbacks object where one was not expected")
+            return
+        }
         for (key, newCallback) in newCallbacks {
             let oldPathItem = try XCTUnwrap(oldCallbacks[key])
             switch (newCallback) {

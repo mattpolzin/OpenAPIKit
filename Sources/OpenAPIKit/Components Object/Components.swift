@@ -15,17 +15,47 @@ extension OpenAPI {
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.
+    ///
+    /// Most of the components dictionaries can contain either the component
+    /// directly or a $ref to the component. This distinction can be seen in
+    /// the types as either `ComponentDictionary<T>` (direct) or
+    /// `ComponentReferenceDictionary<T>` (direct or by-reference).
+    ///
+    /// If you are building a Components Object in Swift you may choose to make
+    /// all of your components direct in which case the
+    /// `OpenAPI.Components.direct()` convenience constructor will save you
+    /// some typing and verbosity.
+    ///
+    /// **Example**
+    ///     OpenAPI.Components(
+    ///       parameters: [ "my_param": .parameter(.cookie(name: "my_param", schema: .string)) ]
+    ///     )
+    ///
+    ///     // The above value is the same as the below value
+    ///
+    ///     OpenAPI.Components.direct(
+    ///       parameters: [ "my_param": .cookie(name: "my_param", schema: .string) ]
+    ///     )
+    ///
+    ///     // However, the `init()` initializer does allow you to use references where desired
+    ///
+    ///     OpenAPI.Components(
+    ///       parameters: [
+    ///         "my_direct_param": .parameter(.cookie(name: "my_param", schema: .string)),
+    ///         "my_param": .reference(.component(named: "my_direct_param"))
+    ///       ]
+    ///     )
     public struct Components: Equatable, CodableVendorExtendable, Sendable {
 
         public var schemas: ComponentDictionary<JSONSchema>
-        public var responses: ComponentDictionary<Response>
-        public var parameters: ComponentDictionary<Parameter>
-        public var examples: ComponentDictionary<Example>
-        public var requestBodies: ComponentDictionary<Request>
-        public var headers: ComponentDictionary<Header>
-        public var securitySchemes: ComponentDictionary<SecurityScheme>
-        public var links: ComponentDictionary<Link>
-        public var callbacks: ComponentDictionary<Callbacks>
+        public var responses: ComponentReferenceDictionary<Response>
+        public var parameters: ComponentReferenceDictionary<Parameter>
+        public var examples: ComponentReferenceDictionary<Example>
+        public var requestBodies: ComponentReferenceDictionary<Request>
+        public var headers: ComponentReferenceDictionary<Header>
+        public var securitySchemes: ComponentReferenceDictionary<SecurityScheme>
+        public var links: ComponentReferenceDictionary<Link>
+        public var callbacks: ComponentReferenceDictionary<Callbacks>
       
         public var pathItems: ComponentDictionary<PathItem>
 
@@ -38,14 +68,14 @@ extension OpenAPI {
 
         public init(
             schemas: ComponentDictionary<JSONSchema> = [:],
-            responses: ComponentDictionary<Response> = [:],
-            parameters: ComponentDictionary<Parameter> = [:],
-            examples: ComponentDictionary<Example> = [:],
-            requestBodies: ComponentDictionary<Request> = [:],
-            headers: ComponentDictionary<Header> = [:],
-            securitySchemes: ComponentDictionary<SecurityScheme> = [:],
-            links: ComponentDictionary<Link> = [:],
-            callbacks: ComponentDictionary<Callbacks> = [:],
+            responses: ComponentReferenceDictionary<Response> = [:],
+            parameters: ComponentReferenceDictionary<Parameter> = [:],
+            examples: ComponentReferenceDictionary<Example> = [:],
+            requestBodies: ComponentReferenceDictionary<Request> = [:],
+            headers: ComponentReferenceDictionary<Header> = [:],
+            securitySchemes: ComponentReferenceDictionary<SecurityScheme> = [:],
+            links: ComponentReferenceDictionary<Link> = [:],
+            callbacks: ComponentReferenceDictionary<Callbacks> = [:],
             pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
@@ -62,6 +92,37 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
         }
 
+        /// Construct components as "direct" entries (no references). When
+        /// building a document in Swift code, this is often sufficient and it
+        /// means you don't need to wrap every entry in an `Either`.
+        public static func direct(
+            schemas: ComponentDictionary<JSONSchema> = [:],
+            responses: ComponentDictionary<Response> = [:],
+            parameters: ComponentDictionary<Parameter> = [:],
+            examples: ComponentDictionary<Example> = [:],
+            requestBodies: ComponentDictionary<Request> = [:],
+            headers: ComponentDictionary<Header> = [:],
+            securitySchemes: ComponentDictionary<SecurityScheme> = [:],
+            links: ComponentDictionary<Link> = [:],
+            callbacks: ComponentDictionary<Callbacks> = [:],
+            pathItems: ComponentDictionary<PathItem> = [:],
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) -> Self {
+            .init(
+                schemas: schemas,
+                responses: responses.mapValues { .b($0) },
+                parameters: parameters.mapValues { .b($0) },
+                examples: examples.mapValues { .b($0) },
+                requestBodies: requestBodies.mapValues { .b($0) },
+                headers: headers.mapValues { .b($0) },
+                securitySchemes: securitySchemes.mapValues { .b($0) },
+                links: links.mapValues { .b($0) },
+                callbacks: callbacks.mapValues { .b($0) },
+                pathItems: pathItems,
+                vendorExtensions: vendorExtensions
+            )
+        }
+
         /// An empty OpenAPI Components Object.
         public static let noComponents: Components = .init()
 
@@ -69,6 +130,12 @@ extension OpenAPI {
             return self == .noComponents
         }
     }
+}
+
+extension OpenAPI {
+
+    public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
+    public typealias ComponentReferenceDictionary<T: ComponentDictionaryLocatable> = OrderedDictionary<ComponentKey, Either<OpenAPI.Reference<T>, T>>
 }
 
 extension OpenAPI.Components {
@@ -130,11 +197,6 @@ extension OpenAPI.Components {
     public static let componentNameExtension: String = "x-component-name"
 }
 
-extension OpenAPI {
-
-    public typealias ComponentDictionary<T> = OrderedDictionary<ComponentKey, T>
-}
-
 // MARK: - Codable
 extension OpenAPI.Components: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -194,30 +256,36 @@ extension OpenAPI.Components: Decodable {
             schemas = try container.decodeIfPresent(OpenAPI.ComponentDictionary<JSONSchema>.self, forKey: .schemas)
                 ?? [:]
 
-            responses = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Response>.self, forKey: .responses)
+            responses = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Response>.self, forKey: .responses)
                 ?? [:]
 
-            parameters = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Parameter>.self, forKey: .parameters)
+            parameters = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Parameter>.self, forKey: .parameters)
             ?? [:]
 
-            examples = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Example>.self, forKey: .examples)
+            examples = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Example>.self, forKey: .examples)
                 ?? [:]
 
-            requestBodies = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
+            requestBodies = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Request>.self, forKey: .requestBodies)
                 ?? [:]
 
-            headers = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Header>.self, forKey: .headers)
+            headers = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Header>.self, forKey: .headers)
                 ?? [:]
 
-            securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
+            securitySchemes = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.SecurityScheme>.self, forKey: .securitySchemes) ?? [:]
 
-            links = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
+            links = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
-            callbacks = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+            callbacks = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
           
             pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
+        } catch let error as EitherDecodeNoTypesMatchedError {
+            if let underlyingError = OpenAPI.Error.Decoding.Document.eitherBranchToDigInto(error) {
+                throw (underlyingError.underlyingError ?? underlyingError)
+            }
+
+            throw error
         } catch let error as DecodingError {
             if let underlyingError = error.underlyingError as? KeyDecodingError {
                 throw GenericError(

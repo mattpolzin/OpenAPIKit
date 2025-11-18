@@ -29,7 +29,7 @@ final class ResolvedDocumentTests: XCTestCase {
     }
 
     func test_documentWithSecurity() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             securitySchemes: [
                 "test": .apiKey(name: "api-key", location: .cookie)
             ]
