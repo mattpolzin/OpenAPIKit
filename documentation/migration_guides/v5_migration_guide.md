@@ -166,6 +166,55 @@ specification) in this section.
 The Response Object `description` field is not optional so code may need to
 change to account for it possibly being `nil`.
 
+### Components Object
+There are changes for the `OpenAPIKit30` module (OAS 3.0.x specification) in
+this section.
+
+Entries in the Components Object's `responses`, `parameters`, `examples`,
+`requestBodies`, `headers`, `securitySchemes`, `links`, and `callbacks`
+dictionaries have all gained support for references. Note that `pathItems` and
+`schemas` still do not support references (per the specification), though
+`schemas` can be JSON references by their very nature already.
+
+This change fixes a gap in OpenAPIKit's ability to represent valid documents.
+
+If you are using subscript access or `lookup()` functions to retrieve entries
+from the Components Object, you do _not_ need to change that code. These
+functions have learned how to follow references they encounter until they land
+on the type of entity being looked up. If you want the behavior of just
+doing a regular lookup and passing the result back even if it is a reference,
+you can use the new `lookupOnce()` function. The existing `lookup()` functions
+can now throw an error they would never throw before: `ReferenceCycleError`.
+
+Error message phrasing has changed subtly which is unlikely to cause problems
+but if you have tests that compare exact error messages then you may need to
+update the test expectations.
+
+If you construct `Components` in-code then you have two options. You can swap
+out existing calls to the `Components` `init()` initializer with calls to the
+new `Components.direct()` convenience constructor or you can nest each component
+entry in an `Either` like follows:
+```swift
+// BEFORE
+Components(
+  parameters: [
+    "param1": .cookie(name: "cookie", schema: .string)
+  ]
+)
+
+// AFTER
+Components(
+  parameters: [
+    "param1": .parameter(.cookie(name: "cookie", schema: .string))
+  ]
+)
+```
+
+If your code uses the `static` `openAPIComponentsKeyPath` variable on types that
+can be found in the Components Object (likely very uncommon), you will now need
+to handle two possibilities: the key path either refers to an object (of generic
+type `T`) or it refers to an `Either<OpenAPI.Reference<T>, T>`.
+
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
 string descriptions of any OpenAPIKit errors, you may need to update the
