@@ -12,7 +12,7 @@ OpenAPIKit follows semantic versioning despite the fact that the OpenAPI specifi
 |------------|-------|--------------------|-----------------------------------|--------------|
 | v3.x       | 5.1+  | ✅                 |                                   |              |
 | v4.x       | 5.8+  | ✅                 | ✅                                |              |
-| v4.x       | 5.8+  | ✅                 | ✅                                | ✅           |
+| v5.x       | 5.10+ | ✅                 | ✅                                | ✅           |
 
 - [Usage](#usage)
   - [Migration](#migration)
