@@ -508,7 +508,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertThrowsError(try JSONSchema.reference(.component(named: "test")).dereferenced(in: components)) { error in
             XCTAssertEqual(
                 String(describing: error),
-                "Encountered a JSON Schema $ref cycle that prevents fully dereferencing document at '#/components/schemas/test'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy."
+                "Encountered a JSON Schema $ref cycle that prevents fully resolving a reference at '#/components/schemas/test'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy or fully looking up references in cycles. `lookupOnce()` is your best option in this case."
             )
         }
     }

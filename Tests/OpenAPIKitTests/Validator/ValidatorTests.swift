@@ -1067,7 +1067,7 @@ final class ValidatorTests: XCTestCase {
 
         let validator = Validator.blank
             .validating(
-                "All server arrays have not in operations have more than 1 server",
+                "All server arrays not in operations have more than 1 server",
                 check: \[OpenAPI.Server].count > 1,
                 when: \.codingPath.count == 1 // server array is under root document (coding path count 1)
                     || take(\.codingPath) { codingPath in
@@ -1075,7 +1075,7 @@ final class ValidatorTests: XCTestCase {
                         guard codingPath.count > 1 else { return false }
 
                         let secondToLastPathComponent = codingPath.suffix(2).first!.stringValue
-                        let httpMethods = OpenAPI.HttpMethod.allCases.map { $0.rawValue.lowercased() }
+                        let httpMethods = OpenAPI.BuiltinHttpMethod.allCases.map { $0.rawValue.lowercased() }
 
                         return !httpMethods.contains(secondToLastPathComponent)
                 }
@@ -1484,9 +1484,68 @@ final class ValidatorTests: XCTestCase {
             XCTAssertEqual(errors?.values.count, 1)
             XCTAssertEqual(
                 errors?.localizedDescription,
-                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\'. at path: .paths[\'/test\'].get.responses.200.content"
+                "Problem encountered when parsing ``: \'gzip\' could not be parsed as a Content Type. Content Types should have the format \'<type>/<subtype>\' at path: .paths[\'/test\'].get.responses.200.content"
             )
             XCTAssertEqual(errors?.values.first?.codingPathString, ".paths[\'/test\'].get.responses.200.content")
+        }
+    }
+
+    func test_collectsConditionalTagWarningNotStrict() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "tags": [ {"name": "hi", "summary": "sum"} ]
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.tags?.first?.applicableConditionalWarnings(for: doc).first?.localizedDescription,
+            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later"
+        )
+
+        let warnings = try doc.validate(strict: false)
+
+        XCTAssertEqual(warnings.count, 1)
+        XCTAssertEqual(
+            warnings.first?.localizedDescription,
+            "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later."
+        )
+        XCTAssertEqual(warnings.first?.codingPathString, ".tags[0]")
+
+        // now test that the warning does not apply for v3.2.0 and above
+        var doc2 = doc
+        doc2.openAPIVersion = .v3_2_0
+
+        try XCTAssertEqual(doc2.validate(strict: false).count, 0)
+    }
+
+    func test_collectsConditionalTagWarningStrict() throws {
+        let docData = """
+        {
+          "info": {"title": "test", "version": "1.0"},
+          "openapi": "3.1.0",
+          "tags": [ {"name": "hi", "summary": "sum"} ]
+        }
+        """.data(using: .utf8)!
+
+        let doc = try orderUnstableDecode(OpenAPI.Document.self, from: docData)
+
+        XCTAssertEqual(
+            doc.tags?.first?.applicableConditionalWarnings(for: doc).first?.localizedDescription,
+            "The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later"
+        )
+
+        XCTAssertThrowsError(try doc.validate(strict: true)) { error in
+            let errors = error as? ValidationErrorCollection
+            XCTAssertEqual(errors?.values.count, 1)
+            XCTAssertEqual(
+                errors?.localizedDescription,
+                "Problem encountered when parsing ``: The Tag summary field is only supported for OpenAPI document versions 3.2.0 and later at path: .tags[0]"
+            )
+            XCTAssertEqual(errors?.values.first?.codingPathString, ".tags[0]")
         }
     }
 }

@@ -15,6 +15,7 @@
 import OpenAPIKitCore
 
 public extension OpenAPI {
+    typealias BuiltinHttpMethod = OpenAPIKitCore.Shared.BuiltinHttpMethod
     typealias HttpMethod = OpenAPIKitCore.Shared.HttpMethod
     typealias ContentType = OpenAPIKitCore.Shared.ContentType
     typealias Error = OpenAPIKitCore.Error
@@ -28,14 +29,6 @@ public extension OpenAPI {
 
 public extension OpenAPI.SecurityScheme {
     typealias Location = OpenAPIKitCore.Shared.SecuritySchemeLocation
-}
-
-public extension OpenAPI.Parameter.Context {
-    typealias Location = OpenAPIKitCore.Shared.ParameterContextLocation
-}
-
-public extension OpenAPI.Parameter.SchemaContext {
-    typealias Style = OpenAPIKitCore.Shared.ParameterSchemaContextStyle
 }
 
 public extension OpenAPI.Response {

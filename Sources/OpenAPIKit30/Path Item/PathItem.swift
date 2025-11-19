@@ -19,7 +19,7 @@ extension OpenAPI {
     /// The `GET` operation, for example, is accessed via the `.get` property. You can
     /// also use the subscript operator, passing it the `HTTPMethod` you want to access.
     ///
-    /// You can access an array of equatable `HttpMethod`/`Operation` paris with the
+    /// You can access an array of equatable `BuiltinHttpMethod`/`Operation` paris with the
     /// `endpoints` property.
     public struct PathItem: Equatable, CodableVendorExtendable, Sendable {
         public var summary: String?
@@ -146,7 +146,7 @@ extension OrderedDictionary where Key == OpenAPI.Path {
 
 extension OpenAPI.PathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
-    public func `for`(_ verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
+    public func `for`(_ verb: OpenAPI.BuiltinHttpMethod) -> OpenAPI.Operation? {
         switch verb {
         case .delete:
             return self.delete
@@ -164,11 +164,13 @@ extension OpenAPI.PathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return nil
         }
     }
 
     /// Set the operation for the given verb, overwriting any already set operation for the same verb.
-    public mutating func set(operation: OpenAPI.Operation?, for verb: OpenAPI.HttpMethod) {
+    public mutating func set(operation: OpenAPI.Operation?, for verb: OpenAPI.BuiltinHttpMethod) {
         switch verb {
         case .delete:
             self.delete(operation)
@@ -186,10 +188,13 @@ extension OpenAPI.PathItem {
             self.put(operation)
         case .trace:
             self.trace(operation)
+        case .query:
+            // not representable
+            print("The QUERY operation was not directly representable in the OAS standard until version 3.2.0")
         }
     }
 
-    public subscript(verb: OpenAPI.HttpMethod) -> OpenAPI.Operation? {
+    public subscript(verb: OpenAPI.BuiltinHttpMethod) -> OpenAPI.Operation? {
         get {
             return `for`(verb)
         }
@@ -201,7 +206,7 @@ extension OpenAPI.PathItem {
     /// An `Endpoint` is the combination of an
     /// HTTP method and an operation.
     public struct Endpoint: Equatable {
-        public let method: OpenAPI.HttpMethod
+        public let method: OpenAPI.BuiltinHttpMethod
         public let operation: OpenAPI.Operation
     }
 
@@ -210,7 +215,7 @@ extension OpenAPI.PathItem {
     /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
     ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpMethod.allCases.compactMap { method in
+        return OpenAPI.BuiltinHttpMethod.allCases.compactMap { method in
             self.for(method).map { .init(method: method, operation: $0) }
         }
     }

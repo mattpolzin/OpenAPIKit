@@ -1067,7 +1067,7 @@ final class ValidatorTests: XCTestCase {
 
         let validator = Validator.blank
             .validating(
-                "All server arrays have not in operations have more than 1 server",
+                "All server arrays not in operations have more than 1 server",
                 check: \[OpenAPI.Server].count > 1,
                 when: \.codingPath.count == 1 // server array is under root document (coding path count 1)
                     || take(\.codingPath) { codingPath in
@@ -1075,7 +1075,7 @@ final class ValidatorTests: XCTestCase {
                         guard codingPath.count > 1 else { return false }
 
                         let secondToLastPathComponent = codingPath.suffix(2).first!.stringValue
-                        let httpMethods = OpenAPI.HttpMethod.allCases.map { $0.rawValue.lowercased() }
+                        let httpMethods = OpenAPI.BuiltinHttpMethod.allCases.map { $0.rawValue.lowercased() }
 
                         return !httpMethods.contains(secondToLastPathComponent)
                 }

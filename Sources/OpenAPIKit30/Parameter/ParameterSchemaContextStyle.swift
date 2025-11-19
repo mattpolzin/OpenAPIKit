@@ -5,8 +5,8 @@
 //  Created by Mathew Polzin on 12/18/22.
 //
 
-extension Shared {
-    public enum ParameterSchemaContextStyle: String, CaseIterable, Codable, Sendable {
+extension OpenAPI.Parameter.SchemaContext {
+    public enum Style: String, CaseIterable, Codable, Sendable {
         case form
         case simple
         case matrix

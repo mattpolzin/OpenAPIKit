@@ -12,24 +12,24 @@ final class ParameterContextTests: XCTestCase {
     typealias Context = OpenAPI.Parameter.Context
 
     func test_query() {
-        let t1: Context = .query
-        XCTAssertEqual(t1, Context.query(required: false, allowEmptyValue: false))
+        let t1: Context = .query(schema: .string)
+        XCTAssertEqual(t1, Context.query(required: false, allowEmptyValue: false, schema: .string))
         XCTAssertFalse(t1.required)
         XCTAssertTrue(t1.inQuery)
         XCTAssertFalse(t1.inHeader)
         XCTAssertFalse(t1.inPath)
         XCTAssertFalse(t1.inCookie)
 
-        let t2: Context = .query(allowEmptyValue: true)
-        XCTAssertEqual(t2, Context.query(required: false, allowEmptyValue: true))
+        let t2: Context = .query(allowEmptyValue: true, schema: .string)
+        XCTAssertEqual(t2, Context.query(required: false, allowEmptyValue: true, schema: .string))
         XCTAssertFalse(t2.required)
         XCTAssertTrue(t2.inQuery)
         XCTAssertFalse(t2.inHeader)
         XCTAssertFalse(t2.inPath)
         XCTAssertFalse(t2.inCookie)
 
-        let t3: Context = .query(required: true)
-        XCTAssertEqual(t3, Context.query(required: true, allowEmptyValue: false))
+        let t3: Context = .query(required: true, schema: .string)
+        XCTAssertEqual(t3, Context.query(required: true, allowEmptyValue: false, schema: .string))
         XCTAssertTrue(t3.required)
         XCTAssertTrue(t3.inQuery)
         XCTAssertFalse(t3.inHeader)
@@ -38,31 +38,31 @@ final class ParameterContextTests: XCTestCase {
     }
 
     func test_header() {
-        let t1: Context = .header
-        XCTAssertEqual(t1, Context.header(required: false))
+        let t1: Context = .header(schema: .string)
+        XCTAssertEqual(t1, Context.header(required: false, schema: .string))
         XCTAssertFalse(t1.required)
         XCTAssertTrue(t1.inHeader)
         XCTAssertFalse(t1.inQuery)
         XCTAssertFalse(t1.inPath)
         XCTAssertFalse(t1.inCookie)
 
-        XCTAssertTrue(Context.header(required: true).required)
+        XCTAssertTrue(Context.header(required: true, schema: .string).required)
     }
 
     func test_cookie() {
-        let t1: Context = .cookie
-        XCTAssertEqual(t1, Context.cookie(required: false))
+        let t1: Context = .cookie(schema: .string)
+        XCTAssertEqual(t1, Context.cookie(required: false, schema: .string))
         XCTAssertFalse(t1.required)
         XCTAssertTrue(t1.inCookie)
         XCTAssertFalse(t1.inQuery)
         XCTAssertFalse(t1.inPath)
         XCTAssertFalse(t1.inHeader)
 
-        XCTAssertTrue(Context.cookie(required: true).required)
+        XCTAssertTrue(Context.cookie(required: true, schema: .string).required)
     }
 
     func test_path() {
-        let t1: Context = .path
+        let t1: Context = .path(schema: .string)
         XCTAssertTrue(t1.required)
         XCTAssertTrue(t1.inPath)
         XCTAssertFalse(t1.inQuery)
@@ -71,10 +71,10 @@ final class ParameterContextTests: XCTestCase {
     }
 
     func test_location() {
-        let t1: Context = .cookie
-        let t2: Context = .header
-        let t3: Context = .path
-        let t4: Context = .query
+        let t1: Context = .cookie(schema: .string)
+        let t2: Context = .header(schema: .string)
+        let t3: Context = .path(schema: .string)
+        let t4: Context = .query(schema: .string)
 
         XCTAssertEqual(t1.location, .cookie)
         XCTAssertEqual(t2.location, .header)

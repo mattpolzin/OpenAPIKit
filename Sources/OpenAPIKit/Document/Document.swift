@@ -6,6 +6,7 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.1 document.
@@ -45,13 +46,16 @@ extension OpenAPI {
     ///
     /// See the documentation on `DereferencedDocument.resolved()` for more.
     ///
-    public struct Document: HasWarnings, CodableVendorExtendable, Sendable {
+    public struct Document: HasConditionalWarnings, HasWarnings, CodableVendorExtendable, Sendable {
         /// OpenAPI Spec "openapi" field.
         ///
         /// OpenAPIKit only explicitly supports versions that can be found in
         /// the `Version` enum. Other versions may or may not be decodable
         /// by OpenAPIKit to a certain extent.
         public var openAPIVersion: Version
+
+        /// OpenAPI Spec "$self" field.
+        public var selfURI: URL?
 
         /// Information about the API described by this OpenAPI Document.
         ///
@@ -142,9 +146,11 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public let warnings: [Warning]
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
             openAPIVersion: Version = .v3_1_1,
+            selfURI: URL? = nil,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -156,6 +162,7 @@ extension OpenAPI {
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.openAPIVersion = openAPIVersion
+            self.selfURI = selfURI
             self.info = info
             self.servers = servers
             self.paths = paths
@@ -167,13 +174,28 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.warnings = []
+
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
         }
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Document \(fieldName) field"
+        )
     }
 }
 
 extension OpenAPI.Document: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.openAPIVersion == rhs.openAPIVersion
+        && lhs.selfURI == rhs.selfURI
         && lhs.info == rhs.info
         && lhs.servers == rhs.servers
         && lhs.paths == rhs.paths
@@ -449,43 +471,123 @@ extension OpenAPI.Document {
     /// specification releases a new patch version, OpenAPIKit will see a patch version release
     /// explicitly supports decoding documents of that new patch version before said version will
     /// succesfully decode as the `v3_1_x` case.
-    public enum Version: RawRepresentable, Equatable, Codable, Sendable {
+    public enum Version: RawRepresentable, Equatable, Comparable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
+        case v3_1_2
         case v3_1_x(x: Int)
 
-        public static let v3_1_2 : Self = .v3_1_x(x: 2)
+        case v3_2_0
+        case v3_2_x(x: Int)
 
-        public init?(rawValue: String) {
-            switch rawValue {
-            case "3.1.0": self = .v3_1_0
-            case "3.1.1": self = .v3_1_1
-            default:
-                let components = rawValue.split(separator: ".")
-                guard components.count == 3 else {
-                    return nil
-                }
-                guard components[0] == "3", components[1] == "1" else {
-                    return nil
-                }
-                guard let patchVersion = Int(components[2], radix: 10) else {
-                    return nil
-                }
-                // to support newer versions released in the future without a breaking
-                // change to the enumeration, bump the upper limit here to e.g. 2 or 3
-                // or 6:
-                guard patchVersion > 1 && patchVersion <= 2 else {
-                    return nil
-                }
-                self = .v3_1_x(x: patchVersion)
-            }
-        }
+      public init?(rawValue: String) {
+          switch rawValue {
+          case "3.1.0": self = .v3_1_0
+          case "3.1.1": self = .v3_1_1
+          case "3.1.2": self = .v3_1_2
+          case "3.2.0": self = .v3_2_0
+          default:
+              let components = rawValue.split(separator: ".")
+              guard components.count == 3 else {
+                  return nil
+              }
+              let minorVersion = components[1]
+              guard components[0] == "3", (minorVersion == "1" || minorVersion == "2") else {
+                  return nil
+              }
+              guard let patchVersion = Int(components[2], radix: 10) else {
+                  return nil
+              }
+              // to support newer versions released in the future without a breaking
+              // change to the enumeration, bump the upper limit here to e.g. 2 or 3
+              // or 6:
+              if minorVersion == "2" {
+                  guard  patchVersion > 0 && patchVersion <= 0 else {
+                      return nil
+                  }
+                  self = .v3_2_x(x: patchVersion)
+              } else {
+                  guard  patchVersion > 2 && patchVersion <= 2 else {
+                      return nil
+                  }
+                  self = .v3_1_x(x: patchVersion)
+              }
+          }
+      }
 
         public var rawValue: String {
             switch self {
             case .v3_1_0: return "3.1.0"
             case .v3_1_1: return "3.1.1"
+            case .v3_1_2: return "3.1.2"
             case .v3_1_x(x: let x): return "3.1.\(x)"
+
+            case .v3_2_0: return "3.2.0"
+            case .v3_2_x(x: let x): return "3.2.\(x)"
+            }
+        }
+
+        public static func < (lhs: Self, rhs: Self) -> Bool {
+            switch lhs {
+            case .v3_1_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: true
+                case .v3_1_2: true
+                case .v3_1_x(x: let x): 0 < x
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_1:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: true
+                case .v3_1_x(x: let y): 1 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_2:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: let y): 2 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_x(x: let x):
+                switch rhs {
+                case .v3_1_0: x < 0
+                case .v3_1_1: x < 1
+                case .v3_1_2: x < 2
+                case .v3_1_x(x: let y): x < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_2_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: false
+                case .v3_2_x(x: let y): 0 < y
+                }
+
+            case .v3_2_x(x: let x):
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: x < 0
+                case .v3_2_x(x: let y): x < y
+                }
             }
         }
     }
@@ -522,6 +624,9 @@ extension OpenAPI.Document: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
+
+        try container.encodeIfPresent(selfURI?.absoluteString, forKey: .selfURI)
+
         try container.encode(info, forKey: .info)
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
@@ -581,6 +686,11 @@ extension OpenAPI.Document: Decodable {
                 )
             }
 
+            let selfURIString: String? = try container.decodeIfPresent(String.self, forKey: .selfURI)
+            selfURI = try selfURIString.map { 
+              try decodeURIString($0, forKey: CodingKeys.selfURI, atPath: decoder.codingPath)
+            }
+
             info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
@@ -601,6 +711,11 @@ extension OpenAPI.Document: Decodable {
 
             self.warnings = warnings
 
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
+
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
@@ -617,9 +732,34 @@ extension OpenAPI.Document: Decodable {
     }
 }
 
+fileprivate func decodeURIString(_ str: String, forKey key: CodingKey, atPath path: [CodingKey]) throws -> URL {
+    let uri: URL?
+    #if canImport(FoundationEssentials)
+    uri = URL(string: str, encodingInvalidCharacters: false)
+    #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+    if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
+        uri = URL(string: str, encodingInvalidCharacters: false)
+    } else {
+        uri = URL(string: str)
+    }
+    #else
+    uri = URL(string: str)
+    #endif
+    guard let uri else {
+        throw GenericError(
+            subjectName: key.stringValue,
+            details: "Failed to parse a valid URI from '\(str)'",
+            codingPath: path
+        )
+    }
+
+    return uri
+}
+
 extension OpenAPI.Document {
     internal enum CodingKeys: ExtendableCodingKey {
         case openAPIVersion
+        case selfURI
         case info
         case jsonSchemaDialect // TODO: implement parsing (https://github.com/mattpolzin/OpenAPIKit/issues/202)
         case servers
@@ -634,6 +774,7 @@ extension OpenAPI.Document {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .openAPIVersion,
+                .selfURI,
                 .info,
                 .jsonSchemaDialect,
                 .servers,
@@ -654,6 +795,8 @@ extension OpenAPI.Document {
             switch stringValue {
             case "openapi":
                 self = .openAPIVersion
+            case "$self":
+                self = .selfURI
             case "info":
                 self = .info
             case "jsonSchemaDialect":
@@ -681,6 +824,8 @@ extension OpenAPI.Document {
             switch self {
             case .openAPIVersion:
                 return "openapi"
+            case .selfURI:
+                return "$self"
             case .info:
                 return "info"
             case .jsonSchemaDialect:

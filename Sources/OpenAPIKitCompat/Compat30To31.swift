@@ -100,16 +100,8 @@ extension OpenAPIKit30.OpenAPI.Server: To31 {
 
 extension OpenAPIKit30.OpenAPI.Header: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Header {
-        let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
-        switch schemaOrContent {
-        case .a(let context):
-            newSchemaOrContent = .a(context.to31())
-        case .b(let contentMap):
-            newSchemaOrContent = .b(contentMap.mapValues { $0.to31() })
-        }
-
-        return OpenAPIKit.OpenAPI.Header(
-            schemaOrContent: newSchemaOrContent,
+        OpenAPIKit.OpenAPI.Header(
+            schemaOrContent: schemaOrContent.to31(),
             description: description,
             required: `required`,
             deprecated: deprecated,
@@ -118,17 +110,28 @@ extension OpenAPIKit30.OpenAPI.Header: To31 {
     }
 }
 
-extension OpenAPIKit30.OpenAPI.Parameter.Context: To31 {
-    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.Context {
+extension Either where A == OpenAPIKit30.OpenAPI.Parameter.SchemaContext, B == OpenAPIKit30.OpenAPI.Content.Map {
+    fileprivate func to31() -> Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map> {
+        switch self {
+        case .a(let context):
+            .a(context.to31())
+        case .b(let contentMap):
+            .b(contentMap.mapValues { $0.to31() })
+        }
+    }
+}
+
+extension OpenAPIKit30.OpenAPI.Parameter.Context {
+    fileprivate func to31(with schemaOrContent: Either<OpenAPIKit30.OpenAPI.Parameter.SchemaContext, OpenAPIKit30.OpenAPI.Content.Map>) -> OpenAPIKit.OpenAPI.Parameter.Context {
         switch self {
         case .query(required: let required, allowEmptyValue: let allowEmptyValue):
-            return .query(required: required, allowEmptyValue: allowEmptyValue)
+            return .query(required: required, allowEmptyValue: allowEmptyValue, schemaOrContent: schemaOrContent.to31())
         case .header(required: let required):
-            return .header(required: required)
+            return .header(required: required, schemaOrContent: schemaOrContent.to31())
         case .path:
-            return .path
+            return .path(schemaOrContent: schemaOrContent.to31())
         case .cookie(required: let required):
-            return .cookie(required: required)
+            return .cookie(required: required, schemaOrContent: schemaOrContent.to31())
         }
     }
 }
@@ -172,7 +175,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
@@ -180,7 +183,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             } else {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schemaReference: .init(ref.to31()),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     example: example
@@ -190,7 +193,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             if let newExamples {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     examples: newExamples
@@ -198,7 +201,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
             } else {
                 return OpenAPIKit.OpenAPI.Parameter.SchemaContext(
                     schema.to31(),
-                    style: style,
+                    style: style.to31(),
                     explode: explode,
                     allowReserved: allowReserved,
                     example: example
@@ -208,12 +211,26 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext: To31 {
     }
 }
 
+extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style: To31 {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter.SchemaContext.Style {
+        switch self {
+        case .form: .form
+        case .simple: .simple
+        case .matrix: .matrix
+        case .label: .label
+        case .spaceDelimited: .spaceDelimited
+        case .pipeDelimited: .pipeDelimited
+        case .deepObject: .deepObject
+        }
+    }
+}
+
 extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
         OpenAPIKit.OpenAPI.Content.Encoding(
             contentTypes: [contentType].compactMap { $0 },
             headers: headers?.mapValues(eitherRefTo31),
-            style: style,
+            style: style.to31(),
             explode: explode,
             allowReserved: allowReserved
         )
@@ -242,18 +259,9 @@ extension OpenAPIKit30.OpenAPI.Content: To31 {
 
 extension OpenAPIKit30.OpenAPI.Parameter: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Parameter {
-        let newSchemaOrContent: Either<OpenAPIKit.OpenAPI.Parameter.SchemaContext, OpenAPIKit.OpenAPI.Content.Map>
-        switch schemaOrContent {
-        case .a(let context):
-            newSchemaOrContent = .a(context.to31())
-        case .b(let contentMap):
-            newSchemaOrContent = .b(contentMap.mapValues { $0.to31() })
-        }
-
         return OpenAPIKit.OpenAPI.Parameter(
             name: name,
-            context: context.to31(),
-            schemaOrContent: newSchemaOrContent,
+            context: context.to31(with: schemaOrContent),
             description: description,
             deprecated: deprecated,
             vendorExtensions: vendorExtensions
@@ -430,8 +438,10 @@ extension OpenAPIKit30.OpenAPI.Tag: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Tag {
         OpenAPIKit.OpenAPI.Tag(
             name: name,
+            summary: nil,
             description: description,
             externalDocs: externalDocs?.to31(),
+            parent: nil,
             vendorExtensions: vendorExtensions
         )
     }
@@ -642,14 +652,14 @@ extension OpenAPIKit30.OpenAPI.Components: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Components {
         OpenAPIKit.OpenAPI.Components(
             schemas: schemas.mapValues { $0.to31() },
-            responses: responses.mapValues { $0.to31() },
-            parameters: parameters.mapValues { $0.to31() },
-            examples: examples.mapValues { $0.to31() },
-            requestBodies: requestBodies.mapValues { $0.to31() },
-            headers: headers.mapValues { $0.to31() },
-            securitySchemes: securitySchemes.mapValues { $0.to31() },
-            links: links.mapValues { $0.to31() },
-            callbacks: callbacks.mapValues { $0.to31() },
+            responses: responses.mapValues { .b($0.to31()) },
+            parameters: parameters.mapValues { .b($0.to31()) },
+            examples: examples.mapValues { .b($0.to31()) },
+            requestBodies: requestBodies.mapValues { .b($0.to31()) },
+            headers: headers.mapValues { .b($0.to31()) },
+            securitySchemes: securitySchemes.mapValues { .b($0.to31()) },
+            links: links.mapValues { .b($0.to31()) },
+            callbacks: callbacks.mapValues { .b($0.to31()) },
             vendorExtensions: vendorExtensions
         )
     }

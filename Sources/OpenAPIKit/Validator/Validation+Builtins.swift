@@ -505,6 +505,58 @@ extension Validation {
             }
         )
     }
+
+    /// Validate the OpenAPI Document's `Parameter`s all have styles that are
+    /// compatible with their locations per the table found at
+    /// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#style-values
+    ///
+    /// - Important: This is included in validation by default.
+    public static var parameterStyleAndLocationAreCompatible: Validation<OpenAPI.Parameter> {
+        .init(
+            check: all(
+                Validation<OpenAPI.Parameter>(
+                    description: "the matrix style can only be used for the path location",
+                    check: \.context.location == .path,
+                    when: \.schemaStyle == .matrix
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the label style can only be used for the path location",
+                    check: \.context.location == .path,
+                    when: \.schemaStyle == .label
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the simple style can only be used for the path and header locations",
+                    check: \.context.location == .path || \.context.location == .header,
+                    when: \.schemaStyle == .simple
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the form style can only be used for the query and cookie locations",
+                    check: \.context.location == .query || \.context.location == .cookie,
+                    when: \.schemaStyle == .form
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the spaceDelimited style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .spaceDelimited
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the pipeDelimited style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .pipeDelimited
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the deepObject style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .deepObject
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the cookie style can only be used for the cookie location",
+                    check: \.context.location == .cookie,
+                    when: \.schemaStyle == .cookie
+                )
+            )
+        )
+    }
 }
 
 /// Used by both the Path Item parameter check and the

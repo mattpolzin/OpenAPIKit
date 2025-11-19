@@ -128,10 +128,12 @@ public struct ValidationError: Swift.Error, CustomStringConvertible, PathContext
     public var localizedDescription: String { description }
 
     public var description: String {
+        let reasonStr: any StringProtocol =
+            reason.last == "." ? reason.dropLast() : reason
         guard !codingPath.isEmpty else {
-            return "\(reason) at root of document"
+            return "\(reasonStr) at root of document"
         }
-        return "\(reason) at path: \(codingPath.stringValue)"
+        return "\(reasonStr) at path: \(codingPath.stringValue)"
     }
 }
 

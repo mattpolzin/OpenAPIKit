@@ -294,10 +294,10 @@ final class ValidationConvenienceTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 parameters: [
-                    "test1": .init(name: "test", context: .header, content: [:]),
-                    "test2": .init(name: "test2", context: .query, content: [:])
+                    "test1": .init(name: "test", context: .header(content: [:])),
+                    "test2": .init(name: "test2", context: .query(content: [:]))
                 ]
             )
         )
@@ -336,10 +336,10 @@ final class ValidationConvenienceTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 parameters: [
-                    "test1": .init(name: "test", context: .header, content: [:]),
-                    "test2": .init(name: "test2", context: .query, content: [:])
+                    "test1": .init(name: "test", context: .header(content: [:])),
+                    "test2": .init(name: "test2", context: .query(content: [:]))
                 ]
             )
         )

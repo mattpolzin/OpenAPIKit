@@ -428,6 +428,20 @@ public protocol OpenAPISummarizable: OpenAPIDescribable {
     func overriddenNonNil(summary: String?) -> Self
 }
 
+extension OpenAPI.Reference: OpenAPISummarizable {
+    public func overriddenNonNil(summary: String?) -> Self {
+        guard let summary else { return self }
+
+        return .init(jsonReference, summary: summary, description: description)
+    }
+
+    public func overriddenNonNil(description: String?) -> Self {
+        guard let description else { return self }
+
+        return .init(jsonReference, summary: summary, description: description)
+    }
+}
+
 // MARK: - Codable
 
 extension JSONReference {
@@ -558,7 +572,12 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
             let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
             let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
             var components = OpenAPI.Components()
-            components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
+            switch ReferenceType.openAPIComponentsKeyPath {
+            case .a(let directPath):
+                components[keyPath: directPath][componentKey] = component
+            case .b(let referencePath):
+                components[keyPath: referencePath][componentKey] = .b(component)
+            }
             return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self).jsonReference, components, messages)
         }
     }

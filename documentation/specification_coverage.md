@@ -112,6 +112,8 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] head
 - [x] patch
 - [x] trace
+- [x] query
+- [x] additionalOperations
 - [x] servers
 - [x] parameters
 - [x] specification extensions (`vendorExtensions`)
@@ -220,8 +222,11 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### Tag Object (`OpenAPI.Tag`)
 - [x] name
+- [x] summary
 - [x] description
 - [x] externalDocs
+- [x] parent
+- [x] kind
 - [x] specification extensions (`vendorExtensions`)
 
 ### Reference Object (`OpenAPI.Reference`)

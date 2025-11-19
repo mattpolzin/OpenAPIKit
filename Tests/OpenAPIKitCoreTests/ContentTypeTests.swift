@@ -66,6 +66,17 @@ final class ContentTypeTests: XCTestCase {
         }
     }
 
+    func test_x_yaml() {
+        // test that we support old x-yaml type but also prefer new official media type
+        let type1 = Shared.ContentType.init(rawValue: "application/yaml")
+        let type2 = Shared.ContentType.init(rawValue: "application/x-yaml")
+
+        XCTAssertEqual(type1?.rawValue, "application/yaml")
+        XCTAssertEqual(type1, .yaml)
+        XCTAssertEqual(type2?.rawValue, "application/yaml")
+        XCTAssertEqual(type2, .yaml)
+    }
+
     func test_goodParam() {
         let type = Shared.ContentType.init(rawValue: "text/html; charset=utf8")
         XCTAssertEqual(type?.warnings.count, 0)

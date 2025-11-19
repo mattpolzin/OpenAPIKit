@@ -52,36 +52,6 @@ final class ResponseErrorTests: XCTestCase {
         }
     }
 
-    func test_missingDescriptionResponseObject() {
-        let documentYML =
-        """
-        openapi: "3.1.0"
-        info:
-            title: test
-            version: 1.0
-        paths:
-            /hello/world:
-                get:
-                    responses:
-                        '200':
-                            not-a-thing: hi
-        """
-
-        XCTAssertThrowsError(try testDecoder.decode(OpenAPI.Document.self, from: documentYML)) { error in
-
-            let openAPIError = OpenAPI.Error(from: error)
-
-            XCTAssertEqual(openAPIError.localizedDescription, "Found neither a $ref nor a Response in .responses.200 for the **GET** endpoint under `/hello/world`. \n\nResponse could not be decoded because:\nExpected to find `description` key but it is missing..")
-            XCTAssertEqual(openAPIError.codingPath.map { $0.stringValue }, [
-                "paths",
-                "/hello/world",
-                "get",
-                "responses",
-                "200"
-            ])
-        }
-    }
-
     func test_badResponseExtension() {
         let documentYML =
         """

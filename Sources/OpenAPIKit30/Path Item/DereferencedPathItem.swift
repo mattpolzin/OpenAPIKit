@@ -77,7 +77,7 @@ public struct DereferencedPathItem: Equatable {
 
 extension DereferencedPathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
-    public func `for`(_ verb: OpenAPI.HttpMethod) -> DereferencedOperation? {
+    public func `for`(_ verb: OpenAPI.BuiltinHttpMethod) -> DereferencedOperation? {
         switch verb {
         case .delete:
             return self.delete
@@ -95,10 +95,12 @@ extension DereferencedPathItem {
             return self.put
         case .trace:
             return self.trace
+        case .query:
+            return nil
         }
     }
 
-    public subscript(verb: OpenAPI.HttpMethod) -> DereferencedOperation? {
+    public subscript(verb: OpenAPI.BuiltinHttpMethod) -> DereferencedOperation? {
         get {
             return `for`(verb)
         }
@@ -107,7 +109,7 @@ extension DereferencedPathItem {
     /// An `Endpoint` is the combination of an
     /// HTTP method and an operation.
     public struct Endpoint: Equatable {
-        public let method: OpenAPI.HttpMethod
+        public let method: OpenAPI.BuiltinHttpMethod
         public let operation: DereferencedOperation
     }
 
@@ -116,7 +118,7 @@ extension DereferencedPathItem {
     /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
     ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpMethod.allCases.compactMap { method in
+        return OpenAPI.BuiltinHttpMethod.allCases.compactMap { method in
             self.for(method).map { .init(method: method, operation: $0) }
         }
     }

@@ -36,7 +36,7 @@ final class DereferencedResponseTests: XCTestCase {
     }
 
     func test_referencedHeader() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             headers: [
                 "test": .init(schema: .string)
             ]
@@ -94,7 +94,7 @@ final class DereferencedResponseTests: XCTestCase {
     }
 
     func test_referencedLink() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             links: [
                 "link1": .init(operationId: "linka")
             ]

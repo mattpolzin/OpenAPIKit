@@ -16,57 +16,57 @@ public protocol ComponentDictionaryLocatable: SummaryOverridable {
     /// This can be used to create a JSON path
     /// like `#/name1/name2/name3`
     static var openAPIComponentsKey: String { get }
-    static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { get }
+    static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { get }
 }
 
 extension JSONSchema: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "schemas" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.schemas }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .a(\.schemas) }
 }
 
 extension OpenAPI.Response: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "responses" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.responses }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.responses) }
 }
 
 extension OpenAPI.Callbacks: ComponentDictionaryLocatable & SummaryOverridable {
     public static var openAPIComponentsKey: String { "callbacks" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.callbacks }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.callbacks) }
 }
 
 extension OpenAPI.Parameter: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "parameters" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.parameters }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.parameters) }
 }
 
 extension OpenAPI.Example: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "examples" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.examples }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.examples) }
 }
 
 extension OpenAPI.Request: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "requestBodies" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.requestBodies }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.requestBodies) }
 }
 
 extension OpenAPI.Header: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "headers" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.headers }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.headers) }
 }
 
 extension OpenAPI.SecurityScheme: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "securitySchemes" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.securitySchemes }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.securitySchemes) }
 }
 
 extension OpenAPI.Link: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "links" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.links }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.links) }
 }
 
 extension OpenAPI.PathItem: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "pathItems" }
-    public static var openAPIComponentsKeyPath: WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>> { \.pathItems }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .a(\.pathItems) }
 }
 
 /// A dereferenceable type can be recursively looked up in

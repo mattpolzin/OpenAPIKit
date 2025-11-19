@@ -834,8 +834,8 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc,oldDoc)
 
-        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"])
-        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"])
+        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"]?.b)
+        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"]?.b)
 
         try assertEqualNewToOld(newParameter1, parameter1)
         try assertEqualNewToOld(newParameter2, parameter2)
@@ -996,14 +996,14 @@ fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _
 
 fileprivate func assertEqualNewToOld(_ newParamContext: OpenAPIKit.OpenAPI.Parameter.Context, _ oldParamContext: OpenAPIKit30.OpenAPI.Parameter.Context) {
     switch (newParamContext, oldParamContext) {
-    case (.query(required: let req, allowEmptyValue: let empty), .query(required: let req2, allowEmptyValue: let empty2)):
+    case (.query(required: let req, allowEmptyValue: let empty, schemaOrContent: _), .query(required: let req2, allowEmptyValue: let empty2)):
         XCTAssertEqual(req, req2)
         XCTAssertEqual(empty, empty2)
-    case (.header(required: let req), .header(required: let req2)):
+    case (.header(required: let req, schemaOrContent: _), .header(required: let req2)):
         XCTAssertEqual(req, req2)
     case (.path, .path):
         break
-    case (.cookie(required: let req), .cookie(required: let req2)):
+    case (.cookie(required: let req, schemaOrContent: _), .cookie(required: let req2)):
         XCTAssertEqual(req, req2)
     default:
         XCTFail("Parameter contexts are not equal. \(newParamContext)  /   \(oldParamContext)")
@@ -1137,6 +1137,7 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
         case .number(let coreContext, let numericContext):
             let newNumericContext = try XCTUnwrap(newSchema.numberContext)
             // TODO: compare number contexts
+            // try assertEqualNewToOld(newNumericContext, numericContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .integer(let coreContext, let integerContext):
@@ -1253,9 +1254,27 @@ fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.E
     } else {
         XCTAssertNil(oldEncoding.headers)
     }
-    XCTAssertEqual(newEncoding.style, oldEncoding.style)
+    try assertEqualNewToOld(newEncoding.style, oldEncoding.style)
     XCTAssertEqual(newEncoding.explode, oldEncoding.explode)
     XCTAssertEqual(newEncoding.allowReserved, oldEncoding.allowReserved)
+}
+
+fileprivate func assertEqualNewToOld(_ newStyle: OpenAPIKit.OpenAPI.Parameter.SchemaContext.Style, _ oldStyle: OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style) throws {
+    let equal: Bool
+    switch (newStyle, oldStyle) {
+    case (.form, .form): equal = true
+    case (.simple, .simple): equal = true
+    case (.matrix, .matrix): equal = true
+    case (.label, .label): equal = true
+    case (.spaceDelimited, .spaceDelimited): equal = true
+    case (.pipeDelimited, .pipeDelimited): equal = true
+    case (.deepObject, .deepObject): equal = true
+    default: equal = false
+    }
+
+    if !equal {
+        XCTFail("New \(newStyle) is not equivalent to old \(oldStyle)")
+    }
 }
 
 fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ oldHeader: OpenAPIKit30.OpenAPI.Header) throws {
@@ -1274,7 +1293,7 @@ fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ o
 }
 
 fileprivate func assertEqualNewToOld(_ newSchemaContext: OpenAPIKit.OpenAPI.Parameter.SchemaContext, _ oldSchemaContext: OpenAPIKit30.OpenAPI.Parameter.SchemaContext) throws {
-    XCTAssertEqual(newSchemaContext.style, oldSchemaContext.style)
+    try assertEqualNewToOld(newSchemaContext.style, oldSchemaContext.style)
     XCTAssertEqual(newSchemaContext.explode, oldSchemaContext.explode)
     XCTAssertEqual(newSchemaContext.allowReserved, oldSchemaContext.allowReserved)
     switch (newSchemaContext.schema, oldSchemaContext.schema) {
@@ -1478,36 +1497,68 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
         let oldSchema = try XCTUnwrap(oldComponents.schemas[key])
         try assertEqualNewToOld(newSchema, oldSchema)
     }
-    for (key, newResponse) in newComponents.responses {
+    for (key, maybeNewResponse) in newComponents.responses {
         let oldResponse = try XCTUnwrap(oldComponents.responses[key])
+        guard case let .b(newResponse) = maybeNewResponse else {
+            XCTFail("Found a reference to a response where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newResponse, oldResponse)
     }
-    for (key, newParameter) in newComponents.parameters {
+    for (key, maybeNewParameter) in newComponents.parameters {
         let oldParameter = try XCTUnwrap(oldComponents.parameters[key])
+        guard case let .b(newParameter) = maybeNewParameter else {
+            XCTFail("Found a reference to a parameter where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newParameter, oldParameter)
     }
-    for (key, newExample) in newComponents.examples {
+    for (key, maybeNewExample) in newComponents.examples {
         let oldExample = try XCTUnwrap(oldComponents.examples[key])
+        guard case let .b(newExample) = maybeNewExample else {
+            XCTFail("Found a reference to an example where one was not expected")
+            return
+        }
         assertEqualNewToOld(newExample, oldExample)
     }
-    for (key, newRequest) in newComponents.requestBodies {
+    for (key, maybeNewRequest) in newComponents.requestBodies {
         let oldRequest = try XCTUnwrap(oldComponents.requestBodies[key])
+        guard case let .b(newRequest) = maybeNewRequest else {
+            XCTFail("Found a reference to a request where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newRequest, oldRequest)
     }
-    for (key, newHeader) in newComponents.headers {
+    for (key, maybeNewHeader) in newComponents.headers {
         let oldHeader = try XCTUnwrap(oldComponents.headers[key])
+        guard case let .b(newHeader) = maybeNewHeader else {
+            XCTFail("Found a reference to a header where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newHeader, oldHeader)
     }
-    for (key, newSecurity) in newComponents.securitySchemes {
+    for (key, maybeNewSecurity) in newComponents.securitySchemes {
         let oldSecurity = try XCTUnwrap(oldComponents.securitySchemes[key])
+        guard case let .b(newSecurity) = maybeNewSecurity else {
+            XCTFail("Found a reference to a security scheme where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newSecurity, oldSecurity)
     }
-    for (key, newLink) in newComponents.links {
+    for (key, maybeNewLink) in newComponents.links {
         let oldLink = try XCTUnwrap(oldComponents.links[key])
+        guard case let .b(newLink) = maybeNewLink else {
+            XCTFail("Found a reference to a link where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newLink, oldLink)
     }
-    for (key, newCallbacks) in newComponents.callbacks {
+    for (key, maybeNewCallbacks) in newComponents.callbacks {
         let oldCallbacks = try XCTUnwrap(oldComponents.callbacks[key])
+        guard case let .b(newCallbacks) = maybeNewCallbacks else {
+            XCTFail("Found a reference to a callbacks object where one was not expected")
+            return
+        }
         for (key, newCallback) in newCallbacks {
             let oldPathItem = try XCTUnwrap(oldCallbacks[key])
             switch (newCallback) {
