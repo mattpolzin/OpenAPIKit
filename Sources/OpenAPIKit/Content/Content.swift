@@ -47,7 +47,7 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = .reference(schemaReference.jsonReference)
+            self.schema = .reference(schemaReference.jsonReference, description: schemaReference.description)
             self.example = example
             self.examples = nil
             self.encoding = encoding

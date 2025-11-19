@@ -485,10 +485,10 @@ extension JSONSchema: LocallyDereferenceable {
             // TODO: consider which other core context properties to override here as with description ^
 
             var extensions = dereferenced.vendorExtensions
-            if let name {
+            if let name = name ?? reference.name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
-            dereferenced = dereferenced.with(vendorExtensions: vendorExtensions)
+            dereferenced = dereferenced.with(vendorExtensions: extensions)
 
             return dereferenced
         case .boolean(let context):
