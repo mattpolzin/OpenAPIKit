@@ -247,8 +247,17 @@ extension OpenAPIKit30.OpenAPI.Content: To31 {
                 vendorExtensions: vendorExtensions
             )
         } else {
+            let eitherRef = schema.map(eitherRefTo31)
+            let schema: OpenAPIKit.JSONSchema? = switch eitherRef {
+                case .none:
+                    nil
+                case .a(let reference):
+                    .reference(reference.jsonReference)
+                case .b(let value):
+                    value
+            }
             return OpenAPIKit.OpenAPI.Content(
-                schema: schema.map(eitherRefTo31),
+                schema: schema,
                 example: example,
                 encoding: encoding?.mapValues { $0.to31() },
                 vendorExtensions: vendorExtensions

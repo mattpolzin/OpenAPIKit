@@ -12,7 +12,7 @@ extension OpenAPI {
     /// 
     /// See [OpenAPI Media Type Object](https://spec.openapis.org/oas/v3.1.1.html#media-type-object).
     public struct Content: Equatable, CodableVendorExtendable, Sendable {
-        public var schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?
+        public var schema: JSONSchema?
         public var example: AnyCodable?
         public var examples: Example.Map?
         public var encoding: OrderedDictionary<String, Encoding>?
@@ -27,7 +27,7 @@ extension OpenAPI {
         /// Create `Content` with a schema, a reference to a schema, or no
         /// schema at all and optionally provide a single example.
         public init(
-            schema: Either<OpenAPI.Reference<JSONSchema>, JSONSchema>?,
+            schema: JSONSchema?,
             example: AnyCodable? = nil,
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
@@ -47,7 +47,7 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = .init(schemaReference)
+            self.schema = .reference(schemaReference.jsonReference)
             self.example = example
             self.examples = nil
             self.encoding = encoding
@@ -62,7 +62,7 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = .init(schema)
+            self.schema = schema
             self.example = example
             self.examples = nil
             self.encoding = encoding
@@ -77,7 +77,16 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = schema
+            switch schema {
+            case .none:
+                self.schema = nil
+
+            case .some(.a(let reference)):
+                self.schema = .reference(reference.jsonReference)
+
+            case .some(.b(let schemaValue)):
+                self.schema = schemaValue
+            }
             self.examples = examples
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding
@@ -92,7 +101,7 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = .init(schemaReference)
+            self.schema = .reference(schemaReference.jsonReference)
             self.examples = examples
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding
@@ -107,7 +116,7 @@ extension OpenAPI {
             encoding: OrderedDictionary<String, Encoding>? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.schema = .init(schema)
+            self.schema = schema
             self.examples = examples
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding
@@ -179,7 +188,7 @@ extension OpenAPI.Content: Decodable {
             )
         }
 
-        schema = try container.decodeIfPresent(Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.self, forKey: .schema)
+        schema = try container.decodeIfPresent(JSONSchema.self, forKey: .schema)
 
         encoding = try container.decodeIfPresent(OrderedDictionary<String, Encoding>.self, forKey: .encoding)
 

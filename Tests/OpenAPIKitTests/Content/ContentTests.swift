@@ -11,17 +11,14 @@ import OpenAPIKit
 
 final class ContentTests: XCTestCase {
     func test_init() {
-        let t1 = OpenAPI.Content(schema: .init(.external(URL(string:"hello.json#/world")!)))
+        let t1 = OpenAPI.Content(schema: .reference(.external(URL(string:"hello.json#/world")!)))
         XCTAssertNotNil(t1.schema?.reference)
-        XCTAssertNil(t1.schema?.schemaValue)
 
         let t2 = OpenAPI.Content(schema: .init(.string))
-        XCTAssertNotNil(t2.schema?.schemaValue)
         XCTAssertNil(t2.schema?.reference)
 
         let t3 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!))
         XCTAssertNotNil(t3.schema?.reference)
-        XCTAssertNil(t3.schema?.schemaValue)
 
         let withExample = OpenAPI.Content(
             schema: .init(.string),
@@ -52,13 +49,11 @@ final class ContentTests: XCTestCase {
             examples: nil
         )
         XCTAssertNotNil(t4.schema?.reference)
-        XCTAssertNil(t4.schema?.schemaValue)
 
         let t5 = OpenAPI.Content(
             schema: .string,
             examples: nil
         )
-        XCTAssertNotNil(t5.schema?.schemaValue)
         XCTAssertNil(t5.schema?.reference)
 
         let _ = OpenAPI.Content(
@@ -98,7 +93,7 @@ final class ContentTests: XCTestCase {
             .tar: .init(schema: .init(.boolean)),
             .tif: .init(schema: .init(.string(contentEncoding: .binary))),
             .txt: .init(schema: .init(.number)),
-            .xml: .init(schema: .init(.external(URL(string: "hello.json#/world")!))),
+            .xml: .init(schema: .reference(.external(URL(string: "hello.json#/world")!))),
             .yaml: .init(schema: .init(.string)),
             .zip: .init(schema: .init(.string)),
 
@@ -118,7 +113,7 @@ final class ContentTests: XCTestCase {
 // MARK: - Codable
 extension ContentTests {
     func test_referenceContent_encode() {
-        let content = OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!)))
+        let content = OpenAPI.Content(schema: .reference(.external(URL(string: "hello.json#/world")!)))
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(
@@ -144,7 +139,7 @@ extension ContentTests {
         """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!))))
+        XCTAssertEqual(content, OpenAPI.Content(schema: .reference(.external(URL(string: "hello.json#/world")!))))
     }
 
     func test_schemaContent_encode() {

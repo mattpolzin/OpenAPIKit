@@ -1086,11 +1086,11 @@ fileprivate func assertEqualNewToOld(_ newRequest: OpenAPIKit.OpenAPI.Request, _
 fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content.Map, _ oldContentMap: OpenAPIKit30.OpenAPI.Content.Map) throws {
     for ((newCt, newContent), (oldCt, oldContent)) in zip(newContentMap, oldContentMap) {
         XCTAssertEqual(newCt, oldCt)
-        switch (newContent.schema, oldContent.schema) {
-        case (.a(let ref1), .a(let ref2)):
+        switch (newContent.schema?.value, oldContent.schema) {
+        case (.reference(let ref1, _), .a(let ref2)):
             XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
-        case (.b(let schema1), .b(let schema2)):
-            try assertEqualNewToOld(schema1, schema2)
+        case (let .some(schema1), .b(let schema2)):
+            try assertEqualNewToOld(.init(schema:schema1), schema2)
         default:
             XCTFail("Found one reference and one schema. \(String(describing: newContent.schema))   /   \(String(describing: oldContent.schema))")
         }
