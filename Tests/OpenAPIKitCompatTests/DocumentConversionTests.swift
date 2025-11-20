@@ -1112,6 +1112,7 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
             XCTAssertNil(oldContent.examples)
         }
         if let newEncodingRef = newContent.encoding {
+            let newEncodingRef = try XCTUnwrap(newEncodingRef.mapValue)
             let oldEncodingRef = try XCTUnwrap(oldContent.encoding)
             for ((newKey, newEncoding), (oldKey, oldEncoding)) in zip(newEncodingRef, oldEncodingRef) {
                 XCTAssertEqual(newKey, oldKey)
