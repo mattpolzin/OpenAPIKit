@@ -123,6 +123,27 @@ final class DereferencedContentTests: XCTestCase {
         )
     }
 
+    func test_inlineItemSchema() throws {
+        let t1 = try OpenAPI.Content(itemSchema: .string).dereferenced(in: .noComponents)
+        XCTAssertEqual(t1.itemSchema, .string(.init(), .init()))
+    }
+
+    func test_referencedItemSchema() throws {
+        let components = OpenAPI.Components(
+            schemas: ["schema1": .string]
+        )
+        let t1 = try OpenAPI.Content(itemSchema: .reference(.component(named: "schema1"))).dereferenced(in: components)
+        XCTAssertEqual(t1.itemSchema, .string(.init(vendorExtensions: ["x-component-name": "schema1"]), .init()))
+    }
+
+    func test_missingItemSchema() {
+        XCTAssertThrowsError(
+            try OpenAPI.Content(
+                itemSchema: .reference(.component(named: "missing"))
+            ).dereferenced(in: .noComponents)
+        )
+    }
+
     func test_inlineEncoding() throws {
         let t1 = try OpenAPI.Content(schema: .string, encoding: ["test": .init()]).dereferenced(in: .noComponents)
         XCTAssertNotNil(t1.encodingMap?["test"])
@@ -151,6 +172,20 @@ final class DereferencedContentTests: XCTestCase {
         )
         // just test that dynamic member lookup is connected correctly
         XCTAssertEqual(t1.encodingMap?["test"]?.style, OpenAPI.Content.Encoding.defaultStyle)
+    }
+
+    func test_inlinePrefixEncoding() throws {
+        let t1 = try OpenAPI.Content(schema: .string, prefixEncoding: [.init()]).dereferenced(in: .noComponents)
+        XCTAssertNil(t1.encodingMap?["test"])
+        XCTAssertEqual(t1.prefixEncoding?.count, 1)
+        XCTAssertNil(t1.itemEncoding)
+    }
+
+    func test_inlineItemEncoding() throws {
+        let t1 = try OpenAPI.Content(schema: .string, itemEncoding: .init()).dereferenced(in: .noComponents)
+        XCTAssertNil(t1.encodingMap?["test"])
+        XCTAssertEqual(t1.prefixEncoding, [])
+        XCTAssertNotNil(t1.itemEncoding)
     }
 
     func test_missingHeaderInEncoding() {

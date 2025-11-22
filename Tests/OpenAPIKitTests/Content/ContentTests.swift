@@ -112,6 +112,27 @@ final class ContentTests: XCTestCase {
         XCTAssertNil(withPrefixAndItemEncoding.schema)
         XCTAssertEqual(withPrefixAndItemEncoding.itemSchema, .string)
         XCTAssertEqual(withPrefixAndItemEncoding.encoding?.positionalValue, .init(prefixEncoding: [.init()], itemEncoding: .init()))
+        XCTAssertEqual(withPrefixAndItemEncoding.prefixEncoding, [.init()])
+        XCTAssertEqual(withPrefixAndItemEncoding.itemEncoding, .init())
+
+        XCTAssertEqual(
+            OpenAPI.Content(
+                schema: .string,
+                prefixEncoding: [],
+                itemEncoding: nil
+            ),
+            OpenAPI.Content(
+                schema: .string,
+                encoding: nil
+            )
+        )
+
+        let emptyPositionalEncoding = OpenAPI.Content(
+            itemSchema: .string,
+            prefixEncoding: [],
+            itemEncoding: nil
+        )
+        XCTAssertEqual(emptyPositionalEncoding.encoding, nil)
     }
 
     func test_contentMap() {
