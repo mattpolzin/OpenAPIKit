@@ -575,7 +575,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         let schema1 = try t1.combined(resolvingAgainst: components)
         XCTAssertEqual(
             schema1,
-            JSONSchema.string.dereferenced()
+            JSONSchema.string(.init(), .init()).dereferenced()
         )
 
         let t2 = [
@@ -585,7 +585,7 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         let schema2 = try t2.combined(resolvingAgainst: components)
         XCTAssertEqual(
             schema2,
-            JSONSchema.object(description: "test", properties: ["test": .string]).dereferenced()
+            JSONSchema.object(description: "test", properties: ["test": .string(.init(vendorExtensions: ["x-component-name": "test"]), .init())]).dereferenced()
         )
     }
 

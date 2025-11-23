@@ -358,6 +358,11 @@ extension JSONSchema {
         guard case .reference = value else { return false }
         return true
     }
+
+    public var reference: JSONReference<JSONSchema>? {
+        guard case let .reference(reference, _) = value else { return nil }
+        return reference
+    }
 }
 
 // MARK: - Context Accessors

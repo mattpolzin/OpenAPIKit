@@ -278,7 +278,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             schemas: ["test": .string]
         )
         let t1 = try JSONSchema.reference(.component(named: "test")).dereferenced(in: components)
-        XCTAssertEqual(t1, .string(.init(), .init()))
+        XCTAssertEqual(t1, .string(.init(vendorExtensions: ["x-component-name": "test"]), .init()))
     }
 
     func test_throwingReferenceWithOverriddenDescription() throws {
@@ -286,7 +286,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             schemas: ["test": .string]
         )
         let t1 = try JSONSchema.reference(.component(named: "test"), description: "hello").dereferenced(in: components)
-        XCTAssertEqual(t1, .string(.init(description: "hello"), .init()))
+        XCTAssertEqual(t1, .string(.init(description: "hello", vendorExtensions: ["x-component-name": "test"]), .init()))
     }
 
     func test_optionalObjectWithoutReferences() {
@@ -360,7 +360,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.object(properties: ["test": .reference(.component(named: "test"))]).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean]))!)
+            .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean(.init(vendorExtensions: ["x-component-name": "test"]))]))!)
         )
         XCTAssertThrowsError(try JSONSchema.object(properties: ["missing": .reference(.component(named: "missing"))]).dereferenced(in: components))
     }
@@ -394,7 +394,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.array(items: .reference(.component(named: "test"))).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .array(.init(), DereferencedJSONSchema.ArrayContext(.init(items: .boolean))!)
+            .array(.init(), DereferencedJSONSchema.ArrayContext(.init(items: .boolean(.init(vendorExtensions: ["x-component-name": "test"]))))!)
         )
         XCTAssertThrowsError(try JSONSchema.array(items: .reference(.component(named: "missing"))).dereferenced(in: components))
     }
@@ -427,7 +427,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.one(of: .reference(.component(named: "test"))).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .one(of: [.boolean(.init())], core: .init())
+            .one(of: [.boolean(.init(vendorExtensions: ["x-component-name": "test"]))], core: .init())
         )
         XCTAssertEqual(t1.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertThrowsError(try JSONSchema.one(of: .reference(.component(named: "missing"))).dereferenced(in: components))
@@ -461,7 +461,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.any(of: .reference(.component(named: "test"))).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .any(of: [.boolean(.init())], core: .init())
+            .any(of: [.boolean(.init(vendorExtensions: ["x-component-name": "test"]))], core: .init())
         )
         XCTAssertEqual(t1.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertThrowsError(try JSONSchema.any(of: .reference(.component(named: "missing"))).dereferenced(in: components))
@@ -489,7 +489,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t1 = try JSONSchema.not(.reference(.component(named: "test"))).dereferenced(in: components)
         XCTAssertEqual(
             t1,
-            .not(.boolean(.init()), core: .init())
+            .not(.boolean(.init(vendorExtensions: ["x-component-name": "test"])), core: .init())
         )
         XCTAssertEqual(t1.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>, .init())
         XCTAssertThrowsError(try JSONSchema.not(.reference(.component(named: "missing"))).dereferenced(in: components))

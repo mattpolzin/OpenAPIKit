@@ -254,16 +254,38 @@ extension Validation {
         )
     }
 
-    /// Validate that all non-external JSONSchema references are found in the document's
+    /// Validate that all non-external OpenAPI JSONSchema references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var schemaReferencesAreValid: Validation<OpenAPI.Reference<JSONSchema>> {
         .init(
-            description: "JSONSchema reference can be found in components/schemas",
+            description: "OpenAPI JSONSchema reference can be found in components/schemas",
             check: { context in
                 guard case let .internal(internalReference) = context.subject.jsonReference,
+                    case .component = internalReference else {
+                    // don't make assertions about external references
+                    // TODO: could make a stronger assertion including
+                    // internal references outside of components given
+                    // some way to resolve those references.
+                    return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all non-external JSONSchema references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var jsonSchemaReferencesAreValid: Validation<JSONSchema> {
+        .init(
+            description: "JSONSchema reference can be found in components/schemas",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject.reference,
                     case .component = internalReference else {
                     // don't make assertions about external references
                     // TODO: could make a stronger assertion including

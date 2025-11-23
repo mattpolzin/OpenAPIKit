@@ -1157,20 +1157,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema?.schemaValue,
+                \.content[.json]?.schema,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
+            when: \OpenAPI.Request.content[.json]?.schema != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema?.schemaValue,
+                \.content[.json]?.schema,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
+            when: \OpenAPI.Response.content[.json]?.schema != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
@@ -1287,20 +1287,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema?.schemaValue,
+                \.content[.json]?.schema,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema?.schemaValue != nil
+            when: \OpenAPI.Request.content[.json]?.schema != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema?.schemaValue,
+                \.content[.json]?.schema,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema?.schemaValue != nil
+            when: \OpenAPI.Response.content[.json]?.schema != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(

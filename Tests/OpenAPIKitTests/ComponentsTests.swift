@@ -28,7 +28,8 @@ final class ComponentsTests: XCTestCase {
     func test_directConstructor() {
         let c1 = OpenAPI.Components(
             schemas: [
-                "one": .string
+                "one": .string,
+                "ref": .reference(.component(named: "one"))
             ],
             responses: [
                 "two": .response(.init(description: "hello", content: [:]))
@@ -74,7 +75,8 @@ final class ComponentsTests: XCTestCase {
 
         let c2 = OpenAPI.Components.direct(
             schemas: [
-                "one": .string
+                "one": .string,
+                "ref": .reference(.component(named: "one"))
             ],
             responses: [
                 "two": .init(description: "hello", content: [:])
@@ -125,7 +127,8 @@ final class ComponentsTests: XCTestCase {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .string,
-                "world": .integer(required: false)
+                "world": .integer(required: false),
+                "ref": .reference(.component(named: "hello"))
             ],
             parameters: [
                 "my_direct_param": .parameter(.cookie(name: "my_param", schema: .string)),
@@ -135,30 +138,33 @@ final class ComponentsTests: XCTestCase {
 
         let ref1 = JSONReference<JSONSchema>.component(named: "world")
         let ref2 = JSONReference<JSONSchema>.component(named: "missing")
-        let ref3 = JSONReference<OpenAPI.Parameter>.component(named: "param")
+        let ref3 = JSONReference<JSONSchema>.component(named: "ref")
+        let ref4 = JSONReference<OpenAPI.Parameter>.component(named: "param")
 
         XCTAssertEqual(components[ref1], .integer(required: false))
         XCTAssertEqual(try? components.lookup(ref1), components[ref1])
         XCTAssertNil(components[ref2])
-        XCTAssertNil(components[ref3])
+        XCTAssertEqual(components[ref3], .string)
+        XCTAssertEqual(try? components.lookup(ref3), components[ref3])
+        XCTAssertNil(components[ref4])
 
-        let ref4 = JSONReference<JSONSchema>.InternalReference.component(name: "world")
-        let ref5 = JSONReference<JSONSchema>.InternalReference.component(name: "missing")
-        let ref6 = JSONReference<OpenAPI.Parameter>.InternalReference.component(name: "param")
+        let ref5 = JSONReference<JSONSchema>.InternalReference.component(name: "world")
+        let ref6 = JSONReference<JSONSchema>.InternalReference.component(name: "missing")
+        let ref7 = JSONReference<OpenAPI.Parameter>.InternalReference.component(name: "param")
 
-        XCTAssertEqual(components[ref4], .integer(required: false))
-        XCTAssertNil(components[ref5])
+        XCTAssertEqual(components[ref5], .integer(required: false))
         XCTAssertNil(components[ref6])
+        XCTAssertNil(components[ref7])
 
-        let ref7 = JSONReference<OpenAPI.Parameter>.component(named: "my_param")
+        let ref8 = JSONReference<OpenAPI.Parameter>.component(named: "my_param")
 
-        XCTAssertEqual(components[ref7], .cookie(name: "my_param", schema: .string))
+        XCTAssertEqual(components[ref8], .cookie(name: "my_param", schema: .string))
 
-        let ref8 = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
+        let ref9 = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
 
-        XCTAssertNil(components[ref8])
+        XCTAssertNil(components[ref9])
 
-        XCTAssertThrowsError(try components.contains(ref8))
+        XCTAssertThrowsError(try components.contains(ref9))
     }
 
     func test_lookupOnce() throws {
@@ -409,6 +415,50 @@ extension ComponentsTests {
         let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
 
         XCTAssertEqual(decoded, OpenAPI.Components())
+    }
+
+    func test_schemaReference_encode() throws {
+        let t1 = OpenAPI.Components(
+            schemas: [
+                "ref": .reference(.external(URL(string: "./hi.yml")!))
+            ]
+        )
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "schemas" : {
+                "ref" : {
+                  "$ref" : ".\\/hi.yml"
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_schemaReference_decode() throws {
+        let t1 =
+        """
+        {
+          "schemas" : {
+            "ref" : {
+              "$ref" : "./hi.yml"
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
+
+        XCTAssertEqual(decoded, OpenAPI.Components(
+            schemas: [
+                "ref": .reference(.external(URL(string: "./hi.yml")!))
+            ]
+        ))
     }
 
     func test_maximal_encode() throws {
