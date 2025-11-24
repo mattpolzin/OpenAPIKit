@@ -71,7 +71,7 @@ final class ContentTests: XCTestCase {
         )
         XCTAssertNil(t5.schema?.reference)
 
-        let _ = OpenAPI.Content(
+        let withEncodingMap = OpenAPI.Content(
             schema: .init(.string),
             example: nil,
             encoding: [
@@ -83,6 +83,16 @@ final class ContentTests: XCTestCase {
                     allowReserved: true
                 )
             ]
+        )
+        XCTAssertEqual(
+            withEncodingMap.encodingMap?["hello"],
+            .init(
+                contentTypes: [.json],
+                headers: [
+                    "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
+                ],
+                allowReserved: true
+            )
         )
 
         let withPrefixEncoding = OpenAPI.Content(
@@ -133,6 +143,18 @@ final class ContentTests: XCTestCase {
             itemEncoding: nil
         )
         XCTAssertEqual(emptyPositionalEncoding.encoding, nil)
+
+        let emptyPositionalEncoding2 = OpenAPI.Content(
+            itemSchema: .string,
+            examples: ["hi": .example(summary: "hi example")],
+            prefixEncoding: [],
+            itemEncoding: nil
+        )
+        XCTAssertEqual(emptyPositionalEncoding2.encoding, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.encodingMap, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.prefixEncoding, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.itemEncoding, nil)
+        XCTAssertNotNil(emptyPositionalEncoding2.examples)
     }
 
     func test_contentMap() {
