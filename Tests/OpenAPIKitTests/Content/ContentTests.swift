@@ -43,6 +43,7 @@ final class ContentTests: XCTestCase {
         // is the order in which the examples are given:
         XCTAssertEqual(withExamples.example?.value as? String, "world")
         XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        XCTAssertEqual(withExamples.conditionalWarnings.count, 0)
 
         let withExamples2 = OpenAPI.Content(
             itemSchema: .string,
@@ -58,6 +59,7 @@ final class ContentTests: XCTestCase {
         // is the order in which the examples are given:
         XCTAssertEqual(withExamples2.example?.value as? String, "world")
         XCTAssertEqual(withExamples2.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        XCTAssertEqual(withExamples2.conditionalWarnings.count, 1)
 
         let t4 = OpenAPI.Content(
             schemaReference: .external(URL(string: "hello.json#/world")!),
@@ -103,6 +105,7 @@ final class ContentTests: XCTestCase {
         XCTAssertNil(withPrefixEncoding.schema)
         XCTAssertEqual(withPrefixEncoding.itemSchema, .string)
         XCTAssertEqual(withPrefixEncoding.encoding?.positionalValue, .init(prefixEncoding: [.init()], itemEncoding: nil))
+        XCTAssertEqual(withPrefixEncoding.conditionalWarnings.count, 2)
 
         let withItemEncoding = OpenAPI.Content(
             itemSchema: .string,
@@ -112,6 +115,7 @@ final class ContentTests: XCTestCase {
         XCTAssertNil(withItemEncoding.schema)
         XCTAssertEqual(withItemEncoding.itemSchema, .string)
         XCTAssertEqual(withItemEncoding.encoding?.positionalValue, .init(itemEncoding: .init()))
+        XCTAssertEqual(withItemEncoding.conditionalWarnings.count, 2)
 
         let withPrefixAndItemEncoding = OpenAPI.Content(
             itemSchema: .string,
@@ -124,6 +128,7 @@ final class ContentTests: XCTestCase {
         XCTAssertEqual(withPrefixAndItemEncoding.encoding?.positionalValue, .init(prefixEncoding: [.init()], itemEncoding: .init()))
         XCTAssertEqual(withPrefixAndItemEncoding.prefixEncoding, [.init()])
         XCTAssertEqual(withPrefixAndItemEncoding.itemEncoding, .init())
+        XCTAssertEqual(withPrefixAndItemEncoding.conditionalWarnings.count, 3)
 
         XCTAssertEqual(
             OpenAPI.Content(

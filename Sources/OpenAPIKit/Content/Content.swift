@@ -11,7 +11,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Media Type Object"
     /// 
     /// See [OpenAPI Media Type Object](https://spec.openapis.org/oas/v3.1.1.html#media-type-object).
-    public struct Content: Equatable, CodableVendorExtendable, Sendable {
+    public struct Content: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         /// A schema describing the complete content of the request, response,
         /// parameter, or header.
         public var schema: JSONSchema?
@@ -44,6 +44,8 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
+
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         /// The encoding of this `Content` (Media Type Object) if it is a map
         /// from property names to encoding information.
@@ -84,6 +86,8 @@ extension OpenAPI {
             self.examples = nil
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema, a reference to a schema, or no
@@ -106,6 +110,8 @@ extension OpenAPI {
                 self.encoding = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: prefixEncoding, itemEncoding: itemEncoding)
         }
 
         /// Create `Content` with a schema, a reference to a schema, or no
@@ -127,6 +133,8 @@ extension OpenAPI {
                 self.encoding = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: prefixEncoding, itemEncoding: itemEncoding)
         }
 
         /// Create `Content` with a reference to a schema and optionally
@@ -142,6 +150,8 @@ extension OpenAPI {
             self.examples = nil
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema and optionally provide a single
@@ -159,6 +169,8 @@ extension OpenAPI {
             self.examples = nil
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema, a reference to a schema, or no
@@ -183,6 +195,8 @@ extension OpenAPI {
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a reference to a schema and optionally
@@ -198,6 +212,8 @@ extension OpenAPI {
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema and optionally provide a map
@@ -215,6 +231,8 @@ extension OpenAPI {
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema and optionally provide a map
@@ -231,6 +249,8 @@ extension OpenAPI {
             self.example = examples.flatMap(Self.firstExample(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: nil, itemEncoding: nil)
         }
 
         /// Create `Content` with a schema and optionally provide a map
@@ -252,7 +272,49 @@ extension OpenAPI {
                 self.encoding = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: prefixEncoding, itemEncoding: itemEncoding)
         }
+    }
+}
+
+extension OpenAPI.Content: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.schema == rhs.schema
+        && lhs.itemSchema == rhs.itemSchema
+        && lhs.example == rhs.example
+        && lhs.examples == rhs.examples
+        && lhs.encoding == rhs.encoding
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
+
+extension OpenAPI.Content {
+    fileprivate static func conditionalWarnings(itemSchema: JSONSchema?, prefixEncoding: [Encoding]?, itemEncoding: Encoding?) -> [(any Condition, OpenAPI.Warning)] {
+        let itemSchemaWarning: (any Condition, OpenAPI.Warning)? =
+            itemSchema.map { _ in
+                OpenAPI.Document.ConditionalWarnings.version(lessThan: .v3_2_0, doesNotSupport: "The Media Type Object itemSchema property")
+            }
+        let prefixEncodingWarning : (any Condition, OpenAPI.Warning)? =
+            prefixEncoding.flatMap { prefixEncoding in
+                if prefixEncoding == [] {
+                    nil
+                } else {
+                    OpenAPI.Document.ConditionalWarnings.version(lessThan: .v3_2_0, doesNotSupport: "The Media Type Object prefixEncoding property")
+                }
+            }
+
+        let itemEncodingWarning : (any Condition, OpenAPI.Warning)? =
+            itemEncoding.map { _ in
+                OpenAPI.Document.ConditionalWarnings.version(lessThan: .v3_2_0, doesNotSupport: "The Media Type Object itemEncoding property")
+            }
+
+        return [
+            itemSchemaWarning,
+            prefixEncodingWarning,
+            itemEncodingWarning
+        ].compactMap { $0 }
     }
 }
 
@@ -342,11 +404,16 @@ extension OpenAPI.Content: Decodable {
         schema = try container.decodeIfPresent(JSONSchema.self, forKey: .schema)
         itemSchema = try container.decodeIfPresent(JSONSchema.self, forKey: .itemSchema)
 
+        var maybePrefixEncoding: [Encoding]? = nil
+        var maybeItemEncoding: Encoding? = nil
         if container.contains(.encoding) {
             encoding = .a(try container.decode(OrderedDictionary<String, Encoding>.self, forKey: .encoding))
         } else if container.contains(.prefixEncoding) || container.contains(.itemEncoding) {
             let prefixEncoding = try container.decodeIfPresent([Encoding].self, forKey: .prefixEncoding) ?? []
             let itemEncoding = try container.decodeIfPresent(Encoding.self, forKey: .itemEncoding)
+
+            maybePrefixEncoding = prefixEncoding
+            maybeItemEncoding = itemEncoding
 
             encoding = .b(.init(prefixEncoding: prefixEncoding, itemEncoding: itemEncoding))
         } else {
@@ -363,6 +430,8 @@ extension OpenAPI.Content: Decodable {
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        conditionalWarnings = Self.conditionalWarnings(itemSchema: itemSchema, prefixEncoding: maybePrefixEncoding, itemEncoding: maybeItemEncoding)
     }
 }
 
