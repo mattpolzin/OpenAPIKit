@@ -483,6 +483,22 @@ final class DocumentTests: XCTestCase {
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Document.self, from: docData))
     }
+
+    func test_initVersionWrongNumberOfComponents() {
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: ""))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1"))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2"))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2.3.4"))
+    }
+
+    func test_initPatchVersionNotInteger() {
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2.a"))
+    }
+
+    func test_versionOutsideKnownBoundsStillSerializesToString() {
+        XCTAssertEqual(OpenAPI.Document.Version.v3_1_x(x: 1000).rawValue, "3.1.1000")
+        XCTAssertEqual(OpenAPI.Document.Version.v3_2_x(x: 1000).rawValue, "3.2.1000")
+    }
 }
 
 // MARK: - Codable
