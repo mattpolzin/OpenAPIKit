@@ -71,6 +71,13 @@ extension Either where A == DereferencedSchemaContext {
     }
 }
 
+extension Either where A == OrderedDictionary<String, OpenAPI.Content.Encoding> {
+
+    public var mapValue: A? {
+        a
+    }
+}
+
 extension Either where B == OpenAPI.PathItem {
     /// Retrieve the path item if that is what this property contains.
     public var pathItemValue: B? { b }
@@ -139,6 +146,10 @@ extension Either where B == OpenAPI.Callbacks {
 extension Either where B == OpenAPI.SecurityScheme {
     /// Retrieve the security scheme if that is what this property contains.
     public var securitySchemeValue: B? { b }
+}
+
+extension Either where B == OpenAPI.Content.PositionalEncoding {
+    public var positionalValue: B? { b }
 }
 
 // MARK: - Convenience constructors

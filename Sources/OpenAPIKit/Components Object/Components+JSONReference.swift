@@ -114,6 +114,29 @@ extension OpenAPI.Components {
         return self[localReference]
     }
 
+    /// Retrieve schema from the `Components`. If the JSONSchema is not a
+    /// reference, it will be returned as-is. If it is a reference, it will be
+    /// looked up in the components if it refers to a components entry. If the
+    /// reference does not refer to a components entry, the function will return
+    /// `nil`.
+    ///
+    /// This function will follow subsequent refernences found within the
+    /// `Components` as long as no cycles are encountered. If a cycle is
+    /// encountered or a reference to a part of the document outside of the
+    /// `Components` is encountered then the function returns `nil`.
+    ///
+    /// If you want a throwing lookup, use the `lookup()` method.
+    public subscript(_ schema: JSONSchema) -> JSONSchema? {
+        guard case .reference(let reference, _) = schema.value else {
+            return schema
+        }
+        guard case .internal(let localReference) = reference else {
+            return nil
+        }
+
+        return self[localReference]
+    }
+
     /// Retrieve item referenced from the `Components`.
     ///
     /// This function will follow subsequent refernences found within the
@@ -328,6 +351,13 @@ extension OpenAPI.Components {
             guard let value else {
                 throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
             }
+
+            // special case for JSONSchemas that are references
+            if let schema = value as? JSONSchema,
+               case let .reference(newReference, _) = schema.value {
+                return try _lookup(newReference, following: visitedReferences.union([reference])) as! ReferenceType
+            }
+
             return value
 
         case .b(let referencePath):
@@ -372,6 +402,33 @@ extension OpenAPI.Components {
         case .b(let value):
             return value
         }
+    }
+
+    /// Lookup schema in the `Components`. If the JSONSchema is not a
+    /// reference, it will be returned as-is. If it is a reference, it will be
+    /// looked up in the components if it refers to a components entry.
+    ///
+    /// This function will follow subsequent refernences found within the
+    /// `Components` as long as no cycles are encountered.
+    ///
+    /// If you want to look something up without throwing, you might want to use the subscript
+    /// operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead
+    /// of just looking it up see the various `dereference` functions
+    /// on this type for more information.
+    ///
+    /// - Important: Looking up an external reference (i.e. one that points to another file)
+    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:,key:)` or
+    ///     `ReferenceCycleError`
+    public func lookup(_ schema: JSONSchema) throws -> JSONSchema {
+        guard case .reference(let reference, _) = schema.value else {
+            return schema
+        }
+        return try lookup(reference)
     }
 
     /// Create an `OpenAPI.Reference`.

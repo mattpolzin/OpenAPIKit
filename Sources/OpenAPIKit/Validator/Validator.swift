@@ -184,6 +184,7 @@ public final class Validator {
             .init(.operationParametersAreUnique),
             .init(.operationIdsAreUnique),
             .init(.schemaReferencesAreValid),
+            .init(.jsonSchemaReferencesAreValid),
             .init(.responseReferencesAreValid),
             .init(.parameterReferencesAreValid),
             .init(.exampleReferencesAreValid),

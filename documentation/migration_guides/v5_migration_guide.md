@@ -215,6 +215,84 @@ can be found in the Components Object (likely very uncommon), you will now need
 to handle two possibilities: the key path either refers to an object (of generic
 type `T`) or it refers to an `Either<OpenAPI.Reference<T>, T>`.
 
+### Media Type Object (`OpenAPI.Content`)
+#### Schema property
+The `schema` property has changed from either an `OpenAPI.Reference` or a
+`JOSNSchema` to just a `JSONSchema`. This both reflects the specification and
+also works just as well because `JSONSchema` has its own `.reference` case.
+However, this does result in some necessary code changes.
+
+You now have one fewer layer to traverse to get to a schema.
+```swift
+/// BEFORE
+let JSONSchema? = content[.json]?.schema?.schemaValue
+
+/// AFTER
+let JSONSchema? = content[.json]?.schema
+```
+
+Switches over the `schema` now should look directly at the `JSONSchema` `value`
+to switch on whether the `schema` is a reference or not.
+```swift
+/// BEFORE
+guard let schema = content[.json]?.schema else { return }
+switch schema {
+case .a(let reference):
+  print(reference)
+case .b(let schema):
+  print(schema)
+}
+
+/// AFTER
+guard let schema = content[.json]?.schema else { return }
+switch schema.value {
+case .reference(let reference, _):
+  print(reference)
+default:
+  print(schema)
+}
+```
+
+The `OpenAPI.Content(schema:example:encoding:vendorExtensions:)` initializer
+takes a schema directly so if you were passing in a schema anyway you just
+remove one layer of wrapping (the `Either` that was previously there). If you
+were passing in a reference, just make sure you are using the `JSONSchema`
+`reference()` convenience constructor where it would have previously been the
+`Either` `reference()` convenience constructor; they should be source-code
+compatible.
+
+#### Encoding property
+The `OpenAPI.Content` `encoding` property has changed from being a map of
+encodings (`OrderedDictionary<String, Encoding>`) to an `Either` in order to
+support the new OAS 3.2.0 `prefixEncoding` and `itemEncoding` options which are
+mutually exclusive with the existing map of encodings.
+
+Anywhere you read the `encoding` property in your existing code, you can switch
+to the `encodingMap` property if you want a short term solution that compiles
+and behaves the same way for any OpenAPI Documents that do not use the new
+positional encoding properties.
+```swift
+/// BEFORE
+let encoding: Encoding? = content.encoding
+
+/// AFTER
+let encoding: Encoding? = content.encodingMap
+```
+
+If you wish to handle the new encoding options, you will need to switch over the
+`Either` or otherwise handle the additional `prefixEncoding` and `itemEncoding`
+properties.
+```swift
+guard let encoding = content.encoding else { return }
+switch encoding {
+case .a(let encodingMap):
+  print(encodingMap)
+case .b(let positionalEncoding):
+  print(positionalEncoding.prefixEncoding)
+  print(positionalEncoding.itemEncoding)
+}
+```
+
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
 string descriptions of any OpenAPIKit errors, you may need to update the

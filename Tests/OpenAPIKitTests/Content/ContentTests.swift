@@ -11,17 +11,14 @@ import OpenAPIKit
 
 final class ContentTests: XCTestCase {
     func test_init() {
-        let t1 = OpenAPI.Content(schema: .init(.external(URL(string:"hello.json#/world")!)))
+        let t1 = OpenAPI.Content(schema: .reference(.external(URL(string:"hello.json#/world")!)))
         XCTAssertNotNil(t1.schema?.reference)
-        XCTAssertNil(t1.schema?.schemaValue)
 
         let t2 = OpenAPI.Content(schema: .init(.string))
-        XCTAssertNotNil(t2.schema?.schemaValue)
         XCTAssertNil(t2.schema?.reference)
 
         let t3 = OpenAPI.Content(schemaReference: .external(URL(string: "hello.json#/world")!))
         XCTAssertNotNil(t3.schema?.reference)
-        XCTAssertNil(t3.schema?.schemaValue)
 
         let withExample = OpenAPI.Content(
             schema: .init(.string),
@@ -46,22 +43,37 @@ final class ContentTests: XCTestCase {
         // is the order in which the examples are given:
         XCTAssertEqual(withExamples.example?.value as? String, "world")
         XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        XCTAssertEqual(withExamples.conditionalWarnings.count, 0)
+
+        let withExamples2 = OpenAPI.Content(
+            itemSchema: .string,
+            examples: [
+                "hello": .example(.init(value: .init("world"))),
+                "bbbb": .example(.init(value: .b("pick me"))),
+                "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
+            ]
+        )
+        XCTAssertEqual(withExamples2.itemSchema, .string)
+        XCTAssertNotNil(withExamples2.examples)
+        // we expect the example to be the first example where ordering
+        // is the order in which the examples are given:
+        XCTAssertEqual(withExamples2.example?.value as? String, "world")
+        XCTAssertEqual(withExamples2.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        XCTAssertEqual(withExamples2.conditionalWarnings.count, 1)
 
         let t4 = OpenAPI.Content(
             schemaReference: .external(URL(string: "hello.json#/world")!),
             examples: nil
         )
         XCTAssertNotNil(t4.schema?.reference)
-        XCTAssertNil(t4.schema?.schemaValue)
 
         let t5 = OpenAPI.Content(
             schema: .string,
             examples: nil
         )
-        XCTAssertNotNil(t5.schema?.schemaValue)
         XCTAssertNil(t5.schema?.reference)
 
-        let _ = OpenAPI.Content(
+        let withEncodingMap = OpenAPI.Content(
             schema: .init(.string),
             example: nil,
             encoding: [
@@ -74,6 +86,80 @@ final class ContentTests: XCTestCase {
                 )
             ]
         )
+        XCTAssertEqual(
+            withEncodingMap.encodingMap?["hello"],
+            .init(
+                contentTypes: [.json],
+                headers: [
+                    "world": .init(OpenAPI.Header(schemaOrContent: .init(.header(.string))))
+                ],
+                allowReserved: true
+            )
+        )
+
+        let withPrefixEncoding = OpenAPI.Content(
+            itemSchema: .string,
+            prefixEncoding: [.init()]
+        )
+
+        XCTAssertNil(withPrefixEncoding.schema)
+        XCTAssertEqual(withPrefixEncoding.itemSchema, .string)
+        XCTAssertEqual(withPrefixEncoding.encoding?.positionalValue, .init(prefixEncoding: [.init()], itemEncoding: nil))
+        XCTAssertEqual(withPrefixEncoding.conditionalWarnings.count, 2)
+
+        let withItemEncoding = OpenAPI.Content(
+            itemSchema: .string,
+            itemEncoding: .init()
+        )
+
+        XCTAssertNil(withItemEncoding.schema)
+        XCTAssertEqual(withItemEncoding.itemSchema, .string)
+        XCTAssertEqual(withItemEncoding.encoding?.positionalValue, .init(itemEncoding: .init()))
+        XCTAssertEqual(withItemEncoding.conditionalWarnings.count, 2)
+
+        let withPrefixAndItemEncoding = OpenAPI.Content(
+            itemSchema: .string,
+            prefixEncoding: [.init()],
+            itemEncoding: .init()
+        )
+
+        XCTAssertNil(withPrefixAndItemEncoding.schema)
+        XCTAssertEqual(withPrefixAndItemEncoding.itemSchema, .string)
+        XCTAssertEqual(withPrefixAndItemEncoding.encoding?.positionalValue, .init(prefixEncoding: [.init()], itemEncoding: .init()))
+        XCTAssertEqual(withPrefixAndItemEncoding.prefixEncoding, [.init()])
+        XCTAssertEqual(withPrefixAndItemEncoding.itemEncoding, .init())
+        XCTAssertEqual(withPrefixAndItemEncoding.conditionalWarnings.count, 3)
+
+        XCTAssertEqual(
+            OpenAPI.Content(
+                schema: .string,
+                prefixEncoding: [],
+                itemEncoding: nil
+            ),
+            OpenAPI.Content(
+                schema: .string,
+                encoding: nil
+            )
+        )
+
+        let emptyPositionalEncoding = OpenAPI.Content(
+            itemSchema: .string,
+            prefixEncoding: [],
+            itemEncoding: nil
+        )
+        XCTAssertEqual(emptyPositionalEncoding.encoding, nil)
+
+        let emptyPositionalEncoding2 = OpenAPI.Content(
+            itemSchema: .string,
+            examples: ["hi": .example(summary: "hi example")],
+            prefixEncoding: [],
+            itemEncoding: nil
+        )
+        XCTAssertEqual(emptyPositionalEncoding2.encoding, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.encodingMap, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.prefixEncoding, nil)
+        XCTAssertEqual(emptyPositionalEncoding2.itemEncoding, nil)
+        XCTAssertNotNil(emptyPositionalEncoding2.examples)
     }
 
     func test_contentMap() {
@@ -98,7 +184,7 @@ final class ContentTests: XCTestCase {
             .tar: .init(schema: .init(.boolean)),
             .tif: .init(schema: .init(.string(contentEncoding: .binary))),
             .txt: .init(schema: .init(.number)),
-            .xml: .init(schema: .init(.external(URL(string: "hello.json#/world")!))),
+            .xml: .init(schema: .reference(.external(URL(string: "hello.json#/world")!))),
             .yaml: .init(schema: .init(.string)),
             .zip: .init(schema: .init(.string)),
 
@@ -118,7 +204,7 @@ final class ContentTests: XCTestCase {
 // MARK: - Codable
 extension ContentTests {
     func test_referenceContent_encode() {
-        let content = OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!)))
+        let content = OpenAPI.Content(schema: .reference(.external(URL(string: "hello.json#/world")!)))
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(
@@ -144,7 +230,7 @@ extension ContentTests {
         """.data(using: .utf8)!
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
-        XCTAssertEqual(content, OpenAPI.Content(schema: .init(.external(URL(string: "hello.json#/world")!))))
+        XCTAssertEqual(content, OpenAPI.Content(schema: .reference(.external(URL(string: "hello.json#/world")!))))
     }
 
     func test_schemaContent_encode() {
@@ -175,6 +261,72 @@ extension ContentTests {
         let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
 
         XCTAssertEqual(content, OpenAPI.Content(schema: .init(.string)))
+    }
+
+    func test_itemSchemaContent_encode() {
+        let content = OpenAPI.Content(itemSchema: .string)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
+
+        assertJSONEquivalent(
+            encodedContent,
+            """
+            {
+              "itemSchema" : {
+                "type" : "string"
+              }
+            }
+            """
+        )
+    }
+
+    func test_itemSchemaContent_decode() {
+        let contentData =
+        """
+        {
+          "itemSchema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content, OpenAPI.Content(itemSchema: .init(.string)))
+    }
+
+    func test_schemaAndItemSchemaContent_encode() {
+        let content = OpenAPI.Content(schema: .string, itemSchema: .string)
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
+
+        assertJSONEquivalent(
+            encodedContent,
+            """
+            {
+              "itemSchema" : {
+                "type" : "string"
+              },
+              "schema" : {
+                "type" : "string"
+              }
+            }
+            """
+        )
+    }
+
+    func test_schemaAndItemSchemaContent_decode() {
+        let contentData =
+        """
+        {
+          "itemSchema" : {
+            "type" : "string"
+          },
+          "schema" : {
+            "type" : "string"
+          }
+        }
+        """.data(using: .utf8)!
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(content, OpenAPI.Content(schema: .string, itemSchema: .init(.string)))
     }
 
     func test_schemalessContent_encode() {
@@ -352,6 +504,40 @@ extension ContentTests {
         XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Content.self, from: contentData))
     }
 
+    func test_decodeFailureForBothEncodingAndItemEncoding() {
+        let contentData =
+        """
+        {
+          "encoding" : {
+            "json" : {
+              "contentType" : "application\\/json"
+            }
+          },
+          "itemEncoding" : {
+            "json" : {
+              "contentType" : "application\\/json"
+            }
+          }
+        }
+        """.data(using: .utf8)!
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Content.self, from: contentData))
+    }
+
+    func test_decodeFailureForBothEncodingAndPrefixEncoding() {
+        let contentData =
+        """
+        {
+          "encoding" : {
+            "json" : {
+              "contentType" : "application\\/json"
+            }
+          },
+          "prefixEncoding" : []
+        }
+        """.data(using: .utf8)!
+        XCTAssertThrowsError(try orderUnstableDecode(OpenAPI.Content.self, from: contentData))
+    }
+
     func test_encodingAndSchema_encode() {
         let content = OpenAPI.Content(
             schema: .init(.string),
@@ -398,6 +584,63 @@ extension ContentTests {
             OpenAPI.Content(
                 schema: .init(.string),
                 encoding: ["json": .init(contentTypes: [.json])]
+            )
+        )
+    }
+
+    func test_prefixAndItemEncodingAndItemSchema_encode() {
+        let content = OpenAPI.Content(
+            itemSchema: .string,
+            prefixEncoding: [.init(contentTypes: [.json])],
+            itemEncoding: .init(contentTypes: [.json])
+        )
+        let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
+
+        assertJSONEquivalent(
+            encodedContent,
+            """
+            {
+              "itemEncoding" : {
+                "contentType" : "application\\/json"
+              },
+              "itemSchema" : {
+                "type" : "string"
+              },
+              "prefixEncoding" : [
+                {
+                  "contentType" : "application\\/json"
+                }
+              ]
+            }
+            """
+        )
+    }
+
+    func test_prefixAndItemEncodingAndItemSchema_decode() {
+        let contentData =
+        """
+        {
+          "itemEncoding" : {
+             "contentType" : "application\\/json"
+          },
+          "itemSchema" : {
+            "type" : "string"
+          },
+          "prefixEncoding" : [
+            {
+              "contentType" : "application\\/json"
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let content = try! orderUnstableDecode(OpenAPI.Content.self, from: contentData)
+
+        XCTAssertEqual(
+            content,
+            OpenAPI.Content(
+                itemSchema: .init(.string),
+                prefixEncoding: [.init(contentTypes: [.json])],
+                itemEncoding: .init(contentTypes: [.json])
             )
         )
     }

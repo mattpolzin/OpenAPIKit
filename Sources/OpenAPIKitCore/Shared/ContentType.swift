@@ -107,21 +107,30 @@ public extension Shared.ContentType {
     static let csv: Self = .init(.csv)
     static let doc: Self = .init(.doc)
     static let docx: Self = .init(.docx)
+    /// Event Stream (e.g. Server-Sent Events)
+    static let eventStream: Self = .init(.eventStream)
     /// URL-encoded form data. See also: `multipartForm`.
     static let form: Self = .init(.form)
     /// Graphics Interchange Format
     static let gif: Self = .init(.gif)
     /// geojson as defined in GeoJSON standard (RFC 7946)
-    ///
     /// see: https://datatracker.ietf.org/doc/html/rfc7946#section-12
     static let geojson: Self = .init(.geojson)
     static let html: Self = .init(.html)
     static let javascript: Self = .init(.javascript)
     /// JPEG image
     static let jpg: Self = .init(.jpg)
+    /// JSON
+    /// See https://www.rfc-editor.org/rfc/rfc8259.html
     static let json: Self = .init(.json)
     /// JSON:API Document
     static let jsonapi: Self = .init(.jsonapi)
+    /// JSON Lines
+    /// See https://jsonlines.org
+    static let jsonl: Self = .init(.jsonl)
+    /// json-seq (text sequences)
+    /// See https://www.rfc-editor.org/rfc/rfc7464.html
+    static let json_seq: Self = .init(.json_seq)
     /// Quicktime video
     static let mov: Self = .init(.mov)
     /// MP3 audio
@@ -132,13 +141,14 @@ public extension Shared.ContentType {
     static let mpg: Self = .init(.mpg)
     /// Multipart form data. See also: `form`.
     static let multipartForm: Self = .init(.multipartForm)
+    /// Multipart mixed data.
+    static let multipartMixed: Self = .init(.multipartMixed)
     /// OpenType font
     static let otf: Self = .init(.otf)
     static let pdf: Self = .init(.pdf)
     /// PNG image
     static let png: Self = .init(.png)
     /// Protocol Buffers
-    ///
     /// See: https://protobuf.dev/
     static let protobuf: Self = .init(.protobuf)
     /// RAR archive
@@ -194,10 +204,11 @@ extension Shared.ContentType {
         case csv
         case doc
         case docx
+        /// Event Stream (e.g. Server-Sent Events)
+        case eventStream
         /// URL-encoded form data. See also: `multipartForm`.
         case form
         /// geojson as defined in GeoJSON standard (RFC 7946)
-        ///
         /// see: https://datatracker.ietf.org/doc/html/rfc7946#section-12
         case geojson
         /// Graphics Interchange Format
@@ -206,9 +217,17 @@ extension Shared.ContentType {
         case javascript
         /// JPEG image
         case jpg
+        /// JSON
+        /// See https://www.rfc-editor.org/rfc/rfc8259.html
         case json
         /// JSON:API Document
         case jsonapi
+        /// JSON Lines
+        /// See https://jsonlines.org
+        case jsonl
+        /// json-seq (text sequences)
+        /// See https://www.rfc-editor.org/rfc/rfc7464.html
+        case json_seq
         /// Quicktime video
         case mov
         /// MP3 audio
@@ -219,13 +238,14 @@ extension Shared.ContentType {
         case mpg
         /// Multipart form data. See also: `form`.
         case multipartForm
+        /// Multipart mixed data.
+        case multipartMixed
         /// OpenType font
         case otf
         case pdf
         /// PNG image
         case png
         /// Protocol Buffers
-        ///
         /// See: https://protobuf.dev/
         case protobuf
         /// RAR archive
@@ -277,6 +297,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case .csv: return "text/csv"
         case .doc: return "application/msword"
         case .docx: return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        case .eventStream: return "text/event-stream"
         case .form: return "application/x-www-form-urlencoded"
         case .geojson: return "application/geo+json"
         case .gif: return "image/gif"
@@ -285,11 +306,14 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case .jpg: return "image/jpeg"
         case .json: return "application/json"
         case .jsonapi: return "application/vnd.api+json"
+        case .jsonl: return "application/jsonl"
+        case .json_seq: return "application/json-seq"
         case .mov: return "video/quicktime"
         case .mp3: return "audio/mpeg"
         case .mp4: return "video/mp4"
         case .mpg: return "video/mpeg"
         case .multipartForm: return "multipart/form-data"
+        case .multipartMixed: return "multipart/mixed"
         case .otf: return "font/otf"
         case .pdf: return "application/pdf"
         case .png: return "image/png"
@@ -330,6 +354,7 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case "text/csv": self = .csv
         case "application/msword": self = .doc
         case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": self = .docx
+        case "text/event-stream": self = .eventStream
         case "application/x-www-form-urlencoded": self = .form
         case "application/geo+json": self = .geojson
         case "image/gif": self = .gif
@@ -338,11 +363,14 @@ extension Shared.ContentType.Builtin: RawRepresentable {
         case "image/jpeg": self = .jpg
         case "application/json": self = .json
         case "application/vnd.api+json": self = .jsonapi
+        case "application/jsonl": self = .jsonl
+        case "application/json-seq": self = .json_seq
         case "video/quicktime": self = .mov
         case "audio/mpeg": self = .mp3
         case "video/mp4": self = .mp4
         case "video/mpeg": self = .mpg
         case "multipart/form-data": self = .multipartForm
+        case "multipart/mixed": self = .multipartMixed
         case "font/otf": self = .otf
         case "application/pdf": self = .pdf
         case "image/png": self = .png
