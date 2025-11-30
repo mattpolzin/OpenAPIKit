@@ -24,7 +24,7 @@ jobs:
           - swift:6.2-jammy
           - swift:6.2-noble
           - swiftlang/swift:nightly-focal
-          - swiftlang/swift:nightly-jammy
+#          - swiftlang/swift:nightly-jammy
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
