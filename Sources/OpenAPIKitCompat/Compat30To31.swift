@@ -466,6 +466,17 @@ extension OpenAPIKit30.OpenAPI.ExternalDocumentation: To31 {
     }
 }
 
+extension OpenAPIKit30.OpenAPI.OAuthFlows: To31 {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.OAuthFlows {
+        OpenAPIKit.OpenAPI.OAuthFlows(
+            implicit: implicit,
+            password: password,
+            clientCredentials: clientCredentials,
+            authorizationCode: authorizationCode
+        )
+    }
+}
+
 extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.SecurityScheme.SecurityType {
         switch self {
@@ -474,7 +485,7 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType: To31 {
         case .http(scheme: let scheme, bearerFormat: let bearerFormat):
             return .http(scheme: scheme, bearerFormat: bearerFormat)
         case .oauth2(flows: let flows):
-            return .oauth2(flows: flows)
+            return .oauth2(flows: flows.to31())
         case .openIdConnect(openIdConnectUrl: let openIdConnectUrl):
             return .openIdConnect(openIdConnectUrl: openIdConnectUrl)
         }
