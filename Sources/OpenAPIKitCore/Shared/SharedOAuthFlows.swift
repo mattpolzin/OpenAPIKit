@@ -18,6 +18,11 @@ extension Shared.OAuthFlows {
     public struct CommonFields: Equatable, Sendable {
         public let refreshUrl: URL?
         public let scopes: OrderedDictionary<Scope, ScopeDescription>
+
+        public init(refreshUrl: URL?, scopes: OrderedDictionary<Scope, ScopeDescription>) {
+            self.refreshUrl = refreshUrl
+            self.scopes = scopes
+        }
     }
 
     @dynamicMemberLookup
