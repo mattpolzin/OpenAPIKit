@@ -149,7 +149,7 @@ extension OpenAPI {
         public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
-            openAPIVersion: Version = .v3_1_1,
+            openAPIVersion: Version = .v3_2_0,
             selfURI: URL? = nil,
             info: Info,
             servers: [Server],
