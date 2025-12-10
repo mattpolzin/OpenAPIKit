@@ -673,3 +673,34 @@ extension SecuritySchemeTests {
         )
     }
 }
+
+// MARK: Validatable
+extension SecuritySchemeTests {
+    func test_supportsValidations() throws {
+        let scheme = OpenAPI.SecurityScheme.mutualTLS(description: "hi", deprecated: true)
+
+        let components = OpenAPI.Components(
+            securitySchemes: [
+                "schemeOne": .securityScheme(scheme)
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: OpenAPI.Document.Info(title: "hi", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: components
+        )
+
+        let validation: Validation<OpenAPI.SecurityScheme> = .init(
+            description: "No security schemes are deprecated",
+            check: \.deprecated != true
+        )
+
+        let validator = Validator.blank.validating(validation)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Failed to satisfy: No security schemes are deprecated at path: .components.securitySchemes.schemeOne")
+        }
+    }
+}
