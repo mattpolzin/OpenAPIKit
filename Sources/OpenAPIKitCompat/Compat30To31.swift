@@ -485,7 +485,7 @@ extension OpenAPIKit30.OpenAPI.SecurityScheme.SecurityType: To31 {
         case .http(scheme: let scheme, bearerFormat: let bearerFormat):
             return .http(scheme: scheme, bearerFormat: bearerFormat)
         case .oauth2(flows: let flows):
-            return .oauth2(flows: flows.to31())
+            return .oauth2(flows: flows.to31(), metadataUrl: nil)
         case .openIdConnect(openIdConnectUrl: let openIdConnectUrl):
             return .openIdConnect(openIdConnectUrl: openIdConnectUrl)
         }

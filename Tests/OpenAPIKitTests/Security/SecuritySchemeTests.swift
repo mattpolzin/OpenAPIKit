@@ -24,8 +24,8 @@ final class SecuritySchemeTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            OpenAPI.SecurityScheme(type: .oauth2(flows: .init()), description: "description"),
-            OpenAPI.SecurityScheme.oauth2(flows: .init(), description: "description")
+            OpenAPI.SecurityScheme(type: .oauth2(flows: .init(), metadataUrl: URL(string: "https://google.com")!), description: "description"),
+            OpenAPI.SecurityScheme.oauth2(flows: .init(), metadataUrl: URL(string: "https://google.com")!,  description: "description")
         )
 
         XCTAssertEqual(
@@ -60,7 +60,7 @@ final class SecuritySchemeTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            OpenAPI.SecurityScheme(type: .oauth2(flows: .init()), description: "description").type.name,
+            OpenAPI.SecurityScheme(type: .oauth2(flows: .init(), metadataUrl: nil), description: "description").type.name,
             .oauth2
         )
 

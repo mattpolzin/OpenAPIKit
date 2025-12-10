@@ -359,7 +359,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                     "read:widgets" : "read those widgets"
                                 ]
                             )
-                        )
+                        ),
+                        metadataUrl: URL(string: "https://google.com")!
                     ),
                     description: "OAuth Flows"
                 )
@@ -367,8 +368,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let securityRequirements: [OpenAPI.SecurityRequirement] = [
             [
-                .component( named: "basic_auth"): [],
-                .component( named: "oauth_flow"): ["read:widgets"]
+                .component(named: "basic_auth"): [],
+                .component(named: "oauth_flow"): ["read:widgets"]
             ]
         ]
 

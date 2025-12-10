@@ -15,6 +15,10 @@ extension OpenAPI {
     public struct SecurityScheme: Equatable, CodableVendorExtendable, Sendable {
         public var type: SecurityType
         public var description: String?
+        /// Indication of if the security scheme is deprecated. Defaults to
+        /// `false` and OpenAPIKit only encodes this property if it is set to
+        /// `true`.
+        public var deprecated: Bool
 
         /// Dictionary of vendor extensions.
         ///
@@ -26,37 +30,39 @@ extension OpenAPI {
         public init(
             type: SecurityType,
             description: String? = nil,
-            vendorExtensions: [String: AnyCodable] = [:]
+            vendorExtensions: [String: AnyCodable] = [:],
+            deprecated: Bool = false
         ) {
             self.type = type
             self.description = description
             self.vendorExtensions = vendorExtensions
+            self.deprecated = deprecated
         }
 
-        public static func apiKey(name: String, location: Location, description: String? = nil) -> SecurityScheme {
-            return .init(type: .apiKey(name: name, location: location), description: description)
+        public static func apiKey(name: String, location: Location, description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
+            return .init(type: .apiKey(name: name, location: location), description: description, deprecated: deprecated)
         }
 
-        public static func http(scheme: String, bearerFormat: String? = nil, description: String? = nil) -> SecurityScheme {
-            return .init(type: .http(scheme: scheme, bearerFormat: bearerFormat), description: description)
+        public static func http(scheme: String, bearerFormat: String? = nil, description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
+            return .init(type: .http(scheme: scheme, bearerFormat: bearerFormat), description: description, deprecated: deprecated)
         }
 
-        public static func oauth2(flows: OAuthFlows, description: String? = nil) -> SecurityScheme {
-            return .init(type: .oauth2(flows: flows), description: description)
+        public static func oauth2(flows: OAuthFlows, metadataUrl: URL? = nil, description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
+            return .init(type: .oauth2(flows: flows, metadataUrl: metadataUrl), description: description, deprecated: deprecated)
         }
 
-        public static func openIdConnect(url: URL, description: String? = nil) -> SecurityScheme {
-            return .init(type: .openIdConnect(openIdConnectUrl: url), description: description)
+        public static func openIdConnect(url: URL, description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
+            return .init(type: .openIdConnect(openIdConnectUrl: url), description: description, deprecated: deprecated)
         }
 
-        public static func mutualTLS(description: String? = nil) -> SecurityScheme {
-            return .init(type: .mutualTLS, description: description)
+        public static func mutualTLS(description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
+            return .init(type: .mutualTLS, description: description, deprecated: deprecated)
         }
 
         public enum SecurityType: Equatable, Sendable {
             case apiKey(name: String, location: Location)
             case http(scheme: String, bearerFormat: String?)
-            case oauth2(flows: OAuthFlows)
+            case oauth2(flows: OAuthFlows, metadataUrl: URL?)
             case openIdConnect(openIdConnectUrl: URL)
             case mutualTLS
         }
@@ -106,6 +112,10 @@ extension OpenAPI.SecurityScheme: Encodable {
 
         try container.encodeIfPresent(description, forKey: .description)
 
+        if deprecated {
+            try container.encode(deprecated, forKey: .deprecated)
+        }
+
         switch type {
         case .apiKey(name: let name, location: let location):
             try container.encode(SecurityType.Name.apiKey, forKey: .type)
@@ -118,9 +128,10 @@ extension OpenAPI.SecurityScheme: Encodable {
         case .openIdConnect(openIdConnectUrl: let url):
             try container.encode(SecurityType.Name.openIdConnect, forKey: .type)
             try container.encode(url.absoluteString, forKey: .openIdConnectUrl)
-        case .oauth2(flows: let flows):
+        case .oauth2(flows: let flows, metadataUrl: let url):
             try container.encode(SecurityType.Name.oauth2, forKey: .type)
             try container.encode(flows, forKey: .flows)
+            try container.encodeIfPresent(url?.absoluteString, forKey: .oauth2MetadataUrl)
         case .mutualTLS:
             try container.encode(SecurityType.Name.mutualTLS, forKey: .type)
         }
@@ -136,6 +147,8 @@ extension OpenAPI.SecurityScheme: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         description = try container.decodeIfPresent(String.self, forKey: .description)
+
+        deprecated = try container.decodeIfPresent(Bool.self, forKey: .deprecated) ?? false
 
         let typeName = try container.decode(SecurityType.Name.self, forKey: .type)
 
@@ -154,7 +167,8 @@ extension OpenAPI.SecurityScheme: Decodable {
             )
         case .oauth2:
             type = .oauth2(
-                flows: try container.decode(OpenAPI.OAuthFlows.self, forKey: .flows)
+                flows: try container.decode(OpenAPI.OAuthFlows.self, forKey: .flows),
+                metadataUrl: try container.decodeURLAsStringIfPresent(forKey: .oauth2MetadataUrl)
             )
         case .openIdConnect:
             type = .openIdConnect(
@@ -186,24 +200,28 @@ extension OpenAPI.SecurityScheme {
     internal enum CodingKeys: ExtendableCodingKey {
         case type
         case description
+        case deprecated
         case name
         case location
         case scheme
         case bearerFormat
         case flows
         case openIdConnectUrl
+        case oauth2MetadataUrl
         case extended(String)
 
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .type,
                 .description,
+                .deprecated,
                 .name,
                 .location,
                 .scheme,
                 .bearerFormat,
                 .flows,
-                .openIdConnectUrl
+                .openIdConnectUrl,
+                .oauth2MetadataUrl
             ]
         }
 
@@ -217,6 +235,8 @@ extension OpenAPI.SecurityScheme {
                 self = .type
             case "description":
                 self = .description
+            case "deprecated":
+                self = .deprecated
             case "name":
                 self = .name
             case "in":
@@ -229,6 +249,8 @@ extension OpenAPI.SecurityScheme {
                 self = .flows
             case "openIdConnectUrl":
                 self = .openIdConnectUrl
+            case "oauth2MetadataUrl":
+                self = .oauth2MetadataUrl
             default:
                 self = .extendedKey(for: stringValue)
             }
@@ -240,6 +262,8 @@ extension OpenAPI.SecurityScheme {
                 return "type"
             case .description:
                 return "description"
+            case .deprecated:
+                return "deprecated"
             case .name:
                 return "name"
             case .location:
@@ -252,6 +276,8 @@ extension OpenAPI.SecurityScheme {
                 return "flows"
             case .openIdConnectUrl:
                 return "openIdConnectUrl"
+            case .oauth2MetadataUrl:
+                return "oauth2MetadataUrl"
             case .extended(let key):
                 return key
             }
@@ -281,3 +307,5 @@ extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
         return (self, .init(), [])
     }
 }
+
+extension OpenAPI.SecurityScheme: Validatable {}

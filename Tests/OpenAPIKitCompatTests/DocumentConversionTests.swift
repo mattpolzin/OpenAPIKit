@@ -1593,7 +1593,8 @@ fileprivate func assertEqualNewToOld(_ newScheme: OpenAPIKit.OpenAPI.SecuritySch
     case (.http(let scheme, let format), .http(let scheme2, let format2)):
         XCTAssertEqual(scheme, scheme2)
         XCTAssertEqual(format, format2)
-    case (.oauth2(let flows), .oauth2(let flows2)):
+    case (.oauth2(let flows, let metadataUrl), .oauth2(let flows2)):
+        XCTAssertNil(metadataUrl)
         try assertEqualNewToOld(flows, flows2)
     case (.openIdConnect(let url), .openIdConnect(let url2)):
         XCTAssertEqual(url, url2)
