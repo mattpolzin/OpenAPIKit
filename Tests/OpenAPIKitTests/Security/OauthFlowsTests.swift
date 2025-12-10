@@ -60,6 +60,18 @@ final class OAuthFlowsTests: XCTestCase {
         XCTAssertEqual(authorizationCodeFlow.refreshUrl, testUrl)
         XCTAssertEqual(authorizationCodeFlow.scopes, scopes)
 
+        let deviceAuthorizationFlow = OpenAPI.OAuthFlows.DeviceAuthorization(
+            deviceAuthorizationUrl: testUrl,
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(deviceAuthorizationFlow.deviceAuthorizationUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.tokenUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.refreshUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.scopes, scopes)
+
         let flows = OpenAPI.OAuthFlows(
             implicit: implicitFlow,
             password: passwordFlow,
@@ -71,6 +83,22 @@ final class OAuthFlowsTests: XCTestCase {
         XCTAssertEqual(flows.password, passwordFlow)
         XCTAssertEqual(flows.clientCredentials, clientCredentialsFlow)
         XCTAssertEqual(flows.authorizationCode, authorizationCodeFlow)
+        XCTAssertEqual(flows.conditionalWarnings.count, 0)
+
+        let flows2 = OpenAPI.OAuthFlows(
+            implicit: implicitFlow,
+            password: passwordFlow,
+            clientCredentials: clientCredentialsFlow,
+            authorizationCode: authorizationCodeFlow,
+            authorizationCode: deviceAuthorizationFlow
+        )
+
+        XCTAssertEqual(flows2.implicit, implicitFlow)
+        XCTAssertEqual(flows2.password, passwordFlow)
+        XCTAssertEqual(flows2.clientCredentials, clientCredentialsFlow)
+        XCTAssertEqual(flows2.authorizationCode, authorizationCodeFlow)
+        XCTAssertEqual(flows2.deviceAuthorization, deviceAuthorizationFlow)
+        XCTAssertEqual(flows2.conditionalWarnings.count, 1)
     }
 }
 

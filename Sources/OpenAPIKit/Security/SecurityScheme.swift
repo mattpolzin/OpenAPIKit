@@ -69,6 +69,15 @@ extension OpenAPI {
     }
 }
 
+fileprivate func notFalseVersionWarning(fieldName: String, value: Bool, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    guard value else { return nil }
+
+    return OpenAPI.Document.ConditionalWarnings.version(
+        lessThan: minimumVersion,
+        doesNotSupport: "The Security Scheme \(fieldName) field"
+    )
+}
+
 extension OpenAPI.SecurityScheme.SecurityType {
     public enum Name: String, Codable {
         case apiKey

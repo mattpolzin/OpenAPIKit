@@ -12,12 +12,14 @@ extension OpenAPI {
     /// OpenAPI Spec "Oauth Flows Object"
     ///
     /// See [OpenAPI Oauth Flows Object](https://spec.openapis.org/oas/v3.0.4.html#oauth-flows-object).
-    public struct OAuthFlows: Equatable, Sendable {
+    public struct OAuthFlows: HasConditionalWarnings, Sendable {
         public let implicit: Implicit?
         public let password: Password?
         public let clientCredentials: ClientCredentials?
         public let authorizationCode: AuthorizationCode?
         public let deviceAuthorization: DeviceAuthorization?
+
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
             implicit: Implicit? = nil,
@@ -31,7 +33,30 @@ extension OpenAPI {
             self.clientCredentials = clientCredentials
             self.authorizationCode = authorizationCode
             self.deviceAuthorization = deviceAuthorization
+
+            self.conditionalWarnings = [
+                nonNilVersionWarning(fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
+    }
+}
+
+extension OpenAPI.OAuthFlows: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.implicit == rhs.implicit
+        && lhs.password == rhs.password
+        && lhs.clientCredentials == rhs.clientCredentials
+        && lhs.authorizationCode == rhs.authorizationCode
+        && lhs.deviceAuthorization == rhs.deviceAuthorization
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The OAuthFlows \(fieldName) field"
+        )
     }
 }
 
@@ -93,6 +118,10 @@ extension OpenAPI.OAuthFlows: Decodable {
         clientCredentials = try container.decodeIfPresent(OpenAPI.OAuthFlows.ClientCredentials.self, forKey: .clientCredentials)
         authorizationCode = try container.decodeIfPresent(OpenAPI.OAuthFlows.AuthorizationCode.self, forKey: .authorizationCode)
         deviceAuthorization = try container.decodeIfPresent(OpenAPI.OAuthFlows.DeviceAuthorization.self, forKey: .deviceAuthorization)
+
+        self.conditionalWarnings = [
+            nonNilVersionWarning(fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
+        ].compactMap { $0 }
     }
 }
 
