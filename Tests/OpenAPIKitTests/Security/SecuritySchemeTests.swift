@@ -218,7 +218,7 @@ extension SecuritySchemeTests {
         )
     }
 
-    func test_oauth2_encode() throws {
+    func test_oauth2Implicit_encode() throws {
         let oauth = OpenAPI.SecurityScheme.oauth2(
             flows: .init(
                 implicit: .init(
@@ -248,7 +248,7 @@ extension SecuritySchemeTests {
         )
     }
 
-    func test_oauth2_decode() throws {
+    func test_oauth2Implicit_decode() throws {
         let oauthData =
         """
         {
@@ -272,6 +272,258 @@ extension SecuritySchemeTests {
                 flows: .init(
                     implicit: .init(
                         authorizationUrl: URL(string: "http://google.com")!,
+                        scopes: ["read:test": "read test"]
+                    )
+                )
+            )
+        )
+    }
+
+    func test_oauth2Password_encode() throws {
+        let oauth = OpenAPI.SecurityScheme.oauth2(
+            flows: .init(
+                password: .init(
+                    tokenUrl: URL(string: "http://google.com")!,
+                    scopes: ["read:test": "read test"]
+                )
+            )
+        )
+
+        let encodedOAuth = try orderUnstableTestStringFromEncoding(of: oauth)
+
+        assertJSONEquivalent(
+            encodedOAuth,
+            """
+            {
+              "flows" : {
+                "password" : {
+                  "scopes" : {
+                    "read:test" : "read test"
+                  },
+                  "tokenUrl" : "http:\\/\\/google.com"
+                }
+              },
+              "type" : "oauth2"
+            }
+            """
+        )
+    }
+
+    func test_oauth2Password_decode() throws {
+        let oauthData =
+        """
+        {
+          "flows" : {
+            "password" : {
+              "scopes" : {
+                "read:test" : "read test"
+              },
+              "tokenUrl" : "http:\\/\\/google.com"
+            }
+          },
+          "type" : "oauth2"
+        }
+        """.data(using: .utf8)!
+
+        let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
+
+        XCTAssertEqual(
+            oauth,
+            OpenAPI.SecurityScheme.oauth2(
+                flows: .init(
+                    password: .init(
+                        tokenUrl: URL(string: "http://google.com")!,
+                        scopes: ["read:test": "read test"]
+                    )
+                )
+            )
+        )
+    }
+
+    func test_oauth2ClientCredentials_encode() throws {
+        let oauth = OpenAPI.SecurityScheme.oauth2(
+            flows: .init(
+                clientCredentials: .init(
+                    tokenUrl: URL(string: "http://google.com")!,
+                    scopes: ["read:test": "read test"]
+                )
+            )
+        )
+
+        let encodedOAuth = try orderUnstableTestStringFromEncoding(of: oauth)
+
+        assertJSONEquivalent(
+            encodedOAuth,
+            """
+            {
+              "flows" : {
+                "clientCredentials" : {
+                  "scopes" : {
+                    "read:test" : "read test"
+                  },
+                  "tokenUrl" : "http:\\/\\/google.com"
+                }
+              },
+              "type" : "oauth2"
+            }
+            """
+        )
+    }
+
+    func test_oauth2ClientCredentials_decode() throws {
+        let oauthData =
+        """
+        {
+          "flows" : {
+            "clientCredentials" : {
+              "tokenUrl" : "http:\\/\\/google.com",
+              "scopes" : {
+                "read:test" : "read test"
+              }
+            }
+          },
+          "type" : "oauth2"
+        }
+        """.data(using: .utf8)!
+
+        let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
+
+        XCTAssertEqual(
+            oauth,
+            OpenAPI.SecurityScheme.oauth2(
+                flows: .init(
+                    clientCredentials: .init(
+                        tokenUrl: URL(string: "http://google.com")!,
+                        scopes: ["read:test": "read test"]
+                    )
+                )
+            )
+        )
+    }
+
+    func test_oauth2AuthorizationCode_encode() throws {
+        let oauth = OpenAPI.SecurityScheme.oauth2(
+            flows: .init(
+                authorizationCode: .init(
+                    authorizationUrl: URL(string: "http://google.com")!,
+                    tokenUrl: URL(string: "http://google.com")!,
+                    scopes: ["read:test": "read test"]
+                )
+            )
+        )
+
+        let encodedOAuth = try orderUnstableTestStringFromEncoding(of: oauth)
+
+        assertJSONEquivalent(
+            encodedOAuth,
+            """
+            {
+              "flows" : {
+                "authorizationCode" : {
+                  "authorizationUrl" : "http:\\/\\/google.com",
+                  "scopes" : {
+                    "read:test" : "read test"
+                  },
+                  "tokenUrl" : "http:\\/\\/google.com"
+                }
+              },
+              "type" : "oauth2"
+            }
+            """
+        )
+    }
+
+    func test_oauth2AuthorizationCode_decode() throws {
+        let oauthData =
+        """
+        {
+          "flows" : {
+            "authorizationCode" : {
+              "authorizationUrl" : "http:\\/\\/google.com",
+              "tokenUrl" : "http:\\/\\/google.com",
+              "scopes" : {
+                "read:test" : "read test"
+              }
+            }
+          },
+          "type" : "oauth2"
+        }
+        """.data(using: .utf8)!
+
+        let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
+
+        XCTAssertEqual(
+            oauth,
+            OpenAPI.SecurityScheme.oauth2(
+                flows: .init(
+                    authorizationCode: .init(
+                        authorizationUrl: URL(string: "http://google.com")!,
+                        tokenUrl: URL(string: "http://google.com")!,
+                        scopes: ["read:test": "read test"]
+                    )
+                )
+            )
+        )
+    }
+
+    func test_oauth2DeviceAuthorization_encode() throws {
+        let oauth = OpenAPI.SecurityScheme.oauth2(
+            flows: .init(
+                deviceAuthorization: .init(
+                    deviceAuthorizationUrl: URL(string: "http://google.com")!,
+                    tokenUrl: URL(string: "http://google.com")!,
+                    scopes: ["read:test": "read test"]
+                )
+            )
+        )
+
+        let encodedOAuth = try orderUnstableTestStringFromEncoding(of: oauth)
+
+        assertJSONEquivalent(
+            encodedOAuth,
+            """
+            {
+              "flows" : {
+                "deviceAuthorization" : {
+                  "deviceAuthorizationUrl" : "http:\\/\\/google.com",
+                  "scopes" : {
+                    "read:test" : "read test"
+                  },
+                  "tokenUrl" : "http:\\/\\/google.com"
+                }
+              },
+              "type" : "oauth2"
+            }
+            """
+        )
+    }
+
+    func test_oauth2DeviceAuthorization_decode() throws {
+        let oauthData =
+        """
+        {
+          "flows" : {
+            "deviceAuthorization" : {
+              "deviceAuthorizationUrl" : "http:\\/\\/google.com",
+              "tokenUrl" : "http:\\/\\/google.com",
+              "scopes" : {
+                "read:test" : "read test"
+              }
+            }
+          },
+          "type" : "oauth2"
+        }
+        """.data(using: .utf8)!
+
+        let oauth = try orderUnstableDecode(OpenAPI.SecurityScheme.self, from: oauthData)
+
+        XCTAssertEqual(
+            oauth,
+            OpenAPI.SecurityScheme.oauth2(
+                flows: .init(
+                    deviceAuthorization: .init(
+                        deviceAuthorizationUrl: URL(string: "http://google.com")!,
+                        tokenUrl: URL(string: "http://google.com")!,
                         scopes: ["read:test": "read test"]
                     )
                 )
