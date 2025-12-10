@@ -12,7 +12,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
     /// See [OpenAPI Security Scheme Object](https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object).
-    public struct SecurityScheme: Equatable, CodableVendorExtendable, Sendable {
+    public struct SecurityScheme: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var type: SecurityType
         public var description: String?
         /// Indication of if the security scheme is deprecated. Defaults to
@@ -26,6 +26,8 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
+        
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
             type: SecurityType,
@@ -37,6 +39,11 @@ extension OpenAPI {
             self.description = description
             self.vendorExtensions = vendorExtensions
             self.deprecated = deprecated
+
+            self.conditionalWarnings = [
+                nonNilVersionWarning(fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
+                notFalseVersionWarning(fieldName: "deprecated", value: deprecated, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
 
         public static func apiKey(name: String, location: Location, description: String? = nil, deprecated: Bool = false) -> SecurityScheme {
@@ -69,6 +76,15 @@ extension OpenAPI {
     }
 }
 
+extension OpenAPI.SecurityScheme: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.type == rhs.type
+        && lhs.description == rhs.description
+        && lhs.deprecated == rhs.deprecated
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
 fileprivate func notFalseVersionWarning(fieldName: String, value: Bool, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
     guard value else { return nil }
 
@@ -76,6 +92,15 @@ fileprivate func notFalseVersionWarning(fieldName: String, value: Bool, minimumV
         lessThan: minimumVersion,
         doesNotSupport: "The Security Scheme \(fieldName) field"
     )
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Security Scheme \(fieldName) field"
+        )
+    }
 }
 
 extension OpenAPI.SecurityScheme.SecurityType {
@@ -100,6 +125,12 @@ extension OpenAPI.SecurityScheme.SecurityType {
         case .mutualTLS:
             return .mutualTLS
         }
+    }
+
+    public var oauth2MetadataUrl: URL? {
+      guard case let .oauth2(_, metadataUrl: metadataUrl) = self else { return nil }
+
+      return metadataUrl
     }
 }
 
@@ -188,6 +219,11 @@ extension OpenAPI.SecurityScheme: Decodable {
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        self.conditionalWarnings = [
+            nonNilVersionWarning(fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
+            notFalseVersionWarning(fieldName: "deprecated", value: deprecated, minimumVersion: .v3_2_0)
+        ].compactMap { $0 }
     }
 
     internal static func decodeAPIKey(from container: KeyedDecodingContainer<OpenAPI.SecurityScheme.CodingKeys>) throws -> (name: String, location: Location) {

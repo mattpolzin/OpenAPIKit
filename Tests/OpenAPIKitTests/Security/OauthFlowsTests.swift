@@ -90,7 +90,7 @@ final class OAuthFlowsTests: XCTestCase {
             password: passwordFlow,
             clientCredentials: clientCredentialsFlow,
             authorizationCode: authorizationCodeFlow,
-            authorizationCode: deviceAuthorizationFlow
+            deviceAuthorization: deviceAuthorizationFlow
         )
 
         XCTAssertEqual(flows2.implicit, implicitFlow)

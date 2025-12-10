@@ -37,6 +37,12 @@ final class SecuritySchemeTests: XCTestCase {
             OpenAPI.SecurityScheme(type: .mutualTLS, description: "description"),
             OpenAPI.SecurityScheme.mutualTLS(description: "description")
         )
+
+        let noWarnings = OpenAPI.SecurityScheme(type: .oauth2(flows: .init(), metadataUrl: nil), deprecated: false)
+        XCTAssertEqual(noWarnings.conditionalWarnings.count, 0)
+
+        let twoWarnings = OpenAPI.SecurityScheme(type: .oauth2(flows: .init(), metadataUrl: URL(string: "https://google.com")!), deprecated: true)
+        XCTAssertEqual(twoWarnings.conditionalWarnings.count, 2)
     }
 
     func test_locallyDereferenced() throws {
@@ -686,6 +692,7 @@ extension SecuritySchemeTests {
         )
 
         let document = OpenAPI.Document(
+            openAPIVersion: .v3_2_0,
             info: OpenAPI.Document.Info(title: "hi", version: "1.0.0"),
             servers: [],
             paths: [:],
