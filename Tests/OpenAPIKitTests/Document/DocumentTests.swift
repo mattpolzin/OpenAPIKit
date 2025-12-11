@@ -40,6 +40,17 @@ final class DocumentTests: XCTestCase {
             tags: ["hi"],
             externalDocs: .init(url: URL(string: "https://google.com")!)
         )
+
+        // construct with external reference to a security scheme
+        let _ = OpenAPI.Document(
+            info: .init(title: "hi", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            security: [
+                [.external(URL(string: "https://example.com/security.yml")!): []]
+            ]
+        )
     }
 
     func test_initOASVersions() {
@@ -846,7 +857,10 @@ extension DocumentTests {
             components: .direct(
                 securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
             ),
-            security: [[.component( named: "security"):[]]]
+            security: [
+                [.component(named: "security"): []],
+                [.external(URL(string: "https://example.com/security.yml")!): []]
+            ]
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
@@ -873,6 +887,11 @@ extension DocumentTests {
                   "security" : [
 
                   ]
+                },
+                {
+                  "https:\\/\\/example.com\\/security.yml" : [
+
+                  ]
                 }
               ]
             }
@@ -880,7 +899,7 @@ extension DocumentTests {
         )
     }
 
-    func test_specifySecurity_decode() throws {
+    func test_specifyInternalSecurity_decode() throws {
         let documentData =
         """
         {
@@ -924,6 +943,122 @@ extension DocumentTests {
                 security: [[.component( named: "security"):[]]]
             )
         )
+    }
+
+    func test_securityNotFoundInComponentsIsExternal_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.1",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "security" : [
+
+              ]
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents,
+                security: [[.external(URL(string: "security")!):[]]]
+            )
+        )
+    }
+
+    func test_specifyExternalSecurity_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+            "securitySchemes" : {
+              "security" : {
+                "in" : "header",
+                "name" : "key",
+                "type" : "apiKey"
+              }
+            }
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.1",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "https://example.com/security.yml": []
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .direct(
+                    securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
+                ),
+                security: [[.external(URL(string: "https://example.com/security.yml")!): []]]
+            )
+        )
+    }
+
+    func test_specifyInvalidSecurity_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+            "securitySchemes" : {
+              "security" : {
+                "in" : "header",
+                "name" : "key",
+                "type" : "apiKey"
+              }
+            }
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.1.1",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "$$$://(capture) <not &a valid>% @url://::**$[]": []
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        XCTAssertThrowsError(
+            try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+        ) { error in
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `security` in the root Document object: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a security scheme found in another file.")
+        }
     }
 
     func test_specifyTags_encode() throws {
