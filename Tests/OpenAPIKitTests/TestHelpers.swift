@@ -88,3 +88,5 @@ func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString =
         line: line
     )
 }
+
+let emptyStringDict = [String: String]()
