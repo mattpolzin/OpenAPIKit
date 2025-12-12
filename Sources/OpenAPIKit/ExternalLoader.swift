@@ -8,10 +8,21 @@
 import OpenAPIKitCore
 import Foundation
 
+// Once we hit language version 6.2 we get warnings (errors for Swift 6
+// language mode) if the ExternalLoader is not a SendableMetatype. We just
+// split this conformance requirement out into a trivial base protocol to make
+// it easy to have different behavior for different language versions. Prior to
+// Swift 6.2, SendableMetatype is not even available.
+#if compiler(>=6.2.0)
+public protocol _ExternalLoaderMetatype: SendableMetatype {}
+#else
+public protocol _ExternalLoaderMetatype {}
+#endif
+
 /// An `ExternalLoader` enables `OpenAPIKit` to load external references 
 /// without knowing the details of what decoder is being used or how new internal 
 /// references should be named.
-public protocol ExternalLoader where Message: Sendable {
+public protocol ExternalLoader: _ExternalLoaderMetatype where Message: Sendable {
     /// This can be anything that an implementor of this protocol wants to pass back from
     /// the `load()` function and have available after all external loading has been done.
     ///
