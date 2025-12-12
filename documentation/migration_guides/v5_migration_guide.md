@@ -26,6 +26,10 @@ statements will need to be updated.
 
 If you use `v3_1_x(x: 2)` you should replace it with `v3_1_2`.
 
+The default OAS version of a `Document` has been updated to `v3_2_0`. If you
+need to produce a `v3_1_x` document, update your code to specify that version in
+the `OpenAPI.Document` constructor.
+
 ### Content Types
 The `application/x-yaml` media type is officially superseded by
 `application/yaml`. OpenAPIKit will continue to support reading the
