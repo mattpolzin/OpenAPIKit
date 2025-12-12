@@ -955,7 +955,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
@@ -1015,6 +1015,7 @@ extension DocumentTests {
         XCTAssertEqual(
             document,
             OpenAPI.Document(
+                openAPIVersion: .v3_1_1,
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],
@@ -1043,7 +1044,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
