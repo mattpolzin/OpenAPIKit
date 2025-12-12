@@ -60,6 +60,18 @@ final class OAuthFlowsTests: XCTestCase {
         XCTAssertEqual(authorizationCodeFlow.refreshUrl, testUrl)
         XCTAssertEqual(authorizationCodeFlow.scopes, scopes)
 
+        let deviceAuthorizationFlow = OpenAPI.OAuthFlows.DeviceAuthorization(
+            deviceAuthorizationUrl: testUrl,
+            tokenUrl: testUrl,
+            refreshUrl: testUrl,
+            scopes: scopes
+        )
+
+        XCTAssertEqual(deviceAuthorizationFlow.deviceAuthorizationUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.tokenUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.refreshUrl, testUrl)
+        XCTAssertEqual(deviceAuthorizationFlow.scopes, scopes)
+
         let flows = OpenAPI.OAuthFlows(
             implicit: implicitFlow,
             password: passwordFlow,
@@ -71,6 +83,22 @@ final class OAuthFlowsTests: XCTestCase {
         XCTAssertEqual(flows.password, passwordFlow)
         XCTAssertEqual(flows.clientCredentials, clientCredentialsFlow)
         XCTAssertEqual(flows.authorizationCode, authorizationCodeFlow)
+        XCTAssertEqual(flows.conditionalWarnings.count, 0)
+
+        let flows2 = OpenAPI.OAuthFlows(
+            implicit: implicitFlow,
+            password: passwordFlow,
+            clientCredentials: clientCredentialsFlow,
+            authorizationCode: authorizationCodeFlow,
+            deviceAuthorization: deviceAuthorizationFlow
+        )
+
+        XCTAssertEqual(flows2.implicit, implicitFlow)
+        XCTAssertEqual(flows2.password, passwordFlow)
+        XCTAssertEqual(flows2.clientCredentials, clientCredentialsFlow)
+        XCTAssertEqual(flows2.authorizationCode, authorizationCodeFlow)
+        XCTAssertEqual(flows2.deviceAuthorization, deviceAuthorizationFlow)
+        XCTAssertEqual(flows2.conditionalWarnings.count, 1)
     }
 }
 
@@ -129,6 +157,12 @@ extension OAuthFlowsTests {
                 tokenUrl: testUrl,
                 refreshUrl: testUrl,
                 scopes: scopes
+            ),
+            deviceAuthorization: OpenAPI.OAuthFlows.DeviceAuthorization(
+                deviceAuthorizationUrl: testUrl,
+                tokenUrl: testUrl,
+                refreshUrl: testUrl,
+                scopes: scopes
             )
         )
 
@@ -148,6 +182,15 @@ extension OAuthFlowsTests {
                 "tokenUrl" : "http:\\/\\/google.com"
               },
               "clientCredentials" : {
+                "refreshUrl" : "http:\\/\\/google.com",
+                "scopes" : {
+                  "read:test" : "read things",
+                  "write:test" : "write things"
+                },
+                "tokenUrl" : "http:\\/\\/google.com"
+              },
+              "deviceAuthorization" : {
+                "deviceAuthorizationUrl" : "http:\\/\\/google.com",
                 "refreshUrl" : "http:\\/\\/google.com",
                 "scopes" : {
                   "read:test" : "read things",
@@ -212,6 +255,15 @@ extension OAuthFlowsTests {
               "write:test" : "write things"
             },
             "tokenUrl" : "http://google.com"
+          },
+          "deviceAuthorization" : {
+            "deviceAuthorizationUrl" : "http://google.com",
+            "refreshUrl" : "http://google.com",
+            "scopes" : {
+              "read:test" : "read things",
+              "write:test" : "write things"
+            },
+            "tokenUrl" : "http://google.com"
           }
         }
         """.data(using: .utf8)!
@@ -240,6 +292,12 @@ extension OAuthFlowsTests {
         XCTAssertEqual(oauthFlows.authorizationCode?.refreshUrl, testUrl)
         XCTAssertEqual(oauthFlows.authorizationCode?.scopes["read:test"], "read things")
         XCTAssertEqual(oauthFlows.authorizationCode?.scopes["write:test"], "write things")
+
+        XCTAssertEqual(oauthFlows.deviceAuthorization?.deviceAuthorizationUrl, testUrl)
+        XCTAssertEqual(oauthFlows.deviceAuthorization?.tokenUrl, testUrl)
+        XCTAssertEqual(oauthFlows.deviceAuthorization?.refreshUrl, testUrl)
+        XCTAssertEqual(oauthFlows.deviceAuthorization?.scopes["read:test"], "read things")
+        XCTAssertEqual(oauthFlows.deviceAuthorization?.scopes["write:test"], "write things")
     }
 
     func test_implicitFlow_encode() throws {

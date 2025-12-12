@@ -857,7 +857,11 @@ internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [Open
     var securityContainer = container.nestedUnkeyedContainer(forKey: key)
     for securityRequirement in security {
         let securityKeysAndValues = securityRequirement
-            .compactMap { keyValue in keyValue.key.name.map { ($0, keyValue.value) } }
+            .compactMap { (key, value) in 
+                guard case .internal = key else { return (key.absoluteString, value) }
+
+                return key.name.map { ($0, value) }
+            }
         let securityStringKeyedDict = Dictionary(
             securityKeysAndValues,
             uniquingKeysWith: { $1 }
@@ -866,35 +870,51 @@ internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [Open
     }
 }
 
-internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys, given optionalComponents: OpenAPI.Components?) throws -> [OpenAPI.SecurityRequirement]? {
+internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: KeyedDecodingContainer<CodingKeys>, forKey codingKey: CodingKeys, given optionalComponents: OpenAPI.Components?) throws -> [OpenAPI.SecurityRequirement]? {
     // A real mess here because we've got an Array of non-string-keyed
     // Dictionaries.
-    if container.contains(key) {
-        var securityContainer = try container.nestedUnkeyedContainer(forKey: key)
+    if container.contains(codingKey) {
+        var securityContainer = try container.nestedUnkeyedContainer(forKey: codingKey)
 
         var securityRequirements = [OpenAPI.SecurityRequirement]()
         while !securityContainer.isAtEnd {
             let securityStringKeyedDict = try securityContainer.decode([String: [String]].self)
 
-            // convert to JSONReference keys
-            let securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
-                (
-                    key: JSONReference<OpenAPI.SecurityScheme>.component(named: key),
-                    value: value
-                )
-            }
+            // ultimately we end up with JSON references that may be internal
+            // or external. we determine if they are internal by looking them
+            // up in the components; if found, they are internal, otherwise,
+            // they are external.
+            let securityKeysAndValues: [(key: JSONReference<OpenAPI.SecurityScheme>, value: [String])]
 
             if let components = optionalComponents {
                 // check each key for validity against components.
                 let foundInComponents = { (ref: JSONReference<OpenAPI.SecurityScheme>) -> Bool in
                     return (try? components.contains(ref)) ?? false
                 }
-                guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
+                var foundBadKeys = false
+                
+                securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
+                    let componentKey = JSONReference<OpenAPI.SecurityScheme>.component(named: key)
+                    if foundInComponents(componentKey) {
+                        return (componentKey, value)
+                    }
+                    if let url = URL(string: key) {
+                        return (.external(url), value)
+                    }
+                    foundBadKeys = true
+                    return (componentKey, value)
+                }
+
+                if foundBadKeys {
                     throw GenericError(
-                        subjectName: key.stringValue,
-                        details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
-                        codingPath: container.codingPath + [key]
+                        subjectName: codingKey.stringValue,
+                        details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a security scheme found in another file",
+                        codingPath: container.codingPath + [codingKey]
                     )
+                }
+            } else {
+                securityKeysAndValues = securityStringKeyedDict.map { (key, value) in 
+                    (JSONReference<OpenAPI.SecurityScheme>.component(named: key), value)
                 }
             }
 
@@ -928,6 +948,10 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
     let securitySchemes = securityRequirements.flatMap { $0.keys }
 
     for securityScheme in securitySchemes {
+        if case .external = securityScheme {
+            // external references are allowed as of OAS 3.2.0
+            continue
+        }
         guard components[securityScheme] != nil else {
             let schemeKey = securityScheme.name ?? securityScheme.absoluteString
             let keys = [
@@ -941,7 +965,7 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
 
             throw GenericError(
                 subjectName: schemeKey,
-                details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
+                details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a Security Scheme found in another file",
                 codingPath: keys
             )
         }

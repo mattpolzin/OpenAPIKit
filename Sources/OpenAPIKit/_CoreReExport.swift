@@ -23,8 +23,18 @@ public extension OpenAPI {
     typealias Path = OpenAPIKitCore.Shared.Path
     typealias ComponentKey = OpenAPIKitCore.Shared.ComponentKey
     typealias Discriminator = OpenAPIKitCore.Shared.Discriminator
-    typealias OAuthFlows = OpenAPIKitCore.Shared.OAuthFlows
     typealias CallbackURL = OpenAPIKitCore.Shared.CallbackURL
+}
+
+public extension OpenAPI.OAuthFlows {
+    typealias Scope = Shared.OAuthFlows.Scope
+    typealias ScopeDescription = Shared.OAuthFlows.ScopeDescription
+
+    typealias CommonFields = Shared.OAuthFlows.CommonFields
+    typealias Implicit = Shared.OAuthFlows.Implicit
+    typealias Password = Shared.OAuthFlows.Password 
+    typealias ClientCredentials = Shared.OAuthFlows.ClientCredentials 
+    typealias AuthorizationCode = Shared.OAuthFlows.AuthorizationCode 
 }
 
 public extension OpenAPI.SecurityScheme {

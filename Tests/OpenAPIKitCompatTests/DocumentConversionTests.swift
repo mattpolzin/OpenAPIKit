@@ -1574,6 +1574,14 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
     XCTAssertEqual(newComponents.vendorExtensions, oldComponents.vendorExtensions)
 }
 
+fileprivate func assertEqualNewToOld(_ newOAuthFlows: OpenAPIKit.OpenAPI.OAuthFlows, _ oldOAuthFlows: OpenAPIKit30.OpenAPI.OAuthFlows) throws {
+    XCTAssertEqual(newOAuthFlows.implicit, oldOAuthFlows.implicit)
+    XCTAssertEqual(newOAuthFlows.password, oldOAuthFlows.password)
+    XCTAssertEqual(newOAuthFlows.clientCredentials, oldOAuthFlows.clientCredentials)
+    XCTAssertEqual(newOAuthFlows.authorizationCode, oldOAuthFlows.authorizationCode)
+    XCTAssertNil(newOAuthFlows.deviceAuthorization)
+}
+
 fileprivate func assertEqualNewToOld(_ newScheme: OpenAPIKit.OpenAPI.SecurityScheme, _ oldScheme: OpenAPIKit30.OpenAPI.SecurityScheme) throws {
     XCTAssertEqual(newScheme.description, oldScheme.description)
     XCTAssertEqual(newScheme.vendorExtensions, oldScheme.vendorExtensions)
@@ -1585,8 +1593,9 @@ fileprivate func assertEqualNewToOld(_ newScheme: OpenAPIKit.OpenAPI.SecuritySch
     case (.http(let scheme, let format), .http(let scheme2, let format2)):
         XCTAssertEqual(scheme, scheme2)
         XCTAssertEqual(format, format2)
-    case (.oauth2(let flows), .oauth2(let flows2)):
-        XCTAssertEqual(flows, flows2)
+    case (.oauth2(let flows, let metadataUrl), .oauth2(let flows2)):
+        XCTAssertNil(metadataUrl)
+        try assertEqualNewToOld(flows, flows2)
     case (.openIdConnect(let url), .openIdConnect(let url2)):
         XCTAssertEqual(url, url2)
     case (.mutualTLS, _):
