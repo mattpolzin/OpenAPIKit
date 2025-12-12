@@ -293,6 +293,13 @@ case .b(let positionalEncoding):
 }
 ```
 
+### Security Scheme Object (`OpenAPI.SecurityScheme`)
+The `type` property's enumeration gains a new associated value on the `oauth2`
+case.
+
+Existing code that switches on that property will need to be updated to match on
+`oauth2(flows: OAuthFlows, metadataUrl: URL?)` now.
+
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
 string descriptions of any OpenAPIKit errors, you may need to update the
