@@ -56,6 +56,8 @@ extension OpenAPI {
         public var securitySchemes: ComponentReferenceDictionary<SecurityScheme>
         public var links: ComponentReferenceDictionary<Link>
         public var callbacks: ComponentReferenceDictionary<Callbacks>
+        /// Media Type Objects (aka `OpenAPI.Content`)
+        public var mediaTypes: ComponentReferenceDictionary<Content>
       
         public var pathItems: ComponentDictionary<PathItem>
 
@@ -76,6 +78,7 @@ extension OpenAPI {
             securitySchemes: ComponentReferenceDictionary<SecurityScheme> = [:],
             links: ComponentReferenceDictionary<Link> = [:],
             callbacks: ComponentReferenceDictionary<Callbacks> = [:],
+            mediaTypes: ComponentReferenceDictionary<Content> = [:],
             pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
@@ -88,6 +91,7 @@ extension OpenAPI {
             self.securitySchemes = securitySchemes
             self.links = links
             self.callbacks = callbacks
+            self.mediaTypes = mediaTypes
             self.pathItems = pathItems
             self.vendorExtensions = vendorExtensions
         }
@@ -105,6 +109,7 @@ extension OpenAPI {
             securitySchemes: ComponentDictionary<SecurityScheme> = [:],
             links: ComponentDictionary<Link> = [:],
             callbacks: ComponentDictionary<Callbacks> = [:],
+            mediaTypes: ComponentDictionary<Content> = [:],
             pathItems: ComponentDictionary<PathItem> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) -> Self {
@@ -118,6 +123,7 @@ extension OpenAPI {
                 securitySchemes: securitySchemes.mapValues { .b($0) },
                 links: links.mapValues { .b($0) },
                 callbacks: callbacks.mapValues { .b($0) },
+                mediaTypes: mediaTypes.mapValues { .b($0) },
                 pathItems: pathItems,
                 vendorExtensions: vendorExtensions
             )
@@ -170,6 +176,7 @@ extension OpenAPI.Components {
         try securitySchemes.merge(other.securitySchemes, uniquingKeysWith: detectCollision(type: "securitySchemes"))
         try links.merge(other.links, uniquingKeysWith: detectCollision(type: "links"))
         try callbacks.merge(other.callbacks, uniquingKeysWith: detectCollision(type: "callbacks"))
+        try mediaTypes.merge(other.mediaTypes, uniquingKeysWith: detectCollision(type: "mediaTypes"))
         try pathItems.merge(other.pathItems, uniquingKeysWith: detectCollision(type: "pathItems"))
         try vendorExtensions.merge(other.vendorExtensions, uniquingKeysWith: detectCollision(type: "vendorExtensions"))
     }
@@ -185,6 +192,7 @@ extension OpenAPI.Components {
         securitySchemes.sortKeys()
         links.sortKeys()
         callbacks.sortKeys()
+        mediaTypes.sortKeys()
         pathItems.sortKeys()
     }
 }
@@ -237,6 +245,10 @@ extension OpenAPI.Components: Encodable {
         if !callbacks.isEmpty {
             try container.encode(callbacks, forKey: .callbacks)
         }
+
+        if !mediaTypes.isEmpty {
+            try container.encode(mediaTypes, forKey: .mediaTypes)
+        }
       
         if !pathItems.isEmpty {
             try container.encode(pathItems, forKey: .pathItems)
@@ -276,6 +288,8 @@ extension OpenAPI.Components: Decodable {
             links = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Link>.self, forKey: .links) ?? [:]
 
             callbacks = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Callbacks>.self, forKey: .callbacks) ?? [:]
+
+            mediaTypes = try container.decodeIfPresent(OpenAPI.ComponentReferenceDictionary<OpenAPI.Content>.self, forKey: .mediaTypes) ?? [:]
           
             pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 
@@ -310,6 +324,7 @@ extension OpenAPI.Components {
         case securitySchemes
         case links
         case callbacks
+        case mediaTypes
         case pathItems
 
         case extended(String)
@@ -325,6 +340,7 @@ extension OpenAPI.Components {
                 .securitySchemes,
                 .links,
                 .callbacks,
+                .mediaTypes,
                 .pathItems
             ]
         }
@@ -353,6 +369,8 @@ extension OpenAPI.Components {
                 self = .links
             case "callbacks":
                 self = .callbacks
+            case "mediaTypes":
+                self = .mediaTypes
             case "pathItems":
                 self = .pathItems
             default:
@@ -380,6 +398,8 @@ extension OpenAPI.Components {
                 return "links"
             case .callbacks:
                 return "callbacks"
+            case .mediaTypes:
+                return "mediaTypes"
             case .pathItems:
                 return "pathItems"
             case .extended(let key):
@@ -409,6 +429,7 @@ extension OpenAPI.Components {
         let oldSecuritySchemes = securitySchemes
         let oldLinks = links
         let oldCallbacks = callbacks
+        let oldMediaTypes = mediaTypes
         let oldPathItems = pathItems
 
         async let (newSchemas, c1, m1) = oldSchemas.externallyDereferenced(with: loader)
@@ -420,7 +441,8 @@ extension OpenAPI.Components {
         async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
 //        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
 //        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
-        async let (newPathItems, c10, m10) = oldPathItems.externallyDereferenced(with: loader)
+        async let (newMediaTypes, c10, m10) = oldMediaTypes.externallyDereferenced(with: loader)
+        async let (newPathItems, c11, m11) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses
@@ -431,6 +453,7 @@ extension OpenAPI.Components {
         securitySchemes = try await newSecuritySchemes
 //        links = try await newLinks
 //        callbacks = try await newCallbacks
+        mediaTypes = try await newMediaTypes
         pathItems = try await newPathItems
 
         let c1Resolved = try await c1
@@ -443,6 +466,7 @@ extension OpenAPI.Components {
 //        let c8Resolved = try await c8
 //        let c9Resolved = try await c9
         let c10Resolved = try await c10
+        let c11Resolved = try await c11
 
         // For Swift 5.10+ we can delete the following links and callbacks code and uncomment the
         // preferred code above.
@@ -464,8 +488,9 @@ extension OpenAPI.Components {
             && c8Resolved.isEmpty
             && c9Resolved.isEmpty
             && c10Resolved.isEmpty
+            && c11Resolved.isEmpty
 
-        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 
+        let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 + m11
 
         if noNewComponents { return newMessages }
 
@@ -479,6 +504,7 @@ extension OpenAPI.Components {
         try merge(c8Resolved)
         try merge(c9Resolved)
         try merge(c10Resolved)
+        try merge(c11Resolved)
 
         switch depth {
             case .iterations(let number):
