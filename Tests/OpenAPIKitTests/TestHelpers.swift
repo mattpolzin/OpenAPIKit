@@ -9,7 +9,7 @@ import Foundation
 @preconcurrency import Yams
 import XCTest
 
-fileprivate let foundationTestEncoder = { () -> JSONEncoder in
+fileprivate func foundationTestEncoder() -> JSONEncoder {
     let encoder = JSONEncoder()
     if #available(macOS 10.13, *) {
         encoder.dateEncodingStrategy = .iso8601
@@ -22,25 +22,25 @@ fileprivate let foundationTestEncoder = { () -> JSONEncoder in
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     #endif
     return encoder
-}()
+}
 
 func orderUnstableEncode<T: Encodable>(_ value: T) throws -> Data {
-    return try foundationTestEncoder.encode(value)
+    return try foundationTestEncoder().encode(value)
 }
 
 func orderUnstableTestStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
     return String(data: try orderUnstableEncode(entity), encoding: .utf8)
 }
 
-fileprivate let yamsTestEncoder = { () -> YAMLEncoder in
+fileprivate func yamsTestEncoder() -> YAMLEncoder {
     return YAMLEncoder()
-}()
-
-func orderStableYAMLEncode<T: Encodable>(_ value: T) throws -> String {
-    return try yamsTestEncoder.encode(value)
 }
 
-fileprivate func buildFoundationTestDecoder(_ userInfo: [CodingUserInfoKey: Any] = [:]) -> JSONDecoder {
+func orderStableYAMLEncode<T: Encodable>(_ value: T) throws -> String {
+    return try yamsTestEncoder().encode(value)
+}
+
+fileprivate func buildFoundationTestDecoder(_ userInfo: [CodingUserInfoKey: any Sendable] = [:]) -> JSONDecoder {
     let decoder = JSONDecoder()
     decoder.userInfo = userInfo
     if #available(macOS 10.12, *) {
@@ -54,18 +54,18 @@ fileprivate func buildFoundationTestDecoder(_ userInfo: [CodingUserInfoKey: Any]
     return decoder
 }
 
-fileprivate let foundationTestDecoder = { () -> JSONDecoder in buildFoundationTestDecoder() }()
+fileprivate func foundationTestDecoder() -> JSONDecoder { buildFoundationTestDecoder() }
 
-func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data, userInfo : [CodingUserInfoKey: Any] = [:]) throws -> T {
+func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data, userInfo : [CodingUserInfoKey: any Sendable] = [:]) throws -> T {
     return try buildFoundationTestDecoder(userInfo).decode(T.self, from: data)
 }
 
-fileprivate let yamsTestDecoder = { () -> YAMLDecoder in
+fileprivate func yamsTestDecoder() -> YAMLDecoder {
     return YAMLDecoder()
-}()
+}
 
 func orderStableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-    return try yamsTestDecoder.decode(T.self, from: data)
+    return try yamsTestDecoder().decode(T.self, from: data)
 }
 
 func assertJSONEquivalent(_ str1: String?, _ str2: String?, file: StaticString = #file, line: UInt = #line) {

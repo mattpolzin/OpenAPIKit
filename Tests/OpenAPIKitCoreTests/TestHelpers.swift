@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-fileprivate let foundationTestEncoder = { () -> JSONEncoder in
+fileprivate func foundationTestEncoder() -> JSONEncoder {
     let encoder = JSONEncoder()
     if #available(macOS 10.13, *) {
         encoder.dateEncodingStrategy = .iso8601
@@ -21,10 +21,10 @@ fileprivate let foundationTestEncoder = { () -> JSONEncoder in
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     #endif
     return encoder
-}()
+}
 
 func orderUnstableEncode<T: Encodable>(_ value: T) throws -> Data {
-    return try foundationTestEncoder.encode(value)
+    return try foundationTestEncoder().encode(value)
 }
 
 func orderUnstableTestStringFromEncoding<T: Encodable>(of entity: T) throws -> String? {
@@ -35,7 +35,7 @@ func orderUnstableTestStringFromEncoding<T: Encodable>(of entity: T) throws -> S
 //    return try fineJSONTestEncoder.encode(value)
 //}
 
-fileprivate let foundationTestDecoder = { () -> JSONDecoder in
+fileprivate func foundationTestDecoder() -> JSONDecoder {
     let decoder = JSONDecoder()
     if #available(macOS 10.12, *) {
         decoder.dateDecodingStrategy = .iso8601
@@ -46,10 +46,10 @@ fileprivate let foundationTestDecoder = { () -> JSONDecoder in
     decoder.keyDecodingStrategy = .useDefaultKeys
     #endif
     return decoder
-}()
+}
 
 func orderUnstableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-    return try foundationTestDecoder.decode(T.self, from: data)
+    return try foundationTestDecoder().decode(T.self, from: data)
 }
 
 //func orderStableDecode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
