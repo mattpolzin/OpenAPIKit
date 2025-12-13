@@ -22,7 +22,6 @@ public extension OpenAPI {
     typealias Warning = OpenAPIKitCore.Warning
     typealias Path = OpenAPIKitCore.Shared.Path
     typealias ComponentKey = OpenAPIKitCore.Shared.ComponentKey
-    typealias Discriminator = OpenAPIKitCore.Shared.Discriminator
     typealias CallbackURL = OpenAPIKitCore.Shared.CallbackURL
 }
 

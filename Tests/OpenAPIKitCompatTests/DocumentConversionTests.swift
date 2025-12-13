@@ -1210,7 +1210,7 @@ fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaCont
     XCTAssertEqual(newCoreContext.nullable, oldCoreContext.nullable)
     XCTAssertEqual(newCoreContext.title, oldCoreContext.title)
     XCTAssertEqual(newCoreContext.description, oldCoreContext.description)
-    XCTAssertEqual(newCoreContext.discriminator, oldCoreContext.discriminator)
+    try assertEqualNewToOld(newCoreContext.discriminator, oldCoreContext.discriminator)
     try assertEqualNewToOld(newCoreContext.externalDocs, oldCoreContext.externalDocs)
     XCTAssertEqual(newCoreContext.allowedValues, oldCoreContext.allowedValues)
     XCTAssertEqual(newCoreContext.defaultValue, oldCoreContext.defaultValue)
@@ -1276,6 +1276,11 @@ fileprivate func assertEqualNewToOld(_ newStyle: OpenAPIKit.OpenAPI.Parameter.Sc
     if !equal {
         XCTFail("New \(newStyle) is not equivalent to old \(oldStyle)")
     }
+}
+
+fileprivate func assertEqualNewToOld(_ newDiscriminator: OpenAPIKit.OpenAPI.Discriminator?, _ oldDiscriminator: OpenAPIKit30.OpenAPI.Discriminator?) throws {
+    XCTAssertEqual(newDiscriminator?.mapping, oldDiscriminator?.mapping)
+    XCTAssertEqual(newDiscriminator?.propertyName, oldDiscriminator?.propertyName)
 }
 
 fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ oldHeader: OpenAPIKit30.OpenAPI.Header) throws {

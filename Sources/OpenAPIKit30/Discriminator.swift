@@ -5,8 +5,10 @@
 //  Created by Mathew Polzin on 10/6/19.
 //
 
-extension Shared {
-    /// OpenAPI Spec "Disciminator Object"
+import OpenAPIKitCore
+
+extension OpenAPI {
+    /// OpenAPI Spec "Discriminator Object"
     ///
     /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.0.4.html#discriminator-object).
     public struct Discriminator: Equatable, Sendable {
@@ -23,7 +25,7 @@ extension Shared {
 
 // MARK: - Codable
 
-extension Shared.Discriminator: Encodable {
+extension OpenAPI.Discriminator: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -32,7 +34,7 @@ extension Shared.Discriminator: Encodable {
     }
 }
 
-extension Shared.Discriminator: Decodable {
+extension OpenAPI.Discriminator: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -41,11 +43,11 @@ extension Shared.Discriminator: Decodable {
     }
 }
 
-extension Shared.Discriminator {
+extension OpenAPI.Discriminator {
     private enum CodingKeys: String, CodingKey {
         case propertyName
         case mapping
     }
 }
 
-extension Shared.Discriminator: Validatable {}
+extension OpenAPI.Discriminator: Validatable {}
