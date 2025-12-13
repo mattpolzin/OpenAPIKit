@@ -527,6 +527,12 @@ extension OpenAPIKit30.JSONTypeFormat: To31 {
     }
 }
 
+extension OpenAPIKit30.OpenAPI.Discriminator: To31 {
+    fileprivate func to31() -> OpenAPIKit.OpenAPI.Discriminator {
+        .init(propertyName: propertyName, mapping: mapping)
+    }
+}
+
 extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.OpenAPIFormat {
     fileprivate func to31() -> OpenAPIKit.JSONSchema.CoreContext<Format> {
         OpenAPIKit.JSONSchema.CoreContext<Format>(
@@ -537,7 +543,7 @@ extension OpenAPIKit30.JSONSchema.CoreContext: To31 where Format: OpenAPIKit.Ope
             deprecated: deprecated,
             title: title,
             description: description,
-            discriminator: discriminator,
+            discriminator: discriminator?.to31(),
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
@@ -557,7 +563,7 @@ extension OpenAPIKit30.JSONSchema.CoreContext where Format == OpenAPIKit30.JSONT
             deprecated: deprecated,
             title: title,
             description: description,
-            discriminator: discriminator,
+            discriminator: discriminator?.to31(),
             externalDocs: externalDocs?.to31(),
             allowedValues: allowedValues,
             defaultValue: defaultValue,
