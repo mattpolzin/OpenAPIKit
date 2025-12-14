@@ -49,10 +49,10 @@ public struct DereferencedParameter: Equatable {
         case .b(let contentMap):
             self.schemaOrContent = .b(
                 try contentMap.mapValues {
-                    try DereferencedContent(
-                        $0,
-                        resolvingIn: components,
-                        following: references
+                    try $0._dereferenced(
+                        in: components,
+                        following: references,
+                        dereferencedFromComponentNamed: nil
                     )
                 }
             )

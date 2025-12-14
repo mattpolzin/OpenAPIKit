@@ -21,10 +21,10 @@ final class ResponseTests: XCTestCase {
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],
-                                  content: [.json: content])
+                                  content: [.json: .content(content)])
         XCTAssertEqual(r2.description, "")
         XCTAssertEqual(r2.headers?["hello"]?.headerValue, header)
-        XCTAssertEqual(r2.content, [.json: content])
+        XCTAssertEqual(r2.content, [.json: .content(content)])
         XCTAssertEqual(r2.conditionalWarnings.count, 0)
 
         // two OAS 3.2.0 warnings: summary is used and description is not
@@ -209,7 +209,7 @@ extension ResponseTests {
         let response = OpenAPI.Response(
             description: "hello world",
             headers: ["hello": .init(header)],
-            content: [.json: content]
+            content: [.json: .content(content)]
         )
 
         let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
@@ -259,7 +259,7 @@ extension ResponseTests {
             OpenAPI.Response(
                 description: "hello world",
                 headers: ["hello": .init(header)],
-                content: [.json: content]
+                content: [.json: .content(content)]
             )
         )
     }
@@ -324,7 +324,7 @@ extension ResponseTests {
         let response = OpenAPI.Response(
             description: "hello world",
             headers: ["hello": .init(header)],
-            content: [.json: content],
+            content: [.json: .content(content)],
             vendorExtensions: [ "x-specialFeature": true ]
         )
 
@@ -377,7 +377,7 @@ extension ResponseTests {
             OpenAPI.Response(
                 description: "hello world",
                 headers: ["hello": .init(header)],
-                content: [.json: content],
+                content: [.json: .content(content)],
                 vendorExtensions: [ "x-specialFeature": true ]
             )
         )

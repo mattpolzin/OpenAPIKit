@@ -28,13 +28,13 @@ final class DereferencedOperationTests: XCTestCase {
                     context: .header(schema: .string)
                 )
             ],
-            requestBody: OpenAPI.Request(content: [.json: .init(schema: .string)]),
+            requestBody: OpenAPI.Request(content: [.json: .content(.init(schema: .string))]),
             responses: [
                 200: .response(description: "test")
             ]
         ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.parameters.count, 1)
-        XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .init(schema: .string)]))
+        XCTAssertEqual(t1.requestBody?.underlyingRequest, OpenAPI.Request(content: [.json: .content(.init(schema: .string))]))
         XCTAssertEqual(t1.responses.count, 1)
         XCTAssertEqual(t1.responseOutcomes.first?.response, t1.responses[status: 200])
         XCTAssertEqual(t1.responseOutcomes.first?.status, 200)
@@ -79,7 +79,7 @@ final class DereferencedOperationTests: XCTestCase {
     func test_requestReference() throws {
         let components = OpenAPI.Components.direct(
             requestBodies: [
-                "test": OpenAPI.Request(content: [.json: .init(schema: .string)])
+                "test": OpenAPI.Request(content: [.json: .content(.init(schema: .string))])
             ]
         )
         let t1 = try OpenAPI.Operation(
@@ -91,7 +91,7 @@ final class DereferencedOperationTests: XCTestCase {
         XCTAssertEqual(
             t1.requestBody?.underlyingRequest,
             OpenAPI.Request(
-                content: [.json: .init(schema: .string)],
+                content: [.json: .content(.init(schema: .string))],
                 vendorExtensions: ["x-component-name": "test"]
             )
         )

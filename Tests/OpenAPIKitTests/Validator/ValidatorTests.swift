@@ -71,8 +71,8 @@ final class ValidatorTests: XCTestCase {
         )
 
         let _ = Validation(
-            check: unwrap(\OpenAPI.Content.Map[.json], into: contentValidation),
-            when: \OpenAPI.Content.Map[.json] != nil
+            check: unwrap(\OpenAPI.Content.Map[.json]?.contentValue, into: contentValidation),
+            when: \OpenAPI.Content.Map[.json]?.contentValue != nil
         )
     }
 
@@ -541,7 +541,7 @@ final class ValidatorTests: XCTestCase {
                             200: .response(
                                 description: "Get the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             )
                         ]
@@ -573,13 +573,13 @@ final class ValidatorTests: XCTestCase {
                             200: .response(
                                 description: "Get the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             ),
                             404: .response(
                                 description: "Leave the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             )
                         ]
@@ -616,13 +616,13 @@ final class ValidatorTests: XCTestCase {
                             200: .response(
                                 description: "Get the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             ),
                             404: .response(
                                 description: "Leave the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             )
                         ]
@@ -655,7 +655,7 @@ final class ValidatorTests: XCTestCase {
                             200: .response(
                                 description: "Get the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             )
                         ]
@@ -765,7 +765,7 @@ final class ValidatorTests: XCTestCase {
                             200: .response(
                                 description: "Get the world",
                                 content: [
-                                    .json: .init(schema: .string)
+                                    .json: .content(.init(schema: .string))
                                 ]
                             )
                         ]
@@ -1094,26 +1094,26 @@ final class ValidatorTests: XCTestCase {
 
         let createRequest = OpenAPI.Request(
             content: [
-                .json: .init(
+                .json: .content(.init(
                     schema: .object(
                         properties: [
                             "classification": .string(allowedValues: "big", "small")
                         ]
                     )
-                )
+                ))
             ]
         )
 
         let successCreateResponse = OpenAPI.Response(
             description: "Created Widget",
             content: [
-                .json: .init(
+                .json: .content(.init(
                     schema: .object(
                         properties: [
                             "classification": .string(allowedValues: "big", "small")
                         ]
                     )
-                )
+                ))
             ]
         )
 
@@ -1157,20 +1157,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema,
+                \.content[.json]?.contentValue?.schema,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema != nil
+            when: \OpenAPI.Request.content[.json]?.contentValue?.schema != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema,
+                \.content[.json]?.contentValue?.schema,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema != nil
+            when: \OpenAPI.Response.content[.json]?.contentValue?.schema != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(
@@ -1221,21 +1221,21 @@ final class ValidatorTests: XCTestCase {
     func test_requestBodySchemaValidationSucceeds() throws {
         let createRequest = OpenAPI.Request(
             content: [
-                .json: .init(
+                .json: .content(.init(
                     schema: .object(
                         properties: [
                             "name": .string,
                             "classification": .string(allowedValues: "big", "small")
                         ]
                     )
-                )
+                ))
             ]
         )
 
         let successCreateResponse = OpenAPI.Response(
             description: "Created Widget",
             content: [
-                .json: .init(
+                .json: .content(.init(
                     schema: .object(
                         properties: [
                             "id": .integer,
@@ -1243,7 +1243,7 @@ final class ValidatorTests: XCTestCase {
                             "classification": .string(allowedValues: "big", "small")
                         ]
                     )
-                )
+                ))
             ]
         )
 
@@ -1287,20 +1287,20 @@ final class ValidatorTests: XCTestCase {
 
         let requestBodyContainsName = Validation(
             check: unwrap(
-                \.content[.json]?.schema,
+                \.content[.json]?.contentValue?.schema,
                 into: resourceContainsName
             ),
 
-            when: \OpenAPI.Request.content[.json]?.schema != nil
+            when: \OpenAPI.Request.content[.json]?.contentValue?.schema != nil
         )
 
         let responseBodyContainsNameAndId = Validation(
             check: unwrap(
-                \.content[.json]?.schema,
+                \.content[.json]?.contentValue?.schema,
                 into: resourceContainsName, responseResourceContainsId
             ),
 
-            when: \OpenAPI.Response.content[.json]?.schema != nil
+            when: \OpenAPI.Response.content[.json]?.contentValue?.schema != nil
         )
 
         let successResponseBodyContainsNameAndId = Validation(

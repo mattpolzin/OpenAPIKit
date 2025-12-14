@@ -24,7 +24,7 @@ final class DereferencedResponseTests: XCTestCase {
                 "Header": .header(.init(schema: .string))
             ],
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ],
             links: [
                 "Link": .link(operationId: "link1")
@@ -73,7 +73,7 @@ final class DereferencedResponseTests: XCTestCase {
         let t1 = try OpenAPI.Response(
             description: "test",
             content: [
-                .json: .init(schemaReference: .component(named: "test"))
+                .json: .content(.init(schemaReference: .component(named: "test")))
             ]
         ).dereferenced(in: components)
         XCTAssertEqual(
@@ -87,7 +87,7 @@ final class DereferencedResponseTests: XCTestCase {
             try OpenAPI.Response(
                 description: "test",
                 content: [
-                    .json: .init(schemaReference: .component(named: "test"))
+                    .json: .content(.init(schemaReference: .component(named: "test")))
                 ]
             ).dereferenced(in: .noComponents)
         )

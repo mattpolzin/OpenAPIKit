@@ -116,7 +116,7 @@ extension Either where A == OpenAPIKit30.OpenAPI.Parameter.SchemaContext, B == O
         case .a(let context):
             .a(context.to31())
         case .b(let contentMap):
-            .b(contentMap.mapValues { $0.to31() })
+            .b(contentMap.mapValues { .b($0.to31()) })
         }
     }
 }
@@ -328,7 +328,7 @@ extension OpenAPIKit30.OpenAPI.Response: To31 {
         OpenAPIKit.OpenAPI.Response(
             description: description,
             headers: headers?.mapValues(eitherRefTo31),
-            content: content.mapValues { $0.to31() },
+            content: content.mapValues { .b($0.to31()) },
             links: links.mapValues(eitherRefTo31),
             vendorExtensions: vendorExtensions
         )
@@ -339,7 +339,7 @@ extension OpenAPIKit30.OpenAPI.Request: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Request {
         OpenAPIKit.OpenAPI.Request(
             description: description,
-            content: content.mapValues { $0.to31() },
+            content: content.mapValues { .b($0.to31()) },
             required: `required`,
             vendorExtensions: vendorExtensions
         )

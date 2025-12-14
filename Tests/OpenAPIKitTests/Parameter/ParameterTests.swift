@@ -13,7 +13,7 @@ final class ParameterTests: XCTestCase {
         let t1 = OpenAPI.Parameter.cookie(
             name: "hello",
             required: true,
-            schemaOrContent: .init([.json: OpenAPI.Content(schema: .string)]),
+            schemaOrContent: .init([.json: .content(OpenAPI.Content(schema: .string))]),
             description: "hi",
             deprecated: true
         )
@@ -22,7 +22,7 @@ final class ParameterTests: XCTestCase {
         let t2 = OpenAPI.Parameter.cookie(
             name: "hello",
             required: true,
-            schemaOrContent: .content([.json: OpenAPI.Content(schema: .string)]),
+            schemaOrContent: .content([.json: .content(OpenAPI.Content(schema: .string))]),
             description: "hi",
             deprecated: true
         )
@@ -80,8 +80,8 @@ final class ParameterTests: XCTestCase {
         let t1: OpenAPI.Parameter.Array = [
             .parameter(OpenAPI.Parameter.cookie(name: "hello", schema: .string)),
             .parameter(name: "hello", context: .cookie(schema: .string)),
-            .parameter(OpenAPI.Parameter.cookie(name: "hello", content: [.json: OpenAPI.Content(schema: .string)])),
-            .parameter(name: "hello", context: .cookie(content: [.json: OpenAPI.Content(schema: .string)])),
+            .parameter(OpenAPI.Parameter.cookie(name: "hello", content: [.json: .content(OpenAPI.Content(schema: .string))])),
+            .parameter(name: "hello", context: .cookie(content: [.json: .content(OpenAPI.Content(schema: .string))])),
             .reference(.component( named: "hello"))
         ]
 
@@ -107,7 +107,7 @@ extension ParameterTests {
     func test_minimalContent_encode() throws {
         let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            content: [ .json: .init(schema: .string)]
+            content: [ .json: .content(.init(schema: .string))]
         )
 
         let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
@@ -154,10 +154,10 @@ extension ParameterTests {
             parameter,
             OpenAPI.Parameter.path(
                 name: "hello",
-                content: [ .json: .init(schema: .string)]
+                content: [ .json: .content(.init(schema: .string))]
             )
         )
-        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string) ])
+        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .content(.init(schema: .string) )])
     }
 
     func test_minimalSchema_encode() throws {
