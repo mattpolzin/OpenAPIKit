@@ -221,6 +221,11 @@ extension Either where B == OpenAPI.Parameter {
     public static func parameter(_ parameter: OpenAPI.Parameter) -> Self { .b(parameter) }
 }
 
+extension Either where B == OpenAPI.Content {
+    /// Construct content.
+    public static func content(_ content: OpenAPI.Content) -> Self { .b(content) }
+}
+
 extension Either where B == OpenAPI.Content.Map {
     /// Construct a content map.
     public static func content(_ map: OpenAPI.Content.Map) -> Self { .b(map) }
