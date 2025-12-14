@@ -45,7 +45,7 @@ extension OpenAPI {
     ///         "my_param": .reference(.component(named: "my_direct_param"))
     ///       ]
     ///     )
-    public struct Components: Equatable, CodableVendorExtendable, Sendable {
+    public struct Components: HasConditionalWarnings, CodableVendorExtendable, Sendable {
 
         public var schemas: ComponentDictionary<JSONSchema>
         public var responses: ComponentReferenceDictionary<Response>
@@ -67,6 +67,8 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
+
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
             schemas: ComponentDictionary<JSONSchema> = [:],
@@ -94,6 +96,10 @@ extension OpenAPI {
             self.mediaTypes = mediaTypes
             self.pathItems = pathItems
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                nonEmptyVersionWarning(fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
 
         /// Construct components as "direct" entries (no references). When
@@ -136,6 +142,32 @@ extension OpenAPI {
             return self == .noComponents
         }
     }
+}
+
+extension OpenAPI.Components: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.schemas == rhs.schemas
+        && lhs.responses == rhs.responses
+        && lhs.parameters == rhs.parameters
+        && lhs.examples == rhs.examples
+        && lhs.requestBodies == rhs.requestBodies
+        && lhs.headers == rhs.headers
+        && lhs.securitySchemes == rhs.securitySchemes
+        && lhs.links == rhs.links
+        && lhs.callbacks == rhs.callbacks
+        && lhs.mediaTypes == rhs.mediaTypes
+        && lhs.pathItems == rhs.pathItems
+        && lhs.vendorExtensions == rhs.vendorExtensions
+    }
+}
+
+fileprivate func nonEmptyVersionWarning(fieldName: String, value: any Collection, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    if value.isEmpty { return nil }
+
+    return OpenAPI.Document.ConditionalWarnings.version(
+        lessThan: minimumVersion,
+        doesNotSupport: "The Components \(fieldName) map"
+    )
 }
 
 extension OpenAPI {
@@ -294,6 +326,10 @@ extension OpenAPI.Components: Decodable {
             pathItems = try container.decodeIfPresent(OpenAPI.ComponentDictionary<OpenAPI.PathItem>.self, forKey: .pathItems) ?? [:]
 
             vendorExtensions = try Self.extensions(from: decoder)
+
+            conditionalWarnings = [
+                nonEmptyVersionWarning(fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         } catch let error as EitherDecodeNoTypesMatchedError {
             if let underlyingError = OpenAPI.Error.Decoding.Document.eitherBranchToDigInto(error) {
                 throw (underlyingError.underlyingError ?? underlyingError)
