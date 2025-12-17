@@ -1173,11 +1173,13 @@ extension JSONSchema.IntegerContext: Decodable {
             let value = try intAttempt
                 ?? doubleAttempt.map { floatVal in
                 guard let integer = Int(exactly: floatVal) else {
+                    let key = max ? CodingKeys.maximum : CodingKeys.minimum
+                    let subject = key.rawValue
                     throw GenericError(
-                        subjectName: max ? "maximum" : "minimum",
+                        subjectName: subject,
                         details: "Expected an Integer literal but found a floating point value (\(String(describing: floatVal)))",
-                        codingPath: decoder.codingPath,
-                        pathIncludesSubject: false
+                        codingPath: decoder.codingPath + [key],
+                        pathIncludesSubject: true
                     )
                 }
                 return integer
