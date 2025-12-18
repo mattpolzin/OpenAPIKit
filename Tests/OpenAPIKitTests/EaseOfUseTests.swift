@@ -65,13 +65,16 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             200: .response(
                                 description: "Successful Retrieve",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "hello": .string
-                                            ]
-                                        ),
-                                        example: #"{ "hello": "world" }"#
+                                    .json: .content(
+                                        .init(
+                                            schema: 
+                                                .object(
+                                                    properties: [
+                                                        "hello": .string
+                                                    ]
+                                                ),
+                                            example: #"{ "hello": "world" }"#
+                                        )
                                     )
                                 ]
                             )
@@ -84,11 +87,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         parameters: [],
                         requestBody: .init(
                             content: [
-                                .json: .init(
-                                    schema: .object(
-                                        properties: [
-                                            "hello": .string
-                                        ]
+                                .json: .content(
+                                    .init(
+                                        schema: .object(
+                                            properties: [
+                                                "hello": .string
+                                            ]
+                                        )
                                     )
                                 )
                             ]
@@ -97,11 +102,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             202: .response(
                                 description: "Successful Create",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "hello": .string
-                                            ]
+                                    .json: .content(
+                                        .init(
+                                            schema: .object(
+                                                properties: [
+                                                    "hello": .string
+                                                ]
+                                            )
                                         )
                                     )
                                 ]
@@ -185,13 +192,15 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 200: .response(
                     description: "Successful Retrieve",
                     content: [
-                        .json: .init(
-                            schema: .object(
-                                properties: [
-                                    "hello": .string
-                                ]
-                            ),
-                            example: #"{ "hello": "world" }"#
+                        .json: .content(
+                            .init(
+                                schema: .object(
+                                    properties: [
+                                        "hello": .string
+                                    ]
+                                ),
+                                example: #"{ "hello": "world" }"#
+                            )
                         )
                     ]
                 )
@@ -205,11 +214,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [],
             requestBody: .init(
                 content: [
-                    .json: .init(
-                        schema: .object(
-                            properties: [
-                                "hello": .string
-                            ]
+                    .json: .content(
+                        .init(
+                            schema: .object(
+                                properties: [
+                                    "hello": .string
+                                ]
+                            )
                         )
                     )
                 ]
@@ -218,11 +229,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 202: .response(
                     description: "Successful Create",
                     content: [
-                        .json: .init(
-                            schema: .object(
-                                properties: [
-                                    "hello": .string
-                                ]
+                        .json: .content(
+                            .init(
+                                schema: .object(
+                                    properties: [
+                                        "hello": .string
+                                    ]
+                                )
                             )
                         )
                     ]
@@ -404,7 +417,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let successfulHelloResponse = OpenAPI.Response(
             description: "Hello",
             content: [
-                .txt: .init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self))
+                .txt: .content(.init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self)))
             ]
         )
 
@@ -463,7 +476,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.get
         let response = endpoint?.responses[status: 200]?.responseValue
-        let responseSchemaReference = response?.content[.json]?.schema
+        let responseSchemaReference = response?.content[.json]?.contentValue?.schema
         // this response schema is a reference found in the Components Object. We dereference
         // it to get at the schema.
         let responseSchema = responseSchemaReference.flatMap { document.components[$0] }
@@ -476,7 +489,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.post
         let request = endpoint?.requestBody?.requestValue
-        let requestSchemaReference = request?.content[.json]?.schema
+        let requestSchemaReference = request?.content[.json]?.contentValue?.schema
         // this request schema is defined inline but dereferencing still produces the schema
         // (dereferencing is just a no-op in this case).
         let requestSchema = requestSchemaReference.flatMap { document.components[$0] }
@@ -531,7 +544,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     200: .response(
                         description: "A single widget",
                         content: [
-                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            .json: .content(.init(schemaReference: .component(named: "testWidgetSchema")))
                         ]
                     )
                 ]
@@ -542,11 +555,13 @@ fileprivate let testDocument =  OpenAPI.Document(
                 description: "Create a new widget by adding a description. The created widget will be returned in the response body including a new part number.",
                 requestBody: OpenAPI.Request(
                     content: [
-                        .json: .init(
-                            schema: JSONSchema.object(
-                                properties: [
-                                    "description": .string
-                                ]
+                        .json: .content(
+                            .init(
+                                schema: JSONSchema.object(
+                                    properties: [
+                                        "description": .string
+                                    ]
+                                )
                             )
                         )
                     ]
@@ -555,7 +570,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     201: .response(
                         description: "The newly created widget",
                         content: [
-                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            .json: .content(.init(schemaReference: .component(named: "testWidgetSchema")))
                         ]
                     )
                 ]
@@ -568,7 +583,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     200: .response(
                         description: "Get documentation on this API.",
                         content: [
-                            .html: .init(schema: .string)
+                            .html: .content(.init(schema: .string))
                         ]
                     )
                 ]

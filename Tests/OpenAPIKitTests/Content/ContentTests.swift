@@ -163,7 +163,7 @@ final class ContentTests: XCTestCase {
     }
 
     func test_contentMap() {
-        let _: OpenAPI.Content.Map = [
+        let _: OpenAPI.Content.Map = .direct([
             .bmp: .init(schema: .init(.string(contentEncoding: .binary))),
             .css: .init(schema: .init(.string)),
             .csv: .init(schema: .init(.string)),
@@ -197,7 +197,7 @@ final class ContentTests: XCTestCase {
             .anyVideo: .init(schema: .string(contentEncoding: .binary)),
 
             .any: .init(schema: .string(contentEncoding: .binary))
-        ]
+        ])
     }
 }
 

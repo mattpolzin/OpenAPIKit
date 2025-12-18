@@ -27,13 +27,13 @@ final class DereferencedParameterTests: XCTestCase {
         let t2 = try OpenAPI.Parameter.path(
             name: "test2",
             content: [
-                .anyText: .init(schema: .string)
+                .anyText: .content(.init(schema: .string))
             ]
         ).dereferenced(in: .noComponents)
 
         XCTAssertEqual(t2.name, "test2")
         XCTAssertEqual(t2.context, .path(content: [
-                .anyText: .init(schema: .string)
+                .anyText: .content(.init(schema: .string))
             ]))
         XCTAssertEqual(
             t2.schemaOrContent.contentValue,
@@ -49,7 +49,7 @@ final class DereferencedParameterTests: XCTestCase {
         let t1 = try OpenAPI.Parameter.header(
             name: "test",
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ]
         ).dereferenced(in: .noComponents)
 
@@ -81,7 +81,7 @@ final class DereferencedParameterTests: XCTestCase {
         )
         let t1 = try OpenAPI.Parameter.header(
             name: "test",
-            content: [.json: .init(schemaReference: .component(named: "test"))]
+            content: [.json: .content(.init(schemaReference: .component(named: "test")))]
         ).dereferenced(in: components)
 
         XCTAssertEqual(

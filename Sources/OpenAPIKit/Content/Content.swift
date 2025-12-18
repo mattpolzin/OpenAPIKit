@@ -319,7 +319,15 @@ extension OpenAPI.Content {
 }
 
 extension OpenAPI.Content {
-    public typealias Map = OrderedDictionary<OpenAPI.ContentType, OpenAPI.Content>
+    public typealias Map = OrderedDictionary<OpenAPI.ContentType, Either<OpenAPI.Reference<OpenAPI.Content>, OpenAPI.Content>>
+}
+
+extension OpenAPI.Content.Map {
+    /// Construct an OpenAPI.Content.Map for which none of the values are
+    /// references (all values are OpenAPI.Content).
+    public static func direct(_ map: OrderedDictionary<OpenAPI.ContentType, OpenAPI.Content>) -> OpenAPI.Content.Map {
+        map.mapValues { .b($0) }
+    }
 }
 
 extension OpenAPI.Content {

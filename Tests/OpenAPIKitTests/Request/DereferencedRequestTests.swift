@@ -22,7 +22,7 @@ final class DereferencedRequestTests: XCTestCase {
     func test_allInlinedComponents() throws {
         let t1 = try OpenAPI.Request(
             description: "test",
-            content: [.json: .init(schema: .string)]
+            content: [.json: .content(.init(schema: .string))]
         ).dereferenced(in: .noComponents)
         XCTAssertEqual(t1.content[.json]?.schema?.jsonSchema, .string)
         // test dynamic member lookup
@@ -38,7 +38,7 @@ final class DereferencedRequestTests: XCTestCase {
         let t1 = try OpenAPI.Request(
             description: "test",
             content: [
-                .json: .init(schemaReference: .component(named: "test"))
+                .json: .content(.init(schemaReference: .component(named: "test")))
             ]
         ).dereferenced(in: components)
         XCTAssertEqual(
@@ -52,7 +52,7 @@ final class DereferencedRequestTests: XCTestCase {
             try OpenAPI.Request(
                 description: "test",
                 content: [
-                    .json: .init(schemaReference: .component(named: "test"))
+                    .json: .content(.init(schemaReference: .component(named: "test")))
                 ]
             ).dereferenced(in: .noComponents)
         )

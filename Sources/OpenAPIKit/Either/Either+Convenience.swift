@@ -103,6 +103,11 @@ extension Either where B == OpenAPI.Link {
     public var linkValue: B? { b }
 }
 
+extension Either where B == OpenAPI.Content {
+    /// Retrieve the content if that is what this property contains.
+    public var contentValue: B? { b }
+}
+
 extension Either where B == OpenAPI.Content.Map {
     /// Retrieve the content map if that is what this property contains.
     public var contentValue: B? { b }
@@ -219,6 +224,11 @@ extension Either where B == OpenAPI.PathItem {
 extension Either where B == OpenAPI.Parameter {
     /// Construct a parameter value.
     public static func parameter(_ parameter: OpenAPI.Parameter) -> Self { .b(parameter) }
+}
+
+extension Either where B == OpenAPI.Content {
+    /// Construct content.
+    public static func content(_ content: OpenAPI.Content) -> Self { .b(content) }
 }
 
 extension Either where B == OpenAPI.Content.Map {

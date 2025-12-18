@@ -22,7 +22,7 @@ final class DereferencedHeaderTests: XCTestCase {
     func test_inlineContentHeader() throws {
         let t1 = try OpenAPI.Header(
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ]
         ).dereferenced(in: .noComponents)
 
@@ -52,7 +52,7 @@ final class DereferencedHeaderTests: XCTestCase {
             ]
         )
         let t1 = try OpenAPI.Header(
-            content: [.json: .init(schemaReference: .component(named: "test"))]
+            content: [.json: .content(.init(schemaReference: .component(named: "test")))]
         ).dereferenced(in: components)
 
         XCTAssertEqual(

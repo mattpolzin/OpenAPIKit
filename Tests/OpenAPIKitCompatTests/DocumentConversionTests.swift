@@ -1086,6 +1086,10 @@ fileprivate func assertEqualNewToOld(_ newRequest: OpenAPIKit.OpenAPI.Request, _
 fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content.Map, _ oldContentMap: OpenAPIKit30.OpenAPI.Content.Map) throws {
     for ((newCt, newContent), (oldCt, oldContent)) in zip(newContentMap, oldContentMap) {
         XCTAssertEqual(newCt, oldCt)
+        guard case let .b(newContent) = newContent else {
+            XCTFail("Expected new content not to be a reference but found a reference: \(newContent)")
+            return
+        }
         switch (newContent.schema?.value, oldContent.schema) {
         case (.reference(let ref1, _), .a(let ref2)):
             XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)

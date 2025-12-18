@@ -258,7 +258,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -280,7 +280,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -302,7 +302,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -324,7 +324,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s1, s2]
                     )
                 )
@@ -346,7 +346,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s1, s2]
                     )
                 )
@@ -369,7 +369,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -393,7 +393,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -417,7 +417,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -438,7 +438,7 @@ final class DocumentTests: XCTestCase {
             paths: [
                 "/hello/world": .init(
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])]
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])]
                     )
                 )
             ],

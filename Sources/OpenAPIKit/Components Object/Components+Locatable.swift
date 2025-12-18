@@ -64,6 +64,11 @@ extension OpenAPI.Link: ComponentDictionaryLocatable {
     public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.links) }
 }
 
+extension OpenAPI.Content: ComponentDictionaryLocatable {
+    public static var openAPIComponentsKey: String { "mediaTypes" }
+    public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .b(\.mediaTypes) }
+}
+
 extension OpenAPI.PathItem: ComponentDictionaryLocatable {
     public static var openAPIComponentsKey: String { "pathItems" }
     public static var openAPIComponentsKeyPath: Either<WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentDictionary<Self>>, WritableKeyPath<OpenAPI.Components, OpenAPI.ComponentReferenceDictionary<Self>>> { .a(\.pathItems) }

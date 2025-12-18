@@ -44,7 +44,8 @@ final class SchemaErrorTests: XCTestCase {
                 "200",
                 "content",
                 "application/json",
-                "schema"
+                "schema",
+                "maximum"
             ])
         }
     }

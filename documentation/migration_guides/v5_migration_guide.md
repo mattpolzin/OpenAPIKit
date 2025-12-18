@@ -297,6 +297,52 @@ case .b(let positionalEncoding):
 }
 ```
 
+### Content Map (`OpenAPI.Content.Map`)
+Content maps now reflect the specification correctly in allowing references to
+Media Type Objects (`OpenAPI.Content`). This means that code that creates or
+reads `OpenAPI.Content` values from a `Content.Map` needs to be updated to dig
+one level deeper and account for the possibility that the `Content` is
+referenced to instead of inlined.
+
+```swift
+// BEFORE
+let contentMap: OpenAPI.Content.Map = [
+  .json: .init(schema: .string)
+]
+let jsonContent: OpenAPI.Content? = contentMap[.json]
+
+// AFTER
+let contentMap: OpenAPI.Content.Map = [
+  .json: .content(.init(schema: .string)),
+  .xml: .component(named: "xml")
+]
+let jsonContent: OpenAPI.Content? = contentMap[.json]?.contentValue
+if case let .b(jsonContent) = contentMap[.json] { /*...*/ }
+
+let referenceToContent: OpenAPI.Reference<OpenAPI.Content>? = contentMap[.xml]?.reference
+if case let .a(referenceToContent) = contentMap[.xml] { /*...*/ }
+
+```
+
+If you are constructing an `OpenAPI.Content.Map`, you have one other option for
+migrating existing code: You can use the new `.direct()` convenience
+constructor:
+```swift
+// BEFORE
+let contentMap: OpenAPI.Content.Map = [
+  .json: .init(schema: .string)
+]
+
+// AFTER
+let contentMap: OpenAPI.Content.Map = [
+  .json: .content(.init(schema: .string))
+]
+// OR
+let contentMap: OpenAPI.Content.Map = .direct([
+  .json: .init(schema: .string)
+])
+```
+
 ### Security Scheme Object (`OpenAPI.SecurityScheme`)
 The `type` property's enumeration gains a new associated value on the `oauth2`
 case.

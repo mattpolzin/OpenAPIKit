@@ -37,7 +37,8 @@ public struct DereferencedContent: Equatable {
     internal init(
         _ content: OpenAPI.Content,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         self.schema = try content.schema?._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         self.itemSchema = try content.itemSchema?._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
@@ -67,6 +68,11 @@ public struct DereferencedContent: Equatable {
             self.encoding = nil
         }
 
+        var content = content
+        if let name {
+            content.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
+        }
+
         self.underlyingContent = content
     }
 
@@ -85,7 +91,7 @@ extension OpenAPI.Content: LocallyDereferenceable {
         following references: Set<AnyHashable>,
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedContent {
-        return try DereferencedContent(self, resolvingIn: components, following: references)
+        return try DereferencedContent(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }
 

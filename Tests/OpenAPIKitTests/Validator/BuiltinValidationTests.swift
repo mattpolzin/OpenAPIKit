@@ -94,9 +94,9 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
+                                    .json: .content(.init(
                                         schema: .fragment(.init())
-                                    )
+                                    ))
                                 ]
                             )
                         ]
@@ -121,11 +121,13 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "nested": .fragment(.init())
-                                            ]
+                                    .json: .content(
+                                        .init(
+                                            schema: .object(
+                                                properties: [
+                                                    "nested": .fragment(.init())
+                                                ]
+                                            )
                                         )
                                     )
                                 ]
@@ -157,11 +159,13 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
-                                        // following is _not_ an empty schema component
-                                        // because it is actually a `{ "type": "object" }`
-                                        // instead of a `{ }`
-                                        schema: .object
+                                    .json: .content(
+                                        .init(
+                                            // following is _not_ an empty schema component
+                                            // because it is actually a `{ "type": "object" }`
+                                            // instead of a `{ }`
+                                            schema: .object
+                                        )
                                     )
                                 ]
                             )
@@ -731,13 +735,15 @@ final class BuiltinValidationTests: XCTestCase {
                         description: "response2",
                         headers: ["header1": .reference(.component(named: "header1"))],
                         content: [
-                            .json: .init(
-                                schema: .string,
-                                examples: [
-                                    "example1": .reference(.component(named: "example1"))
-                                ]
+                            .json: .content(
+                                .init(
+                                    schema: .string,
+                                    examples: [
+                                        "example1": .reference(.component(named: "example1"))
+                                    ]
+                                )
                             ),
-                            .xml: .init(schemaReference: .component(named: "schema1"))
+                            .xml: .content(.init(schemaReference: .component(named: "schema1")))
                         ],
                         links: ["linky": .reference(.component(named: "link1"))]
                     )
@@ -806,7 +812,7 @@ final class BuiltinValidationTests: XCTestCase {
                             "header1": .reference(.component(named: "header1")),
                             "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
                         ],
-                        content: [
+                        content: .direct([
                             .json: .init(
                                 schema: .string,
                                 examples: [
@@ -816,7 +822,7 @@ final class BuiltinValidationTests: XCTestCase {
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
-                        ],
+                        ]),
                         links: [
                             "linky": .reference(.component(named: "link1")),
                             "linky2": .reference(.external(URL(string: "https://linky.com")!))
@@ -851,7 +857,7 @@ final class BuiltinValidationTests: XCTestCase {
                     "example1": .init(value: .b("hello"))
                 ],
                 requestBodies: [
-                    "request1": .init(content: [.json: .init(schema: .object)])
+                    "request1": .init(content: [.json: .content(.init(schema: .object))])
                 ],
                 headers: [
                     "header1": .init(schema: .string)
