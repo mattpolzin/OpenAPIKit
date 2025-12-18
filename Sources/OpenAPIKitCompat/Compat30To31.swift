@@ -138,10 +138,16 @@ extension OpenAPIKit30.OpenAPI.Parameter.Context {
 
 extension OpenAPIKit30.OpenAPI.Example: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Example {
-        OpenAPIKit.OpenAPI.Example(
+        let newValue: OpenAPIKit.OpenAPI.Example.Value? = value.map { value in
+            switch value {
+            case .a(let url): .value(data: nil, serialized: .b(url))
+            case .b(let data): .legacy(data)
+            }
+        }
+        return OpenAPIKit.OpenAPI.Example(
             summary: summary,
             description: description,
-            value: value,
+            value: newValue,
             vendorExtensions: vendorExtensions
         )
     }

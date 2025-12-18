@@ -52,7 +52,7 @@ public struct DereferencedContent: Equatable {
             }
         self.examples = examples
 
-        self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+        self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
             ?? content.example
 
         switch content.encoding {

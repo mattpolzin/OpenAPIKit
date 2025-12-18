@@ -38,7 +38,7 @@ final class ComponentsTests: XCTestCase {
                 "three": .parameter(.init(name: "hi", context: .query(content: [:])))
             ],
             examples: [
-                "four": .example(.init(value: .init(URL(string: "http://address.com")!)))
+                "four": .example(.init(legacyValue: .init(URL(string: "http://address.com")!)))
             ],
             requestBodies: [
                 "five": .request(.init(content: [:]))
@@ -88,7 +88,7 @@ final class ComponentsTests: XCTestCase {
                 "three": .init(name: "hi", context: .query(content: [:]))
             ],
             examples: [
-                "four": .init(value: .init(URL(string: "http://address.com")!))
+                "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
             ],
             requestBodies: [
                 "five": .init(content: [:])
@@ -233,7 +233,7 @@ final class ComponentsTests: XCTestCase {
                 "three": .init(name: "hello", context: .query(schema: .string))
             ],
             examples: [
-                "four": .init(value: .init(URL(string: "hello.com/hello")!))
+                "four": .init(legacyValue: .init(URL(string: "hello.com/hello")!))
             ],
             requestBodies: [
                 "five": .init(content: [:])
@@ -275,7 +275,7 @@ final class ComponentsTests: XCTestCase {
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
         XCTAssertEqual(components[ref3], .init(name: "hello", context: .query(schema: .string)))
-        XCTAssertEqual(components[ref4], .init(value: .init(URL(string: "hello.com/hello")!)))
+        XCTAssertEqual(components[ref4], .init(legacyValue: .init(URL(string: "hello.com/hello")!)))
         XCTAssertEqual(components[ref5], .init(content: [:]))
         XCTAssertEqual(components[ref6], .init(schema: .string))
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
@@ -484,7 +484,7 @@ extension ComponentsTests {
                 "three": .init(name: "hi", context: .query(content: [:]))
             ],
             examples: [
-                "four": .init(value: .init(URL(string: "http://address.com")!))
+                "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
             ],
             requestBodies: [
                 "five": .init(content: [:])
@@ -723,7 +723,7 @@ extension ComponentsTests {
                     "three": .init(name: "hi", context: .query(content: [:]))
                 ],
                 examples: [
-                    "four": .init(value: .init(URL(string: "http://address.com")!))
+                    "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
                 ],
                 requestBodies: [
                     "five": .init(content: [:])

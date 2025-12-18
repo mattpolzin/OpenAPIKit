@@ -47,7 +47,7 @@ public struct DereferencedSchemaContext: Equatable {
             .mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
         self.examples = examples
 
-        self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+        self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
             ?? schemaContext.example
 
         self.underlyingSchemaContext = schemaContext

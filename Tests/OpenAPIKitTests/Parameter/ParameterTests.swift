@@ -723,7 +723,7 @@ extension ParameterTests {
                     style: .default(for: .header),
                     allowReserved: true,
                     examples: [
-                        "test": .example(value: .init(URL(string: "http://website.com")!))
+                        "test": .example(externalValue: URL(string: "http://website.com")!)
                     ]
                 )
             )
@@ -785,7 +785,7 @@ extension ParameterTests {
                         style: .default(for: .header),
                         allowReserved: true,
                         examples: [
-                            "test": .example(value: .init(URL(string: "http://website.com")!))
+                            "test": .example(externalValue: URL(string: "http://website.com")!)
                         ]
                     )
                 )

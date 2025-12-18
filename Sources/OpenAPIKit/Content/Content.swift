@@ -192,7 +192,7 @@ extension OpenAPI {
                 self.schema = schemaValue
             }
             self.examples = examples
-            self.example = examples.flatMap(Self.firstExample(from:))
+            self.example = examples.flatMap(Self.firstExampleValue(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
 
@@ -209,7 +209,7 @@ extension OpenAPI {
         ) {
             self.schema = .reference(schemaReference.jsonReference)
             self.examples = examples
-            self.example = examples.flatMap(Self.firstExample(from:))
+            self.example = examples.flatMap(Self.firstExampleValue(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
 
@@ -228,7 +228,7 @@ extension OpenAPI {
             self.schema = schema
             self.itemSchema = itemSchema
             self.examples = examples
-            self.example = examples.flatMap(Self.firstExample(from:))
+            self.example = examples.flatMap(Self.firstExampleValue(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
 
@@ -246,7 +246,7 @@ extension OpenAPI {
             self.schema = nil
             self.itemSchema = itemSchema
             self.examples = examples
-            self.example = examples.flatMap(Self.firstExample(from:))
+            self.example = examples.flatMap(Self.firstExampleValue(from:))
             self.encoding = encoding.map(Either.a)
             self.vendorExtensions = vendorExtensions
 
@@ -265,7 +265,7 @@ extension OpenAPI {
             self.schema = nil
             self.itemSchema = itemSchema
             self.examples = examples
-            self.example = examples.flatMap(Self.firstExample(from:))
+            self.example = examples.flatMap(Self.firstExampleValue(from:))
             if itemEncoding != nil || prefixEncoding != [] {
                 self.encoding = .b(.init(prefixEncoding: prefixEncoding, itemEncoding: itemEncoding))
             } else {
@@ -336,19 +336,19 @@ extension OpenAPI.Content {
     ///
     /// Operates on a dictionary with values that may be either
     /// an Example or a reference to and example.
-    internal static func firstExample(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
+    internal static func firstExampleValue(from exampleDict: OpenAPI.Example.Map) -> AnyCodable? {
         return exampleDict
             .lazy
-            .compactMap { $0.value.exampleValue?.value?.codableValue }
+            .compactMap { (_, exampleOrRef) in exampleOrRef.exampleValue?.value?.value }
             .first
     }
 
     /// Pulls the first example found in the example dictionary
     /// given.
-    internal static func firstExample(from exampleDict: OrderedDictionary<String, OpenAPI.Example>) -> AnyCodable? {
+    internal static func firstExampleValue(from exampleDict: OrderedDictionary<String, OpenAPI.Example>) -> AnyCodable? {
         return exampleDict
         .lazy
-        .compactMap { $0.value.value?.codableValue }
+        .compactMap { (_, example) in example.value?.value }
         .first
     }
 }
@@ -434,7 +434,7 @@ extension OpenAPI.Content: Decodable {
         } else {
             let examplesMap = try container.decodeIfPresent(OpenAPI.Example.Map.self, forKey: .examples)
             examples = examplesMap
-            example = examplesMap.flatMap(Self.firstExample(from:))
+            example = examplesMap.flatMap(Self.firstExampleValue(from:))
         }
 
         vendorExtensions = try Self.extensions(from: decoder)
