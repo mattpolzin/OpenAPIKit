@@ -93,7 +93,7 @@ extension OpenAPI.Parameter {
             self.allowReserved = allowReserved
             self.schema = .init(schema)
             self.examples = examples
-            self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
 
             self.conditionalWarnings = style.conditionalWarnings
         }
@@ -106,7 +106,7 @@ extension OpenAPI.Parameter {
             self.allowReserved = allowReserved
             self.schema = .init(schema)
             self.examples = examples
-            self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
 
             self.explode = style.defaultExplode
 
@@ -123,7 +123,7 @@ extension OpenAPI.Parameter {
             self.allowReserved = allowReserved
             self.schema = .init(schemaReference)
             self.examples = examples
-            self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
 
             self.conditionalWarnings = style.conditionalWarnings
         }
@@ -136,7 +136,7 @@ extension OpenAPI.Parameter {
             self.allowReserved = allowReserved
             self.schema = .init(schemaReference)
             self.examples = examples
-            self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+            self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
 
             self.explode = style.defaultExplode
 
@@ -321,7 +321,7 @@ extension OpenAPI.Parameter.SchemaContext {
         } else {
             let examplesMap = try container.decodeIfPresent(OpenAPI.Example.Map.self, forKey: .examples)
             examples = examplesMap
-            example = examplesMap.flatMap(OpenAPI.Content.firstExample(from:))
+            example = examplesMap.flatMap(OpenAPI.Content.firstExampleValue(from:))
         }
 
         self.conditionalWarnings = style.conditionalWarnings

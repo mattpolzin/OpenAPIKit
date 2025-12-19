@@ -100,8 +100,8 @@ final class ParameterSchemaTests: XCTestCase {
             .string,
             style: .deepObject,
             examples: [
-                "one": .example(value: .init("hello")),
-                "two": .example(value: .init("world"))
+                "one": .example(.init(legacyValue: .init("hello"))),
+                "two": .example(.init(legacyValue: .init("world")))
             ]
         )
 
@@ -112,7 +112,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t7.example)
         XCTAssertEqual(t7.example?.value as? String, "hello")
         XCTAssertNotNil(t7.examples)
-        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.value?.value as? String, "world")
 
         // straight to schema override explode multiple examples
         let t8 = Schema(
@@ -120,8 +120,8 @@ final class ParameterSchemaTests: XCTestCase {
             style: .deepObject,
             explode: true,
             examples: [
-                "one": .example(value: .init("hello")),
-                "two": .example(value: .init("world"))
+                "one": .example(serializedValue: "hello"),
+                "two": .example(dataValue: "world")
             ]
         )
 
@@ -130,16 +130,16 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertTrue(t8.explode)
         XCTAssertFalse(t8.allowReserved)
         XCTAssertNotNil(t8.example)
-        XCTAssertEqual(t8.example?.value as? String, "hello")
+        XCTAssertEqual(t8.example?.value as? String, "world")
         XCTAssertNotNil(t8.examples)
-        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.value?.value as? String, "world")
 
         // schema reference multiple examples
         let t9 = Schema(
             schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject,
             examples: [
-                "one": .example(value: .init("hello")),
+                "one": .example(.init(legacyValue: .init("hello"))),
                 "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
@@ -159,7 +159,7 @@ final class ParameterSchemaTests: XCTestCase {
             style: .deepObject,
             explode: true,
             examples: [
-                "one": .example(value: .init("hello")),
+                "one": .example(dataValue: .init("hello")),
                 "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
@@ -322,7 +322,7 @@ extension ParameterSchemaTests {
             .string,
             style: .default(for: .path),
             examples: [
-                "one": .example(value: .init("hello"))
+                "one": .example(dataValue: .init("hello"))
             ]
         )
 
@@ -336,7 +336,7 @@ extension ParameterSchemaTests {
               "schema" : {
                 "examples" : {
                   "one" : {
-                    "value" : "hello"
+                    "dataValue" : "hello"
                   }
                 },
                 "schema" : {
@@ -356,7 +356,7 @@ extension ParameterSchemaTests {
           "schema" : {
             "examples" : {
               "one" : {
-                "value" : "hello"
+                "dataValue" : "hello"
               }
             },
             "schema" : {
@@ -374,7 +374,7 @@ extension ParameterSchemaTests {
                 .string,
                 style: .default(for: .path),
                 examples: [
-                    "one": .example(value: .init("hello"))
+                    "one": .example(dataValue: .init("hello"))
                 ]
             )
         )

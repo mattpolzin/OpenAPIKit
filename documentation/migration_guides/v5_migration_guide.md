@@ -350,6 +350,75 @@ case.
 Existing code that switches on that property will need to be updated to match on
 `oauth2(flows: OAuthFlows, metadataUrl: URL?)` now.
 
+### Example Object (`OpenAPI.Example`)
+There are no breaking changes to the `OpenAPIKit30` module in this section.
+
+OAS 3.2.0 introduced new fields along with restrictions around what combinations
+of those fields can be used together. This warranted a restructuring of the
+OpenAPIKit types to represent all new and existing restrictions together.
+
+The old `OpenAPI.Example` `value` property was an `Either` to represent either an
+inline value or an external value. The new `value` property is of the
+`OpenAPI.Example.Value` type.
+
+If you accessed the `codableValue` of the `OpenAPI.Example` `value` property
+before, now you access the `legacyValue` or `dataOrLegacyValue` of the `OpenAPI.Example`:
+```swift
+// BEFORE
+let codableValue = example.value?.codableValue
+
+// AFTER
+let codableValue = example.legacyValue
+
+// AFTER (a bit more future-proof)
+let codableValue = example.dataOrLegacyValue
+
+// AFTER (if you've migrated to only using `dataValue`)
+let codableValue = example.dataValue
+```
+
+If you accessed the `urlValue` of the `OpenAPI.Example` `value` property
+before, now you access the `externalValue` of the `openAPI.Example`:
+```swift
+// BEFORE
+let urlValue = example.value?.urlValue
+
+// AFTER
+let urlValue = example.externalValue
+```
+
+#### Initializers
+The `Example.init(summary:description:value:vendorExtensions:)` initializer has
+been deprecated. Your code should either use the new
+`Example.init(summary:description:legacyValue:vendorExtensions:)` initializer
+(direct replacement) or switch to one of two new initializers that adopts the
+OAS 3.2.0 recommendations for semantics dependening on whether the example value
+in question represents the structure of the example, the serialized form of
+the example, or an external reference to the example:
+```swift
+// BEFORE (structural example)
+let example = OpenAPI.Example(value: .b(.init(["hi": "hello"])))
+
+// AFTER (structural example)
+let example = OpenAPI.Example(dataValue: .init(["hi": "hello"]))
+
+// BEFORE (serialized example, xml)
+let example = OpenAPI.Example(value: .b("<hi>hello</hi>"))
+
+// AFTER (serialized example, xml)
+let example = OpenAPI.Example(serialzedValue: "<hi>hello</hi>")
+
+// BEFORE (external value)
+let example = OpenAPI.Example(
+  value: .a(URL(string: "https://example.com/example.json")!)
+)
+
+// AFTER (external value)
+let example = OpenAPI.Example(
+  externalValue: URL(string: "https://example.com/example.json")!
+)
+```
+
 ### Errors
 Some error messages have been tweaked in small ways. If you match on the
 string descriptions of any OpenAPIKit errors, you may need to update the

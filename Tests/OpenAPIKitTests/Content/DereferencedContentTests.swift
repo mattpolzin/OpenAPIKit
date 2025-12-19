@@ -17,7 +17,7 @@ final class DereferencedContentTests: XCTestCase {
 
     func test_oneExampleReferenced() throws {
         let components = OpenAPI.Components.direct(
-            examples: ["test": .init(value: .init("hello world"))]
+            examples: ["test": .init(legacyValue: .init("hello world"))]
         )
         let t1 = try OpenAPI.Content(
             schema: .string,
@@ -26,15 +26,15 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(t1.example, "hello world")
         XCTAssertEqual(
             t1.examples, 
-            ["test": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
+            ["test": .init(legacyValue: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
         )
     }
 
     func test_multipleExamplesReferenced() throws {
         let components = OpenAPI.Components.direct(
             examples: [
-                "test1": .init(value: .init("hello world")),
-                "test2": .init(value: .a(URL(string: "http://website.com")!))
+                "test1": .init(legacyValue: .init("hello world")),
+                "test2": .init(legacyValue: .a(URL(string: "http://website.com")!))
             ]
         )
         let t1 = try OpenAPI.Content(
@@ -48,8 +48,8 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(
             t1.examples,
             [
-                "test1": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
-                "test2": .init(value: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
+                "test1": .init(legacyValue: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
+                "test2": .init(legacyValue: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
             ]
         )
     }

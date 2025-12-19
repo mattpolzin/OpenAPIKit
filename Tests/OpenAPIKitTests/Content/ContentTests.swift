@@ -33,32 +33,32 @@ final class ContentTests: XCTestCase {
         let withExamples = OpenAPI.Content(
             schema: .init(.string),
             examples: [
-                "hello": .example(.init(value: .init("world"))),
-                "bbbb": .example(.init(value: .b("pick me"))),
-                "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
+                "hello": .example(serializedValue: "world"),
+                "bbbb": .example(dataValue: .init(["hi": "hello"])),
+                "aaaa": .example(externalValue: URL(string: "http://google.com")!)
             ]
         )
         XCTAssertNotNil(withExamples.examples)
-        // we expect the example to be the first example where ordering
-        // is the order in which the examples are given:
-        XCTAssertEqual(withExamples.example?.value as? String, "world")
-        XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        // we expect the example (singular) to be the first example with a data value
+        // where ordering is the order in which the examples are given:
+        XCTAssertEqual(withExamples.example?.value as? [String: String], ["hi": "hello"])
+        XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(serializedValue: "world"))
         XCTAssertEqual(withExamples.conditionalWarnings.count, 0)
 
         let withExamples2 = OpenAPI.Content(
             itemSchema: .string,
             examples: [
-                "hello": .example(.init(value: .init("world"))),
-                "bbbb": .example(.init(value: .b("pick me"))),
-                "aaaa": .example(.init(value: .a(URL(string: "http://google.com")!)))
+                "hello": .example(serializedValue: "world"),
+                "bbbb": .example(dataValue: .init(["hi": "hello"])),
+                "aaaa": .example(externalValue: URL(string: "http://google.com")!)
             ]
         )
         XCTAssertEqual(withExamples2.itemSchema, .string)
         XCTAssertNotNil(withExamples2.examples)
-        // we expect the example to be the first example where ordering
-        // is the order in which the examples are given:
-        XCTAssertEqual(withExamples2.example?.value as? String, "world")
-        XCTAssertEqual(withExamples2.examples?["hello"]?.exampleValue, .init(value: .init("world")))
+        // we expect the example (singular) to be the first example with a data value
+        // where ordering is the order in which the examples are given:
+        XCTAssertEqual(withExamples.example?.value as? [String: String], ["hi": "hello"])
+        XCTAssertEqual(withExamples.examples?["hello"]?.exampleValue, .init(serializedValue: "world"))
         XCTAssertEqual(withExamples2.conditionalWarnings.count, 1)
 
         let t4 = OpenAPI.Content(
@@ -412,7 +412,7 @@ extension ContentTests {
 
     func test_examplesAndSchemaContent_encode() {
         let content = OpenAPI.Content(schema: .init(.object(properties: ["hello": .string])),
-                                      examples: ["hello": .b(OpenAPI.Example(value: .init(.init([ "hello": "world" ]))))])
+                                      examples: ["hello": .b(OpenAPI.Example(dataValue: .init([ "hello": "world" ])))])
         let encodedContent = try! orderUnstableTestStringFromEncoding(of: content)
 
         assertJSONEquivalent(
@@ -421,7 +421,7 @@ extension ContentTests {
             {
               "examples" : {
                 "hello" : {
-                  "value" : {
+                  "dataValue" : {
                     "hello" : "world"
                   }
                 }
@@ -448,7 +448,7 @@ extension ContentTests {
         {
           "examples" : {
             "hello": {
-                "value": {
+                "dataValue": {
                     "hello" : "world"
                 }
             }
@@ -471,7 +471,7 @@ extension ContentTests {
         XCTAssertEqual(content.schema, .init(.object(properties: ["hello": .string])))
 
         XCTAssertEqual(content.example?.value as? [String: String], [ "hello": "world" ])
-        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.codableValue?.value as? [String: String], [ "hello": "world" ])
+        XCTAssertEqual(content.examples?["hello"]?.exampleValue?.value?.value?.value as? [String: String], [ "hello": "world" ])
     }
 
     func test_decodeFailureForBothExampleAndExamples() {

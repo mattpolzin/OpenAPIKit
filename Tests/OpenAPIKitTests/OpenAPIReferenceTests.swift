@@ -87,7 +87,7 @@ final class OpenAPIReferenceTests: XCTestCase {
                 "hello": .path(name: "name", content: [:], description: "description")
             ],
             examples: [
-                "hello": .init(summary: "summary", description: "description", value: .b(""))
+                "hello": .init(summary: "summary", description: "description", legacyValue: .b(""))
             ],
             requestBodies: [
                 "hello": .init(description: "description", content: [:])

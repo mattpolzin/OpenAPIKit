@@ -1237,8 +1237,15 @@ fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.S
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
     XCTAssertEqual(newExample.summary, oldExample.summary)
     XCTAssertEqual(newExample.description, oldExample.description)
-    XCTAssertEqual(newExample.value, oldExample.value)
     XCTAssertEqual(newExample.vendorExtensions, oldExample.vendorExtensions)
+
+    XCTAssertNil(newExample.serializedValue)
+    XCTAssertNil(newExample.dataValue)
+    switch oldExample.value {
+    case .a(let url): XCTAssertEqual(url, newExample.externalValue)
+    case .b(let data): XCTAssertEqual(data, newExample.value?.value)
+    case nil: XCTAssertNil(newExample.value)
+    }
 }
 
 fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.Encoding, _ oldEncoding: OpenAPIKit30.OpenAPI.Content.Encoding) throws {

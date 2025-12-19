@@ -854,7 +854,7 @@ final class BuiltinValidationTests: XCTestCase {
                     "parameter1": .init(name: "test", context: .header(schema: .string))
                 ],
                 examples: [
-                    "example1": .init(value: .b("hello"))
+                    "example1": .init(legacyValue: .b("hello"))
                 ],
                 requestBodies: [
                     "request1": .init(content: [.json: .content(.init(schema: .object))])
