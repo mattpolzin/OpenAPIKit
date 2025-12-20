@@ -1141,13 +1141,12 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .number(let coreContext, let numericContext):
             let newNumericContext = try XCTUnwrap(newSchema.numberContext)
-            // TODO: compare number contexts
-            // try assertEqualNewToOld(newNumericContext, numericContext)
+            assertEqualNewToOld(newNumericContext, numericContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .integer(let coreContext, let integerContext):
             let newIntegerContext = try XCTUnwrap(newSchema.integerContext)
-            // TODO: compare integer contexts
+            assertEqualNewToOld(newIntegerContext, integerContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .string(let coreContext, let stringContext):
@@ -1157,12 +1156,12 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .object(let coreContext, let objectContext):
             let newObjectContext = try XCTUnwrap(newSchema.objectContext)
-            // TODO: compare object contexts
+            try assertEqualNewToOld(newObjectContext, objectContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .array(let coreContext, let arrayContext):
             let newArrayContext = try XCTUnwrap(newSchema.arrayContext)
-            // TODO: compare array contexts
+            try assertEqualNewToOld(newArrayContext, arrayContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .all(of: let schemas, core: let coreContext):
@@ -1233,6 +1232,60 @@ fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.S
     XCTAssertNil(newStringContext.contentEncoding)
     XCTAssertNil(newStringContext.contentMediaType)
 }
+
+fileprivate func assertEqualNewToOld(_ newNumericContext: OpenAPIKit.JSONSchema.NumericContext, _ oldNumericContext: OpenAPIKit30.JSONSchema.NumericContext) {
+    XCTAssertEqual(newNumericContext.multipleOf, oldNumericContext.multipleOf)
+    XCTAssertEqual(newNumericContext.maximum?.value, oldNumericContext.maximum?.value)
+    XCTAssertEqual(newNumericContext.maximum?.exclusive, oldNumericContext.maximum?.exclusive)
+    XCTAssertEqual(newNumericContext.minimum?.value, oldNumericContext.minimum?.value)
+    XCTAssertEqual(newNumericContext.minimum?.exclusive, oldNumericContext.minimum?.exclusive)
+}
+
+fileprivate func assertEqualNewToOld(_ newIntegerContext: OpenAPIKit.JSONSchema.IntegerContext, _ oldIntegerContext: OpenAPIKit30.JSONSchema.IntegerContext) {
+    XCTAssertEqual(newIntegerContext.multipleOf, oldIntegerContext.multipleOf)
+    XCTAssertEqual(newIntegerContext.maximum?.value, oldIntegerContext.maximum?.value)
+    XCTAssertEqual(newIntegerContext.maximum?.exclusive, oldIntegerContext.maximum?.exclusive)
+    XCTAssertEqual(newIntegerContext.minimum?.value, oldIntegerContext.minimum?.value)
+    XCTAssertEqual(newIntegerContext.minimum?.exclusive, oldIntegerContext.minimum?.exclusive)
+}
+
+fileprivate func assertEqualNewToOld(_ newArrayContext: OpenAPIKit.JSONSchema.ArrayContext, _ oldArrayContext: OpenAPIKit30.JSONSchema.ArrayContext) throws {
+    if let newItems = newArrayContext.items {
+        guard let oldItems = oldArrayContext.items else {
+            return XCTFail("New array context has items defined but old array context does not")
+        }
+        try assertEqualNewToOld(newItems, oldItems)
+    } else {
+        XCTAssertNil(oldArrayContext.items)
+    }
+    XCTAssertNil(newArrayContext.prefixItems)
+    XCTAssertEqual(newArrayContext.maxItems, oldArrayContext.maxItems)
+    XCTAssertEqual(newArrayContext.minItems, oldArrayContext.minItems)
+    XCTAssertEqual(newArrayContext.uniqueItems, oldArrayContext.uniqueItems)
+}
+
+fileprivate func assertEqualNewToOld(_ newObjectContext: OpenAPIKit.JSONSchema.ObjectContext, _ oldObjectContext: OpenAPIKit30.JSONSchema.ObjectContext) throws {
+    XCTAssertEqual(newObjectContext.minProperties, oldObjectContext.minProperties)
+    XCTAssertEqual(newObjectContext.maxProperties, oldObjectContext.maxProperties)
+    switch (newObjectContext.additionalProperties, oldObjectContext.additionalProperties) {
+    case (.a(let value1), .a(let value2)): XCTAssertEqual(value1, value2)
+    case (.b(let value1), .b(let value2)): try assertEqualNewToOld(value1, value2)
+    case (nil, nil): break
+    default:
+        XCTFail("Found mismatch of bool or JSONSchema value for additionalProperties of object contexts: \(newObjectContext) is not equal to \(oldObjectContext)")
+    }
+    XCTAssertEqual(newObjectContext.properties.count, oldObjectContext.properties.count)
+    for (key, prop) in oldObjectContext.properties {
+        guard let newProp = newObjectContext.properties[key] else {
+            XCTFail("Found old prop \(prop) at key \(key) with no neq prop set in the OAS 3.1/2 document")
+            return
+        }
+        try assertEqualNewToOld(newProp, prop)
+    }
+    XCTAssertEqual(newObjectContext.requiredProperties, oldObjectContext.requiredProperties)
+    XCTAssertEqual(newObjectContext.optionalProperties, oldObjectContext.optionalProperties)
+}
+
 
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
     XCTAssertEqual(newExample.summary, oldExample.summary)
