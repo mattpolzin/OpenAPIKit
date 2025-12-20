@@ -24,6 +24,7 @@ final class ExampleTests: XCTestCase {
         XCTAssertEqual(full1.legacyValue, .init(URL(string: "https://google.com")!))
         XCTAssertEqual(full1.dataOrLegacyValue, .init(URL(string: "https://google.com")!))
         XCTAssertEqual(full1.vendorExtensions["hello"]?.value as? String, "world")
+        XCTAssertEqual(full1.conditionalWarnings.count, 0)
 
         let full2 = OpenAPI.Example(
             summary: "hello",
@@ -31,6 +32,13 @@ final class ExampleTests: XCTestCase {
             dataValue: .init("hello"),
             vendorExtensions: ["hello": "world"]
         )
+        XCTAssertEqual(full2.summary, "hello")
+        XCTAssertEqual(full2.description, "world")
+        XCTAssertEqual(full2.value?.value, .init("hello"))
+        XCTAssertEqual(full2.dataValue, .init("hello"))
+        XCTAssertEqual(full2.dataOrLegacyValue, .init("hello"))
+        XCTAssertEqual(full2.vendorExtensions["hello"]?.value as? String, "world")
+        XCTAssertEqual(full2.conditionalWarnings.count, 1)
 
         let full3 = OpenAPI.Example(
             summary: "hello",
@@ -43,25 +51,31 @@ final class ExampleTests: XCTestCase {
         XCTAssertEqual(full3.description, "world")
         XCTAssertEqual(full3.externalValue, URL(string: "https://google.com")!)
         XCTAssertEqual(full3.vendorExtensions["hello"]?.value as? String, "world")
+        XCTAssertEqual(full3.conditionalWarnings.count, 0)
 
-        XCTAssertEqual(full2.summary, "hello")
-        XCTAssertEqual(full2.description, "world")
-        XCTAssertEqual(full2.value?.value, .init("hello"))
-        XCTAssertEqual(full2.dataValue, .init("hello"))
-        XCTAssertEqual(full2.dataOrLegacyValue, .init("hello"))
-        XCTAssertEqual(full2.vendorExtensions["hello"]?.value as? String, "world")
+        let dataPlusSerialized = OpenAPI.Example(
+            summary: "hello",
+            dataValue: .init("hello"),
+            serializedValue: "hello"
+        )
+        XCTAssertEqual(dataPlusSerialized.summary, "hello")
+        XCTAssertEqual(dataPlusSerialized.dataValue, .init("hello"))
+        XCTAssertEqual(dataPlusSerialized.serializedValue, "hello")
+        XCTAssertEqual(dataPlusSerialized.conditionalWarnings.count, 2)
 
         let small = OpenAPI.Example(serializedValue: "hello")
         XCTAssertNil(small.summary)
         XCTAssertNil(small.description)
         XCTAssertEqual(small.serializedValue, "hello")
         XCTAssertEqual(small.vendorExtensions, [:])
+        XCTAssertEqual(small.conditionalWarnings.count, 1)
 
         let noValue = OpenAPI.Example()
         XCTAssertNil(noValue.summary)
         XCTAssertNil(noValue.description)
         XCTAssertNil(noValue.value)
         XCTAssertEqual(noValue.vendorExtensions, [:])
+        XCTAssertEqual(noValue.conditionalWarnings.count, 0)
 
         let _ = OpenAPI.Example(legacyValue: .b(.init(["hi": "hello"])))
         let _ = OpenAPI.Example(legacyValue: .b("<hi>hello</hi>"))
