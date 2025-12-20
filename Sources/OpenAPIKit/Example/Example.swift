@@ -12,7 +12,7 @@ extension OpenAPI {
     /// OpenAPI Spec "Example Object"
     ///
     /// See [OpenAPI Example Object](https://spec.openapis.org/oas/v3.2.0.html#example-object).
-    public struct Example: Equatable, CodableVendorExtendable, Sendable {
+    public struct Example: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public let summary: String?
         public let description: String?
 
@@ -26,6 +26,8 @@ extension OpenAPI {
         /// `[ "x-extensionKey": <anything>]`
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
+
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public var dataValue: AnyCodable? { value?.dataValue }
         public var serializedValue: String? { value?.serializedValue }
@@ -49,6 +51,8 @@ extension OpenAPI {
             case nil: self.value = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = self.value?.conditionalWarnings ?? []
         }
 
         public init(
@@ -65,6 +69,8 @@ extension OpenAPI {
             case nil: self.value = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = self.value?.conditionalWarnings ?? []
         }
 
         public init(
@@ -77,6 +83,8 @@ extension OpenAPI {
             self.description = description
             self.value = value
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = self.value?.conditionalWarnings ?? []
         }
 
         public init(
@@ -94,6 +102,8 @@ extension OpenAPI {
                 self.value = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = self.value?.conditionalWarnings ?? []
         }
 
         public init(
@@ -111,12 +121,41 @@ extension OpenAPI {
                 self.value = nil
             }
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = self.value?.conditionalWarnings ?? []
         }
+    }
+}
+
+extension OpenAPI.Example: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.summary == rhs.summary
+        && lhs.description == rhs.description
+        && lhs.value == rhs.value
+        && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
 extension OpenAPI.Example {
     public typealias Map = OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.Example>, OpenAPI.Example>>
+}
+
+extension OpenAPI.Example.Value {
+    fileprivate var conditionalWarnings: [(any Condition, OpenAPI.Warning)] {
+        [
+            nonNilVersionWarning(fieldName: "dataValue", value: dataValue, minimumVersion: .v3_2_0),
+            nonNilVersionWarning(fieldName: "serializedValue", value: serializedValue, minimumVersion: .v3_2_0)
+        ].compactMap { $0 }
+    }
+}
+
+fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+    value.map { _ in
+        OpenAPI.Document.ConditionalWarnings.version(
+            lessThan: minimumVersion,
+            doesNotSupport: "The Example Object \(fieldName) field"
+        )
+    }
 }
 
 // MARK: - Either Convenience
@@ -268,6 +307,8 @@ extension OpenAPI.Example: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        conditionalWarnings = self.value?.conditionalWarnings ?? []
     }
 }
 
