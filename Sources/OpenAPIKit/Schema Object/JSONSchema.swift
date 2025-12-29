@@ -269,9 +269,13 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, Sendable {
         }
     }
 
+    public var xml: OpenAPI.XML? {
+        coreContext.xml
+    }
+
     // See `JSONSchemaContext`
     public var inferred: Bool {
-        return coreContext.inferred
+        coreContext.inferred
     }
 }
 
@@ -1129,7 +1133,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.BooleanFormat>(
             format: format,
@@ -1146,7 +1151,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         return .boolean(context)
     }
@@ -1168,7 +1174,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .boolean(
             format: format,
@@ -1185,7 +1192,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
     }
 
@@ -1211,7 +1219,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let context = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(
             format: format,
@@ -1228,7 +1237,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         return .fragment(context)
     }
@@ -1250,7 +1260,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .fragment(
             format: format,
@@ -1267,7 +1278,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
     }
 
@@ -1301,7 +1313,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.StringFormat>(
             format: format,
@@ -1318,7 +1331,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         let stringContext = JSONSchema.StringContext(
             maxLength: maxLength,
@@ -1352,7 +1366,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .string(
             format: format,
@@ -1374,7 +1389,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
     }
 
@@ -1403,7 +1419,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.NumberFormat>(
             format: format,
@@ -1420,7 +1437,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         let numbericContext = JSONSchema.NumericContext(
             multipleOf: multipleOf,
@@ -1450,7 +1468,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .number(
             format: format,
@@ -1470,7 +1489,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
     }
 
@@ -1499,7 +1519,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let genericContext = JSONSchema.CoreContext<JSONTypeFormat.IntegerFormat>(
             format: format,
@@ -1516,7 +1537,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         let integerContext = JSONSchema.IntegerContext(
             multipleOf: multipleOf,
@@ -1546,7 +1568,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .integer(
             format: format,
@@ -1566,7 +1589,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
     }
 
@@ -1596,7 +1620,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ObjectFormat>(
             format: format,
@@ -1613,7 +1638,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
         let objectContext = JSONSchema.ObjectContext(
             properties: properties,
@@ -1651,7 +1677,8 @@ extension JSONSchema {
         examples: [AnyCodable] = [],
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         let coreContext = JSONSchema.CoreContext<JSONTypeFormat.ArrayFormat>(
             format: format,
@@ -1668,7 +1695,8 @@ extension JSONSchema {
             examples: examples,
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
-            defs: defs
+            defs: defs,
+            xml: xml
         )
 
         let arrayContext = JSONSchema.ArrayContext(
@@ -1704,7 +1732,8 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .all(
             of: schemas,
@@ -1715,7 +1744,8 @@ extension JSONSchema {
                 discriminator: discriminator,
                 anchor: anchor,
                 dynamicAnchor: dynamicAnchor,
-                defs: defs
+                defs: defs,
+                xml: xml
             )
         )
     }
@@ -1738,7 +1768,8 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .one(
             of: schemas,
@@ -1749,7 +1780,8 @@ extension JSONSchema {
                 discriminator: discriminator,
                 anchor: anchor,
                 dynamicAnchor: dynamicAnchor,
-                defs: defs
+                defs: defs,
+                xml: xml
             )
         )
     }
@@ -1772,7 +1804,8 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .any(
             of: schemas,
@@ -1783,7 +1816,8 @@ extension JSONSchema {
                 discriminator: discriminator,
                 anchor: anchor,
                 dynamicAnchor: dynamicAnchor,
-                defs: defs
+                defs: defs,
+                xml: xml
             )
         )
     }
@@ -1803,7 +1837,8 @@ extension JSONSchema {
         discriminator: OpenAPI.Discriminator? = nil,
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .not(
             schema,
@@ -1814,7 +1849,8 @@ extension JSONSchema {
                 discriminator: discriminator,
                 anchor: anchor,
                 dynamicAnchor: dynamicAnchor,
-                defs: defs
+                defs: defs,
+                xml: xml
             )
         )
     }
@@ -1827,11 +1863,20 @@ extension JSONSchema {
         description: String? = nil,
         anchor: String? = nil,
         dynamicAnchor: String? = nil,
-        defs: OrderedDictionary<String, JSONSchema> = [:]
+        defs: OrderedDictionary<String, JSONSchema> = [:],
+        xml: OpenAPI.XML? = nil
     ) -> JSONSchema {
         return .reference(
             reference,
-            .init(required: required, title: title, description: description, anchor: anchor, dynamicAnchor: dynamicAnchor, defs: defs)
+            .init(
+                required: required,
+                title: title,
+                description: description,
+                anchor: anchor,
+                dynamicAnchor: dynamicAnchor,
+                defs: defs,
+                xml: xml
+                )
         )
     }
 }

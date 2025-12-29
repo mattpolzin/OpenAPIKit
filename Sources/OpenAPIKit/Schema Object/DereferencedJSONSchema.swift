@@ -153,6 +153,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext, Sendable {
     public var deprecated: Bool { jsonSchema.deprecated }
 
     // See `JSONSchemaContext`
+    public var xml: OpenAPI.XML? { jsonSchema.xml }
+
+    // See `JSONSchemaContext`
     public var vendorExtensions: [String : AnyCodable] {
         // NOTE: this doesnot just do `jsonSchema.vendorExtensions` because of some wild
         //       Swift bug that I don't have time to think through at the moment.

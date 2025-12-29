@@ -263,6 +263,7 @@ final class SchemaObjectTests: XCTestCase {
             .any(of: [.boolean]),
             .one(of: [.boolean]),
             .not(.boolean),
+            .object(xml: .init(name: "test")),
             .reference(.external(URL(string: "hello/world.json#/hello")!))
         ]
 
@@ -1782,6 +1783,38 @@ extension SchemaObjectTests {
         XCTAssertEqual(
             try orderUnstableDecode(JSONSchema.self, from: schemaSchema),
             .fragment(.init())
+        )
+    }
+
+    func test_decodeXmlFragment() throws {
+        let xmlSchema = """
+        {
+            "xml" : {
+                "name" : "test"
+            }
+        }
+        """.data(using: .utf8)!
+
+        XCTAssertEqual(
+            try orderUnstableDecode(JSONSchema.self, from: xmlSchema),
+            .fragment(.init(xml: .init(name: "test")))
+        )
+    }
+
+    func test_encodeXmlFragment() throws {
+        let fragment = JSONSchema.fragment(.init(xml: .init(name: "test")))
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: fragment)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "xml" : {
+                "name" : "test"
+              }
+            }
+            """
         )
     }
 
