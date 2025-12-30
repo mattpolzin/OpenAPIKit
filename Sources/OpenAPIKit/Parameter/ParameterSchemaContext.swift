@@ -10,8 +10,8 @@ import OpenAPIKitCore
 extension OpenAPI.Parameter {
     /// OpenAPI Spec "Parameter Object" schema and style configuration.
     ///
-    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object)
-    /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.1.1.html#style-values).
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.2.0.html#parameter-object)
+    /// and [OpenAPI Style Values](https://spec.openapis.org/oas/v3.2.0.html#style-values).
     public struct SchemaContext: HasConditionalWarnings, Sendable {
         public var style: Style
         public var explode: Bool
@@ -216,7 +216,7 @@ extension OpenAPI.Parameter.SchemaContext.Style {
     /// per the OpenAPI Specification.
     ///
     /// See the `style` fixed field under
-    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.2.0.html#parameter-object).
     public static func `default`(for location: OpenAPI.Parameter.Context.Location) -> Self {
         switch location {
         case .query:
@@ -236,7 +236,7 @@ extension OpenAPI.Parameter.SchemaContext.Style {
     /// per the OpenAPI Specification.
     ///
     /// See the `style` fixed field under
-    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    /// [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.2.0.html#parameter-object).
     public static func `default`(for context: OpenAPI.Parameter.Context) -> Self {
         switch context {
         case .query:

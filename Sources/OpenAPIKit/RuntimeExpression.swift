@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Runtime Expression"
     ///
-    /// See [OpenAPI Runtime Expression[(https://spec.openapis.org/oas/v3.1.1.html#runtime-expressions).
+    /// See [OpenAPI Runtime Expression[(https://spec.openapis.org/oas/v3.2.0.html#runtime-expressions).
     ///
     public enum RuntimeExpression: RawRepresentable, Equatable, Sendable {
         case url

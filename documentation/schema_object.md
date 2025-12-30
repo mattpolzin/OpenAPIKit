@@ -1,6 +1,6 @@
 
 ## Schema Object
-In OpenAPIKit, the Schema Object from the OpenAPI Specification is represented by the `JSONSchema` type. Indeed, OpenAPI 3.1.x fully supports the JSON Schema specification, though OpenAPIKit does not (yet) have 100% complete JSON Schema specification support.
+In OpenAPIKit, the Schema Object from the OpenAPI Specification is represented by the `JSONSchema` type. Indeed, OpenAPI 3.1.x+ fully supports the JSON Schema specification, though OpenAPIKit does not (yet) have 100% complete JSON Schema specification support.
 
 A `JSONSchema` can be:
 1. Any of the fundamental types (`boolean`, `number`, `integer`, `string`, and in OpenAPI v3.1 `null`).

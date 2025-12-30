@@ -60,7 +60,7 @@ public protocol JSONSchemaContext: Sendable {
     /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
     /// or `oneOf`) as a way to reduce redundancy.
     ///
-    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.1.1.html#discriminator-object).
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.2.0.html#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.

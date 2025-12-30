@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Response Object"
     ///
-    /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.1.1.html#response-object).
+    /// See [OpenAPI Response Object](https://spec.openapis.org/oas/v3.2.0.html#response-object).
     public struct Response: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var summary: String?
         public var description: String?
