@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Security Scheme Object"
     ///
-    /// See [OpenAPI Security Scheme Object](https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object).
+    /// See [OpenAPI Security Scheme Object](https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object).
     public struct SecurityScheme: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var type: SecurityType
         public var description: String?

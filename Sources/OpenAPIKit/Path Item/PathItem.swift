@@ -12,7 +12,7 @@ extension OpenAPI {
     /// Object also includes reference support which OpenAPIKit implements via
     /// the PathItem.Map type)
     /// 
-    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.1.1.html#path-item-object).
+    /// See [OpenAPI Path Item Object](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
     ///
     /// In addition to parameters that apply to all endpoints under the current path,
     /// this type offers access to each possible endpoint operation under properties

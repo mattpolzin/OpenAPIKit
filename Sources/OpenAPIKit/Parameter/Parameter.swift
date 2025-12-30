@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Parameter Object"
     /// 
-    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    /// See [OpenAPI Parameter Object](https://spec.openapis.org/oas/v3.2.0.html#parameter-object).
     public struct Parameter: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public var name: String
 
@@ -463,7 +463,7 @@ extension OpenAPI.Parameter {
     /// containing exactly the things that differentiate
     /// one parameter from another, per the specification.
     ///
-    /// See [Parameter Object](https://spec.openapis.org/oas/v3.1.1.html#parameter-object).
+    /// See [Parameter Object](https://spec.openapis.org/oas/v3.2.0.html#parameter-object).
     internal struct ParameterIdentity: Hashable {
         let name: String
         let location: Context.Location

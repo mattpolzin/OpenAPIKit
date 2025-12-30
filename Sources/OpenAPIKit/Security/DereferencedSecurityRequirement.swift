@@ -63,7 +63,7 @@ public struct DereferencedSecurityRequirement: Equatable {
         /// not require a specified scope. For other security scheme types,
         /// the array MUST be empty.
         ///
-        /// See  [Security Requirement Object](https://spec.openapis.org/oas/v3.1.1.html#security-requirement-object) for more.
+        /// See  [Security Requirement Object](https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object) for more.
         public let requiredScopes: [String]
     }
 }

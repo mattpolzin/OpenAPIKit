@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Components Object".
     ///
-    /// See [OpenAPI Components Object](https://spec.openapis.org/oas/v3.1.1.html#components-object).
+    /// See [OpenAPI Components Object](https://spec.openapis.org/oas/v3.2.0.html#components-object).
     /// 
     /// This is a place to put reusable components to
     /// be referenced from other parts of the spec.

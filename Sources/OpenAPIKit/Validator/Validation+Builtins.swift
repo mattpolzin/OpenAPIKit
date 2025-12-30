@@ -14,7 +14,7 @@ extension Validation {
     /// `PathItem.Map`.
     ///
     /// The OpenAPI Specification does not require that the document
-    /// contain any paths for [security reasons](https://spec.openapis.org/oas/v3.1.1.html#security-filtering)
+    /// contain any paths for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
     /// or even because it only contains webhooks, but authors may still
     /// want to protect against an empty `PathItem.Map` in some cases.
     ///
@@ -30,7 +30,7 @@ extension Validation {
     /// one operation.
     ///
     /// The OpenAPI Specification does not require that path items
-    /// contain any operations for [security reasons](https://spec.openapis.org/oas/v3.1.1.html#security-filtering)
+    /// contain any operations for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// a `PathItem` with no operations in error.
     ///
@@ -183,7 +183,7 @@ extension Validation {
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
     /// The OpenAPI Specification requires that tag names on the Document
-    /// [are unique](https://spec.openapis.org/oas/v3.1.1.html#openapi-object).
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#openapi-object).
     ///
     /// - Important: This is included in validation by default.
     public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
@@ -203,7 +203,7 @@ extension Validation {
     /// A Path Item Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.1.1.html#path-item-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -221,7 +221,7 @@ extension Validation {
     /// An Operation's Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.1.1.html#operation-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -235,7 +235,7 @@ extension Validation {
 
     /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
     ///
-    /// The OpenAPI Specification requires that Operation Ids [are unique](https://spec.openapis.org/oas/v3.1.1.html#operation-object).
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
     ///
     /// - Important: This validation does not assert that all path references are valid and found in the
     ///     components for the document. It skips over missing path items.

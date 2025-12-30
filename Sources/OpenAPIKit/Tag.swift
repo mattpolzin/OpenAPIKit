@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Tag Object"
     ///
-    /// See [OpenAPI Tag Object](https://spec.openapis.org/oas/v3.1.1.html#tag-object).
+    /// See [OpenAPI Tag Object](https://spec.openapis.org/oas/v3.2.0.html#tag-object).
     public struct Tag: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         public let name: String
         /// Summary of the tag. Available for OAS 3.2.0 and greater.

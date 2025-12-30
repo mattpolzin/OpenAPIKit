@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"
     ///
-    /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.1.1.html#info-object).
+    /// See [OpenAPI Info Object](https://spec.openapis.org/oas/v3.2.0.html#info-object).
     public struct Info: Equatable, CodableVendorExtendable, Sendable {
         public var title: String
         public var summary: String?
@@ -50,7 +50,7 @@ extension OpenAPI.Document {
 
         /// OpenAPI Spec "Contact Object"
         ///
-        /// See [OpenAPI Contact Object](https://spec.openapis.org/oas/v3.1.1.html#contact-object).
+        /// See [OpenAPI Contact Object](https://spec.openapis.org/oas/v3.2.0.html#contact-object).
         public struct Contact: Equatable, CodableVendorExtendable, Sendable {
             public let name: String?
             public let url: URL?
@@ -78,7 +78,7 @@ extension OpenAPI.Document {
 
         /// OpenAPI Spec "License Object"
         ///
-        /// See [OpenAPI License Object](https://spec.openapis.org/oas/v3.1.1.html#license-object).
+        /// See [OpenAPI License Object](https://spec.openapis.org/oas/v3.2.0.html#license-object).
         public struct License: Equatable, CodableVendorExtendable, Sendable {
             public let name: String
             public let identifier: Identifier?
