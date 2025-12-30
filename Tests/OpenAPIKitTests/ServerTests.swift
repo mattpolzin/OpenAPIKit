@@ -48,6 +48,21 @@ class ServerTests: XCTestCase {
         XCTAssertEqual(s2.urlTemplate, URLTemplate(rawValue: "https://hello.com")!)
         XCTAssertEqual(s2.description, "hello world")
         XCTAssertEqual(s2.variables, ["hello": variable])
+        XCTAssertEqual(s2.conditionalWarnings.count, 0)
+
+        let s3 = Server(
+            url: URL(string: "https://hello.com")!,
+            name: "name",
+            description: "hello world",
+            variables: [
+                "hello": variable
+            ]
+        )
+
+        XCTAssertEqual(s3.urlTemplate, URLTemplate(rawValue: "https://hello.com")!)
+        XCTAssertEqual(s3.description, "hello world")
+        XCTAssertEqual(s3.variables, ["hello": variable])
+        XCTAssertEqual(s3.conditionalWarnings.count, 1)
     }
 }
 
@@ -157,22 +172,25 @@ extension ServerTests {
 
         let serverDecoded = try orderUnstableDecode(Server.self, from: serverData)
 
+        let expectedServer = Server(
+            url: URL(string: "https://hello.com")!,
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["hello"],
+                    default: "hello",
+                    description: "hello again",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
+        )
+
         XCTAssertEqual(
             serverDecoded,
-            Server(
-                url: URL(string: "https://hello.com")!,
-                description: "hello world",
-                variables: [
-                    "hello": .init(
-                        enum: ["hello"],
-                        default: "hello",
-                        description: "hello again",
-                        vendorExtensions: [ "x-otherThing": 1234 ]
-                    )
-                ],
-                vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
-            )
+            expectedServer
         )
+        XCTAssertEqual(expectedServer.conditionalWarnings.count, 0)
     }
 
     func test_maximalServer_encode() throws {
@@ -196,6 +214,95 @@ extension ServerTests {
             """
             {
               "description" : "hello world",
+              "url" : "https:\\/\\/hello.com",
+              "variables" : {
+                "hello" : {
+                  "default" : "hello",
+                  "description" : "hello again",
+                  "enum" : [
+                    "hello"
+                  ],
+                  "x-otherThing" : 1234
+                }
+              },
+              "x-specialFeature" : [
+                "hello",
+                "world"
+              ]
+            }
+            """
+        )
+    }
+
+    func test_maximalServerPlusName_decode() throws {
+        let serverData =
+        """
+        {
+            "url": "https://hello.com",
+            "name": "name",
+            "description": "hello world",
+            "variables": {
+                "hello": {
+                    "enum": ["hello"],
+                    "default": "hello",
+                    "description": "hello again",
+                    "x-otherThing": 1234
+                }
+            },
+            "x-specialFeature": [
+                "hello",
+                "world"
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let serverDecoded = try orderUnstableDecode(Server.self, from: serverData)
+
+        let expectedServer = Server(
+            url: URL(string: "https://hello.com")!,
+            name: "name",
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["hello"],
+                    default: "hello",
+                    description: "hello again",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
+        )
+
+        XCTAssertEqual(
+            serverDecoded,
+            expectedServer
+        )
+        XCTAssertEqual(expectedServer.conditionalWarnings.count, 1)
+    }
+
+    func test_maximalServerPlusName_encode() throws {
+        let server = Server(
+            url: URL(string: "https://hello.com")!,
+            name: "name",
+            description: "hello world",
+            variables: [
+                "hello": .init(
+                    enum: ["hello"],
+                    default: "hello",
+                    description: "hello again",
+                    vendorExtensions: [ "x-otherThing": 1234 ]
+                )
+            ],
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
+        )
+        let encodedServer = try orderUnstableTestStringFromEncoding(of: server)
+
+        assertJSONEquivalent(
+            encodedServer,
+            """
+            {
+              "description" : "hello world",
+              "name" : "name",
               "url" : "https:\\/\\/hello.com",
               "variables" : {
                 "hello" : {
