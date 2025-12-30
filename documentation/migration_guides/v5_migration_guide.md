@@ -2,7 +2,7 @@
 For general information on the v5 release, see the release notes on GitHub. The
 rest of this guide will be formatted as a series of changes and what options you
 have to migrate code from v4 to v5. You can also refer back to the release notes
-for each of the v4 pre-releases for the most thorough look at what changed.
+for each of the v5 pre-releases for the most thorough look at what changed.
 
 This guide will not spend time on strictly additive features of version 5. See
 the release notes, README, and documentation for information on new features.
