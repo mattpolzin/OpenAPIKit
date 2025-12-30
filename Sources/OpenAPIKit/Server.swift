@@ -49,7 +49,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
-                nonNilVersionWarning(fieldName: "name", value: name, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
 
@@ -70,7 +70,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
-                nonNilVersionWarning(fieldName: "name", value: name, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
@@ -82,15 +82,6 @@ extension OpenAPI.Server: Equatable {
         && lhs.description == rhs.description
         && lhs.variables == rhs.variables
         && lhs.vendorExtensions == rhs.vendorExtensions
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Server \(fieldName) field"
-        )
     }
 }
 
@@ -171,7 +162,7 @@ extension OpenAPI.Server: Decodable {
         vendorExtensions = try Self.extensions(from: decoder)
 
         conditionalWarnings = [
-            nonNilVersionWarning(fieldName: "name", value: name, minimumVersion: .v3_2_0)
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }

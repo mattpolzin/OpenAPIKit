@@ -111,9 +111,9 @@ extension OpenAPI {
 
             self.conditionalWarnings = [
                 // If query is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "PathItem", fieldName: "query", value: query, minimumVersion: .v3_2_0),
                 // If there are additionalOperations defiend, the document must be OAS version 3.2.0 or greater
-                nonEmptyVersionWarning(fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonEmptyVersionWarning(objectName: "PathItem", fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
 
@@ -182,24 +182,6 @@ extension OpenAPI.PathItem: Equatable {
         && lhs.additionalOperations == rhs.additionalOperations
         && lhs.vendorExtensions == rhs.vendorExtensions
     }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The PathItem \(fieldName) field"
-        )
-    }
-}
-
-fileprivate func nonEmptyVersionWarning<Key,  Value>(fieldName: String, value: OrderedDictionary<Key, Value>, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    if value.isEmpty { return nil }
-
-    return OpenAPI.Document.ConditionalWarnings.version(
-        lessThan: minimumVersion,
-        doesNotSupport: "The PathItem \(fieldName) map"
-    )
 }
 
 extension OpenAPI.PathItem {
@@ -379,9 +361,9 @@ extension OpenAPI.PathItem: Decodable {
 
             self.conditionalWarnings = [
                 // If query is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "query", value: query, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "PathItem", fieldName: "query", value: query, minimumVersion: .v3_2_0),
                 // If there are additionalOperations defiend, the document must be OAS version 3.2.0 or greater
-                nonEmptyVersionWarning(fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonEmptyVersionWarning(objectName: "PathItem", fieldName: "additionalOperations", value: additionalOperations, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         } catch let error as DecodingError {
             if let underlyingError = error.underlyingError as? KeyDecodingError {

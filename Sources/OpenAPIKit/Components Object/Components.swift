@@ -98,7 +98,7 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.conditionalWarnings = [
-                nonEmptyVersionWarning(fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonEmptyVersionWarning(objectName: "Components", fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
 
@@ -159,15 +159,6 @@ extension OpenAPI.Components: Equatable {
         && lhs.pathItems == rhs.pathItems
         && lhs.vendorExtensions == rhs.vendorExtensions
     }
-}
-
-fileprivate func nonEmptyVersionWarning(fieldName: String, value: any Collection, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    if value.isEmpty { return nil }
-
-    return OpenAPI.Document.ConditionalWarnings.version(
-        lessThan: minimumVersion,
-        doesNotSupport: "The Components \(fieldName) map"
-    )
 }
 
 extension OpenAPI {
@@ -328,7 +319,7 @@ extension OpenAPI.Components: Decodable {
             vendorExtensions = try Self.extensions(from: decoder)
 
             conditionalWarnings = [
-                nonEmptyVersionWarning(fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonEmptyVersionWarning(objectName: "Components", fieldName: "mediaTypes", value: mediaTypes, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         } catch let error as EitherDecodeNoTypesMatchedError {
             if let underlyingError = OpenAPI.Error.Decoding.Document.eitherBranchToDigInto(error) {

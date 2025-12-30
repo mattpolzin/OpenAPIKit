@@ -35,7 +35,7 @@ extension OpenAPI {
             self.deviceAuthorization = deviceAuthorization
 
             self.conditionalWarnings = [
-                nonNilVersionWarning(fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "OAuthFlows", fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
@@ -48,15 +48,6 @@ extension OpenAPI.OAuthFlows: Equatable {
         && lhs.clientCredentials == rhs.clientCredentials
         && lhs.authorizationCode == rhs.authorizationCode
         && lhs.deviceAuthorization == rhs.deviceAuthorization
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The OAuthFlows \(fieldName) field"
-        )
     }
 }
 
@@ -120,7 +111,7 @@ extension OpenAPI.OAuthFlows: Decodable {
         deviceAuthorization = try container.decodeIfPresent(OpenAPI.OAuthFlows.DeviceAuthorization.self, forKey: .deviceAuthorization)
 
         self.conditionalWarnings = [
-            nonNilVersionWarning(fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "OAuthFlows", fieldName: "deviceAuthorization", value: deviceAuthorization, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }

@@ -57,5 +57,27 @@ internal extension OpenAPI.Document {
 
             return (DocumentVersionCondition(version: version, comparator: .lessThan), warning)
         }
+
+        static func nonNilVersionWarning<Subject>(objectName: String, fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+            value.map { _ in
+                OpenAPI.Document.ConditionalWarnings.version(
+                    lessThan: minimumVersion,
+                    doesNotSupport: "The \(objectName) \(fieldName) field"
+                )
+            }
+        }
+
+        static func nonEmptyVersionWarning<Key,  Value>(objectName: String, fieldName: String, value: OrderedDictionary<Key, Value>, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
+            if value.isEmpty { return nil }
+
+            return OpenAPI.Document.ConditionalWarnings.version(
+                lessThan: minimumVersion,
+                doesNotSupport: "The \(objectName) \(fieldName) map"
+            )
+        }
     }
+}
+
+internal enum OASWarnings {
+    typealias Doc = OpenAPI.Document.ConditionalWarnings
 }
