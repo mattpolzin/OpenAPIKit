@@ -41,7 +41,7 @@ extension OpenAPI {
             self.deprecated = deprecated
 
             self.conditionalWarnings = [
-                nonNilVersionWarning(fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "SecurityScheme", fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
                 notFalseVersionWarning(fieldName: "deprecated", value: deprecated, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
@@ -92,15 +92,6 @@ fileprivate func notFalseVersionWarning(fieldName: String, value: Bool, minimumV
         lessThan: minimumVersion,
         doesNotSupport: "The Security Scheme \(fieldName) field"
     )
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Security Scheme \(fieldName) field"
-        )
-    }
 }
 
 extension OpenAPI.SecurityScheme.SecurityType {
@@ -221,7 +212,7 @@ extension OpenAPI.SecurityScheme: Decodable {
         vendorExtensions = try Self.extensions(from: decoder)
 
         self.conditionalWarnings = [
-            nonNilVersionWarning(fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "SecurityScheme", fieldName: "oauth2MetadataUrl", value: type.oauth2MetadataUrl, minimumVersion: .v3_2_0),
             notFalseVersionWarning(fieldName: "deprecated", value: deprecated, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }

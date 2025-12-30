@@ -47,7 +47,7 @@ extension OpenAPI {
 
             self.conditionalWarnings = [
                 // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Response", fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
                 // If description is nil, the document must be OAS version 3.2.0 or greater
                 notOptionalVersionWarning(fieldName: "description", value: description, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
@@ -63,15 +63,6 @@ extension OpenAPI.Response: Equatable {
         && lhs.content == rhs.content
         && lhs.links == rhs.links
         && lhs.vendorExtensions == rhs.vendorExtensions
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Response \(fieldName) field"
-        )
     }
 }
 
@@ -246,7 +237,7 @@ extension OpenAPI.Response: Decodable {
 
             conditionalWarnings = [
                 // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Response", fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
                 // If description is nil, the document must be OAS version 3.2.0 or greater
                 notOptionalVersionWarning(fieldName: "description", value: description, minimumVersion: .v3_2_0)
             ].compactMap { $0 }

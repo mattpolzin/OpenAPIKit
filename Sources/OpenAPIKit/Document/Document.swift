@@ -177,18 +177,9 @@ extension OpenAPI {
 
             self.conditionalWarnings = [
                 // If $self is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Document", fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
             ].compactMap { $0 }
         }
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Document \(fieldName) field"
-        )
     }
 }
 
@@ -713,7 +704,7 @@ extension OpenAPI.Document: Decodable {
 
             self.conditionalWarnings = [
                 // If $self is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Document", fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
             ].compactMap { $0 }
 
         } catch let error as OpenAPI.Error.Decoding.Path {

@@ -26,7 +26,7 @@ extension OpenAPI {
             self.defaultMapping = defaultMapping
 
             self.conditionalWarnings = [
-                nonNilVersionWarning(fieldName: "defaultMapping", value: defaultMapping, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Discriminator", fieldName: "defaultMapping", value: defaultMapping, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
@@ -37,15 +37,6 @@ extension OpenAPI.Discriminator: Equatable {
         lhs.propertyName == rhs.propertyName
         && lhs.mapping == rhs.mapping
         && lhs.defaultMapping == rhs.defaultMapping
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Discriminator \(fieldName) field"
-        )
     }
 }
 
@@ -70,7 +61,7 @@ extension OpenAPI.Discriminator: Decodable {
         defaultMapping = try container.decodeIfPresent(String.self, forKey: .defaultMapping)
 
         conditionalWarnings = [
-            nonNilVersionWarning(fieldName: "defaultMapping", value: defaultMapping, minimumVersion: .v3_2_0)
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Discriminator", fieldName: "defaultMapping", value: defaultMapping, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }

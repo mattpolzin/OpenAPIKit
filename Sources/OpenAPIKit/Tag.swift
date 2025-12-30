@@ -58,11 +58,11 @@ extension OpenAPI {
 
             self.conditionalWarnings = [
                 // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
                 // If parent is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
                 // If kind is non-nil, the document must be OAS version 3.2.0 or greater
-                nonNilVersionWarning(fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
             ].compactMap { $0 }
         }
     }
@@ -96,15 +96,6 @@ extension OpenAPI.Tag.Kind {
     public static let badge: OpenAPI.Tag.Kind = "badge"
     /// See https://spec.openapis.org/registry/tag-kind/nav.html
     public static let nav: OpenAPI.Tag.Kind = "nav"
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Tag \(fieldName) field"
-        )
-    }
 }
 
 extension OpenAPI.Tag: Equatable {
@@ -199,11 +190,11 @@ extension OpenAPI.Tag: Decodable {
 
         conditionalWarnings = [
             // If summary is non-nil, the document must be OAS version 3.2.0 or greater
-            nonNilVersionWarning(fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "summary", value: summary, minimumVersion: .v3_2_0),
             // If parent is non-nil, the document must be OAS version 3.2.0 or greater
-            nonNilVersionWarning(fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "parent", value: parent, minimumVersion: .v3_2_0),
             // If kind is non-nil, the document must be OAS version 3.2.0 or greater
-            nonNilVersionWarning(fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Tag", fieldName: "kind", value: kind, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
     }
 }

@@ -143,18 +143,9 @@ extension OpenAPI.Example {
 extension OpenAPI.Example.Value {
     fileprivate var conditionalWarnings: [(any Condition, OpenAPI.Warning)] {
         [
-            nonNilVersionWarning(fieldName: "dataValue", value: dataValue, minimumVersion: .v3_2_0),
-            nonNilVersionWarning(fieldName: "serializedValue", value: serializedValue, minimumVersion: .v3_2_0)
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Example", fieldName: "dataValue", value: dataValue, minimumVersion: .v3_2_0),
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Example", fieldName: "serializedValue", value: serializedValue, minimumVersion: .v3_2_0)
         ].compactMap { $0 }
-    }
-}
-
-fileprivate func nonNilVersionWarning<Subject>(fieldName: String, value: Subject?, minimumVersion: OpenAPI.Document.Version) -> (any Condition, OpenAPI.Warning)? {
-    value.map { _ in
-        OpenAPI.Document.ConditionalWarnings.version(
-            lessThan: minimumVersion,
-            doesNotSupport: "The Example Object \(fieldName) field"
-        )
     }
 }
 
