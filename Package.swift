@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -74,5 +74,5 @@ let package = Package(
             name: "OpenAPIKitCompatTests",
             dependencies: ["OpenAPIKitCompat"])
     ],
-    swiftLanguageVersions: [ .v5 ]
+    swiftLanguageModes: [ .v5, .v6 ]
 )
