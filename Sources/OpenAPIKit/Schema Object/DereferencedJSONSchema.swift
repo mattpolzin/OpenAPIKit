@@ -153,6 +153,9 @@ public enum DereferencedJSONSchema: Equatable, JSONSchemaContext, Sendable {
     public var deprecated: Bool { jsonSchema.deprecated }
 
     // See `JSONSchemaContext`
+    public var xml: OpenAPI.XML? { jsonSchema.xml }
+
+    // See `JSONSchemaContext`
     public var vendorExtensions: [String : AnyCodable] {
         // NOTE: this doesnot just do `jsonSchema.vendorExtensions` because of some wild
         //       Swift bug that I don't have time to think through at the moment.
@@ -485,10 +488,10 @@ extension JSONSchema: LocallyDereferenceable {
             // TODO: consider which other core context properties to override here as with description ^
 
             var extensions = dereferenced.vendorExtensions
-            if let name {
+            if let name = name ?? reference.name {
                 extensions[OpenAPI.Components.componentNameExtension] = .init(name)
             }
-            dereferenced = dereferenced.with(vendorExtensions: vendorExtensions)
+            dereferenced = dereferenced.with(vendorExtensions: extensions)
 
             return dereferenced
         case .boolean(let context):

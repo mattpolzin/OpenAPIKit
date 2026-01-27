@@ -10,7 +10,7 @@ import OpenAPIKitCore
 extension OpenAPI {
     /// OpenAPI Spec "Request Body Object"
     ///
-    /// See [OpenAPI Request Body Object](https://spec.openapis.org/oas/v3.1.1.html#request-body-object).
+    /// See [OpenAPI Request Body Object](https://spec.openapis.org/oas/v3.2.0.html#request-body-object).
     public struct Request: Equatable, CodableVendorExtendable, Sendable {
         public var description: String?
         public var content: Content.Map

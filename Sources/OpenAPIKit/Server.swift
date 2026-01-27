@@ -11,13 +11,15 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"
     ///
-    /// See [OpenAPI Server Object](https://spec.openapis.org/oas/v3.1.1.html#server-object).
+    /// See [OpenAPI Server Object](https://spec.openapis.org/oas/v3.2.0.html#server-object).
     ///
-    public struct Server: Equatable, CodableVendorExtendable, Sendable {
+    public struct Server: HasConditionalWarnings, CodableVendorExtendable, Sendable {
         /// OpenAPI Server URLs can have variable placeholders in them.
         /// The `urlTemplate` can be asked for a well-formed Foundation
         /// `URL` if all variables in it have been replaced by constant values.
         public let urlTemplate: URLTemplate
+        /// An optional unique string to refer to the host designated by the URL.
+        public let name: String?
         public let description: String?
         /// A map from the names of variables found in the `urlTemplate` to
         /// descriptions, allowed values, and defaults.
@@ -30,17 +32,25 @@ extension OpenAPI {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
+
         /// Create an OpenAPI Server Object.
         public init(
             url: URL,
+            name: String? = nil,
             description: String? = nil,
             variables: OrderedDictionary<String, Variable> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.urlTemplate = URLTemplate(url: url)
+            self.name = name
             self.description = description
             self.variables = variables
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
 
         /// Create an OpenAPI Server Object with a URL containing
@@ -48,22 +58,37 @@ extension OpenAPI {
         /// which the API is invoked,
         public init(
             urlTemplate: URLTemplate,
+            name: String? = nil,
             description: String? = nil,
             variables: OrderedDictionary<String, Variable> = [:],
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.urlTemplate = urlTemplate
+            self.name = name
             self.description = description
             self.variables = variables
             self.vendorExtensions = vendorExtensions
+
+            self.conditionalWarnings = [
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
+            ].compactMap { $0 }
         }
+    }
+}
+
+extension OpenAPI.Server: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.urlTemplate == rhs.urlTemplate
+        && lhs.description == rhs.description
+        && lhs.variables == rhs.variables
+        && lhs.vendorExtensions == rhs.vendorExtensions
     }
 }
 
 extension OpenAPI.Server {
     /// OpenAPI Spec "Server Variable Object"
     ///
-    /// See [OpenAPI Server Variable Object](https://spec.openapis.org/oas/v3.1.1.html#server-variable-object).
+    /// See [OpenAPI Server Variable Object](https://spec.openapis.org/oas/v3.2.0.html#server-variable-object).
     ///
     public struct Variable: Equatable, CodableVendorExtendable, Sendable {
         public var `enum`: [String]?
@@ -112,6 +137,7 @@ extension OpenAPI.Server: Encodable {
 
         try container.encode(urlTemplate, forKey: .url)
 
+        try container.encodeIfPresent(name, forKey: .name)
         try container.encodeIfPresent(description, forKey: .description)
 
         if variables.count > 0 {
@@ -129,16 +155,22 @@ extension OpenAPI.Server: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         urlTemplate = try container.decode(URLTemplate.self, forKey: .url)
+        name = try container.decodeIfPresent(String.self, forKey: .name)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         variables = try container.decodeIfPresent(OrderedDictionary<String, Variable>.self, forKey: .variables) ?? [:]
 
         vendorExtensions = try Self.extensions(from: decoder)
+
+        conditionalWarnings = [
+            OASWarnings.Doc.nonNilVersionWarning(objectName: "Server", fieldName: "name", value: name, minimumVersion: .v3_2_0)
+        ].compactMap { $0 }
     }
 }
 
 extension OpenAPI.Server {
     internal enum CodingKeys: ExtendableCodingKey {
         case url
+        case name
         case description
         case variables
 
@@ -147,6 +179,7 @@ extension OpenAPI.Server {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .url,
+                .name,
                 .description,
                 .variables
             ]
@@ -160,6 +193,8 @@ extension OpenAPI.Server {
             switch stringValue {
             case "url":
                 self = .url
+            case "name":
+                self = .name
             case "description":
                 self = .description
             case "variables":
@@ -173,6 +208,8 @@ extension OpenAPI.Server {
             switch self {
             case .url:
                 return "url"
+            case .name:
+                return "name"
             case .description:
                 return "description"
             case .variables:

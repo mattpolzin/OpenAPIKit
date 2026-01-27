@@ -10,65 +10,40 @@ import OpenAPIKit
 
 final class ParameterTests: XCTestCase {
     func test_initialize() {
-        let t1 = OpenAPI.Parameter(
+        let t1 = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie(required: true),
-            schemaOrContent: .init([.json: OpenAPI.Content(schema: .string)]),
+            required: true,
+            schemaOrContent: .init([.json: .content(OpenAPI.Content(schema: .string))]),
             description: "hi",
             deprecated: true
         )
         XCTAssertTrue(t1.required)
 
-        let t2 = OpenAPI.Parameter(
+        let t2 = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie(required: true),
-            schemaOrContent: .content([.json: OpenAPI.Content(schema: .string)]),
+            required: true,
+            schemaOrContent: .content([.json: .content(OpenAPI.Content(schema: .string))]),
             description: "hi",
             deprecated: true
         )
         XCTAssertTrue(t2.deprecated)
         XCTAssertEqual(t1, t2)
 
-        let t4 = OpenAPI.Parameter(
+        let t6 = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie(required: false),
-            schema: .init(.string, style: .default(for: .cookie)),
-            description: "hi",
-            deprecated: false
-        )
-        XCTAssertFalse(t4.required)
-
-        let t5 = OpenAPI.Parameter(
-            name: "hello",
-            context: .cookie,
-            schema: .string
-        )
-        XCTAssertFalse(t5.deprecated)
-
-        let t6 = OpenAPI.Parameter(
-            name: "hello",
-            context: .cookie,
             schemaOrContent: .schema(.init(.string, style: .default(for: .cookie)))
         )
-        XCTAssertEqual(t5, t6)
+        XCTAssertFalse(t6.required)
 
-        let _ = OpenAPI.Parameter(
+        let _ = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie,
             schemaReference: .component( named: "hello")
-        )
-
-        let _ = OpenAPI.Parameter(
-            name: "hello",
-            context: .cookie,
-            content: [.json: OpenAPI.Content(schema: .string)]
         )
     }
 
     func test_schemaAccess() {
-        let t1 = OpenAPI.Parameter(
+        let t1 = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie,
             schemaOrContent: .schema(.init(.string, style: .default(for: .cookie)))
         )
 
@@ -79,9 +54,8 @@ final class ParameterTests: XCTestCase {
         XCTAssertEqual(t1.schemaOrContent.schemaContextValue, .init(.string, style: .default(for: .cookie)))
         XCTAssertEqual(t1.schemaOrContent.schemaContextValue?.schema.schemaValue, t1.schemaOrContent.schemaValue)
 
-        let t2 = OpenAPI.Parameter(
+        let t2 = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie,
             schemaReference: .component( named: "hello")
         )
 
@@ -91,9 +65,8 @@ final class ParameterTests: XCTestCase {
         XCTAssertEqual(t2.schemaOrContent.schemaReference, .component( named: "hello"))
         XCTAssertEqual(t2.schemaOrContent.schemaContextValue?.schema.reference, t2.schemaOrContent.schemaReference)
 
-        let t3 = OpenAPI.Parameter(
+        let t3 = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
             content: [:]
         )
 
@@ -105,10 +78,10 @@ final class ParameterTests: XCTestCase {
 
     func test_parameterArray() {
         let t1: OpenAPI.Parameter.Array = [
-            .parameter(OpenAPI.Parameter(name: "hello", context: .cookie, schema: .string)),
-            .parameter(name: "hello", context: .cookie, schema: .string),
-            .parameter(OpenAPI.Parameter(name: "hello", context: .cookie, content: [.json: OpenAPI.Content(schema: .string)])),
-            .parameter(name: "hello", context: .cookie, content: [.json: OpenAPI.Content(schema: .string)]),
+            .parameter(OpenAPI.Parameter.cookie(name: "hello", schema: .string)),
+            .parameter(name: "hello", context: .cookie(schema: .string)),
+            .parameter(OpenAPI.Parameter.cookie(name: "hello", content: [.json: .content(OpenAPI.Content(schema: .string))])),
+            .parameter(name: "hello", context: .cookie(content: [.json: .content(OpenAPI.Content(schema: .string))])),
             .reference(.component( named: "hello"))
         ]
 
@@ -119,18 +92,22 @@ final class ParameterTests: XCTestCase {
         XCTAssertNotEqual(t1[4], t1[2])
         XCTAssertNotEqual(t1[4], t1[3])
 
-        XCTAssertEqual(t1[0].parameterValue, OpenAPI.Parameter(name: "hello", context: .cookie, schema: .string))
+        XCTAssertEqual(t1[0].parameterValue, OpenAPI.Parameter.cookie(name: "hello", schema: .string))
         XCTAssertEqual(t1[4].reference, .component( named: "hello"))
+    }
+
+    func test_querystringLocation() {
+        let t1 = OpenAPI.Parameter.querystring(name: "string", content: [:])
+        XCTAssertEqual(t1.conditionalWarnings.count, 1)
     }
 }
 
 // MARK: - Codable Tests
 extension ParameterTests {
     func test_minimalContent_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
-            content: [ .json: .init(schema: .string)]
+            content: [ .json: .content(.init(schema: .string))]
         )
 
         let encodedParameter = try orderUnstableTestStringFromEncoding(of: parameter)
@@ -175,19 +152,17 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.path(
                 name: "hello",
-                context: .path,
-                content: [ .json: .init(schema: .string)]
+                content: [ .json: .content(.init(schema: .string))]
             )
         )
-        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .init(schema: .string) ])
+        XCTAssertEqual(parameter.schemaOrContent.contentValue, [ .json: .content(.init(schema: .string) )])
     }
 
     func test_minimalSchema_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
             schema: .string
         )
 
@@ -225,18 +200,16 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.path(
                 name: "hello",
-                context: .path,
                 schema: .string
             )
         )
     }
 
     func test_queryParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.query(
             name: "hello",
-            context: .query,
             schema: .string
         )
 
@@ -273,9 +246,8 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .query)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.query(
                 name: "hello",
-                context: .query,
                 schema: .string
             )
         )
@@ -287,9 +259,9 @@ extension ParameterTests {
     }
 
     func test_queryParamAllowEmpty_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.query(
             name: "hello",
-            context: .query(allowEmptyValue: true),
+            allowEmptyValue: true,
             schema: .string
         )
 
@@ -327,18 +299,18 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.query(
                 name: "hello",
-                context: .query(allowEmptyValue: true),
+                allowEmptyValue: true,
                 schema: .string
             )
         )
     }
 
     func test_requiredQueryParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.query(
             name: "hello",
-            context: .query(required: true),
+            required: true,
             schema: .string
         )
 
@@ -376,18 +348,17 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.query(
                 name: "hello",
-                context: .query(required: true),
+                required: true,
                 schema: .string
             )
         )
     }
 
     func test_headerParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.header(
             name: "hello",
-            context: .header,
             schema: .string
         )
 
@@ -424,18 +395,17 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .header)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.header(
                 name: "hello",
-                context: .header,
                 schema: .string
             )
         )
     }
 
     func test_requiredHeaderParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.header(
             name: "hello",
-            context: .header(required: true),
+            required: true,
             schema: .string
         )
 
@@ -473,18 +443,17 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.header(
                 name: "hello",
-                context: .header(required: true),
+                required: true,
                 schema: .string
             )
         )
     }
 
     func test_cookieParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie,
             schema: .string
         )
 
@@ -521,18 +490,17 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .cookie)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.cookie(
                 name: "hello",
-                context: .cookie,
                 schema: .string
             )
         )
     }
 
     func test_requiredCookieParam_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.cookie(
             name: "hello",
-            context: .cookie(required: true),
+            required: true,
             schema: .string
         )
 
@@ -570,18 +538,17 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.cookie(
                 name: "hello",
-                context: .cookie(required: true),
+                required: true,
                 schema: .string
             )
         )
     }
 
     func test_deprecated_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
             schema: .string,
             deprecated: true
         )
@@ -622,9 +589,8 @@ extension ParameterTests {
 
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.path(
                 name: "hello",
-                context: .path,
                 schema: .string,
                 deprecated: true
             )
@@ -632,9 +598,8 @@ extension ParameterTests {
     }
 
     func test_description_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
             schema: .string,
             description: "world"
         )
@@ -676,9 +641,8 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .path)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.path(
                 name: "hello",
-                context: .path,
                 schema: .string,
                 description: "world"
             )
@@ -686,13 +650,15 @@ extension ParameterTests {
     }
 
     func test_example_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.header(
             name: "hello",
-            context: .header(required: true),
-            schema: .init(
-                .string,
-                style: .default(for: .header),
-                example: "hello string"
+            required: true,
+            schemaOrContent: .schema(
+                .init(
+                    .string,
+                    style: .default(for: .header),
+                    example: "hello string"
+                )
             )
         )
 
@@ -733,29 +699,33 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .header)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.header(
                 name: "hello",
-                context: .header(required: true),
-                schema: .init(
-                    .string,
-                    style: .default(for: .header),
-                    example: "hello string"
+                required: true,
+                schemaOrContent: .schema(
+                    .init(
+                        .string,
+                        style: .default(for: .header),
+                        example: "hello string"
+                    )
                 )
             )
         )
     }
 
     func test_examples_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.header(
             name: "hello",
-            context: .header(required: true),
-            schema: .init(
-                .string,
-                style: .default(for: .header),
-                allowReserved: true,
-                examples: [
-                    "test": .example(value: .init(URL(string: "http://website.com")!))
-                ]
+            required: true,
+            schemaOrContent: .schema(
+                .init(
+                    .string,
+                    style: .default(for: .header),
+                    allowReserved: true,
+                    examples: [
+                        "test": .example(externalValue: URL(string: "http://website.com")!)
+                    ]
+                )
             )
         )
 
@@ -806,25 +776,26 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .header)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.header(
                 name: "hello",
-                context: .header(required: true),
-                schema: .init(
-                    .string,
-                    style: .default(for: .header),
-                    allowReserved: true,
-                    examples: [
-                        "test": .example(value: .init(URL(string: "http://website.com")!))
-                    ]
+                required: true,
+                schemaOrContent: .schema(
+                    .init(
+                        .string,
+                        style: .default(for: .header),
+                        allowReserved: true,
+                        examples: [
+                            "test": .example(externalValue: URL(string: "http://website.com")!)
+                        ]
+                    )
                 )
             )
         )
     }
 
     func test_vendorExtension_encode() throws {
-        let parameter = OpenAPI.Parameter(
+        let parameter = OpenAPI.Parameter.path(
             name: "hello",
-            context: .path,
             schema: .string,
             description: "world",
             vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
@@ -875,9 +846,8 @@ extension ParameterTests {
         XCTAssertEqual(parameter.location, .path)
         XCTAssertEqual(
             parameter,
-            OpenAPI.Parameter(
+            OpenAPI.Parameter.path(
                 name: "hello",
-                context: .path,
                 schema: .string,
                 description: "world",
                 vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]

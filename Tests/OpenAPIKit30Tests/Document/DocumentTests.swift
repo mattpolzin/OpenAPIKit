@@ -202,6 +202,19 @@ final class DocumentTests: XCTestCase {
         XCTAssertEqual(t.allServers, [])
     }
 
+    func test_allServersExternalPathItem() {
+        let t = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .reference(.external(URL(string: "file://./hello_world.json")!))
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertEqual(t.allServers, [])
+    }
+
     func test_allServers_onlyRoot() {
         let s1 = OpenAPI.Server(url: URL(string: "https://website.com")!)
         let s2 = OpenAPI.Server(url: URL(string: "https://website2.com")!)

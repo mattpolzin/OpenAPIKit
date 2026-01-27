@@ -26,6 +26,7 @@ final class ContentTypeTests: XCTestCase {
             .csv,
             .doc,
             .docx,
+            .eventStream,
             .form,
             .gif,
             .html,
@@ -33,11 +34,14 @@ final class ContentTypeTests: XCTestCase {
             .jpg,
             .json,
             .jsonapi,
+            .jsonl,
+            .json_seq,
             .mov,
             .mp3,
             .mp4,
             .mpg,
             .multipartForm,
+            .multipartMixed,
             .otf,
             .pdf,
             .rar,
@@ -64,6 +68,17 @@ final class ContentTypeTests: XCTestCase {
         for type in types {
             XCTAssertEqual(type, Shared.ContentType(rawValue: type.rawValue))
         }
+    }
+
+    func test_x_yaml() {
+        // test that we support old x-yaml type but also prefer new official media type
+        let type1 = Shared.ContentType.init(rawValue: "application/yaml")
+        let type2 = Shared.ContentType.init(rawValue: "application/x-yaml")
+
+        XCTAssertEqual(type1?.rawValue, "application/yaml")
+        XCTAssertEqual(type1, .yaml)
+        XCTAssertEqual(type2?.rawValue, "application/yaml")
+        XCTAssertEqual(type2, .yaml)
     }
 
     func test_goodParam() {

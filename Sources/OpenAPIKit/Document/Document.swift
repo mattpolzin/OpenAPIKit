@@ -6,11 +6,12 @@
 //
 
 import OpenAPIKitCore
+import Foundation
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.1 document.
     /// 
-    /// See [OpenAPI Specification](https://spec.openapis.org/oas/v3.1.1.html).
+    /// See [OpenAPI Specification](https://spec.openapis.org/oas/v3.2.0.html).
     ///
     /// An OpenAPI Document can say a _lot_ about the API it describes.
     /// A read-through of the specification is highly recommended because
@@ -45,13 +46,16 @@ extension OpenAPI {
     ///
     /// See the documentation on `DereferencedDocument.resolved()` for more.
     ///
-    public struct Document: HasWarnings, CodableVendorExtendable, Sendable {
+    public struct Document: HasConditionalWarnings, HasWarnings, CodableVendorExtendable, Sendable {
         /// OpenAPI Spec "openapi" field.
         ///
         /// OpenAPIKit only explicitly supports versions that can be found in
         /// the `Version` enum. Other versions may or may not be decodable
         /// by OpenAPIKit to a certain extent.
         public var openAPIVersion: Version
+
+        /// OpenAPI Spec "$self" field.
+        public var selfURI: URL?
 
         /// Information about the API described by this OpenAPI Document.
         ///
@@ -100,7 +104,7 @@ extension OpenAPI {
         ///
         /// Closely related to the callbacks feature, this section describes requests initiated other than by an API call, for example by an out of band registration.
         /// The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses
-        /// See [OpenAPI Webhook Object](https://spec.openapis.org/oas/v3.1.1.html#fixed-fields)
+        /// See [OpenAPI Webhook Object](https://spec.openapis.org/oas/v3.2.0.html#fixed-fields)
         public var webhooks: OrderedDictionary<String, Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem>>
         
         /// A declaration of which security mechanisms can be used across the API.
@@ -142,9 +146,11 @@ extension OpenAPI {
         public var vendorExtensions: [String: AnyCodable]
 
         public let warnings: [Warning]
+        public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
-            openAPIVersion: Version = .v3_1_1,
+            openAPIVersion: Version = .v3_2_0,
+            selfURI: URL? = nil,
             info: Info,
             servers: [Server],
             paths: PathItem.Map,
@@ -156,6 +162,7 @@ extension OpenAPI {
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.openAPIVersion = openAPIVersion
+            self.selfURI = selfURI
             self.info = info
             self.servers = servers
             self.paths = paths
@@ -167,6 +174,11 @@ extension OpenAPI {
             self.vendorExtensions = vendorExtensions
 
             self.warnings = []
+
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Document", fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
         }
     }
 }
@@ -174,6 +186,7 @@ extension OpenAPI {
 extension OpenAPI.Document: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.openAPIVersion == rhs.openAPIVersion
+        && lhs.selfURI == rhs.selfURI
         && lhs.info == rhs.info
         && lhs.servers == rhs.servers
         && lhs.paths == rhs.paths
@@ -249,7 +262,7 @@ extension OpenAPI.Document {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://spec.openapis.org/oas/v3.1.1.html#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.2.0.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
       return (paths.values + webhooks.values)
@@ -433,7 +446,7 @@ extension OpenAPI {
     /// Multiple entries in this dictionary indicate all schemes named are
     /// required on the same request.
     ///
-    /// See [OpenAPI Security Requirement Object](https://spec.openapis.org/oas/v3.1.1.html#security-requirement-object).
+    /// See [OpenAPI Security Requirement Object](https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object).
     public typealias SecurityRequirement = [JSONReference<SecurityScheme>: [String]]
 }
 
@@ -449,43 +462,123 @@ extension OpenAPI.Document {
     /// specification releases a new patch version, OpenAPIKit will see a patch version release
     /// explicitly supports decoding documents of that new patch version before said version will
     /// succesfully decode as the `v3_1_x` case.
-    public enum Version: RawRepresentable, Equatable, Codable, Sendable {
+    public enum Version: RawRepresentable, Equatable, Comparable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
+        case v3_1_2
         case v3_1_x(x: Int)
 
-        public static let v3_1_2 : Self = .v3_1_x(x: 2)
+        case v3_2_0
+        case v3_2_x(x: Int)
 
-        public init?(rawValue: String) {
-            switch rawValue {
-            case "3.1.0": self = .v3_1_0
-            case "3.1.1": self = .v3_1_1
-            default:
-                let components = rawValue.split(separator: ".")
-                guard components.count == 3 else {
-                    return nil
-                }
-                guard components[0] == "3", components[1] == "1" else {
-                    return nil
-                }
-                guard let patchVersion = Int(components[2], radix: 10) else {
-                    return nil
-                }
-                // to support newer versions released in the future without a breaking
-                // change to the enumeration, bump the upper limit here to e.g. 2 or 3
-                // or 6:
-                guard patchVersion > 1 && patchVersion <= 2 else {
-                    return nil
-                }
-                self = .v3_1_x(x: patchVersion)
-            }
-        }
+      public init?(rawValue: String) {
+          switch rawValue {
+          case "3.1.0": self = .v3_1_0
+          case "3.1.1": self = .v3_1_1
+          case "3.1.2": self = .v3_1_2
+          case "3.2.0": self = .v3_2_0
+          default:
+              let components = rawValue.split(separator: ".")
+              guard components.count == 3 else {
+                  return nil
+              }
+              let minorVersion = components[1]
+              guard components[0] == "3", (minorVersion == "1" || minorVersion == "2") else {
+                  return nil
+              }
+              guard let patchVersion = Int(components[2], radix: 10) else {
+                  return nil
+              }
+              // to support newer versions released in the future without a breaking
+              // change to the enumeration, bump the upper limit here to e.g. 2 or 3
+              // or 6:
+              if minorVersion == "2" {
+                  guard  patchVersion > 0 && patchVersion <= 0 else {
+                      return nil
+                  }
+                  self = .v3_2_x(x: patchVersion)
+              } else {
+                  guard  patchVersion > 2 && patchVersion <= 2 else {
+                      return nil
+                  }
+                  self = .v3_1_x(x: patchVersion)
+              }
+          }
+      }
 
         public var rawValue: String {
             switch self {
             case .v3_1_0: return "3.1.0"
             case .v3_1_1: return "3.1.1"
+            case .v3_1_2: return "3.1.2"
             case .v3_1_x(x: let x): return "3.1.\(x)"
+
+            case .v3_2_0: return "3.2.0"
+            case .v3_2_x(x: let x): return "3.2.\(x)"
+            }
+        }
+
+        public static func < (lhs: Self, rhs: Self) -> Bool {
+            switch lhs {
+            case .v3_1_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: true
+                case .v3_1_2: true
+                case .v3_1_x(x: let x): 0 < x
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_1:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: true
+                case .v3_1_x(x: let y): 1 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_2:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: let y): 2 < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_1_x(x: let x):
+                switch rhs {
+                case .v3_1_0: x < 0
+                case .v3_1_1: x < 1
+                case .v3_1_2: x < 2
+                case .v3_1_x(x: let y): x < y
+                case .v3_2_0: true
+                case .v3_2_x(x: _): true
+                }
+
+            case .v3_2_0:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: false
+                case .v3_2_x(x: let y): 0 < y
+                }
+
+            case .v3_2_x(x: let x):
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: x < 0
+                case .v3_2_x(x: let y): x < y
+                }
             }
         }
     }
@@ -522,6 +615,9 @@ extension OpenAPI.Document: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(openAPIVersion, forKey: .openAPIVersion)
+
+        try container.encodeIfPresent(selfURI?.absoluteString, forKey: .selfURI)
+
         try container.encode(info, forKey: .info)
 
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
@@ -581,6 +677,11 @@ extension OpenAPI.Document: Decodable {
                 )
             }
 
+            let selfURIString: String? = try container.decodeIfPresent(String.self, forKey: .selfURI)
+            selfURI = try selfURIString.map { 
+              try decodeURIString($0, forKey: CodingKeys.selfURI, atPath: decoder.codingPath)
+            }
+
             info = try container.decode(OpenAPI.Document.Info.self, forKey: .info)
             servers = try container.decodeIfPresent([OpenAPI.Server].self, forKey: .servers) ?? []
 
@@ -601,6 +702,11 @@ extension OpenAPI.Document: Decodable {
 
             self.warnings = warnings
 
+            self.conditionalWarnings = [
+                // If $self is non-nil, the document must be OAS version 3.2.0 or greater
+                OASWarnings.Doc.nonNilVersionWarning(objectName: "Document", fieldName: "$self", value: selfURI, minimumVersion: .v3_2_0),
+            ].compactMap { $0 }
+
         } catch let error as OpenAPI.Error.Decoding.Path {
 
             throw OpenAPI.Error.Decoding.Document(error)
@@ -617,9 +723,34 @@ extension OpenAPI.Document: Decodable {
     }
 }
 
+fileprivate func decodeURIString(_ str: String, forKey key: CodingKey, atPath path: [CodingKey]) throws -> URL {
+    let uri: URL?
+    #if canImport(FoundationEssentials)
+    uri = URL(string: str, encodingInvalidCharacters: false)
+    #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+    if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
+        uri = URL(string: str, encodingInvalidCharacters: false)
+    } else {
+        uri = URL(string: str)
+    }
+    #else
+    uri = URL(string: str)
+    #endif
+    guard let uri else {
+        throw GenericError(
+            subjectName: key.stringValue,
+            details: "Failed to parse a valid URI from '\(str)'",
+            codingPath: path
+        )
+    }
+
+    return uri
+}
+
 extension OpenAPI.Document {
     internal enum CodingKeys: ExtendableCodingKey {
         case openAPIVersion
+        case selfURI
         case info
         case jsonSchemaDialect // TODO: implement parsing (https://github.com/mattpolzin/OpenAPIKit/issues/202)
         case servers
@@ -634,6 +765,7 @@ extension OpenAPI.Document {
         static var allBuiltinKeys: [CodingKeys] {
             return [
                 .openAPIVersion,
+                .selfURI,
                 .info,
                 .jsonSchemaDialect,
                 .servers,
@@ -654,6 +786,8 @@ extension OpenAPI.Document {
             switch stringValue {
             case "openapi":
                 self = .openAPIVersion
+            case "$self":
+                self = .selfURI
             case "info":
                 self = .info
             case "jsonSchemaDialect":
@@ -681,6 +815,8 @@ extension OpenAPI.Document {
             switch self {
             case .openAPIVersion:
                 return "openapi"
+            case .selfURI:
+                return "$self"
             case .info:
                 return "info"
             case .jsonSchemaDialect:
@@ -712,7 +848,11 @@ internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [Open
     var securityContainer = container.nestedUnkeyedContainer(forKey: key)
     for securityRequirement in security {
         let securityKeysAndValues = securityRequirement
-            .compactMap { keyValue in keyValue.key.name.map { ($0, keyValue.value) } }
+            .compactMap { (key, value) in 
+                guard case .internal = key else { return (key.absoluteString, value) }
+
+                return key.name.map { ($0, value) }
+            }
         let securityStringKeyedDict = Dictionary(
             securityKeysAndValues,
             uniquingKeysWith: { $1 }
@@ -721,35 +861,51 @@ internal func encodeSecurity<CodingKeys: CodingKey>(requirements security: [Open
     }
 }
 
-internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys, given optionalComponents: OpenAPI.Components?) throws -> [OpenAPI.SecurityRequirement]? {
+internal func decodeSecurityRequirements<CodingKeys: CodingKey>(from container: KeyedDecodingContainer<CodingKeys>, forKey codingKey: CodingKeys, given optionalComponents: OpenAPI.Components?) throws -> [OpenAPI.SecurityRequirement]? {
     // A real mess here because we've got an Array of non-string-keyed
     // Dictionaries.
-    if container.contains(key) {
-        var securityContainer = try container.nestedUnkeyedContainer(forKey: key)
+    if container.contains(codingKey) {
+        var securityContainer = try container.nestedUnkeyedContainer(forKey: codingKey)
 
         var securityRequirements = [OpenAPI.SecurityRequirement]()
         while !securityContainer.isAtEnd {
             let securityStringKeyedDict = try securityContainer.decode([String: [String]].self)
 
-            // convert to JSONReference keys
-            let securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
-                (
-                    key: JSONReference<OpenAPI.SecurityScheme>.component(named: key),
-                    value: value
-                )
-            }
+            // ultimately we end up with JSON references that may be internal
+            // or external. we determine if they are internal by looking them
+            // up in the components; if found, they are internal, otherwise,
+            // they are external.
+            let securityKeysAndValues: [(key: JSONReference<OpenAPI.SecurityScheme>, value: [String])]
 
             if let components = optionalComponents {
                 // check each key for validity against components.
                 let foundInComponents = { (ref: JSONReference<OpenAPI.SecurityScheme>) -> Bool in
                     return (try? components.contains(ref)) ?? false
                 }
-                guard securityKeysAndValues.map({ $0.key }).allSatisfy(foundInComponents) else {
+                var foundBadKeys = false
+                
+                securityKeysAndValues = securityStringKeyedDict.map { (key, value) in
+                    let componentKey = JSONReference<OpenAPI.SecurityScheme>.component(named: key)
+                    if foundInComponents(componentKey) {
+                        return (componentKey, value)
+                    }
+                    if let url = URL(string: key) {
+                        return (.external(url), value)
+                    }
+                    foundBadKeys = true
+                    return (componentKey, value)
+                }
+
+                if foundBadKeys {
                     throw GenericError(
-                        subjectName: key.stringValue,
-                        details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
-                        codingPath: container.codingPath + [key]
+                        subjectName: codingKey.stringValue,
+                        details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a security scheme found in another file",
+                        codingPath: container.codingPath + [codingKey]
                     )
+                }
+            } else {
+                securityKeysAndValues = securityStringKeyedDict.map { (key, value) in 
+                    (JSONReference<OpenAPI.SecurityScheme>.component(named: key), value)
                 }
             }
 
@@ -783,6 +939,10 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
     let securitySchemes = securityRequirements.flatMap { $0.keys }
 
     for securityScheme in securitySchemes {
+        if case .external = securityScheme {
+            // external references are allowed as of OAS 3.2.0
+            continue
+        }
         guard components[securityScheme] != nil else {
             let schemeKey = securityScheme.name ?? securityScheme.absoluteString
             let keys = [
@@ -796,7 +956,7 @@ internal func validate(securityRequirements: [OpenAPI.SecurityRequirement], at p
 
             throw GenericError(
                 subjectName: schemeKey,
-                details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary",
+                details: "Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a Security Scheme found in another file",
                 codingPath: keys
             )
         }

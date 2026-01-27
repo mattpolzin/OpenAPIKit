@@ -39,8 +39,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     parameters: [
                         .parameter(
                             name: "param",
-                            context: .path,
-                            schema: .string
+                            context: .path(schema: .string)
                         )
                     ],
                     get: .init(
@@ -51,12 +50,14 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             .reference(.component( named: "filter")),
                             .parameter(
                                 name: "Content-Type",
-                                context: .header(required: false),
-                                schema: .string(
-                                    allowedValues: [
-                                        .init(OpenAPI.ContentType.json.rawValue),
-                                        .init(OpenAPI.ContentType.txt.rawValue)
-                                    ]
+                                context: .header(
+                                    required: false,
+                                    schema: .string(
+                                        allowedValues: [
+                                            .init(OpenAPI.ContentType.json.rawValue),
+                                            .init(OpenAPI.ContentType.txt.rawValue)
+                                        ]
+                                    )
                                 )
                             )
                         ],
@@ -64,13 +65,16 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             200: .response(
                                 description: "Successful Retrieve",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "hello": .string
-                                            ]
-                                        ),
-                                        example: #"{ "hello": "world" }"#
+                                    .json: .content(
+                                        .init(
+                                            schema: 
+                                                .object(
+                                                    properties: [
+                                                        "hello": .string
+                                                    ]
+                                                ),
+                                            example: #"{ "hello": "world" }"#
+                                        )
                                     )
                                 ]
                             )
@@ -83,11 +87,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         parameters: [],
                         requestBody: .init(
                             content: [
-                                .json: .init(
-                                    schema: .object(
-                                        properties: [
-                                            "hello": .string
-                                        ]
+                                .json: .content(
+                                    .init(
+                                        schema: .object(
+                                            properties: [
+                                                "hello": .string
+                                            ]
+                                        )
                                     )
                                 )
                             ]
@@ -96,11 +102,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                             202: .response(
                                 description: "Successful Create",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "hello": .string
-                                            ]
+                                    .json: .content(
+                                        .init(
+                                            schema: .object(
+                                                properties: [
+                                                    "hello": .string
+                                                ]
+                                            )
                                         )
                                     )
                                 ]
@@ -109,23 +117,25 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 schemas: [
                     "string_schema": .string
                 ],
                 parameters: [
                     "filter": .init(
                         name: "filter",
-                        context: .query(required: false),
-                        schema: .init(
-                            .object(
-                                properties: [
-                                    "size": .integer,
-                                    "shape": .string(allowedValues: [ "round", "square" ])
-                                ]
-                            ),
-                            style: .deepObject,
-                            explode: true
+                        context: .query(
+                            required: false,
+                            schemaOrContent: .schema(.init(
+                                .object(
+                                    properties: [
+                                        "size": .integer,
+                                        "shape": .string(allowedValues: [ "round", "square" ])
+                                    ]
+                                ),
+                                style: .deepObject,
+                                explode: true
+                            ))
                         )
                     )
                 ]
@@ -168,12 +178,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 .reference(.component( named: "filter")),
                 .parameter(
                     name: "Content-Type",
-                    context: .header(required: false),
-                    schema: .string(
-                        allowedValues: [
-                            .init(OpenAPI.ContentType.json.rawValue),
-                            .init(OpenAPI.ContentType.txt.rawValue)
-                        ]
+                    context: .header(required: false,
+                        schema: .string(
+                            allowedValues: [
+                                .init(OpenAPI.ContentType.json.rawValue),
+                                .init(OpenAPI.ContentType.txt.rawValue)
+                            ]
+                        )
                     )
                 )
             ],
@@ -181,13 +192,15 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 200: .response(
                     description: "Successful Retrieve",
                     content: [
-                        .json: .init(
-                            schema: .object(
-                                properties: [
-                                    "hello": .string
-                                ]
-                            ),
-                            example: #"{ "hello": "world" }"#
+                        .json: .content(
+                            .init(
+                                schema: .object(
+                                    properties: [
+                                        "hello": .string
+                                    ]
+                                ),
+                                example: #"{ "hello": "world" }"#
+                            )
                         )
                     ]
                 )
@@ -201,11 +214,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [],
             requestBody: .init(
                 content: [
-                    .json: .init(
-                        schema: .object(
-                            properties: [
-                                "hello": .string
-                            ]
+                    .json: .content(
+                        .init(
+                            schema: .object(
+                                properties: [
+                                    "hello": .string
+                                ]
+                            )
                         )
                     )
                 ]
@@ -214,11 +229,13 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                 202: .response(
                     description: "Successful Create",
                     content: [
-                        .json: .init(
-                            schema: .object(
-                                properties: [
-                                    "hello": .string
-                                ]
+                        .json: .content(
+                            .init(
+                                schema: .object(
+                                    properties: [
+                                        "hello": .string
+                                    ]
+                                )
                             )
                         )
                     ]
@@ -232,23 +249,22 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
             parameters: [
                 .parameter(
                     name: "param",
-                    context: .path,
-                    schema: .string
+                    context: .path(schema: .string)
                 )
             ],
             get: testSHOW_endpoint,
             post: testCREATE_endpoint
         )
 
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             schemas: [
                 "string_schema": .string
             ],
             parameters: [
-                "filter": .init(
+                "filter": .query(
                     name: "filter",
-                    context: .query(required: false),
-                    schema: .init(
+                    required: false,
+                    schemaOrContent: .schema(.init(
                         .object(
                             properties: [
                                 "size": .integer,
@@ -258,7 +274,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                         style: .deepObject,
                         explode: true
                     )
-                )
+                ))
             ]
         )
 
@@ -340,7 +356,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
     }
 
     func test_securityRequirements() {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             securitySchemes: [
                 "basic_auth": .init(
                     type: .http(scheme: "basic", bearerFormat: nil),
@@ -356,7 +372,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
                                     "read:widgets" : "read those widgets"
                                 ]
                             )
-                        )
+                        ),
+                        metadataUrl: URL(string: "https://google.com")!
                     ),
                     description: "OAuth Flows"
                 )
@@ -364,8 +381,8 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let securityRequirements: [OpenAPI.SecurityRequirement] = [
             [
-                .component( named: "basic_auth"): [],
-                .component( named: "oauth_flow"): ["read:widgets"]
+                .component(named: "basic_auth"): [],
+                .component(named: "oauth_flow"): ["read:widgets"]
             ]
         ]
 
@@ -400,7 +417,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
         let successfulHelloResponse = OpenAPI.Response(
             description: "Hello",
             content: [
-                .txt: .init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self))
+                .txt: .content(.init(schemaReference: try components.reference(named: "hello_string", ofType: JSONSchema.self)))
             ]
         )
 
@@ -459,7 +476,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.get
         let response = endpoint?.responses[status: 200]?.responseValue
-        let responseSchemaReference = response?.content[.json]?.schema
+        let responseSchemaReference = response?.content[.json]?.contentValue?.schema
         // this response schema is a reference found in the Components Object. We dereference
         // it to get at the schema.
         let responseSchema = responseSchemaReference.flatMap { document.components[$0] }
@@ -472,7 +489,7 @@ final class DeclarativeEaseOfUseTests: XCTestCase {
 
         let endpoint = document.paths["/widgets/{id}"]?.pathItemValue?.post
         let request = endpoint?.requestBody?.requestValue
-        let requestSchemaReference = request?.content[.json]?.schema
+        let requestSchemaReference = request?.content[.json]?.contentValue?.schema
         // this request schema is defined inline but dereferencing still produces the schema
         // (dereferencing is just a no-op in this case).
         let requestSchema = requestSchemaReference.flatMap { document.components[$0] }
@@ -488,7 +505,7 @@ fileprivate let testWidgetSchema = JSONSchema.object(
     ]
 )
 
-fileprivate let testComponents = OpenAPI.Components(
+fileprivate let testComponents = OpenAPI.Components.direct(
     schemas: [
         "testWidgetSchema": testWidgetSchema
     ],
@@ -517,8 +534,7 @@ fileprivate let testDocument =  OpenAPI.Document(
             parameters: [
                 .parameter(
                     name: "id",
-                    context: .path,
-                    schema: .string
+                    context: .path(schema: .string)
                 )
             ],
             get: OpenAPI.Operation(
@@ -528,7 +544,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     200: .response(
                         description: "A single widget",
                         content: [
-                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            .json: .content(.init(schemaReference: .component(named: "testWidgetSchema")))
                         ]
                     )
                 ]
@@ -539,11 +555,13 @@ fileprivate let testDocument =  OpenAPI.Document(
                 description: "Create a new widget by adding a description. The created widget will be returned in the response body including a new part number.",
                 requestBody: OpenAPI.Request(
                     content: [
-                        .json: .init(
-                            schema: JSONSchema.object(
-                                properties: [
-                                    "description": .string
-                                ]
+                        .json: .content(
+                            .init(
+                                schema: JSONSchema.object(
+                                    properties: [
+                                        "description": .string
+                                    ]
+                                )
                             )
                         )
                     ]
@@ -552,7 +570,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     201: .response(
                         description: "The newly created widget",
                         content: [
-                            .json: .init(schemaReference: .component(named: "testWidgetSchema"))
+                            .json: .content(.init(schemaReference: .component(named: "testWidgetSchema")))
                         ]
                     )
                 ]
@@ -565,7 +583,7 @@ fileprivate let testDocument =  OpenAPI.Document(
                     200: .response(
                         description: "Get documentation on this API.",
                         content: [
-                            .html: .init(schema: .string)
+                            .html: .content(.init(schema: .string))
                         ]
                     )
                 ]

@@ -34,6 +34,13 @@ public struct DereferencedPathItem: Equatable {
     public let patch: DereferencedOperation?
     /// The dereferenced TRACE operation, if defined.
     public let trace: DereferencedOperation?
+    /// The dereferenced QUERY operation, if defined.
+    public let query: DereferencedOperation?
+
+    /// Additional operations, keyed by all-caps HTTP method names. This
+    /// map MUST NOT contain any entries that can be represented by the
+    /// fixed fields on this type (e.g. `post`, `get`, etc.).
+    public let additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, DereferencedOperation>
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.PathItem, T>) -> T {
         return underlyingPathItem[keyPath: path]
@@ -64,6 +71,9 @@ public struct DereferencedPathItem: Equatable {
         self.head = try pathItem.head.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.patch = try pathItem.patch.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
         self.trace = try pathItem.trace.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+        self.query = try pathItem.query.map { try DereferencedOperation($0, resolvingIn: components, following: references) }
+
+        self.additionalOperations = try pathItem.additionalOperations.mapValues { try DereferencedOperation($0, resolvingIn: components, following: references) }
 
         var pathItem = pathItem
         if let name {
@@ -80,22 +90,20 @@ extension DereferencedPathItem {
     /// Retrieve the operation for the given verb, if one is set for this path.
     public func `for`(_ verb: OpenAPI.HttpMethod) -> DereferencedOperation? {
         switch verb {
-        case .delete:
-            return self.delete
-        case .get:
-            return self.get
-        case .head:
-            return self.head
-        case .options:
-            return self.options
-        case .patch:
-            return self.patch
-        case .post:
-            return self.post
-        case .put:
-            return self.put
-        case .trace:
-            return self.trace
+        case .builtin(let builtin):
+            switch builtin {
+            case .delete: self.delete
+            case .get: self.get
+            case .head: self.head
+            case .options: self.options
+            case .patch: self.patch
+            case .post: self.post
+            case .put: self.put
+            case .trace: self.trace
+            case .query: self.query
+            }
+        case .other(let other):
+            additionalOperations[.other(other)]
         }
     }
 
@@ -117,9 +125,11 @@ extension DereferencedPathItem {
     /// - Returns: An array of `Endpoints` with the method (i.e. `.get`) and the operation for
     ///     the method.
     public var endpoints: [Endpoint] {
-        return OpenAPI.HttpMethod.allCases.compactMap { method in
-            self.for(method).map { .init(method: method, operation: $0) }
+        let builtins = OpenAPI.BuiltinHttpMethod.allCases.compactMap { method -> Endpoint? in
+            self.for(.builtin(method)).map { .init(method: .builtin(method), operation: $0) }
         }
+
+        return builtins + additionalOperations.map { key, value in .init(method: key, operation: value) }
     }
 }
 
@@ -151,6 +161,9 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         let oldHead = head
         let oldPatch = patch
         let oldTrace = trace
+        let oldQuery = query
+
+        let oldAdditionalOperations = additionalOperations
 
         async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
 //        async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
@@ -162,6 +175,9 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         async let (newHead, c8, m8) = oldHead.externallyDereferenced(with: loader)
         async let (newPatch, c9, m9) = oldPatch.externallyDereferenced(with: loader)
         async let (newTrace, c10, m10) = oldTrace.externallyDereferenced(with: loader)
+        async let (newQuery, c11, m11) = oldQuery.externallyDereferenced(with: loader)
+
+        async let (newAdditionalOperations, c12, m12) = oldAdditionalOperations.externallyDereferenced(with: loader)
 
         var pathItem = self
         var newComponents = try await c1
@@ -179,6 +195,8 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         pathItem.head = try await newHead
         pathItem.patch = try await newPatch
         pathItem.trace = try await newTrace
+        pathItem.query = try await newQuery
+        pathItem.additionalOperations = try await newAdditionalOperations
 
         try await newComponents.merge(c3)
         try await newComponents.merge(c4)
@@ -188,6 +206,8 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         try await newComponents.merge(c8)
         try await newComponents.merge(c9)
         try await newComponents.merge(c10)
+        try await newComponents.merge(c11)
+        try await newComponents.merge(c12)
 
         try await newMessages += m3
         try await newMessages += m4
@@ -197,6 +217,8 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
         try await newMessages += m8
         try await newMessages += m9
         try await newMessages += m10
+        try await newMessages += m11
+        try await newMessages += m12
 
         if let oldServers {
             async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)

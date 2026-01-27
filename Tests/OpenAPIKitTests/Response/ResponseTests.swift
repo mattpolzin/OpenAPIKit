@@ -17,14 +17,36 @@ final class ResponseTests: XCTestCase {
         XCTAssertNil(r1.headers)
         XCTAssertEqual(r1.content, [:])
 
-        let content = OpenAPI.Content(schema: .init(OpenAPI.Reference<JSONSchema>.external(URL(string: "hello.yml")!)))
+        let content = OpenAPI.Content(schema: .reference(.external(URL(string: "hello.yml")!)))
         let header = OpenAPI.Header(schemaOrContent: .init(.header(.string)))
         let r2 = OpenAPI.Response(description: "",
                                   headers: ["hello": .init(header)],
-                                  content: [.json: content])
+                                  content: [.json: .content(content)])
         XCTAssertEqual(r2.description, "")
         XCTAssertEqual(r2.headers?["hello"]?.headerValue, header)
-        XCTAssertEqual(r2.content, [.json: content])
+        XCTAssertEqual(r2.content, [.json: .content(content)])
+        XCTAssertEqual(r2.conditionalWarnings.count, 0)
+
+        // two OAS 3.2.0 warnings: summary is used and description is not
+        let r3 = OpenAPI.Response(summary: "",
+                                  content: [:])
+        XCTAssertEqual(r3.summary, "")
+        XCTAssertNil(r3.description)
+        XCTAssertEqual(r3.conditionalWarnings.count, 2)
+
+        // one OAS 3.2.0 warnings: summary is used
+        let r4 = OpenAPI.Response(summary: "",
+                                  description: "",
+                                  content: [:])
+        XCTAssertEqual(r4.summary, "")
+        XCTAssertEqual(r4.description, "")
+        XCTAssertEqual(r4.conditionalWarnings.count, 1)
+
+        // one OAS 3.2.0 warnings: description is not used
+        let r5 = OpenAPI.Response(content: [:])
+        XCTAssertNil(r5.summary)
+        XCTAssertNil(r5.description)
+        XCTAssertEqual(r5.conditionalWarnings.count, 1)
     }
 
     func test_responseMap() {
@@ -122,6 +144,18 @@ extension ResponseTests {
             }
             """
         )
+
+        let response3 = OpenAPI.Response(summary: "", content: [:])
+        let encodedResponse3 = try! orderUnstableTestStringFromEncoding(of: response3)
+
+        assertJSONEquivalent(
+            encodedResponse3,
+            """
+            {
+              "summary" : ""
+            }
+            """
+        )
     }
 
     func test_emptyDescriptionEmptyContent_decode() {
@@ -157,6 +191,16 @@ extension ResponseTests {
         let response3 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData3)
 
         XCTAssertEqual(response3, OpenAPI.Response(description: "", headers: [:], content: [:]))
+
+        let responseData4 =
+        """
+        {
+          "summary" : ""
+        }
+        """.data(using: .utf8)!
+        let response4 = try! orderUnstableDecode(OpenAPI.Response.self, from: responseData4)
+
+        XCTAssertEqual(response4, OpenAPI.Response(summary: "", content: [:]))
     }
 
     func test_populatedDescriptionPopulatedContent_encode() {
@@ -165,7 +209,7 @@ extension ResponseTests {
         let response = OpenAPI.Response(
             description: "hello world",
             headers: ["hello": .init(header)],
-            content: [.json: content]
+            content: [.json: .content(content)]
         )
 
         let encodedResponse = try! orderUnstableTestStringFromEncoding(of: response)
@@ -215,7 +259,7 @@ extension ResponseTests {
             OpenAPI.Response(
                 description: "hello world",
                 headers: ["hello": .init(header)],
-                content: [.json: content]
+                content: [.json: .content(content)]
             )
         )
     }
@@ -280,7 +324,7 @@ extension ResponseTests {
         let response = OpenAPI.Response(
             description: "hello world",
             headers: ["hello": .init(header)],
-            content: [.json: content],
+            content: [.json: .content(content)],
             vendorExtensions: [ "x-specialFeature": true ]
         )
 
@@ -333,7 +377,7 @@ extension ResponseTests {
             OpenAPI.Response(
                 description: "hello world",
                 headers: ["hello": .init(header)],
-                content: [.json: content],
+                content: [.json: .content(content)],
                 vendorExtensions: [ "x-specialFeature": true ]
             )
         )

@@ -14,7 +14,7 @@ extension Validation {
     /// `PathItem.Map`.
     ///
     /// The OpenAPI Specification does not require that the document
-    /// contain any paths for [security reasons](https://spec.openapis.org/oas/v3.1.1.html#security-filtering)
+    /// contain any paths for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
     /// or even because it only contains webhooks, but authors may still
     /// want to protect against an empty `PathItem.Map` in some cases.
     ///
@@ -30,7 +30,7 @@ extension Validation {
     /// one operation.
     ///
     /// The OpenAPI Specification does not require that path items
-    /// contain any operations for [security reasons](https://spec.openapis.org/oas/v3.1.1.html#security-filtering)
+    /// contain any operations for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
     /// but documentation that is public in nature might only ever have
     /// a `PathItem` with no operations in error.
     ///
@@ -183,7 +183,7 @@ extension Validation {
     /// Validate that the OpenAPI Document's `Tags` all have unique names.
     ///
     /// The OpenAPI Specification requires that tag names on the Document
-    /// [are unique](https://spec.openapis.org/oas/v3.1.1.html#openapi-object).
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#openapi-object).
     ///
     /// - Important: This is included in validation by default.
     public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
@@ -203,7 +203,7 @@ extension Validation {
     /// A Path Item Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.1.1.html#path-item-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -221,7 +221,7 @@ extension Validation {
     /// An Operation's Parameter's identity is defined as the pairing of its `name` and
     /// `location`.
     ///
-    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.1.1.html#operation-object).
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
     ///
     /// - Important: This is included in validation by default.
     ///
@@ -235,7 +235,7 @@ extension Validation {
 
     /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
     ///
-    /// The OpenAPI Specification requires that Operation Ids [are unique](https://spec.openapis.org/oas/v3.1.1.html#operation-object).
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
     ///
     /// - Important: This validation does not assert that all path references are valid and found in the
     ///     components for the document. It skips over missing path items.
@@ -254,16 +254,38 @@ extension Validation {
         )
     }
 
-    /// Validate that all non-external JSONSchema references are found in the document's
+    /// Validate that all non-external OpenAPI JSONSchema references are found in the document's
     /// components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var schemaReferencesAreValid: Validation<OpenAPI.Reference<JSONSchema>> {
         .init(
-            description: "JSONSchema reference can be found in components/schemas",
+            description: "OpenAPI JSONSchema reference can be found in components/schemas",
             check: { context in
                 guard case let .internal(internalReference) = context.subject.jsonReference,
+                    case .component = internalReference else {
+                    // don't make assertions about external references
+                    // TODO: could make a stronger assertion including
+                    // internal references outside of components given
+                    // some way to resolve those references.
+                    return true
+                }
+                return context.document.components.contains(internalReference)
+            }
+        )
+    }
+
+    /// Validate that all non-external JSONSchema references are found in the document's
+    /// components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var jsonSchemaReferencesAreValid: Validation<JSONSchema> {
+        .init(
+            description: "JSONSchema reference can be found in components/schemas",
+            check: { context in
+                guard case let .internal(internalReference) = context.subject.reference,
                     case .component = internalReference else {
                     // don't make assertions about external references
                     // TODO: could make a stronger assertion including
@@ -503,6 +525,58 @@ extension Validation {
                 
                 return operationIds.contains(operationId)
             }
+        )
+    }
+
+    /// Validate the OpenAPI Document's `Parameter`s all have styles that are
+    /// compatible with their locations per the table found at
+    /// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#style-values
+    ///
+    /// - Important: This is included in validation by default.
+    public static var parameterStyleAndLocationAreCompatible: Validation<OpenAPI.Parameter> {
+        .init(
+            check: all(
+                Validation<OpenAPI.Parameter>(
+                    description: "the matrix style can only be used for the path location",
+                    check: \.context.location == .path,
+                    when: \.schemaStyle == .matrix
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the label style can only be used for the path location",
+                    check: \.context.location == .path,
+                    when: \.schemaStyle == .label
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the simple style can only be used for the path and header locations",
+                    check: \.context.location == .path || \.context.location == .header,
+                    when: \.schemaStyle == .simple
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the form style can only be used for the query and cookie locations",
+                    check: \.context.location == .query || \.context.location == .cookie,
+                    when: \.schemaStyle == .form
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the spaceDelimited style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .spaceDelimited
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the pipeDelimited style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .pipeDelimited
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the deepObject style can only be used for the query location",
+                    check: \.context.location == .query,
+                    when: \.schemaStyle == .deepObject
+                ),
+                Validation<OpenAPI.Parameter>(
+                    description: "the cookie style can only be used for the cookie location",
+                    check: \.context.location == .cookie,
+                    when: \.schemaStyle == .cookie
+                )
+            )
         )
     }
 }

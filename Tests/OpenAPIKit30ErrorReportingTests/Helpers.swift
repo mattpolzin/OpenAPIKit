@@ -8,4 +8,4 @@
 import Foundation
 @preconcurrency import Yams
 
-let testDecoder = YAMLDecoder()
+var testDecoder: YAMLDecoder { YAMLDecoder() }

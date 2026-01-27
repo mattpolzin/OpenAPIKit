@@ -65,5 +65,6 @@ extension Warning: CustomStringConvertible {
 }
 
 public protocol HasWarnings {
+    /// Warnings generated while decoding an OpenAPI type.
     var warnings: [Warning] { get }
 }

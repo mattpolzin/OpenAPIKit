@@ -71,6 +71,13 @@ extension Either where A == DereferencedSchemaContext {
     }
 }
 
+extension Either where A == OrderedDictionary<String, OpenAPI.Content.Encoding> {
+
+    public var mapValue: A? {
+        a
+    }
+}
+
 extension Either where B == OpenAPI.PathItem {
     /// Retrieve the path item if that is what this property contains.
     public var pathItemValue: B? { b }
@@ -94,6 +101,11 @@ extension Either where B == OpenAPI.Response {
 extension Either where B == OpenAPI.Link {
     /// Retrieve the link if that is what this property contains.
     public var linkValue: B? { b }
+}
+
+extension Either where B == OpenAPI.Content {
+    /// Retrieve the content if that is what this property contains.
+    public var contentValue: B? { b }
 }
 
 extension Either where B == OpenAPI.Content.Map {
@@ -129,6 +141,20 @@ extension Either where B == AnyCodable {
 extension Either where B == OpenAPI.Header {
     /// Retrieve the header if that is what this property contains.
     public var headerValue: B? { b }
+}
+
+extension Either where B == OpenAPI.Callbacks {
+    /// Retrieve the callbacks if that is what this property contains.
+    public var callbacksValue: B? { b }
+}
+
+extension Either where B == OpenAPI.SecurityScheme {
+    /// Retrieve the security scheme if that is what this property contains.
+    public var securitySchemeValue: B? { b }
+}
+
+extension Either where B == OpenAPI.Content.PositionalEncoding {
+    public var positionalValue: B? { b }
 }
 
 // MARK: - Convenience constructors
@@ -169,6 +195,8 @@ extension Either where B == OpenAPI.PathItem {
         head: OpenAPI.Operation? = nil,
         patch: OpenAPI.Operation? = nil,
         trace: OpenAPI.Operation? = nil,
+        query: OpenAPI.Operation? = nil,
+        additionalOperations: OrderedDictionary<OpenAPI.HttpMethod, OpenAPI.Operation> = [:],
         vendorExtensions: [String: AnyCodable] = [:]
     ) {
         self = .b(
@@ -185,6 +213,8 @@ extension Either where B == OpenAPI.PathItem {
                 head: head,
                 patch: patch,
                 trace: trace,
+                query: query,
+                additionalOperations: additionalOperations,
                 vendorExtensions: vendorExtensions
             )
         )
@@ -194,6 +224,11 @@ extension Either where B == OpenAPI.PathItem {
 extension Either where B == OpenAPI.Parameter {
     /// Construct a parameter value.
     public static func parameter(_ parameter: OpenAPI.Parameter) -> Self { .b(parameter) }
+}
+
+extension Either where B == OpenAPI.Content {
+    /// Construct content.
+    public static func content(_ content: OpenAPI.Content) -> Self { .b(content) }
 }
 
 extension Either where B == OpenAPI.Content.Map {
@@ -216,7 +251,22 @@ extension Either where B == OpenAPI.Response {
     public static func response(_ response: OpenAPI.Response) -> Self { .b(response) }
 }
 
+extension Either where B == OpenAPI.Link {
+    /// Construct a link value.
+    public static func link(_ link: OpenAPI.Link) -> Self { .b(link) }
+}
+
 extension Either where B == OpenAPI.Header {
     /// Construct a header value.
     public static func header(_ header: OpenAPI.Header) -> Self { .b(header) }
+}
+
+extension Either where B == OpenAPI.Callbacks {
+    /// Construct a callbacks value.
+    public static func callbacks(_ callbacks: OpenAPI.Callbacks) -> Self { .b(callbacks) }
+}
+
+extension Either where B == OpenAPI.SecurityScheme {
+    /// Construct a security scheme value.
+    public static func securityScheme(_ securityScheme: OpenAPI.SecurityScheme) -> Self { .b(securityScheme) }
 }

@@ -11,7 +11,7 @@ import Foundation
 extension OpenAPI {
     /// OpenAPI Spec "External Documentation Object"
     /// 
-    /// See [OpenAPI External Documentation Object](https://spec.openapis.org/oas/v3.1.1.html#external-documentation-object).
+    /// See [OpenAPI External Documentation Object](https://spec.openapis.org/oas/v3.2.0.html#external-documentation-object).
     public struct ExternalDocumentation: Equatable, CodableVendorExtendable, Sendable {
         public var description: String?
         public var url: URL

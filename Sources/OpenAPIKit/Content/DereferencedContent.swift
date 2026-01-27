@@ -14,9 +14,14 @@ import OpenAPIKitCore
 public struct DereferencedContent: Equatable {
     public let underlyingContent: OpenAPI.Content
     public let schema: DereferencedJSONSchema?
+    public let itemSchema: DereferencedJSONSchema?
     public let examples: OrderedDictionary<String, OpenAPI.Example>?
     public let example: AnyCodable?
-    public let encoding: OrderedDictionary<String, DereferencedContentEncoding>?
+    public let encoding: Either<OrderedDictionary<String, DereferencedContentEncoding>, DereferencedPositionalEncoding>?
+
+    public var encodingMap: OrderedDictionary<String, DereferencedContentEncoding>? { encoding?.a }
+    public var prefixEncoding: [DereferencedContentEncoding]? { encoding?.b?.prefixEncoding }
+    public var itemEncoding: DereferencedContentEncoding? { encoding?.b?.itemEncoding }
 
     public subscript<T>(dynamicMember path: KeyPath<OpenAPI.Content, T>) -> T {
         return underlyingContent[keyPath: path]
@@ -32,9 +37,11 @@ public struct DereferencedContent: Equatable {
     internal init(
         _ content: OpenAPI.Content,
         resolvingIn components: OpenAPI.Components,
-        following references: Set<AnyHashable>
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?
     ) throws {
         self.schema = try content.schema?._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+        self.itemSchema = try content.itemSchema?._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
         let examples = try content.examples?
             .mapValues { 
                 try $0._dereferenced(
@@ -45,13 +52,25 @@ public struct DereferencedContent: Equatable {
             }
         self.examples = examples
 
-        self.example = examples.flatMap(OpenAPI.Content.firstExample(from:))
+        self.example = examples.flatMap(OpenAPI.Content.firstExampleValue(from:))
             ?? content.example
 
-        self.encoding = try content.encoding.map { encodingMap in
-            try encodingMap.mapValues { encoding in
+        switch content.encoding {
+        case .a(let encodingMap):
+            self.encoding = .a(try encodingMap.mapValues { encoding in
                 try encoding._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
-            }
+            })
+        case .b(let positionalEncoding):
+            let prefixEncoding = try  positionalEncoding.prefixEncoding.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            let itemEncoding = try positionalEncoding.itemEncoding.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            self.encoding = .b(.init(prefixEncoding: prefixEncoding, itemEncoding: itemEncoding))
+        case nil:
+            self.encoding = nil
+        }
+
+        var content = content
+        if let name {
+            content.vendorExtensions[OpenAPI.Components.componentNameExtension] = .init(name)
         }
 
         self.underlyingContent = content
@@ -72,15 +91,17 @@ extension OpenAPI.Content: LocallyDereferenceable {
         following references: Set<AnyHashable>,
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedContent {
-        return try DereferencedContent(self, resolvingIn: components, following: references)
+        return try DereferencedContent(self, resolvingIn: components, following: references, dereferencedFromComponentNamed: name)
     }
 }
 
 extension OpenAPI.Content: ExternallyDereferenceable {
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
       let oldSchema = schema
+      let oldItemSchema = itemSchema
 
       async let (newSchema, c1, m1) = oldSchema.externallyDereferenced(with: loader)
+      async let (newItemSchema, c2, m2) = oldItemSchema.externallyDereferenced(with: loader)
 
       var newContent = self
       var newComponents = try await c1
@@ -88,18 +109,33 @@ extension OpenAPI.Content: ExternallyDereferenceable {
 
       newContent.schema = try await newSchema
 
+      try await newComponents.merge(c2)
+      newMessages += try await m2
+      newContent.itemSchema = try await newItemSchema
+
         if let oldExamples = examples {
-            let (newExamples, c2, m2) = try await oldExamples.externallyDereferenced(with: loader)
+            let (newExamples, c3, m3) = try await oldExamples.externallyDereferenced(with: loader)
             newContent.examples = newExamples
-            try newComponents.merge(c2)
-            newMessages += m2
+            try newComponents.merge(c3)
+            newMessages += m3
         }
 
         if let oldEncoding = encoding {
-            let (newEncoding, c3, m3) = try await oldEncoding.externallyDereferenced(with: loader)
-            newContent.encoding = newEncoding
-            try newComponents.merge(c3)
-            newMessages += m3
+            switch oldEncoding {
+            case .a(let oldEncoding):
+                let (newEncoding, c4, m4) = try await oldEncoding.externallyDereferenced(with: loader)
+                newContent.encoding = .a(newEncoding)
+                try newComponents.merge(c4)
+                newMessages += m4
+
+            case .b(let oldPositionalEncoding):
+                async let (newItemEncoding, c4, m4) = try oldPositionalEncoding.itemEncoding.externallyDereferenced(with: loader)
+                async let (newPrefixEncoding, c5, m5) = try oldPositionalEncoding.prefixEncoding.externallyDereferenced(with: loader)
+                newContent.encoding = try await .b(.init(prefixEncoding: newPrefixEncoding, itemEncoding: newItemEncoding))
+                try await newComponents.merge(c4)
+                try await newComponents.merge(c5)
+                newMessages += try await m4 + m5
+            }
         }
 
         return (newContent, newComponents, newMessages)

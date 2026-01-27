@@ -1,6 +1,6 @@
 
 ## Specification Coverage <!-- omit in toc -->
-The list below is organized like the [OpenAPI Specification 3.1.x](https://spec.openapis.org/oas/v3.1.1.html) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
+The list below is organized like the [OpenAPI Specification 3.2.x](https://spec.openapis.org/oas/v3.2.0.html) reference. Types that have OpenAPIKit representations are checked off. Types that have different names in OpenAPIKit than they do in the specification have their OpenAPIKit names in parenthesis.
 
 For more information on the OpenAPIKit types, see the [full type documentation](https://github.com/mattpolzin/OpenAPIKit/wiki).
 
@@ -38,6 +38,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### OpenAPI Object (`OpenAPI.Document`)
 - [x] openapi (`openAPIVersion`)
+- [x] $self (`selfRUI`)
 - [x] info
 - [ ] jsonSchemaDialect
 - [x] servers
@@ -72,7 +73,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] specification extensions (`vendorExtensions`)
 
 ### Server Object (`OpenAPI.Server`)
-- [x] url
+- [x] url (`urlTemplate`)
 - [x] description
 - [x] variables
 - [x] specification extensions (`vendorExtensions`)
@@ -112,6 +113,8 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] head
 - [x] patch
 - [x] trace
+- [x] query
+- [x] additionalOperations
 - [x] servers
 - [x] parameters
 - [x] specification extensions (`vendorExtensions`)
@@ -138,18 +141,18 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### Parameter Object (`OpenAPI.Parameter`)
 - [x] name
-- [x] in (`context`)
+- [x] in (`context.location`)
 - [x] description
-- [x] required (part of `context`)
+- [x] required (`context.required`)
 - [x] deprecated
 - [x] allowEmptyValue (part of `context`)
-- [x] schema (`schemaOrContent`)
+- [x] schema (`schemaOrContent` in relevant `context` cases)
     - [x] style
     - [x] explode
     - [x] allowReserved
     - [x] example
     - [x] examples
-- [x] content (`schemaOrContent`)
+- [x] content (`schemaOrContent` in relevant `context` cases)
 - [x] specification extensions (`vendorExtensions`)
 
 ### Request Body Object (`OpenAPI.Request`)
@@ -160,9 +163,12 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### Media Type Object (`OpenAPI.Content`)
 - [x] schema
+- [x] itemSchema
 - [x] example
 - [x] examples
-- [x] encoding
+- [x] encoding (`encoding` first case)
+- [x] prefixEncoding (part of `encoding` second case)
+- [x] itemEncoding (part of `encoding` second case)
 - [x] specification extensions (`vendorExtensions`)
 
 ### Encoding Object (`OpenAPI.Content.Encoding`)
@@ -171,7 +177,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - [x] style
 - [x] explode
 - [x] allowReserved
-- [ ] specification extensions
+- [x] specification extensions
 
 ### Responses Object (`OpenAPI.Response.Map`)
 - [x] default (`Response.StatusCode.Code` `.default` case)
@@ -179,6 +185,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 - ~[ ] specification extensions~ (not a planned addition)
 
 ### Response Object (`OpenAPI.Response`)
+- [x] summary
 - [x] description
 - [x] headers
 - [x] content
@@ -220,8 +227,11 @@ For more information on the OpenAPIKit types, see the [full type documentation](
 
 ### Tag Object (`OpenAPI.Tag`)
 - [x] name
+- [x] summary
 - [x] description
 - [x] externalDocs
+- [x] parent
+- [x] kind
 - [x] specification extensions (`vendorExtensions`)
 
 ### Reference Object (`OpenAPI.Reference`)
@@ -235,7 +245,7 @@ For more information on the OpenAPIKit types, see the [full type documentation](
     - [x] remote (different file) reference (`external` case)
         - [x] encode
         - [x] decode
-        - [ ] dereference
+        - [x] dereference
 
 ### Schema Object (`JSONSchema`)
 - [x] Mostly complete support for JSON Schema inherited keywords (select ones enumerated below)

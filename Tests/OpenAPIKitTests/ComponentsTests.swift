@@ -25,36 +25,167 @@ final class ComponentsTests: XCTestCase {
         XCTAssertFalse(c3.isEmpty)
     }
 
+    func test_directConstructor() {
+        let c1 = OpenAPI.Components(
+            schemas: [
+                "one": .string,
+                "ref": .reference(.component(named: "one"))
+            ],
+            responses: [
+                "two": .response(.init(description: "hello", content: [:]))
+            ],
+            parameters: [
+                "three": .parameter(.init(name: "hi", context: .query(content: [:])))
+            ],
+            examples: [
+                "four": .example(.init(legacyValue: .init(URL(string: "http://address.com")!)))
+            ],
+            requestBodies: [
+                "five": .request(.init(content: [:]))
+            ],
+            headers: [
+                "six": .header(.init(schema: .string))
+            ],
+            securitySchemes: [
+                "seven": .securityScheme(.http(scheme: "cool"))
+            ],
+            links: [
+                "eight": .link(.init(operationId: "op1"))
+            ],
+            callbacks: [
+                "nine": .callbacks([
+                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                        .init(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
+                        )
+                    )
+                ])
+            ],
+            mediaTypes: [
+                "ten": .content(.init(schema: .string))
+            ],
+            pathItems: [
+                "eleven": .init(get: .init(responses: [200: .response(description: "response")]))
+            ],
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
+        )
+
+        let c2 = OpenAPI.Components.direct(
+            schemas: [
+                "one": .string,
+                "ref": .reference(.component(named: "one"))
+            ],
+            responses: [
+                "two": .init(description: "hello", content: [:])
+            ],
+            parameters: [
+                "three": .init(name: "hi", context: .query(content: [:]))
+            ],
+            examples: [
+                "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
+            ],
+            requestBodies: [
+                "five": .init(content: [:])
+            ],
+            headers: [
+                "six": .init(schema: .string)
+            ],
+            securitySchemes: [
+                "seven": .http(scheme: "cool")
+            ],
+            links: [
+                "eight": .init(operationId: "op1")
+            ],
+            callbacks: [
+                "nine": [
+                    OpenAPI.CallbackURL(rawValue: "{$request.query.queryUrl}")!: .pathItem(
+                        .init(
+                            post: .init(
+                                responses: [
+                                    200: .response(
+                                        description: "callback successfully processed"
+                                    )
+                                ]
+                            )
+                        )
+                    )
+                ]
+            ],
+            mediaTypes: [
+                "ten": .init(schema: .string)
+            ],
+            pathItems: [
+                "eleven": .init(get: .init(responses: [200: .response(description: "response")]))
+            ],
+            vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
+        )
+
+        XCTAssertEqual(c1, c2)
+    }
+
     func test_referenceLookup() throws {
         let components = OpenAPI.Components(
             schemas: [
                 "hello": .string,
-                "world": .integer(required: false)
+                "world": .integer(required: false),
+                "ref": .reference(.component(named: "hello"))
+            ],
+            parameters: [
+                "my_direct_param": .parameter(.cookie(name: "my_param", schema: .string)),
+                "my_param": .reference(.component(named: "my_direct_param"))
             ]
         )
 
         let ref1 = JSONReference<JSONSchema>.component(named: "world")
         let ref2 = JSONReference<JSONSchema>.component(named: "missing")
-        let ref3 = JSONReference<OpenAPI.Parameter>.component(named: "param")
+        let ref3 = JSONReference<JSONSchema>.component(named: "ref")
+        let ref4 = JSONReference<OpenAPI.Parameter>.component(named: "param")
 
         XCTAssertEqual(components[ref1], .integer(required: false))
         XCTAssertEqual(try? components.lookup(ref1), components[ref1])
         XCTAssertNil(components[ref2])
-        XCTAssertNil(components[ref3])
+        XCTAssertEqual(components[ref3], .string)
+        XCTAssertEqual(try? components.lookup(ref3), components[ref3])
+        XCTAssertNil(components[ref4])
 
-        let ref4 = JSONReference<JSONSchema>.InternalReference.component(name: "world")
-        let ref5 = JSONReference<JSONSchema>.InternalReference.component(name: "missing")
-        let ref6 = JSONReference<OpenAPI.Parameter>.InternalReference.component(name: "param")
+        let ref5 = JSONReference<JSONSchema>.InternalReference.component(name: "world")
+        let ref6 = JSONReference<JSONSchema>.InternalReference.component(name: "missing")
+        let ref7 = JSONReference<OpenAPI.Parameter>.InternalReference.component(name: "param")
 
-        XCTAssertEqual(components[ref4], .integer(required: false))
-        XCTAssertNil(components[ref5])
+        XCTAssertEqual(components[ref5], .integer(required: false))
         XCTAssertNil(components[ref6])
-
-        let ref7 = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
-
         XCTAssertNil(components[ref7])
 
-        XCTAssertThrowsError(try components.contains(ref7))
+        let ref8 = JSONReference<OpenAPI.Parameter>.component(named: "my_param")
+
+        XCTAssertEqual(components[ref8], .cookie(name: "my_param", schema: .string))
+
+        let ref9 = JSONReference<JSONSchema>.external(URL(string: "hello.json")!)
+
+        XCTAssertNil(components[ref9])
+
+        XCTAssertThrowsError(try components.contains(ref9))
+    }
+
+    func test_lookupOnce() throws {
+        let components = OpenAPI.Components(
+            parameters: [
+                "my_direct_param": .parameter(.cookie(name: "my_param", schema: .string)),
+                "my_param": .reference(.component(named: "my_direct_param"))
+            ]
+        )
+
+        let ref1 = JSONReference<OpenAPI.Parameter>.component(named: "my_param")
+        let ref2 = JSONReference<OpenAPI.Parameter>.component(named: "my_direct_param")
+
+        XCTAssertEqual(try components.lookupOnce(ref1), .reference(.component(named: "my_direct_param")))
+        XCTAssertEqual(try components.lookupOnce(ref2), .parameter(.cookie(name: "my_param", schema: .string)))
     }
 
     func test_failedExternalReferenceLookup() {
@@ -91,7 +222,7 @@ final class ComponentsTests: XCTestCase {
     }
 
     func test_lookupEachType() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             schemas: [
                 "one": .string
             ],
@@ -99,10 +230,10 @@ final class ComponentsTests: XCTestCase {
                 "two": .init(description: "hello", content: [:])
             ],
             parameters: [
-                "three": .init(name: "hello", context: .query, schema: .string)
+                "three": .init(name: "hello", context: .query(schema: .string))
             ],
             examples: [
-                "four": .init(value: .init(URL(string: "hello.com/hello")!))
+                "four": .init(legacyValue: .init(URL(string: "hello.com/hello")!))
             ],
             requestBodies: [
                 "five": .init(content: [:])
@@ -121,8 +252,11 @@ final class ComponentsTests: XCTestCase {
                     OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
                 ]
             ],
+            mediaTypes: [
+                "ten": .init(schema: .string)
+            ],
             pathItems: [
-                "ten": .init(get: .init(responses: [:]))
+                "eleven": .init(get: .init(responses: [:]))
             ]
         )
 
@@ -135,12 +269,13 @@ final class ComponentsTests: XCTestCase {
         let ref7 = try components.reference(named: "seven", ofType: OpenAPI.SecurityScheme.self)
         let ref8 = try components.reference(named: "eight", ofType: OpenAPI.Link.self)
         let ref9 = try components.reference(named: "nine", ofType: OpenAPI.Callbacks.self)
-        let ref10 = try components.reference(named: "ten", ofType: OpenAPI.PathItem.self)
+        let ref10 = try components.reference(named: "ten", ofType: OpenAPI.Content.self)
+        let ref11 = try components.reference(named: "eleven", ofType: OpenAPI.PathItem.self)
 
         XCTAssertEqual(components[ref1], .string)
         XCTAssertEqual(components[ref2], .init(description: "hello", content: [:]))
-        XCTAssertEqual(components[ref3], .init(name: "hello", context: .query, schema: .string))
-        XCTAssertEqual(components[ref4], .init(value: .init(URL(string: "hello.com/hello")!)))
+        XCTAssertEqual(components[ref3], .init(name: "hello", context: .query(schema: .string)))
+        XCTAssertEqual(components[ref4], .init(legacyValue: .init(URL(string: "hello.com/hello")!)))
         XCTAssertEqual(components[ref5], .init(content: [:]))
         XCTAssertEqual(components[ref6], .init(schema: .string))
         XCTAssertEqual(components[ref7], .apiKey(name: "hello", location: .cookie))
@@ -151,7 +286,8 @@ final class ComponentsTests: XCTestCase {
                 OpenAPI.CallbackURL(rawValue: "{$url}")!: .pathItem(.init(post: .init(responses: [:])))
             ]
         )
-        XCTAssertEqual(components[ref10], .init(get: .init(responses: [:])))
+        XCTAssertEqual(components[ref10], .init(schema: .string))
+        XCTAssertEqual(components[ref11], .init(get: .init(responses: [:])))
     }
 
     func test_subscriptLookup() throws {
@@ -184,7 +320,10 @@ final class ComponentsTests: XCTestCase {
                 "hello": .boolean
             ],
             links: [
-                "linky": .init(operationId: "op 1")
+                "linky": .link(.init(operationId: "op 1")),
+                "linky_ref": .reference(.component(named: "linky")),
+                "cycle_start": .reference(.component(named: "cycle_end")),
+                "cycle_end": .reference(.component(named: "cycle_start"))
             ]
         )
 
@@ -212,6 +351,20 @@ final class ComponentsTests: XCTestCase {
         XCTAssertThrowsError(try components.lookup(link1)) { error in
             XCTAssertEqual(error as? OpenAPI.Components.ReferenceError, .missingOnLookup(name: "hello", key: "links"))
             XCTAssertEqual((error as? OpenAPI.Components.ReferenceError)?.description, "Failed to look up a JSON Reference. 'hello' was not found in links.")
+        }
+
+        let link2: Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "linky"))
+
+        XCTAssertEqual(try components.lookup(link2), .init(operationId: "op 1"))
+
+        let link3: Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "linky_ref"))
+
+        XCTAssertEqual(try components.lookup(link3), .init(operationId: "op 1"))
+
+        let link4: Either<OpenAPI.Reference<OpenAPI.Link>, OpenAPI.Link> = .reference(.component(named: "cycle_start"))
+
+        XCTAssertThrowsError(try components.lookup(link4)) { error in
+            XCTAssertEqual((error as? OpenAPI.Components.ReferenceCycleError)?.description, "Encountered a JSON Schema $ref cycle that prevents fully resolving a reference at \'#/components/links/cycle_start\'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy or fully looking up references in cycles. `lookupOnce()` is your best option in this case.")
         }
 
         let reference1: JSONReference<JSONSchema> = .component(named: "hello")
@@ -275,8 +428,52 @@ extension ComponentsTests {
         XCTAssertEqual(decoded, OpenAPI.Components())
     }
 
-    func test_maximal_encode() throws {
+    func test_schemaReference_encode() throws {
         let t1 = OpenAPI.Components(
+            schemas: [
+                "ref": .reference(.external(URL(string: "./hi.yml")!))
+            ]
+        )
+
+        let encoded = try orderUnstableTestStringFromEncoding(of: t1)
+
+        assertJSONEquivalent(
+            encoded,
+            """
+            {
+              "schemas" : {
+                "ref" : {
+                  "$ref" : ".\\/hi.yml"
+                }
+              }
+            }
+            """
+        )
+    }
+
+    func test_schemaReference_decode() throws {
+        let t1 =
+        """
+        {
+          "schemas" : {
+            "ref" : {
+              "$ref" : "./hi.yml"
+            }
+          }
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try orderUnstableDecode(OpenAPI.Components.self, from: t1)
+
+        XCTAssertEqual(decoded, OpenAPI.Components(
+            schemas: [
+                "ref": .reference(.external(URL(string: "./hi.yml")!))
+            ]
+        ))
+    }
+
+    func test_maximal_encode() throws {
+        let t1 = OpenAPI.Components.direct(
             schemas: [
                 "one": .string
             ],
@@ -284,10 +481,10 @@ extension ComponentsTests {
                 "two": .init(description: "hello", content: [:])
             ],
             parameters: [
-                "three": .init(name: "hi", context: .query, content: [:])
+                "three": .init(name: "hi", context: .query(content: [:]))
             ],
             examples: [
-                "four": .init(value: .init(URL(string: "http://address.com")!))
+                "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
             ],
             requestBodies: [
                 "five": .init(content: [:])
@@ -316,8 +513,11 @@ extension ComponentsTests {
                     )
                 ]
             ],
+            mediaTypes: [
+                "ten": .init(schema: .string)
+            ],
             pathItems: [
-                "ten": .init(get: .init(responses: [200: .response(description: "response")]))
+                "eleven": .init(get: .init(responses: [200: .response(description: "response")]))
             ],
             vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
         )
@@ -358,6 +558,13 @@ extension ComponentsTests {
                   "operationId" : "op1"
                 }
               },
+              "mediaTypes" : {
+                "ten" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              },
               "parameters" : {
                 "three" : {
                   "content" : {
@@ -368,7 +575,7 @@ extension ComponentsTests {
                 }
               },
               "pathItems" : {
-                "ten" : {
+                "eleven" : {
                   "get" : {
                     "responses" : {
                       "200" : {
@@ -444,6 +651,13 @@ extension ComponentsTests {
               "operationId" : "op1"
             }
           },
+          "mediaTypes" : {
+            "ten" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
           "parameters" : {
             "three" : {
               "content" : {
@@ -454,7 +668,7 @@ extension ComponentsTests {
             }
           },
           "pathItems" : {
-            "ten" : {
+            "eleven" : {
               "get" : {
                 "responses" : {
                   "200" : {
@@ -498,7 +712,7 @@ extension ComponentsTests {
 
         XCTAssertEqual(
             decoded,
-            OpenAPI.Components(
+            OpenAPI.Components.direct(
                 schemas: [
                     "one": .string
                 ],
@@ -506,10 +720,10 @@ extension ComponentsTests {
                     "two": .init(description: "hello", content: [:])
                 ],
                 parameters: [
-                    "three": .init(name: "hi", context: .query, content: [:])
+                    "three": .init(name: "hi", context: .query(content: [:]))
                 ],
                 examples: [
-                    "four": .init(value: .init(URL(string: "http://address.com")!))
+                    "four": .init(legacyValue: .init(URL(string: "http://address.com")!))
                 ],
                 requestBodies: [
                     "five": .init(content: [:])
@@ -538,8 +752,11 @@ extension ComponentsTests {
                         )
                     ]
                 ],
+                mediaTypes: [
+                    "ten": .init(schema: .string)
+                ],
                 pathItems: [
-                    "ten": .init(get: .init(responses: [200: .response(description: "response")]))
+                    "eleven": .init(get: .init(responses: [200: .response(description: "response")]))
                 ],
                 vendorExtensions: ["x-specialFeature": .init(["hello", "world"])]
             )
@@ -581,7 +798,8 @@ extension ComponentsTests {
             options: op,
             head: op,
             patch: op,
-            trace: op
+            trace: op,
+            query: op
           )
         ]
       )
@@ -615,6 +833,9 @@ extension ComponentsTests {
                 "put" : {
 
                 },
+                "query" : {
+
+                },
                 "trace" : {
 
                 }
@@ -646,6 +867,8 @@ extension ComponentsTests {
                 "put" : {
                 },
                 "trace" : {
+                },
+                "query" : {
                 }
               }
             }
@@ -667,7 +890,8 @@ extension ComponentsTests {
                       options: op,
                       head: op,
                       patch: op,
-                      trace: op
+                      trace: op,
+                      query: op
                     )
                   ]
                 )

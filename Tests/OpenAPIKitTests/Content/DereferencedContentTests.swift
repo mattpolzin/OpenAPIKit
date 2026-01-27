@@ -16,8 +16,8 @@ final class DereferencedContentTests: XCTestCase {
     }
 
     func test_oneExampleReferenced() throws {
-        let components = OpenAPI.Components(
-            examples: ["test": .init(value: .init("hello world"))]
+        let components = OpenAPI.Components.direct(
+            examples: ["test": .init(legacyValue: .init("hello world"))]
         )
         let t1 = try OpenAPI.Content(
             schema: .string,
@@ -26,15 +26,15 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(t1.example, "hello world")
         XCTAssertEqual(
             t1.examples, 
-            ["test": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
+            ["test": .init(legacyValue: .init("hello world"), vendorExtensions: ["x-component-name": "test"])]
         )
     }
 
     func test_multipleExamplesReferenced() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             examples: [
-                "test1": .init(value: .init("hello world")),
-                "test2": .init(value: .a(URL(string: "http://website.com")!))
+                "test1": .init(legacyValue: .init("hello world")),
+                "test2": .init(legacyValue: .a(URL(string: "http://website.com")!))
             ]
         )
         let t1 = try OpenAPI.Content(
@@ -48,8 +48,8 @@ final class DereferencedContentTests: XCTestCase {
         XCTAssertEqual(
             t1.examples,
             [
-                "test1": .init(value: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
-                "test2": .init(value: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
+                "test1": .init(legacyValue: .init("hello world"), vendorExtensions: ["x-component-name": "test1"]),
+                "test2": .init(legacyValue: .init(URL(string: "http://website.com")!), vendorExtensions: ["x-component-name": "test2"])
             ]
         )
     }
@@ -123,14 +123,35 @@ final class DereferencedContentTests: XCTestCase {
         )
     }
 
+    func test_inlineItemSchema() throws {
+        let t1 = try OpenAPI.Content(itemSchema: .string).dereferenced(in: .noComponents)
+        XCTAssertEqual(t1.itemSchema, .string(.init(), .init()))
+    }
+
+    func test_referencedItemSchema() throws {
+        let components = OpenAPI.Components(
+            schemas: ["schema1": .string]
+        )
+        let t1 = try OpenAPI.Content(itemSchema: .reference(.component(named: "schema1"))).dereferenced(in: components)
+        XCTAssertEqual(t1.itemSchema, .string(.init(vendorExtensions: ["x-component-name": "schema1"]), .init()))
+    }
+
+    func test_missingItemSchema() {
+        XCTAssertThrowsError(
+            try OpenAPI.Content(
+                itemSchema: .reference(.component(named: "missing"))
+            ).dereferenced(in: .noComponents)
+        )
+    }
+
     func test_inlineEncoding() throws {
         let t1 = try OpenAPI.Content(schema: .string, encoding: ["test": .init()]).dereferenced(in: .noComponents)
-        XCTAssertNotNil(t1.encoding?["test"])
-        XCTAssertNil(t1.encoding?["test"]?.headers)
+        XCTAssertNotNil(t1.encodingMap?["test"])
+        XCTAssertNil(t1.encodingMap?["test"]?.headers)
     }
 
     func test_referencedHeaderInEncoding() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             headers: [
                 "test": OpenAPI.Header(schema: .string)
             ]
@@ -146,11 +167,25 @@ final class DereferencedContentTests: XCTestCase {
             ]
         ).dereferenced(in: components)
         XCTAssertEqual(
-            t1.encoding?["test"]?.headers?["test"]?.schemaOrContent.schemaValue,
+            t1.encodingMap?["test"]?.headers?["test"]?.schemaOrContent.schemaValue,
             DereferencedJSONSchema.string(.init(), .init())
         )
         // just test that dynamic member lookup is connected correctly
-        XCTAssertEqual(t1.encoding?["test"]?.style, OpenAPI.Content.Encoding.defaultStyle)
+        XCTAssertEqual(t1.encodingMap?["test"]?.style, OpenAPI.Content.Encoding.defaultStyle)
+    }
+
+    func test_inlinePrefixEncoding() throws {
+        let t1 = try OpenAPI.Content(schema: .string, prefixEncoding: [.init()]).dereferenced(in: .noComponents)
+        XCTAssertNil(t1.encodingMap?["test"])
+        XCTAssertEqual(t1.prefixEncoding?.count, 1)
+        XCTAssertNil(t1.itemEncoding)
+    }
+
+    func test_inlineItemEncoding() throws {
+        let t1 = try OpenAPI.Content(schema: .string, itemEncoding: .init()).dereferenced(in: .noComponents)
+        XCTAssertNil(t1.encodingMap?["test"])
+        XCTAssertEqual(t1.prefixEncoding, [])
+        XCTAssertNotNil(t1.itemEncoding)
     }
 
     func test_missingHeaderInEncoding() {

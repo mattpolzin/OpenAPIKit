@@ -114,7 +114,8 @@ extension CodableVendorExtendable {
             throw GenericError(
                 subjectName: "Vendor Extension",
                 details: "Found at least one vendor extension property that does not begin with the required 'x-' prefix. Invalid properties: \(invalidKeysList)",
-                codingPath: decoder.codingPath
+                codingPath: decoder.codingPath,
+                pathIncludesSubject: false
             )
         }
 

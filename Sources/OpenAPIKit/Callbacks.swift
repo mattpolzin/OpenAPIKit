@@ -13,7 +13,7 @@ extension OpenAPI {
     /// A map from runtime expressions to path items to be used as
     /// callbacks for the API. The OpenAPI Spec "Callback Object."
     ///
-    /// See [OpenAPI Callback Object](https://spec.openapis.org/oas/v3.1.1.html#callback-object).
+    /// See [OpenAPI Callback Object](https://spec.openapis.org/oas/v3.2.0.html#callback-object).
     ///
     public typealias Callbacks = OrderedDictionary<CallbackURL, Either<OpenAPI.Reference<PathItem>, PathItem>>
 

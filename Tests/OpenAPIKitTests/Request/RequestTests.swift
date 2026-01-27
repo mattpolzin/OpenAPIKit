@@ -21,24 +21,31 @@ final class RequestTests: XCTestCase {
                                 content: [:],
                                 required: true)
 
-        let _ = OpenAPI.Request(description: "A Request",
-                                content: [
-                                    .json: .init(schema: .init(simpleSchema))
-
+        let _ = OpenAPI.Request(
+            description: "A Request",
+            content: [
+                .json: .content(.init(schema: .init(simpleSchema)))
             ],
-                                required: false)
+            required: false
+        )
 
-        let _ = OpenAPI.Request(content: [
-            .xml: .init(schema: .init(simpleSchema))
-            ])
+        let _ = OpenAPI.Request(
+            content: [
+                .xml: .content(.init(schema: .init(simpleSchema)))
+            ]
+        )
 
-        let _ = OpenAPI.Request(content: [
-            .form: .init(schema: .init(simpleSchema))
-            ])
+        let _ = OpenAPI.Request(
+            content: [
+                .form: .content(.init(schema: .init(simpleSchema)))
+            ]
+        )
 
-        let _ = OpenAPI.Request(content: [
-            .json: .init(schema: .init(.external(URL(string: "hello.json#/world")!)))
-            ])
+        let _ = OpenAPI.Request(
+            content: [
+                .json: .content(.init(schema: .reference(.external(URL(string: "hello.json#/world")!))))
+            ]
+        )
     }
 }
 
@@ -60,9 +67,11 @@ extension RequestTests {
     }
 
     func test_onlyReferenceContent_encode() {
-        let request = OpenAPI.Request(content: [
-            .json: .init(schema: .init(.external(URL(string: "hello.json#/world")!)))
-            ])
+        let request = OpenAPI.Request(
+            content: [
+                .json: .content(.init(schema: .reference(.external(URL(string: "hello.json#/world")!))))
+            ]
+        )
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
         assertJSONEquivalent(
@@ -85,9 +94,13 @@ extension RequestTests {
         let requestData = #"{ "content": { "application/json": { "schema": { "$ref": "hello.json#/world" } } } }"#.data(using: .utf8)!
         let request = try! orderUnstableDecode(OpenAPI.Request.self, from: requestData)
 
-        XCTAssertEqual(request, OpenAPI.Request(content: [
-            .json : .init(schema: .init(.external(URL(string: "hello.json#/world")!)))
-            ]))
+        XCTAssertEqual(request,
+            OpenAPI.Request(
+                content: [
+                  .json : .content(.init(schema: .reference(.external(URL(string: "hello.json#/world")!))))
+                ]
+            )
+        )
     }
 
     func test_onlySchemaContent_encode() {
@@ -97,7 +110,7 @@ extension RequestTests {
             ]
         )
         let request = OpenAPI.Request(content: [
-            .json: .init(schema: .init(schema))
+            .json: .content(.init(schema: .init(schema)))
         ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
@@ -147,10 +160,12 @@ extension RequestTests {
             request,
             OpenAPI.Request(
                 content: [
-                    .json : .init(
-                        schema: .init(
-                            .object(
-                                properties: ["hello": .string(required: false)]
+                    .json : .content(
+                        .init(
+                            schema: .init(
+                                .object(
+                                    properties: ["hello": .string(required: false)]
+                                )
                             )
                         )
                     )
@@ -289,7 +304,7 @@ extension RequestTests {
             ]
         )
         let request = OpenAPI.Request(content: [
-            .xml: .init(schema: .init(schema))
+            .xml: .content(.init(schema: .init(schema)))
             ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
@@ -339,9 +354,11 @@ extension RequestTests {
             request,
             OpenAPI.Request(
                 content: [
-                    .xml : .init(
-                        schema: .init(
-                            .object(properties: ["hello": .string(required: false)])
+                    .xml : .content(
+                        .init(
+                            schema: .init(
+                                .object(properties: ["hello": .string(required: false)])
+                            )
                         )
                     )
                 ]
@@ -356,7 +373,7 @@ extension RequestTests {
             ]
         )
         let request = OpenAPI.Request(content: [
-            .form: .init(schema: .init(schema))
+            .form: .content(.init(schema: .init(schema)))
             ])
         let encodedString = try! orderUnstableTestStringFromEncoding(of: request)
 
@@ -406,9 +423,11 @@ extension RequestTests {
             request,
             OpenAPI.Request(
                 content: [
-                    .form : .init(
-                        schema: .init(
-                            .object(properties: ["hello": .string(required: false)])
+                    .form : .content(
+                        .init(
+                            schema: .init(
+                                .object(properties: ["hello": .string(required: false)])
+                            )
                         )
                     )
                 ]

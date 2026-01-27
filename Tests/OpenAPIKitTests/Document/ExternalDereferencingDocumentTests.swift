@@ -74,6 +74,41 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     "type": "object"
                 }
                 """,
+                "requests_hello_json": """
+                {
+                    "content": {
+                        "application/json": {
+                            "itemSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "$ref": "file://./schemas/string_param.json"
+                                    }
+                                }
+                            },
+                            "prefixEncoding": [
+                                {
+                                    "style": "form"
+                                }
+                            ],
+                            "itemEncoding": {
+                                "headers": {
+                                    "head1": {
+                                        "$ref": "file://./headers/hello.json"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """,
+                "headers_hello_json": """
+                {
+                    "schema": {
+                        "$ref": "file://./schemas/string_param.json"
+                    }
+                }
+                """,
                 "paths_webhook_json": """
                 {
                     "summary": "just a webhook",
@@ -220,6 +255,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                    ],
                    get: .init(
                       operationId: "helloOp",
+                      requestBody: .reference(.external(URL(string: "file://./requests/hello.json")!)),
                       responses: [:],
                       callbacks: [
                           "callback1": .reference(.external(URL(string: "file://./callbacks/one.json")!))
@@ -248,6 +284,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
 
+        // do 4 times
         var docCopy1 = document
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
@@ -255,14 +292,17 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         try await docCopy1.externallyDereference(with: ExampleLoader.self)
         docCopy1.components.sort()
 
+        // do to depth of 4
         var docCopy2 = document
         try await docCopy2.externallyDereference(with: ExampleLoader.self, depth: 4)
         docCopy2.components.sort()
 
+        // do until done
         var docCopy3 = document
         let messages = try await docCopy3.externallyDereference(with: ExampleLoader.self, depth: .full)
         docCopy3.components.sort()
 
+        // for this document, depth of 4 is enough for all the above to compare equally
         XCTAssertEqual(docCopy1, docCopy2)
         XCTAssertEqual(docCopy2, docCopy3)
 
@@ -270,6 +310,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
             messages.sorted(),
             ["file://./callbacks/one.json",
              "file://./examples/good.json",
+             "file://./headers/hello.json",
              "file://./headers/webhook.json",
              "file://./headers/webhook2.json",
              "file://./links/first.json",
@@ -278,9 +319,12 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
              "file://./paths/callback.json",
              "file://./paths/webhook.json",
              "file://./paths/webhook.json",
+             "file://./requests/hello.json",
              "file://./requests/webhook.json",
              "file://./responses/webhook.json",
              "file://./schemas/basic_object.json",
+             "file://./schemas/string_param.json",
+             "file://./schemas/string_param.json",
              "file://./schemas/string_param.json",
              "file://./schemas/string_param.json",
              "file://./schemas/string_param.json",

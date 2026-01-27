@@ -70,6 +70,11 @@ extension OpenAPI.Error.Decoding.Response {
 
     internal init(_ error: GenericError) {
         var codingPath = Self.relativePath(from: error.codingPath)
+
+        if error.pathIncludesSubject {
+            codingPath = codingPath.dropLast()
+        }
+
         let code = codingPath.removeFirst().stringValue.lowercased()
 
         // this part of the coding path is structurally guaranteed to be a status code

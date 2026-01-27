@@ -1057,7 +1057,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_withInitalAllowedValues() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, allowedValues: [false]))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, allowedValues: [.init([:])]), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, allowedValues: [.init(emptyStringDict)]), .init(properties: [:]))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, allowedValues: [.init([false])]), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, allowedValues: [2.5]), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, allowedValues: [5]), .init())
@@ -1065,7 +1065,7 @@ final class SchemaObjectTests: XCTestCase {
         let fragment = JSONSchema.fragment(.init(allowedValues: [false]))
 
         XCTAssertEqual(boolean.allowedValues, [false])
-        XCTAssertEqual(object.allowedValues, [.init([:])])
+        XCTAssertEqual(object.allowedValues, [.init(emptyStringDict)])
         XCTAssertEqual(array.allowedValues?[0].value as! [Bool], [false])
         XCTAssertEqual(number.allowedValues, [2.5])
         XCTAssertEqual(integer.allowedValues, [5])
@@ -1077,7 +1077,7 @@ final class SchemaObjectTests: XCTestCase {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(allowedValues: [false])
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
-            .with(allowedValues: [.init([:])])
+            .with(allowedValues: [.init(emptyStringDict)])
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .with(allowedValues: [.init([false])])
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
@@ -1118,7 +1118,7 @@ final class SchemaObjectTests: XCTestCase {
 
     func test_withInitalDefaultValue() {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true, defaultValue: false))
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, defaultValue: .init([:])), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, defaultValue: .init(emptyStringDict)), .init(properties: [:]))
         let array = JSONSchema.array(.init(format: .unspecified, required: true, defaultValue: .init([false])), .init(items: .boolean(.init(format: .unspecified, required: true))))
         let number = JSONSchema.number(.init(format: .unspecified, required: true, defaultValue: 2.5), .init())
         let integer = JSONSchema.integer(.init(format: .unspecified, required: true, defaultValue: 5), .init())
@@ -1126,7 +1126,7 @@ final class SchemaObjectTests: XCTestCase {
         let fragment = JSONSchema.fragment(.init(defaultValue: false))
 
         XCTAssertEqual(boolean.defaultValue, false)
-        XCTAssertEqual(object.defaultValue, .init([:]))
+        XCTAssertEqual(object.defaultValue, .init(emptyStringDict))
         XCTAssertEqual(array.defaultValue, .init([false]))
         XCTAssertEqual(number.defaultValue, 2.5)
         XCTAssertEqual(integer.defaultValue, 5)
@@ -1138,7 +1138,7 @@ final class SchemaObjectTests: XCTestCase {
         let boolean = JSONSchema.boolean(.init(format: .unspecified, required: true))
             .with(defaultValue: false)
         let object = JSONSchema.object(.init(format: .unspecified, required: true), .init(properties: [:]))
-            .with(defaultValue: .init([:]))
+            .with(defaultValue: .init(emptyStringDict))
         let array = JSONSchema.array(.init(format: .unspecified, required: true), .init(items: .boolean(.init(format: .unspecified, required: true))))
             .with(defaultValue: .init([false]))
         let number = JSONSchema.number(.init(format: .unspecified, required: true), .init())
@@ -1178,7 +1178,7 @@ final class SchemaObjectTests: XCTestCase {
     }
 
     func test_withInitialExample() {
-        let object = JSONSchema.object(.init(format: .unspecified, required: true, example: .init([:])), .init(properties: [:]))
+        let object = JSONSchema.object(.init(format: .unspecified, required: true, example: .init(emptyStringDict)), .init(properties: [:]))
         let fragment = JSONSchema.fragment(.init(example: "hi"))
 
         // nonsense

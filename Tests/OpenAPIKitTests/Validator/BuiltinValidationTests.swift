@@ -94,9 +94,9 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
+                                    .json: .content(.init(
                                         schema: .fragment(.init())
-                                    )
+                                    ))
                                 ]
                             )
                         ]
@@ -121,11 +121,13 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
-                                        schema: .object(
-                                            properties: [
-                                                "nested": .fragment(.init())
-                                            ]
+                                    .json: .content(
+                                        .init(
+                                            schema: .object(
+                                                properties: [
+                                                    "nested": .fragment(.init())
+                                                ]
+                                            )
                                         )
                                     )
                                 ]
@@ -157,11 +159,13 @@ final class BuiltinValidationTests: XCTestCase {
                             200: .response(
                                 description: "Test",
                                 content: [
-                                    .json: .init(
-                                        // following is _not_ an empty schema component
-                                        // because it is actually a `{ "type": "object" }`
-                                        // instead of a `{ }`
-                                        schema: .object
+                                    .json: .content(
+                                        .init(
+                                            // following is _not_ an empty schema component
+                                            // because it is actually a `{ "type": "object" }`
+                                            // instead of a `{ }`
+                                            schema: .object
+                                        )
                                     )
                                 ]
                             )
@@ -207,7 +211,7 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello/world/{idx}": .init(
                     parameters: [
-                        .parameter(name: "idx", context: .path, schema: .string)
+                        .parameter(name: "idx", context: .path(schema: .string))
                     ],
                     get: .init(
                         responses: [:]
@@ -229,7 +233,7 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello/world/{idx}": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "idx", context: .path, schema: .string)
+                            .parameter(name: "idx", context: .path(schema: .string))
                         ],
                         responses: [:]
                     )
@@ -496,8 +500,8 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "hiya", context: .path, schema: .string),
-                            .parameter(name: "hiya", context: .path, schema: .string)
+                            .parameter(name: "hiya", context: .path(schema: .string)),
+                            .parameter(name: "hiya", context: .path(schema: .string))
                         ],
                         responses: [
                             200: .response(description: "hi")
@@ -524,9 +528,9 @@ final class BuiltinValidationTests: XCTestCase {
                 "/hello": .init(
                     get: .init(
                         parameters: [
-                            .parameter(name: "hiya", context: .query, schema: .string),
-                            .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
-                            .parameter(name: "cool", context: .path, schema: .string)  // changes parameter name but not location
+                            .parameter(name: "hiya", context: .query(schema: .string)),
+                            .parameter(name: "hiya", context: .path(schema: .string)), // changes parameter location but not name
+                            .parameter(name: "cool", context: .path(schema: .string))  // changes parameter name but not location
                         ],
                         responses: [
                             200: .response(description: "hi")
@@ -646,8 +650,8 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     parameters: [
-                        .parameter(name: "hiya", context: .query, schema: .string),
-                        .parameter(name: "hiya", context: .query, schema: .string)
+                        .parameter(name: "hiya", context: .query(schema: .string)),
+                        .parameter(name: "hiya", context: .query(schema: .string))
                     ],
                     get: .init(
                         responses: [
@@ -674,9 +678,9 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     parameters: [
-                        .parameter(name: "hiya", context: .query, schema: .string),
-                        .parameter(name: "hiya", context: .path, schema: .string), // changes parameter location but not name
-                        .parameter(name: "cool", context: .path, schema: .string) // changes parameter name but not location
+                        .parameter(name: "hiya", context: .query(schema: .string)),
+                        .parameter(name: "hiya", context: .path(schema: .string)), // changes parameter location but not name
+                        .parameter(name: "cool", context: .path(schema: .string)) // changes parameter name but not location
                     ],
                     get: .init(
                         responses: [
@@ -731,13 +735,15 @@ final class BuiltinValidationTests: XCTestCase {
                         description: "response2",
                         headers: ["header1": .reference(.component(named: "header1"))],
                         content: [
-                            .json: .init(
-                                schema: .string,
-                                examples: [
-                                    "example1": .reference(.component(named: "example1"))
-                                ]
+                            .json: .content(
+                                .init(
+                                    schema: .string,
+                                    examples: [
+                                        "example1": .reference(.component(named: "example1"))
+                                    ]
+                                )
                             ),
-                            .xml: .init(schemaReference: .component(named: "schema1"))
+                            .xml: .content(.init(schemaReference: .component(named: "schema1")))
                         ],
                         links: ["linky": .reference(.component(named: "link1"))]
                     )
@@ -806,7 +812,7 @@ final class BuiltinValidationTests: XCTestCase {
                             "header1": .reference(.component(named: "header1")),
                             "external": .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!))
                         ],
-                        content: [
+                        content: .direct([
                             .json: .init(
                                 schema: .string,
                                 examples: [
@@ -816,7 +822,7 @@ final class BuiltinValidationTests: XCTestCase {
                             ),
                             .xml: .init(schemaReference: .component(named: "schema1")),
                             .txt: .init(schemaReference: .external(URL(string: "https://website.com/file.json#/hello/world")!))
-                        ],
+                        ]),
                         links: [
                             "linky": .reference(.component(named: "link1")),
                             "linky2": .reference(.external(URL(string: "https://linky.com")!))
@@ -837,7 +843,7 @@ final class BuiltinValidationTests: XCTestCase {
                 "/world": .reference(.component(named: "path1")),
                 "/external": .reference(.external(URL(string: "https://other-world.com")!))
             ],
-            components: .init(
+            components: .direct(
                 schemas: [
                     "schema1": .object
                 ],
@@ -845,13 +851,13 @@ final class BuiltinValidationTests: XCTestCase {
                     "response1": .init(description: "test")
                 ],
                 parameters: [
-                    "parameter1": .init(name: "test", context: .header, schema: .string)
+                    "parameter1": .init(name: "test", context: .header(schema: .string))
                 ],
                 examples: [
-                    "example1": .init(value: .b("hello"))
+                    "example1": .init(legacyValue: .b("hello"))
                 ],
                 requestBodies: [
-                    "request1": .init(content: [.json: .init(schema: .object)])
+                    "request1": .init(content: [.json: .content(.init(schema: .object))])
                 ],
                 headers: [
                     "header1": .init(schema: .string)
@@ -909,7 +915,7 @@ final class BuiltinValidationTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 links: [
                     "testLink": link
                 ]
@@ -936,7 +942,7 @@ final class BuiltinValidationTests: XCTestCase {
                     )
                 )
             ],
-            components: .init(
+            components: .direct(
                 links: [
                     "testLink": link
                 ]
@@ -949,6 +955,262 @@ final class BuiltinValidationTests: XCTestCase {
             let errorCollection = error as? ValidationErrorCollection
             XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: Links with operationIds have corresponding Operations")
             XCTAssertTrue((errorCollection?.values.first?.codingPath.map { $0.stringValue }.joined(separator: ".") ?? "").contains("testLink"))
+        }
+    }
+
+    func test_badMatrixStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .matrix))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the matrix style can only be used for the path location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badLabelStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .label))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the label style can only be used for the path location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badSimpleStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.query(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .simple))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the simple style can only be used for the path and header locations")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badFormStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .form))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the form style can only be used for the query and cookie locations")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badSpaceDelimitedStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .spaceDelimited))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the spaceDelimited style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badPipeDelimitedStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .pipeDelimited))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the pipeDelimited style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badDeepObjectStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .deepObject))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the deepObject style can only be used for the query location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
+        }
+    }
+
+    func test_badCookieStyleLocation_fails() throws {
+        let parameter = OpenAPI.Parameter.header(
+            name: "test",
+            schemaOrContent: .schema(.init(.string, style: .cookie))
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        operationId: "testOperation",
+                        parameters: [
+                            .parameter(parameter)
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+        
+        let validator = Validator.blank.validating(.parameterStyleAndLocationAreCompatible)
+        
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the cookie style can only be used for the cookie location")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
         }
     }
 }

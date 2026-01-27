@@ -11,7 +11,7 @@ import OpenAPIKit
 final class HeaderTests: XCTestCase {
     func test_init() {
         let contentMap: OpenAPI.Content.Map = [
-            .json: .init(schema: .string)
+            .json: .content(.init(schema: .string))
         ]
 
         let t1 = OpenAPI.Header(schemaOrContent: .init(contentMap))
@@ -64,7 +64,7 @@ final class HeaderTests: XCTestCase {
 extension HeaderTests {
     func test_header_contentMap_encode() throws {
         let header = OpenAPI.Header(content: [
-            .json: .init(schema: .string)
+            .json: .content(.init(schema: .string))
         ])
 
         let headerEncoding = try orderUnstableTestStringFromEncoding(of: header)
@@ -103,7 +103,7 @@ extension HeaderTests {
         XCTAssertEqual(
             header,
             OpenAPI.Header(content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ])
         )
     }
@@ -217,7 +217,7 @@ extension HeaderTests {
     func test_header_required_encode() throws {
         let header = OpenAPI.Header(
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ],
             required: true
         )
@@ -261,7 +261,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string)
+                    .json: .content(.init(schema: .string))
                 ],
                 required: true
             )
@@ -271,7 +271,7 @@ extension HeaderTests {
     func test_header_withDescription_encode() throws {
         let header = OpenAPI.Header(
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ],
             description: "hello"
         )
@@ -315,7 +315,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string)
+                    .json: .content(.init(schema: .string))
                 ],
                 description: "hello"
             )
@@ -325,7 +325,7 @@ extension HeaderTests {
     func test_header_deprecated_encode() throws {
         let header = OpenAPI.Header(
             content: [
-                .json: .init(schema: .string)
+                .json: .content(.init(schema: .string))
             ],
             deprecated: true
         )
@@ -369,7 +369,7 @@ extension HeaderTests {
             header,
             OpenAPI.Header(
                 content: [
-                    .json: .init(schema: .string)
+                    .json: .content(.init(schema: .string))
                 ],
                 deprecated: true
             )

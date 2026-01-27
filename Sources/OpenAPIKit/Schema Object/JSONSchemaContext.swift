@@ -60,7 +60,7 @@ public protocol JSONSchemaContext: Sendable {
     /// be placed on a parent object (one level up from an `allOf`, `anyOf`,
     /// or `oneOf`) as a way to reduce redundancy.
     ///
-    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.1.1.html#discriminator-object).
+    /// See [OpenAPI Discriminator Object](https://spec.openapis.org/oas/v3.2.0.html#discriminator-object).
     var discriminator: OpenAPI.Discriminator? { get }
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.
@@ -131,6 +131,9 @@ public protocol JSONSchemaContext: Sendable {
     /// See [Dynamic References with "$dynamicRef"](https://json-schema.org/draft/2020-12/json-schema-core#name-dynamic-references-with-dyn)
     var dynamicAnchor: String? { get }
 
+    /// Additional metadata to describe the XML representation of this schema.
+    var xml: OpenAPI.XML? { get }
+
     /// Vendor Extensions (a.k.a. Specification Extensions) for the schema
     var vendorExtensions: [String: AnyCodable] { get }
 }
@@ -175,6 +178,10 @@ extension JSONSchema {
         /// A list of schema-local definitions.
         public let defs: OrderedDictionary<String, JSONSchema>
 
+        /// Additional metadata to describe the XML representation of this
+        /// schema.
+        public let xml: OpenAPI.XML?
+
         /// Dictionary of vendor extensions.
         ///
         /// These should be of the form:
@@ -218,6 +225,7 @@ extension JSONSchema {
                 && defaultValue == nil
                 && examples.isEmpty
                 && _permissions == nil
+                && xml == nil
         }
 
         /// Create a schema core context.
@@ -242,6 +250,7 @@ extension JSONSchema {
             anchor: String? = nil,
             dynamicAnchor: String? = nil,
             defs: OrderedDictionary<String, JSONSchema> = [:],
+            xml: OpenAPI.XML? = nil,
             vendorExtensions: [String: AnyCodable] = [:],
             _inferred: Bool = false
         ) {
@@ -261,6 +270,7 @@ extension JSONSchema {
             self.anchor = anchor
             self.dynamicAnchor = dynamicAnchor
             self.defs = defs
+            self.xml = xml
             self.vendorExtensions = vendorExtensions
             self.inferred = _inferred
         }
@@ -281,6 +291,7 @@ extension JSONSchema {
             anchor: String? = nil,
             dynamicAnchor: String? = nil,
             defs: OrderedDictionary<String, JSONSchema> = [:],
+            xml: OpenAPI.XML? = nil,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
             self.warnings = []
@@ -299,6 +310,7 @@ extension JSONSchema {
             self.anchor = anchor
             self.dynamicAnchor = dynamicAnchor
             self.defs = defs
+            self.xml = xml
             self.vendorExtensions = vendorExtensions
             self.inferred = false
         }
@@ -307,8 +319,7 @@ extension JSONSchema {
 
 extension JSONSchema.CoreContext: Equatable {
     public static func == (lhs: JSONSchema.CoreContext<Format>, rhs: JSONSchema.CoreContext<Format>) -> Bool {
-      // Split the conditionals up for the sake of the Swift 5.4 compiler.
-      let step1 = lhs.format == rhs.format
+      lhs.format == rhs.format
           && lhs.required == rhs.required
           && lhs.nullable == rhs.nullable
           && lhs._permissions == rhs._permissions
@@ -317,14 +328,13 @@ extension JSONSchema.CoreContext: Equatable {
           && lhs.description == rhs.description
           && lhs.externalDocs == rhs.externalDocs
           && lhs.discriminator == rhs.discriminator
-
-      return step1
           && lhs.allowedValues == rhs.allowedValues
           && lhs.defaultValue == rhs.defaultValue
           && lhs.examples == rhs.examples
           && lhs.anchor == rhs.anchor
           && lhs.dynamicAnchor == rhs.dynamicAnchor
           && lhs.defs == rhs.defs
+          && lhs.xml == rhs.xml
           && lhs.vendorExtensions == rhs.vendorExtensions
           && lhs.inferred == rhs.inferred
     }
@@ -351,6 +361,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -374,6 +385,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -397,6 +409,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -420,6 +433,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -443,6 +457,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -466,6 +481,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -489,6 +505,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -512,6 +529,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -535,6 +553,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -558,6 +577,7 @@ extension JSONSchema.CoreContext {
             anchor: anchor,
             dynamicAnchor: dynamicAnchor,
             defs: defs,
+            xml: xml,
             vendorExtensions: vendorExtensions,
             _inferred: inferred
         )
@@ -874,6 +894,7 @@ extension JSONSchema {
         case readOnly
         case writeOnly
         case deprecated
+        case xml
     }
 }
 
@@ -906,6 +927,8 @@ extension JSONSchema.CoreContext: Encodable {
         if !defs.isEmpty {
             try container.encode(defs, forKey: .defs)
         }
+
+        try container.encodeIfPresent(xml, forKey: .xml)
 
         // deprecated is false if omitted
         if deprecated {
@@ -1011,6 +1034,9 @@ extension JSONSchema.CoreContext: Decodable {
         anchor = try container.decodeIfPresent(String.self, forKey: .anchor)
         dynamicAnchor = try container.decodeIfPresent(String.self, forKey: .dynamicAnchor)
         defs = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .defs) ?? [:]
+
+        xml = try container.decodeIfPresent(OpenAPI.XML.self, forKey: .xml)
+
         // vendor extensions get decoded by the JSONSchema because although vendor extensions
         // apply to all schemas (core context) they are more accurately in the context of the
         // full JSON Schema.
@@ -1042,7 +1068,7 @@ extension JSONSchema.CoreContext: Decodable {
                 .underlyingError(
                       GenericError(
                           subjectName: "OpenAPI Schema",
-                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'.",
+                          details: "Found 'nullable' property. This property is not supported by OpenAPI v3.1.x. OpenAPIKit has translated it into 'type: [\"null\", ...]'",
                           codingPath: container.codingPath
                       )
                   )
@@ -1173,11 +1199,13 @@ extension JSONSchema.IntegerContext: Decodable {
             let value = try intAttempt
                 ?? doubleAttempt.map { floatVal in
                 guard let integer = Int(exactly: floatVal) else {
+                    let key = max ? CodingKeys.maximum : CodingKeys.minimum
+                    let subject = key.rawValue
                     throw GenericError(
-                        subjectName: max ? "maximum" : "minimum",
+                        subjectName: subject,
                         details: "Expected an Integer literal but found a floating point value (\(String(describing: floatVal)))",
-                        codingPath: decoder.codingPath,
-                        pathIncludesSubject: false
+                        codingPath: decoder.codingPath + [key],
+                        pathIncludesSubject: true
                     )
                 }
                 return integer

@@ -105,7 +105,7 @@ extension DereferencedDocument {
     /// each path, traversed in the order the paths appear in
     /// the document.
     ///
-    /// See [Operation Object](https://spec.openapis.org/oas/v3.1.1.html#operation-object) in the specifcation.
+    /// See [Operation Object](https://spec.openapis.org/oas/v3.2.0.html#operation-object) in the specifcation.
     ///
     public var allOperationIds: [String] {
         return paths.values

@@ -205,14 +205,14 @@ final class ResolvedEndpointTests: XCTestCase {
                 "/hello/world": .init(
                     summary: "routeSummary",
                     description: "routeDescription",
-                    parameters: [.parameter(name: "one", context: .header, schema: .string)],
+                    parameters: [.parameter(name: "one", context: .header(schema: .string))],
                     get: .init(
                         tags: "a", "b",
                         summary: "endpointSummary",
                         description: "endpointDescription",
                         externalDocs: .init(url: URL(string: "http://website.com")!),
                         operationId: "hi there",
-                        parameters: [.parameter(name: "two", context: .query, schema: .string)],
+                        parameters: [.parameter(name: "two", context: .query(schema: .string))],
                         requestBody: .init(description: "requestBody", content: [:]),
                         responses: [200: .response(description: "hello world")],
                         deprecated: true,
@@ -243,14 +243,14 @@ final class ResolvedEndpointTests: XCTestCase {
                 "/hello/world": .init(
                     summary: "routeSummary",
                     description: "routeDescription",
-                    parameters: [.parameter(name: "one", context: .header, schema: .string)],
+                    parameters: [.parameter(name: "one", context: .header(schema: .string))],
                     get: .init(
                         tags: "a", "b",
                         summary: "endpointSummary",
                         description: "endpointDescription",
                         externalDocs: .init(url: URL(string: "http://website.com")!),
                         operationId: "hi there",
-                        parameters: [.parameter(name: "one", context: .header, schema: .integer)],
+                        parameters: [.parameter(name: "one", context: .header(schema: .integer))],
                         requestBody: .init(description: "requestBody", content: [:]),
                         responses: [200: .response(description: "hello world")],
                         deprecated: true,
@@ -302,7 +302,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -357,7 +357,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -411,7 +411,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(
@@ -445,14 +445,14 @@ final class ResolvedEndpointTests: XCTestCase {
                 "/hello/world": .init(
                     summary: "routeSummary",
                     description: "routeDescription",
-                    parameters: [.parameter(name: "one", context: .header(required: true), schema: .string)],
+                    parameters: [.parameter(name: "one", context: .header(required: true, schema: .string))],
                     get: .init(
                         tags: "a", "b",
                         summary: "endpointSummary",
                         description: "endpointDescription",
                         externalDocs: .init(url: URL(string: "http://website.com")!),
                         operationId: "hi there",
-                        parameters: [.parameter(name: "two", context: .query, schema: .string)],
+                        parameters: [.parameter(name: "two", context: .query(schema: .string))],
                         requestBody: .init(description: "requestBody", content: [:]),
                         responses: [200: .response(description: "hello world")],
                         deprecated: true,
@@ -510,7 +510,7 @@ final class ResolvedEndpointTests: XCTestCase {
                     ]
                 )
             ],
-            components: .init(
+            components: .direct(
                 securitySchemes: [
                     "secure1": .apiKey(name: "hi", location: .cookie),
                     "secure2": .oauth2(

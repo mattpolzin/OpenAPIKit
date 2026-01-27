@@ -76,7 +76,7 @@ final class OpenAPIReferenceTests: XCTestCase {
     }
 
     func test_summaryAndDescriptionOverrides() throws {
-        let components = OpenAPI.Components(
+        let components = OpenAPI.Components.direct(
             schemas: [
                 "hello": .string(description: "description")
             ],
@@ -84,10 +84,10 @@ final class OpenAPIReferenceTests: XCTestCase {
                 "hello": .init(description: "description")
             ],
             parameters: [
-                "hello": .init(name: "name", context: .path, content: [:], description: "description")
+                "hello": .path(name: "name", content: [:], description: "description")
             ],
             examples: [
-                "hello": .init(summary: "summary", description: "description", value: .b(""))
+                "hello": .init(summary: "summary", description: "description", legacyValue: .b(""))
             ],
             requestBodies: [
                 "hello": .init(description: "description", content: [:])

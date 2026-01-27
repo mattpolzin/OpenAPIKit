@@ -834,8 +834,8 @@ final class DocumentConversionTests: XCTestCase {
 
         try assertEqualNewToOld(newDoc,oldDoc)
 
-        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"])
-        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"])
+        let newParameter1 = try XCTUnwrap(newDoc.components.parameters["param1"]?.b)
+        let newParameter2 = try XCTUnwrap(newDoc.components.parameters["param2"]?.b)
 
         try assertEqualNewToOld(newParameter1, parameter1)
         try assertEqualNewToOld(newParameter2, parameter2)
@@ -996,14 +996,14 @@ fileprivate func assertEqualNewToOld(_ newParam: OpenAPIKit.OpenAPI.Parameter, _
 
 fileprivate func assertEqualNewToOld(_ newParamContext: OpenAPIKit.OpenAPI.Parameter.Context, _ oldParamContext: OpenAPIKit30.OpenAPI.Parameter.Context) {
     switch (newParamContext, oldParamContext) {
-    case (.query(required: let req, allowEmptyValue: let empty), .query(required: let req2, allowEmptyValue: let empty2)):
+    case (.query(required: let req, allowEmptyValue: let empty, schemaOrContent: _), .query(required: let req2, allowEmptyValue: let empty2)):
         XCTAssertEqual(req, req2)
         XCTAssertEqual(empty, empty2)
-    case (.header(required: let req), .header(required: let req2)):
+    case (.header(required: let req, schemaOrContent: _), .header(required: let req2)):
         XCTAssertEqual(req, req2)
     case (.path, .path):
         break
-    case (.cookie(required: let req), .cookie(required: let req2)):
+    case (.cookie(required: let req, schemaOrContent: _), .cookie(required: let req2)):
         XCTAssertEqual(req, req2)
     default:
         XCTFail("Parameter contexts are not equal. \(newParamContext)  /   \(oldParamContext)")
@@ -1086,11 +1086,15 @@ fileprivate func assertEqualNewToOld(_ newRequest: OpenAPIKit.OpenAPI.Request, _
 fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content.Map, _ oldContentMap: OpenAPIKit30.OpenAPI.Content.Map) throws {
     for ((newCt, newContent), (oldCt, oldContent)) in zip(newContentMap, oldContentMap) {
         XCTAssertEqual(newCt, oldCt)
-        switch (newContent.schema, oldContent.schema) {
-        case (.a(let ref1), .a(let ref2)):
+        guard case let .b(newContent) = newContent else {
+            XCTFail("Expected new content not to be a reference but found a reference: \(newContent)")
+            return
+        }
+        switch (newContent.schema?.value, oldContent.schema) {
+        case (.reference(let ref1, _), .a(let ref2)):
             XCTAssertEqual(ref1.absoluteString, ref2.absoluteString)
-        case (.b(let schema1), .b(let schema2)):
-            try assertEqualNewToOld(schema1, schema2)
+        case (let .some(schema1), .b(let schema2)):
+            try assertEqualNewToOld(.init(schema:schema1), schema2)
         default:
             XCTFail("Found one reference and one schema. \(String(describing: newContent.schema))   /   \(String(describing: oldContent.schema))")
         }
@@ -1112,6 +1116,7 @@ fileprivate func assertEqualNewToOld(_ newContentMap: OpenAPIKit.OpenAPI.Content
             XCTAssertNil(oldContent.examples)
         }
         if let newEncodingRef = newContent.encoding {
+            let newEncodingRef = try XCTUnwrap(newEncodingRef.mapValue)
             let oldEncodingRef = try XCTUnwrap(oldContent.encoding)
             for ((newKey, newEncoding), (oldKey, oldEncoding)) in zip(newEncodingRef, oldEncodingRef) {
                 XCTAssertEqual(newKey, oldKey)
@@ -1136,12 +1141,12 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .number(let coreContext, let numericContext):
             let newNumericContext = try XCTUnwrap(newSchema.numberContext)
-            // TODO: compare number contexts
+            assertEqualNewToOld(newNumericContext, numericContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .integer(let coreContext, let integerContext):
             let newIntegerContext = try XCTUnwrap(newSchema.integerContext)
-            // TODO: compare integer contexts
+            assertEqualNewToOld(newIntegerContext, integerContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .string(let coreContext, let stringContext):
@@ -1151,12 +1156,12 @@ fileprivate func assertEqualNewToOld(_ newSchema: OpenAPIKit.JSONSchema, _ oldSc
 
         case .object(let coreContext, let objectContext):
             let newObjectContext = try XCTUnwrap(newSchema.objectContext)
-            // TODO: compare object contexts
+            try assertEqualNewToOld(newObjectContext, objectContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .array(let coreContext, let arrayContext):
             let newArrayContext = try XCTUnwrap(newSchema.arrayContext)
-            // TODO: compare array contexts
+            try assertEqualNewToOld(newArrayContext, arrayContext)
             try assertEqualNewToOld(newCoreContext, coreContext)
 
         case .all(of: let schemas, core: let coreContext):
@@ -1208,7 +1213,7 @@ fileprivate func assertEqualNewToOld(_ newCoreContext: OpenAPIKit.JSONSchemaCont
     XCTAssertEqual(newCoreContext.nullable, oldCoreContext.nullable)
     XCTAssertEqual(newCoreContext.title, oldCoreContext.title)
     XCTAssertEqual(newCoreContext.description, oldCoreContext.description)
-    XCTAssertEqual(newCoreContext.discriminator, oldCoreContext.discriminator)
+    try assertEqualNewToOld(newCoreContext.discriminator, oldCoreContext.discriminator)
     try assertEqualNewToOld(newCoreContext.externalDocs, oldCoreContext.externalDocs)
     XCTAssertEqual(newCoreContext.allowedValues, oldCoreContext.allowedValues)
     XCTAssertEqual(newCoreContext.defaultValue, oldCoreContext.defaultValue)
@@ -1228,11 +1233,72 @@ fileprivate func assertEqualNewToOld(_ newStringContext: OpenAPIKit.JSONSchema.S
     XCTAssertNil(newStringContext.contentMediaType)
 }
 
+fileprivate func assertEqualNewToOld(_ newNumericContext: OpenAPIKit.JSONSchema.NumericContext, _ oldNumericContext: OpenAPIKit30.JSONSchema.NumericContext) {
+    XCTAssertEqual(newNumericContext.multipleOf, oldNumericContext.multipleOf)
+    XCTAssertEqual(newNumericContext.maximum?.value, oldNumericContext.maximum?.value)
+    XCTAssertEqual(newNumericContext.maximum?.exclusive, oldNumericContext.maximum?.exclusive)
+    XCTAssertEqual(newNumericContext.minimum?.value, oldNumericContext.minimum?.value)
+    XCTAssertEqual(newNumericContext.minimum?.exclusive, oldNumericContext.minimum?.exclusive)
+}
+
+fileprivate func assertEqualNewToOld(_ newIntegerContext: OpenAPIKit.JSONSchema.IntegerContext, _ oldIntegerContext: OpenAPIKit30.JSONSchema.IntegerContext) {
+    XCTAssertEqual(newIntegerContext.multipleOf, oldIntegerContext.multipleOf)
+    XCTAssertEqual(newIntegerContext.maximum?.value, oldIntegerContext.maximum?.value)
+    XCTAssertEqual(newIntegerContext.maximum?.exclusive, oldIntegerContext.maximum?.exclusive)
+    XCTAssertEqual(newIntegerContext.minimum?.value, oldIntegerContext.minimum?.value)
+    XCTAssertEqual(newIntegerContext.minimum?.exclusive, oldIntegerContext.minimum?.exclusive)
+}
+
+fileprivate func assertEqualNewToOld(_ newArrayContext: OpenAPIKit.JSONSchema.ArrayContext, _ oldArrayContext: OpenAPIKit30.JSONSchema.ArrayContext) throws {
+    if let newItems = newArrayContext.items {
+        guard let oldItems = oldArrayContext.items else {
+            return XCTFail("New array context has items defined but old array context does not")
+        }
+        try assertEqualNewToOld(newItems, oldItems)
+    } else {
+        XCTAssertNil(oldArrayContext.items)
+    }
+    XCTAssertNil(newArrayContext.prefixItems)
+    XCTAssertEqual(newArrayContext.maxItems, oldArrayContext.maxItems)
+    XCTAssertEqual(newArrayContext.minItems, oldArrayContext.minItems)
+    XCTAssertEqual(newArrayContext.uniqueItems, oldArrayContext.uniqueItems)
+}
+
+fileprivate func assertEqualNewToOld(_ newObjectContext: OpenAPIKit.JSONSchema.ObjectContext, _ oldObjectContext: OpenAPIKit30.JSONSchema.ObjectContext) throws {
+    XCTAssertEqual(newObjectContext.minProperties, oldObjectContext.minProperties)
+    XCTAssertEqual(newObjectContext.maxProperties, oldObjectContext.maxProperties)
+    switch (newObjectContext.additionalProperties, oldObjectContext.additionalProperties) {
+    case (.a(let value1), .a(let value2)): XCTAssertEqual(value1, value2)
+    case (.b(let value1), .b(let value2)): try assertEqualNewToOld(value1, value2)
+    case (nil, nil): break
+    default:
+        XCTFail("Found mismatch of bool or JSONSchema value for additionalProperties of object contexts: \(newObjectContext) is not equal to \(oldObjectContext)")
+    }
+    XCTAssertEqual(newObjectContext.properties.count, oldObjectContext.properties.count)
+    for (key, prop) in oldObjectContext.properties {
+        guard let newProp = newObjectContext.properties[key] else {
+            XCTFail("Found old prop \(prop) at key \(key) with no neq prop set in the OAS 3.1/2 document")
+            return
+        }
+        try assertEqualNewToOld(newProp, prop)
+    }
+    XCTAssertEqual(newObjectContext.requiredProperties, oldObjectContext.requiredProperties)
+    XCTAssertEqual(newObjectContext.optionalProperties, oldObjectContext.optionalProperties)
+}
+
+
 fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _ oldExample: OpenAPIKit30.OpenAPI.Example) {
     XCTAssertEqual(newExample.summary, oldExample.summary)
     XCTAssertEqual(newExample.description, oldExample.description)
-    XCTAssertEqual(newExample.value, oldExample.value)
     XCTAssertEqual(newExample.vendorExtensions, oldExample.vendorExtensions)
+
+    XCTAssertNil(newExample.serializedValue)
+    XCTAssertNil(newExample.dataValue)
+    switch oldExample.value {
+    case .a(let url): XCTAssertEqual(url, newExample.externalValue)
+    case .b(let data): XCTAssertEqual(data, newExample.value?.value)
+    case nil: XCTAssertNil(newExample.value)
+    }
 }
 
 fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.Encoding, _ oldEncoding: OpenAPIKit30.OpenAPI.Content.Encoding) throws {
@@ -1253,9 +1319,32 @@ fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.E
     } else {
         XCTAssertNil(oldEncoding.headers)
     }
-    XCTAssertEqual(newEncoding.style, oldEncoding.style)
+    try assertEqualNewToOld(newEncoding.style, oldEncoding.style)
     XCTAssertEqual(newEncoding.explode, oldEncoding.explode)
     XCTAssertEqual(newEncoding.allowReserved, oldEncoding.allowReserved)
+}
+
+fileprivate func assertEqualNewToOld(_ newStyle: OpenAPIKit.OpenAPI.Parameter.SchemaContext.Style, _ oldStyle: OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style) throws {
+    let equal: Bool
+    switch (newStyle, oldStyle) {
+    case (.form, .form): equal = true
+    case (.simple, .simple): equal = true
+    case (.matrix, .matrix): equal = true
+    case (.label, .label): equal = true
+    case (.spaceDelimited, .spaceDelimited): equal = true
+    case (.pipeDelimited, .pipeDelimited): equal = true
+    case (.deepObject, .deepObject): equal = true
+    default: equal = false
+    }
+
+    if !equal {
+        XCTFail("New \(newStyle) is not equivalent to old \(oldStyle)")
+    }
+}
+
+fileprivate func assertEqualNewToOld(_ newDiscriminator: OpenAPIKit.OpenAPI.Discriminator?, _ oldDiscriminator: OpenAPIKit30.OpenAPI.Discriminator?) throws {
+    XCTAssertEqual(newDiscriminator?.mapping, oldDiscriminator?.mapping)
+    XCTAssertEqual(newDiscriminator?.propertyName, oldDiscriminator?.propertyName)
 }
 
 fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ oldHeader: OpenAPIKit30.OpenAPI.Header) throws {
@@ -1274,7 +1363,7 @@ fileprivate func assertEqualNewToOld(_ newHeader: OpenAPIKit.OpenAPI.Header, _ o
 }
 
 fileprivate func assertEqualNewToOld(_ newSchemaContext: OpenAPIKit.OpenAPI.Parameter.SchemaContext, _ oldSchemaContext: OpenAPIKit30.OpenAPI.Parameter.SchemaContext) throws {
-    XCTAssertEqual(newSchemaContext.style, oldSchemaContext.style)
+    try assertEqualNewToOld(newSchemaContext.style, oldSchemaContext.style)
     XCTAssertEqual(newSchemaContext.explode, oldSchemaContext.explode)
     XCTAssertEqual(newSchemaContext.allowReserved, oldSchemaContext.allowReserved)
     switch (newSchemaContext.schema, oldSchemaContext.schema) {
@@ -1478,36 +1567,68 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
         let oldSchema = try XCTUnwrap(oldComponents.schemas[key])
         try assertEqualNewToOld(newSchema, oldSchema)
     }
-    for (key, newResponse) in newComponents.responses {
+    for (key, maybeNewResponse) in newComponents.responses {
         let oldResponse = try XCTUnwrap(oldComponents.responses[key])
+        guard case let .b(newResponse) = maybeNewResponse else {
+            XCTFail("Found a reference to a response where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newResponse, oldResponse)
     }
-    for (key, newParameter) in newComponents.parameters {
+    for (key, maybeNewParameter) in newComponents.parameters {
         let oldParameter = try XCTUnwrap(oldComponents.parameters[key])
+        guard case let .b(newParameter) = maybeNewParameter else {
+            XCTFail("Found a reference to a parameter where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newParameter, oldParameter)
     }
-    for (key, newExample) in newComponents.examples {
+    for (key, maybeNewExample) in newComponents.examples {
         let oldExample = try XCTUnwrap(oldComponents.examples[key])
+        guard case let .b(newExample) = maybeNewExample else {
+            XCTFail("Found a reference to an example where one was not expected")
+            return
+        }
         assertEqualNewToOld(newExample, oldExample)
     }
-    for (key, newRequest) in newComponents.requestBodies {
+    for (key, maybeNewRequest) in newComponents.requestBodies {
         let oldRequest = try XCTUnwrap(oldComponents.requestBodies[key])
+        guard case let .b(newRequest) = maybeNewRequest else {
+            XCTFail("Found a reference to a request where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newRequest, oldRequest)
     }
-    for (key, newHeader) in newComponents.headers {
+    for (key, maybeNewHeader) in newComponents.headers {
         let oldHeader = try XCTUnwrap(oldComponents.headers[key])
+        guard case let .b(newHeader) = maybeNewHeader else {
+            XCTFail("Found a reference to a header where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newHeader, oldHeader)
     }
-    for (key, newSecurity) in newComponents.securitySchemes {
+    for (key, maybeNewSecurity) in newComponents.securitySchemes {
         let oldSecurity = try XCTUnwrap(oldComponents.securitySchemes[key])
+        guard case let .b(newSecurity) = maybeNewSecurity else {
+            XCTFail("Found a reference to a security scheme where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newSecurity, oldSecurity)
     }
-    for (key, newLink) in newComponents.links {
+    for (key, maybeNewLink) in newComponents.links {
         let oldLink = try XCTUnwrap(oldComponents.links[key])
+        guard case let .b(newLink) = maybeNewLink else {
+            XCTFail("Found a reference to a link where one was not expected")
+            return
+        }
         try assertEqualNewToOld(newLink, oldLink)
     }
-    for (key, newCallbacks) in newComponents.callbacks {
+    for (key, maybeNewCallbacks) in newComponents.callbacks {
         let oldCallbacks = try XCTUnwrap(oldComponents.callbacks[key])
+        guard case let .b(newCallbacks) = maybeNewCallbacks else {
+            XCTFail("Found a reference to a callbacks object where one was not expected")
+            return
+        }
         for (key, newCallback) in newCallbacks {
             let oldPathItem = try XCTUnwrap(oldCallbacks[key])
             switch (newCallback) {
@@ -1522,6 +1643,14 @@ fileprivate func assertEqualNewToOld(_ newComponents: OpenAPIKit.OpenAPI.Compone
     XCTAssertEqual(newComponents.vendorExtensions, oldComponents.vendorExtensions)
 }
 
+fileprivate func assertEqualNewToOld(_ newOAuthFlows: OpenAPIKit.OpenAPI.OAuthFlows, _ oldOAuthFlows: OpenAPIKit30.OpenAPI.OAuthFlows) throws {
+    XCTAssertEqual(newOAuthFlows.implicit, oldOAuthFlows.implicit)
+    XCTAssertEqual(newOAuthFlows.password, oldOAuthFlows.password)
+    XCTAssertEqual(newOAuthFlows.clientCredentials, oldOAuthFlows.clientCredentials)
+    XCTAssertEqual(newOAuthFlows.authorizationCode, oldOAuthFlows.authorizationCode)
+    XCTAssertNil(newOAuthFlows.deviceAuthorization)
+}
+
 fileprivate func assertEqualNewToOld(_ newScheme: OpenAPIKit.OpenAPI.SecurityScheme, _ oldScheme: OpenAPIKit30.OpenAPI.SecurityScheme) throws {
     XCTAssertEqual(newScheme.description, oldScheme.description)
     XCTAssertEqual(newScheme.vendorExtensions, oldScheme.vendorExtensions)
@@ -1533,8 +1662,9 @@ fileprivate func assertEqualNewToOld(_ newScheme: OpenAPIKit.OpenAPI.SecuritySch
     case (.http(let scheme, let format), .http(let scheme2, let format2)):
         XCTAssertEqual(scheme, scheme2)
         XCTAssertEqual(format, format2)
-    case (.oauth2(let flows), .oauth2(let flows2)):
-        XCTAssertEqual(flows, flows2)
+    case (.oauth2(let flows, let metadataUrl), .oauth2(let flows2)):
+        XCTAssertNil(metadataUrl)
+        try assertEqualNewToOld(flows, flows2)
     case (.openIdConnect(let url), .openIdConnect(let url2)):
         XCTAssertEqual(url, url2)
     case (.mutualTLS, _):

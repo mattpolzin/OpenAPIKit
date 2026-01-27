@@ -170,12 +170,12 @@ public final class Validator {
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
     /// - Operation Ids are unique across the whole Document.
-    /// - All OpenAPI.References that refer to components in this
-    ///     document can be found in the components dictionary.
-    /// - `Enum` must not be empty in the document's
-    ///     Server Variable.
-    /// - `Default` must exist in the enum values in the document's
-    ///     Server Variable.
+    /// - All OpenAPI.References that refer to components in this document can
+    ///     be found in the components dictionary.
+    /// - `Enum` must not be empty in the document's Server Variable.
+    /// - `Default` must exist in the enum values in the document's Server
+    ///     Variable.
+    /// - `Parameter` styles and locations are compatible with each other.
     ///
     public convenience init() {
         self.init(validations: [
@@ -184,6 +184,7 @@ public final class Validator {
             .init(.operationParametersAreUnique),
             .init(.operationIdsAreUnique),
             .init(.schemaReferencesAreValid),
+            .init(.jsonSchemaReferencesAreValid),
             .init(.responseReferencesAreValid),
             .init(.parameterReferencesAreValid),
             .init(.exampleReferencesAreValid),
@@ -193,7 +194,8 @@ public final class Validator {
             .init(.callbacksReferencesAreValid),
             .init(.pathItemReferencesAreValid),
             .init(.serverVariableEnumIsValid),
-            .init(.serverVariableDefaultExistsInEnum)
+            .init(.serverVariableDefaultExistsInEnum),
+            .init(.parameterStyleAndLocationAreCompatible)
         ])
     }
 
@@ -545,9 +547,15 @@ extension _Validator: SingleValueEncodingContainer {
 
     fileprivate func collectWarnings(from value: Encodable, atKey key: CodingKey? = nil) {
         let pathTail = key.map { [$0] } ?? []
+        var localWarnings = [Warning]()
         if let warnable = value as? HasWarnings {
-            warnings += warnable.warnings.map(contextualize(at: codingPath + pathTail))
+            localWarnings += warnable.warnings
         }
+        if let conditionalWarnable = value as? HasConditionalWarnings {
+            localWarnings += conditionalWarnable.applicableConditionalWarnings(for: document)
+        }
+
+        warnings += localWarnings.map(contextualize(at: codingPath + pathTail))
     }
 }
 

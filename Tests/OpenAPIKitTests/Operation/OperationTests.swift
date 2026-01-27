@@ -23,7 +23,7 @@ final class OperationTests: XCTestCase {
             description: "description",
             externalDocs: .init(url: URL(string: "https://google.com")!),
             operationId: "123",
-            parameters: [.parameter(name: "hi", context: .query, schema: .string)],
+            parameters: [.parameter(name: "hi", context: .query(schema: .string))],
             requestBody: .init(content: [:]),
             responses: [:],
             callbacks: [:],
@@ -116,7 +116,7 @@ extension OperationTests {
             parameters: [
                 .reference(.component(named: "hello"))
             ],
-            requestBody: .init(content: [.json: .init(schema: .init(.string))]),
+            requestBody: .init(content: [.json: .content(.init(schema: .init(.string)))]),
             responses: [200: .reference(.component(named: "test"))],
             callbacks: [
                 "callback": .init(
@@ -290,7 +290,7 @@ extension OperationTests {
                 parameters: [
                     .reference(.component(named: "hello"))
                 ],
-                requestBody: .init(content: [.json: .init(schema: .init(.string))]),
+                requestBody: .init(content: [.json: .content(.init(schema: .init(.string)))]),
                 responses: [200: .reference(.component(named: "test"))],
                 callbacks: [
                     "callback": .init(
@@ -317,9 +317,9 @@ extension OperationTests {
         )
 
         // compare request to construction of Either
-        XCTAssertEqual(operation.requestBody, .request(.init(content: [.json: .init(schema: .init(.string))])))
+        XCTAssertEqual(operation.requestBody, .request(.init(content: [.json: .content(.init(schema: .init(.string)))])))
         // compare request having extracted from Either
-        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .init(schema: .init(.string))]))
+        XCTAssertEqual(operation.requestBody?.requestValue, .init(content: [.json: .content(.init(schema: .init(.string)))]))
 
         XCTAssertNil(operation.responses[200]?.responseValue)
         XCTAssertEqual(operation.responses[200]?.reference, .component(named: "test"))

@@ -100,8 +100,8 @@ final class ParameterSchemaTests: XCTestCase {
             .string,
             style: .deepObject,
             examples: [
-                "one": .example(value: .init("hello")),
-                "two": .example(value: .init("world"))
+                "one": .example(.init(legacyValue: .init("hello"))),
+                "two": .example(.init(legacyValue: .init("world")))
             ]
         )
 
@@ -112,7 +112,7 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertNotNil(t7.example)
         XCTAssertEqual(t7.example?.value as? String, "hello")
         XCTAssertNotNil(t7.examples)
-        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t7.examples?["two"]?.exampleValue?.value?.value?.value as? String, "world")
 
         // straight to schema override explode multiple examples
         let t8 = Schema(
@@ -120,8 +120,8 @@ final class ParameterSchemaTests: XCTestCase {
             style: .deepObject,
             explode: true,
             examples: [
-                "one": .example(value: .init("hello")),
-                "two": .example(value: .init("world"))
+                "one": .example(serializedValue: "hello"),
+                "two": .example(dataValue: "world")
             ]
         )
 
@@ -130,16 +130,16 @@ final class ParameterSchemaTests: XCTestCase {
         XCTAssertTrue(t8.explode)
         XCTAssertFalse(t8.allowReserved)
         XCTAssertNotNil(t8.example)
-        XCTAssertEqual(t8.example?.value as? String, "hello")
+        XCTAssertEqual(t8.example?.value as? String, "world")
         XCTAssertNotNil(t8.examples)
-        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.codableValue?.value as? String, "world")
+        XCTAssertEqual(t8.examples?["two"]?.exampleValue?.value?.value?.value as? String, "world")
 
         // schema reference multiple examples
         let t9 = Schema(
             schemaReference: .external(URL(string: "hello.yml")!),
             style: .deepObject,
             examples: [
-                "one": .example(value: .init("hello")),
+                "one": .example(.init(legacyValue: .init("hello"))),
                 "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
@@ -159,7 +159,7 @@ final class ParameterSchemaTests: XCTestCase {
             style: .deepObject,
             explode: true,
             examples: [
-                "one": .example(value: .init("hello")),
+                "one": .example(dataValue: .init("hello")),
                 "two": .reference(.external(URL(string: "world.yml")!))
             ]
         )
@@ -209,6 +209,11 @@ final class ParameterSchemaTests: XCTestCase {
 
         let t7 = Schema(.string, style: .deepObject)
         XCTAssertFalse(t7.explode)
+    }
+
+    public func test_cookie_style() {
+        let t1 = Schema(.string, style: .cookie)
+        XCTAssertEqual(t1.conditionalWarnings.count, 1)
     }
 }
 
@@ -317,7 +322,7 @@ extension ParameterSchemaTests {
             .string,
             style: .default(for: .path),
             examples: [
-                "one": .example(value: .init("hello"))
+                "one": .example(dataValue: .init("hello"))
             ]
         )
 
@@ -331,7 +336,7 @@ extension ParameterSchemaTests {
               "schema" : {
                 "examples" : {
                   "one" : {
-                    "value" : "hello"
+                    "dataValue" : "hello"
                   }
                 },
                 "schema" : {
@@ -351,7 +356,7 @@ extension ParameterSchemaTests {
           "schema" : {
             "examples" : {
               "one" : {
-                "value" : "hello"
+                "dataValue" : "hello"
               }
             },
             "schema" : {
@@ -369,7 +374,7 @@ extension ParameterSchemaTests {
                 .string,
                 style: .default(for: .path),
                 examples: [
-                    "one": .example(value: .init("hello"))
+                    "one": .example(dataValue: .init("hello"))
                 ]
             )
         )
@@ -531,7 +536,7 @@ fileprivate struct SchemaWrapper: Codable {
     let location: TestLocation
     let schema: OpenAPI.Parameter.SchemaContext
 
-    init(location: OpenAPI.Parameter.Context, schema: OpenAPI.Parameter.SchemaContext) {
+    init(location: OpenAPI.Parameter.Context.Location, schema: OpenAPI.Parameter.SchemaContext) {
         self.location = .init(location)
         self.schema = schema
     }
@@ -546,22 +551,25 @@ fileprivate struct SchemaWrapper: Codable {
         case header
         case path
         case cookie
+        case querystring
 
-        var paramLoc: OpenAPI.Parameter.Context {
+        var paramLoc: OpenAPI.Parameter.Context.Location {
             switch self {
-            case .query: return .query
-            case .header: return .header
-            case .path: return .path
-            case .cookie: return .cookie
+            case .query: .query
+            case .header: .header
+            case .path: .path
+            case .cookie: .cookie
+            case .querystring: .querystring
             }
         }
 
-        init(_ paramLoc: OpenAPI.Parameter.Context) {
+        init(_ paramLoc: OpenAPI.Parameter.Context.Location) {
             switch paramLoc {
             case .query: self = .query
             case .header: self = .header
             case .path: self = .path
             case .cookie: self = .cookie
+            case .querystring: self = .querystring
             }
         }
     }

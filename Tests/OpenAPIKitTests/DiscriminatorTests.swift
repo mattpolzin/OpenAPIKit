@@ -14,11 +14,21 @@ final class DiscriminatorTests: XCTestCase {
         let t1 = OpenAPI.Discriminator(propertyName: "hello world")
         XCTAssertEqual(t1.propertyName, "hello world")
         XCTAssertNil(t1.mapping)
+        XCTAssertEqual(t1.conditionalWarnings.count, 0)
 
         let t2 = OpenAPI.Discriminator(propertyName: "hello world",
                                        mapping: ["hello": "world"])
         XCTAssertEqual(t2.propertyName, "hello world")
         XCTAssertEqual(t2.mapping, ["hello": "world"])
+        XCTAssertEqual(t2.conditionalWarnings.count, 0)
+
+        let t3 = OpenAPI.Discriminator(propertyName: "hello world",
+                                       mapping: ["hello": "world"],
+                                       defaultMapping: "world")
+        XCTAssertEqual(t3.propertyName, "hello world")
+        XCTAssertEqual(t3.mapping, ["hello": "world"])
+        XCTAssertEqual(t3.defaultMapping, "world")
+        XCTAssertEqual(t3.conditionalWarnings.count, 1)
     }
 }
 
@@ -84,5 +94,36 @@ extension DiscriminatorTests {
 
         XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello",
                                                             mapping: [ "hello": "world"]))
+    }
+
+    func test_withDefaultMapping_encode() {
+        let discriminator = OpenAPI.Discriminator(propertyName: "hello",
+                                                  defaultMapping: "world")
+        let encodedDiscriminator = try! orderUnstableTestStringFromEncoding(of: discriminator)
+
+        assertJSONEquivalent(
+            encodedDiscriminator,
+            """
+            {
+              "defaultMapping" : "world",
+              "propertyName" : "hello"
+            }
+            """
+        )
+    }
+
+    func test_withDefaultMapping_decode() {
+        let discriminatorData =
+        """
+        {
+            "defaultMapping" : "world",
+            "propertyName": "hello",
+        }
+        """.data(using: .utf8)!
+
+        let discriminator = try! orderUnstableDecode(OpenAPI.Discriminator.self, from: discriminatorData)
+
+        XCTAssertEqual(discriminator, OpenAPI.Discriminator(propertyName: "hello",
+                                                            defaultMapping: "world"))
     }
 }

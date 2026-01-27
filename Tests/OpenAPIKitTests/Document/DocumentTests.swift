@@ -20,6 +20,7 @@ final class DocumentTests: XCTestCase {
 
         let _ = OpenAPI.Document(
             openAPIVersion: .v3_1_0,
+            selfURI: .init(string: "https://example.com/openapi")!,
             info: .init(title: "hi", version: "1.0"),
             servers: [
                 .init(url: URL(string: "https://google.com")!)
@@ -39,6 +40,17 @@ final class DocumentTests: XCTestCase {
             tags: ["hi"],
             externalDocs: .init(url: URL(string: "https://google.com")!)
         )
+
+        // construct with external reference to a security scheme
+        let _ = OpenAPI.Document(
+            info: .init(title: "hi", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents,
+            security: [
+                [.external(URL(string: "https://example.com/security.yml")!): []]
+            ]
+        )
     }
 
     func test_initOASVersions() {
@@ -48,24 +60,45 @@ final class DocumentTests: XCTestCase {
         let t2 = OpenAPI.Document.Version.v3_1_1
         XCTAssertEqual(t2.rawValue, "3.1.1")
 
-        let t3 = OpenAPI.Document.Version.v3_1_x(x: 2)
+        let t3 = OpenAPI.Document.Version.v3_1_2
         XCTAssertEqual(t3.rawValue, "3.1.2")
 
         let t4 = OpenAPI.Document.Version.v3_1_x(x: 8)
         XCTAssertEqual(t4.rawValue, "3.1.8")
 
-        let t5 = OpenAPI.Document.Version(rawValue: "3.1.0")
-        XCTAssertEqual(t5, .v3_1_0)
+        let t5 = OpenAPI.Document.Version.v3_2_0
+        XCTAssertEqual(t5.rawValue, "3.2.0")
 
-        let t6 = OpenAPI.Document.Version(rawValue: "3.1.1")
-        XCTAssertEqual(t6, .v3_1_1)
+        let t6 = OpenAPI.Document.Version(rawValue: "3.1.0")
+        XCTAssertEqual(t6, .v3_1_0)
 
-        let t7 = OpenAPI.Document.Version(rawValue: "3.1.2")
-        XCTAssertEqual(t7, .v3_1_x(x: 2))
+        let t7 = OpenAPI.Document.Version(rawValue: "3.1.1")
+        XCTAssertEqual(t7, .v3_1_1)
+
+        let t8 = OpenAPI.Document.Version(rawValue: "3.1.2")
+        XCTAssertEqual(t8, .v3_1_2)
 
         // not a known version:
-        let t8 = OpenAPI.Document.Version(rawValue: "3.1.8")
-        XCTAssertNil(t8)
+        let t9 = OpenAPI.Document.Version(rawValue: "3.1.8")
+        XCTAssertNil(t9)
+
+        let t10 = OpenAPI.Document.Version(rawValue: "3.2.8")
+        XCTAssertNil(t10)
+    }
+
+    func test_compareOASVersions() {
+        let versions: [OpenAPI.Document.Version] = [
+          .v3_1_0,
+          .v3_1_1,
+          .v3_1_2,
+          .v3_2_0
+        ]
+
+        for v1Idx in 0...(versions.count - 2) {
+            for v2Idx in (v1Idx + 1)...(versions.count - 1) {
+                XCTAssert(versions[v1Idx] < versions[v2Idx])
+            }
+        }
     }
 
     func test_getRoutes() {
@@ -114,7 +147,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:]))
+                    put: .init(operationId: nil, responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -129,7 +167,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: nil, responses: [:]))
+                    put: .init(operationId: nil, responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -144,12 +187,17 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: "test", responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:]))
+                    put: .init(operationId: "two", responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: "three", responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
 
-        XCTAssertEqual(t3.allOperationIds, ["test", "two"])
+        XCTAssertEqual(t3.allOperationIds, ["test", "two", "three"])
 
         // paths, one operation id (first one nil), no components, no webhooks
         let t4 = OpenAPI.Document(
@@ -159,7 +207,12 @@ final class DocumentTests: XCTestCase {
                 "/hello": .init(
                     get: .init(operationId: nil, responses: [:])),
                 "/hello/world": .init(
-                    put: .init(operationId: "two", responses: [:]))
+                    put: .init(operationId: "two", responses: [:])),
+                "/hi/mom": .init(
+                    additionalOperations: [
+                      "LINK": .init(operationId: nil, responses: [:])
+                    ]
+                )
             ],
             components: .noComponents
         )
@@ -205,7 +258,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -227,7 +280,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -249,7 +302,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: []
                     )
                 )
@@ -271,7 +324,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s1, s2]
                     )
                 )
@@ -293,7 +346,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s1, s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s1, s2]
                     )
                 )
@@ -316,7 +369,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -340,7 +393,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -364,7 +417,7 @@ final class DocumentTests: XCTestCase {
                 "/hello/world": .init(
                     servers: [s2, s4],
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])],
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])],
                         servers: [s3]
                     )
                 )
@@ -385,7 +438,7 @@ final class DocumentTests: XCTestCase {
             paths: [
                 "/hello/world": .init(
                     get: .init(
-                        responses: [.default: .response(description: "test", content: [.json: .init(schema: .string)])]
+                        responses: [.default: .response(description: "test", content: [.json: .content(.init(schema: .string))])]
                     )
                 )
             ],
@@ -441,6 +494,22 @@ final class DocumentTests: XCTestCase {
 
         XCTAssertNoThrow(try orderUnstableDecode(OpenAPI.Document.self, from: docData))
     }
+
+    func test_initVersionWrongNumberOfComponents() {
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: ""))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1"))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2"))
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2.3.4"))
+    }
+
+    func test_initPatchVersionNotInteger() {
+        XCTAssertNil(OpenAPI.Document.Version(rawValue: "1.2.a"))
+    }
+
+    func test_versionOutsideKnownBoundsStillSerializesToString() {
+        XCTAssertEqual(OpenAPI.Document.Version.v3_1_x(x: 1000).rawValue, "3.1.1000")
+        XCTAssertEqual(OpenAPI.Document.Version.v3_2_x(x: 1000).rawValue, "3.2.1000")
+    }
 }
 
 // MARK: - Codable
@@ -462,7 +531,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1"
+              "openapi" : "3.2.0"
             }
             """
         )
@@ -476,7 +545,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           }
@@ -626,7 +695,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1",
+              "openapi" : "3.2.0",
               "servers" : [
                 {
                   "url" : "http:\\/\\/google.com"
@@ -645,7 +714,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
@@ -669,6 +738,60 @@ extension DocumentTests {
         )
     }
 
+    func test_specifySelfURI_encode() throws {
+        let document = OpenAPI.Document(
+            selfURI: .init(string: "https://example.com/openapi")!,
+            info: .init(title: "API", version: "1.0"),
+            servers: [],
+            paths: [:],
+            components: .noComponents
+        )
+        let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
+
+        assertJSONEquivalent(
+            encodedDocument,
+            """
+            {
+              "$self" : "https:\\/\\/example.com\\/openapi",
+              "info" : {
+                "title" : "API",
+                "version" : "1.0"
+              },
+              "openapi" : "3.2.0"
+            }
+            """
+        )
+    }
+
+    func test_specifySelfURI_decode() throws {
+        let documentData =
+        """
+        {
+          "$self": "https://example.com/openapi",
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.2.0",
+          "paths" : {
+
+          }
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                selfURI: .init(string: "https://example.com/openapi")!,
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents
+            )
+        )
+    }
+
     func test_specifyPaths_encode() throws {
         let document = OpenAPI.Document(
             info: .init(title: "API", version: "1.0"),
@@ -686,7 +809,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1",
+              "openapi" : "3.2.0",
               "paths" : {
                 "\\/test" : {
                   "summary" : "hi"
@@ -705,7 +828,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
             "\\/test" : {
               "summary" : "hi"
@@ -731,10 +854,13 @@ extension DocumentTests {
             info: .init(title: "API", version: "1.0"),
             servers: [],
             paths: [:],
-            components: .init(
+            components: .direct(
                 securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
             ),
-            security: [[.component( named: "security"):[]]]
+            security: [
+                [.component(named: "security"): []],
+                [.external(URL(string: "https://example.com/security.yml")!): []]
+            ]
         )
         let encodedDocument = try orderUnstableTestStringFromEncoding(of: document)
 
@@ -755,10 +881,15 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1",
+              "openapi" : "3.2.0",
               "security" : [
                 {
                   "security" : [
+
+                  ]
+                },
+                {
+                  "https:\\/\\/example.com\\/security.yml" : [
 
                   ]
                 }
@@ -768,7 +899,90 @@ extension DocumentTests {
         )
     }
 
-    func test_specifySecurity_decode() throws {
+    func test_specifyInternalSecurity_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+            "securitySchemes" : {
+              "security" : {
+                "in" : "header",
+                "name" : "key",
+                "type" : "apiKey"
+              }
+            }
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.2.0",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "security" : [
+
+              ]
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .direct(
+                    securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
+                ),
+                security: [[.component( named: "security"):[]]]
+            )
+        )
+    }
+
+    func test_securityNotFoundInComponentsIsExternal_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.2.0",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "security" : [
+
+              ]
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let document = try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+
+        XCTAssertEqual(
+            document,
+            OpenAPI.Document(
+                info: .init(title: "API", version: "1.0"),
+                servers: [],
+                paths: [:],
+                components: .noComponents,
+                security: [[.external(URL(string: "security")!):[]]]
+            )
+        )
+    }
+
+    func test_specifyExternalSecurity_decode() throws {
         let documentData =
         """
         {
@@ -791,9 +1005,7 @@ extension DocumentTests {
           },
           "security" : [
             {
-              "security" : [
-
-              ]
+              "https://example.com/security.yml": []
             }
           ]
         }
@@ -803,15 +1015,51 @@ extension DocumentTests {
         XCTAssertEqual(
             document,
             OpenAPI.Document(
+                openAPIVersion: .v3_1_1,
                 info: .init(title: "API", version: "1.0"),
                 servers: [],
                 paths: [:],
-                components: .init(
+                components: .direct(
                     securitySchemes: ["security": .init(type: .apiKey(name: "key", location: .header))]
                 ),
-                security: [[.component( named: "security"):[]]]
+                security: [[.external(URL(string: "https://example.com/security.yml")!): []]]
             )
         )
+    }
+
+    func test_specifyInvalidSecurity_decode() throws {
+        let documentData =
+        """
+        {
+          "components" : {
+            "securitySchemes" : {
+              "security" : {
+                "in" : "header",
+                "name" : "key",
+                "type" : "apiKey"
+              }
+            }
+          },
+          "info" : {
+            "title" : "API",
+            "version" : "1.0"
+          },
+          "openapi" : "3.2.0",
+          "paths" : {
+
+          },
+          "security" : [
+            {
+              "$$$://(capture) <not &a valid>% @url://::**$[]": []
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        XCTAssertThrowsError(
+            try orderUnstableDecode(OpenAPI.Document.self, from: documentData)
+        ) { error in
+            XCTAssertEqual(OpenAPI.Error(from: error).localizedDescription, "Problem encountered when parsing `security` in the root Document object: Each key found in a Security Requirement dictionary must refer to a Security Scheme present in the Components dictionary or be a JSON reference to a security scheme found in another file.")
+        }
     }
 
     func test_specifyTags_encode() throws {
@@ -832,7 +1080,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1",
+              "openapi" : "3.2.0",
               "tags" : [
                 {
                   "name" : "hi"
@@ -851,7 +1099,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
@@ -897,7 +1145,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1"
+              "openapi" : "3.2.0"
             }
             """
         )
@@ -914,7 +1162,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           }
@@ -956,7 +1204,7 @@ extension DocumentTests {
                 "title" : "API",
                 "version" : "1.0"
               },
-              "openapi" : "3.1.1",
+              "openapi" : "3.2.0",
               "x-specialFeature" : [
                 "hello",
                 "world"
@@ -977,7 +1225,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
@@ -1017,7 +1265,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "paths" : {
 
           },
@@ -1044,7 +1292,7 @@ extension DocumentTests {
     
     func test_webhooks_encode() throws {
         let op = OpenAPI.Operation(responses: [:])
-        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
         let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
         
         let document = OpenAPI.Document(
@@ -1069,7 +1317,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
@@ -1093,6 +1341,9 @@ extension DocumentTests {
               "put" : {
 
               },
+              "query" : {
+
+              },
               "trace" : {
 
               }
@@ -1106,7 +1357,7 @@ extension DocumentTests {
     
   func test_webhooks_encode_decode() throws {
     let op = OpenAPI.Operation(responses: [:])
-    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op)
+    let pathItem = OpenAPI.PathItem(get: op, put: op, post: op, options: op, head: op, patch: op, trace: op, query: op)
 
       let document = OpenAPI.Document(
         info: .init(title: "API", version: "1.0"),
@@ -1137,7 +1388,7 @@ extension DocumentTests {
           "title": "API",
           "version": "1.0"
         },
-        "openapi": "3.1.1",
+        "openapi": "3.2.0",
         "paths": {
         },
         "webhooks": {
@@ -1157,6 +1408,8 @@ extension DocumentTests {
             "put": {
             },
             "trace": {
+            },
+            "query": {
             }
           }
         }
@@ -1172,7 +1425,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+                    "webhook-test": .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)
@@ -1182,7 +1435,7 @@ extension DocumentTests {
     
     func test_webhooks_noPaths_encode() throws {
         let op = OpenAPI.Operation(responses: [:])
-        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op)
+        let pathItem: OpenAPI.PathItem = .init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op)
         let pathItemTest: Either<OpenAPI.Reference<OpenAPI.PathItem>, OpenAPI.PathItem> = .pathItem(pathItem)
         
         let document = OpenAPI.Document(
@@ -1207,7 +1460,7 @@ extension DocumentTests {
             "title" : "API",
             "version" : "1.0"
           },
-          "openapi" : "3.1.1",
+          "openapi" : "3.2.0",
           "webhooks" : {
             "webhook-test" : {
               "delete" : {
@@ -1229,6 +1482,9 @@ extension DocumentTests {
 
               },
               "put" : {
+
+              },
+              "query" : {
 
               },
               "trace" : {
@@ -1253,7 +1509,7 @@ extension DocumentTests {
           "title": "API",
           "version": "1.0"
         },
-        "openapi": "3.1.1",
+        "openapi": "3.2.0",
         "webhooks": {
           "webhook-test": {
             "delete": {
@@ -1271,6 +1527,8 @@ extension DocumentTests {
             "put": {
             },
             "trace": {
+            },
+            "query": {
             }
           }
         }
@@ -1286,7 +1544,7 @@ extension DocumentTests {
                 servers: [],
                 paths: [:],
                 webhooks:  [
-                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op))
+                    "webhook-test": .pathItem(.init(get: op, put: op, post: op, delete: op, options: op, head: op, patch: op, trace: op, query: op))
                 ],
                 components: .noComponents,
                 externalDocs: .init(url: URL(string: "http://google.com")!)
