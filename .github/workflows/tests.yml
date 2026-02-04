@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:5.10-focal
-          - swift:5.10-jammy
           - swift:6.0-focal
           - swift:6.0-jammy
           - swift:6.0-noble
