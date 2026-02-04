@@ -76,7 +76,7 @@ Be aware of the change to minimum Swift version.
 Most documentation will focus on what it looks like to work with the
 `OpenAPIKit` module and OpenAPI 3.2.x documents. If you need to support OpenAPI
 3.0.x documents, take a look at the section on [supporting OpenAPI 3.0.x documents](#supporting-openapi-30x-documents)
-4.before you get too deep into this library's docs.
+before you get too deep into this library's docs.
 
 Version 3.2.x of the OpenAPI Specification is backwards compatible with version
 3.1.x of the specification but it adds some new features. The OpenAPIKit types
