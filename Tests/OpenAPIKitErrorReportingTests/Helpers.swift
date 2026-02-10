@@ -6,6 +6,6 @@
 //
 
 import Foundation
-@preconcurrency import Yams
+import Yams
 
 var testDecoder: YAMLDecoder { YAMLDecoder() }

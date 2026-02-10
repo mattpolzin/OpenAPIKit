@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 
 final class RequestErrorTests: XCTestCase {
     func test_wrongTypeRequest() {

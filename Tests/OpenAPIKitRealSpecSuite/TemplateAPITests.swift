@@ -17,7 +17,7 @@
 
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking

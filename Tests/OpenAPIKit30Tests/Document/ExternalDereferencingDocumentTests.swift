@@ -3,7 +3,7 @@
 //  
 
 import Foundation
-@preconcurrency import Yams
+import Yams
 import OpenAPIKit30
 import XCTest
 
