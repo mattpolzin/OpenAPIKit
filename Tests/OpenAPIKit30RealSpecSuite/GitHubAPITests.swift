@@ -37,7 +37,7 @@ final class GitHubAPICampatibilityTests: XCTestCase {
     }
 
     func test_successfullyParsedDocument() throws {
-        #if os(Linux) && compiler(>=6.0)
+        #if os(Linux)
             throw XCTSkip("Swift bug causes CI failure currently (line 48): failed - The operation could not be completed. The file doesn’t exist.")
         #endif
         switch githubAPI {
