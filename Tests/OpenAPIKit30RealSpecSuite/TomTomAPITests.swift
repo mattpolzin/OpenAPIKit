@@ -22,19 +22,23 @@ final class TomTomAPICampatibilityTests: XCTestCase {
 
     override func setUp() {
         if tomtomAPI == nil {
+            // Test file can be redownloaded from
+            // https://raw.githubusercontent.com/APIs-guru/openapi-directory/c9190db19e5cb151592d44f0d4482839e1e5a8e0/APIs/tomtom.com/search/1.0.0/openapi.yaml
             tomtomAPI = Result {
-                try YAMLDecoder().decode(
-                    OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/APIs-guru/openapi-directory/c9190db19e5cb151592d44f0d4482839e1e5a8e0/APIs/tomtom.com/search/1.0.0/openapi.yaml")!)
+                let currentWorkingDirectory = FileManager.default.currentDirectoryPath
+                return try YAMLDecoder().decode(
+                  OpenAPI.Document.self,
+                  from: String(
+                    contentsOf: URL(
+                      filePath: "./Tests/inputs/tomtom-3.0.yaml",
+                      relativeTo: URL(filePath: currentWorkingDirectory, directoryHint: .isDirectory)),
+                    encoding: .utf8)
                 )
             }
         }
     }
 
     func test_successfullyParsedDocument() throws {
-        #if os(Linux)
-        throw XCTSkip("Swift bug causes CI failure currently (line 43): failed - The operation could not be completed. The file doesn’t exist.")
-        #endif
         switch tomtomAPI {
         case nil:
             XCTFail("Did not attempt to pull TomTom API documentation like expected.")

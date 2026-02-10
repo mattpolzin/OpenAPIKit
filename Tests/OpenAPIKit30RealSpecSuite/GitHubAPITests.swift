@@ -27,19 +27,23 @@ final class GitHubAPICampatibilityTests: XCTestCase {
                 commit for now.
          */
         if githubAPI == nil {
+            // Test file can be redownloaded from
+            // https://raw.githubusercontent.com/github/rest-api-description/e4f28959fbc6c9fc4eea823b495061dded87e84d/descriptions/ghes-3.0/ghes-3.0.yaml
             githubAPI = Result {
-                try YAMLDecoder().decode(
-                    OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/github/rest-api-description/e4f28959fbc6c9fc4eea823b495061dded87e84d/descriptions/ghes-3.0/ghes-3.0.yaml")!)
+                let currentWorkingDirectory = FileManager.default.currentDirectoryPath
+                return try YAMLDecoder().decode(
+                  OpenAPI.Document.self,
+                  from: String(
+                    contentsOf: URL(
+                      filePath: "./Tests/inputs/ghes-3.0.yaml",
+                      relativeTo: URL(filePath: currentWorkingDirectory, directoryHint: .isDirectory)),
+                    encoding: .utf8)
                 )
             }
         }
     }
 
     func test_successfullyParsedDocument() throws {
-        #if os(Linux)
-            throw XCTSkip("Swift bug causes CI failure currently (line 48): failed - The operation could not be completed. The file doesn’t exist.")
-        #endif
         switch githubAPI {
         case nil:
             XCTFail("Did not attempt to pull GitHub API documentation like expected.")
