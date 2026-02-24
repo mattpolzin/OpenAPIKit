@@ -1,11 +1,13 @@
 //
 //  SchemaErrorTests.swift
 //  
-//
-//  Created by Mathew Polzin.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit30
 @preconcurrency import Yams

@@ -1,12 +1,14 @@
 //
 //  Components.swift
 //  
-//
-//  Created by Mathew Polzin on 6/22/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "Components Object".

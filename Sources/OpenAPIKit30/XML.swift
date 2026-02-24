@@ -1,12 +1,14 @@
 //
 //  XML.swift
 //  
-//
-//  Created by Mathew Polzin on 1/15/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "XML Object"

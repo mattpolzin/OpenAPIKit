@@ -1,12 +1,14 @@
 //
 //  JSONReference.swift
 //  
-//
-//  Created by Mathew Polzin on 6/22/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// A reference following the JSON Reference specification.
 ///

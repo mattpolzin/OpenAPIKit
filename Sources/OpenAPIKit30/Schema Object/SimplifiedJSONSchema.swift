@@ -1,12 +1,14 @@
 //
 //  SimplifiedJSONSchema.swift
 //  
-//
-//  Created by Mathew Polzin on 9/4/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension JSONSchema {
     /// Get a  simplified `DereferencedJSONSchema`.

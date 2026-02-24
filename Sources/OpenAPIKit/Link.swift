@@ -1,16 +1,18 @@
 //
 //  Link.swift
 //  
-//
-//  Created by Mathew Polzin on 1/23/20.
-//
 
 // TODO: create validation that operationIds in Link objects
 //       refer to Operation objects in the document that have the
 //       given ids.
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "Link Object"

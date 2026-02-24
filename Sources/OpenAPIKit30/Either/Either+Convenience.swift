@@ -1,12 +1,14 @@
 //
 //  Either+Convenience.swift
 //  
-//
-//  Created by Mathew Polzin on 3/29/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // MARK: - Convenience accessors
 extension Either where A: OpenAPIKitCore._OpenAPIReference {

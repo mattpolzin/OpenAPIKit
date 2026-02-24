@@ -1,12 +1,14 @@
 //
 //  ExternalDocumentation.swift
 //  
-//
-//  Created by Mathew Polzin on 11/2/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "External Documentation Object"

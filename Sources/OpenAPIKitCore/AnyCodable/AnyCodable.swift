@@ -20,7 +20,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /**
  A type-erased `Codable` value.

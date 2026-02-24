@@ -1,11 +1,13 @@
 //
 //  Validation+ConvenienceTests.swift
 //  
-//
-//  Created by Mathew Polzin on 6/5/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 @testable import OpenAPIKit
 

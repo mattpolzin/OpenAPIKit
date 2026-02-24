@@ -2,11 +2,15 @@
 //  EitherTests.swift
 //  OpenAPIKit - EitherTests
 //
-//  Created by Mathew Polzin on 11/23/18.
-//
 
 import XCTest
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 @testable import OpenAPIKitCore
 
 // MARK: - init

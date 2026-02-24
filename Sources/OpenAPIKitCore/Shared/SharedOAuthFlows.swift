@@ -1,11 +1,12 @@
 //
 //  SharedOAuthFlows.swift
 //  
-//
-//  Created by Mathew Polzin on 1/23/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension Shared {
     public enum OAuthFlows {}

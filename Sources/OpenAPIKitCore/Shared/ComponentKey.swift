@@ -1,11 +1,12 @@
 //
 //  ComponentKey.swift
 //  
-//
-//  Created by Mathew Polzin on 12/17/22.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension Shared {
     /// A key for one of the component dictionaries.

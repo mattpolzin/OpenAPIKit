@@ -2,10 +2,12 @@
 //  SwiftPrimitiveTypes+OpenAPI.swift
 //  OpenAPIKit
 //
-//  Created by Mathew Polzin on 01/13/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension Optional: OpenAPISchemaType where Wrapped: OpenAPISchemaType {
     static public var openAPISchema: JSONSchema {

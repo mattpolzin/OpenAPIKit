@@ -1,9 +1,6 @@
 //
 //  GitHubAPITests.swift
 //  
-//
-//  Created by Mathew Polzin on 7/28/20.
-//
 
 
 /**
@@ -18,7 +15,13 @@
 import XCTest
 import OpenAPIKit
 @preconcurrency import Yams
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif

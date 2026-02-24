@@ -2,10 +2,13 @@
 //  Result+ValueTests.swift
 //  OpenAPIKitTests
 //
-//  Created by Mathew Polzin on 8/25/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 @testable import OpenAPIKit
 
