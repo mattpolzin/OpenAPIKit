@@ -1,13 +1,15 @@
 //
 //  PathItemTests.swift
 //  
-//
-//  Created by Mathew Polzin on 12/29/19.
-//
 
 import XCTest
 import OpenAPIKit
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 final class PathItemTests: XCTestCase {
     func test_initializePathComponents() {

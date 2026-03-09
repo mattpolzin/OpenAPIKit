@@ -1,12 +1,14 @@
 //
 //  Example.swift
 //  
-//
-//  Created by Mathew Polzin on 10/6/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "Example Object"

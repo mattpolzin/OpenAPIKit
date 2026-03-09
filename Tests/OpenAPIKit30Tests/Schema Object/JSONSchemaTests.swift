@@ -1,11 +1,13 @@
 //
 //  JSONSchemaTests.swift
 //  
-//
-//  Created by Mathew Polzin on 6/23/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit30
 

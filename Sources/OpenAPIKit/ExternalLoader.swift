@@ -1,12 +1,14 @@
 //
 //  ExternalLoader.swift
 //  
-//
-//  Created by Mathew Polzin on 7/30/2023.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Once we hit language version 6.2 we get warnings (errors for Swift 6
 // language mode) if the ExternalLoader is not a SendableMetatype. We just

@@ -1,10 +1,6 @@
 //
 //  GitHubAPITests.swift
 //  
-//
-//  Created by Mathew Polzin on 7/28/20.
-//
-
 
 /**
  There are not currently any examples of OpenAPI 3.1 documents to use in this
@@ -12,13 +8,16 @@
  first compat test we add.
  */
 
-
-
-
 import XCTest
 import OpenAPIKit
 import Yams
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif

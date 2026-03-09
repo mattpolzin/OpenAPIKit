@@ -1,11 +1,13 @@
 //
 //  ExampleTests.swift
 //  
-//
-//  Created by Mathew Polzin on 10/6/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import OpenAPIKit
 import XCTest
 

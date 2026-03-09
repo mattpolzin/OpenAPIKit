@@ -2,11 +2,14 @@
 //  Server.swift
 //  OpenAPIKit
 //
-//  Created by Mathew Polzin on 8/25/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// OpenAPI Spec "Server Object"

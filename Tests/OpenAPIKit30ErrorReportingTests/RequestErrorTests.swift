@@ -1,11 +1,13 @@
 //
 //  RequestErrorTests.swift
 //  
-//
-//  Created by Mathew Polzin on 2/24/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit30
 import Yams

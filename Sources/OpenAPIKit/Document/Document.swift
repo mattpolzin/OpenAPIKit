@@ -2,11 +2,14 @@
 //  Document.swift
 //  OpenAPI
 //
-//  Created by Mathew Polzin on 1/13/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// The root of an OpenAPI 3.1 document.

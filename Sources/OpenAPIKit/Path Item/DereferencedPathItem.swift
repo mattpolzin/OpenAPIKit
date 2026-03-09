@@ -1,12 +1,14 @@
 //
 //  DereferencedPathItem.swift
 //  
-//
-//  Created by Mathew Polzin on 6/18/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// An `OpenAPI.PathItem` type that guarantees
 /// its `parameters` and operations are inlined instead of

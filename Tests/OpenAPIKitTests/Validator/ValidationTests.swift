@@ -1,11 +1,13 @@
 //
 //  ValidationTests.swift
 //  
-//
-//  Created by Mathew Polzin on 6/3/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 @testable import OpenAPIKit
 

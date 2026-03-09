@@ -1,16 +1,18 @@
 //
 //  SchemaObjectYamsTests.swift
 //  
-//
-//  Created by Mathew Polzin on 4/22/20.
-//
 
 ///
 /// This file exists to facilitate regression tests for Yams-specific problems encountered
 /// and fixed.
 ///
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit30
 import Yams

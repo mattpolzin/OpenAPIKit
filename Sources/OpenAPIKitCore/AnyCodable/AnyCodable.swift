@@ -20,6 +20,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+// Full Foundation is currently required here for NSNull and more
 import Foundation
 
 /**

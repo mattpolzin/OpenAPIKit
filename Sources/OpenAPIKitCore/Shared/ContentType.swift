@@ -5,6 +5,9 @@
 //  Created by Mathew Polzin on 12/29/19.
 //
 
+// Full Foundation is currently required here for Substring.trimmingCharacters(in:)
+import Foundation
+
 extension Shared {
     /// The Content Type of an API request or response body.
     public struct ContentType: Codable, Equatable, Hashable, RawRepresentable, HasWarnings, Sendable {

@@ -1,11 +1,12 @@
 //
 //  Container+DecodeURLAsString.swift
 //  
-//
-//  Created by Mathew Polzin on 7/5/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension KeyedDecodingContainerProtocol {
     internal func decodeURLAsString(forKey key: Self.Key) throws -> URL {

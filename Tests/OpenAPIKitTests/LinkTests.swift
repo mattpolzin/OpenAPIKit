@@ -1,12 +1,15 @@
 //
 //  LinkTests.swift
 //  
-//
-//  Created by Mathew Polzin on 1/23/20.
-//
 
 import OpenAPIKit
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 
 final class LinkTests: XCTestCase {

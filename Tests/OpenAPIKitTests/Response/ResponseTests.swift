@@ -2,10 +2,13 @@
 //  ResponseTests.swift
 //  OpenAPI
 //
-//  Created by Mathew Polzin on 7/5/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit
 

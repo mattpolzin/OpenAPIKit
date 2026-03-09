@@ -1,12 +1,14 @@
 //
 //  OrderedDictionry+LocallyDereferenceable.swift
 //  
-//
-//  Created by Alberto Lagos on 11-09-23.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// A Swift extension for dereferencing an `OrderedDictionary` conforming to the `LocallyDereferenceable` protocol.
 ///

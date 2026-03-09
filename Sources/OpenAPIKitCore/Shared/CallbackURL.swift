@@ -1,11 +1,12 @@
 //
 //  CallbackURL.swift
 //  
-//
-//  Created by Mathew Polzin on 12/19/22.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension Shared {
     /// A URL template where the placeholders are OpenAPI **Runtime Expressions** instead

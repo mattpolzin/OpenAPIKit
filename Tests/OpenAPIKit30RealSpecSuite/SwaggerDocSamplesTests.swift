@@ -1,11 +1,13 @@
 //
 //  SwaggerDocSamplesTests.swift
 //  
-//
-//  Created by Mathew Polzin on 7/25/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit30
 import Yams

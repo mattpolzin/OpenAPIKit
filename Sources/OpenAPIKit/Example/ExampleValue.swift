@@ -2,7 +2,11 @@
 //  ExampleValue.swift
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI.Example {
     /// OpenAPI Spec "Example Object" `datValue`, `serializedValue`,
