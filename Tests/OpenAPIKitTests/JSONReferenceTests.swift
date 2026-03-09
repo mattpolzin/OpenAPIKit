@@ -180,6 +180,21 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t1.openAPIReference().internalValue, .component(name: "hello"))
 
     }
+
+    func test_asJsonSchema() {
+        XCTAssertEqual(
+            OpenAPI.Reference<JSONSchema>.component(named: "hello").asJsonSchema(),
+            JSONSchema.reference(.component(named: "hello"))
+        )
+        XCTAssertEqual(
+            Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.a(.component(named: "hello")).flattenToJsonSchema(),
+            JSONSchema.reference(.component(named: "hello"))
+        )
+        XCTAssertEqual(
+            Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.b(.string).flattenToJsonSchema(),
+            .string
+        )
+    }
 }
 
 // MARK: Codable

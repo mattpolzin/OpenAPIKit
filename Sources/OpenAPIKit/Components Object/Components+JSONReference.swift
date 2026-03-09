@@ -230,6 +230,11 @@ extension OpenAPI.Components {
     /// If you want to look something up without throwing, you might want to use the subscript
     /// operator on the `Components`.
     ///
+    /// If you are recursing through JSONSchema references, you may want to
+    /// call `flattenToJsonSchema()` on the result of `lookupOnce()` because
+    /// `lookupOnce()` will wrap any resulting `JSONSchema` reference in an
+    /// `OpenAPI.Reference` which adds work if all you want to do is recurse.
+    ///
     /// If you also want to fully dereference the value in question instead
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
@@ -286,6 +291,11 @@ extension OpenAPI.Components {
     ///
     /// If you want to look something up without throwing, you might want to use the subscript
     /// operator on the `Components`.
+    ///
+    /// If you are recursing through JSONSchema references, you may want to
+    /// call `flattenToJsonSchema()` on the result of `lookupOnce()` because
+    /// `lookupOnce()` will wrap any resulting `JSONSchema` reference in an
+    /// `OpenAPI.Reference` which adds work if all you want to do is recurse.
     ///
     /// If you also want to fully dereference the value in question instead
     /// of just looking it up see the various `dereference` functions
