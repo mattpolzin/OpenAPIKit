@@ -167,7 +167,7 @@ A new `cookie` style has been added. Code that exhaustively switches on the
 There are no breaking changes for the `OpenAPIKit30` module (OAS 3.0.x
 specification) in this section.
 
-The Response Object `description` field is not optional so code may need to
+The Response Object `description` field is now optional so code may need to
 change to account for it possibly being `nil`.
 
 ### Components Object
