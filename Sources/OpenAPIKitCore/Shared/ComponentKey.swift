@@ -2,11 +2,8 @@
 //  ComponentKey.swift
 //  
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// Full Foundation is currently required here for CharacterSet
 import Foundation
-#endif
 
 extension Shared {
     /// A key for one of the component dictionaries.

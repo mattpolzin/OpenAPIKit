@@ -20,11 +20,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// Full Foundation is currently required here for NSNull and more
 import Foundation
-#endif
 
 /**
  A type-erased `Codable` value.
