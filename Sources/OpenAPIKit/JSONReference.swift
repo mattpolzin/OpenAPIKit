@@ -387,6 +387,42 @@ extension OpenAPI {
     }
 }
 
+public extension OpenAPI.Reference where ReferenceType == JSONSchema {
+    /// When an OpenAPI.Reference points at a JSONSchema, it can be represented
+    /// as a JSONSchema directly because JSONSchema has an innate ability to
+    /// represent references itself.
+    ///
+    /// Example:
+    ///
+    ///     OpenAPI.Reference<JSONSchema>.component(named: "hello").asJsonSchema()
+    ///     // results in JSONSchema.reference(.component(named: "hello"))
+    func asJsonSchema() -> JSONSchema {
+        .reference(jsonReference)
+          .overriddenNonNil(summary: summary)
+          .overriddenNonNil(description: description)
+    }
+}
+
+public extension Either where A == OpenAPI.Reference<JSONSchema>, B == JSONSchema {
+    /// When an Either represents a reference or a schema, it can be
+    /// "flattened" to a JSONSchema because JSONSchema has an innate ability to
+    /// represent references itself.
+    ///
+    /// Examples:
+    ///
+    ///     Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.a(.component(named: "hello")).flattenToJsonSchema()
+    ///     // results in JSONSchema.reference(.component(named: "hello"))
+    ///
+    ///     Either<OpenAPI.Reference<JSONSchema>, JSONSchema>.b(.string).flattenToJsonSchema()
+    ///     // results in JSONSchema.string
+    func flattenToJsonSchema() -> JSONSchema {
+        switch self {
+        case .a(let reference): reference.asJsonSchema()
+        case .b(let schema): schema
+        }
+    }
+}
+
 public extension JSONReference {
     /// Create an OpenAPI.Reference from the given JSONReference.
     func openAPIReference(withDescription description: String? = nil) -> OpenAPI.Reference<ReferenceType> {
