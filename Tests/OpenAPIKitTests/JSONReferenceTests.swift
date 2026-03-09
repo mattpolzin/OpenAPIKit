@@ -178,7 +178,21 @@ final class JSONReferenceTests: XCTestCase {
 
         // test dynamic member lookup:
         XCTAssertEqual(t1.openAPIReference().internalValue, .component(name: "hello"))
+    }
 
+    func test_openAPIRefOverridable() {
+        XCTAssertEqual(
+            OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello").overriddenNonNil(summary: "hi").overriddenNonNil(description: "hello there"),
+            .component(named: "hello", summary: "hi", description: "hello there")
+        )
+        XCTAssertEqual(
+            OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello", summary: "hi").overriddenNonNil(summary: nil),
+            .component(named: "hello", summary: "hi")
+        )
+        XCTAssertEqual(
+            OpenAPI.Reference<OpenAPI.PathItem>.component(named: "hello", description: "hello there").overriddenNonNil(description: nil),
+            .component(named: "hello", description: "hello there")
+        )
     }
 
     func test_asJsonSchema() {
