@@ -1,11 +1,12 @@
 //
 //  URLTemplate.swift
 //  
-//
-//  Created by Mathew Polzin on 8/13/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// A URL that may contain variable placeholders.
 ///

@@ -1,11 +1,13 @@
 //
 //  DiscriminatorTests.swift
 //  
-//
-//  Created by Mathew Polzin on 11/3/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import OpenAPIKit
 import XCTest
 

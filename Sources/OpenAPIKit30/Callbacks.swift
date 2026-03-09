@@ -1,12 +1,14 @@
 //
 //  Callback.swift
 //  
-//
-//  Created by Mathew Polzin on 11/1/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI {
     /// A map from runtime expressions to path items to be used as

@@ -1,11 +1,13 @@
 //
 //  SchemaFragmentTests.swift
 //  
-//
-//  Created by Mathew Polzin on 4/21/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import OpenAPIKit30
 import XCTest
 

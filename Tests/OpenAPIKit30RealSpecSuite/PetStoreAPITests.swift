@@ -1,14 +1,17 @@
 //
 //  PetStoreAPITests.swift
 //
-//
-//  Created by Mathew Polzin on 2/17/20.
-//
 
 import XCTest
 import OpenAPIKit30
 @preconcurrency import Yams
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif

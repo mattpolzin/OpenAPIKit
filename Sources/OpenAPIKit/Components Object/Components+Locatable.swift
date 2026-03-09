@@ -1,12 +1,14 @@
 //
 //  Components+Locatable.swift
 //  
-//
-//  Created by Mathew Polzin on 3/30/20.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// Anything conforming to ComponentDictionaryLocatable knows
 /// where to find resources of its type in the Components Dictionary.

@@ -1,10 +1,8 @@
 //
 //  ComponentKey.swift
 //  
-//
-//  Created by Mathew Polzin on 12/17/22.
-//
 
+// Full Foundation is currently required here for CharacterSet
 import Foundation
 
 extension Shared {

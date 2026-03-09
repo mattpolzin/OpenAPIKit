@@ -1,12 +1,14 @@
 //
 //  DocumentInfo.swift
 //  
-//
-//  Created by Mathew Polzin on 12/29/19.
-//
 
 import OpenAPIKitCore
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 extension OpenAPI.Document {
     /// OpenAPI Spec "Info Object"

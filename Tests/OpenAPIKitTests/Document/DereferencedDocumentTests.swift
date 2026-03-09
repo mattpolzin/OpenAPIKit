@@ -1,11 +1,13 @@
 //
 //  DereferencedDocumentTests.swift
 //  
-//
-//  Created by Mathew Polzin on 6/22/20.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import XCTest
 import OpenAPIKit
 

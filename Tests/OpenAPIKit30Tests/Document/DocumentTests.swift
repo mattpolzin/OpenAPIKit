@@ -1,11 +1,13 @@
 //
 //  DocumentTests.swift
 //  
-//
-//  Created by Mathew Polzin on 10/27/19.
-//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+
 import OpenAPIKit30
 import XCTest
 
