@@ -167,8 +167,10 @@ extension OpenAPI.Components {
     /// object will have its `summary` and/or `description` overridden by that of the reference.
     /// This only applies if the referenced object would normally have a summary/description.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)`
@@ -207,8 +209,10 @@ extension OpenAPI.Components {
     /// object will have its `summary` and/or `description` overridden by that of the reference.
     /// This only applies if the referenced object would normally have a summary/description.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)` or
@@ -239,8 +243,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)`
@@ -262,8 +268,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)` or
@@ -301,8 +309,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)`
@@ -337,8 +347,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)` or
@@ -399,8 +411,10 @@ extension OpenAPI.Components {
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)` or
@@ -414,6 +428,34 @@ extension OpenAPI.Components {
         }
     }
 
+    /// Pass an `Either` with a reference or a component. `lookupOnce()` will
+    /// return the component value if it is found in the Components Object.
+    /// That value may itself be a reference. If you want to look things up in
+    /// the components object recursively use `lookup()`.
+    ///
+    /// If you want to look something up without throwing, you might want to use the subscript
+    /// operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead of
+    /// just looking it up see the various `dereference` functions on this type
+    /// for more information.
+    ///
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:,key:)`
+    public func lookupOnce<ReferenceType: ComponentDictionaryLocatable>(_ maybeReference: Either<OpenAPI.Reference<ReferenceType>, ReferenceType>) throws -> Either<OpenAPI.Reference<ReferenceType>, ReferenceType> {
+        switch maybeReference {
+        case .a(let reference):
+            return try lookupOnce(reference.jsonReference)
+        case .b(let value):
+            return .b(value)
+        }
+    }
+
     /// Lookup schema in the `Components`. If the JSONSchema is not a
     /// reference, it will be returned as-is. If it is a reference, it will be
     /// looked up in the components if it refers to a components entry.
@@ -421,15 +463,17 @@ extension OpenAPI.Components {
     /// This function will follow subsequent refernences found within the
     /// `Components` as long as no cycles are encountered.
     ///
-    /// If you want to look something up without throwing, you might want to use the subscript
-    /// operator on the `Components`.
+    /// If you want to look something up without throwing, you might want to
+    /// use the subscript operator on the `Components`.
     ///
     /// If you also want to fully dereference the value in question instead
     /// of just looking it up see the various `dereference` functions
     /// on this type for more information.
     ///
-    /// - Important: Looking up an external reference (i.e. one that points to another file)
-    ///     is not currently supported by OpenAPIKit and will therefore always throw an error.
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
     ///
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)` or
@@ -439,6 +483,31 @@ extension OpenAPI.Components {
             return schema
         }
         return try lookup(reference)
+    }
+
+    /// Lookup schema in the `Components`. If the JSONSchema is not a
+    /// reference, it will be returned as-is. If it is a reference, it will be
+    /// looked up in the components if it refers to a components entry.
+    ///
+    /// If you want to look something up without throwing, you might want to
+    /// use the subscript operator on the `Components`.
+    ///
+    /// If you also want to fully dereference the value in question instead
+    /// of just looking it up see the various `dereference` functions
+    /// on this type for more information.
+    ///
+    /// - Important: Loading an external reference (i.e. one that points to
+    ///     another file) is done via `externallyDereferenced(with:)` functions
+    ///     available on most types; attempting to lookup an external reference
+    ///     will `throw`.
+    ///
+    /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
+    ///     `ReferenceError.missingOnLookup(name:,key:)`
+    public func lookupOnce(_ schema: JSONSchema) throws -> JSONSchema {
+        guard case .reference(let reference, _) = schema.value else {
+            return schema
+        }
+        return try lookupOnce(reference).flattenToJsonSchema()
     }
 
     /// Create an `OpenAPI.Reference`.
