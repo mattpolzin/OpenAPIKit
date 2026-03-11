@@ -199,6 +199,126 @@ extension Validation {
         )
     }
 
+    /// Validate that all OpenAPI JSONSchema references are internal and found
+    /// in the document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `schemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var schemaReferencesFoundInComponents: Validation<OpenAPI.Reference<JSONSchema>> {
+        References.schemaReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all JSONSchema references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `jsonSchemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var jsonSchemaReferencesFoundInComponents: Validation<JSONSchema> {
+        References.jsonSchemaReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Response references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `responseReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var responseReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Response>> {
+        References.responseReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Parameter references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `parameterReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var parameterReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
+        References.parameterReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Example references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `exampleReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var exampleReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Example>> {
+        References.exampleReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Request references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `requestReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var requestReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Request>> {
+        References.requestReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Header references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `headerReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var headerReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Header>> {
+        References.headerReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Link references are internal and found in the document's
+    /// components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `linkReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var linkReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Link>> {
+        References.linkReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Callbacks references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `callbacksReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var callbacksReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
+        References.callbacksReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all PathItem references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `pathItemReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var pathItemReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+        References.pathItemReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
     // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
@@ -284,7 +404,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var schemaReferencesAreValid: Validation<OpenAPI.Reference<JSONSchema>> {
-        References.schemaReferencesAreValid(mustPointToComponents: false)
+        References.schemaReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all JSONSchema components references are found in the
@@ -293,7 +413,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var jsonSchemaReferencesAreValid: Validation<JSONSchema> {
-        References.jsonSchemaReferencesAreValid(mustPointToComponents: false)
+        References.jsonSchemaReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Response components references are found in the
@@ -302,7 +422,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var responseReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Response>> {
-        References.responseReferencesAreValid(mustPointToComponents: false)
+        References.responseReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Parameter components references are found in the
@@ -311,7 +431,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var parameterReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
-        References.parameterReferencesAreValid(mustPointToComponents: false)
+        References.parameterReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Example components references are found in the
@@ -320,7 +440,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var exampleReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Example>> {
-        References.exampleReferencesAreValid(mustPointToComponents: false)
+        References.exampleReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Request components references are found in the
@@ -329,7 +449,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var requestReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Request>> {
-        References.requestReferencesAreValid(mustPointToComponents: false)
+        References.requestReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Header components references are found in the
@@ -338,7 +458,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var headerReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Header>> {
-        References.headerReferencesAreValid(mustPointToComponents: false)
+        References.headerReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Link components references are found in the
@@ -347,7 +467,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var linkReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Link>> {
-        References.linkReferencesAreValid(mustPointToComponents: false)
+        References.linkReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all Callbacks components references are found in the
@@ -356,7 +476,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var callbacksReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
-        References.callbacksReferencesAreValid(mustPointToComponents: false)
+        References.callbacksReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
     /// Validate that all PathItem components references are found in the
@@ -365,7 +485,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     ///
     public static var pathItemReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
-        References.pathItemReferencesAreValid(mustPointToComponents: false)
+        References.pathItemReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
     
     /// Validate that `enum` must not be empty in the document's

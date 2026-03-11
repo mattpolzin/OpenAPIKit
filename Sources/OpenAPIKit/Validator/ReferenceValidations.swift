@@ -13,14 +13,17 @@ extension Validation {
         /// given type that point at the Components Object are found in the
         /// document's components dictionary. You can choose whether an
         /// internal reference to somewhere other than the components
-        /// dictionary should pass or fail.
-        internal static func referencesAreValid<ReferenceType: ComponentDictionaryLocatable>(ofType type: ReferenceType.Type, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<ReferenceType>> {
-            .init(
-                description: "OpenAPI \(String(describing: type)) reference can be found in components/\(ReferenceType.openAPIComponentsKey)",
+        /// dictionary should pass or fail. You can also choose whether
+        /// external references should fail or pass.
+        internal static func referencesAreValid<ReferenceType: ComponentDictionaryLocatable>(ofType type: ReferenceType.Type, named name: String, mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<ReferenceType>> {
+            let requireInternalAddendum = if requireInternal { " points to this document and" } else { "" }
+
+            return .init(
+                description: "\(name) reference\(requireInternalAddendum) can be found in components/\(ReferenceType.openAPIComponentsKey)",
                 check: { context in
                     guard case let .internal(internalReference) = context.subject.jsonReference else {
-                        // don't make assertions about external references
-                        return true
+                        // don't make assertions about external references other than if we are requiring references to be internal
+                        return !requireInternal
                     }
 
                     guard case .component = internalReference else {
@@ -34,17 +37,19 @@ extension Validation {
             )
         }
 
-        internal static func schemaReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<JSONSchema>> {
-            referencesAreValid(ofType: JSONSchema.self, mustPointToComponents: requireComponents)
+        internal static func schemaReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<JSONSchema>> {
+            referencesAreValid(ofType: JSONSchema.self, named: "JSONSchema", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func jsonSchemaReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<JSONSchema> {
-            .init(
-                description: "JSONSchema reference can be found in components/schemas",
+        internal static func jsonSchemaReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<JSONSchema> {
+            let requireInternalAddendum = if requireInternal { " points to this document and" } else { "" }
+
+            return .init(
+                description: "JSONSchema reference\(requireInternalAddendum) can be found in components/schemas",
                 check: { context in
-                    guard case let .internal(internalReference) = context.subject.reference else {
+                    guard case let .internal(internalReference) = context.subject.reference  else {
                         // don't make assertions about external references
-                        return true
+                        return !requireInternal
                     }
 
                     guard case .component = internalReference else {
@@ -54,40 +59,41 @@ extension Validation {
                         return !requireComponents
                     }
                     return context.document.components.contains(internalReference)
-                }
+                },
+                when: \.reference != nil
             )
         }
 
-        internal static func responseReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Response>> {
-            referencesAreValid(ofType: OpenAPI.Response.self, mustPointToComponents: requireComponents)
+        internal static func responseReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Response>> {
+            referencesAreValid(ofType: OpenAPI.Response.self, named: "Response", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func parameterReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
-            referencesAreValid(ofType: OpenAPI.Parameter.self, mustPointToComponents: requireComponents)
+        internal static func parameterReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
+            referencesAreValid(ofType: OpenAPI.Parameter.self, named: "Parameter", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func exampleReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Example>> {
-            referencesAreValid(ofType: OpenAPI.Example.self, mustPointToComponents: requireComponents)
+        internal static func exampleReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Example>> {
+            referencesAreValid(ofType: OpenAPI.Example.self, named: "Example", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func requestReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Request>> {
-            referencesAreValid(ofType: OpenAPI.Request.self, mustPointToComponents: requireComponents)
+        internal static func requestReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Request>> {
+            referencesAreValid(ofType: OpenAPI.Request.self, named: "Request", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func headerReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Header>> {
-            referencesAreValid(ofType: OpenAPI.Header.self, mustPointToComponents: requireComponents)
+        internal static func headerReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Header>> {
+            referencesAreValid(ofType: OpenAPI.Header.self, named: "Header", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func linkReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Link>> {
-            referencesAreValid(ofType: OpenAPI.Link.self, mustPointToComponents: requireComponents)
+        internal static func linkReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Link>> {
+            referencesAreValid(ofType: OpenAPI.Link.self, named: "Link", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func callbacksReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
-            referencesAreValid(ofType: OpenAPI.Callbacks.self, mustPointToComponents: requireComponents)
+        internal static func callbacksReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
+            referencesAreValid(ofType: OpenAPI.Callbacks.self, named: "Callbacks", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
 
-        internal static func pathItemReferencesAreValid(mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
-            referencesAreValid(ofType: OpenAPI.PathItem.self, mustPointToComponents: requireComponents)
+        internal static func pathItemReferencesAreValid(mustBeInternal requireInternal: Bool, mustPointToComponents requireComponents: Bool) -> Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+            referencesAreValid(ofType: OpenAPI.PathItem.self, named: "PathItem", mustBeInternal: requireInternal, mustPointToComponents: requireComponents)
         }
     }
 }
