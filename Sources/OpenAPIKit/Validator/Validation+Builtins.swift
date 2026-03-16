@@ -175,6 +175,150 @@ extension Validation {
         )
     }
 
+    /// Validate the OpenAPI Document's `Links` with operationIds refer to
+    /// Operations that exist in the document.
+    ///
+    /// This validation ensures that Link Objects using operationIds have corresponding
+    /// Operations in the document that have those IDs.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var linkOperationsExist: Validation<OpenAPI.Link> {
+        .init(
+            description: "Links with operationIds have corresponding Operations",
+            check: { context in
+                guard case let .b(operationId) = context.subject.operation else {
+                    // don't make assertions about Links that don't have operationIds
+                    return true
+                }
+                
+                // Collect all operation IDs from the document
+                let operationIds = context.document.allOperationIds
+                
+                return operationIds.contains(operationId)
+            }
+        )
+    }
+
+    /// Validate that all OpenAPI JSONSchema references are internal and found
+    /// in the document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `schemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var schemaReferencesFoundInComponents: Validation<OpenAPI.Reference<JSONSchema>> {
+        References.schemaReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all JSONSchema references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `jsonSchemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var jsonSchemaReferencesFoundInComponents: Validation<JSONSchema> {
+        References.jsonSchemaReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Response references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `responseReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var responseReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Response>> {
+        References.responseReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Parameter references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `parameterReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var parameterReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
+        References.parameterReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Example references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `exampleReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var exampleReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Example>> {
+        References.exampleReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Request references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `requestReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var requestReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Request>> {
+        References.requestReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Header references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `headerReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var headerReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Header>> {
+        References.headerReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Link references are internal and found in the document's
+    /// components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `linkReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var linkReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Link>> {
+        References.linkReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all Callbacks references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `callbacksReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var callbacksReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
+        References.callbacksReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
+    /// Validate that all PathItem references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `pathItemReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var pathItemReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+        References.pathItemReferencesAreValid(mustBeInternal: true, mustPointToComponents: true)
+    }
+
     // MARK: - Included with `Validator()` by default
 
     // You can start with no validations (not even the defaults below)
@@ -254,224 +398,94 @@ extension Validation {
         )
     }
 
-    /// Validate that all non-external OpenAPI JSONSchema references are found in the document's
-    /// components dictionary.
+    /// Validate that all OpenAPI JSONSchema components references are found in
+    /// the document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var schemaReferencesAreValid: Validation<OpenAPI.Reference<JSONSchema>> {
-        .init(
-            description: "OpenAPI JSONSchema reference can be found in components/schemas",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                    // don't make assertions about external references
-                    // TODO: could make a stronger assertion including
-                    // internal references outside of components given
-                    // some way to resolve those references.
-                    return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.schemaReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external JSONSchema references are found in the document's
-    /// components dictionary.
+    /// Validate that all JSONSchema components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var jsonSchemaReferencesAreValid: Validation<JSONSchema> {
-        .init(
-            description: "JSONSchema reference can be found in components/schemas",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.reference,
-                    case .component = internalReference else {
-                    // don't make assertions about external references
-                    // TODO: could make a stronger assertion including
-                    // internal references outside of components given
-                    // some way to resolve those references.
-                    return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.jsonSchemaReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Response references are found in the document's
-    /// components dictionary.
+    /// Validate that all Response components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var responseReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Response>> {
-        .init(
-            description: "Response reference can be found in components/responses",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.responseReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Parameter references are found in the document's
-    /// components dictionary.
+    /// Validate that all Parameter components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var parameterReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
-        .init(
-            description: "Parameter reference can be found in components/parameters",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.parameterReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Example references are found in the document's
-    /// components dictionary.
+    /// Validate that all Example components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var exampleReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Example>> {
-        .init(
-            description: "Example reference can be found in components/examples",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.exampleReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Request references are found in the document's
-    /// components dictionary.
+    /// Validate that all Request components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var requestReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Request>> {
-        .init(
-            description: "Request reference can be found in components/requestBodies",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.requestReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Header references are found in the document's
-    /// components dictionary.
+    /// Validate that all Header components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var headerReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Header>> {
-        .init(
-            description: "Header reference can be found in components/headers",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                    case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.headerReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Link references are found in the document's
-    /// components dictionary.
+    /// Validate that all Link components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var linkReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Link>> {
-        .init(
-            description: "Link reference can be found in components/links",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                      case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.linkReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external Callbacks references are found in the document's
-    /// components dictionary.
+    /// Validate that all Callbacks components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var callbacksReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
-        .init(
-            description: "Callbacks reference can be found in components/callbacks",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                      case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.callbacksReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
 
-    /// Validate that all non-external PathItem references are found in the document's
-    /// components dictionary.
+    /// Validate that all PathItem components references are found in the
+    /// document's components dictionary.
     ///
     /// - Important: This is included in validation by default.
     ///
     public static var pathItemReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
-        .init(
-            description: "PathItem reference can be found in components/pathItems",
-            check: { context in
-                guard case let .internal(internalReference) = context.subject.jsonReference,
-                      case .component = internalReference else {
-                        // don't make assertions about external references
-                        // TODO: could make a stronger assertion including
-                        // internal references outside of components given
-                        // some way to resolve those references.
-                        return true
-                }
-                return context.document.components.contains(internalReference)
-            }
-        )
+        References.pathItemReferencesAreValid(mustBeInternal: false, mustPointToComponents: false)
     }
     
     /// Validate that `enum` must not be empty in the document's
@@ -504,30 +518,6 @@ extension Validation {
         )
     }
 
-    /// Validate the OpenAPI Document's `Links` with operationIds refer to
-    /// Operations that exist in the document.
-    ///
-    /// This validation ensures that Link Objects using operationIds have corresponding
-    /// Operations in the document that have those IDs.
-    ///
-    /// - Important: This is not an included validation by default.
-    public static var linkOperationsExist: Validation<OpenAPI.Link> {
-        .init(
-            description: "Links with operationIds have corresponding Operations",
-            check: { context in
-                guard case let .b(operationId) = context.subject.operation else {
-                    // don't make assertions about Links that don't have operationIds
-                    return true
-                }
-                
-                // Collect all operation IDs from the document
-                let operationIds = context.document.allOperationIds
-                
-                return operationIds.contains(operationId)
-            }
-        )
-    }
-
     /// Validate the OpenAPI Document's `Parameter`s all have styles that are
     /// compatible with their locations per the table found at
     /// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#style-values
@@ -535,6 +525,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     public static var parameterStyleAndLocationAreCompatible: Validation<OpenAPI.Parameter> {
         .init(
+            description: "Parameter styles are all compatible with their locations",
             check: all(
                 Validation<OpenAPI.Parameter>(
                     description: "the matrix style can only be used for the path location",

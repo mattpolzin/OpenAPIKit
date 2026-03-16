@@ -152,18 +152,51 @@ extension OpenAPI.Document {
 ///
 public final class Validator {
 
-    internal var validations: [AnyValidation]
+    internal var customValidations: [AnyValidation]
 
-    /// Creates a `Validator`.
-    internal init(validations: [AnyValidation]) {
-        self.validations = validations
+    internal var nonReferenceDefaultValidations: [AnyValidation] = [
+        .init(.documentTagNamesAreUnique),
+        .init(.pathItemParametersAreUnique),
+        .init(.operationParametersAreUnique),
+        .init(.operationIdsAreUnique),
+        .init(.serverVariableEnumIsValid),
+        .init(.serverVariableDefaultExistsInEnum),
+        .init(.parameterStyleAndLocationAreCompatible)
+    ]
+
+    internal var referenceDefaultValidations: [AnyValidation] = [
+        .init(.schemaReferencesAreValid),
+        .init(.jsonSchemaReferencesAreValid),
+        .init(.responseReferencesAreValid),
+        .init(.parameterReferencesAreValid),
+        .init(.exampleReferencesAreValid),
+        .init(.requestReferencesAreValid),
+        .init(.headerReferencesAreValid),
+        .init(.linkReferencesAreValid),
+        .init(.callbacksReferencesAreValid),
+        .init(.pathItemReferencesAreValid)
+    ]
+
+    internal var validations: [AnyValidation] {
+        nonReferenceDefaultValidations + referenceDefaultValidations + customValidations
     }
 
-    /// Creates the default `Validator`. Note that
-    /// this Validator will perform the default validations.
-    /// If you want a Validator that won't perform any
-    /// validations except the ones you add, use
-    /// `Validator.blank`.
+    public var validationDescriptions: [String] {
+        validations.map(\.description)
+    }
+
+    /// Creates a `Validator` with exactly the given validations.
+    ///
+    /// - Important: Default builtin validations are not run if the Validator is creaated with this initializer.
+    internal init(validations: [AnyValidation]) {
+        self.referenceDefaultValidations = []
+        self.nonReferenceDefaultValidations = []
+        self.customValidations = validations
+    }
+
+    /// Creates the default `Validator`. Note that this Validator will perform
+    /// the default validations. If you want a Validator that won't perform any
+    /// validations except the ones you add, use `Validator.blank`.
     ///
     /// The default validations are
     /// - Document-level tag names are unique.
@@ -177,37 +210,18 @@ public final class Validator {
     ///     Variable.
     /// - `Parameter` styles and locations are compatible with each other.
     ///
-    public convenience init() {
-        self.init(validations: [
-            .init(.documentTagNamesAreUnique),
-            .init(.pathItemParametersAreUnique),
-            .init(.operationParametersAreUnique),
-            .init(.operationIdsAreUnique),
-            .init(.schemaReferencesAreValid),
-            .init(.jsonSchemaReferencesAreValid),
-            .init(.responseReferencesAreValid),
-            .init(.parameterReferencesAreValid),
-            .init(.exampleReferencesAreValid),
-            .init(.requestReferencesAreValid),
-            .init(.headerReferencesAreValid),
-            .init(.linkReferencesAreValid),
-            .init(.callbacksReferencesAreValid),
-            .init(.pathItemReferencesAreValid),
-            .init(.serverVariableEnumIsValid),
-            .init(.serverVariableDefaultExistsInEnum),
-            .init(.parameterStyleAndLocationAreCompatible)
-        ])
+    public init() {
+        self.customValidations = []
     }
 
-    /// A validator with no validation rules at all (not
-    /// even the defaults).
+    /// A validator with no validation rules at all (not even the defaults).
     public static var blank: Validator {
         return Self.init(validations: [])
     }
 
     /// Add a validation to be performed.
     public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
-        validations.append(AnyValidation(validation))
+        customValidations.append(AnyValidation(validation))
         return self
     }
 
@@ -278,6 +292,41 @@ public final class Validator {
         }
 
         return validating(validity, when: predicate)
+    }
+}
+
+extension Validator {
+    /// Add validations that all references are internal can be looked up in
+    /// the Components Object.
+    ///
+    /// By default, all references must be "valid" but that allows for internal
+    /// references that do not live in the Components Object.
+    public func validatingAllReferencesFoundInComponents() -> Self {
+        // replace the less strict default reference validations as they are
+        // encompassed by the stricter validations:
+        referenceDefaultValidations = [
+            .init(.schemaReferencesFoundInComponents),
+            .init(.jsonSchemaReferencesFoundInComponents),
+            .init(.responseReferencesFoundInComponents),
+            .init(.parameterReferencesFoundInComponents),
+            .init(.exampleReferencesFoundInComponents),
+            .init(.requestReferencesFoundInComponents),
+            .init(.headerReferencesFoundInComponents),
+            .init(.linkReferencesFoundInComponents),
+            .init(.callbacksReferencesFoundInComponents),
+            .init(.pathItemReferencesFoundInComponents)
+        ]
+        return self
+    }
+
+    /// Skip validations that references are internal or can be looked up in
+    /// the Components Object.
+    ///
+    /// By default, all references must be "valid" but that allows for internal
+    /// references that do not live in the Components Object. If you skip reference validations then nothing about references will be validated.
+    public func skippingReferenceValidations() -> Self {
+        referenceDefaultValidations = []
+        return self
     }
 }
 
