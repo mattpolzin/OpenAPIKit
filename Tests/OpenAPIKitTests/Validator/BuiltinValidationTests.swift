@@ -13,6 +13,73 @@ import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
 
+    func test_variousConfigurationsHaveExpectedValidationCounts() {
+        let blank = Validator.blank
+        XCTAssertEqual(blank.validationDescriptions.count, 0)
+
+        let singleCustom = Validator.blank.validating(.pathItemReferencesAreValid)
+        XCTAssertEqual(singleCustom.validationDescriptions.count, 1)
+        XCTAssertEqual(singleCustom.validationDescriptions, [
+            "PathItem reference can be found in components/pathItems"
+        ])
+
+        let withoutReferenceValidations = Validator().skippingReferenceValidations()
+        XCTAssertEqual(withoutReferenceValidations.validationDescriptions.count, 7)
+        XCTAssertEqual(withoutReferenceValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations"
+        ])
+
+        let defaultValidations = Validator()
+        XCTAssertEqual(defaultValidations.validationDescriptions.count, 17)
+        XCTAssertEqual(defaultValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations",
+            "JSONSchema reference can be found in components/schemas",
+            "JSONSchema reference can be found in components/schemas",
+            "Response reference can be found in components/responses",
+            "Parameter reference can be found in components/parameters",
+            "Example reference can be found in components/examples",
+            "Request reference can be found in components/requestBodies",
+            "Header reference can be found in components/headers",
+            "Link reference can be found in components/links",
+            "Callbacks reference can be found in components/callbacks",
+            "PathItem reference can be found in components/pathItems"
+        ])
+
+        let stricterReferenceValidations = Validator().validatingAllReferencesFoundInComponents()
+        XCTAssertEqual(stricterReferenceValidations.validationDescriptions.count, 17)
+        XCTAssertEqual(stricterReferenceValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations",
+            "JSONSchema reference points to this document and can be found in components/schemas",
+            "JSONSchema reference points to this document and can be found in components/schemas",
+            "Response reference points to this document and can be found in components/responses",
+            "Parameter reference points to this document and can be found in components/parameters",
+            "Example reference points to this document and can be found in components/examples",
+            "Request reference points to this document and can be found in components/requestBodies",
+            "Header reference points to this document and can be found in components/headers",
+            "Link reference points to this document and can be found in components/links",
+            "Callbacks reference points to this document and can be found in components/callbacks",
+            "PathItem reference points to this document and can be found in components/pathItems"
+        ])
+    }
+
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -791,7 +858,7 @@ final class BuiltinValidationTests: XCTestCase {
         }
     }
 
-    func test_oneOfEachReferenceTypeSucceeds() throws {
+    fileprivate var oneOfEachReference: OpenAPI.Document {
         let path = OpenAPI.PathItem(
             put: .init(
                 requestBody: .reference(.external(URL(string: "https://website.com/file.json#/hello/world")!)),
@@ -832,7 +899,8 @@ final class BuiltinValidationTests: XCTestCase {
                     )
                 ],
                 callbacks: [
-                  "callbacks1": .reference(.component(named: "callbacks1"))
+                    "callbacks1": .reference(.component(named: "callbacks1")),
+                    "callbacks2": .reference(.external(URL(string: "https://callbacks.com")!))
                 ]
             )
         )
@@ -868,7 +936,7 @@ final class BuiltinValidationTests: XCTestCase {
                     "link1": .init(operationId: "op 1")
                 ],
                 callbacks: [
-                  "callbacks1": .init()
+                    "callbacks1": .init()
                 ],
                 pathItems: [
                     "path1": .init()
@@ -876,8 +944,115 @@ final class BuiltinValidationTests: XCTestCase {
             )
         )
 
+        return document
+    }
+
+    func test_oneOfEachReferenceTypeSucceeds() throws {
+        let document = oneOfEachReference
+
         // NOTE this is part of default validation
         try document.validate()
+    }
+
+    func test_oneOfEachInternalReferenceTypeSucceedsComponentValidation() throws {
+        let document = oneOfEachReference
+
+        // NOTE this is NOT part of default validation
+        let validator = Validator().validatingAllReferencesFoundInComponents()
+        // NOTE this _will_ still fail but only for the external references
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.count, 9)
+            XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Request reference points to this document and can be found in components/requestBodies")
+            XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].put.requestBody")
+            XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Parameter reference points to this document and can be found in components/parameters")
+            XCTAssertEqual(error?.values[1].codingPathString, ".paths['/hello'].post.parameters[1]")
+            XCTAssertEqual(error?.values[2].reason, "Failed to satisfy: Response reference points to this document and can be found in components/responses")
+            XCTAssertEqual(error?.values[2].codingPathString, ".paths['/hello'].post.responses.301")
+            XCTAssertEqual(error?.values[3].reason, "Failed to satisfy: Header reference points to this document and can be found in components/headers")
+            XCTAssertEqual(error?.values[3].codingPathString, ".paths['/hello'].post.responses.404.headers.external")
+            XCTAssertEqual(error?.values[4].reason, "Failed to satisfy: Example reference points to this document and can be found in components/examples")
+            XCTAssertEqual(error?.values[4].codingPathString, ".paths['/hello'].post.responses.404.content['application/json'].examples.external")
+            XCTAssertEqual(error?.values[5].reason, "Failed to satisfy: JSONSchema reference points to this document and can be found in components/schemas")
+            XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].post.responses.404.content['text/plain'].schema")
+            XCTAssertEqual(error?.values[6].reason, "Failed to satisfy: Link reference points to this document and can be found in components/links")
+            XCTAssertEqual(error?.values[6].codingPathString, ".paths['/hello'].post.responses.404.links.linky2")
+            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: Callbacks reference points to this document and can be found in components/callbacks")
+            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/hello'].post.callbacks.callbacks2")
+            XCTAssertEqual(error?.values[8].reason, "Failed to satisfy: PathItem reference points to this document and can be found in components/pathItems")
+            XCTAssertEqual(error?.values[8].codingPathString, ".paths['/external']")
+        }
+    }
+
+    func test_oneOfEachReferenceTypeFailsComponentValidationIfNotInComponents() throws {
+        var document = oneOfEachReference
+        document.components = .noComponents
+
+        // NOTE this is NOT part of default validation
+        let validator = Validator().validatingAllReferencesFoundInComponents()
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.count, 18)
+            XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: Request reference points to this document and can be found in components/requestBodies")
+            XCTAssertEqual(error?.values[0].codingPathString, ".paths['/hello'].put.requestBody")
+            XCTAssertEqual(error?.values[1].reason, "Failed to satisfy: Parameter reference points to this document and can be found in components/parameters")
+            XCTAssertEqual(error?.values[1].codingPathString, ".paths['/hello'].post.parameters[0]")
+            XCTAssertEqual(error?.values[2].reason, "Failed to satisfy: Parameter reference points to this document and can be found in components/parameters")
+            XCTAssertEqual(error?.values[2].codingPathString, ".paths['/hello'].post.parameters[1]")
+            XCTAssertEqual(error?.values[3].reason, "Failed to satisfy: Request reference points to this document and can be found in components/requestBodies")
+            XCTAssertEqual(error?.values[3].codingPathString, ".paths['/hello'].post.requestBody")
+            XCTAssertEqual(error?.values[4].reason, "Failed to satisfy: Response reference points to this document and can be found in components/responses")
+            XCTAssertEqual(error?.values[4].codingPathString, ".paths['/hello'].post.responses.200")
+            XCTAssertEqual(error?.values[5].reason, "Failed to satisfy: Response reference points to this document and can be found in components/responses")
+            XCTAssertEqual(error?.values[5].codingPathString, ".paths['/hello'].post.responses.301")
+            XCTAssertEqual(error?.values[6].reason, "Failed to satisfy: Header reference points to this document and can be found in components/headers")
+            XCTAssertEqual(error?.values[6].codingPathString, ".paths['/hello'].post.responses.404.headers.header1")
+            XCTAssertEqual(error?.values[7].reason, "Failed to satisfy: Header reference points to this document and can be found in components/headers")
+            XCTAssertEqual(error?.values[7].codingPathString, ".paths['/hello'].post.responses.404.headers.external")
+            XCTAssertEqual(error?.values[8].reason, "Failed to satisfy: Example reference points to this document and can be found in components/examples")
+            XCTAssertEqual(error?.values[8].codingPathString, ".paths['/hello'].post.responses.404.content['application/json'].examples.example1")
+            XCTAssertEqual(error?.values[9].reason, "Failed to satisfy: Example reference points to this document and can be found in components/examples")
+            XCTAssertEqual(error?.values[9].codingPathString, ".paths['/hello'].post.responses.404.content['application/json'].examples.external")
+            XCTAssertEqual(error?.values[10].reason, "Failed to satisfy: JSONSchema reference points to this document and can be found in components/schemas")
+            XCTAssertEqual(error?.values[10].codingPathString, ".paths['/hello'].post.responses.404.content['application/xml'].schema")
+            XCTAssertEqual(error?.values[11].reason, "Failed to satisfy: JSONSchema reference points to this document and can be found in components/schemas")
+            XCTAssertEqual(error?.values[11].codingPathString, ".paths['/hello'].post.responses.404.content['text/plain'].schema")
+            XCTAssertEqual(error?.values[12].reason, "Failed to satisfy: Link reference points to this document and can be found in components/links")
+            XCTAssertEqual(error?.values[12].codingPathString, ".paths['/hello'].post.responses.404.links.linky")
+            XCTAssertEqual(error?.values[13].reason, "Failed to satisfy: Link reference points to this document and can be found in components/links")
+            XCTAssertEqual(error?.values[13].codingPathString, ".paths['/hello'].post.responses.404.links.linky2")
+            XCTAssertEqual(error?.values[14].reason, "Failed to satisfy: Callbacks reference points to this document and can be found in components/callbacks")
+            XCTAssertEqual(error?.values[14].codingPathString, ".paths['/hello'].post.callbacks.callbacks1")
+            XCTAssertEqual(error?.values[15].reason, "Failed to satisfy: Callbacks reference points to this document and can be found in components/callbacks")
+            XCTAssertEqual(error?.values[15].codingPathString, ".paths['/hello'].post.callbacks.callbacks2")
+            XCTAssertEqual(error?.values[16].reason, "Failed to satisfy: PathItem reference points to this document and can be found in components/pathItems")
+            XCTAssertEqual(error?.values[16].codingPathString, ".paths['/world']")
+            XCTAssertEqual(error?.values[17].reason, "Failed to satisfy: PathItem reference points to this document and can be found in components/pathItems")
+            XCTAssertEqual(error?.values[17].codingPathString, ".paths['/external']")
+        }
+    }
+
+    func test_internalReferenceToNonComponentFailsFoundInComponents() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/internal": .reference(.internal(path: "#/not/important/where"))
+            ],
+            components: .noComponents
+        )
+
+        // Document will pass less strict default validations
+        try document.validate()
+
+        // Document will fail stricter reference found in component validations
+        let validator = Validator().validatingAllReferencesFoundInComponents()
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.count, 1)
+            XCTAssertEqual(error?.values[0].reason, "Failed to satisfy: PathItem reference points to this document and can be found in components/pathItems")
+            XCTAssertEqual(error?.values[0].codingPathString, ".paths['/internal']")
+        }
     }
 
     func test_pathItemsTopLevelReferencesReferencingPathItemComponentsSuccess() throws {
@@ -927,7 +1102,28 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.linkOperationsExist)
         try document.validate(using: validator)
     }
-    
+
+    func test_linkOperationNoId_succeeds() throws {
+        // Create a link without an operationId
+        let link = OpenAPI.Link(operation: .a(URL(string: "https://operation.com")!))
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init()
+            ],
+            components: .direct(
+                links: [
+                    "testLink": link
+                ]
+            )
+        )
+
+        let validator = Validator.blank.validating(.linkOperationsExist)
+        try document.validate(using: validator)
+    }
+
     func test_linkOperationsExist_fails() throws {
         // Create a link with an operationId that doesn't exist in the document
         let link = OpenAPI.Link(operationId: "nonExistentOperation")
