@@ -13,6 +13,73 @@ import OpenAPIKit
 
 final class BuiltinValidationTests: XCTestCase {
 
+    func test_variousConfigurationsHaveExpectedValidationCounts() {
+        let blank = Validator.blank
+        XCTAssertEqual(blank.validationDescriptions.count, 0)
+
+        let singleCustom = Validator.blank.validating(.pathItemReferencesAreValid)
+        XCTAssertEqual(singleCustom.validationDescriptions.count, 1)
+        XCTAssertEqual(singleCustom.validationDescriptions, [
+            "PathItem reference can be found in components/pathItems"
+        ])
+
+        let withoutReferenceValidations = Validator().skippingReferenceValidations()
+        XCTAssertEqual(withoutReferenceValidations.validationDescriptions.count, 7)
+        XCTAssertEqual(withoutReferenceValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations"
+        ])
+
+        let defaultValidations = Validator()
+        XCTAssertEqual(defaultValidations.validationDescriptions.count, 17)
+        XCTAssertEqual(defaultValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations",
+            "JSONSchema reference can be found in components/schemas",
+            "JSONSchema reference can be found in components/schemas",
+            "Response reference can be found in components/responses",
+            "Parameter reference can be found in components/parameters",
+            "Example reference can be found in components/examples",
+            "Request reference can be found in components/requestBodies",
+            "Header reference can be found in components/headers",
+            "Link reference can be found in components/links",
+            "Callbacks reference can be found in components/callbacks",
+            "PathItem reference can be found in components/pathItems"
+        ])
+
+        let stricterReferenceValidations = Validator().validatingAllReferencesFoundInComponents()
+        XCTAssertEqual(stricterReferenceValidations.validationDescriptions.count, 17)
+        XCTAssertEqual(stricterReferenceValidations.validationDescriptions, [
+            "The names of Tags in the Document are unique",
+            "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "All Operation Ids in Document are unique",
+            "Server Variable\'s enum is either not defined or is non-empty (if defined).",
+            "Server Variable\'s default must exist in enum, if enum is defined.",
+            "Parameter styles are all compatible with their locations",
+            "JSONSchema reference points to this document and can be found in components/schemas",
+            "JSONSchema reference points to this document and can be found in components/schemas",
+            "Response reference points to this document and can be found in components/responses",
+            "Parameter reference points to this document and can be found in components/parameters",
+            "Example reference points to this document and can be found in components/examples",
+            "Request reference points to this document and can be found in components/requestBodies",
+            "Header reference points to this document and can be found in components/headers",
+            "Link reference points to this document and can be found in components/links",
+            "Callbacks reference points to this document and can be found in components/callbacks",
+            "PathItem reference points to this document and can be found in components/pathItems"
+        ])
+    }
+
     func test_noPathsOnDocumentFails() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),
@@ -1035,7 +1102,28 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.linkOperationsExist)
         try document.validate(using: validator)
     }
-    
+
+    func test_linkOperationNoId_succeeds() throws {
+        // Create a link without an operationId
+        let link = OpenAPI.Link(operation: .a(URL(string: "https://operation.com")!))
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init()
+            ],
+            components: .direct(
+                links: [
+                    "testLink": link
+                ]
+            )
+        )
+
+        let validator = Validator.blank.validating(.linkOperationsExist)
+        try document.validate(using: validator)
+    }
+
     func test_linkOperationsExist_fails() throws {
         // Create a link with an operationId that doesn't exist in the document
         let link = OpenAPI.Link(operationId: "nonExistentOperation")

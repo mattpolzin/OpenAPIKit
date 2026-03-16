@@ -525,6 +525,7 @@ extension Validation {
     /// - Important: This is included in validation by default.
     public static var parameterStyleAndLocationAreCompatible: Validation<OpenAPI.Parameter> {
         .init(
+            description: "Parameter styles are all compatible with their locations",
             check: all(
                 Validation<OpenAPI.Parameter>(
                     description: "the matrix style can only be used for the path location",

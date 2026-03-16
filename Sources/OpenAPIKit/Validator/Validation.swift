@@ -42,6 +42,8 @@ public struct Validation<Subject: Validatable> {
     /// - The coding path where the validation is occurring.
     public let predicate: (ValidationContext<Subject>) -> Bool
 
+    public let description: String
+
     /// Apply the validation to the given value if the predicate
     /// returns `true`.
     public func apply(to subject: Subject, at codingPath: [CodingKey], in document: OpenAPI.Document) -> [ValidationError] {
@@ -62,6 +64,8 @@ public struct Validation<Subject: Validatable> {
     /// all values of the type your `validate` method operates on.
     ///
     /// - Parameters:
+    ///     - description: A description of the correct state described by the
+    ///         `validate` function. If not given will default to the description of the type.
     ///     - validate: A function taking validation contexts containing
     ///         subjects of type `Subject` and validating them. This function must
     ///         return an array of errors. If validation succeeds, return an empty
@@ -70,11 +74,13 @@ public struct Validation<Subject: Validatable> {
     ///         should run against the given value.
     ///
     public init(
+        description: String? = nil,
         check validate: @escaping (ValidationContext<Subject>) -> [ValidationError],
         when predicate: @escaping (ValidationContext<Subject>) -> Bool = { _ in true }
     ) {
         self.validate = validate
         self.predicate = predicate
+        self.description = description ?? String(describing: Self.self)
     }
 
     /// Create a Validation with a single error that applies to values of type `Subject`.
@@ -103,7 +109,7 @@ public struct Validation<Subject: Validatable> {
                 ? []
                 : [ ValidationError(reason: "Failed to satisfy: \(description)", at: context.codingPath) ]
         }
-        self.init(check: validity, when: predicate)
+        self.init(description: description, check: validity, when: predicate)
     }
 }
 
@@ -166,7 +172,11 @@ internal struct AnyValidation {
         return _apply(value, codingPath, document)
     }
 
+    /// A description of the correct or desirable outcome being validated.
+    public let description: String
+
     init<T>(_ validation: Validation<T>) {
+        self.description = validation.description
         self._apply = { input, codingPath, document in
 
             guard let subject = input as? T else {

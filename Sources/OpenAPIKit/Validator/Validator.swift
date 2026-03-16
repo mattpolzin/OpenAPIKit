@@ -181,6 +181,10 @@ public final class Validator {
         nonReferenceDefaultValidations + referenceDefaultValidations + customValidations
     }
 
+    public var validationDescriptions: [String] {
+        validations.map(\.description)
+    }
+
     /// Creates a `Validator` with exactly the given validations.
     ///
     /// - Important: Default builtin validations are not run if the Validator is creaated with this initializer.
@@ -298,11 +302,9 @@ extension Validator {
     /// By default, all references must be "valid" but that allows for internal
     /// references that do not live in the Components Object.
     public func validatingAllReferencesFoundInComponents() -> Self {
-        // turn off the less strict default reference validations as they are
+        // replace the less strict default reference validations as they are
         // encompassed by the stricter validations:
-        referenceDefaultValidations = []
-
-        customValidations.append(contentsOf: [
+        referenceDefaultValidations = [
             .init(.schemaReferencesFoundInComponents),
             .init(.jsonSchemaReferencesFoundInComponents),
             .init(.responseReferencesFoundInComponents),
@@ -313,7 +315,17 @@ extension Validator {
             .init(.linkReferencesFoundInComponents),
             .init(.callbacksReferencesFoundInComponents),
             .init(.pathItemReferencesFoundInComponents)
-        ])
+        ]
+        return self
+    }
+
+    /// Skip validations that references are internal or can be looked up in
+    /// the Components Object.
+    ///
+    /// By default, all references must be "valid" but that allows for internal
+    /// references that do not live in the Components Object. If you skip reference validations then nothing about references will be validated.
+    public func skippingReferenceValidations() -> Self {
+        referenceDefaultValidations = []
         return self
     }
 }
