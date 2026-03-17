@@ -1086,6 +1086,32 @@ final class ValidatorTests: XCTestCase {
         try document.validate(using: validator)
     }
 
+    func test_keyedContainerKeysAreValidated() {
+        let contentMap : OpenAPI.Content.Map = [
+            .json: .a(.component(named: "jsonContent"))
+        ]
+        let doc = OpenAPI.Document(
+            info: .init(title: "doc", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    summary: "test",
+                    get: .init(responses: [
+                        200: .response(content: contentMap)
+                    ])
+                )
+            ],
+            components: .noComponents
+        )
+        let notJson = Validation<OpenAPI.ContentType>.init(description: "JSON content not allowed", check: \.rawValue != "application/json")
+
+        XCTAssertThrowsError(try doc.validate(using: Validator.blank.validating(notJson), strict: false)) { error in
+            let error = error as? ValidationErrorCollection
+
+            XCTAssertEqual(error.map(OpenAPI.Error.init(from:))?.localizedDescription, "Failed to satisfy: JSON content not allowed at path: .paths[\'/hello\'].get.responses.200.content[\'application/json\']")
+        }
+    }
+
     /// This test confirms the last example in the validation documentation file (documentation/validation.md)
     /// functions as-written.
     func test_requestBodySchemaValidationFails() {

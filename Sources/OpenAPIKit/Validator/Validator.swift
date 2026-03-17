@@ -424,6 +424,10 @@ class _ReferencingValidator: _Validator {
             userInfo: encoder.userInfo,
             codingPath: encoder.codingPath + [key]
         )
+        if let typedKey = key as? AnyCodingKey,
+            let validatableKey = typedKey.originalValue as? Validatable {
+              applyValidations(to: validatableKey)
+        }
     }
 
     init(referencing encoder: _Validator, at index: Int) {
@@ -573,7 +577,7 @@ extension _Validator: SingleValueEncodingContainer {
         )
     }
 
-    fileprivate func applyValidations(to value: Encodable, atKey key: CodingKey? = nil) {
+    fileprivate func applyValidations(to value: Any, atKey key: CodingKey? = nil) {
         let pathTail = key.map { [$0] } ?? []
         for idx in validations.indices {
             errors += validations[idx].apply(to: value, at: codingPath + pathTail, in: document)
