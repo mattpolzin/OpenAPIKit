@@ -282,9 +282,16 @@ extension OrderedDictionary: Sendable where Key: Sendable, Value: Sendable {}
 public struct AnyCodingKey: CodingKey {
 
     public let stringValue: String
+    public let originalValue: Any
 
     public init(stringValue: String) {
         self.stringValue = stringValue
+        self.originalValue = stringValue
+    }
+
+    public init(stringValue: String, originalValue: Any) {
+        self.stringValue = stringValue
+        self.originalValue = originalValue
     }
 
     public let intValue: Int? = nil
@@ -327,7 +334,8 @@ extension OrderedDictionary: Encodable where Key: Encodable, Value: Encodable {
 
         // try for RawRepresentable with String RawValues
         if let encodableDictionary = self as? StringRawKeyEncodable {
-            let kvPairs = zip(encodableDictionary.orderedStringKeys, self.values)
+            let keyPairs = zip(self.orderedKeys, encodableDictionary.orderedStringKeys)
+            let kvPairs = zip(keyPairs, self.values)
             try encodeKeyValuePairs(kvPairs, to: encoder)
             return
         }
@@ -365,15 +373,16 @@ internal func encodeKeyValuePairs<Value: Encodable>(
     }
 }
 
-/// Encode a sequence of `String`/`Value` pairs as a hash.
-internal func encodeKeyValuePairs<Value: Encodable>(
-    _ keyValuePairs: Zip2Sequence<[String], [Value]>,
+/// Encode a sequence of `String`/`Value` pairs as a hash keeping track of the
+/// original RawRepresentable values.
+internal func encodeKeyValuePairs<Value: Encodable, T>(
+    _ keyValuePairs: Zip2Sequence<Zip2Sequence<[T], [String]>, [Value]>,
     to encoder: Encoder
 ) throws {
     var container = encoder.container(keyedBy: AnyCodingKey.self)
 
     for (key, value) in keyValuePairs {
-        try container.encode(value, forKey: .init(stringValue: key))
+        try container.encode(value, forKey: .init(stringValue: key.1, originalValue: key.0))
     }
 }
 
