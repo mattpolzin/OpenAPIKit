@@ -7,6 +7,12 @@
 
 import OpenAPIKitCore
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 // MARK: - Core Context
 
 /// A schema context stores information about a schema.
@@ -65,6 +71,9 @@ public protocol JSONSchemaContext: Sendable {
 
     /// Get the external docs, if specified. If unspecified, returns `nil`.
     var externalDocs: OpenAPI.ExternalDocumentation? { get }
+
+    /// An identifier for this schema, if one is defined.
+    var id: URL? { get }
 
     /// The OpenAPI spec calls this "enum"
     ///
@@ -138,6 +147,18 @@ public protocol JSONSchemaContext: Sendable {
     var vendorExtensions: [String: AnyCodable] { get }
 }
 
+public extension JSONSchemaContext {
+    var id: URL? { nil }
+
+    /// Establish the base URI for this schema context.
+    ///
+    /// If the schema defines `$id`, it is resolved against the parent base URI.
+    /// Otherwise, the parent base URI is carried forward unchanged.
+    func baseURI(relativeTo parentBaseURI: URL?) -> URL? {
+        id?.resolvedURI(relativeTo: parentBaseURI) ?? parentBaseURI
+    }
+}
+
 extension JSONSchema {
     /// The context that applies to all schemas.
     public struct CoreContext<Format: OpenAPIFormat>: JSONSchemaContext, HasWarnings {
@@ -153,6 +174,7 @@ extension JSONSchema {
         public let title: String?
         public let description: String?
         public let externalDocs: OpenAPI.ExternalDocumentation?
+        public let id: URL?
 
         public let discriminator: OpenAPI.Discriminator?
 
@@ -221,6 +243,7 @@ extension JSONSchema {
                 && title == nil
                 && _deprecated == nil
                 && externalDocs == nil
+                && id == nil
                 && allowedValues == nil
                 && defaultValue == nil
                 && examples.isEmpty
@@ -244,6 +267,7 @@ extension JSONSchema {
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            id: URL? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
             examples: [AnyCodable] = [],
@@ -264,6 +288,7 @@ extension JSONSchema {
             self.description = description
             self.discriminator = discriminator
             self.externalDocs = externalDocs
+            self.id = id
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.examples = examples
@@ -285,6 +310,7 @@ extension JSONSchema {
             description: String? = nil,
             discriminator: OpenAPI.Discriminator? = nil,
             externalDocs: OpenAPI.ExternalDocumentation? = nil,
+            id: URL? = nil,
             allowedValues: [AnyCodable]? = nil,
             defaultValue: AnyCodable? = nil,
             examples: [String],
@@ -304,6 +330,7 @@ extension JSONSchema {
             self.description = description
             self.discriminator = discriminator
             self.externalDocs = externalDocs
+            self.id = id
             self.allowedValues = allowedValues
             self.defaultValue = defaultValue
             self.examples = examples.map(AnyCodable.init)
@@ -327,6 +354,7 @@ extension JSONSchema.CoreContext: Equatable {
           && lhs.title == rhs.title
           && lhs.description == rhs.description
           && lhs.externalDocs == rhs.externalDocs
+          && lhs.id == rhs.id
           && lhs.discriminator == rhs.discriminator
           && lhs.allowedValues == rhs.allowedValues
           && lhs.defaultValue == rhs.defaultValue
@@ -355,6 +383,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -379,6 +408,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -403,6 +433,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -427,6 +458,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -451,6 +483,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -475,6 +508,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: [example],
@@ -499,6 +533,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -523,6 +558,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -547,6 +583,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -571,6 +608,31 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            allowedValues: allowedValues,
+            defaultValue: defaultValue,
+            examples: examples,
+            anchor: anchor,
+            dynamicAnchor: dynamicAnchor,
+            defs: defs,
+            xml: xml,
+            vendorExtensions: vendorExtensions,
+            _inferred: inferred
+        )
+    }
+
+    /// Return this context with the given identifier.
+    public func with(id: URL) -> JSONSchema.CoreContext<Format> {
+        return .init(
+            format: format,
+            required: required,
+            nullable: nullable,
+            permissions: _permissions,
+            deprecated: _deprecated,
+            title: title,
+            description: description,
+            discriminator: discriminator,
+            externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
@@ -883,6 +945,7 @@ extension JSONSchema {
         case description
         case discriminator
         case externalDocs
+        case id = "$id"
         case allowedValues = "enum"
         case const
         case defaultValue = "default"
@@ -919,6 +982,7 @@ extension JSONSchema.CoreContext: Encodable {
         try container.encodeIfPresent(description, forKey: .description)
         try container.encodeIfPresent(discriminator, forKey: .discriminator)
         try container.encodeIfPresent(externalDocs, forKey: .externalDocs)
+        try container.encodeIfPresent(id?.absoluteString, forKey: .id)
         if !examples.isEmpty {
             try container.encode(examples, forKey: .examples)
         }
@@ -989,6 +1053,7 @@ extension JSONSchema.CoreContext: Decodable {
         description = try container.decodeIfPresent(String.self, forKey: .description)
         discriminator = try container.decodeIfPresent(OpenAPI.Discriminator.self, forKey: .discriminator)
         externalDocs = try container.decodeIfPresent(OpenAPI.ExternalDocumentation.self, forKey: .externalDocs)
+        id = try container.decodeURLAsStringIfPresent(forKey: .id)
         if Format.self == JSONTypeFormat.StringFormat.self {
             if nullable {
                 allowedValues = try Self.decodeAllowedValuesOrConst(String?.self, inContainer: container)?.map(AnyCodable.init)
