@@ -53,6 +53,11 @@ extension OpenAPI.Components {
     /// reference is itself another reference (e.g. entries in the `responses`
     /// dictionary are allowed to be references).
     public func contains<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) -> Bool {
+        if case .anchor(name: let anchorName) = reference,
+           ReferenceType.self == JSONSchema.self {
+            return localAnchorSchema(named: anchorName) != nil
+        }
+
         switch ReferenceType.openAPIComponentsKeyPath {
         case .a(let directPath):
             return reference.name
@@ -317,6 +322,15 @@ extension OpenAPI.Components {
     /// - Throws: `ReferenceError.cannotLookupRemoteReference` or
     ///     `ReferenceError.missingOnLookup(name:,key:)`
     public func lookupOnce<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference) throws -> Either<OpenAPI.Reference<ReferenceType>, ReferenceType> {
+        if case .anchor(name: let anchorName) = reference,
+           ReferenceType.self == JSONSchema.self {
+            guard let schema = localAnchorSchema(named: anchorName) else {
+                throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+            }
+
+            return .b(schema as! ReferenceType)
+        }
+
         let value: Either<OpenAPI.Reference<ReferenceType>, ReferenceType>?
         switch ReferenceType.openAPIComponentsKeyPath {
         case .a(let directPath):
@@ -362,6 +376,19 @@ extension OpenAPI.Components {
     internal func _lookup<ReferenceType: ComponentDictionaryLocatable>(_ reference: JSONReference<ReferenceType>.InternalReference, following visitedReferences: Set<AnyHashable> = .init()) throws -> ReferenceType {
         if visitedReferences.contains(reference) {
             throw ReferenceCycleError(ref: reference.rawValue)
+        }
+
+        if case .anchor(name: let anchorName) = reference,
+           ReferenceType.self == JSONSchema.self {
+            guard let schema = localAnchorSchema(named: anchorName) else {
+                throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+            }
+
+            if case let .reference(newReference, _) = schema.value {
+                return try _lookup(newReference, following: visitedReferences.union([reference])) as! ReferenceType
+            }
+
+            return schema as! ReferenceType
         }
 
         switch ReferenceType.openAPIComponentsKeyPath {

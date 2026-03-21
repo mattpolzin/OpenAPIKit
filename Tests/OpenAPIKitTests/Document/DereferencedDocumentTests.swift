@@ -124,4 +124,61 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(t1.security.count, 1)
         XCTAssertEqual(t1.security.first?.schemes["test"]?.securityScheme.type, .apiKey(name: "Api-Key", location: .header))
     }
+
+    func test_locallyDereferencedResolvesSchemaAnchorReferences() throws {
+        let anchoredChild = JSONSchema.string(
+            .init(anchor: "nameAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.object(
+            properties: [
+                "name": .reference(.anchor(named: "nameAnchor"))
+            ],
+            defs: [
+                "nameDefinition": anchoredChild
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        OpenAPI.ContentType.json: .content(
+                                            .init(
+                                                schema: .reference(.component(named: "anchoredSchema"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[OpenAPI.ContentType.json]?
+            .schema
+
+        let nameSchema = schema?.objectContext?.properties["name"]
+        XCTAssertEqual(nameSchema?.jsonType, .string)
+        XCTAssertEqual(nameSchema?.anchor, "nameAnchor")
+    }
 }
