@@ -282,14 +282,14 @@ extension OrderedDictionary: Sendable where Key: Sendable, Value: Sendable {}
 public struct AnyCodingKey: CodingKey {
 
     public let stringValue: String
-    public let originalValue: Any
+    public let originalValue: (any Validatable)?
 
     public init(stringValue: String) {
         self.stringValue = stringValue
-        self.originalValue = stringValue
+        self.originalValue = nil
     }
 
-    public init(stringValue: String, originalValue: Any) {
+    public init(stringValue: String, originalValue: (any Validatable)?) {
         self.stringValue = stringValue
         self.originalValue = originalValue
     }
@@ -300,6 +300,8 @@ public struct AnyCodingKey: CodingKey {
         return nil
     }
 }
+
+extension AnyCodingKey: @unchecked Sendable {}
 
 // MARK: - Encodable
 extension OrderedDictionary: Encodable where Key: Encodable, Value: Encodable {
@@ -382,7 +384,7 @@ internal func encodeKeyValuePairs<Value: Encodable, T>(
     var container = encoder.container(keyedBy: AnyCodingKey.self)
 
     for (key, value) in keyValuePairs {
-        try container.encode(value, forKey: .init(stringValue: key.1, originalValue: key.0))
+        try container.encode(value, forKey: .init(stringValue: key.1, originalValue: key.0 as? any Validatable))
     }
 }
 
