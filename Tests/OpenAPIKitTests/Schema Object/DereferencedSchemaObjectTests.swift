@@ -304,6 +304,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .boolean(.init())
         )
 
+        let tPattern = JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced()
+        XCTAssertEqual(
+            tPattern?.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
+        )
+
         let t3 = JSONSchema.object(
             properties: [
                 "required": .string,
@@ -333,6 +339,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(
             t2.objectContext?.additionalProperties?.schemaValue,
             .boolean(.init())
+        )
+
+        let tPattern = try JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced(in: components)
+        XCTAssertEqual(
+            tPattern.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
         )
 
         let t3 = try JSONSchema.object(

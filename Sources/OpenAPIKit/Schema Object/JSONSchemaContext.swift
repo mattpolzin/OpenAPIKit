@@ -782,6 +782,10 @@ extension JSONSchema {
         /// allows you to omit the property from encoding.
         public let additionalProperties: Either<Bool, JSONSchema>?
 
+        /// Schemas keyed by regular expressions that matching property names
+        /// must satisfy.
+        public let patternProperties: OrderedDictionary<String, JSONSchema>
+
         /// The properties of this object that are required.
         ///
         /// - Note: An object's required properties array
@@ -811,11 +815,13 @@ extension JSONSchema {
 
         public init(
             properties: OrderedDictionary<String, JSONSchema>,
+            patternProperties: OrderedDictionary<String, JSONSchema> = [:],
             additionalProperties: Either<Bool, JSONSchema>? = nil,
             maxProperties: Int? = nil,
             minProperties: Int? = nil
         ) {
             self.properties = properties
+            self.patternProperties = patternProperties
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties
             self._minProperties = minProperties
@@ -1260,6 +1266,7 @@ extension JSONSchema.ObjectContext {
         case maxProperties
         case minProperties
         case properties
+        case patternProperties
         case additionalProperties
         case required
     }
@@ -1273,6 +1280,10 @@ extension JSONSchema.ObjectContext: Encodable {
 
         if properties.count > 0 {
             try container.encode(properties, forKey: .properties)
+        }
+
+        if patternProperties.count > 0 {
+            try container.encode(patternProperties, forKey: .patternProperties)
         }
 
         try container.encodeIfPresent(additionalProperties, forKey: .additionalProperties)
@@ -1291,6 +1302,7 @@ extension JSONSchema.ObjectContext: Decodable {
 
         maxProperties = try container.decodeIfPresent(Int.self, forKey: .maxProperties)
         _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
+        patternProperties = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .patternProperties) ?? [:]
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
