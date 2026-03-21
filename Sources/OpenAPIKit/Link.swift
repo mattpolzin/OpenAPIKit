@@ -11,6 +11,7 @@ import OpenAPIKitCore
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
+@preconcurrency
 import Foundation
 #endif
 
