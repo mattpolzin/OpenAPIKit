@@ -30,6 +30,21 @@ final class JSONReferenceURIResolutionTests: XCTestCase {
         )
     }
 
+    func test_jsonReference_resolvedURIWithoutBasePreservesRelativeReference() {
+        let reference = JSONReference<JSONSchema>.external(URL(string: "other.yaml#/components/schemas/world")!)
+
+        XCTAssertEqual(
+            reference.resolvedURI(relativeTo: nil).relativeString,
+            "other.yaml#/components/schemas/world"
+        )
+    }
+
+    func test_openAPIReference_uriReferenceReliesOnUnderlyingJSONReference() {
+        let reference = OpenAPI.Reference<JSONSchema>.component(named: "hello")
+
+        XCTAssertEqual(reference.uriReference.relativeString, "#/components/schemas/hello")
+    }
+
     func test_openAPIReference_resolvedURIReliesOnUnderlyingJSONReference() {
         let baseURI = URL(string: "https://example.com/schemas/root.yaml")!
         let reference = OpenAPI.Reference<JSONSchema>.component(named: "hello")

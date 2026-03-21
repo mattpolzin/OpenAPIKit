@@ -608,6 +608,7 @@ extension JSONSchema.CoreContext {
             description: description,
             discriminator: discriminator,
             externalDocs: externalDocs,
+            id: id,
             allowedValues: allowedValues,
             defaultValue: defaultValue,
             examples: examples,
