@@ -1082,6 +1082,16 @@ final class SchemaFragmentCombiningTests: XCTestCase {
         XCTAssertThrowsError(try patternPropertyDifference.combined(resolvingAgainst: .noComponents))
     }
 
+    func test_ObjectPatternPropertiesCombine() throws {
+        let combined = try [
+            JSONSchema.object(patternProperties: ["^x-": .string]),
+            JSONSchema.object(patternProperties: ["^y-": .boolean])
+        ].combined(resolvingAgainst: .noComponents)
+
+        XCTAssertEqual(combined.objectContext?.patternProperties["^x-"], .string(.init(), .init()))
+        XCTAssertEqual(combined.objectContext?.patternProperties["^y-"], .boolean(.init()))
+    }
+
     // MARK: - Inconsistency Failures
     func test_generalGenericErrors() {
 

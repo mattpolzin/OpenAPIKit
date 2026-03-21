@@ -714,6 +714,7 @@ extension JSONSchema.ObjectContext {
         }
         return .init(
             properties: properties,
+            patternProperties: patternProperties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
             minProperties: _minProperties
