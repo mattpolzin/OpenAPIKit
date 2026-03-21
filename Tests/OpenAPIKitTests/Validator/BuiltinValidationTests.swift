@@ -573,11 +573,11 @@ final class BuiltinValidationTests: XCTestCase {
             paths: [
                 "/hello": .init(
                     get: .init(
-                        servers: [
-                            .init(url: URL(string: "https://operation.example.com")!, name: "shared")
-                        ],
                         responses: [
                             200: .response(description: "hi")
+                        ],
+                        servers: [
+                            .init(url: URL(string: "https://operation.example.com")!, name: "shared")
                         ]
                     )
                 )
@@ -605,12 +605,12 @@ final class BuiltinValidationTests: XCTestCase {
                         .init(url: URL(string: "https://unnamed-path.example.com")!)
                     ],
                     get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                        ],
                         servers: [
                             .init(url: URL(string: "https://operation.example.com")!, name: "operation"),
                             .init(url: URL(string: "https://unnamed-operation.example.com")!)
-                        ],
-                        responses: [
-                            200: .response(description: "hi")
                         ]
                     )
                 )
@@ -618,11 +618,11 @@ final class BuiltinValidationTests: XCTestCase {
             webhooks: [
                 "/event": .init(
                     post: .init(
-                        servers: [
-                            .init(url: URL(string: "https://webhook.example.com")!, name: "webhook")
-                        ],
                         responses: [
                             200: .response(description: "ok")
+                        ],
+                        servers: [
+                            .init(url: URL(string: "https://webhook.example.com")!, name: "webhook")
                         ]
                     )
                 )
