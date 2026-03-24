@@ -352,7 +352,7 @@ extension Validation {
         .init(
             description: "The names of Servers in the Document are unique",
             check: { context in
-                let serverNames = allServerNames(in: context.subject)
+                let serverNames = context.subject.allServers.compactMap(\.name)
                 return Set(serverNames).count == serverNames.count
             }
         )
@@ -597,19 +597,4 @@ fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, comp
     let identities = foundParameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
 
     return Set(identities).count == foundParameters.count
-}
-
-fileprivate func allServerNames(in document: OpenAPI.Document) -> [String] {
-    var serverNames = document.servers.compactMap(\.name)
-    let pathItems = (document.paths.values + document.webhooks.values).compactMap { document.components[$0] }
-
-    for pathItem in pathItems {
-        serverNames.append(contentsOf: (pathItem.servers ?? []).compactMap(\.name))
-
-        for endpoint in pathItem.endpoints {
-            serverNames.append(contentsOf: (endpoint.operation.servers ?? []).compactMap(\.name))
-        }
-    }
-
-    return serverNames
 }
