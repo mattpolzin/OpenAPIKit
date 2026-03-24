@@ -2082,15 +2082,9 @@ extension JSONSchema: Decodable {
     }
 
     public init(from decoder: Decoder) throws {
-        let schemaID = try Self.decodeSchemaID(from: decoder)
-
         if let ref = try? JSONReference<JSONSchema>(from: decoder) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
-            var schema = Self(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
-            if let schemaID {
-                schema = schema.with(id: schemaID)
-            }
-            self = schema
+            self = Self(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
             return
         }
 
@@ -2107,9 +2101,6 @@ extension JSONSchema: Decodable {
             )
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
-            }
-            if let schemaID {
-                schema = schema.with(id: schemaID)
             }
 
             // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
@@ -2131,9 +2122,6 @@ extension JSONSchema: Decodable {
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
             }
-            if let schemaID {
-                schema = schema.with(id: schemaID)
-            }
 
             // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
             let extensions = try Self.decodeVenderExtensions(from: decoder)
@@ -2153,9 +2141,6 @@ extension JSONSchema: Decodable {
             if schema.subschemas.contains(where: { $0.nullable }) {
                 schema = schema.nullableSchemaObject()
             }
-            if let schemaID {
-                schema = schema.with(id: schemaID)
-            }
 
             // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
             let extensions = try Self.decodeVenderExtensions(from: decoder)
@@ -2166,15 +2151,12 @@ extension JSONSchema: Decodable {
 
         if container.contains(.not) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
-            var schema: JSONSchema = .init(warnings: coreContext.warnings,
+            let schema: JSONSchema = .init(warnings: coreContext.warnings,
                 schema: .not(
                     try container.decode(JSONSchema.self, forKey: .not),
                     core: coreContext
                 )
             )
-            if let schemaID {
-                schema = schema.with(id: schemaID)
-            }
 
             // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
             let extensions = try Self.decodeVenderExtensions(from: decoder)
@@ -2233,7 +2215,7 @@ extension JSONSchema: Decodable {
             }
         }
 
-        var value: Schema
+        let value: Schema
         if typeHint == .null {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             _warnings += coreContext.warnings
@@ -2294,10 +2276,6 @@ extension JSONSchema: Decodable {
 
         self.warnings = _warnings
 
-        if let schemaID {
-            value = value.with(id: schemaID)
-        }
-
         // Ad-hoc vendor extension support since JSONSchema does coding keys differently.
         let extensions = try Self.decodeVenderExtensions(from: decoder)
 
@@ -2322,36 +2300,6 @@ extension JSONSchema: Decodable {
         return decodedAny
             .filter { $0.key.lowercased().starts(with: "x-") }
             .mapValues(AnyCodable.init)
-    }
-
-    private static func decodeSchemaID(from decoder: Decoder) throws -> URL? {
-        guard let decodedAny = try AnyCodable(from: decoder).value as? [String: any Sendable],
-              let rawID = decodedAny["$id"] as? String else {
-            return nil
-        }
-
-        #if canImport(FoundationEssentials)
-        let url = URL(string: rawID, encodingInvalidCharacters: false)
-        #elseif os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-        let url: URL?
-        if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-            url = URL(string: rawID, encodingInvalidCharacters: false)
-        } else {
-            url = URL(string: rawID)
-        }
-        #else
-        let url = URL(string: rawID)
-        #endif
-
-        guard let url else {
-            throw GenericError(
-                subjectName: "$id",
-                details: "If specified, must be a valid URL",
-                codingPath: decoder.codingPath
-            )
-        }
-
-        return url
     }
 
     private static func decodeTypes(from container: KeyedDecodingContainer<JSONSchema.HintCodingKeys>) throws -> [JSONType] {
