@@ -219,34 +219,7 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, Sendable {
 
     // See `JSONSchemaContext`
     public var id: URL? {
-        switch value {
-        case .null(let core):
-            return core.id
-        case .boolean(let core):
-            return core.id
-        case .number(let core, _):
-            return core.id
-        case .integer(let core, _):
-            return core.id
-        case .string(let core, _):
-            return core.id
-        case .object(let core, _):
-            return core.id
-        case .array(let core, _):
-            return core.id
-        case .all(of: _, core: let core):
-            return core.id
-        case .one(of: _, core: let core):
-            return core.id
-        case .any(of: _, core: let core):
-            return core.id
-        case .not(_, core: let core):
-            return core.id
-        case .reference(_, let core):
-            return core.id
-        case .fragment(let core):
-            return core.id
-        }
+        return coreContext.id
     }
 
     // See `JSONSchemaContext`
