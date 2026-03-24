@@ -2057,7 +2057,7 @@ extension JSONSchema: Decodable {
     public init(from decoder: Decoder) throws {
         if let ref = try? JSONReference<JSONSchema>(from: decoder) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
-            self = Self(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
+            self = .init(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
             return
         }
 
