@@ -46,6 +46,38 @@ public protocol ExternalLoader: _ExternalLoaderMetatype where Message: Sendable 
     ///    time the same type and URL pair are passed in the same `ComponentKey` should be 
     ///    returned.
     static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey
+
+    /// Determine the next Component Key (where to store something in the
+    /// Components Object) for a newly loaded object.
+    ///
+    /// This overload allows loaders to inspect the decoded value itself when
+    /// deciding what key should be used.
+    static func componentKey<T>(
+        for loadedValue: T,
+        type: T.Type,
+        at url: URL
+    ) throws -> OpenAPI.ComponentKey
+}
+
+public extension ExternalLoader {
+    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+        try defaultComponentKey(at: url)
+    }
+
+    static func componentKey<T>(
+        for loadedValue: T,
+        type: T.Type,
+        at url: URL
+    ) throws -> OpenAPI.ComponentKey {
+        try componentKey(type: type, at: url)
+    }
+
+    private static func defaultComponentKey(at url: URL) throws -> OpenAPI.ComponentKey {
+        try .forceInit(rawValue: url.absoluteString
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "#", with: "_")
+            .replacingOccurrences(of: ".", with: "_"))
+    }
 }
 
 public protocol ExternallyDereferenceable {

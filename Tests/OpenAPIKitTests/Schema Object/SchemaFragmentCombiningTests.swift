@@ -1074,6 +1074,12 @@ final class SchemaFragmentCombiningTests: XCTestCase {
                 XCTAssert(error ~= .attributeConflict, "\(error) is not ~= `.attributeConflict` --  \(fragments)")
             }
         }
+
+        let patternPropertyDifference: [JSONSchema] = [
+            .object(.init(), .init(properties: [:], patternProperties: ["^x-": .boolean])),
+            .object(.init(), .init(properties: [:], patternProperties: ["^x-": .string]))
+        ]
+        XCTAssertThrowsError(try patternPropertyDifference.combined(resolvingAgainst: .noComponents))
     }
 
     // MARK: - Inconsistency Failures

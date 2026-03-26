@@ -3237,6 +3237,55 @@ extension SchemaObjectTests {
         XCTAssertEqual(contextB, .init(properties: ["hello": .boolean(.init(format: .generic, required: false))], additionalProperties: .init(.string)))
     }
 
+    func test_encodeObjectWithPatternProperties() {
+        let object = JSONSchema.object(
+            .init(format: .unspecified, required: true),
+            .init(
+                properties: ["hello": .boolean(.init(format: .unspecified, required: false))],
+                patternProperties: ["^x-": .string(required: false)]
+            )
+        )
+
+        testEncodingPropertyLines(entity: object,
+                                  propertyLines: [
+                                    "\"patternProperties\" : {",
+                                    "  \"^x-\" : {",
+                                    "    \"type\" : \"string\"",
+                                    "  }",
+                                    "},",
+                                    "\"properties\" : {",
+                                    "  \"hello\" : {",
+                                    "    \"type\" : \"boolean\"",
+                                    "  }",
+                                    "},",
+                                    "\"type\" : \"object\""
+        ])
+    }
+
+    func test_decodeObjectWithPatternProperties() {
+        let objectData = """
+        {
+            "patternProperties": {
+                "^x-": { "type": "string" }
+            },
+            "type": "object"
+        }
+        """.data(using: .utf8)!
+
+        let object = try! orderUnstableDecode(JSONSchema.self, from: objectData)
+
+        XCTAssertEqual(
+            object,
+            JSONSchema.object(
+                .init(format: .generic),
+                .init(
+                    properties: [:],
+                    patternProperties: ["^x-": .string]
+                )
+            )
+        )
+    }
+
     func test_encodeObjectWithExample() {
         let string = try! JSONSchema.string(.init(format: .unspecified, required: true), .init())
             .with(example: "hello")
