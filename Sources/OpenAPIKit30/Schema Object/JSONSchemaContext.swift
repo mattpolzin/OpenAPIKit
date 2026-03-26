@@ -7,6 +7,12 @@
 
 import OpenAPIKitCore
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 // MARK: - Core Context
 
 /// A schema context stores information about a schema.
@@ -122,12 +128,24 @@ public protocol JSONSchemaContext: Sendable {
 
     /// `true` if this schema is deprecated, `false` otherwise.
     var deprecated: Bool { get }
+
+    /// An identifier for this schema, if one is defined.
+    var id: URL? { get }
 }
 
 extension JSONSchemaContext {
     // Default implementation to make addition of this new property which is only
     // supposed to be set internally a non-breaking addition.
     public var inferred: Bool { false }
+    public var id: URL? { nil }
+
+    /// Establish the base URI for this schema context.
+    ///
+    /// If the schema defines an identifier, it is resolved against the parent
+    /// base URI. Otherwise, the parent base URI is carried forward unchanged.
+    public func baseURI(relativeTo parentBaseURI: URL?) -> URL? {
+        id?.resolvedURI(relativeTo: parentBaseURI) ?? parentBaseURI
+    }
 }
 
 extension JSONSchema {
