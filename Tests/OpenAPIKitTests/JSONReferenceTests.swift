@@ -447,6 +447,34 @@ extension JSONReferenceTests {
         XCTAssertEqual(components, .init(schemas: ["__schema_json__components_schemas_test": .string]))
         XCTAssertEqual(messages, ["./schema.json#/components/schemas/test"])
     }
+
+    func test_externalDerefObjectPatternProperties() async throws {
+        let schema = JSONSchema.object(
+            patternProperties: ["^x-": .reference(.external(.init(string: "./pattern.json")!))],
+            additionalProperties: .init(.reference(.external(.init(string: "./additional.json")!)))
+        )
+
+        let (newSchema, components, messages) = try await schema.externallyDereferenced(with: SchemaLoader.self)
+
+        XCTAssertEqual(
+            newSchema.objectContext?.patternProperties["^x-"],
+            .reference(.component(named: "__pattern_json"))
+        )
+        XCTAssertEqual(
+            newSchema.objectContext?.additionalProperties?.schemaValue,
+            .reference(.component(named: "__additional_json"))
+        )
+        XCTAssertEqual(
+            components,
+            .init(
+                schemas: [
+                    "__pattern_json": .string,
+                    "__additional_json": .string
+                ]
+            )
+        )
+        XCTAssertEqual(messages, ["./pattern.json", "./additional.json"])
+    }
 }
 
 // MARK: - Test Types

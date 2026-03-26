@@ -304,6 +304,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .boolean(.init())
         )
 
+        let tPattern = JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced()
+        XCTAssertEqual(
+            tPattern?.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
+        )
+
         let t3 = JSONSchema.object(
             properties: [
                 "required": .string,
@@ -320,6 +326,48 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         )
     }
 
+    func test_optionalObjectContextPatternPropertiesRoundTrip() throws {
+        let context = try XCTUnwrap(
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: ["fixed": .string],
+                    patternProperties: ["^x-": .boolean],
+                    additionalProperties: .init(.integer)
+                )
+            )
+        )
+
+        XCTAssertEqual(
+            context.patternProperties["^x-"],
+            .boolean(.init())
+        )
+        XCTAssertEqual(
+            context.additionalProperties?.schemaValue,
+            .integer(.init(), .init())
+        )
+
+        let schema = DereferencedJSONSchema.object(.init(), context).jsonSchema
+        XCTAssertEqual(
+            schema.objectContext,
+            .init(
+                properties: ["fixed": .string],
+                patternProperties: ["^x-": .boolean],
+                additionalProperties: .init(.integer)
+            )
+        )
+    }
+
+    func test_optionalObjectContextPatternPropertiesReferenceFailure() {
+        XCTAssertNil(
+            DereferencedJSONSchema.ObjectContext(
+                .init(
+                    properties: [:],
+                    patternProperties: ["^x-": .reference(.component(named: "missing"))]
+                )
+            )
+        )
+    }
+
     func test_throwingObjectWithoutReferences() throws {
         let components = OpenAPI.Components.noComponents
         let t1 = try JSONSchema.object(properties: ["test": .string]).dereferenced(in: components)
@@ -333,6 +381,12 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(
             t2.objectContext?.additionalProperties?.schemaValue,
             .boolean(.init())
+        )
+
+        let tPattern = try JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced(in: components)
+        XCTAssertEqual(
+            tPattern.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
         )
 
         let t3 = try JSONSchema.object(
@@ -365,6 +419,32 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean(.init(vendorExtensions: ["x-component-name": "test"]))]))!)
         )
         XCTAssertThrowsError(try JSONSchema.object(properties: ["missing": .reference(.component(named: "missing"))]).dereferenced(in: components))
+    }
+
+    func test_simplifiedObjectWithPatternProperties() throws {
+        let simplified = try JSONSchema.object(
+            patternProperties: ["^x-": .all(of: [.string])],
+            additionalProperties: .init(.all(of: [.boolean]))
+        )
+        .dereferenced(in: .noComponents)
+        .simplified()
+
+        XCTAssertEqual(
+            simplified.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
+        )
+        XCTAssertEqual(
+            simplified.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
+        XCTAssertEqual(
+            simplified.jsonSchema.objectContext,
+            .init(
+                properties: [:],
+                patternProperties: ["^x-": .string],
+                additionalProperties: .init(.boolean)
+            )
+        )
     }
 
     func test_optionalArrayWithoutReferences() {

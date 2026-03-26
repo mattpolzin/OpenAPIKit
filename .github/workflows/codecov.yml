@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
-    - run: swift test --enable-test-discovery --enable-code-coverage
+    - run: swift test -j 1 --enable-test-discovery --enable-code-coverage --parallel --num-workers 1
     - id: analysis
       uses: mattpolzin/swift-codecov-action@0.7.5
       with:
