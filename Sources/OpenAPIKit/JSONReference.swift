@@ -68,6 +68,16 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         return .internal(.path(path))
     }
 
+    /// Reference a local JSON Schema anchor in this file.
+    ///
+    /// Example:
+    ///
+    ///     JSONReference<JSONSchema>.anchor(named: "greetings")
+    ///     // encoded string: "#greetings"
+    public static func anchor(named name: String) -> Self {
+        return .internal(.anchor(name: name))
+    }
+
     /// `true` for internal references, `false` for
     /// external references (i.e. to another file).
     public var isInternal: Bool {
@@ -129,6 +139,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
     public enum InternalReference: LosslessStringConvertible, RawRepresentable, Equatable, Hashable, Sendable {
         /// The reference refers to a component (i.e. `#/components/...`).
         case component(name: String)
+        /// The reference refers to a local anchor (i.e. `#myAnchor`).
+        case anchor(name: String)
         /// The reference refers to some path outside the Components Object.
         case path(Path)
 
@@ -146,6 +158,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         public var name: String? {
             switch self {
             case .component(name: let name):
+                return name
+            case .anchor(name: let name):
                 return name
             case .path(let path):
                 return path.components.last?.stringValue
@@ -165,6 +179,14 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
                 return nil
             }
             let fragment = rawValue.dropFirst()
+            guard !fragment.isEmpty else {
+                self = .path(Path(rawValue: ""))
+                return
+            }
+            guard fragment.first == "/" else {
+                self = .anchor(name: String(fragment))
+                return
+            }
             guard fragment.starts(with: "/components") else {
                 self = .path(Path(rawValue: String(fragment)))
                 return
@@ -190,6 +212,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             switch self {
             case .component(name: let name):
                 return "#/components/\(ReferenceType.openAPIComponentsKey)/\(name)"
+            case .anchor(name: let name):
+                return "#\(name)"
             case .path(let path):
                 return "#\(path.rawValue)"
             }

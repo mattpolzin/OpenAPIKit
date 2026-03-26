@@ -7,7 +7,7 @@ import OpenAPIKitCore
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
-import Foundation
+@preconcurrency import Foundation
 #endif
 
 extension OpenAPI.Document {

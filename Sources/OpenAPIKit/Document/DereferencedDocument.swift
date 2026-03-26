@@ -48,9 +48,11 @@ public struct DereferencedDocument: Equatable {
     ///     on whether an unresolvable reference points to another file or just points to a
     ///     component in the same file that cannot be found in the Components Object.
     internal init(_ document: OpenAPI.Document) throws {
+        let components = document.locallyDereferenceableComponents
+
         self.paths = try document.paths.mapValues {
             try $0._dereferenced(
-                in: document.components,
+                in: components,
                 following: [],
                 dereferencedFromComponentNamed: nil
             )
@@ -58,7 +60,7 @@ public struct DereferencedDocument: Equatable {
         self.security = try document.security.map {
             try DereferencedSecurityRequirement(
                 $0,
-                resolvingIn: document.components,
+                resolvingIn: components,
                 following: []
             )
         }
