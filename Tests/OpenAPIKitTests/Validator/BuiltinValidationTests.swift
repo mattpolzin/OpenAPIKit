@@ -30,6 +30,7 @@ final class BuiltinValidationTests: XCTestCase {
             "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Querystring parameters are unique and do not coexist with query parameters",
             "All Operation Ids in Document are unique",
             "Server Variable\'s enum is either not defined or is non-empty (if defined).",
             "Server Variable\'s default must exist in enum, if enum is defined.",
@@ -43,6 +44,7 @@ final class BuiltinValidationTests: XCTestCase {
             "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Querystring parameters are unique and do not coexist with query parameters",
             "All Operation Ids in Document are unique",
             "Server Variable\'s enum is either not defined or is non-empty (if defined).",
             "Server Variable\'s default must exist in enum, if enum is defined.",
@@ -66,6 +68,7 @@ final class BuiltinValidationTests: XCTestCase {
             "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
+            "Querystring parameters are unique and do not coexist with query parameters",
             "All Operation Ids in Document are unique",
             "Server Variable\'s enum is either not defined or is non-empty (if defined).",
             "Server Variable\'s default must exist in enum, if enum is defined.",
@@ -1482,5 +1485,136 @@ final class BuiltinValidationTests: XCTestCase {
             XCTAssertEqual(errorCollection?.values.first?.reason, "Failed to satisfy: the cookie style can only be used for the cookie location")
             XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters[0]")
         }
+    }
+
+    func test_duplicateQuerystringParametersOnPathItem_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(OpenAPI.Parameter.querystring(name: "first", content: [:])),
+                        .parameter(OpenAPI.Parameter.querystring(name: "second", content: [:]))
+                    ],
+                    get: .init(responses: [:])
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.querystringParametersAreCompatible)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Path Item parameters must not contain more than one `querystring` parameter")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].parameters")
+        }
+    }
+
+    func test_duplicateQuerystringParametersAcrossPathItemAndOperation_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(OpenAPI.Parameter.querystring(name: "first", content: [:]))
+                    ],
+                    get: .init(
+                        parameters: [
+                            .parameter(OpenAPI.Parameter.querystring(name: "second", content: [:]))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.querystringParametersAreCompatible)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Operation parameters must not contain more than one `querystring` parameter, including inherited Path Item parameters")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters")
+        }
+    }
+
+    func test_querystringAndQueryParametersOnOperation_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(OpenAPI.Parameter.query(name: "query", schema: .string)),
+                            .parameter(OpenAPI.Parameter.querystring(name: "querystring", content: [:]))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.querystringParametersAreCompatible)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Operation parameters must not mix `querystring` and `query` parameter locations")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters")
+        }
+    }
+
+    func test_querystringAndQueryParametersAcrossPathItemAndOperation_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    parameters: [
+                        .parameter(OpenAPI.Parameter.query(name: "query", schema: .string))
+                    ],
+                    get: .init(
+                        parameters: [
+                            .parameter(OpenAPI.Parameter.querystring(name: "querystring", content: [:]))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.querystringParametersAreCompatible)
+
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+            let errorCollection = error as? ValidationErrorCollection
+            XCTAssertEqual(errorCollection?.values.first?.reason, "Operation parameters must not mix `querystring` and `query` parameter locations, including inherited Path Item parameters")
+            XCTAssertEqual(errorCollection?.values.first?.codingPath.stringValue, ".paths[\'/hello\'].get.parameters")
+        }
+    }
+
+    func test_singleQuerystringParameter_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(OpenAPI.Parameter.querystring(name: "querystring", content: [:]))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(.querystringParametersAreCompatible)
+        try document.validate(using: validator)
     }
 }
