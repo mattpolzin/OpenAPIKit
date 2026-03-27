@@ -155,10 +155,8 @@ extension AnyCodable: Encodable {
             try container.encode(nsnumber.floatValue)
         case .doubleType, .float64Type, .cgFloatType:
             try container.encode(nsnumber.doubleValue)
-            #if swift(>=5.0)
         @unknown default:
             fatalError()
-            #endif
         }
     }
     #endif

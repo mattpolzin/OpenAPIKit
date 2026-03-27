@@ -10,11 +10,11 @@ import Foundation
 
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 
 final class SecuritySchemeErrorTests: XCTestCase {
     func test_missingSecuritySchemeError() throws {
-        #if os(Linux) && compiler(>=6.0) && compiler(<6.1)
+        #if os(Linux) && compiler(<6.1)
         throw XCTSkip("Swift bug causes no exception in this test case for just one Swift 6 version (6.0)")
         #endif
 

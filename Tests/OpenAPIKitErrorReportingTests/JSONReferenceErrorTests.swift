@@ -10,7 +10,7 @@ import Foundation
 
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 
 final class JSONReferenceErrorTests: XCTestCase {
     func test_referenceFailedToParse() {
