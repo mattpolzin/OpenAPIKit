@@ -391,11 +391,13 @@ extension Validation {
             description: "Querystring parameters are unique and do not coexist with query parameters",
             check: { context in
                 let pathParameters = resolvedParameters(context.subject.parameters, components: context.document.components)
-                let pathSummary = parameterLocationSummary(pathParameters)
+                let pathSummary = ParameterLocationSummary(pathParameters)
                 let pathParametersPath = context.codingPath + [Validator.CodingKey.init(stringValue: "parameters")]
                 var errors = [ValidationError]()
+                let pathHasMultipleQuerystringParameters = pathSummary.querystringCount > 1
+                let pathMixesQueryLocations = pathSummary.querystringCount > 0 && pathSummary.queryCount > 0
 
-                if pathSummary.querystringCount > 1 {
+                if pathHasMultipleQuerystringParameters {
                     errors.append(
                         ValidationError(
                             reason: "Path Item parameters must not contain more than one `querystring` parameter",
@@ -404,7 +406,7 @@ extension Validation {
                     )
                 }
 
-                if pathSummary.querystringCount > 0 && pathSummary.queryCount > 0 {
+                if pathMixesQueryLocations {
                     errors.append(
                         ValidationError(
                             reason: "Path Item parameters must not mix `querystring` and `query` parameter locations",
@@ -415,13 +417,27 @@ extension Validation {
 
                 for endpoint in context.subject.endpoints {
                     let operationParameters = resolvedParameters(endpoint.operation.parameters, components: context.document.components)
-                    let operationSummary = parameterLocationSummary(operationParameters)
+                    let operationSummary = ParameterLocationSummary(operationParameters)
                     let operationParametersPath = context.codingPath + [
                         Validator.CodingKey.init(stringValue: codingPathKey(for: endpoint.method)),
                         Validator.CodingKey.init(stringValue: "parameters")
                     ]
+                    let operationHasMultipleQuerystringParameters = operationSummary.querystringCount > 1
+                    let operationMixesQueryLocations = operationSummary.querystringCount > 0 &&
+                        operationSummary.queryCount > 0
+                    let effectiveQuerystringCount = pathSummary.querystringCount + operationSummary.querystringCount
+                    let effectiveQueryCount = pathSummary.queryCount + operationSummary.queryCount
+                    let inheritedHasMultipleQuerystringParameters =
+                        !pathHasMultipleQuerystringParameters &&
+                        !operationHasMultipleQuerystringParameters &&
+                        effectiveQuerystringCount > 1
+                    let inheritedMixesQueryLocations =
+                        !pathMixesQueryLocations &&
+                        !operationMixesQueryLocations &&
+                        effectiveQuerystringCount > 0 &&
+                        effectiveQueryCount > 0
 
-                    if operationSummary.querystringCount > 1 {
+                    if operationHasMultipleQuerystringParameters {
                         errors.append(
                             ValidationError(
                                 reason: "Operation parameters must not contain more than one `querystring` parameter",
@@ -430,7 +446,7 @@ extension Validation {
                         )
                     }
 
-                    if operationSummary.querystringCount > 0 && operationSummary.queryCount > 0 {
+                    if operationMixesQueryLocations {
                         errors.append(
                             ValidationError(
                                 reason: "Operation parameters must not mix `querystring` and `query` parameter locations",
@@ -439,9 +455,7 @@ extension Validation {
                         )
                     }
 
-                    if pathSummary.querystringCount <= 1 &&
-                        operationSummary.querystringCount <= 1 &&
-                        pathSummary.querystringCount + operationSummary.querystringCount > 1 {
+                    if inheritedHasMultipleQuerystringParameters {
                         errors.append(
                             ValidationError(
                                 reason: "Operation parameters must not contain more than one `querystring` parameter, including inherited Path Item parameters",
@@ -450,10 +464,7 @@ extension Validation {
                         )
                     }
 
-                    if !(pathSummary.querystringCount > 0 && pathSummary.queryCount > 0) &&
-                        !(operationSummary.querystringCount > 0 && operationSummary.queryCount > 0) &&
-                        pathSummary.querystringCount + operationSummary.querystringCount > 0 &&
-                        pathSummary.queryCount + operationSummary.queryCount > 0 {
+                    if inheritedMixesQueryLocations {
                         errors.append(
                             ValidationError(
                                 reason: "Operation parameters must not mix `querystring` and `query` parameter locations, including inherited Path Item parameters",
@@ -680,13 +691,11 @@ fileprivate func resolvedParameters(_ parameters: OpenAPI.Parameter.Array, compo
 fileprivate struct ParameterLocationSummary {
     let queryCount: Int
     let querystringCount: Int
-}
 
-fileprivate func parameterLocationSummary(_ parameters: [OpenAPI.Parameter]) -> ParameterLocationSummary {
-    .init(
-        queryCount: parameters.filter { $0.location == .query }.count,
-        querystringCount: parameters.filter { $0.location == .querystring }.count
-    )
+    init(_ parameters: [OpenAPI.Parameter]) {
+        queryCount = parameters.filter { $0.location == .query }.count
+        querystringCount = parameters.filter { $0.location == .querystring }.count
+    }
 }
 
 fileprivate func codingPathKey(for method: OpenAPI.HttpMethod) -> String {

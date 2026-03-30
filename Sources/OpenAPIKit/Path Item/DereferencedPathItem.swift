@@ -167,73 +167,66 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
 
         let oldAdditionalOperations = additionalOperations
 
+        async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
+//        async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
+        async let (newGet, c3, m3) = oldGet.externallyDereferenced(with: loader)
+        async let (newPut, c4, m4) = oldPut.externallyDereferenced(with: loader)
+        async let (newPost, c5, m5) = oldPost.externallyDereferenced(with: loader)
+        async let (newDelete, c6, m6) = oldDelete.externallyDereferenced(with: loader)
+        async let (newOptions, c7, m7) = oldOptions.externallyDereferenced(with: loader)
+        async let (newHead, c8, m8) = oldHead.externallyDereferenced(with: loader)
+        async let (newPatch, c9, m9) = oldPatch.externallyDereferenced(with: loader)
+        async let (newTrace, c10, m10) = oldTrace.externallyDereferenced(with: loader)
+        async let (newQuery, c11, m11) = oldQuery.externallyDereferenced(with: loader)
+
+        async let (newAdditionalOperations, c12, m12) = oldAdditionalOperations.externallyDereferenced(with: loader)
+
         var pathItem = self
+        var newComponents = try await c1
+        var newMessages = try await m1
 
-        // Older Swift 6.0/6.1 Linux runtimes have been observed crashing when this
-        // dereference path fans out into a large batch of `async let` child tasks.
-        // The sequential form keeps behavior the same while staying compatible
-        // across the full test matrix.
-        let (newParameters, c1, m1) = try await oldParameters.externallyDereferenced(with: loader)
-        pathItem.parameters = newParameters
+        // ideally we would async let all of the props above and then set them here,
+        // but for now since there seems to be some sort of compiler bug we will do
+        // newServers in an if let below
+        pathItem.parameters = try await newParameters
+        pathItem.get = try await newGet
+        pathItem.put = try await newPut
+        pathItem.post = try await newPost
+        pathItem.delete = try await newDelete
+        pathItem.options = try await newOptions
+        pathItem.head = try await newHead
+        pathItem.patch = try await newPatch
+        pathItem.trace = try await newTrace
+        pathItem.query = try await newQuery
+        pathItem.additionalOperations = try await newAdditionalOperations
 
-        var newComponents = c1
-        var newMessages = m1
+        try await newComponents.merge(c3)
+        try await newComponents.merge(c4)
+        try await newComponents.merge(c5)
+        try await newComponents.merge(c6)
+        try await newComponents.merge(c7)
+        try await newComponents.merge(c8)
+        try await newComponents.merge(c9)
+        try await newComponents.merge(c10)
+        try await newComponents.merge(c11)
+        try await newComponents.merge(c12)
 
-        let (newGet, c3, m3) = try await oldGet.externallyDereferenced(with: loader)
-        pathItem.get = newGet
-        try newComponents.merge(c3)
-        newMessages += m3
-
-        let (newPut, c4, m4) = try await oldPut.externallyDereferenced(with: loader)
-        pathItem.put = newPut
-        try newComponents.merge(c4)
-        newMessages += m4
-
-        let (newPost, c5, m5) = try await oldPost.externallyDereferenced(with: loader)
-        pathItem.post = newPost
-        try newComponents.merge(c5)
-        newMessages += m5
-
-        let (newDelete, c6, m6) = try await oldDelete.externallyDereferenced(with: loader)
-        pathItem.delete = newDelete
-        try newComponents.merge(c6)
-        newMessages += m6
-
-        let (newOptions, c7, m7) = try await oldOptions.externallyDereferenced(with: loader)
-        pathItem.options = newOptions
-        try newComponents.merge(c7)
-        newMessages += m7
-
-        let (newHead, c8, m8) = try await oldHead.externallyDereferenced(with: loader)
-        pathItem.head = newHead
-        try newComponents.merge(c8)
-        newMessages += m8
-
-        let (newPatch, c9, m9) = try await oldPatch.externallyDereferenced(with: loader)
-        pathItem.patch = newPatch
-        try newComponents.merge(c9)
-        newMessages += m9
-
-        let (newTrace, c10, m10) = try await oldTrace.externallyDereferenced(with: loader)
-        pathItem.trace = newTrace
-        try newComponents.merge(c10)
-        newMessages += m10
-
-        let (newQuery, c11, m11) = try await oldQuery.externallyDereferenced(with: loader)
-        pathItem.query = newQuery
-        try newComponents.merge(c11)
-        newMessages += m11
-
-        let (newAdditionalOperations, c12, m12) = try await oldAdditionalOperations.externallyDereferenced(with: loader)
-        pathItem.additionalOperations = newAdditionalOperations
-        try newComponents.merge(c12)
-        newMessages += m12
+        try await newMessages += m3
+        try await newMessages += m4
+        try await newMessages += m5
+        try await newMessages += m6
+        try await newMessages += m7
+        try await newMessages += m8
+        try await newMessages += m9
+        try await newMessages += m10
+        try await newMessages += m11
+        try await newMessages += m12
 
         if let oldServers {
-            let (newServers, c2, m2) = try await oldServers.externallyDereferenced(with: loader)
-            pathItem.servers = newServers
-            try newComponents.merge(c2)
-            newMessages += m2
+            async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
+            pathItem.servers = try await newServers
+            try await newComponents.merge(c2)
+            try await newMessages += m2
         }
 
         return (pathItem, newComponents, newMessages)
