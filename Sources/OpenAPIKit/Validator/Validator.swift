@@ -75,6 +75,7 @@ extension OpenAPI.Document {
 /// The default validations are
 /// - Operations must contain at least one response.
 /// - Document-level tag names are unique.
+/// - Server names are unique across the whole Document.
 /// - Parameters are unique within each Path Item.
 /// - Parameters are unique within each Operation.
 /// - Querystring parameters are unique and do not coexist with query parameters.
@@ -157,6 +158,7 @@ public final class Validator {
 
     internal var nonReferenceDefaultValidations: [AnyValidation] = [
         .init(.documentTagNamesAreUnique),
+        .init(.documentServerNamesAreUnique),
         .init(.pathItemParametersAreUnique),
         .init(.operationParametersAreUnique),
         .init(.querystringParametersAreCompatible),
@@ -202,6 +204,7 @@ public final class Validator {
     ///
     /// The default validations are
     /// - Document-level tag names are unique.
+    /// - Server names are unique across the whole Document.
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
     /// - Querystring parameters are unique and do not coexist with query parameters.

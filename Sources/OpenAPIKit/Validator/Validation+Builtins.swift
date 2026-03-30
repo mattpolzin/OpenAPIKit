@@ -341,6 +341,23 @@ extension Validation {
         )
     }
 
+    /// Validate that all named OpenAPI `Server`s have unique names across the
+    /// whole Document.
+    ///
+    /// The OpenAPI Specification requires server names
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#server-object).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var documentServerNamesAreUnique: Validation<OpenAPI.Document> {
+        .init(
+            description: "The names of Servers in the Document are unique",
+            check: { context in
+                let serverNames = context.subject.allServers.compactMap(\.name)
+                return Set(serverNames).count == serverNames.count
+            }
+        )
+    }
+
     /// Validate that all OpenAPI Path Items have no duplicate parameters defined
     /// within them.
     ///

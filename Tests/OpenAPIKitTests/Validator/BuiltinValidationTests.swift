@@ -27,6 +27,7 @@ final class BuiltinValidationTests: XCTestCase {
         XCTAssertEqual(withoutReferenceValidations.validationDescriptions.count, 8)
         XCTAssertEqual(withoutReferenceValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
+            "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Querystring parameters are unique and do not coexist with query parameters",
@@ -40,6 +41,7 @@ final class BuiltinValidationTests: XCTestCase {
         XCTAssertEqual(defaultValidations.validationDescriptions.count, 18)
         XCTAssertEqual(defaultValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
+            "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Querystring parameters are unique and do not coexist with query parameters",
@@ -63,6 +65,7 @@ final class BuiltinValidationTests: XCTestCase {
         XCTAssertEqual(stricterReferenceValidations.validationDescriptions.count, 18)
         XCTAssertEqual(stricterReferenceValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
+            "The names of Servers in the Document are unique",
             "Path Item parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Operation parameters are unique (identity is defined by the \'name\' and \'location\')",
             "Querystring parameters are unique and do not coexist with query parameters",
@@ -561,6 +564,75 @@ final class BuiltinValidationTests: XCTestCase {
         )
 
         // NOTE this is part of default validation
+        try document.validate()
+    }
+
+    func test_duplicateServerNamesOnDocumentFails() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(url: URL(string: "https://root.example.com")!, name: "shared")
+            ],
+            paths: [
+                "/hello": .init(
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                        ],
+                        servers: [
+                            .init(url: URL(string: "https://operation.example.com")!, name: "shared")
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        XCTAssertThrowsError(try document.validate()) { error in
+            let error = error as? ValidationErrorCollection
+            XCTAssertEqual(error?.values.first?.reason, "Failed to satisfy: The names of Servers in the Document are unique")
+            XCTAssertEqual(error?.values.first?.codingPath.map { $0.stringValue }, [])
+        }
+    }
+
+    func test_uniqueServerNamesOnDocumentSucceeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [
+                .init(url: URL(string: "https://root.example.com")!, name: "root")
+            ],
+            paths: [
+                "/hello": .init(
+                    servers: [
+                        .init(url: URL(string: "https://path.example.com")!, name: "path"),
+                        .init(url: URL(string: "https://unnamed-path.example.com")!)
+                    ],
+                    get: .init(
+                        responses: [
+                            200: .response(description: "hi")
+                        ],
+                        servers: [
+                            .init(url: URL(string: "https://operation.example.com")!, name: "operation"),
+                            .init(url: URL(string: "https://unnamed-operation.example.com")!)
+                        ]
+                    )
+                )
+            ],
+            webhooks: [
+                "/event": .init(
+                    post: .init(
+                        responses: [
+                            200: .response(description: "ok")
+                        ],
+                        servers: [
+                            .init(url: URL(string: "https://webhook.example.com")!, name: "webhook")
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
         try document.validate()
     }
 
