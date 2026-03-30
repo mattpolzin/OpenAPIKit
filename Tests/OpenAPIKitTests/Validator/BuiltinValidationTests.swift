@@ -24,7 +24,7 @@ final class BuiltinValidationTests: XCTestCase {
         ])
 
         let withoutReferenceValidations = Validator().skippingReferenceValidations()
-        XCTAssertEqual(withoutReferenceValidations.validationDescriptions.count, 8)
+        XCTAssertEqual(withoutReferenceValidations.validationDescriptions.count, 9)
         XCTAssertEqual(withoutReferenceValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
             "The names of Servers in the Document are unique",
@@ -38,7 +38,7 @@ final class BuiltinValidationTests: XCTestCase {
         ])
 
         let defaultValidations = Validator()
-        XCTAssertEqual(defaultValidations.validationDescriptions.count, 18)
+        XCTAssertEqual(defaultValidations.validationDescriptions.count, 19)
         XCTAssertEqual(defaultValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
             "The names of Servers in the Document are unique",
@@ -62,7 +62,7 @@ final class BuiltinValidationTests: XCTestCase {
         ])
 
         let stricterReferenceValidations = Validator().validatingAllReferencesFoundInComponents()
-        XCTAssertEqual(stricterReferenceValidations.validationDescriptions.count, 18)
+        XCTAssertEqual(stricterReferenceValidations.validationDescriptions.count, 19)
         XCTAssertEqual(stricterReferenceValidations.validationDescriptions, [
             "The names of Tags in the Document are unique",
             "The names of Servers in the Document are unique",
