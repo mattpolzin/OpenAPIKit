@@ -165,6 +165,15 @@ extension OpenAPI.Components {
                 callbacks.collectLocalAnchorSchemas(into: &anchors)
             }
         }
+
+        for mediaType in mediaTypes.values {
+            switch mediaType {
+            case .a:
+                continue
+            case .b(let mediaType):
+                mediaType.collectLocalAnchorSchemas(into: &anchors)
+            }
+        }
     }
 }
 
@@ -316,6 +325,37 @@ extension OpenAPI.Content {
     ) {
         schema?.collectLocalAnchorSchemas(into: &anchors)
         itemSchema?.collectLocalAnchorSchemas(into: &anchors)
+
+        switch encoding {
+        case .a(let encodingMap):
+            for encoding in encodingMap.values {
+                encoding.collectLocalAnchorSchemas(into: &anchors)
+            }
+        case .b(let positionalEncoding):
+            positionalEncoding.collectLocalAnchorSchemas(into: &anchors)
+        case .none:
+            break
+        }
+    }
+}
+
+extension OpenAPI.Content.Encoding {
+    fileprivate func collectLocalAnchorSchemas(
+        into anchors: inout OrderedDictionary<String, JSONSchema>
+    ) {
+        headers?.collectLocalAnchorSchemas(into: &anchors)
+    }
+}
+
+extension OpenAPI.Content.PositionalEncoding {
+    fileprivate func collectLocalAnchorSchemas(
+        into anchors: inout OrderedDictionary<String, JSONSchema>
+    ) {
+        for encoding in prefixEncoding {
+            encoding.collectLocalAnchorSchemas(into: &anchors)
+        }
+
+        itemEncoding?.collectLocalAnchorSchemas(into: &anchors)
     }
 }
 

@@ -202,7 +202,9 @@ final class DereferencedDocumentTests: XCTestCase {
                                                         "request": .reference(.anchor(named: "requestAnchor")),
                                                         "response": .reference(.anchor(named: "responseAnchor")),
                                                         "header": .reference(.anchor(named: "headerAnchor")),
-                                                        "webhook": .reference(.anchor(named: "webhookAnchor"))
+                                                        "webhook": .reference(.anchor(named: "webhookAnchor")),
+                                                        "mediaType": .reference(.anchor(named: "mediaTypeAnchor")),
+                                                        "encodingHeader": .reference(.anchor(named: "encodingHeaderAnchor"))
                                                     ]
                                                 )
                                             )
@@ -271,6 +273,22 @@ final class DereferencedDocumentTests: XCTestCase {
                     "anchoredHeader": .init(
                         schema: .string(.init(anchor: "headerAnchor"), .init())
                     )
+                ],
+                mediaTypes: [
+                    "anchoredMediaType": .init(
+                        schema: .number(.init(anchor: "mediaTypeAnchor"), .init()),
+                        encoding: [
+                            "payload": .init(
+                                headers: [
+                                    "anchoredEncodingHeader": .b(
+                                        .init(
+                                            schema: .integer(.init(anchor: "encodingHeaderAnchor"), .init())
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
                 ]
             )
         )
@@ -290,5 +308,7 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(schema.objectContext?.properties["response"]?.jsonType, .boolean)
         XCTAssertEqual(schema.objectContext?.properties["header"]?.jsonType, .string)
         XCTAssertEqual(schema.objectContext?.properties["webhook"]?.jsonType, .number)
+        XCTAssertEqual(schema.objectContext?.properties["mediaType"]?.jsonType, .number)
+        XCTAssertEqual(schema.objectContext?.properties["encodingHeader"]?.jsonType, .integer)
     }
 }
