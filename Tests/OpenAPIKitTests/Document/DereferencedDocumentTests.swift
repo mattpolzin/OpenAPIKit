@@ -181,4 +181,114 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(nameSchema?.jsonType, .string)
         XCTAssertEqual(nameSchema?.anchor, "nameAnchor")
     }
+
+    func test_locallyDereferencedResolvesAnchorsCollectedAcrossDocumentLocations() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .object(
+                                                    properties: [
+                                                        "parameter": .reference(.anchor(named: "parameterAnchor")),
+                                                        "request": .reference(.anchor(named: "requestAnchor")),
+                                                        "response": .reference(.anchor(named: "responseAnchor")),
+                                                        "header": .reference(.anchor(named: "headerAnchor")),
+                                                        "webhook": .reference(.anchor(named: "webhookAnchor"))
+                                                    ]
+                                                )
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            webhooks: [
+                "event": .pathItem(
+                    .init(
+                        post: .init(
+                            responses: [
+                                200: .response(
+                                    description: "webhook success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .number(.init(anchor: "webhookAnchor"), .init())
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "__openapikit_anchor_0_776562686f6f6b416e63686f72": .string
+                ],
+                responses: [
+                    "anchoredResponse": .init(
+                        description: "anchored response",
+                        content: [
+                            .json: .content(
+                                .init(
+                                    schema: .boolean(.init(anchor: "responseAnchor"))
+                                )
+                            )
+                        ]
+                    )
+                ],
+                parameters: [
+                    "anchoredParameter": .query(
+                        name: "kind",
+                        schema: .string(.init(anchor: "parameterAnchor"), .init())
+                    )
+                ],
+                requestBodies: [
+                    "anchoredRequest": .init(
+                        content: [
+                            .json: .content(
+                                .init(
+                                    schema: .integer(.init(anchor: "requestAnchor"), .init())
+                                )
+                            )
+                        ]
+                    )
+                ],
+                headers: [
+                    "anchoredHeader": .init(
+                        schema: .string(.init(anchor: "headerAnchor"), .init())
+                    )
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = try XCTUnwrap(
+            dereferencedDocument
+                .paths["/hello"]?
+                .get?
+                .responses[status: 200]?
+                .content[OpenAPI.ContentType.json]?
+                .schema
+        )
+
+        XCTAssertEqual(schema.objectContext?.properties["parameter"]?.jsonType, .string)
+        XCTAssertEqual(schema.objectContext?.properties["request"]?.jsonType, .integer)
+        XCTAssertEqual(schema.objectContext?.properties["response"]?.jsonType, .boolean)
+        XCTAssertEqual(schema.objectContext?.properties["header"]?.jsonType, .string)
+        XCTAssertEqual(schema.objectContext?.properties["webhook"]?.jsonType, .number)
+    }
 }
