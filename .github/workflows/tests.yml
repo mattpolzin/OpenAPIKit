@@ -30,16 +30,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
     - name: Run tests
-      run: |
-        if [ "${{ matrix.image }}" = "swiftlang/swift:nightly-focal" ]; then
-          swift test -j 1 \
-            -Xswiftc -strict-concurrency=complete \
-            -Xswiftc -disable-batch-mode \
-            -Xswiftc -gnone \
-            -Xcc -g0
-        else
-          swift test -Xswiftc -strict-concurrency=complete
-        fi
+      run: swift test -Xswiftc -strict-concurrency=complete
   osx:
     strategy:
       fail-fast: false
