@@ -447,6 +447,26 @@ extension JSONReferenceTests {
         XCTAssertEqual(components, .init(schemas: ["__schema_json__components_schemas_test": .string]))
         XCTAssertEqual(messages, ["./schema.json#/components/schemas/test"])
     }
+
+    func test_externalDerefUsesLoadedValueAwareComponentKeyWhenProvided() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json")!)
+
+        let (newReference, components, messages) = try await reference.externallyDereferenced(with: InformedSchemaLoader.self)
+
+        XCTAssertEqual(newReference, .component(named: "loaded_object_schema"))
+        XCTAssertEqual(components, .init(schemas: ["loaded_object_schema": .object(.init(), .init(properties: [:]))]))
+        XCTAssertEqual(messages, ["./schema.json"])
+    }
+
+    func test_externalDerefUsesDefaultComponentKeyWhenNoComponentKeyOverridesAreProvided() async throws {
+        let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json#/test")!)
+
+        let (newReference, components, messages) = try await reference.externallyDereferenced(with: DefaultSchemaLoader.self)
+
+        XCTAssertEqual(newReference, .component(named: "__schema_json__test"))
+        XCTAssertEqual(components, .init(schemas: ["__schema_json__test": .string]))
+        XCTAssertEqual(messages, ["./schema.json#/test"])
+    }
 }
 
 // MARK: - Test Types
@@ -465,6 +485,25 @@ extension JSONReferenceTests {
                 .replacingOccurrences(of: "/", with: "_")
                 .replacingOccurrences(of: "#", with: "_")
                 .replacingOccurrences(of: ".", with: "_"))
+        }
+    }
+
+    struct InformedSchemaLoader: ExternalLoader {
+        static func load<T: Decodable>(_ url: URL) -> (T, [String]) {
+            return (JSONSchema.object(.init(), .init(properties: [:])) as! T, [url.absoluteString])
+        }
+
+        static func componentKey<T>(for loadedValue: T, type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+            if let schema = loadedValue as? JSONSchema, schema.jsonType == .object {
+                return "loaded_object_schema"
+            }
+            return try componentKey(type: type, at: url)
+        }
+    }
+
+    struct DefaultSchemaLoader: ExternalLoader {
+        static func load<T: Decodable>(_ url: URL) -> (T, [String]) {
+            return (JSONSchema.string as! T, [url.absoluteString])
         }
     }
 }
