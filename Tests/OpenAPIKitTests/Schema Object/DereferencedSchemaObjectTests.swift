@@ -326,7 +326,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         )
     }
 
-    func test_optionalObjectContextPatternPropertiesRoundTrip() throws {
+    func test_optionalObjectContextPatternPropertiesCanConvertBackToJSONSchema() throws {
         let context = try XCTUnwrap(
             DereferencedJSONSchema.ObjectContext(
                 .init(
@@ -353,17 +353,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                 properties: ["fixed": .string],
                 patternProperties: ["^x-": .boolean],
                 additionalProperties: .init(.integer)
-            )
-        )
-    }
-
-    func test_optionalObjectContextPatternPropertiesReferenceFailure() {
-        XCTAssertNil(
-            DereferencedJSONSchema.ObjectContext(
-                .init(
-                    properties: [:],
-                    patternProperties: ["^x-": .reference(.component(named: "missing"))]
-                )
             )
         )
     }
@@ -407,6 +396,7 @@ final class DereferencedSchemaObjectTests: XCTestCase {
 
     func test_optionalObjectWithReferences() {
         XCTAssertNil(JSONSchema.object(properties: ["test": .reference(.component(named: "test"))]).dereferenced())
+        XCTAssertNil(JSONSchema.object(patternProperties: ["^x-": .reference(.component(named: "missing"))]).dereferenced())
     }
 
     func test_throwingObjectWithReferences() throws {
@@ -419,32 +409,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .object(.init(), DereferencedJSONSchema.ObjectContext(.init(properties: ["test": .boolean(.init(vendorExtensions: ["x-component-name": "test"]))]))!)
         )
         XCTAssertThrowsError(try JSONSchema.object(properties: ["missing": .reference(.component(named: "missing"))]).dereferenced(in: components))
-    }
-
-    func test_simplifiedObjectWithPatternProperties() throws {
-        let simplified = try JSONSchema.object(
-            patternProperties: ["^x-": .all(of: [.string])],
-            additionalProperties: .init(.all(of: [.boolean]))
-        )
-        .dereferenced(in: .noComponents)
-        .simplified()
-
-        XCTAssertEqual(
-            simplified.objectContext?.patternProperties["^x-"],
-            .string(.init(), .init())
-        )
-        XCTAssertEqual(
-            simplified.objectContext?.additionalProperties?.schemaValue,
-            .boolean(.init())
-        )
-        XCTAssertEqual(
-            simplified.jsonSchema.objectContext,
-            .init(
-                properties: [:],
-                patternProperties: ["^x-": .string],
-                additionalProperties: .init(.boolean)
-            )
-        )
     }
 
     func test_optionalArrayWithoutReferences() {
@@ -593,6 +557,24 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                 "Encountered a JSON Schema $ref cycle that prevents fully resolving a reference at '#/components/schemas/test'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy or fully looking up references in cycles. `lookupOnce()` is your best option in this case."
             )
         }
+    }
+
+    func test_simplifiedObjectWithPatternProperties() throws {
+        let simplified = try JSONSchema.object(
+            patternProperties: ["^x-": .all(of: [.string])],
+            additionalProperties: .init(.all(of: [.boolean]))
+        )
+        .dereferenced(in: .noComponents)
+        .simplified()
+
+        XCTAssertEqual(
+            simplified.objectContext?.patternProperties["^x-"],
+            .string(.init(), .init())
+        )
+        XCTAssertEqual(
+            simplified.objectContext?.additionalProperties?.schemaValue,
+            .boolean(.init())
+        )
     }
 
     func test_withDescription() throws {

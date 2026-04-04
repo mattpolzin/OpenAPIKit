@@ -3280,7 +3280,7 @@ extension SchemaObjectTests {
                 .init(format: .generic),
                 .init(
                     properties: [:],
-                    patternProperties: ["^x-": .string]
+                    patternProperties: ["^x-": .string(required: false)]
                 )
             )
         )

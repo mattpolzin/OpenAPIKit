@@ -1302,13 +1302,14 @@ extension JSONSchema.ObjectContext: Decodable {
 
         maxProperties = try container.decodeIfPresent(Int.self, forKey: .maxProperties)
         _minProperties = try container.decodeIfPresent(Int.self, forKey: .minProperties)
-        patternProperties = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .patternProperties) ?? [:]
         additionalProperties = try container.decodeIfPresent(Either<Bool, JSONSchema>.self, forKey: .additionalProperties)
 
         let requiredArray = try container.decodeIfPresent([String].self, forKey: .required) ?? []
 
         let decodedProperties = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .properties) ?? [:]
+        let decodedPatternProperties = try container.decodeIfPresent(OrderedDictionary<String, JSONSchema>.self, forKey: .patternProperties) ?? [:]
         properties = Self.properties(decodedProperties, takingRequirementsFrom: requiredArray)
+        patternProperties = decodedPatternProperties.mapValues { $0.optionalSchemaObject() }
     }
 
     /// Make any property not in the given "required" array optional.
