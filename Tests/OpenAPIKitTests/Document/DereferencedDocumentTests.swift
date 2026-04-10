@@ -311,4 +311,60 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(schema.objectContext?.properties["mediaType"]?.jsonType, .number)
         XCTAssertEqual(schema.objectContext?.properties["encodingHeader"]?.jsonType, .integer)
     }
+
+    func test_locallyDereferencedResolvesSchemaAnchorReferencesFromPrefixItems() throws {
+        let anchoredTupleChild = JSONSchema.string(
+            .init(anchor: "tupleAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.array(
+            .init(),
+            .init(
+                prefixItems: [
+                    anchoredTupleChild
+                ]
+            )
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "tupleAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredTupleSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[.json]?
+            .schema
+
+        XCTAssertEqual(schema?.jsonType, .string)
+        XCTAssertEqual(schema?.anchor, "tupleAnchor")
+    }
 }

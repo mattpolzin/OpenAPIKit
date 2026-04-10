@@ -340,7 +340,6 @@ extension DereferencedJSONSchema {
         public let maxProperties: Int?
         let _minProperties: Int?
         public let properties: OrderedDictionary<String, DereferencedJSONSchema>
-        public let patternProperties: OrderedDictionary<String, DereferencedJSONSchema>
         public let additionalProperties: Either<Bool, DereferencedJSONSchema>?
 
         // NOTE that an object's required properties
@@ -373,16 +372,7 @@ extension DereferencedJSONSchema {
                 otherProperties[name] = dereferencedProperty
             }
 
-            var otherPatternProperties = OrderedDictionary<String, DereferencedJSONSchema>()
-            for (pattern, property) in objectContext.patternProperties {
-                guard let dereferencedPatternProperty = property.dereferenced() else {
-                    return nil
-                }
-                otherPatternProperties[pattern] = dereferencedPatternProperty
-            }
-
             properties = otherProperties
-            patternProperties = otherPatternProperties
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
@@ -404,7 +394,6 @@ extension DereferencedJSONSchema {
             following references: Set<AnyHashable>
         ) throws {
             properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
-            patternProperties = try objectContext.patternProperties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
@@ -419,13 +408,11 @@ extension DereferencedJSONSchema {
 
         internal init(
             properties: OrderedDictionary<String, DereferencedJSONSchema>,
-            patternProperties: OrderedDictionary<String, DereferencedJSONSchema> = [:],
             additionalProperties: Either<Bool, DereferencedJSONSchema>? = nil,
             maxProperties: Int? = nil,
             minProperties: Int? = nil
         ) {
             self.properties = properties
-            self.patternProperties = patternProperties
             self.additionalProperties = additionalProperties
             self.maxProperties = maxProperties
             self._minProperties = minProperties
@@ -444,7 +431,6 @@ extension DereferencedJSONSchema {
 
             return .init(
                 properties: properties.mapValues { $0.jsonSchema },
-                patternProperties: patternProperties.mapValues { $0.jsonSchema },
                 additionalProperties: underlyingAdditionalProperties,
                 maxProperties: maxProperties,
                 minProperties: _minProperties
@@ -587,15 +573,11 @@ extension JSONSchema: ExternallyDereferenceable {
             try components.merge(c1)
             messages += m1
 
-            let (newPatternProperties, c2, m2) = try await object.patternProperties.externallyDereferenced(with: loader)
-            try components.merge(c2)
-            messages += m2
-
             let newAdditionalProperties: Either<Bool, JSONSchema>?
             if case .b(let schema) = object.additionalProperties {
-                let (additionalProperties, c3, m3) = try await schema.externallyDereferenced(with: loader)
-                try components.merge(c3)
-                messages += m3
+                let (additionalProperties, c2, m2) = try await schema.externallyDereferenced(with: loader)
+                try components.merge(c2)
+                messages += m2
                 newAdditionalProperties = .b(additionalProperties)
             } else {
                 newAdditionalProperties = object.additionalProperties
@@ -607,7 +589,6 @@ extension JSONSchema: ExternallyDereferenceable {
                     core, 
                     .init(
                         properties: newProperties, 
-                        patternProperties: newPatternProperties,
                         additionalProperties: newAdditionalProperties, 
                         maxProperties: object.maxProperties, 
                         minProperties: object._minProperties

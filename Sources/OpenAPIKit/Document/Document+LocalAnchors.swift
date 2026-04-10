@@ -418,6 +418,9 @@ extension JSONSchema {
 
         case .array(_, let arrayContext):
             arrayContext.items?.collectLocalAnchorSchemas(into: &anchors)
+            arrayContext.prefixItems?.forEach {
+                $0.collectLocalAnchorSchemas(into: &anchors)
+            }
 
         case .all(of: let schemas, core: _),
              .one(of: let schemas, core: _),

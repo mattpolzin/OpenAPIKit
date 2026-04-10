@@ -304,12 +304,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
             .boolean(.init())
         )
 
-        let tPattern = JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced()
-        XCTAssertEqual(
-            tPattern?.objectContext?.patternProperties["^x-"],
-            .string(.init(), .init())
-        )
-
         let t3 = JSONSchema.object(
             properties: [
                 "required": .string,
@@ -326,37 +320,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         )
     }
 
-    func test_optionalObjectContextPatternPropertiesCanConvertBackToJSONSchema() throws {
-        let context = try XCTUnwrap(
-            DereferencedJSONSchema.ObjectContext(
-                .init(
-                    properties: ["fixed": .string],
-                    patternProperties: ["^x-": .boolean],
-                    additionalProperties: .init(.integer)
-                )
-            )
-        )
-
-        XCTAssertEqual(
-            context.patternProperties["^x-"],
-            .boolean(.init())
-        )
-        XCTAssertEqual(
-            context.additionalProperties?.schemaValue,
-            .integer(.init(), .init())
-        )
-
-        let schema = DereferencedJSONSchema.object(.init(), context).jsonSchema
-        XCTAssertEqual(
-            schema.objectContext,
-            .init(
-                properties: ["fixed": .string],
-                patternProperties: ["^x-": .boolean],
-                additionalProperties: .init(.integer)
-            )
-        )
-    }
-
     func test_throwingObjectWithoutReferences() throws {
         let components = OpenAPI.Components.noComponents
         let t1 = try JSONSchema.object(properties: ["test": .string]).dereferenced(in: components)
@@ -370,12 +333,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         XCTAssertEqual(
             t2.objectContext?.additionalProperties?.schemaValue,
             .boolean(.init())
-        )
-
-        let tPattern = try JSONSchema.object(patternProperties: ["^x-": .string]).dereferenced(in: components)
-        XCTAssertEqual(
-            tPattern.objectContext?.patternProperties["^x-"],
-            .string(.init(), .init())
         )
 
         let t3 = try JSONSchema.object(
@@ -396,7 +353,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
 
     func test_optionalObjectWithReferences() {
         XCTAssertNil(JSONSchema.object(properties: ["test": .reference(.component(named: "test"))]).dereferenced())
-        XCTAssertNil(JSONSchema.object(patternProperties: ["^x-": .reference(.component(named: "missing"))]).dereferenced())
     }
 
     func test_throwingObjectWithReferences() throws {
@@ -557,24 +513,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
                 "Encountered a JSON Schema $ref cycle that prevents fully resolving a reference at '#/components/schemas/test'. This type of reference cycle is not inherently problematic for JSON Schemas, but it does mean OpenAPIKit cannot fully resolve references because attempting to do so results in an infinite loop over any reference cycles. You should still be able to parse the document, just avoid requesting a `locallyDereferenced()` copy or fully looking up references in cycles. `lookupOnce()` is your best option in this case."
             )
         }
-    }
-
-    func test_simplifiedObjectWithPatternProperties() throws {
-        let simplified = try JSONSchema.object(
-            patternProperties: ["^x-": .all(of: [.string])],
-            additionalProperties: .init(.all(of: [.boolean]))
-        )
-        .dereferenced(in: .noComponents)
-        .simplified()
-
-        XCTAssertEqual(
-            simplified.objectContext?.patternProperties["^x-"],
-            .string(.init(), .init())
-        )
-        XCTAssertEqual(
-            simplified.objectContext?.additionalProperties?.schemaValue,
-            .boolean(.init())
-        )
     }
 
     func test_withDescription() throws {
