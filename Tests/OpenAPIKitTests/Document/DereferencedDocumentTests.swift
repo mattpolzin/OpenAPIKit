@@ -367,4 +367,48 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(schema?.jsonType, .string)
         XCTAssertEqual(schema?.anchor, "tupleAnchor")
     }
+
+    func test_locallyDereferencedFailsOnDuplicateSchemaAnchors() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "duplicateAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "first": .string(.init(anchor: "duplicateAnchor"), .init()),
+                    "second": .integer(.init(anchor: "duplicateAnchor"), .init())
+                ]
+            )
+        )
+
+        XCTAssertThrowsError(try document.locallyDereferenced()) { error in
+            XCTAssertEqual(
+                error as? OpenAPI.Document.DuplicateAnchorError,
+                .init(name: "duplicateAnchor")
+            )
+            XCTAssertEqual(
+                (error as? OpenAPI.Document.DuplicateAnchorError)?.description,
+                "Encountered multiple JSON Schema $anchor definitions named 'duplicateAnchor' while preparing a locally dereferenced document. OpenAPIKit cannot determine which schema '#duplicateAnchor' should resolve to."
+            )
+        }
+    }
 }

@@ -5,13 +5,33 @@
 import OpenAPIKitCore
 
 extension OpenAPI.Document {
-    internal var locallyDereferenceableComponents: OpenAPI.Components {
+    public struct DuplicateAnchorError: Swift.Error, Equatable, CustomStringConvertible {
+        public let name: String
+
+        public init(name: String) {
+            self.name = name
+        }
+
+        public var description: String {
+            "Encountered multiple JSON Schema $anchor definitions named '\(name)' while preparing a locally dereferenced document. OpenAPIKit cannot determine which schema '#\(name)' should resolve to."
+        }
+
+        public var localizedDescription: String {
+            description
+        }
+    }
+
+    internal func locallyDereferenceableComponents() throws -> OpenAPI.Components {
         var components = self.components
-        var anchors: OrderedDictionary<String, JSONSchema> = [:]
+        var localAnchors = LocalAnchorCollection()
 
-        collectLocalAnchorSchemas(into: &anchors)
+        collectLocalAnchorSchemas(into: &localAnchors)
 
-        for (anchor, schema) in anchors {
+        if let duplicateAnchor = localAnchors.duplicateAnchorNames.sorted().first {
+            throw DuplicateAnchorError(name: duplicateAnchor)
+        }
+
+        for (anchor, schema) in localAnchors.schemasByName {
             components.registerLocalAnchorSchema(schema, named: anchor)
         }
 
@@ -19,22 +39,39 @@ extension OpenAPI.Document {
     }
 
     private func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        components.collectLocalAnchorSchemas(into: &anchors)
+        components.collectLocalAnchorSchemas(into: &localAnchors)
 
         for pathItem in paths.values {
             guard case .b(let pathItem) = pathItem else {
                 continue
             }
-            pathItem.collectLocalAnchorSchemas(into: &anchors)
+            pathItem.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
         for webhook in webhooks.values {
             guard case .b(let pathItem) = webhook else {
                 continue
             }
-            pathItem.collectLocalAnchorSchemas(into: &anchors)
+            pathItem.collectLocalAnchorSchemas(into: &localAnchors)
+        }
+    }
+}
+
+fileprivate struct LocalAnchorCollection {
+    var schemasByName: OrderedDictionary<String, JSONSchema> = [:]
+    var duplicateAnchorNames: Set<String> = []
+
+    mutating func record(_ schema: JSONSchema) {
+        guard let anchor = schema.anchor else {
+            return
+        }
+
+        if schemasByName[anchor] == nil {
+            schemasByName[anchor] = schema
+        } else {
+            duplicateAnchorNames.insert(anchor)
         }
     }
 }
@@ -111,10 +148,10 @@ extension OpenAPI.Components {
     }
 
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for schema in schemas.values {
-            schema.collectLocalAnchorSchemas(into: &anchors)
+            schema.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
         for parameter in parameters.values {
@@ -122,7 +159,7 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let parameter):
-                parameter.collectLocalAnchorSchemas(into: &anchors)
+                parameter.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
@@ -131,7 +168,7 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let request):
-                request.collectLocalAnchorSchemas(into: &anchors)
+                request.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
@@ -140,7 +177,7 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let response):
-                response.collectLocalAnchorSchemas(into: &anchors)
+                response.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
@@ -149,12 +186,12 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let header):
-                header.collectLocalAnchorSchemas(into: &anchors)
+                header.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
         for pathItem in pathItems.values {
-            pathItem.collectLocalAnchorSchemas(into: &anchors)
+            pathItem.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
         for callbacks in callbacks.values {
@@ -162,7 +199,7 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let callbacks):
-                callbacks.collectLocalAnchorSchemas(into: &anchors)
+                callbacks.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
@@ -171,7 +208,7 @@ extension OpenAPI.Components {
             case .a:
                 continue
             case .b(let mediaType):
-                mediaType.collectLocalAnchorSchemas(into: &anchors)
+                mediaType.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
     }
@@ -179,38 +216,38 @@ extension OpenAPI.Components {
 
 extension OpenAPI.PathItem {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for parameter in parameters {
             switch parameter {
             case .a:
                 continue
             case .b(let parameter):
-                parameter.collectLocalAnchorSchemas(into: &anchors)
+                parameter.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
         for endpoint in endpoints {
-            endpoint.operation.collectLocalAnchorSchemas(into: &anchors)
+            endpoint.operation.collectLocalAnchorSchemas(into: &localAnchors)
         }
     }
 }
 
 extension OpenAPI.Operation {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for parameter in parameters {
             switch parameter {
             case .a:
                 continue
             case .b(let parameter):
-                parameter.collectLocalAnchorSchemas(into: &anchors)
+                parameter.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
         if case .some(.b(let requestBody)) = requestBody {
-            requestBody.collectLocalAnchorSchemas(into: &anchors)
+            requestBody.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
         for response in responses.values {
@@ -218,7 +255,7 @@ extension OpenAPI.Operation {
             case .a:
                 continue
             case .b(let response):
-                response.collectLocalAnchorSchemas(into: &anchors)
+                response.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
 
@@ -227,7 +264,7 @@ extension OpenAPI.Operation {
             case .a:
                 continue
             case .b(let callbacks):
-                callbacks.collectLocalAnchorSchemas(into: &anchors)
+                callbacks.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
     }
@@ -235,14 +272,14 @@ extension OpenAPI.Operation {
 
 extension OpenAPI.Callbacks {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for pathItem in values {
             switch pathItem {
             case .a:
                 continue
             case .b(let pathItem):
-                pathItem.collectLocalAnchorSchemas(into: &anchors)
+                pathItem.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
     }
@@ -250,70 +287,70 @@ extension OpenAPI.Callbacks {
 
 extension OpenAPI.Parameter {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         switch schemaOrContent {
         case .a(let schemaContext):
-            schemaContext.collectLocalAnchorSchemas(into: &anchors)
+            schemaContext.collectLocalAnchorSchemas(into: &localAnchors)
         case .b(let content):
-            content.collectLocalAnchorSchemas(into: &anchors)
+            content.collectLocalAnchorSchemas(into: &localAnchors)
         }
     }
 }
 
 extension OpenAPI.Parameter.SchemaContext {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         switch schema {
         case .a:
             break
         case .b(let schema):
-            schema.collectLocalAnchorSchemas(into: &anchors)
+            schema.collectLocalAnchorSchemas(into: &localAnchors)
         }
     }
 }
 
 extension OpenAPI.Request {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        content.collectLocalAnchorSchemas(into: &anchors)
+        content.collectLocalAnchorSchemas(into: &localAnchors)
     }
 }
 
 extension OpenAPI.Response {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        headers?.collectLocalAnchorSchemas(into: &anchors)
-        content.collectLocalAnchorSchemas(into: &anchors)
+        headers?.collectLocalAnchorSchemas(into: &localAnchors)
+        content.collectLocalAnchorSchemas(into: &localAnchors)
     }
 }
 
 extension OpenAPI.Header {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         switch schemaOrContent {
         case .a(let schemaContext):
-            schemaContext.collectLocalAnchorSchemas(into: &anchors)
+            schemaContext.collectLocalAnchorSchemas(into: &localAnchors)
         case .b(let content):
-            content.collectLocalAnchorSchemas(into: &anchors)
+            content.collectLocalAnchorSchemas(into: &localAnchors)
         }
     }
 }
 
 extension OrderedDictionary where Key == OpenAPI.ContentType, Value == Either<OpenAPI.Reference<OpenAPI.Content>, OpenAPI.Content> {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for content in values {
             switch content {
             case .a:
                 continue
             case .b(let content):
-                content.collectLocalAnchorSchemas(into: &anchors)
+                content.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
     }
@@ -321,18 +358,18 @@ extension OrderedDictionary where Key == OpenAPI.ContentType, Value == Either<Op
 
 extension OpenAPI.Content {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        schema?.collectLocalAnchorSchemas(into: &anchors)
-        itemSchema?.collectLocalAnchorSchemas(into: &anchors)
+        schema?.collectLocalAnchorSchemas(into: &localAnchors)
+        itemSchema?.collectLocalAnchorSchemas(into: &localAnchors)
 
         switch encoding {
         case .a(let encodingMap):
             for encoding in encodingMap.values {
-                encoding.collectLocalAnchorSchemas(into: &anchors)
+                encoding.collectLocalAnchorSchemas(into: &localAnchors)
             }
         case .b(let positionalEncoding):
-            positionalEncoding.collectLocalAnchorSchemas(into: &anchors)
+            positionalEncoding.collectLocalAnchorSchemas(into: &localAnchors)
         case .none:
             break
         }
@@ -341,34 +378,34 @@ extension OpenAPI.Content {
 
 extension OpenAPI.Content.Encoding {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        headers?.collectLocalAnchorSchemas(into: &anchors)
+        headers?.collectLocalAnchorSchemas(into: &localAnchors)
     }
 }
 
 extension OpenAPI.Content.PositionalEncoding {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for encoding in prefixEncoding {
-            encoding.collectLocalAnchorSchemas(into: &anchors)
+            encoding.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
-        itemEncoding?.collectLocalAnchorSchemas(into: &anchors)
+        itemEncoding?.collectLocalAnchorSchemas(into: &localAnchors)
     }
 }
 
 extension OrderedDictionary where Key == String, Value == Either<OpenAPI.Reference<OpenAPI.Header>, OpenAPI.Header> {
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
         for header in values {
             switch header {
             case .a:
                 continue
             case .b(let header):
-                header.collectLocalAnchorSchemas(into: &anchors)
+                header.collectLocalAnchorSchemas(into: &localAnchors)
             }
         }
     }
@@ -396,41 +433,39 @@ extension JSONSchema {
     }
 
     fileprivate func collectLocalAnchorSchemas(
-        into anchors: inout OrderedDictionary<String, JSONSchema>
+        into localAnchors: inout LocalAnchorCollection
     ) {
-        if let anchor, anchors[anchor] == nil {
-            anchors[anchor] = self
-        }
+        localAnchors.record(self)
 
         for definition in defs.values {
-            definition.collectLocalAnchorSchemas(into: &anchors)
+            definition.collectLocalAnchorSchemas(into: &localAnchors)
         }
 
         switch value {
         case .object(_, let objectContext):
             for property in objectContext.properties.values {
-                property.collectLocalAnchorSchemas(into: &anchors)
+                property.collectLocalAnchorSchemas(into: &localAnchors)
             }
 
             if case .b(let additionalProperties) = objectContext.additionalProperties {
-                additionalProperties.collectLocalAnchorSchemas(into: &anchors)
+                additionalProperties.collectLocalAnchorSchemas(into: &localAnchors)
             }
 
         case .array(_, let arrayContext):
-            arrayContext.items?.collectLocalAnchorSchemas(into: &anchors)
+            arrayContext.items?.collectLocalAnchorSchemas(into: &localAnchors)
             arrayContext.prefixItems?.forEach {
-                $0.collectLocalAnchorSchemas(into: &anchors)
+                $0.collectLocalAnchorSchemas(into: &localAnchors)
             }
 
         case .all(of: let schemas, core: _),
              .one(of: let schemas, core: _),
              .any(of: let schemas, core: _):
             for schema in schemas {
-                schema.collectLocalAnchorSchemas(into: &anchors)
+                schema.collectLocalAnchorSchemas(into: &localAnchors)
             }
 
         case .not(let schema, core: _):
-            schema.collectLocalAnchorSchemas(into: &anchors)
+            schema.collectLocalAnchorSchemas(into: &localAnchors)
 
         case .null,
              .boolean,
