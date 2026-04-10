@@ -368,6 +368,59 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(schema?.anchor, "tupleAnchor")
     }
 
+    func test_locallyDereferencedResolvesSchemaAnchorReferencesFromPatternProperties() throws {
+        let anchoredPatternChild = JSONSchema.string(
+            .init(anchor: "patternAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.object(
+            patternProperties: [
+                "^x-": anchoredPatternChild
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "patternAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredPatternSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[.json]?
+            .schema
+
+        XCTAssertEqual(schema?.jsonType, .string)
+        XCTAssertEqual(schema?.anchor, "patternAnchor")
+    }
+
     func test_locallyDereferencedFailsOnDuplicateSchemaAnchors() {
         let document = OpenAPI.Document(
             info: .init(title: "test", version: "1.0"),

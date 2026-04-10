@@ -447,6 +447,10 @@ extension JSONSchema {
                 property.collectLocalAnchorSchemas(into: &localAnchors)
             }
 
+            for property in objectContext.patternProperties.values {
+                property.collectLocalAnchorSchemas(into: &localAnchors)
+            }
+
             if case .b(let additionalProperties) = objectContext.additionalProperties {
                 additionalProperties.collectLocalAnchorSchemas(into: &localAnchors)
             }
