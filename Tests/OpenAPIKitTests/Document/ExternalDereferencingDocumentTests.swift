@@ -76,7 +76,17 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 """,
                 "schemas_basic_object_json": """
                 {
-                    "type": "object"
+                    "type": "object",
+                    "patternProperties": {
+                        "^x-": {
+                            "$ref": "file://./schemas/pattern_property.json"
+                        }
+                    }
+                }
+                """,
+                "schemas_pattern_property_json": """
+                {
+                    "type": "string"
                 }
                 """,
                 "requests_hello_json": """
@@ -310,6 +320,10 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         // for this document, depth of 4 is enough for all the above to compare equally
         XCTAssertEqual(docCopy1, docCopy2)
         XCTAssertEqual(docCopy2, docCopy3)
+        XCTAssertEqual(
+            docCopy3.components.schemas["schemas_basic_object_json"]?.objectContext?.patternProperties["^x-"],
+            .reference(.component(named: "schemas_pattern_property_json"), required: false)
+        )
 
         XCTAssertEqual(
             messages.sorted(),
@@ -328,6 +342,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
              "file://./requests/webhook.json",
              "file://./responses/webhook.json",
              "file://./schemas/basic_object.json",
+             "file://./schemas/pattern_property.json",
              "file://./schemas/string_param.json",
              "file://./schemas/string_param.json",
              "file://./schemas/string_param.json",

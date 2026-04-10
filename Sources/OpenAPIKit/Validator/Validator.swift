@@ -78,6 +78,7 @@ extension OpenAPI.Document {
 /// - Server names are unique across the whole Document.
 /// - Parameters are unique within each Path Item.
 /// - Parameters are unique within each Operation.
+/// - Querystring parameters are unique and do not coexist with query parameters.
 /// - Operation Ids are unique across the whole Document.
 /// - All OpenAPI.References that refer to components in this
 ///     document can be found in the components dictionary.
@@ -160,6 +161,7 @@ public final class Validator {
         .init(.documentServerNamesAreUnique),
         .init(.pathItemParametersAreUnique),
         .init(.operationParametersAreUnique),
+        .init(.querystringParametersAreCompatible),
         .init(.operationIdsAreUnique),
         .init(.serverVariableEnumIsValid),
         .init(.serverVariableDefaultExistsInEnum),
@@ -205,6 +207,7 @@ public final class Validator {
     /// - Server names are unique across the whole Document.
     /// - Parameters are unique within each Path Item.
     /// - Parameters are unique within each Operation.
+    /// - Querystring parameters are unique and do not coexist with query parameters.
     /// - Operation Ids are unique across the whole Document.
     /// - All OpenAPI.References that refer to components in this document can
     ///     be found in the components dictionary.
