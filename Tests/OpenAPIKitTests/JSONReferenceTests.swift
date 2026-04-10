@@ -42,6 +42,10 @@ final class JSONReferenceTests: XCTestCase {
         let t19 = JSONReference<JSONSchema>.InternalReference.component(name: "hello")
         XCTAssertEqual(t18, t19)
 
+        let t20 = JSONReference<JSONSchema>.InternalReference("#hello")
+        let t21 = JSONReference<JSONSchema>.InternalReference.anchor(name: "hello")
+        XCTAssertEqual(t20, t21)
+
         let t7: JSONReference<JSONSchema>.Path = [
             "hello",
             "world"
@@ -97,6 +101,15 @@ final class JSONReferenceTests: XCTestCase {
         XCTAssertEqual(t5.name, "there")
         XCTAssertEqual(t5.rawValue, "#/hello/there")
         XCTAssertEqual(t5.description, "#/hello/there")
+
+        let t5a = JSONReference<JSONSchema>.anchor(named: "hello")
+        XCTAssertEqual(t5a.name, "hello")
+        XCTAssertEqual(t5a.absoluteString, "#hello")
+
+        let t5b = JSONReference<JSONSchema>.InternalReference.anchor(name: "hello")
+        XCTAssertEqual(t5b.name, "hello")
+        XCTAssertEqual(t5b.rawValue, "#hello")
+        XCTAssertEqual(t5b.description, "#hello")
 
         let t6 = JSONReference<JSONSchema>.Path("/hello/there")
         XCTAssertEqual(t6.components, ["hello", "there"])

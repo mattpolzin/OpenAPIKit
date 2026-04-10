@@ -386,6 +386,69 @@ final class ComponentsTests: XCTestCase {
         }
     }
 
+    func test_anchorLookup() throws {
+        let anchorName = "testAnchor"
+        let anchorKey = try XCTUnwrap(
+            OpenAPI.ComponentKey(rawValue: "__openapikit_anchor_0_74657374416e63686f72")
+        )
+        let aliasKey = try XCTUnwrap(
+            OpenAPI.ComponentKey(rawValue: "__openapikit_anchor_0_616c696173416e63686f72")
+        )
+        let anchoredSchema = JSONSchema.string(
+            .init(
+                anchor: anchorName,
+                vendorExtensions: [
+                    "x-openapikit-local-anchor": .init(anchorName)
+                ]
+            ),
+            .init()
+        )
+        let components = OpenAPI.Components.direct(
+            schemas: [
+                "hello": .boolean,
+                anchorKey: anchoredSchema,
+                "aliasTarget": .reference(.component(named: "hello")),
+                aliasKey: JSONSchema.reference(
+                    .component(named: "aliasTarget"),
+                    .init(
+                        anchor: "aliasAnchor",
+                        vendorExtensions: [
+                            "x-openapikit-local-anchor": .init("aliasAnchor")
+                        ]
+                    )
+                )
+            ]
+        )
+
+        let anchorReference = JSONReference<JSONSchema>.anchor(named: anchorName)
+        XCTAssertTrue(try components.contains(anchorReference))
+        let resolvedAnchorSchema = try components.lookup(anchorReference)
+        XCTAssertEqual(resolvedAnchorSchema.jsonType, .string)
+        XCTAssertEqual(resolvedAnchorSchema.anchor, anchorName)
+        let lookedUpAnchor: Either<OpenAPI.Reference<JSONSchema>, JSONSchema> = try components.lookupOnce(anchorReference)
+        guard case .b(let onceResolvedAnchorSchema) = lookedUpAnchor else {
+            return XCTFail("Expected anchor lookupOnce to return a concrete schema")
+        }
+        XCTAssertEqual(onceResolvedAnchorSchema.jsonType, .string)
+        XCTAssertEqual(onceResolvedAnchorSchema.anchor, anchorName)
+
+        let aliasReference = JSONReference<JSONSchema>.anchor(named: "aliasAnchor")
+        XCTAssertEqual(try components.lookup(aliasReference), JSONSchema.boolean)
+    }
+
+    func test_missingAnchorLookup() {
+        let components = OpenAPI.Components.noComponents
+        let missingReference = JSONReference<JSONSchema>.anchor(named: "missingAnchor")
+
+        XCTAssertFalse((try? components.contains(missingReference)) ?? true)
+        XCTAssertThrowsError(try components.lookup(missingReference)) { error in
+            XCTAssertEqual(
+                error as? OpenAPI.Components.ReferenceError,
+                .missingOnLookup(name: "missingAnchor", key: "schemas")
+            )
+        }
+    }
+
     func test_goodKeysNoProblems() {
         XCTAssertNil(OpenAPI.ComponentKey.problem(with: "hello"))
         XCTAssertNil(OpenAPI.ComponentKey.problem(with: "_hell.o-"))

@@ -124,4 +124,344 @@ final class DereferencedDocumentTests: XCTestCase {
         XCTAssertEqual(t1.security.count, 1)
         XCTAssertEqual(t1.security.first?.schemes["test"]?.securityScheme.type, .apiKey(name: "Api-Key", location: .header))
     }
+
+    func test_locallyDereferencedResolvesSchemaAnchorReferences() throws {
+        let anchoredChild = JSONSchema.string(
+            .init(anchor: "nameAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.object(
+            properties: [
+                "name": .reference(.anchor(named: "nameAnchor"))
+            ],
+            defs: [
+                "nameDefinition": anchoredChild
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        OpenAPI.ContentType.json: .content(
+                                            .init(
+                                                schema: .reference(.component(named: "anchoredSchema"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[OpenAPI.ContentType.json]?
+            .schema
+
+        let nameSchema = schema?.objectContext?.properties["name"]
+        XCTAssertEqual(nameSchema?.jsonType, .string)
+        XCTAssertEqual(nameSchema?.anchor, "nameAnchor")
+    }
+
+    func test_locallyDereferencedResolvesAnchorsCollectedAcrossDocumentLocations() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .object(
+                                                    properties: [
+                                                        "parameter": .reference(.anchor(named: "parameterAnchor")),
+                                                        "request": .reference(.anchor(named: "requestAnchor")),
+                                                        "response": .reference(.anchor(named: "responseAnchor")),
+                                                        "header": .reference(.anchor(named: "headerAnchor")),
+                                                        "webhook": .reference(.anchor(named: "webhookAnchor")),
+                                                        "mediaType": .reference(.anchor(named: "mediaTypeAnchor")),
+                                                        "encodingHeader": .reference(.anchor(named: "encodingHeaderAnchor"))
+                                                    ]
+                                                )
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            webhooks: [
+                "event": .pathItem(
+                    .init(
+                        post: .init(
+                            responses: [
+                                200: .response(
+                                    description: "webhook success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .number(.init(anchor: "webhookAnchor"), .init())
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "__openapikit_anchor_0_776562686f6f6b416e63686f72": .string
+                ],
+                responses: [
+                    "anchoredResponse": .init(
+                        description: "anchored response",
+                        content: [
+                            .json: .content(
+                                .init(
+                                    schema: .boolean(.init(anchor: "responseAnchor"))
+                                )
+                            )
+                        ]
+                    )
+                ],
+                parameters: [
+                    "anchoredParameter": .query(
+                        name: "kind",
+                        schema: .string(.init(anchor: "parameterAnchor"), .init())
+                    )
+                ],
+                requestBodies: [
+                    "anchoredRequest": .init(
+                        content: [
+                            .json: .content(
+                                .init(
+                                    schema: .integer(.init(anchor: "requestAnchor"), .init())
+                                )
+                            )
+                        ]
+                    )
+                ],
+                headers: [
+                    "anchoredHeader": .init(
+                        schema: .string(.init(anchor: "headerAnchor"), .init())
+                    )
+                ],
+                mediaTypes: [
+                    "anchoredMediaType": .init(
+                        schema: .number(.init(anchor: "mediaTypeAnchor"), .init()),
+                        encoding: [
+                            "payload": .init(
+                                headers: [
+                                    "anchoredEncodingHeader": .b(
+                                        .init(
+                                            schema: .integer(.init(anchor: "encodingHeaderAnchor"), .init())
+                                        )
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = try XCTUnwrap(
+            dereferencedDocument
+                .paths["/hello"]?
+                .get?
+                .responses[status: 200]?
+                .content[OpenAPI.ContentType.json]?
+                .schema
+        )
+
+        XCTAssertEqual(schema.objectContext?.properties["parameter"]?.jsonType, .string)
+        XCTAssertEqual(schema.objectContext?.properties["request"]?.jsonType, .integer)
+        XCTAssertEqual(schema.objectContext?.properties["response"]?.jsonType, .boolean)
+        XCTAssertEqual(schema.objectContext?.properties["header"]?.jsonType, .string)
+        XCTAssertEqual(schema.objectContext?.properties["webhook"]?.jsonType, .number)
+        XCTAssertEqual(schema.objectContext?.properties["mediaType"]?.jsonType, .number)
+        XCTAssertEqual(schema.objectContext?.properties["encodingHeader"]?.jsonType, .integer)
+    }
+
+    func test_locallyDereferencedResolvesSchemaAnchorReferencesFromPrefixItems() throws {
+        let anchoredTupleChild = JSONSchema.string(
+            .init(anchor: "tupleAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.array(
+            .init(),
+            .init(
+                prefixItems: [
+                    anchoredTupleChild
+                ]
+            )
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "tupleAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredTupleSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[.json]?
+            .schema
+
+        XCTAssertEqual(schema?.jsonType, .string)
+        XCTAssertEqual(schema?.anchor, "tupleAnchor")
+    }
+
+    func test_locallyDereferencedResolvesSchemaAnchorReferencesFromPatternProperties() throws {
+        let anchoredPatternChild = JSONSchema.string(
+            .init(anchor: "patternAnchor"),
+            .init()
+        )
+        let anchoredSchema = JSONSchema.object(
+            patternProperties: [
+                "^x-": anchoredPatternChild
+            ]
+        )
+
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "patternAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "anchoredPatternSchema": anchoredSchema
+                ]
+            )
+        )
+
+        let dereferencedDocument = try document.locallyDereferenced()
+        let schema = dereferencedDocument
+            .paths["/hello"]?
+            .get?
+            .responses[status: 200]?
+            .content[.json]?
+            .schema
+
+        XCTAssertEqual(schema?.jsonType, .string)
+        XCTAssertEqual(schema?.anchor, "patternAnchor")
+    }
+
+    func test_locallyDereferencedFailsOnDuplicateSchemaAnchors() {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello": .pathItem(
+                    .init(
+                        get: .init(
+                            responses: [
+                                200: .response(
+                                    description: "success",
+                                    content: [
+                                        .json: .content(
+                                            .init(
+                                                schema: .reference(.anchor(named: "duplicateAnchor"))
+                                            )
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            ],
+            components: .direct(
+                schemas: [
+                    "first": .string(.init(anchor: "duplicateAnchor"), .init()),
+                    "second": .integer(.init(anchor: "duplicateAnchor"), .init())
+                ]
+            )
+        )
+
+        XCTAssertThrowsError(try document.locallyDereferenced()) { error in
+            XCTAssertEqual(
+                error as? OpenAPI.Document.DuplicateAnchorError,
+                .init(name: "duplicateAnchor")
+            )
+            XCTAssertEqual(
+                (error as? OpenAPI.Document.DuplicateAnchorError)?.description,
+                "Encountered multiple JSON Schema $anchor definitions named 'duplicateAnchor' while preparing a locally dereferenced document. OpenAPIKit cannot determine which schema '#duplicateAnchor' should resolve to."
+            )
+        }
+    }
 }
