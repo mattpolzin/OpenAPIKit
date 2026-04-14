@@ -7,6 +7,12 @@
 
 import OpenAPIKitCore
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 /// OpenAPI "Schema Object"
 /// 
 /// See [OpenAPI Schema Object](https://spec.openapis.org/oas/v3.2.0.html#schema-object).
@@ -209,6 +215,11 @@ public struct JSONSchema: JSONSchemaContext, HasWarnings, Sendable {
     // See `JSONSchemaContext`
     public var externalDocs: OpenAPI.ExternalDocumentation? {
         return coreContext.externalDocs
+    }
+
+    // See `JSONSchemaContext`
+    public var id: URL? {
+        return coreContext.id
     }
 
     // See `JSONSchemaContext`
@@ -493,6 +504,13 @@ extension JSONSchema: VendorExtendable {
             schema: value.with(vendorExtensions: vendorExtensions)
         )
     }
+
+    public func with(id: URL) -> JSONSchema {
+        .init(
+            warnings: warnings,
+            schema: value.with(id: id)
+        )
+    }
 }
 
 extension JSONSchema.Schema {
@@ -524,6 +542,37 @@ extension JSONSchema.Schema {
             return .reference(context, coreContext.with(vendorExtensions: vendorExtensions))
         case .fragment(let context):
             return .fragment(context.with(vendorExtensions: vendorExtensions))
+        }
+    }
+
+    public func with(id: URL) -> JSONSchema.Schema {
+        switch self {
+        case .null(let context):
+            return .null(context.with(id: id))
+        case .boolean(let context):
+            return .boolean(context.with(id: id))
+        case .number(let contextA, let contextB):
+            return .number(contextA.with(id: id), contextB)
+        case .integer(let contextA, let contextB):
+            return .integer(contextA.with(id: id), contextB)
+        case .string(let contextA, let contextB):
+            return .string(contextA.with(id: id), contextB)
+        case .object(let contextA, let contextB):
+            return .object(contextA.with(id: id), contextB)
+        case .array(let contextA, let contextB):
+            return .array(contextA.with(id: id), contextB)
+        case .all(of: let of, core: let core):
+            return .all(of: of, core: core.with(id: id))
+        case .one(of: let of, core: let core):
+            return .one(of: of, core: core.with(id: id))
+        case .any(of: let of, core: let core):
+            return .any(of: of, core: core.with(id: id))
+        case .not(let of, core: let core):
+            return .not(of, core: core.with(id: id))
+        case .reference(let context, let coreContext):
+            return .reference(context, coreContext.with(id: id))
+        case .fragment(let context):
+            return .fragment(context.with(id: id))
         }
     }
 }
@@ -2008,7 +2057,6 @@ extension JSONSchema: Decodable {
     }
 
     public init(from decoder: Decoder) throws {
-
         if let ref = try? JSONReference<JSONSchema>(from: decoder) {
             let coreContext = try CoreContext<JSONTypeFormat.AnyFormat>(from: decoder)
             self = .init(warnings: coreContext.warnings, schema: .reference(ref, coreContext))
