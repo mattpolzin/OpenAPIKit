@@ -1,4 +1,4 @@
-[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 5.10+](http://img.shields.io/badge/Swift-5.10+-blue.svg)](https://swift.org)
+[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 6.0+](http://img.shields.io/badge/Swift-6.0+-blue.svg)](https://swift.org)
 
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT) ![Tests](https://github.com/mattpolzin/OpenAPIKit/actions/workflows/tests.yml/badge.svg?branch=main)
 
@@ -16,9 +16,9 @@ versions and key features are supported by which OpenAPIKit versions.
 
 | OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | External Dereferencing & Sendable | OpenAPI v3.2 |
 |------------|-------|--------------------|-----------------------------------|--------------|
-| v3.x       | 5.1+  | ✅                 |                                   |              |
 | v4.x       | 5.8+  | ✅                 | ✅                                |              |
 | v5.x       | 5.10+ | ✅                 | ✅                                | ✅           |
+| v6.x       | 6.0+  | ✅                 | ✅                                | ✅           |
 
 - [Usage](#usage)
   - [Migration](#migration)

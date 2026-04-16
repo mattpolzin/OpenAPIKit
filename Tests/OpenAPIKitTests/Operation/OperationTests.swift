@@ -7,7 +7,7 @@
 
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 
 final class OperationTests: XCTestCase {
     func test_init() {

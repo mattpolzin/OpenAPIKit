@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 
 import PackageDescription
 
@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", "5.1.0"..<"7.0.0") // just for tests
+        .package(url: "https://github.com/jpsim/Yams.git", "6.0.0"..<"7.0.0") // just for tests
     ],
     targets: [
         .target(
@@ -74,5 +74,5 @@ let package = Package(
             name: "OpenAPIKitCompatTests",
             dependencies: ["OpenAPIKitCompat"])
     ],
-    swiftLanguageVersions: [ .v5 ]
+    swiftLanguageModes: [ .v5, .v6 ]
 )

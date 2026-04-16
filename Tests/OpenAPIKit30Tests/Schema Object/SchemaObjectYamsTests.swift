@@ -15,7 +15,7 @@ import Foundation
 
 import XCTest
 import OpenAPIKit30
-@preconcurrency import Yams
+import Yams
 
 final class SchemaObjectYamsTests: XCTestCase {
     func test_floatingPointWholeNumberIntegerDecode() throws {

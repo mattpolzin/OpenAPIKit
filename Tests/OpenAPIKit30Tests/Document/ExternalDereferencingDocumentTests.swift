@@ -8,7 +8,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
-@preconcurrency import Yams
+import Yams
 import OpenAPIKit30
 import XCTest
 
