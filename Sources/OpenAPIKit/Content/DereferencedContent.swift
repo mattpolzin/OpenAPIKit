@@ -100,8 +100,8 @@ extension OpenAPI.Content: ExternallyDereferenceable {
       let oldSchema = schema
       let oldItemSchema = itemSchema
 
-      async let (newSchema, c1, m1) = oldSchema.externallyDereferenced(with: loader)
-      async let (newItemSchema, c2, m2) = oldItemSchema.externallyDereferenced(with: loader)
+      async let (newSchema, c1, m1): (JSONSchema?, OpenAPI.Components, [Loader.Message]) = oldSchema.externallyDereferenced(with: loader)
+      async let (newItemSchema, c2, m2): (JSONSchema?, OpenAPI.Components, [Loader.Message]) = oldItemSchema.externallyDereferenced(with: loader)
 
       var newContent = self
       var newComponents = try await c1
@@ -129,8 +129,8 @@ extension OpenAPI.Content: ExternallyDereferenceable {
                 newMessages += m4
 
             case .b(let oldPositionalEncoding):
-                async let (newItemEncoding, c4, m4) = try oldPositionalEncoding.itemEncoding.externallyDereferenced(with: loader)
-                async let (newPrefixEncoding, c5, m5) = try oldPositionalEncoding.prefixEncoding.externallyDereferenced(with: loader)
+                async let (newItemEncoding, c4, m4): (OpenAPI.Content.Encoding?, OpenAPI.Components, [Loader.Message]) = try oldPositionalEncoding.itemEncoding.externallyDereferenced(with: loader)
+                async let (newPrefixEncoding, c5, m5): ([OpenAPI.Content.Encoding], OpenAPI.Components, [Loader.Message]) = try oldPositionalEncoding.prefixEncoding.externallyDereferenced(with: loader)
                 newContent.encoding = try await .b(.init(prefixEncoding: newPrefixEncoding, itemEncoding: newItemEncoding))
                 try await newComponents.merge(c4)
                 try await newComponents.merge(c5)

@@ -461,17 +461,17 @@ extension OpenAPI.Components {
         let oldMediaTypes = mediaTypes
         let oldPathItems = pathItems
 
-        async let (newSchemas, c1, m1) = oldSchemas.externallyDereferenced(with: loader)
-        async let (newResponses, c2, m2) = oldResponses.externallyDereferenced(with: loader)
-        async let (newParameters, c3, m3) = oldParameters.externallyDereferenced(with: loader)
-        async let (newExamples, c4, m4) = oldExamples.externallyDereferenced(with: loader)
-        async let (newRequestBodies, c5, m5) = oldRequestBodies.externallyDereferenced(with: loader)
-        async let (newHeaders, c6, m6) = oldHeaders.externallyDereferenced(with: loader)
-        async let (newSecuritySchemes, c7, m7) = oldSecuritySchemes.externallyDereferenced(with: loader)
+        async let (newSchemas, c1, m1): (OpenAPI.ComponentDictionary<JSONSchema>, OpenAPI.Components, [Loader.Message]) = oldSchemas.externallyDereferenced(with: loader)
+        async let (newResponses, c2, m2): (OpenAPI.ComponentReferenceDictionary<OpenAPI.Response>, OpenAPI.Components, [Loader.Message]) = oldResponses.externallyDereferenced(with: loader)
+        async let (newParameters, c3, m3): (OpenAPI.ComponentReferenceDictionary<OpenAPI.Parameter>, OpenAPI.Components, [Loader.Message]) = oldParameters.externallyDereferenced(with: loader)
+        async let (newExamples, c4, m4): (OpenAPI.ComponentReferenceDictionary<OpenAPI.Example>, OpenAPI.Components, [Loader.Message]) = oldExamples.externallyDereferenced(with: loader)
+        async let (newRequestBodies, c5, m5): (OpenAPI.ComponentReferenceDictionary<OpenAPI.Request>, OpenAPI.Components, [Loader.Message]) = oldRequestBodies.externallyDereferenced(with: loader)
+        async let (newHeaders, c6, m6): (OpenAPI.ComponentReferenceDictionary<OpenAPI.Header>, OpenAPI.Components, [Loader.Message]) = oldHeaders.externallyDereferenced(with: loader)
+        async let (newSecuritySchemes, c7, m7): (OpenAPI.ComponentReferenceDictionary<OpenAPI.SecurityScheme>, OpenAPI.Components, [Loader.Message]) = oldSecuritySchemes.externallyDereferenced(with: loader)
 //        async let (newLinks, c8, m8) = oldLinks.externallyDereferenced(with: loader)
 //        async let (newCallbacks, c9, m9) = oldCallbacks.externallyDereferenced(with: loader)
         async let (newMediaTypes, c10, m10) = oldMediaTypes.externallyDereferenced(with: loader)
-        async let (newPathItems, c11, m11) = oldPathItems.externallyDereferenced(with: loader)
+        async let (newPathItems, c11, m11): (OpenAPI.ComponentDictionary<OpenAPI.PathItem>, OpenAPI.Components, [Loader.Message]) = oldPathItems.externallyDereferenced(with: loader)
 
         schemas = try await newSchemas
         responses = try await newResponses

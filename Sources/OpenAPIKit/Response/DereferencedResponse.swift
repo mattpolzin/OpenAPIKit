@@ -83,8 +83,8 @@ extension OpenAPI.Response: ExternallyDereferenceable {
         let oldLinks = links
         let oldHeaders = headers
 
-        async let (newContent, c1, m1) = oldContent.externallyDereferenced(with: loader)
-        async let (newLinks, c2, m2) = oldLinks.externallyDereferenced(with: loader)
+        async let (newContent, c1, m1): (OpenAPI.Content.Map, OpenAPI.Components, [Loader.Message]) = oldContent.externallyDereferenced(with: loader)
+        async let (newLinks, c2, m2): (OpenAPI.Link.Map, OpenAPI.Components, [Loader.Message]) = oldLinks.externallyDereferenced(with: loader)
 //        async let (newHeaders, c3, m3) = oldHeaders.externallyDereferenced(with: loader)
 
         var response = self

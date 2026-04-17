@@ -80,7 +80,7 @@ extension OpenAPI.Content: ExternallyDereferenceable {
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let oldSchema = schema
 
-        async let (newSchema, c1, m1) = oldSchema.externallyDereferenced(with: loader)
+        async let (newSchema, c1, m1): (Either<JSONReference<JSONSchema>, JSONSchema>?, OpenAPI.Components, [Loader.Message]) = oldSchema.externallyDereferenced(with: loader)
 
         var newContent = self
         var newComponents = try await c1

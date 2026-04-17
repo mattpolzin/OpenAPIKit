@@ -131,10 +131,10 @@ extension OpenAPI.Operation: ExternallyDereferenceable {
         let oldRequestBody = requestBody
         let oldResponses = responses
 
-        async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
-        async let (newRequestBody, c2, m2) = oldRequestBody.externallyDereferenced(with: loader)
-        async let (newResponses, c3, m3) = oldResponses.externallyDereferenced(with: loader)
-        async let (newCallbacks, c4, m4) = callbacks.externallyDereferenced(with: loader)
+        async let (newParameters, c1, m1): (OpenAPI.Parameter.Array, OpenAPI.Components, [Loader.Message]) = oldParameters.externallyDereferenced(with: loader)
+        async let (newRequestBody, c2, m2): (Either<OpenAPI.Reference<OpenAPI.Request>, OpenAPI.Request>?, OpenAPI.Components, [Loader.Message]) = oldRequestBody.externallyDereferenced(with: loader)
+        async let (newResponses, c3, m3): (OpenAPI.Response.Map, OpenAPI.Components, [Loader.Message]) = oldResponses.externallyDereferenced(with: loader)
+        async let (newCallbacks, c4, m4): (OpenAPI.CallbacksMap, OpenAPI.Components, [Loader.Message]) = callbacks.externallyDereferenced(with: loader)
 //        let (newServers, c5, m5) = try await servers.externallyDereferenced(with: loader)
 
         var newOperation = self

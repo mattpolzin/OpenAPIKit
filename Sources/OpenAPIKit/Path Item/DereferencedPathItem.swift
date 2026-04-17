@@ -167,19 +167,19 @@ extension OpenAPI.PathItem: ExternallyDereferenceable {
 
         let oldAdditionalOperations = additionalOperations
 
-        async let (newParameters, c1, m1) = oldParameters.externallyDereferenced(with: loader)
+        async let (newParameters, c1, m1): ([Either<OpenAPI.Reference<OpenAPI.Parameter>, OpenAPI.Parameter>], OpenAPI.Components, [Loader.Message]) = oldParameters.externallyDereferenced(with: loader)
 //        async let (newServers, c2, m2) = oldServers.externallyDereferenced(with: loader)
-        async let (newGet, c3, m3) = oldGet.externallyDereferenced(with: loader)
-        async let (newPut, c4, m4) = oldPut.externallyDereferenced(with: loader)
-        async let (newPost, c5, m5) = oldPost.externallyDereferenced(with: loader)
-        async let (newDelete, c6, m6) = oldDelete.externallyDereferenced(with: loader)
-        async let (newOptions, c7, m7) = oldOptions.externallyDereferenced(with: loader)
-        async let (newHead, c8, m8) = oldHead.externallyDereferenced(with: loader)
-        async let (newPatch, c9, m9) = oldPatch.externallyDereferenced(with: loader)
-        async let (newTrace, c10, m10) = oldTrace.externallyDereferenced(with: loader)
-        async let (newQuery, c11, m11) = oldQuery.externallyDereferenced(with: loader)
+        async let (newGet, c3, m3): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message]) = oldGet.externallyDereferenced(with: loader)
+        async let (newPut, c4, m4): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldPut.externallyDereferenced(with: loader)
+        async let (newPost, c5, m5): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldPost.externallyDereferenced(with: loader)
+        async let (newDelete, c6, m6): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldDelete.externallyDereferenced(with: loader)
+        async let (newOptions, c7, m7): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldOptions.externallyDereferenced(with: loader)
+        async let (newHead, c8, m8): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldHead.externallyDereferenced(with: loader)
+        async let (newPatch, c9, m9): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldPatch.externallyDereferenced(with: loader)
+        async let (newTrace, c10, m10): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message])  = oldTrace.externallyDereferenced(with: loader)
+        async let (newQuery, c11, m11): (OpenAPI.Operation?, OpenAPI.Components, [Loader.Message]) = oldQuery.externallyDereferenced(with: loader)
 
-        async let (newAdditionalOperations, c12, m12) = oldAdditionalOperations.externallyDereferenced(with: loader)
+        async let (newAdditionalOperations, c12, m12): (OrderedDictionary<OpenAPI.HttpMethod, OpenAPI.Operation>, OpenAPI.Components, [Loader.Message]) = oldAdditionalOperations.externallyDereferenced(with: loader)
 
         var pathItem = self
         var newComponents = try await c1
