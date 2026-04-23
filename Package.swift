@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -18,6 +18,13 @@ let package = Package(
         .library(
             name: "OpenAPIKitCompat",
             targets: ["OpenAPIKitCompat"]),
+    ],
+    traits: [
+        .init(
+            name: "ExternalLoading",
+            description: "A framework that allows using OpenAPIKit for loading external JSON references into the Components Object. Building OpenAPKit with this capability is notably slower given its use of Swift Concurrency."
+        ),
+        .default(enabledTraits: ["ExternalLoading"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
