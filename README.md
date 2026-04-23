@@ -1,4 +1,4 @@
-[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 6.0+](http://img.shields.io/badge/Swift-6.0+-blue.svg)](https://swift.org)
+[![sswg:sandbox|94x20](https://img.shields.io/badge/sswg-sandbox-lightgrey.svg)](https://github.com/swift-server/sswg/blob/master/process/incubation.md#sandbox-level) [![Swift 6.1+](http://img.shields.io/badge/Swift-6.1+-blue.svg)](https://swift.org)
 
 [![MIT license](http://img.shields.io/badge/license-MIT-lightgrey.svg)](http://opensource.org/licenses/MIT) ![Tests](https://github.com/mattpolzin/OpenAPIKit/actions/workflows/tests.yml/badge.svg?branch=main)
 
@@ -18,7 +18,7 @@ versions and key features are supported by which OpenAPIKit versions.
 |------------|-------|--------------------|-----------------------------------|--------------|
 | v4.x       | 5.8+  | ✅                 | ✅                                |              |
 | v5.x       | 5.10+ | ✅                 | ✅                                | ✅           |
-| v6.x       | 6.0+  | ✅                 | ✅                                | ✅           |
+| v6.x       | 6.1+  | ✅                 | ✅                                | ✅           |
 
 - [Usage](#usage)
   - [Migration](#migration)
@@ -214,6 +214,25 @@ newDoc = oldDoc?.convert(to: .v3_2_0) ??
 You could also call `oldDoc?.convert(to: .v3_1_4)` if you specifically wanted to
 work against a 3.1.x document for whatever reason (possibly because you wanted
 to reserialize the document at a 3.1.x version).
+
+### Traits
+The OpenAPIKit package offers an `"ExternalLoading"` trait that is enabled by
+default. External Loading (i.e. loading multiple OpenAPI files in order to
+resolve references between them) uses Swift Concurrency to parallelize loading
+of each file. Swift Concurrency adds enough overhead to the compilation time of
+OpenAPIKit that it might be worth disabling this trait if you do not need the
+External Loading capability. Note that it is _compile time_ that takes a hit
+from enabling External Loading, not _runtime speed_.
+
+To disable External Loading features, depend on OpenAPIKit with an empty
+`traits` argument:
+```swift
+.package(
+  url: "https://github/com/mattpolzin/openapikit.git",
+  from: "6.0.0",
+  traits: []
+)
+```
 
 ### A note on dictionary ordering
 The **Foundation** library's `JSONEncoder` and `JSONDecoder` do not make any
