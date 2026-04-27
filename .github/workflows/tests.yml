@@ -13,16 +13,15 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:6.0-focal
-          - swift:6.0-jammy
-          - swift:6.0-noble
           - swift:6.1-focal
           - swift:6.1-jammy
           - swift:6.1-noble
           - swift:6.2-jammy
           - swift:6.2-noble
+          - swift:6.3-jammy
+          - swift:6.3-noble
           - swiftlang/swift:nightly-focal
-#          - swiftlang/swift:nightly-jammy
+          - swiftlang/swift:nightly-jammy
     container: ${{ matrix.image }}
     steps:
     - name: Checkout code
