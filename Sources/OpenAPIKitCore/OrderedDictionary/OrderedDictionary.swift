@@ -282,14 +282,14 @@ extension OrderedDictionary: Sendable where Key: Sendable, Value: Sendable {}
 public struct AnyCodingKey: CodingKey {
 
     public let stringValue: String
-    public let originalValue: Any
+    public let originalValue: any Sendable
 
     public init(stringValue: String) {
         self.stringValue = stringValue
         self.originalValue = stringValue
     }
 
-    public init(stringValue: String, originalValue: Any) {
+    public init(stringValue: String, originalValue: any Sendable) {
         self.stringValue = stringValue
         self.originalValue = originalValue
     }
@@ -375,14 +375,20 @@ internal func encodeKeyValuePairs<Value: Encodable>(
 
 /// Encode a sequence of `String`/`Value` pairs as a hash keeping track of the
 /// original RawRepresentable values.
-internal func encodeKeyValuePairs<Value: Encodable, T>(
+internal func encodeKeyValuePairs<Value: Encodable, T> (
     _ keyValuePairs: Zip2Sequence<Zip2Sequence<[T], [String]>, [Value]>,
     to encoder: Encoder
 ) throws {
     var container = encoder.container(keyedBy: AnyCodingKey.self)
 
     for (key, value) in keyValuePairs {
-        try container.encode(value, forKey: .init(stringValue: key.1, originalValue: key.0))
+        // NOTE: This is a bit of a hack -- Because OrderedDictionary is used
+        // internally but not meant to be vendored to downstream projects for
+        // arbitrary use outside of OpenAPIKit types, we do know that all Keys
+        //are sendable. It is just difficult to prove that to the compiler so
+        // I will have to work at that later.
+        let anyValue = (key.0 as Any) as! any Sendable
+        try container.encode(value, forKey: .init(stringValue: key.1, originalValue: anyValue))
     }
 }
 
