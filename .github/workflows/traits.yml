@@ -1,0 +1,12 @@
+name: Traits
+
+on: [pull_request]
+
+jobs:
+  without-default-traits:
+    container: 
+      image: swift:6.3
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - run: swift test --enable-test-discovery --disable-default-traits
