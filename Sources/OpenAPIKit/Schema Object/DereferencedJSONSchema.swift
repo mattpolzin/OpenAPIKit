@@ -539,6 +539,7 @@ extension JSONSchema: LocallyDereferenceable {
 }
 
 extension JSONSchema: ExternallyDereferenceable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let newSchema: JSONSchema
         let newComponents: OpenAPI.Components
@@ -653,4 +654,5 @@ extension JSONSchema: ExternallyDereferenceable {
 
         return (newSchema, newComponents, newMessages)
     }
+#endif
 }

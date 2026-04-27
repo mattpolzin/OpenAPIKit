@@ -398,6 +398,7 @@ extension OpenAPI.Document {
         return try DereferencedDocument(self)
     }
 
+#if ExternalLoading
     /// Load all remote references into the document. A remote reference is one
     /// that points to another file rather than a location within the
     /// same file.
@@ -437,6 +438,7 @@ extension OpenAPI.Document {
 
         return try await context + m1 + m2 + m3
     }
+#endif
 }
 
 extension OpenAPI {

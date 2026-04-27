@@ -9,6 +9,7 @@ import OpenAPIKitCore
 
 extension OrderedDictionary where Key: Sendable, Value: ExternallyDereferenceable & Sendable {
 
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         try await withThrowingTaskGroup(of: (Key, Value, OpenAPI.Components, [Loader.Message]).self) { group in
           for (key, value) in self {
@@ -33,4 +34,5 @@ extension OrderedDictionary where Key: Sendable, Value: ExternallyDereferenceabl
           return (newDict, newComponents, newMessages)
         }
     }
+#endif
 }
