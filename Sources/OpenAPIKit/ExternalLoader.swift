@@ -49,5 +49,7 @@ public protocol ExternalLoader: _ExternalLoaderMetatype where Message: Sendable 
 }
 
 public protocol ExternallyDereferenceable {
+#if ExternalLoading
     func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message])
+#endif
 }

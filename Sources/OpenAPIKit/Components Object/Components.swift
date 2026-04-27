@@ -439,6 +439,7 @@ extension OpenAPI.Components {
 }
 
 extension OpenAPI.Components {
+#if ExternalLoading
     internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
         if case let .iterations(number) = depth,
            number <= 0 {
@@ -542,6 +543,7 @@ extension OpenAPI.Components {
                 return try await externallyDereference(with: loader, depth: .full, context: newMessages)
         }
     }
+#endif
 }
 
 extension OpenAPI.Components: Validatable {}

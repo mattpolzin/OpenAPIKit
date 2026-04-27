@@ -84,6 +84,7 @@ extension OpenAPI.Header: LocallyDereferenceable {
 }
 
 extension OpenAPI.Header: ExternallyDereferenceable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
 
         // if not for a Swift bug, this whole next bit would just be the
@@ -117,4 +118,5 @@ extension OpenAPI.Header: ExternallyDereferenceable {
 
         return (newHeader, newComponents, newMessages)
     }
+#endif
 }
