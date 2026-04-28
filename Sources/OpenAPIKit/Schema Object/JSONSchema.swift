@@ -1614,6 +1614,7 @@ extension JSONSchema {
         minProperties: Int? = nil,
         maxProperties: Int? = nil,
         properties: OrderedDictionary<String, JSONSchema> = [:],
+        patternProperties: OrderedDictionary<String, JSONSchema> = [:],
         additionalProperties: Either<Bool, JSONSchema>? = nil,
         allowedValues: [AnyCodable]? = nil,
         defaultValue: AnyCodable? = nil,
@@ -1643,6 +1644,7 @@ extension JSONSchema {
         )
         let objectContext = JSONSchema.ObjectContext(
             properties: properties,
+            patternProperties: patternProperties,
             additionalProperties: additionalProperties,
             maxProperties: maxProperties,
             minProperties: minProperties

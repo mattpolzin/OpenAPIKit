@@ -341,6 +341,23 @@ extension Validation {
         )
     }
 
+    /// Validate that all named OpenAPI `Server`s have unique names across the
+    /// whole Document.
+    ///
+    /// The OpenAPI Specification requires server names
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#server-object).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var documentServerNamesAreUnique: Validation<OpenAPI.Document> {
+        .init(
+            description: "The names of Servers in the Document are unique",
+            check: { context in
+                let serverNames = context.subject.allServers.compactMap(\.name)
+                return Set(serverNames).count == serverNames.count
+            }
+        )
+    }
+
     /// Validate that all OpenAPI Path Items have no duplicate parameters defined
     /// within them.
     ///
@@ -374,6 +391,108 @@ extension Validation {
             description: "Operation parameters are unique (identity is defined by the 'name' and 'location')",
             check: { parametersAreUnique($0.subject.parameters, components: $0.document.components) },
             when: \.parameters.count > 0
+        )
+    }
+
+    /// Validate that `querystring` parameters are unique and do not coexist
+    /// with `query` parameters within a Path Item's effective operation
+    /// parameters.
+    ///
+    /// OpenAPI 3.2.0 requires that a `querystring` parameter
+    /// [must not appear more than once and must not appear in the same operation
+    /// as any `query` parameters](https://spec.openapis.org/oas/v3.2.0.html#parameter-locations).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var querystringParametersAreCompatible: Validation<OpenAPI.PathItem> {
+        .init(
+            description: "Querystring parameters are unique and do not coexist with query parameters",
+            check: { context in
+                let pathParameters = resolvedParameters(context.subject.parameters, components: context.document.components)
+                let pathSummary = ParameterLocationSummary(pathParameters)
+                let pathParametersPath = context.codingPath + [Validator.CodingKey.init(stringValue: "parameters")]
+                var errors = [ValidationError]()
+                let pathHasMultipleQuerystringParameters = pathSummary.querystringCount > 1
+                let pathMixesQueryLocations = pathSummary.querystringCount > 0 && pathSummary.queryCount > 0
+
+                if pathHasMultipleQuerystringParameters {
+                    errors.append(
+                        ValidationError(
+                            reason: "Path Item parameters must not contain more than one `querystring` parameter",
+                            at: pathParametersPath
+                        )
+                    )
+                }
+
+                if pathMixesQueryLocations {
+                    errors.append(
+                        ValidationError(
+                            reason: "Path Item parameters must not mix `querystring` and `query` parameter locations",
+                            at: pathParametersPath
+                        )
+                    )
+                }
+
+                for endpoint in context.subject.endpoints {
+                    let operationParameters = resolvedParameters(endpoint.operation.parameters, components: context.document.components)
+                    let operationSummary = ParameterLocationSummary(operationParameters)
+                    let operationParametersPath = context.codingPath + [
+                        Validator.CodingKey.init(stringValue: codingPathKey(for: endpoint.method)),
+                        Validator.CodingKey.init(stringValue: "parameters")
+                    ]
+                    let operationHasMultipleQuerystringParameters = operationSummary.querystringCount > 1
+                    let operationMixesQueryLocations = operationSummary.querystringCount > 0 &&
+                        operationSummary.queryCount > 0
+                    let effectiveQuerystringCount = pathSummary.querystringCount + operationSummary.querystringCount
+                    let effectiveQueryCount = pathSummary.queryCount + operationSummary.queryCount
+                    let inheritedHasMultipleQuerystringParameters =
+                        !pathHasMultipleQuerystringParameters &&
+                        !operationHasMultipleQuerystringParameters &&
+                        effectiveQuerystringCount > 1
+                    let inheritedMixesQueryLocations =
+                        !pathMixesQueryLocations &&
+                        !operationMixesQueryLocations &&
+                        effectiveQuerystringCount > 0 &&
+                        effectiveQueryCount > 0
+
+                    if operationHasMultipleQuerystringParameters {
+                        errors.append(
+                            ValidationError(
+                                reason: "Operation parameters must not contain more than one `querystring` parameter",
+                                at: operationParametersPath
+                            )
+                        )
+                    }
+
+                    if operationMixesQueryLocations {
+                        errors.append(
+                            ValidationError(
+                                reason: "Operation parameters must not mix `querystring` and `query` parameter locations",
+                                at: operationParametersPath
+                            )
+                        )
+                    }
+
+                    if inheritedHasMultipleQuerystringParameters {
+                        errors.append(
+                            ValidationError(
+                                reason: "Operation parameters must not contain more than one `querystring` parameter, including inherited Path Item parameters",
+                                at: operationParametersPath
+                            )
+                        )
+                    }
+
+                    if inheritedMixesQueryLocations {
+                        errors.append(
+                            ValidationError(
+                                reason: "Operation parameters must not mix `querystring` and `query` parameter locations, including inherited Path Item parameters",
+                                at: operationParametersPath
+                            )
+                        )
+                    }
+                }
+
+                return errors
+            }
         )
     }
 
@@ -575,9 +694,32 @@ extension Validation {
 /// Used by both the Path Item parameter check and the
 /// Operation parameter check in the default validations.
 fileprivate func parametersAreUnique(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> Bool {
-    let foundParameters = parameters.compactMap { try? components.lookup($0) }
+    let foundParameters = resolvedParameters(parameters, components: components)
 
     let identities = foundParameters.map { OpenAPI.Parameter.ParameterIdentity(name: $0.name, location: $0.location) }
 
     return Set(identities).count == foundParameters.count
+}
+
+fileprivate func resolvedParameters(_ parameters: OpenAPI.Parameter.Array, components: OpenAPI.Components) -> [OpenAPI.Parameter] {
+    parameters.compactMap { try? components.lookup($0) }
+}
+
+fileprivate struct ParameterLocationSummary {
+    let queryCount: Int
+    let querystringCount: Int
+
+    init(_ parameters: [OpenAPI.Parameter]) {
+        queryCount = parameters.filter { $0.location == .query }.count
+        querystringCount = parameters.filter { $0.location == .querystring }.count
+    }
+}
+
+fileprivate func codingPathKey(for method: OpenAPI.HttpMethod) -> String {
+    switch method {
+    case .builtin(let builtin):
+        return builtin.rawValue.lowercased()
+    case .other(let other):
+        return other
+    }
 }
