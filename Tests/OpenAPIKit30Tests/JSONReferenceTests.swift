@@ -359,6 +359,7 @@ extension JSONReferenceTests {
 }
 
 // MARK: - External Dereferencing
+#if ExternalLoading
 extension JSONReferenceTests {
     func test_externalDerefNoFragment() async throws {
         let reference: JSONReference<JSONSchema> = .external(.init(string: "./schema.json")!)
@@ -390,3 +391,4 @@ extension JSONReferenceTests {
         XCTAssertEqual(messages, ["./schema.json#/components/schemas/test"])
     }
 }
+#endif
