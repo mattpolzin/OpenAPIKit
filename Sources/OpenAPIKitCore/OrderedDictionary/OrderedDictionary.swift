@@ -375,7 +375,7 @@ internal func encodeKeyValuePairs<Value: Encodable>(
 
 /// Encode a sequence of `String`/`Value` pairs as a hash keeping track of the
 /// original RawRepresentable values.
-internal func encodeKeyValuePairs<Value: Encodable, T> (
+internal func encodeKeyValuePairs<Value: Encodable, T>(
     _ keyValuePairs: Zip2Sequence<Zip2Sequence<[T], [String]>, [Value]>,
     to encoder: Encoder
 ) throws {
