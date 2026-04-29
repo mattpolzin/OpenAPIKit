@@ -4,7 +4,7 @@
 
 import XCTest
 import OpenAPIKit30
-@preconcurrency import Yams
+import Yams
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -25,19 +25,23 @@ final class GoogleBooksAPICampatibilityTests: XCTestCase {
 
     override func setUp() {
         if booksAPI == nil {
+            // Test file can be redownloaded from
+            // https://raw.githubusercontent.com/APIs-guru/openapi-directory/master/APIs/googleapis.com/books/v1/openapi.yaml
             booksAPI = Result {
-                try YAMLDecoder().decode(
-                    OpenAPI.Document.self,
-                    from: String(contentsOf: URL(string: "https://raw.githubusercontent.com/APIs-guru/openapi-directory/master/APIs/googleapis.com/books/v1/openapi.yaml")!)
+                let currentWorkingDirectory = FileManager.default.currentDirectoryPath
+                return try YAMLDecoder().decode(
+                  OpenAPI.Document.self,
+                  from: String(
+                    contentsOf: URL(
+                      filePath: "./Tests/inputs/google-books-3.0.yaml",
+                      relativeTo: URL(filePath: currentWorkingDirectory, directoryHint: .isDirectory)),
+                    encoding: .utf8)
                 )
             }
         }
     }
 
     func test_successfullyParsedDocument() throws {
-        #if os(Linux) && compiler(>=6.0)
-            throw XCTSkip("Swift bug causes CI failure currently (line 48): failed - The operation could not be completed. The file doesn’t exist.")
-        #endif
         switch booksAPI {
         case nil:
             XCTFail("Did not attempt to pull Google Books API documentation like expected.")

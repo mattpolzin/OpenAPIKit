@@ -7,7 +7,7 @@
 
 import OpenAPIKitCore
 import XCTest
-@preconcurrency import Yams
+import Yams
 
 final class OrderedDictionaryTests: XCTestCase {
     func test_initGrouping() {

@@ -78,6 +78,7 @@ extension OpenAPI.Response: LocallyDereferenceable {
 }
 
 extension OpenAPI.Response: ExternallyDereferenceable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         let oldContent = content
         let oldLinks = links
@@ -105,4 +106,5 @@ extension OpenAPI.Response: ExternallyDereferenceable {
 
         return (response, components, messages)
     }
+#endif
 }

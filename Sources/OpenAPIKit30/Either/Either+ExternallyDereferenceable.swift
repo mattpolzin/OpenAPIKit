@@ -10,6 +10,7 @@ import OpenAPIKitCore
 // MARK: - ExternallyDereferenceable
 extension Either: ExternallyDereferenceable where A: ExternallyDereferenceable, B: ExternallyDereferenceable {
 
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         switch self {
         case .a(let a):
@@ -20,4 +21,5 @@ extension Either: ExternallyDereferenceable where A: ExternallyDereferenceable, 
            return (.b(newB), components, messages)
         }
     }
+#endif
 }
