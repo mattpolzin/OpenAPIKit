@@ -25,6 +25,7 @@ versions and key features are supported by which OpenAPIKit versions.
     - [Older Versions](#older-versions)
     - [3.x to 4.x](#3x-to-4x)
     - [4.x to 5.x](#4x-to-5x)
+    - [5.x to 6.x](#5x-to-6x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
