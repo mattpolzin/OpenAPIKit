@@ -14,11 +14,11 @@ OpenAPIKit follows semantic versioning despite the fact that the OpenAPI
 specificaiton does not. The following chart shows which OpenAPI specification
 versions and key features are supported by which OpenAPIKit versions.
 
-| OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | External Dereferencing & Sendable | OpenAPI v3.2 |
-|------------|-------|--------------------|-----------------------------------|--------------|
-| v4.x       | 5.8+  | ✅                 | ✅                                |              |
-| v5.x       | 5.10+ | ✅                 | ✅                                | ✅           |
-| v6.x       | 6.1+  | ✅                 | ✅                                | ✅           |
+| OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | OpenAPI v3.2 | Package Traits |
+|------------|-------|--------------------|--------------|----------------|
+| v4.x       | 5.8+  | ✅                 |              |                |
+| v5.x       | 5.10+ | ✅                 | ✅           |                |
+| v6.x       | 6.1+  | ✅                 | ✅           | ✅             |
 
 - [Usage](#usage)
   - [Migration](#migration)
@@ -70,6 +70,12 @@ If you are migrating from OpenAPIKit 4.x to OpenAPIKit 5.x, check out the
 [v5 migration guide](./documentation/migration_guides/v5_migration_guide.md).
 
 Be aware of the change to minimum Swift version.
+
+#### 5.x to 6.x
+If you are migrating from OpenAPIKit 5.x to OpenAPIKit 6.x, check out the
+[v6 migration guide](./documentation/migration_guides/v6_migration_guide.md).
+
+Be aware of the change to minimum Swift version, now Swift 6.1.
 
 ### Decoding OpenAPI Documents
 
