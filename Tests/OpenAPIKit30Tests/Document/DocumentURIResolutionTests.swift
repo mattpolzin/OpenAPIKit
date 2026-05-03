@@ -36,7 +36,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "https://example.com/root/index.yaml")!
-            ).absoluteString,
+            )?.absoluteString,
             "https://example.com/root/shared.yaml#/components/schemas/User"
         )
     }

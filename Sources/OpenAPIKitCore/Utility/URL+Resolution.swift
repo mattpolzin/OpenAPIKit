@@ -9,13 +9,11 @@ public extension URL {
     ///
     /// If `baseURI` is `nil`, relative URI-references remain relative.
     func resolvedURI(relativeTo baseURI: URL?) -> URL {
-        let referenceString = relativeString
-
         if let baseURI,
-           let resolvedURI = URL(string: referenceString, relativeTo: baseURI)?.absoluteURL {
+           let resolvedURI = URL(string: relativeString, relativeTo: baseURI)?.absoluteURL {
             return resolvedURI
         }
 
-        return URL(string: referenceString) ?? self
+        return self
     }
 }

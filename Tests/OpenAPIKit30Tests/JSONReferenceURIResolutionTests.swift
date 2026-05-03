@@ -11,7 +11,7 @@ final class JSONReferenceURIResolutionTests: XCTestCase {
     func test_jsonReference_uriReferencePreservesInternalReferenceAsFragment() {
         let reference = JSONReference<JSONSchema>.component(named: "hello")
 
-        XCTAssertEqual(reference.uriReference.relativeString, "#/components/schemas/hello")
+        XCTAssertEqual(reference.uriReference?.relativeString, "#/components/schemas/hello")
     }
 
     func test_jsonReference_resolvedURIResolvesInternalAndExternalReferencesAgainstBaseURI() {
@@ -19,13 +19,13 @@ final class JSONReferenceURIResolutionTests: XCTestCase {
 
         let internalReference = JSONReference<JSONSchema>.component(named: "hello")
         XCTAssertEqual(
-            internalReference.resolvedURI(relativeTo: baseURI).absoluteString,
+            internalReference.resolvedURI(relativeTo: baseURI)?.absoluteString,
             "https://example.com/schemas/root.yaml#/components/schemas/hello"
         )
 
         let externalReference = JSONReference<JSONSchema>.external(URL(string: "other.yaml#/components/schemas/world")!)
         XCTAssertEqual(
-            externalReference.resolvedURI(relativeTo: baseURI).absoluteString,
+            externalReference.resolvedURI(relativeTo: baseURI)?.absoluteString,
             "https://example.com/schemas/other.yaml#/components/schemas/world"
         )
     }
