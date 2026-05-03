@@ -84,6 +84,7 @@ extension OpenAPI.Parameter: LocallyDereferenceable {
 }
 
 extension OpenAPI.Parameter: ExternallyDereferenceable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
 
         // if not for a Swift bug, this whole function would just be the
@@ -131,8 +132,10 @@ extension OpenAPI.Parameter: ExternallyDereferenceable {
 
         return (newParameter, newComponents, newMessages)
     }
+#endif
 }
 
+#if ExternalLoading
 fileprivate func externallyDereference<Loader: ExternalLoader>(
     schemaOrContent: Either<OpenAPI.Parameter.SchemaContext, OpenAPI.Content.Map>,
     with loader: Loader.Type
@@ -146,3 +149,4 @@ fileprivate func externallyDereference<Loader: ExternalLoader>(
         return (.b(map), components, messages)
     }
 }
+#endif

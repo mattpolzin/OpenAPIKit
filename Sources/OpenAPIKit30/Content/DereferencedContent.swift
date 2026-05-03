@@ -77,6 +77,7 @@ extension OpenAPI.Content: LocallyDereferenceable {
 }
 
 extension OpenAPI.Content: ExternallyDereferenceable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let oldSchema = schema
 
@@ -104,4 +105,5 @@ extension OpenAPI.Content: ExternallyDereferenceable {
 
         return (newContent, newComponents, newMessages)
     }
+#endif
 }

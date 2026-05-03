@@ -2,7 +2,7 @@ Thank you for considering contributing to OpenAPIKit!
 
 Take a look at the [Code of Conduct](https://github.com/mattpolzin/OpenAPIKit/blob/master/CODE_OF_CONDUCT.md) and note the [MIT license](https://github.com/mattpolzin/OpenAPIKit/blob/master/LICENSE.txt) associated with this project.
 
-If you are preparing a change for the current release of OpenAPIKit (major version 5), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 4 of OpenAPIKit, branch off of the `release/4_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version `6`), branch off of the `release/6_0` branch of this repository.
+If you are preparing a change for the current release of OpenAPIKit (major version 6), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 5 of OpenAPIKit, branch off of the `release/5_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version `7`), branch off of the `release/7_0` branch of this repository.
 
 Please do the following in the course of preparing a branch and pull request for this project.
 
@@ -14,11 +14,11 @@ Please do the following in the course of preparing a branch and pull request for
 
 ### Goals for each currently maintained major version
 
-`4.x`: Non-breaking changes that fix bugs or add improvements to the support of either OpenAPI Spec v3.0.x or OpenAPI Spec v3.1.x.
 `5.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
+`6.x`: Breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
 
 #### Goals for the Next/unreleased version
-The next major version will be `6.0`.
+The next major version will be `7.0`.
 
 Priorities for this release have not been settled on yet.
 

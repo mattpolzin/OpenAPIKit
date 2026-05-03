@@ -6,6 +6,7 @@ import OpenAPIKitCore
 
 extension Array where Element: ExternallyDereferenceable & Sendable {
 
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) {
         try await withThrowingTaskGroup(of: (Int, (Element, OpenAPI.Components, [Loader.Message])).self) { group in
             for (idx, elem) in zip(self.indices, self) {
@@ -29,4 +30,5 @@ extension Array where Element: ExternallyDereferenceable & Sendable {
             return (newElems.map { $0.1 }, newComponents, newMessages)
         }
     }
+#endif
 }

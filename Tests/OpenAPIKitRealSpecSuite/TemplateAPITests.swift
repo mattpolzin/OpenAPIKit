@@ -2,19 +2,15 @@
 //  GitHubAPITests.swift
 //  
 
-
 /**
  There are not currently any examples of OpenAPI 3.1 documents to use in this
  compatibility test suite but this file exists as a template from which to build out the
  first compat test we add.
  */
 
-
-
-
 import XCTest
 import OpenAPIKit
-@preconcurrency import Yams
+import Yams
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials

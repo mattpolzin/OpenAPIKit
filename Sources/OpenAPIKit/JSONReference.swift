@@ -602,6 +602,7 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
 }
 
 extension JSONReference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         switch self {
         case .internal(let ref):
@@ -619,6 +620,7 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
             return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self).jsonReference, components, messages)
         }
     }
+#endif
 }
 
 extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: LocallyDereferenceable {
@@ -649,10 +651,12 @@ extension OpenAPI.Reference: LocallyDereferenceable where ReferenceType: Locally
 }
 
 extension OpenAPI.Reference: ExternallyDereferenceable where ReferenceType: ExternallyDereferenceable & Decodable & Equatable {
+#if ExternalLoading
     public func externallyDereferenced<Loader: ExternalLoader>(with loader: Loader.Type) async throws -> (Self, OpenAPI.Components, [Loader.Message]) { 
         let (newRef, components, messages) = try await jsonReference.externallyDereferenced(with: loader)
         return (.init(newRef), components, messages)
     }
+#endif
 }
 
 extension OpenAPI.Reference: Validatable where ReferenceType: Validatable {}
