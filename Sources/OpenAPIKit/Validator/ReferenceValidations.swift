@@ -7,7 +7,7 @@
 
 import OpenAPIKitCore
 
-extension Validation {
+extension BuiltinValidation {
     internal enum References {
         /// Create a validation that all non-external OpenAPI references of the
         /// given type that point at the Components Object are found in the
