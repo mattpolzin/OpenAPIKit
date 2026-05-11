@@ -99,14 +99,14 @@ extension OpenAPI.Document {
 ///
 /// There are a few default validations that ship with OpenAPIKit but
 /// are not used unless explicitly added to a Validator. You can find these
-/// validations as static members of the `Validation` type.
+/// validations as static members of the `BuiltinValidation` type.
 ///
 /// **Example**
 ///
 ///     let document = OpenAPI.Document(...)
 ///     let validator = Validator()
-///         .validating(.documentContainsPaths)
-///         .validating(.pathsContainOperations)
+///         .validating(\.documentContainsPaths,
+///                     \.pathsContainOperations)
 ///     try document.validate(using: validator)
 ///
 /// At their core, all validations are values of the `Validation`
