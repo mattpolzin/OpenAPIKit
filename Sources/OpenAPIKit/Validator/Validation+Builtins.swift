@@ -7,7 +7,7 @@
 
 import OpenAPIKitCore
 
-public enum BuiltinValidation: SendableMetatype {
+public enum BuiltinValidation {
     // MARK: - Optionally added with `Validator.validating()`
 
     /// Validate the OpenAPI Document has at least one path in its
