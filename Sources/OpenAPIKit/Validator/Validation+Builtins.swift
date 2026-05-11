@@ -83,6 +83,7 @@ public enum BuiltinValidation: SendableMetatype {
     /// - Important: This is not an included validation by default.
     public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
         .init(
+            description: "Parameters in all paths are documented",
             check: { context in
                 var errors = [ValidationError]()
 
@@ -143,6 +144,7 @@ public enum BuiltinValidation: SendableMetatype {
     /// - Important: This is not an included validation by default.
     public static var serverVariablesAreDefined: Validation<OpenAPI.Server> {
         .init(
+            description: "All server template variables are defined",
             check: { context in
                 let missingVariables = context.subject.urlTemplate.variables
                     .filter { !context.subject.variables.contains(key: $0) }
