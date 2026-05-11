@@ -14,14 +14,18 @@ extension OpenAPI.Document {
     ///     - validator: Validator to use. By default,
     ///         a validator that just asserts requirements of the OpenAPI
     ///         Specification will be used.
-    ///     - strict: When true, warnings are thrown as errors. Set to false to
+    ///     - strict: When true, parsing warnings become errors. Set to false to
     ///         return warnings instead of throwing them. True by default.
+    ///         **NOTE** that this does not control whether validation errors
+    ///         are treated as errors or warnings, it controls whether warnings
+    ///         from parsing the OpenAPI Document are elevated to errors while
+    ///         validating.
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
     /// - returns: Any warnings that did not cause validation to fail.
     ///
-    /// Call without any arguments to validate some aspects of the OpenAPI
+    /// Call without any arguments to validate aspects of the OpenAPI
     /// Specification not guaranteed by the Swift types in OpenAPIKit.
     /// You can create a `Validator` of your own, adding additional steps
     /// to the validation (or starting from scratch), and then pass that
