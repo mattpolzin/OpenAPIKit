@@ -7,7 +7,7 @@
 
 import OpenAPIKitCore
 
-extension Validation {
+public enum BuiltinValidation: SendableMetatype {
     // MARK: - Optionally added with `Validator.validating()`
 
     /// Validate the OpenAPI Document has at least one path in its
@@ -688,6 +688,429 @@ extension Validation {
                 )
             )
         )
+    }
+}
+
+// For backwards compatibilty, expose builtin validations on the Validation
+// struct. Going forward, however, exposing builtin validations on the generic
+// Validation struct is less convenient.
+extension Validation {
+    // MARK: - Optionally added with `Validator.validating()`
+
+    /// Validate the OpenAPI Document has at least one path in its
+    /// `PathItem.Map`.
+    ///
+    /// The OpenAPI Specification does not require that the document
+    /// contain any paths for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
+    /// or even because it only contains webhooks, but authors may still
+    /// want to protect against an empty `PathItem.Map` in some cases.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var documentContainsPaths: Validation<OpenAPI.Document> { BuiltinValidation.documentContainsPaths }
+
+    /// Validate the OpenAPI Document's `PathItems` all have at least
+    /// one operation.
+    ///
+    /// The OpenAPI Specification does not require that path items
+    /// contain any operations for [security reasons](https://spec.openapis.org/oas/v3.2.0.html#security-filtering)
+    /// but documentation that is public in nature might only ever have
+    /// a `PathItem` with no operations in error.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var pathsContainOperations: Validation<OpenAPI.PathItem> { BuiltinValidation.pathsContainOperations }
+
+    /// Validate the OpenAPI Document's `JSONSchemas` all have at least
+    /// one defining characteristic.
+    ///
+    /// The JSON Schema Specification does not require that components
+    /// have any defining characteristics. An "empty" schema component can
+    /// be written as follows:
+    ///
+    ///     {
+    ///     }
+    ///
+    /// It is reasonable, however, to want to validate that all schema components
+    /// are non-empty and therefore offer some value to the consumer/reader of
+    /// the OpenAPI documentation beyond just "this property exists."
+    ///
+    /// - Note: A sneaky way for the empty object to get into documentation is
+    ///     by putting a property name in a parent object's `required` array
+    ///     without adding that property to the `properties` map.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var schemaComponentsAreDefined: Validation<JSONSchema> {
+        BuiltinValidation.schemaComponentsAreDefined
+    }
+
+    /// Validate that any `Parameters` in the path of any endpoint are documented.
+    /// In other words, if a path contains variables (i.e. `"{variable}"`) then there are
+    /// corresponding `parameters` entries in the `PathItem` or `Operation` for
+    /// each endpoint.
+    ///
+    /// In order to gain easy access to both the path (where the variable placeholders live)
+    /// and the parameter definitions, this validation runs once per document and performs a
+    /// loop over each endpoint in the document.
+    ///
+    /// - Important: This validation does not assert that all path item references are valid and
+    ///     can be found. Invalid or missing references will be skipped over.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var pathParametersAreDefined: Validation<OpenAPI.PathItem.Map> {
+        BuiltinValidation.pathParametersAreDefined
+    }
+
+    /// Validate that all Server Objects define all of the variables found in their URL Templates.
+    ///
+    /// For example, a server URL Template of `{scheme}://website.com/{path}` would
+    /// fail this validation if either "scheme" or "path" were not found in the Server Object's
+    /// `variables` dictionary.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var serverVariablesAreDefined: Validation<OpenAPI.Server> {
+        BuiltinValidation.serverVariablesAreDefined
+    }
+
+    /// Validate the OpenAPI Document's `Operations` all have at least
+    /// one response.
+    ///
+    /// The OpenAPI Specification does not require that Responses Objects
+    /// contain at least one response but you may wish to validate that all 
+    /// operations contain at least one response in your own API.
+    ///
+    /// The specification recommends that if there is only one response then
+    /// it be a successful response but this validation does not require that.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var operationsContainResponses: Validation<OpenAPI.Operation> {
+        BuiltinValidation.operationsContainResponses
+    }
+
+    /// Validate the OpenAPI Document's `Links` with operationIds refer to
+    /// Operations that exist in the document.
+    ///
+    /// This validation ensures that Link Objects using operationIds have corresponding
+    /// Operations in the document that have those IDs.
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var linkOperationsExist: Validation<OpenAPI.Link> {
+        BuiltinValidation.linkOperationsExist
+    }
+
+    /// Validate that all OpenAPI JSONSchema references are internal and found
+    /// in the document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `schemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var schemaReferencesFoundInComponents: Validation<OpenAPI.Reference<JSONSchema>> {
+        BuiltinValidation.schemaReferencesFoundInComponents
+    }
+
+    /// Validate that all JSONSchema references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `jsonSchemaReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var jsonSchemaReferencesFoundInComponents: Validation<JSONSchema> {
+        BuiltinValidation.jsonSchemaReferencesFoundInComponents
+    }
+
+    /// Validate that all Response references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `responseReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var responseReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Response>> {
+        BuiltinValidation.responseReferencesFoundInComponents
+    }
+
+    /// Validate that all Parameter references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `parameterReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var parameterReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
+        BuiltinValidation.parameterReferencesFoundInComponents
+    }
+
+    /// Validate that all Example references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `exampleReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var exampleReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Example>> {
+        BuiltinValidation.exampleReferencesFoundInComponents
+    }
+
+    /// Validate that all Request references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `requestReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var requestReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Request>> {
+        BuiltinValidation.requestReferencesFoundInComponents
+    }
+
+    /// Validate that all Header references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `headerReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var headerReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Header>> {
+        BuiltinValidation.headerReferencesFoundInComponents
+    }
+
+    /// Validate that all Link references are internal and found in the document's
+    /// components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `linkReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var linkReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Link>> {
+        BuiltinValidation.linkReferencesFoundInComponents
+    }
+
+    /// Validate that all Callbacks references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `callbacksReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var callbacksReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
+        BuiltinValidation.callbacksReferencesFoundInComponents
+    }
+
+    /// Validate that all PathItem references are internal and found in the
+    /// document's components dictionary.
+    ///
+    /// - See also: The similar but distinct default-on validation
+    ///             `pathItemReferencesAreValid`. 
+    ///
+    /// - Important: This is not an included in validation by default.
+    ///
+    public static var pathItemReferencesFoundInComponents: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+        BuiltinValidation.pathItemReferencesFoundInComponents
+    }
+
+    // MARK: - Included with `Validator()` by default
+
+    // You can start with no validations (not even the defaults below)
+    // by calling `Validator.blank`.
+
+    /// Validate that the OpenAPI Document's `Tags` all have unique names.
+    ///
+    /// The OpenAPI Specification requires that tag names on the Document
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#openapi-object).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var documentTagNamesAreUnique: Validation<OpenAPI.Document> {
+        BuiltinValidation.documentTagNamesAreUnique
+    }
+
+    /// Validate that all named OpenAPI `Server`s have unique names across the
+    /// whole Document.
+    ///
+    /// The OpenAPI Specification requires server names
+    /// [are unique](https://spec.openapis.org/oas/v3.2.0.html#server-object).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var documentServerNamesAreUnique: Validation<OpenAPI.Document> {
+        BuiltinValidation.documentServerNamesAreUnique
+    }
+
+    /// Validate that all OpenAPI Path Items have no duplicate parameters defined
+    /// within them.
+    ///
+    /// A Path Item Parameter's identity is defined as the pairing of its `name` and
+    /// `location`.
+    ///
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#path-item-object).
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var pathItemParametersAreUnique: Validation<OpenAPI.PathItem> {
+        BuiltinValidation.pathItemParametersAreUnique
+    }
+
+    /// Validate that all OpenAPI Operations have no duplicate parameters defined
+    /// within them.
+    ///
+    /// An Operation's Parameter's identity is defined as the pairing of its `name` and
+    /// `location`.
+    ///
+    /// The OpenAPI Specification requires that these parameters [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var operationParametersAreUnique: Validation<OpenAPI.Operation> {
+        BuiltinValidation.operationParametersAreUnique
+    }
+
+    /// Validate that `querystring` parameters are unique and do not coexist
+    /// with `query` parameters within a Path Item's effective operation
+    /// parameters.
+    ///
+    /// OpenAPI 3.2.0 requires that a `querystring` parameter
+    /// [must not appear more than once and must not appear in the same operation
+    /// as any `query` parameters](https://spec.openapis.org/oas/v3.2.0.html#parameter-locations).
+    ///
+    /// - Important: This is included in validation by default.
+    public static var querystringParametersAreCompatible: Validation<OpenAPI.PathItem> {
+        BuiltinValidation.querystringParametersAreCompatible
+    }
+
+    /// Validate that all OpenAPI Operation Ids are unique across the whole Document.
+    ///
+    /// The OpenAPI Specification requires that Operation Ids [are unique](https://spec.openapis.org/oas/v3.2.0.html#operation-object).
+    ///
+    /// - Important: This validation does not assert that all path references are valid and found in the
+    ///     components for the document. It skips over missing path items.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var operationIdsAreUnique: Validation<OpenAPI.Document> {
+        BuiltinValidation.operationIdsAreUnique
+    }
+
+    /// Validate that all OpenAPI JSONSchema components references are found in
+    /// the document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var schemaReferencesAreValid: Validation<OpenAPI.Reference<JSONSchema>> {
+        BuiltinValidation.schemaReferencesAreValid
+    }
+
+    /// Validate that all JSONSchema components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var jsonSchemaReferencesAreValid: Validation<JSONSchema> {
+        BuiltinValidation.jsonSchemaReferencesAreValid
+    }
+
+    /// Validate that all Response components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var responseReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Response>> {
+        BuiltinValidation.responseReferencesAreValid
+    }
+
+    /// Validate that all Parameter components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var parameterReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Parameter>> {
+        BuiltinValidation.parameterReferencesAreValid
+    }
+
+    /// Validate that all Example components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var exampleReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Example>> {
+        BuiltinValidation.exampleReferencesAreValid
+    }
+
+    /// Validate that all Request components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var requestReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Request>> {
+        BuiltinValidation.requestReferencesAreValid
+    }
+
+    /// Validate that all Header components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var headerReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Header>> {
+        BuiltinValidation.headerReferencesAreValid
+    }
+
+    /// Validate that all Link components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var linkReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Link>> {
+        BuiltinValidation.linkReferencesAreValid
+    }
+
+    /// Validate that all Callbacks components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var callbacksReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.Callbacks>> {
+        BuiltinValidation.callbacksReferencesAreValid
+    }
+
+    /// Validate that all PathItem components references are found in the
+    /// document's components dictionary.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var pathItemReferencesAreValid: Validation<OpenAPI.Reference<OpenAPI.PathItem>> {
+        BuiltinValidation.pathItemReferencesAreValid
+    }
+    
+    /// Validate that `enum` must not be empty in the document's
+    /// Server Variable.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVariableEnumIsValid: Validation<OpenAPI.Server.Variable> {
+        BuiltinValidation.serverVariableEnumIsValid
+    }
+
+    /// Validate that `default` must exist in the enum values in the document's
+    /// Server Variable, if such values (enum) are defined.
+    ///
+    /// - Important: This is included in validation by default.
+    ///
+    public static var serverVariableDefaultExistsInEnum : Validation<OpenAPI.Server.Variable> {
+        BuiltinValidation.serverVariableDefaultExistsInEnum
+    }
+
+    /// Validate the OpenAPI Document's `Parameter`s all have styles that are
+    /// compatible with their locations per the table found at
+    /// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#style-values
+    ///
+    /// - Important: This is included in validation by default.
+    public static var parameterStyleAndLocationAreCompatible: Validation<OpenAPI.Parameter> {
+        BuiltinValidation.parameterStyleAndLocationAreCompatible
     }
 }
 
