@@ -52,7 +52,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "https://example.com/root/index.yaml")!
-            )?.absoluteString,
+            ).absoluteString,
             "https://example.com/root/descriptions/shared.yaml#/components/schemas/User"
         )
     }
@@ -72,7 +72,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "https://example.com/root/index.yaml")!
-            )?.absoluteString,
+            ).absoluteString,
             "https://example.com/root/descriptions/openapi.yaml#/components/schemas/User"
         )
     }
@@ -88,7 +88,7 @@ final class DocumentURIResolutionTests: XCTestCase {
         let reference = JSONReference<JSONSchema>.external(URL(string: "shared.yaml#/components/schemas/User")!)
 
         XCTAssertEqual(
-            document.resolvedURI(for: reference, relativeTo: nil)?.relativeString,
+            document.resolvedURI(for: reference, relativeTo: nil).relativeString,
             "shared.yaml#/components/schemas/User"
         )
     }
@@ -125,7 +125,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "file://home/someone/src/api/openapi.yaml")!
-            )?.absoluteString,
+            ).absoluteString,
             "https://example.com/api/shared/foo#/components/requestBodies/Foo"
         )
     }
@@ -144,7 +144,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "https://example.com/api/openapis.yaml")!
-            )?.absoluteString,
+            ).absoluteString,
             "https://example.com/api/schemas/foo"
         )
     }
@@ -181,7 +181,7 @@ final class DocumentURIResolutionTests: XCTestCase {
             document.resolvedURI(
                 for: reference,
                 relativeTo: URL(string: "https://staging.example.com/api/openapi")!
-            )?.absoluteString,
+            ).absoluteString,
             "https://staging.example.com/api/shared/foo#/components/requestBodies/Foo"
         )
     }

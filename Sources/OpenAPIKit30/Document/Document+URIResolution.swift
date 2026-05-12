@@ -17,7 +17,7 @@ public extension OpenAPI.Document {
     func resolvedURI<ReferenceType>(
         for reference: JSONReference<ReferenceType>,
         relativeTo retrievalURI: URL? = nil
-    ) -> URL? {
+    ) -> URL {
         reference.resolvedURI(relativeTo: baseURI(relativeTo: retrievalURI))
     }
 }
