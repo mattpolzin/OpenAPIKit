@@ -841,6 +841,31 @@ final class DocumentConversionTests: XCTestCase {
         try assertEqualNewToOld(newParameter2, parameter2)
     }
 
+    func test_ContentEncoding() throws {
+        let encoding1 = OpenAPIKit30.OpenAPI.Content.Encoding(
+            contentTypes: [.json, .txt], headers: ["Content-Type": .header(.init(schema: .string))],
+            style: .form, allowReserved: false)
+        let encoding2 = OpenAPIKit30.OpenAPI.Content.Encoding(contentTypes: [.json], )
+
+        let content = OpenAPIKit30.OpenAPI.Content(
+            schema: .string, encoding: ["one": encoding1, "two": encoding2])
+
+        let oldDoc = OpenAPIKit30.OpenAPI.Document(
+            info: .init(title: "test", version: "1.0.0"),
+            servers: [],
+            paths: [
+                "/root": .init(
+                    summary: "path one", description: "the first path", servers: [], parameters: [],
+                    get: .init(requestBody: .init(content: [.json: content]), responses: [:]))
+            ],
+            components: .noComponents
+        )
+
+        let newDoc = oldDoc.convert(to: .v3_2_0)
+
+        try assertEqualNewToOld(newDoc, oldDoc)
+    }
+
     // TODO: more tests
 }
 
@@ -1302,7 +1327,7 @@ fileprivate func assertEqualNewToOld(_ newExample: OpenAPIKit.OpenAPI.Example, _
 }
 
 fileprivate func assertEqualNewToOld(_ newEncoding: OpenAPIKit.OpenAPI.Content.Encoding, _ oldEncoding: OpenAPIKit30.OpenAPI.Content.Encoding) throws {
-    XCTAssertEqual(newEncoding.contentTypes.first, oldEncoding.contentType)
+    XCTAssertEqual(newEncoding.contentTypes, oldEncoding.contentTypes)
     if let newEncodingHeaders = newEncoding.headers {
         let oldEncodingHeaders = try XCTUnwrap(oldEncoding.headers)
         for ((newKey, newHeader), (oldKey, oldHeader)) in zip(newEncodingHeaders, oldEncodingHeaders) {
