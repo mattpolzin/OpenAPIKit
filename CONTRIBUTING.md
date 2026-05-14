@@ -20,7 +20,7 @@ Please do the following in the course of preparing a branch and pull request for
 #### Goals for the Next/unreleased version
 The next major version will be `7.0`.
 
-Priorities for this release have not been settled on yet.
+The big goal of the `v7.0` release is removing OpenAPI 3.0 Standard tooling. That is specifically _not_ removing the ability to encoding/decode OAS 3.0 documents or convert OAS 3.0 documents to OAS 3.1/3,2 documents, but any other tooling related specifically to OAS 3.0 documents should get removed. This will reduce maintenance burden going forward. In effect this means that users who want to perform simplification, validation, etc. on OAS 3.0 documents will need to convert them (in Swift, using the OpenAPIKitCompat module provided by OpenAPIKit) to OAS 3.1/3.2 documents and then run the simplification, validation, etc. on those converted documents.
 
 **Please create GitHub issues** to propose any specific code refactoring or breaking changes you would like to see as I am opinionated about the degree to which I want to refactor and breaking changes should be well motivated; in other words, I aim to adopt more modern Swift, but avoid structural changes motivated by a difference in opinion rather than common Swift coding practices.
 
