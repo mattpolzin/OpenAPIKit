@@ -234,7 +234,7 @@ extension OpenAPIKit30.OpenAPI.Parameter.SchemaContext.Style: To31 {
 extension OpenAPIKit30.OpenAPI.Content.Encoding: To31 {
     fileprivate func to31() -> OpenAPIKit.OpenAPI.Content.Encoding {
         OpenAPIKit.OpenAPI.Content.Encoding(
-            contentTypes: [contentType].compactMap { $0 },
+            contentTypes: contentTypes,
             headers: headers?.mapValues(eitherRefTo31),
             style: style.to31(),
             explode: explode,

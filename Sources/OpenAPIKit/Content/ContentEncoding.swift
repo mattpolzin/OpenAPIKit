@@ -27,8 +27,6 @@ extension OpenAPI.Content {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
-        /// The singular `contentType` argument is only provided for backwards compatibility and
-        /// using the plural `contentTypes` argument should be preferred.
         public init(
             contentTypes: [OpenAPI.ContentType] = [],
             headers: OpenAPI.Header.Map? = nil,

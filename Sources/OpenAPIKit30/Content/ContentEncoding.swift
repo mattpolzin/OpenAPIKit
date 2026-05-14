@@ -14,7 +14,7 @@ extension OpenAPI.Content {
     public struct Encoding: Equatable, CodableVendorExtendable, Sendable {
         public typealias Style = OpenAPI.Parameter.SchemaContext.Style
 
-        public let contentType: OpenAPI.ContentType?
+        public let contentTypes: [OpenAPI.ContentType]
         public let headers: OpenAPI.Header.Map?
         public let style: Style
         public let explode: Bool
@@ -27,14 +27,25 @@ extension OpenAPI.Content {
         /// where the values are anything codable.
         public var vendorExtensions: [String: AnyCodable]
 
+        /// Get the content type if only one is specified.
+        ///
+        /// - Important: This is **soft-deprecated**. Use the `contentTypes`
+        ///     property instead.
+        public var contentType: OpenAPI.ContentType? {
+            guard contentTypes.count == 1 else { return nil }
+            return contentTypes.first
+        }
+
+        /// - Important: This is **soft-deprecated**. Use the initializer
+        ///    that takes a `contentTypes` array instead.
         public init(
-            contentType: OpenAPI.ContentType? = nil,
+            contentType: OpenAPI.ContentType?,
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             allowReserved: Bool = false,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.contentType = contentType
+            self.contentTypes = contentType.map { [$0] } ?? []
             self.headers = headers
             self.style = style
             self.explode = style.defaultExplode
@@ -43,14 +54,47 @@ extension OpenAPI.Content {
         }
 
         public init(
-            contentType: OpenAPI.ContentType? = nil,
+            contentTypes: [OpenAPI.ContentType] = [],
+            headers: OpenAPI.Header.Map? = nil,
+            style: Style = Self.defaultStyle,
+            allowReserved: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
+            self.contentTypes = contentTypes
+            self.headers = headers
+            self.style = style
+            self.explode = style.defaultExplode
+            self.allowReserved = allowReserved
+            self.vendorExtensions = vendorExtensions
+        }
+
+        /// - Important: This is **soft-deprecated**. Use the initializer
+        ///    that takes a `contentTypes` array instead.
+        public init(
+            contentType: OpenAPI.ContentType?,
             headers: OpenAPI.Header.Map? = nil,
             style: Style = Self.defaultStyle,
             explode: Bool,
             allowReserved: Bool = false,
             vendorExtensions: [String: AnyCodable] = [:]
         ) {
-            self.contentType = contentType
+            self.contentTypes = contentType.map { [$0] } ?? []
+            self.headers = headers
+            self.style = style
+            self.explode = explode
+            self.allowReserved = allowReserved
+            self.vendorExtensions = vendorExtensions
+        }
+
+        public init(
+            contentTypes: [OpenAPI.ContentType] = [],
+            headers: OpenAPI.Header.Map? = nil,
+            style: Style = Self.defaultStyle,
+            explode: Bool,
+            allowReserved: Bool = false,
+            vendorExtensions: [String: AnyCodable] = [:]
+        ) {
+            self.contentTypes = contentTypes
             self.headers = headers
             self.style = style
             self.explode = explode
@@ -67,7 +111,12 @@ extension OpenAPI.Content.Encoding: Encodable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encodeIfPresent(contentType, forKey: .contentType)
+        if contentTypes.count > 0 {
+            let contentTypesString = contentTypes
+                .map(\.rawValue)
+                .joined(separator: ", ")
+            try container.encode(contentTypesString, forKey: .contentType)
+        }
         try container.encodeIfPresent(headers, forKey: .headers)
 
         if style != Self.defaultStyle {
@@ -90,7 +139,16 @@ extension OpenAPI.Content.Encoding: Decodable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        contentType = try container.decodeIfPresent(OpenAPI.ContentType.self, forKey: .contentType)
+        let contentTypesString = try container.decodeIfPresent(String.self, forKey: .contentType)
+        if let contentTypesString {
+            contentTypes = contentTypesString
+                .split(separator: ",")
+                .compactMap { string in
+                    OpenAPI.ContentType.init(rawValue: string.trimmingCharacters(in: .whitespaces))
+                }
+        } else {
+            contentTypes = []
+        }
 
         headers = try container.decodeIfPresent(OpenAPI.Header.Map.self, forKey: .headers)
 
