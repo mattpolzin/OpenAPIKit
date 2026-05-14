@@ -16,16 +16,16 @@ versions and key features are supported by which OpenAPIKit versions.
 
 | OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | OpenAPI v3.2 | Package Traits |
 |------------|-------|--------------------|--------------|----------------|
-| v4.x       | 5.8+  | ✅                 |              |                |
 | v5.x       | 5.10+ | ✅                 | ✅           |                |
 | v6.x       | 6.1+  | ✅                 | ✅           | ✅             |
+| v7.x       | 6.2+  | ✅                 | ✅           | ✅             |
 
 - [Usage](#usage)
   - [Migration](#migration)
     - [Older Versions](#older-versions)
-    - [3.x to 4.x](#3x-to-4x)
     - [4.x to 5.x](#4x-to-5x)
     - [5.x to 6.x](#5x-to-6x)
+    - [6.x to 7.x](#6x-to-7x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
@@ -58,13 +58,7 @@ versions and key features are supported by which OpenAPIKit versions.
 #### Older Versions
 - [`1.x` to `2.x`](./documentation/migration_guides/v2_migration_guide.md)
 - [`2.x` to `3.x`](./documentation/migration_guides/v3_migration_guide.md)
-
-#### 3.x to 4.x
-If you are migrating from OpenAPIKit 3.x to OpenAPIKit 4.x, check out the
-[v4 migration guide](./documentation/migration_guides/v4_migration_guide.md).
-
-Be aware of the changes to minimum Swift version and minimum Yams version
-(although Yams is only a test dependency of OpenAPIKit).
+- [`3.x` to `4.x`](./documentation/migration_guides/v4_migration_guide.md)
 
 #### 4.x to 5.x
 If you are migrating from OpenAPIKit 4.x to OpenAPIKit 5.x, check out the
@@ -77,6 +71,12 @@ If you are migrating from OpenAPIKit 5.x to OpenAPIKit 6.x, check out the
 [v6 migration guide](./documentation/migration_guides/v6_migration_guide.md).
 
 Be aware of the change to minimum Swift version, now Swift 6.1.
+
+#### 6.x to 7.x
+If you are migrating from OpenAPIKit 6.x to OpenAPIKit 7.x, check out the
+[v7 migration guide](./documentation/migration_guides/v7_migration_guide.md).
+
+Be aware of the change to minimum Swift version, now Swift 6.2.
 
 ### Decoding OpenAPI Documents
 
