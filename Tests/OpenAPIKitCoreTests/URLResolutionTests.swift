@@ -13,7 +13,7 @@ final class URLResolutionTests: XCTestCase {
         let baseURI = URL(string: "https://example.com/root/openapi.yaml")!
 
         XCTAssertEqual(
-            reference.resolvedURI(relativeTo: baseURI),
+            rebaseURL(reference, relativeTo: baseURI),
             URL(string: "https://example.com/root/schemas/user.yaml#/User")!
         )
     }
@@ -21,12 +21,12 @@ final class URLResolutionTests: XCTestCase {
     func test_resolvedURIPreservesRelativeReferenceWithoutBaseURI() {
         let reference = URL(string: "schemas/user.yaml#/User")!
 
-        XCTAssertEqual(reference.resolvedURI(relativeTo: nil), reference)
+        XCTAssertEqual(rebaseURL(reference, relativeTo: nil), reference)
     }
 
     func test_resolvedURIPreservesAbsoluteReferenceWithoutBaseURI() {
         let reference = URL(string: "https://example.com/schemas/user.yaml#/User")!
 
-        XCTAssertEqual(reference.resolvedURI(relativeTo: nil), reference)
+        XCTAssertEqual(rebaseURL(reference, relativeTo: nil), reference)
     }
 }

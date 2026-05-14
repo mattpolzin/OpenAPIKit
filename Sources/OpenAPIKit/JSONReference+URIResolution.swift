@@ -23,7 +23,7 @@ public extension JSONReference {
     ///
     /// If `baseURI` is `nil`, relative URI-references remain relative.
     func resolvedURI(relativeTo baseURI: URL?) -> URL {
-        uriReference.resolvedURI(relativeTo: baseURI)
+        rebaseURL(uriReference, relativeTo: baseURI)
     }
 }
 

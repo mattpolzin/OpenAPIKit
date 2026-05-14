@@ -4,16 +4,15 @@ import FoundationEssentials
 import Foundation
 #endif
 
-public extension URL {
-    /// Resolve this URI-reference against the given base URI.
-    ///
-    /// If `baseURI` is `nil`, relative URI-references remain relative.
-    func resolvedURI(relativeTo baseURI: URL?) -> URL {
-        if let baseURI,
-           let resolvedURI = URL(string: relativeString, relativeTo: baseURI)?.absoluteURL {
-            return resolvedURI
-        }
-
-        return self
+/// Resolve a URI-reference as a relative URL against the given base URI.
+///
+/// If `baseURI` is `nil`, relative URI-references remain relative.
+public func rebaseURL(_ target: URL, relativeTo baseURI: URL?) -> URL {
+    if let baseURI,
+      let resolvedURI = URL(string: target.relativeString, relativeTo: baseURI)?.absoluteURL
+    {
+        return resolvedURI
     }
+
+    return target
 }

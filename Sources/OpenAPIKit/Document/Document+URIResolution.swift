@@ -12,7 +12,7 @@ public extension OpenAPI.Document {
     /// If the document has a `$self`, it is resolved against the retrieval URI.
     /// Otherwise, the retrieval URI itself is the established base URI.
     func baseURI(relativeTo retrievalURI: URL? = nil) -> URL? {
-        selfURI?.resolvedURI(relativeTo: retrievalURI) ?? retrievalURI
+        selfURI.map { rebaseURL($0, relativeTo: retrievalURI) } ?? retrievalURI
     }
 
     /// Resolve a JSON reference against this document's established base URI.

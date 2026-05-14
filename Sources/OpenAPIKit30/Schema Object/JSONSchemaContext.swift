@@ -144,7 +144,7 @@ extension JSONSchemaContext {
     /// If the schema defines an identifier, it is resolved against the parent
     /// base URI. Otherwise, the parent base URI is carried forward unchanged.
     public func baseURI(relativeTo parentBaseURI: URL?) -> URL? {
-        id?.resolvedURI(relativeTo: parentBaseURI) ?? parentBaseURI
+        id.map { rebaseURL($0, relativeTo: parentBaseURI) } ?? parentBaseURI
     }
 }
 
