@@ -508,6 +508,16 @@ extension JSONSchema: LocallyDereferenceable {
             dereferenced = dereferenced.with(vendorExtensions: extensions)
 
             return dereferenced
+        case .dynamicReference(let reference, _):
+            // A `DereferencedJSONSchema` must not contain references. Dynamic-scope
+            // resolution is not yet implemented (see #359), so a `$dynamicRef`
+            // cannot be inlined; dereferencing fails rather than retaining the
+            // reference and breaking the `Dereferenced...` invariant.
+            throw GenericError(
+                subjectName: "JSONSchema",
+                details: "Cannot dereference `$dynamicRef` ('\(reference.absoluteString)'): dynamic references are not resolved by local dereferencing.",
+                codingPath: []
+            )
         case .boolean(let context):
             return .boolean(addComponentNameExtension(to: context))
         case .object(let coreContext, let objectContext):
@@ -665,6 +675,10 @@ extension JSONSchema: ExternallyDereferenceable {
             newSchema = .init(
                 schema: .reference(newReference, core)
             )
+        case .dynamicReference:
+            newComponents = .noComponents
+            newSchema = self
+            newMessages = []
         case .fragment(_): 
             newComponents = .noComponents
             newSchema = self

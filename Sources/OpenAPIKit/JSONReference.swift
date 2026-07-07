@@ -131,6 +131,9 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         case component(name: String)
         /// The reference refers to some path outside the Components Object.
         case path(Path)
+        /// The reference refers to a plain URI fragment identifying a
+        /// `$dynamicAnchor` or `$anchor` (e.g. `#category`).
+        case anchor(String)
 
         /// Get the name of the referenced object.
         ///
@@ -149,6 +152,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
                 return name
             case .path(let path):
                 return path.components.last?.stringValue
+            case .anchor(let name):
+                return name
             }
         }
 
@@ -166,7 +171,10 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             }
             let fragment = rawValue.dropFirst()
             guard fragment.starts(with: "/components") else {
-                self = .path(Path(rawValue: String(fragment)))
+                // A fragment without a leading '/' is a plain anchor (#category).
+                self = fragment.first == "/"
+                    ? .path(Path(rawValue: String(fragment)))
+                    : .anchor(String(fragment))
                 return
             }
             guard fragment.starts(with: "/components/\(ReferenceType.openAPIComponentsKey)") else {
@@ -192,6 +200,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
                 return "#/components/\(ReferenceType.openAPIComponentsKey)/\(name)"
             case .path(let path):
                 return "#\(path.rawValue)"
+            case .anchor(let name):
+                return "#\(name)"
             }
         }
     }
