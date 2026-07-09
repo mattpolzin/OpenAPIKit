@@ -676,6 +676,8 @@ extension JSONSchema: ExternallyDereferenceable {
                 schema: .reference(newReference, core)
             )
         case .dynamicReference:
+            // TODO: external dereferencing of `$dynamicRef` is not implemented;
+            //       deferred alongside local dynamic-scope resolution (see #359).
             newComponents = .noComponents
             newSchema = self
             newMessages = []
