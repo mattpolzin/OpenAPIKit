@@ -729,12 +729,12 @@ extension JSONSchema: ExternallyDereferenceable {
             newSchema = .init(
                 schema: .reference(newReference, core)
             )
-        case .dynamicReference:
-            // TODO: external dereferencing of `$dynamicRef` is not implemented;
-            //       deferred alongside local dynamic-scope resolution (see #359).
-            newComponents = .noComponents
-            newSchema = self
-            newMessages = []
+        case .dynamicReference(let dynamicRef, let core):
+            // Delegate to the wrapped JSONReference's external deref (same path as $ref).
+            let (newReference, components, messages) = try await dynamicRef.jsonReference.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(schema: .dynamicReference(JSONDynamicReference(newReference), core))
         case .fragment(_): 
             newComponents = .noComponents
             newSchema = self
