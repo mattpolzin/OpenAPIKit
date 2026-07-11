@@ -318,10 +318,27 @@ extension OpenAPI.Components {
 extension OpenAPI.Components {
 #if ExternalLoading
     internal mutating func externallyDereference<Loader: ExternalLoader>(with loader: Loader.Type, depth: ExternalDereferenceDepth = .iterations(1), context: [Loader.Message] = []) async throws -> [Loader.Message] {
-        if case let .iterations(number) = depth,
-           number <= 0 {
-            return context
+        var remainingIterations: Int? = if case .iterations(let number) = depth { number } else { nil }
+        var accumulatedMessages = context
+
+        while true {
+            if let remainingIterations, remainingIterations <= 0 {
+                return accumulatedMessages
+            }
+
+            let (noNewComponents, newMessages) = try await performExternalDereferencePass(with: loader, context: accumulatedMessages)
+            accumulatedMessages = newMessages
+
+            if noNewComponents { return accumulatedMessages }
+
+            remainingIterations = remainingIterations.map { $0 - 1 }
         }
+    }
+
+    /// One pass of external dereferencing. Snapshot each component map, dereference it,
+    /// and merge any newly-loaded components into `self`. Returns `(noNewComponents, messages)`,
+    /// where `noNewComponents` is true when the pass loaded nothing new (i.e. dereferencing is complete).
+    private mutating func performExternalDereferencePass<Loader: ExternalLoader>(with loader: Loader.Type, context: [Loader.Message]) async throws -> (noNewComponents: Bool, messages: [Loader.Message]) {
 
         // NOTE: The links and callbacks related code commented out below pushes Swift 5.8 and 5.9
         //       over the edge and you get exit code 137 crashes in CI.
@@ -394,7 +411,7 @@ extension OpenAPI.Components {
 
         let newMessages = try await context + m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10
 
-        if noNewComponents { return newMessages }
+        if noNewComponents { return (true, newMessages) }
 
         try merge(c1Resolved)
         try merge(c2Resolved)
@@ -407,12 +424,7 @@ extension OpenAPI.Components {
         try merge(c9Resolved)
         try merge(c10Resolved)
 
-        switch depth {
-            case .iterations(let number):
-                return try await externallyDereference(with: loader, depth: .iterations(number - 1), context: newMessages)
-            case .full:
-                return try await externallyDereference(with: loader, depth: .full, context: newMessages)
-        }
+        return (false, newMessages)
     }
 #endif
 }
