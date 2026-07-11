@@ -184,18 +184,76 @@ final class JSONSchemaDynamicReferenceTests: XCTestCase {
         XCTAssertTrue(schema.isDynamicReference)
     }
 
-    // MARK: - Dereferencing
+    // MARK: - Dereferencing (dynamic-scope resolution)
 
-    func test_dereference_throwsOnDynamicReference() throws {
-        // A `DereferencedJSONSchema` must not contain references. Until
-        // dynamic-scope resolution lands (follow-up to #359), a `$dynamicRef`
-        // cannot be inlined, so local dereferencing fails rather than
-        // retaining the reference.
+    func test_dereference_genericsInline() throws {
+        // The JSON Schema "generics" pattern: a `$dynamicAnchor` lives in `$defs`
+        // and the `$dynamicRef` target is a leaf (non-recursive) schema.
+        // Dereferencing inlines the concrete target.
+        let jsonString = """
+        {
+          "$defs": {
+            "itemType": {
+              "$dynamicAnchor": "T",
+              "type": "string"
+            },
+            "other": { "type": "number" }
+          },
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$dynamicRef": "#T" }
+            }
+          }
+        }
+        """
+
+        let box = try orderUnstableDecode(JSONSchema.self, from: jsonString.data(using: .utf8)!)
+        let dereferenced = try box.dereferenced(in: .noComponents)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let items = try XCTUnwrap(objectContext.properties["items"])
+        let itemsItems: DereferencedJSONSchema = try XCTUnwrap(items.arrayContext?.items)
+
+        // The leaf `$defs.itemType` (`string`) was inlined through the dynamic ref.
+        guard case .string = itemsItems else {
+            XCTFail("expected dynamic ref to inline to .string, got \(itemsItems)")
+            return
+        }
+    }
+
+    func test_dereference_recursiveThrows() throws {
+        // A self-referential schema: `Node` declares `$dynamicAnchor: node` and
+        // its `next` points back at `#node`. Inlining would not terminate, so
+        // dereferencing must throw (consistent with recursive static `$ref`).
+        let jsonString = """
+        {
+          "$dynamicAnchor": "node",
+          "type": "object",
+          "properties": {
+            "value": { "type": "string" },
+            "next": { "$dynamicRef": "#node" }
+          }
+        }
+        """
+
+        let node = try orderUnstableDecode(JSONSchema.self, from: jsonString.data(using: .utf8)!)
+
+        XCTAssertThrowsError(try node.dereferenced(in: .noComponents))
+    }
+
+    func test_dereference_unresolvableThrows() throws {
+        // A `$dynamicRef` whose anchor is not declared anywhere in scope cannot
+        // be resolved and must throw (rather than degrade to `any`/`unknown`).
         let jsonString = """
         {
           "type": "object",
           "properties": {
-            "item": { "$dynamicRef": "#category" }
+            "item": { "$dynamicRef": "#unmatched" }
           }
         }
         """
@@ -205,6 +263,179 @@ final class JSONSchemaDynamicReferenceTests: XCTestCase {
         XCTAssertThrowsError(try schema.dereferenced(in: .noComponents)) { error in
             let description = String(describing: error)
             XCTAssertTrue(description.contains("$dynamicRef"), "expected error to mention `$dynamicRef`, got: \(description)")
+        }
+    }
+
+    func test_dereference_scopePropagatesAcrossRefBoundary() throws {
+        // `Outer` references `Inner`. The dynamic anchor "leaf" lives in `Outer`'s
+        // `$defs`; `Inner` contains the `$dynamicRef`. The dynamic scope must
+        // travel across the `$ref` boundary so Inner's `$dynamicRef` resolves to
+        // Outer's concrete leaf type (outermost anchor wins).
+        let components = OpenAPI.Components(
+            schemas: [
+                "Outer": .reference(
+                    .component(named: "Inner"),
+                    .init(
+                        defs: [
+                            "L": .boolean(.init(dynamicAnchor: "leaf"))
+                        ]
+                    )
+                ),
+                "Inner": .object(
+                    .init(),
+                    .init(properties: [
+                        "flag": .dynamicReference(.anchor("leaf"))
+                    ])
+                )
+            ]
+        )
+
+        let outer = try XCTUnwrap(components.schemas["Outer"])
+        let dereferenced = try outer.dereferenced(in: components)
+
+        // Outer is a reference to Inner, so after dereferencing we see Inner's
+        // object shape with `flag` resolved through the dynamic scope.
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let flag: DereferencedJSONSchema = try XCTUnwrap(objectContext.properties["flag"])
+
+        // The dynamic ref resolved to Outer's `$defs.L` (.boolean) across the $ref.
+        guard case .boolean = flag else {
+            XCTFail("expected flag to resolve to Outer's `$defs.L` (.boolean) across the $ref, got \(flag)")
+            return
+        }
+    }
+
+    func test_dereference_optionalDescribedDynamicRef() throws {
+        // A `$dynamicRef` that is optional (required: false) and carries a
+        // description: both propagate to the inlined result, mirroring `$ref`.
+        let item = JSONSchema.dynamicReference(.anchor("T"), required: false, description: "the item")
+        let box = JSONSchema.object(
+            .init(defs: ["T": .string(.init(dynamicAnchor: "T"), .init())]),
+            .init(properties: ["item": item])
+        )
+
+        let dereferenced = try box.dereferenced(in: .noComponents)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let resolved = try XCTUnwrap(objectContext.properties["item"])
+
+        // Inlined to the leaf `.string`, with optionality and description preserved.
+        guard case .string = resolved else {
+            XCTFail("expected dynamic ref to inline to .string, got \(resolved)")
+            return
+        }
+        XCTAssertFalse(resolved.required)
+        XCTAssertEqual(resolved.description, "the item")
+    }
+
+    func test_dereference_nonAnchorDynamicRefThrows() throws {
+        // A `$dynamicRef` whose target is a component path (not a plain anchor)
+        // is not resolved via a dynamic anchor and throws.
+        let jsonString = """
+        {
+          "type": "object",
+          "properties": {
+            "item": { "$dynamicRef": "#/components/schemas/Foo" }
+          }
+        }
+        """
+
+        let schema = try orderUnstableDecode(JSONSchema.self, from: jsonString.data(using: .utf8)!)
+
+        XCTAssertThrowsError(try schema.dereferenced(in: .noComponents))
+    }
+
+    func test_dereference_siblingDynamicRefsResolveIndependently() throws {
+        // Two sibling properties each holding `$dynamicRef "#T"` resolve
+        // independently -- the cycle guard inserted for one must not leak to
+        // the other (both inline to the same leaf type).
+        let jsonString = """
+        {
+          "$defs": { "T": { "$dynamicAnchor": "T", "type": "string" } },
+          "type": "object",
+          "properties": {
+            "a": { "$dynamicRef": "#T" },
+            "b": { "$dynamicRef": "#T" }
+          }
+        }
+        """
+
+        let schema = try orderUnstableDecode(JSONSchema.self, from: jsonString.data(using: .utf8)!)
+        let dereferenced = try schema.dereferenced(in: .noComponents)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        for key in ["a", "b"] {
+            let resolved: DereferencedJSONSchema = try XCTUnwrap(objectContext.properties[key])
+            guard case .string = resolved else {
+                XCTFail("expected sibling `\(key)` to inline to .string, got \(resolved)")
+                return
+            }
+        }
+    }
+
+    func test_dereference_optionalReferenceProperty() throws {
+        // Covers the `.reference` optional (required: false) path threaded by
+        // the scope-aware dereferencer: an optional `$ref` property dereferences
+        // to an optional result.
+        let components = OpenAPI.Components(schemas: [
+            "Foo": .string,
+            "Holder": .object(
+                .init(),
+                .init(properties: [
+                    "opt": .reference(.component(named: "Foo"), .init(required: false))
+                ])
+            )
+        ])
+
+        let holder = try XCTUnwrap(components.schemas["Holder"])
+        let dereferenced = try holder.dereferenced(in: components)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let opt: DereferencedJSONSchema = try XCTUnwrap(objectContext.properties["opt"])
+        XCTAssertFalse(opt.required)
+    }
+
+    func test_dereference_dynamicRefReachedViaRef() throws {
+        // A `$ref` to a component that is itself a `$dynamicRef`: the component
+        // name propagates (dereferencedFromComponentNamed) and the dynamicRef
+        // resolves against the referencing schema's dynamic scope.
+        let components = OpenAPI.Components(
+            schemas: [
+                "Wrapper": .object(
+                    .init(defs: ["T": .string(.init(dynamicAnchor: "T"), .init())]),
+                    .init(properties: [
+                        "item": .reference(.component(named: "DynRef"))
+                    ])
+                ),
+                "DynRef": .dynamicReference(.anchor("T"))
+            ]
+        )
+
+        let wrapper = try XCTUnwrap(components.schemas["Wrapper"])
+        let dereferenced = try wrapper.dereferenced(in: components)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let item: DereferencedJSONSchema = try XCTUnwrap(objectContext.properties["item"])
+
+        // $ref DynRef -> DynRef is $dynamicRef #T -> resolves to Wrapper's $defs.T (.string).
+        guard case .string = item else {
+            XCTFail("expected item to resolve to .string via $ref -> $dynamicRef, got \(item)")
+            return
         }
     }
 }
