@@ -353,5 +353,60 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
              "file://./schemas/string_param.json#"]
         )
     }
+
+    func test_cyclicExternalReferencesConvergeAtFullDepth() async throws {
+        // Documents that A→B→A cycle: `.full` must converge, not infinite-loop.
+        // Merge-collision (detectCollision keeps old) discards re-loaded components.
+        struct CyclicLoader: ExternalLoader {
+            typealias Message = String
+
+            static func load<T>(_ url: URL) async throws -> (T, [Message]) where T: Decodable {
+                let key = try componentKey(type: T.self, at: url)
+                let files: [String: Data] = [
+                    "schemas_a_json": """
+                    {"type":"object","properties":{"next":{"$ref":"file://./schemas/b.json"}}}
+                    """.data(using: .utf8)!,
+                    "schemas_b_json": """
+                    {"type":"object","properties":{"next":{"$ref":"file://./schemas/a.json"}}}
+                    """.data(using: .utf8)!
+                ]
+                let data = try XCTUnwrap(files[key.rawValue])
+                let decoded = try JSONDecoder().decode(T.self, from: data)
+                return (decoded, [url.absoluteString])
+            }
+
+            static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+                let urlString = url.pathComponents.dropFirst()
+                    .joined(separator: "_")
+                    .replacingOccurrences(of: ".", with: "_")
+                return try .forceInit(rawValue: urlString)
+            }
+        }
+
+        let document = OpenAPI.Document(
+            info: .init(title: "cyclic test", version: "1.0.0"),
+            servers: [],
+            paths: [:],
+            components: .init(
+                schemas: ["entry": .reference(.external(URL(string: "file://./schemas/a.json")!))]
+            )
+        )
+
+        var docCopy = document
+        _ = try await docCopy.externallyDereference(with: CyclicLoader.self, depth: .full)
+
+        // .full converged despite the A→B→A cycle.
+        let aSchema = try XCTUnwrap(docCopy.components.schemas["schemas_a_json"])
+        let bSchema = try XCTUnwrap(docCopy.components.schemas["schemas_b_json"])
+
+        // Both schemas' external refs resolved to internal references.
+        guard case .object(_, let aCtx) = aSchema.value,
+              case .object(_, let bCtx) = bSchema.value else {
+            XCTFail("expected both schemas to be .object")
+            return
+        }
+        XCTAssertTrue(try XCTUnwrap(aCtx.properties["next"]).isReference)
+        XCTAssertTrue(try XCTUnwrap(bCtx.properties["next"]).isReference)
+    }
 }
 #endif
