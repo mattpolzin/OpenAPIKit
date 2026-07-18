@@ -486,11 +486,8 @@ extension JSONSchema: LocallyDereferenceable {
     /// Scope-aware dereferencing.
     ///
     /// `dynamicScope` maps a `$dynamicAnchor` name to the **outermost** schema
-    /// resource bearing that anchor on the current resolution path (first-wins
-    /// insertion). A `$dynamicRef` is resolved against this scope per JSON
-    /// Schema 2020-12 dynamic-scope rules: the outermost matching anchor wins.
-    /// Non-recursive targets are inlined; recursive or unresolvable dynamic
-    /// references throw (a `DereferencedJSONSchema` must not contain references).
+    /// resource bearing that anchor on the current resolution path. Non-recursive
+    /// targets are inlined; recursive or unresolvable `$dynamicRef`s throw.
     internal func _dereferenced(
         in components: OpenAPI.Components,
         following references: Set<AnyHashable>,
@@ -505,9 +502,7 @@ extension JSONSchema: LocallyDereferenceable {
             return context.with(vendorExtensions: extensions)
         }
 
-        // Seed the dynamic scope with this schema's own `$dynamicAnchor` and any
-        // declared in its `$defs` (the JSON Schema "generics" pattern). First-wins
-        // keeps the outermost resource's anchor, per the dynamic-scope rules.
+        // `$defs` anchors count as part of this resource (the JSON Schema "generics" pattern).
         var dynamicScope = outerDynamicScope
         if let anchor = self.dynamicAnchor, dynamicScope[anchor] == nil {
             dynamicScope[anchor] = self
@@ -522,15 +517,9 @@ extension JSONSchema: LocallyDereferenceable {
         case .null(let coreContext):
             return .null(addComponentNameExtension(to: coreContext))
         case .reference(let reference, let context):
-            // Thread the dynamic scope across the `$ref` boundary (outermost-wins).
-            var newReferences = references
-            let (inserted, _) = newReferences.insert(reference)
-            guard inserted else {
-                throw OpenAPI.Components.ReferenceCycleError(ref: reference.absoluteString)
+            var dereferenced = try reference._dereferenced(in: components, following: references) { resolved, refs, name in
+                try resolved._dereferenced(in: components, following: refs, dereferencedFromComponentNamed: name, dynamicScope: dynamicScope)
             }
-            var dereferenced = try components
-                .lookup(reference)
-                ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: reference.name, dynamicScope: dynamicScope)
 
             if !context.required {
                 dereferenced = dereferenced.optionalSchemaObject()
@@ -548,9 +537,8 @@ extension JSONSchema: LocallyDereferenceable {
 
             return dereferenced
         case .dynamicReference(let reference, let context):
-            // Resolve `$dynamicRef` against the dynamic scope. Only plain anchor
-            // references participate; component/path/external dynamic refs have no
-            // matching dynamic anchor and throw.
+            // Only `#anchor` dynamic refs bind to the dynamic scope; component/path/external
+            // forms have no scope entry and intentionally throw below.
             if case .internal(.anchor(let anchorName)) = reference.jsonReference,
                let target = dynamicScope[anchorName] {
                 let cycleKey = AnyHashable("dynamicRef:#\(anchorName)")
