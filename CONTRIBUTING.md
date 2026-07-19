@@ -12,10 +12,17 @@ Please do the following in the course of preparing a branch and pull request for
 - If your changes only apply for OpenAPI 3.1.x and 3.2.x documents, modify the `OpenAPIKit` module. If your changes only apply for OpenAPI 3.0.x documents, modify the `OpenAPIKit30` module. If your changes apply to both, please port your changes from one to the other so both are updated if you have time. If you don't have time to apply changes to both modules, create a PR and ask for assistance with porting your changes. If you are not sure whether your changes apply to both modules, you can also create a PR and then ask for clarification.
 - If your changes only apply to OpenAPI 3.2.x documents, add "conditional warnings" so that the `OpenAPIKit` module can support the OAS 3.2.x feature but also warn if an OAS 3.1.x document uses that feature. See existing types with `HasConditionalWarnings` protocol conformance for examples.
 
+### AI Contribution Policy
+This project accepts AI-assisted contributions but requests contributors to fully own PRs and Issues that are submitted for review. This project is maintained with very limited availability on an entirely voluntary basis so please:
+  - Write your issues and PR descriptions by hand or at least take any particularly verbose AI text and boil it down to exactly what you need to share with other OpenAPIKit contributors and maintainers.
+  - Fully understand all code you submit to the project so that you can answer questions or explain decisions to maintainers who are reviewing your code.
+  - Do not respond to PR feedback by feeding the maintainer's comments into AI and then pasting the AI's response. Once you submit something to OpenAPIKit as a contribution, we expect communication to be human-to-human. If the goal was to collaborate directly with AI, maintainers could feed their comments into that AI themselves. The goal of feedback/conversation is to come to a shared understanding of the best outcome through context sharing and reasoned debate and a predicive text model is not capable of reasoning so it is not suitable.
+
 ### Goals for each currently maintained major version
 
 `5.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
-`6.x`: Breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
+
+`6.x`: Breaking changes that fix bugs or Non-breaking changes that add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
 
 #### Goals for the Next/unreleased version
 The next major version will be `7.0`.
