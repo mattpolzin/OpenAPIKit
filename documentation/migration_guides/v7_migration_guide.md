@@ -17,14 +17,10 @@ encodes/decodes the `$dynamicRef` keyword. Schemas whose only attribute is
 `$dynamicRef` now decode as `.dynamicReference` instead of decoding as an empty
 `.fragment` with an "unsupported attributes" warning.
 
-### Local dereferencing fails on `$dynamicRef`
+### Local dereferencing resolves `$dynamicRef`
 
-A `DereferencedJSONSchema` must not contain references. Until dynamic-scope
-resolution is added (tracked in #359), `locallyDereferenced()` and
-`JSONSchema.dereferenced(in:)` **throw** when they encounter a `$dynamicRef`
-they cannot inline, mirroring how unresolvable static `$ref` values fail. The
-raw `JSONSchema` AST still carries `.dynamicReference` for tools that read
-schemas without dereferencing.
+`locallyDereferenced()` and `JSONSchema.dereferenced(in:)` now resolve
+`$dynamicRef` against the dynamic scope.
 
 ### `$ref` with a plain fragment now round-trips verbatim
 
@@ -34,5 +30,4 @@ rather than `.path(...)`. The practical effect is that such references round-tri
 verbatim (`"#foo"`) instead of being rewritten with a slash (`"#/foo"`).
 References into the Components Object (`#/components/...`) and JSON-pointer paths
 (`#/foo/bar`) are unaffected.
-
 
