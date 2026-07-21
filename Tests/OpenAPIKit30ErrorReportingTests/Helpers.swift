@@ -8,6 +8,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-@preconcurrency import Yams
+import Yams
 
 var testDecoder: YAMLDecoder { YAMLDecoder() }

@@ -270,6 +270,7 @@ final class BuiltinValidationTests: XCTestCase {
         )
 
         let validator = Validator.blank.validating(.pathParametersAreDefined)
+        XCTAssertEqual(validator.validationDescriptions, ["Parameters in all paths are documented"])
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             let error = error as? ValidationErrorCollection
             XCTAssertEqual(
@@ -332,6 +333,7 @@ final class BuiltinValidationTests: XCTestCase {
         )
 
         let validator = Validator.blank.validating(.serverVariablesAreDefined)
+        XCTAssertEqual(validator.validationDescriptions, ["All server template variables are defined"])
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
             XCTAssertEqual(
                 (error as? ValidationErrorCollection)?.values.map(String.init(describing:)),

@@ -78,6 +78,43 @@ final class ValidatorTests: XCTestCase {
         )
     }
 
+    func test_initWithOneOrMoreBuiltinsByPath() {
+        let validator1 = Validator.blank.validating(\.documentContainsPaths)
+        XCTAssertEqual(validator1.validationDescriptions.count, 1)
+
+        let validator2 = Validator.blank.validating(\.documentContainsPaths, \.pathsContainOperations)
+        XCTAssertEqual(validator2.validationDescriptions.count, 2)
+    }
+
+    func test_removingOneOrMoreBuiltinValidationsByPath() {
+        let validator1 = Validator()
+        let validator1Count = validator1.validationDescriptions.count
+        validator1.withoutValidating(\.documentTagNamesAreUnique)
+        XCTAssertFalse(validator1.validationDescriptions.contains{ $0.description == BuiltinValidation.documentTagNamesAreUnique.description })
+        XCTAssertEqual(validator1.validationDescriptions.count, validator1Count - 1)
+
+        let validator2 = Validator()
+        let validator2Count = validator2.validationDescriptions.count
+        validator2.withoutValidating(\.documentTagNamesAreUnique, \.documentServerNamesAreUnique)
+        XCTAssertFalse(validator2.validationDescriptions.contains{ $0.description == BuiltinValidation.documentContainsPaths.description })
+        XCTAssertFalse(validator2.validationDescriptions.contains{ $0.description == BuiltinValidation.documentServerNamesAreUnique.description })
+        XCTAssertEqual(validator2.validationDescriptions.count, validator2Count - 2)
+
+        // also removes reference builtin validations
+        let validator3 = Validator()
+        let validator3Count = validator3.validationDescriptions.count
+        validator3.withoutValidating(\.headerReferencesAreValid)
+        XCTAssertFalse(validator3.validationDescriptions.contains{ $0.description == BuiltinValidation.headerReferencesAreValid.description })
+        XCTAssertEqual(validator3.validationDescriptions.count, validator3Count - 1)
+
+        // also removes non-default builtin validations
+        let validator4 = Validator().validating(\.documentContainsPaths)
+        let validator4Count = validator4.validationDescriptions.count
+        validator4.withoutValidating(\.documentContainsPaths)
+        XCTAssertFalse(validator4.validationDescriptions.contains{ $0.description == BuiltinValidation.documentContainsPaths.description })
+        XCTAssertEqual(validator4.validationDescriptions.count, validator4Count - 1)
+    }
+
     func test_validationSucceedsUnconditionally() throws {
         let server = OpenAPI.Server(
             url: URL(string: "https://google.com")!,

@@ -14,14 +14,18 @@ extension OpenAPI.Document {
     ///     - validator: Validator to use. By default,
     ///         a validator that just asserts requirements of the OpenAPI
     ///         Specification will be used.
-    ///     - strict: When true, warnings are thrown as errors. Set to false to
+    ///     - strict: When true, parsing warnings become errors. Set to false to
     ///         return warnings instead of throwing them. True by default.
+    ///         **NOTE** that this does not control whether validation errors
+    ///         are treated as errors or warnings, it controls whether warnings
+    ///         from parsing the OpenAPI Document are elevated to errors while
+    ///         validating.
     ///
     /// - throws: `ValidationErrors` if any validations failed.
     ///     `EncodingError` if encoding failed for a structural reason.
     /// - returns: Any warnings that did not cause validation to fail.
     ///
-    /// Call without any arguments to validate some aspects of the OpenAPI
+    /// Call without any arguments to validate aspects of the OpenAPI
     /// Specification not guaranteed by the Swift types in OpenAPIKit.
     /// You can create a `Validator` of your own, adding additional steps
     /// to the validation (or starting from scratch), and then pass that
@@ -90,16 +94,19 @@ extension OpenAPI.Document {
 /// You can add validations to the validator using the
 /// `validating()` instance methods.
 ///
+/// Builtin validations can be removed selectively using the 
+/// `withoutValidating()` instance methods.
+///
 /// There are a few default validations that ship with OpenAPIKit but
 /// are not used unless explicitly added to a Validator. You can find these
-/// validations as static members of the `Validation` type.
+/// validations as static members of the `BuiltinValidation` type.
 ///
 /// **Example**
 ///
 ///     let document = OpenAPI.Document(...)
 ///     let validator = Validator()
-///         .validating(.documentContainsPaths)
-///         .validating(.pathsContainOperations)
+///         .validating(\.documentContainsPaths,
+///                     \.pathsContainOperations)
 ///     try document.validate(using: validator)
 ///
 /// At their core, all validations are values of the `Validation`
@@ -226,8 +233,29 @@ public final class Validator {
     }
 
     /// Add a validation to be performed.
+    @discardableResult
     public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
         customValidations.append(AnyValidation(validation))
+        return self
+    }
+
+    /// Add one or more builtin validations to be performed.
+    @discardableResult
+    public func validating<each T: Encodable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
+        for validationPath in repeat each validations {
+            customValidations.append(AnyValidation(BuiltinValidation.self[keyPath: validationPath]))
+        }
+        return self
+    }
+
+    /// Remove a builtin validation.
+    @discardableResult
+    public func withoutValidating<each T: Encodable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
+        for validationPath in repeat each validations {
+            nonReferenceDefaultValidations.removeAll { $0.description == BuiltinValidation.self[keyPath: validationPath].description }
+            referenceDefaultValidations.removeAll { $0.description == BuiltinValidation.self[keyPath: validationPath].description }
+            customValidations.removeAll { $0.description == BuiltinValidation.self[keyPath: validationPath].description }
+        }
         return self
     }
 
@@ -238,6 +266,7 @@ public final class Validator {
     ///         them. This function should return an array of all validation failures.
     ///         `ValidationError` is a good general purpose error for this use-case.
     ///
+    @discardableResult
     public func validating<T: Encodable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) -> Self {
@@ -267,6 +296,7 @@ public final class Validator {
     ///     - description: The description of the correct state described by the assertion.
     ///     - validate: The function called to assert a condition. The function should return `false`
     ///         if the validity check has failed or `true` if everything is valid.
+    @discardableResult
     public func validating<T: Encodable>(
         _ description: String,
         check validate: @escaping (ValidationContext<T>) -> Bool
@@ -286,6 +316,7 @@ public final class Validator {
     ///     - validate: The function called to assert a condition. The function should return `false`
     ///         if the validity check has failed or `true` if everything is valid.
     ///     - predicate: A condition that must be met for this validation to be applied.
+    @discardableResult
     public func validating<T: Encodable>(
         _ description: String,
         check validate: @escaping (ValidationContext<T>) -> Bool,

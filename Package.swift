@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -19,9 +19,16 @@ let package = Package(
             name: "OpenAPIKitCompat",
             targets: ["OpenAPIKitCompat"]),
     ],
+    traits: [
+        .init(
+            name: "ExternalLoading",
+            description: "A framework that allows using OpenAPIKit for loading external JSON references into the Components Object. Building OpenAPKit with this capability is notably slower given its use of Swift Concurrency."
+        ),
+        .default(enabledTraits: ["ExternalLoading"])
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
-        .package(url: "https://github.com/jpsim/Yams.git", "5.1.0"..<"7.0.0") // just for tests
+        .package(url: "https://github.com/jpsim/Yams.git", "6.0.0"..<"7.0.0") // just for tests
     ],
     targets: [
         .target(
@@ -74,5 +81,5 @@ let package = Package(
             name: "OpenAPIKitCompatTests",
             dependencies: ["OpenAPIKitCompat"])
     ],
-    swiftLanguageVersions: [ .v5 ]
+    swiftLanguageModes: [ .v5, .v6 ]
 )

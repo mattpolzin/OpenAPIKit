@@ -8,10 +8,11 @@ import FoundationEssentials
 import Foundation
 #endif
 
-@preconcurrency import Yams
+import Yams
 import OpenAPIKit
 import XCTest
 
+#if ExternalLoading
 final class ExternalDereferencingDocumentTests: XCTestCase {
     // temporarily test with an example of the new interface
     func test_example() async throws {
@@ -353,3 +354,4 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
         )
     }
 }
+#endif
