@@ -325,7 +325,7 @@ extension OpenAPI.Components {
         if case .anchor(name: let anchorName) = reference,
            ReferenceType.self == JSONSchema.self {
             guard let schema = localAnchorSchema(named: anchorName) else {
-                throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+                throw ReferenceError.missingAnchorOnLookup(name: anchorName)
             }
 
             return .b(schema as! ReferenceType)
@@ -381,7 +381,7 @@ extension OpenAPI.Components {
         if case .anchor(name: let anchorName) = reference,
            ReferenceType.self == JSONSchema.self {
             guard let schema = localAnchorSchema(named: anchorName) else {
-                throw ReferenceError.missingOnLookup(name: reference.name ?? "unnamed", key: ReferenceType.openAPIComponentsKey)
+                throw ReferenceError.missingAnchorOnLookup(name: anchorName)
             }
 
             if case let .reference(newReference, _) = schema.value {
@@ -562,6 +562,7 @@ extension OpenAPI.Components {
         case cannotLookupRemoteReference
         case missingOnCreation(name: String, key: String)
         case missingOnLookup(name: String, key: String)
+        case missingAnchorOnLookup(name: String)
 
         public var description: String {
             switch self {
@@ -571,6 +572,8 @@ extension OpenAPI.Components {
                 return "You cannot create references to components that do not exist in the Components Object this way. You can construct a `JSONReference` directly if you need to circumvent this protection. '\(name)' was not found in \(key)."
             case .missingOnLookup(name: let name, key: let key):
                 return "Failed to look up a JSON Reference. '\(name)' was not found in \(key)."
+            case .missingAnchorOnLookup(name: let name):
+                return "Failed to look up a JSON Schema anchor. '#\(name)' did not resolve to a schema anchor in this document."
             }
         }
     }

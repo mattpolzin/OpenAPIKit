@@ -441,10 +441,20 @@ final class ComponentsTests: XCTestCase {
         let missingReference = JSONReference<JSONSchema>.anchor(named: "missingAnchor")
 
         XCTAssertFalse((try? components.contains(missingReference)) ?? true)
+        XCTAssertThrowsError(try components.lookupOnce(missingReference)) { error in
+            XCTAssertEqual(
+                error as? OpenAPI.Components.ReferenceError,
+                .missingAnchorOnLookup(name: "missingAnchor")
+            )
+        }
         XCTAssertThrowsError(try components.lookup(missingReference)) { error in
             XCTAssertEqual(
                 error as? OpenAPI.Components.ReferenceError,
-                .missingOnLookup(name: "missingAnchor", key: "schemas")
+                .missingAnchorOnLookup(name: "missingAnchor")
+            )
+            XCTAssertEqual(
+                (error as? OpenAPI.Components.ReferenceError)?.description,
+                "Failed to look up a JSON Schema anchor. '#missingAnchor' did not resolve to a schema anchor in this document."
             )
         }
     }
