@@ -18,6 +18,10 @@ This project accepts AI-assisted contributions but requests contributors to full
   - Fully understand all code you submit to the project so that you can answer questions or explain decisions to maintainers who are reviewing your code.
   - Do not respond to PR feedback by feeding the maintainer's comments into AI and then pasting the AI's response. Once you submit something to OpenAPIKit as a contribution, we expect communication to be human-to-human. If the goal was to collaborate directly with AI, maintainers could feed their comments into that AI themselves. The goal of feedback/conversation is to come to a shared understanding of the best outcome through context sharing and reasoned debate and a predicive text model is not capable of reasoning so it is not suitable.
 
+The following are some more specific requests around PR descriptions. Really these apply to both AI and non-AI contributions, but AI is pretty well known for the following kinds of things:
+  - Do not write down what files you made changes to or enumerate the changes you made. Commit messages should enumerate the changes and git already tracks what files you changed. The PR description should be a high level description and explanation of motivation for various decisions made.
+  - Do not write down what testing was performed. All PRs should pass the full CI test suite in GitHub, maintainers don't need to know what tests are passing for you locally. Running the tests locally is just as a decision point for whether the PR is ready to put up for review.
+
 ### Goals for each currently maintained major version
 
 `5.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
