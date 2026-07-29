@@ -439,3 +439,36 @@ final class JSONSchemaDynamicReferenceTests: XCTestCase {
         }
     }
 }
+
+#if ExternalLoading
+extension JSONSchemaDynamicReferenceTests {
+    func test_externalDeref_dynamicReference_external() async throws {
+        // An external `$dynamicRef` is dereferenced through its underlying
+        // `JSONReference` -- same path as `$ref`: fetch + convert to an
+        // internal component reference.
+        let schema = JSONSchema.dynamicReference(
+            JSONDynamicReference(.external(.init(string: "./schema.json")!))
+        )
+
+        let (newSchema, components, messages) = try await schema.externallyDereferenced(with: JSONReferenceTests.SchemaLoader.self)
+
+        XCTAssertTrue(newSchema.isDynamicReference)
+        XCTAssertEqual(newSchema.dynamicReference?.name, "__schema_json")
+        XCTAssertEqual(components, .init(schemas: ["__schema_json": .string]))
+        XCTAssertEqual(messages, ["./schema.json"])
+    }
+
+    func test_externalDeref_dynamicReference_internal_noop() async throws {
+        // An internal `$dynamicRef` (anchor) is not external; external
+        // dereferencing leaves it unchanged.
+        let schema = JSONSchema.dynamicReference(.anchor("node"))
+
+        let (newSchema, components, messages) = try await schema.externallyDereferenced(with: JSONReferenceTests.SchemaLoader.self)
+
+        XCTAssertTrue(newSchema.isDynamicReference)
+        XCTAssertEqual(newSchema.dynamicReference?.absoluteString, "#node")
+        XCTAssertTrue(components.schemas.isEmpty)
+        XCTAssertEqual(messages, [])
+    }
+}
+#endif
