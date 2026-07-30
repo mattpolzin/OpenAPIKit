@@ -335,8 +335,8 @@ final class JSONSchemaDynamicReferenceTests: XCTestCase {
     }
 
     func test_dereference_nonAnchorDynamicRefThrows() throws {
-        // A `$dynamicRef` whose target is a component path (not a plain anchor)
-        // is not resolved via a dynamic anchor and throws.
+        // A `$dynamicRef` whose target is a component path resolves like `$ref`
+        // (§7.7). Here `Foo` is not in Components, so dereferencing throws.
         let jsonString = """
         {
           "type": "object",
@@ -349,6 +349,33 @@ final class JSONSchemaDynamicReferenceTests: XCTestCase {
         let schema = try orderUnstableDecode(JSONSchema.self, from: jsonString.data(using: .utf8)!)
 
         XCTAssertThrowsError(try schema.dereferenced(in: .noComponents))
+    }
+
+    func test_dereference_componentFormDynamicRefResolves() throws {
+        // A component-form `$dynamicRef` (JSON-Pointer fragment, no plain name)
+        // behaves like `$ref` per §7.7. The target component is inlined.
+        let components = OpenAPI.Components(schemas: [
+            "Foo": .string,
+            "Holder": .object(
+                .init(),
+                .init(properties: [
+                    "item": .dynamicReference(.init(.internal(.component(name: "Foo"))))
+                ])
+            )
+        ])
+
+        let holder = try XCTUnwrap(components.schemas["Holder"])
+        let dereferenced = try holder.dereferenced(in: components)
+
+        guard case .object(_, let objectContext) = dereferenced else {
+            XCTFail("expected .object, got \(dereferenced)")
+            return
+        }
+        let item: DereferencedJSONSchema = try XCTUnwrap(objectContext.properties["item"])
+        guard case .string = item else {
+            XCTFail("expected component-form $dynamicRef to inline to .string, got \(item)")
+            return
+        }
     }
 
     func test_dereference_siblingDynamicRefsResolveIndependently() throws {
@@ -469,6 +496,28 @@ extension JSONSchemaDynamicReferenceTests {
         XCTAssertEqual(newSchema.dynamicReference?.absoluteString, "#node")
         XCTAssertTrue(components.schemas.isEmpty)
         XCTAssertEqual(messages, [])
+    }
+
+    func test_externalDeref_thenLocalDeref_inlinesExternalTarget() async throws {
+        // End-to-end: external `$dynamicRef` → external deref loads the target
+        // and rewrites to an internal component ref → local deref inlines it
+        // via the static fallback (§7.7: JSON-Pointer fragment behaves like
+        // `$ref`). Mirrors the `external-dynamic-ref.yaml` fixture scenario.
+        let schema = JSONSchema.dynamicReference(
+            JSONDynamicReference(.external(.init(string: "./schema.json")!))
+        )
+
+        let (rewritten, extComponents, _) = try await schema.externallyDereferenced(with: JSONReferenceTests.SchemaLoader.self)
+
+        // After external deref the dynamic ref points at a loaded component.
+        XCTAssertEqual(rewritten.dynamicReference?.name, "__schema_json")
+
+        // Local deref inlines the loaded target (`.string`).
+        let dereferenced = try rewritten.dereferenced(in: extComponents)
+        guard case .string = dereferenced else {
+            XCTFail("expected external $dynamicRef to inline to .string, got \(dereferenced)")
+            return
+        }
     }
 }
 #endif

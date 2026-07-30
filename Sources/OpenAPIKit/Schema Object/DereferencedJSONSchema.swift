@@ -537,9 +537,12 @@ extension JSONSchema: LocallyDereferenceable {
 
             return dereferenced
         case .dynamicReference(let reference, let context):
-            // Only `#anchor` dynamic refs bind to the dynamic scope; component/path/external
-            // forms have no scope entry and intentionally throw below.
-            if case .internal(.anchor(let anchorName)) = reference.jsonReference,
+            let jsonRef = reference.jsonReference
+
+            // Dynamic-scope resolution for plain-name anchors (the
+            // generics/recursive pattern): the outermost in-scope
+            // `$dynamicAnchor` wins (JSON Schema 2020-12 §7.7).
+            if case .internal(.anchor(let anchorName)) = jsonRef,
                let target = dynamicScope[anchorName] {
                 let cycleKey = AnyHashable("dynamicRef:#\(anchorName)")
                 if references.contains(cycleKey) {
@@ -567,11 +570,40 @@ extension JSONSchema: LocallyDereferenceable {
 
                 return dereferenced
             }
-            throw GenericError(
-                subjectName: "JSONSchema",
-                details: "Cannot dereference `$dynamicRef` ('\(reference.absoluteString)'): no matching `$dynamicAnchor` found in dynamic scope.",
-                codingPath: []
-            )
+
+            // Plain anchor with no matching `$dynamicAnchor` in scope: OpenAPIKit
+            // has no plain-`$anchor` index, so this cannot be resolved.
+            if case .internal(.anchor(let anchorName)) = jsonRef {
+                throw GenericError(
+                    subjectName: "JSONSchema",
+                    details: "Cannot dereference `$dynamicRef` ('#\(anchorName)'): no matching `$dynamicAnchor` found in dynamic scope.",
+                    codingPath: []
+                )
+            }
+
+            // Component/path-form `$dynamicRef`: the fragment is a JSON Pointer
+            // (no plain name), so dynamic-scope matching does not apply and the
+            // reference behaves like `$ref` (§7.7). This also covers external
+            // `$dynamicRef` targets that `externallyDereferenced()` rewrote to
+            // internal component references after loading.
+            var dereferenced = try jsonRef._dereferenced(in: components, following: references) { resolved, refs, resolvedName in
+                try resolved._dereferenced(in: components, following: refs, dereferencedFromComponentNamed: resolvedName, dynamicScope: dynamicScope)
+            }
+
+            if !context.required {
+                dereferenced = dereferenced.optionalSchemaObject()
+            }
+            if let refDescription = context.description {
+                dereferenced = dereferenced.with(description: refDescription)
+            }
+
+            var extensions = dereferenced.vendorExtensions
+            if let name {
+                extensions[OpenAPI.Components.componentNameExtension] = .init(name)
+            }
+            dereferenced = dereferenced.with(vendorExtensions: extensions)
+
+            return dereferenced
         case .boolean(let context):
             return .boolean(addComponentNameExtension(to: context))
         case .object(let coreContext, let objectContext):
