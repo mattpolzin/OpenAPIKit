@@ -124,6 +124,52 @@ extension XMLTests {
         )
     }
 
+    func test_legacyDefaultsOmitted_encode() throws {
+        let xml = OpenAPI.XML(
+            name: "hello",
+            namespace: URL(string: "http://hello.world.com")!,
+            prefix: "there",
+            attribute: false,
+            wrapped: false
+        )
+        let encodedXML = try orderUnstableTestStringFromEncoding(of: xml)
+
+        assertJSONEquivalent(
+            encodedXML,
+            """
+            {
+              "name" : "hello",
+              "namespace" : "http:\\/\\/hello.world.com",
+              "prefix" : "there"
+            }
+            """
+        )
+    }
+
+    // omitted defaults should be decoded as a modern representation, not legacy
+    func test_defaultsOmitted_decode() throws {
+        let xmlData =
+            """
+            {
+              "name" : "hello",
+              "namespace" : "http:\\/\\/hello.world.com",
+              "prefix" : "there"
+            }
+            """.data(using: .utf8)!
+
+        let xml = try orderUnstableDecode(OpenAPI.XML.self, from: xmlData)
+        XCTAssertEqual(xml.conditionalWarnings.count, 0)
+
+        XCTAssertEqual(
+            xml,
+                OpenAPI.XML(
+                name: "hello",
+                namespace: URL(string: "http://hello.world.com")!,
+                prefix: "there",
+            )
+        )
+    }
+
     func test_complete_encode() throws {
         let xml = OpenAPI.XML(
             name: "hello",
