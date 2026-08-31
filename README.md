@@ -177,6 +177,11 @@ You can use this same validation system to dig arbitrarily deep into an OpenAPI
 Document and assert things that the OpenAPI Specification does not actually
 mandate. For more on validation, see the [OpenAPIKit Validation Documentation](./documentation/validation.md).
 
+Validations can only be run on OAS 3.1 or OAS 3.2 documents but you can convert
+OAS 3.0 documents to 3.1 or 3.2 using OpenAPIKit and run validations on that
+result to effectively validate OAS 3.0 documents. See the next section for
+details on converting OAS 3.0 documents to later versions.
+
 ### Supporting OpenAPI 3.0.x Documents
 If you need to operate on OpenAPI 3.0.x documents and only 3.0.x documents, you
 can use the `OpenAPIKit30` module throughout your code.

@@ -31,3 +31,8 @@ verbatim (`"#foo"`) instead of being rewritten with a slash (`"#/foo"`).
 References into the Components Object (`#/components/...`) and JSON-pointer paths
 (`#/foo/bar`) are unaffected.
 
+### Validation and Simplification removed for OAS 3.0
+The `OpenAPIKit30` module's validation and simplification code has been removed
+to reduce maintenance overhead going forward. You can still encode/decode and
+dereference OAS 3.0 documents and convert them to OAS 3.1 or 3.2 documents
+using the `OpenAPIKitCompat` module if you want to validate or simplify them.
