@@ -305,9 +305,10 @@ extension DereferencedJSONSchema {
         internal init(
             _ arrayContext: JSONSchema.ArrayContext,
             resolvingIn components: OpenAPI.Components,
-            following references: Set<AnyHashable>
+            following references: Set<AnyHashable>,
+            dynamicScope: [String: JSONSchema] = [:]
         ) throws {
-            items = try arrayContext.items.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            items = try arrayContext.items.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
             maxItems = arrayContext.maxItems
             _minItems = arrayContext._minItems
             _uniqueItems = arrayContext._uniqueItems
@@ -401,17 +402,18 @@ extension DereferencedJSONSchema {
         internal init(
             _ objectContext: JSONSchema.ObjectContext,
             resolvingIn components: OpenAPI.Components,
-            following references: Set<AnyHashable>
+            following references: Set<AnyHashable>,
+            dynamicScope: [String: JSONSchema] = [:]
         ) throws {
-            properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
-            patternProperties = try objectContext.patternProperties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            properties = try objectContext.properties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
+            patternProperties = try objectContext.patternProperties.mapValues { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
             maxProperties = objectContext.maxProperties
             _minProperties = objectContext._minProperties
             switch objectContext.additionalProperties {
             case .a(let bool):
                 additionalProperties = .a(bool)
             case .b(let schema):
-                additionalProperties = .b(try schema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil))
+                additionalProperties = .b(try schema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope))
             case nil:
                 additionalProperties = nil
             }
@@ -478,6 +480,20 @@ extension JSONSchema: LocallyDereferenceable {
         following references: Set<AnyHashable>,
         dereferencedFromComponentNamed name: String?
     ) throws -> DereferencedJSONSchema {
+        try _dereferenced(in: components, following: references, dereferencedFromComponentNamed: name, dynamicScope: [:])
+    }
+
+    /// Scope-aware dereferencing.
+    ///
+    /// `dynamicScope` maps a `$dynamicAnchor` name to the **outermost** schema
+    /// resource bearing that anchor on the current resolution path. Non-recursive
+    /// targets are inlined; recursive or unresolvable `$dynamicRef`s throw.
+    internal func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        dereferencedFromComponentNamed name: String?,
+        dynamicScope outerDynamicScope: [String: JSONSchema]
+    ) throws -> DereferencedJSONSchema {
         func addComponentNameExtension<T>(to context: CoreContext<T>) -> CoreContext<T> {
             var extensions = context.vendorExtensions
             if let name {
@@ -486,12 +502,24 @@ extension JSONSchema: LocallyDereferenceable {
             return context.with(vendorExtensions: extensions)
         }
 
+        // `$defs` anchors count as part of this resource (the JSON Schema "generics" pattern).
+        var dynamicScope = outerDynamicScope
+        if let anchor = self.dynamicAnchor, dynamicScope[anchor] == nil {
+            dynamicScope[anchor] = self
+        }
+        for (_, def) in self.defs {
+            if let defAnchor = def.dynamicAnchor, dynamicScope[defAnchor] == nil {
+                dynamicScope[defAnchor] = def
+            }
+        }
+
         switch value {
         case .null(let coreContext):
             return .null(addComponentNameExtension(to: coreContext))
         case .reference(let reference, let context):
-            var dereferenced = try reference
-                ._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil)
+            var dereferenced = try reference._dereferenced(in: components, following: references) { resolved, refs, name in
+                try resolved._dereferenced(in: components, following: refs, dereferencedFromComponentNamed: name, dynamicScope: dynamicScope)
+            }
 
             if !context.required {
                 dereferenced = dereferenced.optionalSchemaObject()
@@ -508,17 +536,85 @@ extension JSONSchema: LocallyDereferenceable {
             dereferenced = dereferenced.with(vendorExtensions: extensions)
 
             return dereferenced
+        case .dynamicReference(let reference, let context):
+            let jsonRef = reference.jsonReference
+
+            // Dynamic-scope resolution for plain-name anchors (the
+            // generics/recursive pattern): the outermost in-scope
+            // `$dynamicAnchor` wins (JSON Schema 2020-12 §7.7).
+            if case .internal(.anchor(let anchorName)) = jsonRef,
+               let target = dynamicScope[anchorName] {
+                let cycleKey = AnyHashable("dynamicRef:#\(anchorName)")
+                if references.contains(cycleKey) {
+                    // Recursive dynamic reference: cannot inline without retaining a
+                    // reference, so fail -- consistent with static `$ref` cycles.
+                    throw OpenAPI.Components.ReferenceCycleError(ref: reference.absoluteString)
+                }
+                var newReferences = references
+                newReferences.insert(cycleKey)
+                var dereferenced = try target
+                    ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope)
+
+                if !context.required {
+                    dereferenced = dereferenced.optionalSchemaObject()
+                }
+                if let refDescription = context.description {
+                    dereferenced = dereferenced.with(description: refDescription)
+                }
+
+                var extensions = dereferenced.vendorExtensions
+                if let name {
+                    extensions[OpenAPI.Components.componentNameExtension] = .init(name)
+                }
+                dereferenced = dereferenced.with(vendorExtensions: extensions)
+
+                return dereferenced
+            }
+
+            // Plain anchor with no matching `$dynamicAnchor` in scope: OpenAPIKit
+            // has no plain-`$anchor` index, so this cannot be resolved.
+            if case .internal(.anchor(let anchorName)) = jsonRef {
+                throw GenericError(
+                    subjectName: "JSONSchema",
+                    details: "Cannot dereference `$dynamicRef` ('#\(anchorName)'): no matching `$dynamicAnchor` found in dynamic scope.",
+                    codingPath: []
+                )
+            }
+
+            // Component/path-form `$dynamicRef`: the fragment is a JSON Pointer
+            // (no plain name), so dynamic-scope matching does not apply and the
+            // reference behaves like `$ref` (§7.7). This also covers external
+            // `$dynamicRef` targets that `externallyDereferenced()` rewrote to
+            // internal component references after loading.
+            var dereferenced = try jsonRef._dereferenced(in: components, following: references) { resolved, refs, resolvedName in
+                try resolved._dereferenced(in: components, following: refs, dereferencedFromComponentNamed: resolvedName, dynamicScope: dynamicScope)
+            }
+
+            if !context.required {
+                dereferenced = dereferenced.optionalSchemaObject()
+            }
+            if let refDescription = context.description {
+                dereferenced = dereferenced.with(description: refDescription)
+            }
+
+            var extensions = dereferenced.vendorExtensions
+            if let name {
+                extensions[OpenAPI.Components.componentNameExtension] = .init(name)
+            }
+            dereferenced = dereferenced.with(vendorExtensions: extensions)
+
+            return dereferenced
         case .boolean(let context):
             return .boolean(addComponentNameExtension(to: context))
         case .object(let coreContext, let objectContext):
             return try .object(
                 addComponentNameExtension(to: coreContext),
-                DereferencedJSONSchema.ObjectContext(objectContext, resolvingIn: components, following: references)
+                DereferencedJSONSchema.ObjectContext(objectContext, resolvingIn: components, following: references, dynamicScope: dynamicScope)
             )
         case .array(let coreContext, let arrayContext):
             return try .array(
                 addComponentNameExtension(to: coreContext),
-                DereferencedJSONSchema.ArrayContext(arrayContext, resolvingIn: components, following: references)
+                DereferencedJSONSchema.ArrayContext(arrayContext, resolvingIn: components, following: references, dynamicScope: dynamicScope)
             )
         case .number(let coreContext, let numberContext):
             return .number(addComponentNameExtension(to: coreContext), numberContext)
@@ -527,16 +623,16 @@ extension JSONSchema: LocallyDereferenceable {
         case .string(let coreContext, let stringContext):
             return .string(addComponentNameExtension(to: coreContext), stringContext)
         case .all(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
             return .all(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .one(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
             return .one(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .any(of: let jsonSchemas, core: let coreContext):
-            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil) }
+            let schemas = try jsonSchemas.map { try $0._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope) }
             return .any(of: schemas, core: addComponentNameExtension(to: coreContext))
         case .not(let jsonSchema, core: let coreContext):
-            return .not(try jsonSchema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil), core: addComponentNameExtension(to: coreContext))
+            return .not(try jsonSchema._dereferenced(in: components, following: references, dereferencedFromComponentNamed: nil, dynamicScope: dynamicScope), core: addComponentNameExtension(to: coreContext))
         case .fragment(let context):
             return .fragment(addComponentNameExtension(to: context))
         }
@@ -665,6 +761,12 @@ extension JSONSchema: ExternallyDereferenceable {
             newSchema = .init(
                 schema: .reference(newReference, core)
             )
+        case .dynamicReference(let dynamicRef, let core):
+            // Delegate to the wrapped JSONReference's external deref (same path as $ref).
+            let (newReference, components, messages) = try await dynamicRef.jsonReference.externallyDereferenced(with: loader)
+            newComponents = components
+            newMessages = messages
+            newSchema = .init(schema: .dynamicReference(JSONDynamicReference(newReference), core))
         case .fragment(_): 
             newComponents = .noComponents
             newSchema = self

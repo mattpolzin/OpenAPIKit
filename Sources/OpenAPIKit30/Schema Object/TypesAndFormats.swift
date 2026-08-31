@@ -109,7 +109,7 @@ public enum JSONTypeFormat: Equatable, Sendable {
 ///
 /// See "formats" under the OpenAPI [data type](https://spec.openapis.org/oas/v3.0.4.html#data-types)
 /// documentation.
-public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Validatable, Sendable where RawValue == String {
+public protocol OpenAPIFormat: SwiftTyped, Codable, Equatable, RawRepresentable, Sendable where RawValue == String {
     static var unspecified: Self { get }
 
     var jsonType: JSONType { get }
@@ -243,5 +243,3 @@ extension JSONTypeFormat.StringFormat: OpenAPIFormat {
         return .string
     }
 }
-
-extension JSONType: Validatable {}

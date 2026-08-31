@@ -103,5 +103,3 @@ extension OpenAPI.ExternalDocumentation {
         }
     }
 }
-
-extension OpenAPI.ExternalDocumentation: Validatable {}
