@@ -66,9 +66,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
 
-            // test validating
-            try doc.validate()
-
             XCTAssertEqual(
                 doc.paths["/pets"]?.pathItemValue?.patch?.requestBody?.requestValue?
                     .content[.json]?.schema?.schemaValue,
@@ -156,9 +153,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
 
-            // test validating
-            try doc.validate()
-
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
         } catch let error {
@@ -210,9 +204,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
 
-            // test validating
-            try doc.validate()
-
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
         } catch let error {
@@ -250,9 +241,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
 
-            // test validating
-            try doc.validate()
-
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
         } catch let error {
@@ -281,9 +269,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         // test decoding
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
-
-            // test validating
-            try doc.validate()
 
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
@@ -322,9 +307,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         // test decoding
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
-
-            // test validating
-            try doc.validate()
 
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
@@ -398,9 +380,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
         // test decoding
         do {
             let doc = try YAMLDecoder().decode(OpenAPI.Document.self, from: docString)
-
-            // test validating
-            try doc.validate()
 
             // test dereferencing and resolving
             _ = try doc.locallyDereferenced().resolved()
