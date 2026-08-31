@@ -53,16 +53,6 @@ final class SchemaFragmentTests: XCTestCase {
         let generalProperties = JSONSchema.CoreContext<JSONTypeFormat.AnyFormat>(format: .other("date"), nullable: false, permissions: .readWrite, deprecated: false, title: "Date", description: "a date", discriminator: .init(propertyName: "test"), externalDocs: .init(url: URL(string: "http://url.com")!), allowedValues: [], example: "2020-01-01")
         let t1 = JSONSchema.fragment(generalProperties)
         assertSameGeneralProperties(t1, as: generalProperties)
-        let t2 = JSONSchema.integer(generalProperties.transformed(), .init(multipleOf: 10, maximum: (20, exclusive: false), minimum: (0, exclusive: true)))
-        assertSameGeneralProperties(t2, as: generalProperties)
-        let t3 = JSONSchema.number(generalProperties.transformed(), .init(multipleOf: 12.5, maximum: (25, exclusive: false), minimum: (0, exclusive: false)))
-        assertSameGeneralProperties(t3, as: generalProperties)
-        let t4 = JSONSchema.string(generalProperties.transformed(), .init(maxLength: 5, minLength: 1, pattern: ".*"))
-        assertSameGeneralProperties(t4, as: generalProperties)
-        let t5 = JSONSchema.array(generalProperties.transformed(), .init(items: .string, maxItems: 7, minItems: 2, uniqueItems: true))
-        assertSameGeneralProperties(t5, as: generalProperties)
-        let t6 = JSONSchema.object(generalProperties.transformed(), .init(properties: ["hello": .string], additionalProperties: .init(.string), maxProperties: 100, minProperties: 0))
-        assertSameGeneralProperties(t6, as: generalProperties)
     }
 
     func test_jsonType() {

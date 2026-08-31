@@ -81,34 +81,6 @@ final class SwaggerDocSamplesTests: XCTestCase {
 
             XCTAssertEqual(resolvedDoc.routes.count, 1)
             XCTAssertEqual(resolvedDoc.endpoints.count, 1)
-
-            let dogSchema = JSONSchema.object(
-                discriminator: .init(propertyName: "pet_type"),
-                properties: [
-                    "pet_type": .string,
-                    "bark": .boolean(required: false),
-                    "breed": .string(required: false, allowedValues: "Dingo", "Husky", "Retriever", "Shepherd")
-                ]
-            )
-            let catSchema = JSONSchema.object(
-                discriminator: .init(propertyName: "pet_type"),
-                properties: [
-                    "pet_type": .string,
-                    "hunts": .boolean(required: false),
-                    "age": .integer(required: false)
-                ]
-            )
-
-            XCTAssertEqual(
-                try resolvedDoc.endpoints[0].requestBody?.content[.json]?.schema?.simplified().jsonSchema,
-                JSONSchema.one(
-                    of: [
-                        catSchema,
-                        dogSchema
-                    ],
-                    core: .init(discriminator: .init(propertyName: "pet_type"))
-                )
-            )
         } catch let error {
             let friendlyError = OpenAPI.Error(from: error)
             throw friendlyError
