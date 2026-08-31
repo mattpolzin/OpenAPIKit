@@ -37,10 +37,6 @@ import Foundation
 /// or necessary depending on whether you have the Components Object built out and
 /// available at the time and location where you need to create a reference.
 ///
-/// Regardless of how you create your reference, internal references to things in the
-/// Components Object will be validated when you call `validate()` on an
-/// `OpenAPI.Document`.
-///
 public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference, Sendable {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
@@ -404,5 +400,3 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
     }
 #endif
 }
-
-extension JSONReference: Validatable where ReferenceType: Validatable {}
