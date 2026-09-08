@@ -594,7 +594,7 @@ OpenAPIKit leaves it to you to decide how to load external files and where to
 store the results in the Components Object. It does this by requiring that you
 provide an implementation of the
 [`ExternalLoader`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/externalloader)
-protocol. You provide a `load` function and a `componentKey` function, both of
+protocol. You provide a `load` function and a `componentKey()` function, both of
 which accept as input the `URL` to load. A simple mock example implementation
 from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader`
 can be set up:
@@ -605,14 +605,13 @@ struct ExampleLoader: ExternalLoader {
 
     static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
         // load data from file, perhaps. we will just mock that up for the example:
-        let data = try await mockData(componentKey(type: T.self, at: url))
+        let data = try await mockData(url)
 
         // We use the YAML decoder purely for order-stability.
         let decoded = try YAMLDecoder().decode(T.self, from: data)
         let finished: T
-        // while unnecessary, a loader may likely want to attatch some extra info
-        // to keep track of where a reference was loaded from. This example
-        shows
+        // while unnecessary, a loader may likely want to attach some extra info
+        // to keep track of where a reference was loaded from. This example shows
         // the strategy of using vendor extensions.
         if var extendable = decoded as? VendorExtendable {
             extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
@@ -623,7 +622,7 @@ struct ExampleLoader: ExternalLoader {
         return (finished, [])
     }
 
-    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+    static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
         // do anything you want here to determine what key the new component should be stored at.
         //
         // for the example, we will just transform the URL path into a valid components key:

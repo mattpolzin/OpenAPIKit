@@ -41,3 +41,19 @@ See the
 [README](https://github.com/mattpolzin/OpenAPIKit/blob/main/README.md#supporting-openapi-30x-documents)
 for more on how to covert documents so that you can write code against 3.1/3.2
 documents but still support reading 3.0 documents.
+
+### External Loading
+The `componentKey()` function required to conform to the `ExternalLoader`
+protocol has changed from taking the type of thing being loaded as its first
+argument to instead taking the object that has been loaded. This gives the
+`componentKey()` function more information if it is needed. It's likely a very
+small change to any current implementations of external loading.
+
+Before:
+```swift
+static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey
+```
+After:
+```swift
+static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey
+```
