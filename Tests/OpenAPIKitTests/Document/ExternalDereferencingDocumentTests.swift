@@ -24,7 +24,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
 
             static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
                 // load data from file, perhaps. we will just mock that up for the test:
-                let data = try await mockData(componentKey(type: T.self, at: url))
+                let data = try await mockData(url)
 
                 // We use the YAML decoder purely for order-stability.
                 let decoded = try YAMLDecoder().decode(T.self, from: data)
@@ -41,7 +41,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                 return (finished, [url.absoluteString])
             }
 
-            static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+            static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
                 // do anything you want here to determine what key the new component should be stored at.
                 // for the example, we will just transform the URL into a valid components key:
                 let urlString = url.pathComponents.dropFirst()
@@ -51,12 +51,16 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
             }
 
             /// Mock up some data, just for the example. 
-            static func mockData(_ key: OpenAPIKit.OpenAPI.ComponentKey) async throws -> Data {
-                return try XCTUnwrap(files[key.rawValue])
+            static func mockData(_ url: URL) async throws -> Data {
+                return try XCTUnwrap(files[url.absoluteString])
             }
+            
+
+
+
 
             static let files: [String: Data] = [
-                "params_name_json": """
+                "file://./params/name.json": """
                 {
                     "name": "name",
                     "description": "a lonely parameter",
@@ -67,7 +71,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "schemas_string_param_json": """
+                "file://./schemas/string_param.json": """
                 {
                     "oneOf": [
                         { "type": "string" },
@@ -75,7 +79,15 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     ]
                 }
                 """,
-                "schemas_basic_object_json": """
+                "file://./schemas/string_param.json#": """
+                {
+                    "oneOf": [
+                        { "type": "string" },
+                        { "$ref": "file://./schemas/basic_object.json" }
+                    ]
+                }
+                """,
+                "file://./schemas/basic_object.json": """
                 {
                     "type": "object",
                     "patternProperties": {
@@ -85,12 +97,12 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "schemas_pattern_property_json": """
+                "file://./schemas/pattern_property.json": """
                 {
                     "type": "string"
                 }
                 """,
-                "requests_hello_json": """
+                "file://./requests/hello.json": """
                 {
                     "content": {
                         "application/json": {
@@ -118,14 +130,14 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "headers_hello_json": """
+                "file://./headers/hello.json": """
                 {
                     "schema": {
                         "$ref": "file://./schemas/string_param.json"
                     }
                 }
                 """,
-                "paths_webhook_json": """
+                "file://./paths/webhook.json": """
                 {
                     "summary": "just a webhook",
                     "get": {
@@ -140,7 +152,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "requests_webhook_json": """
+                "file://./requests/webhook.json": """
                 {
                     "content": {
                         "application/json": {
@@ -173,7 +185,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "responses_webhook_json": """
+                "file://./responses/webhook.json": """
                 {
                     "description": "webhook response",
                     "content": {
@@ -199,14 +211,14 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "headers_webhook_json": """
+                "file://./headers/webhook.json": """
                 {
                     "schema": {
                         "$ref": "file://./schemas/string_param.json"
                     }
                 }
                 """,
-                "headers_webhook2_json": """
+                "file://./headers/webhook2.json": """
                 {
                     "content": {
                         "application/json": {
@@ -217,19 +229,19 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "examples_good_json": """
+                "file://./examples/good.json": """
                 {
                     "value": "{\\"body\\": \\"request me\\"}"
                 }
                 """,
-                "callbacks_one_json": """
+                "file://./callbacks/one.json": """
                 {
                     "https://callback.site.com/callback": {
                         "$ref": "file://./paths/callback.json"
                     }
                 }
                 """,
-                "paths_callback_json": """
+                "file://./paths/callback.json": """
                 {
                     "summary": "just a callback",
                     "get": {
@@ -253,7 +265,7 @@ final class ExternalDereferencingDocumentTests: XCTestCase {
                     }
                 }
                 """,
-                "links_first_json": """
+                "file://./links/first.json": """
                 {
                     "operationId": "helloOp"
                 }
