@@ -246,7 +246,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             let pathComponents = rawValue
                 .split(separator: "/")
                 .map(String.init)
-                .map(PathComponent.init(stringValue:))
+                .map{ str in PathComponent(stringValue: str) }
 
             components = pathComponents
         }
