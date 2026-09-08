@@ -36,3 +36,8 @@ The `OpenAPIKit30` module's validation and simplification code has been removed
 to reduce maintenance overhead going forward. You can still encode/decode and
 dereference OAS 3.0 documents and convert them to OAS 3.1 or 3.2 documents
 using the `OpenAPIKitCompat` module if you want to validate or simplify them.
+
+See the
+[README](https://github.com/mattpolzin/OpenAPIKit/blob/main/README.md#supporting-openapi-30x-documents)
+for more on how to covert documents so that you can write code against 3.1/3.2
+documents but still support reading 3.0 documents.
