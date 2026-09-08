@@ -626,8 +626,8 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
         case .internal(let ref):
             return (.internal(ref), .init(), [])
         case .external(let url):
-            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
             let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
+            let componentKey = try loader.componentKey(for: component, at: url)
             var components = OpenAPI.Components()
             switch ReferenceType.openAPIComponentsKeyPath {
             case .a(let directPath):
