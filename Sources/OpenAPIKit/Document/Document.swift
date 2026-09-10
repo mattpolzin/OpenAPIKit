@@ -496,7 +496,7 @@ extension OpenAPI.Document {
               // change to the enumeration, bump the upper limit here to e.g. 2 or 3
               // or 6:
               if minorVersion == "2" {
-                  guard  patchVersion > 0 && patchVersion <= 0 else {
+                  guard  patchVersion > 0 && patchVersion <= 1 else {
                       return nil
                   }
                   self = .v3_2_x(x: patchVersion)
