@@ -152,7 +152,7 @@ extension OpenAPI {
         public let conditionalWarnings: [(any Condition, OpenAPI.Warning)]
 
         public init(
-            openAPIVersion: Version = .v3_2_0,
+            openAPIVersion: Version = .defaultVersion,
             selfURI: URL? = nil,
             info: Info,
             servers: [Server],
@@ -462,11 +462,11 @@ extension OpenAPI.Document {
     /// this enum. Other versions may or may not be decodable by
     /// OpenAPIKit to a certain extent.
     ///
-    ///**IMPORTANT**: Although the `v3_1_x` case supports arbitrary
+    ///**IMPORTANT**: Although the `v3_1_x` and `v3_2_x` cases supports arbitrary
     /// patch versions, only _known_ patch versions are decodable. That is, if the OpenAPI
     /// specification releases a new patch version, OpenAPIKit will see a patch version release
     /// explicitly supports decoding documents of that new patch version before said version will
-    /// succesfully decode as the `v3_1_x` case.
+    /// succesfully decode as the `v3_1_x` or `v3_2_x` case.
     public enum Version: RawRepresentable, Equatable, Comparable, Codable, Sendable {
         case v3_1_0
         case v3_1_1
@@ -475,6 +475,12 @@ extension OpenAPI.Document {
 
         case v3_2_0
         case v3_2_x(x: Int)
+
+      // Generally it makes sense for new documents to default to the latest
+      // released version OpenAPIKit supports but to be safe we will avoid
+      // the "breaking change" of the default version changing other than
+      // with major releases.
+      public static let defaultVersion = Self.v3_2_0
 
       public init?(rawValue: String) {
           switch rawValue {
@@ -497,13 +503,15 @@ extension OpenAPI.Document {
               // to support newer versions released in the future without a breaking
               // change to the enumeration, bump the upper limit here to e.g. 2 or 3
               // or 6:
+              let v3_1PatchUpperBound = 2
+              let v3_2PatchUpperBound = 1
               if minorVersion == "2" {
-                  guard  patchVersion > 0 && patchVersion <= 0 else {
+                  guard  patchVersion > 0 && patchVersion <= v3_2PatchUpperBound else {
                       return nil
                   }
                   self = .v3_2_x(x: patchVersion)
               } else {
-                  guard  patchVersion > 2 && patchVersion <= 2 else {
+                  guard  patchVersion > 2 && patchVersion <= v3_1PatchUpperBound else {
                       return nil
                   }
                   self = .v3_1_x(x: patchVersion)
