@@ -1619,4 +1619,540 @@ final class BuiltinValidationTests: XCTestCase {
         let validator = Validator.blank.validating(.querystringParametersAreCompatible)
         try document.validate(using: validator)
     }
+
+    func test_partialIntegerBound_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .integer(maximum: (1, true))))
+                        ],
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .content(.init(
+                                        schema: .integer(minimum: (0, false))
+                                    ))
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_singleIntegerInBound_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .integer(maximum: (1, false), minimum: (1, false))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_invalidIntegerBound_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .integer(maximum: (1, true), minimum: (2, false))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_emptyIntegerBound_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .integer(maximum: (1, false), minimum: (1, true))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_partialNumberBound_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .number(maximum: (1, true))))
+                        ],
+                        responses: [
+                            200: .response(
+                                description: "Test",
+                                content: [
+                                    .json: .content(.init(
+                                        schema: .number(minimum: (0, false))
+                                    ))
+                                ]
+                            )
+                        ]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_singleNumberInBound_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .number(maximum: (1, false), minimum: (1, false))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_invalidNumberBound_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .number(maximum: (1, true), minimum: (2, false))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_emptyNumberBound_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .number(maximum: (1, false), minimum: (1, true))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_partialStringLength_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .string(minLength: 1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaStringLengthBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_singleCharStringLength_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .string(minLength: 1, maxLength: 1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaStringLengthBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_negativeStringLength_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .string(minLength: -1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaStringLengthBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_invalidStringLength_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .string(minLength: 2, maxLength: 1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaStringLengthBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_partialArrayCount_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: 2)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_fixedArrayCount_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: 2, maxItems: 2)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_negativeArrayCount_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: -1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_invalidArrayCount_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: 2, maxItems: 1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_partialTupleArrayCount_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: 1, maxItems: 3, prefixItems: [.integer, .integer])))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_excessiveTupleArrayCount_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .array(minItems: 1, maxItems: 2, prefixItems: [.integer, .integer, .integer])))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaArrayLengthBoundIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_partialPropertyCount_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .object(minProperties: 2)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_validPropertyCount_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .object(minProperties: 2, maxProperties: 4)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        try document.validate(using: validator)
+    }
+
+    func test_negativePropertyCount_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .object(minProperties: -1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_invalidPropertyCount_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            .parameter(.query(name: "test", schema: .object(minProperties: 3, maxProperties: 1)))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_requiredPropertyCountMismatch_fails() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            // NOTE: the schema requires all 3 properties, but it should be at most 2
+                            .parameter(.query(name: "test", schema: .object(minProperties: 1, maxProperties: 2, properties: ["0": .integer, "1": .integer, "2": .integer])))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        XCTAssertThrowsError(try document.validate(using: validator)) { error in
+        }
+    }
+
+    func test_requiredPropertyCountMatch_succeeds() throws {
+        let document = OpenAPI.Document(
+            info: .init(title: "test", version: "1.0"),
+            servers: [],
+            paths: [
+                "/hello/world": .init(
+                    get: .init(
+                        parameters: [
+                            // NOTE: the schema requires "0", "1" & "2" be present, saying `minProperties: 1` is technically not wrong
+                            .parameter(.query(name: "test", schema: .object(minProperties: 1, maxProperties: 5, properties: ["0": .integer, "1": .integer, "2": .integer], additionalProperties: .boolean(true))))
+                        ],
+                        responses: [:]
+                    )
+                )
+            ],
+            components: .noComponents
+        )
+
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaObjectPropertyCountIsValid)
+        try document.validate(using: validator)
+    }
 }
