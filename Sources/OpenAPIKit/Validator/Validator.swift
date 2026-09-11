@@ -94,7 +94,7 @@ extension OpenAPI.Document {
 /// You can add validations to the validator using the
 /// `validating()` instance methods.
 ///
-/// Builtin validations can be removed selectively using the 
+/// Builtin validations can be removed selectively using the
 /// `withoutValidating()` instance methods.
 ///
 /// There are a few default validations that ship with OpenAPIKit but
@@ -240,6 +240,7 @@ public final class Validator {
     }
 
     /// Add one or more builtin validations to be performed.
+    @_semantics("optimize.no.crossmodule")
     @discardableResult
     public func validating<each T: Encodable & Validatable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
         for validationPath in repeat each validations {
@@ -249,6 +250,7 @@ public final class Validator {
     }
 
     /// Remove a builtin validation.
+    @_semantics("optimize.no.crossmodule")
     @discardableResult
     public func withoutValidating<each T: Encodable & Validatable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
         for validationPath in repeat each validations {
