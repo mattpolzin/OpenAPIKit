@@ -416,5 +416,3 @@ extension OpenAPI.Components {
     }
 #endif
 }
-
-extension OpenAPI.Components: Validatable {}

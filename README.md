@@ -16,16 +16,16 @@ versions and key features are supported by which OpenAPIKit versions.
 
 | OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | OpenAPI v3.2 | Package Traits |
 |------------|-------|--------------------|--------------|----------------|
-| v4.x       | 5.8+  | ✅                 |              |                |
 | v5.x       | 5.10+ | ✅                 | ✅           |                |
 | v6.x       | 6.1+  | ✅                 | ✅           | ✅             |
+| v7.x       | 6.2+  | ✅                 | ✅           | ✅             |
 
 - [Usage](#usage)
   - [Migration](#migration)
     - [Older Versions](#older-versions)
-    - [3.x to 4.x](#3x-to-4x)
     - [4.x to 5.x](#4x-to-5x)
     - [5.x to 6.x](#5x-to-6x)
+    - [6.x to 7.x](#6x-to-7x)
   - [Decoding OpenAPI Documents](#decoding-openapi-documents)
     - [Decoding Errors](#decoding-errors)
   - [Encoding OpenAPI Documents](#encoding-openapi-documents)
@@ -58,13 +58,7 @@ versions and key features are supported by which OpenAPIKit versions.
 #### Older Versions
 - [`1.x` to `2.x`](./documentation/migration_guides/v2_migration_guide.md)
 - [`2.x` to `3.x`](./documentation/migration_guides/v3_migration_guide.md)
-
-#### 3.x to 4.x
-If you are migrating from OpenAPIKit 3.x to OpenAPIKit 4.x, check out the
-[v4 migration guide](./documentation/migration_guides/v4_migration_guide.md).
-
-Be aware of the changes to minimum Swift version and minimum Yams version
-(although Yams is only a test dependency of OpenAPIKit).
+- [`3.x` to `4.x`](./documentation/migration_guides/v4_migration_guide.md)
 
 #### 4.x to 5.x
 If you are migrating from OpenAPIKit 4.x to OpenAPIKit 5.x, check out the
@@ -77,6 +71,12 @@ If you are migrating from OpenAPIKit 5.x to OpenAPIKit 6.x, check out the
 [v6 migration guide](./documentation/migration_guides/v6_migration_guide.md).
 
 Be aware of the change to minimum Swift version, now Swift 6.1.
+
+#### 6.x to 7.x
+If you are migrating from OpenAPIKit 6.x to OpenAPIKit 7.x, check out the
+[v7 migration guide](./documentation/migration_guides/v7_migration_guide.md).
+
+Be aware of the change to minimum Swift version, now Swift 6.2.
 
 ### Decoding OpenAPI Documents
 
@@ -176,6 +176,11 @@ try openAPIDoc.validate()
 You can use this same validation system to dig arbitrarily deep into an OpenAPI
 Document and assert things that the OpenAPI Specification does not actually
 mandate. For more on validation, see the [OpenAPIKit Validation Documentation](./documentation/validation.md).
+
+Validations can only be run on OAS 3.1 or OAS 3.2 documents but you can convert
+OAS 3.0 documents to 3.1 or 3.2 using OpenAPIKit and run validations on that
+result to effectively validate OAS 3.0 documents. See the next section for
+details on converting OAS 3.0 documents to later versions.
 
 ### Supporting OpenAPI 3.0.x Documents
 If you need to operate on OpenAPI 3.0.x documents and only 3.0.x documents, you
@@ -589,7 +594,7 @@ OpenAPIKit leaves it to you to decide how to load external files and where to
 store the results in the Components Object. It does this by requiring that you
 provide an implementation of the
 [`ExternalLoader`](https://mattpolzin.github.io/OpenAPIKit/documentation/openapikit/externalloader)
-protocol. You provide a `load` function and a `componentKey` function, both of
+protocol. You provide a `load` function and a `componentKey()` function, both of
 which accept as input the `URL` to load. A simple mock example implementation
 from the OpenAPIKit tests will go a long way to showing how the `ExternalLoader`
 can be set up:
@@ -600,14 +605,13 @@ struct ExampleLoader: ExternalLoader {
 
     static func load<T>(_ url: URL) async throws -> (T, [Message]) where T : Decodable {
         // load data from file, perhaps. we will just mock that up for the example:
-        let data = try await mockData(componentKey(type: T.self, at: url))
+        let data = try await mockData(url)
 
         // We use the YAML decoder purely for order-stability.
         let decoded = try YAMLDecoder().decode(T.self, from: data)
         let finished: T
-        // while unnecessary, a loader may likely want to attatch some extra info
-        // to keep track of where a reference was loaded from. This example
-        shows
+        // while unnecessary, a loader may likely want to attach some extra info
+        // to keep track of where a reference was loaded from. This example shows
         // the strategy of using vendor extensions.
         if var extendable = decoded as? VendorExtendable {
             extendable.vendorExtensions["x-source-url"] = AnyCodable(url)
@@ -618,7 +622,7 @@ struct ExampleLoader: ExternalLoader {
         return (finished, [])
     }
 
-    static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
+    static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey {
         // do anything you want here to determine what key the new component should be stored at.
         //
         // for the example, we will just transform the URL path into a valid components key:

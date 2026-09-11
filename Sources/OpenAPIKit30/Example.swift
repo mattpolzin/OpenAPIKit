@@ -195,5 +195,3 @@ extension OpenAPI.Example: ExternallyDereferenceable {
     }
 #endif
 }
-
-extension OpenAPI.Example: Validatable {}

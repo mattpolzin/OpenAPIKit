@@ -24,6 +24,11 @@ let document = OpenAPI.Document(...)
 try document.validate()
 ```
 
+These validations are not supported by the `OpenAPIKit30` module, but you can
+convert OAS 3.0 documents to 3.1 or 3.2 within Swift code using the
+`OpenAPIKitCompat` module and then run validations on them. For more on that,
+see the **Supporting OpenAPI 3.0.x Documents** section of the OpenAPIKit README.
+
 If validation fails, `document.validate()` will throw a `ValidationErrorCollection` value. `ValidationErrorCollection` is a `Swift.Error` that holds all of the validation errors that occurred. You can access the individual validation errors with its `values` property.
 
 By default, validation is "strict" in that any warnings produced when parsing the OpenAPI document will produce errors when validating. If you would like to handle these warnings differently, you can use `document.validate(strict: false)` which will not throw errors for warnings but instead returns those warnings.
@@ -92,19 +97,19 @@ The simplest possible validations are equalities and inequalities. Such validati
 
 I'll call this the "Subject KeyPath syntax" because the type of the root of the KeyPath is the "subject" of the validation context.
 
-To assert that the version of the OpenAPI Document is 3.0.0 we could write
+To assert that the version of the OpenAPI Document is 3.1.0 we could write
 ```swift
 Validator().validating(
-   "Using OpenAPI v 3.0.0",
-   check: \OpenAPI.Document.openAPIVersion == .v3_0_0
+   "Using OpenAPI v 3.1.0",
+   check: \OpenAPI.Document.openAPIVersion == .v3_1_0
 )
 ```
 
 Just to immediately demystify this, the equivalent validation expressed as a closure is
 ```swift
 Validator().validating(
-    "Using OpenAPI v 3.0.0",
-    check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_0_0 }
+    "Using OpenAPI v 3.1.0",
+    check: { (context: ValidationContext<OpenAPI.Document>) in context.subject.openAPIVersion == .v3_1_0 }
 )
 ```
 

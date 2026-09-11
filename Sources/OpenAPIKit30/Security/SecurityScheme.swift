@@ -262,5 +262,3 @@ extension OpenAPI.SecurityScheme: ExternallyDereferenceable {
     }
 #endif
 }
-
-extension OpenAPI.SecurityScheme.SecurityType.Name: Validatable {}

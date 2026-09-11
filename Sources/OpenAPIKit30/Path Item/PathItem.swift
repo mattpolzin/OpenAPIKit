@@ -389,5 +389,3 @@ extension OpenAPI.PathItem {
         }
     }
 }
-
-extension OpenAPI.PathItem: Validatable {}

@@ -173,6 +173,8 @@ internal struct FragmentCombiner {
             self.combinedFragment = .array(try leftCoreContext.combined(with: rightCoreContext), arrayContext)
         case (.fragment(let leftCoreContext), .object(let rightCoreContext, let objectContext)):
             self.combinedFragment = .object(try leftCoreContext.combined(with: rightCoreContext), objectContext)
+        case (.fragment(let leftCoreContext), .dynamicReference(let reference, let rightCoreContext)):
+            self.combinedFragment = .dynamicReference(reference, try leftCoreContext.combined(with: rightCoreContext))
 
         case (.boolean(let leftCoreContext), .boolean(let rightCoreContext)):
             self.combinedFragment = .boolean(try leftCoreContext.combined(with: rightCoreContext))
@@ -202,6 +204,8 @@ internal struct FragmentCombiner {
 
         case (_, .any), (.any, _), (_, .not), (.not, _), (_, .one), (.one, _):
             throw JSONSchemaResolutionError(.unsupported(because: "not, any(of:), and one(of:) are not yet supported for schema resolution"))
+        case (_, .dynamicReference), (.dynamicReference, _):
+            throw JSONSchemaResolutionError(.unsupported(because: "$dynamicRef is not supported for schema simplification"))
         case (.boolean, _),
              (.integer, _),
              (.number, _),
@@ -238,7 +242,7 @@ internal struct FragmentCombiner {
 
         let jsonSchema: JSONSchema
         switch combinedFragment.value {
-        case .fragment, .reference, .null:
+        case .fragment, .reference, .dynamicReference, .null:
             jsonSchema = combinedFragment
         case .boolean(let coreContext):
             jsonSchema = .boolean(try coreContext.validatedContext())

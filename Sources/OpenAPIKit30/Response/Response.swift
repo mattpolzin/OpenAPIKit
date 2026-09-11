@@ -188,5 +188,3 @@ extension OpenAPI.Response: Decodable {
         }
     }
 }
-
-extension OpenAPI.Response: Validatable {}

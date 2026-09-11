@@ -259,6 +259,3 @@ extension OpenAPI.Server: ExternallyDereferenceable {
     }
 #endif
 }
-
-extension OpenAPI.Server: Validatable {}
-extension OpenAPI.Server.Variable: Validatable {}
