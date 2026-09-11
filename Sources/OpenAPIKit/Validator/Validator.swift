@@ -234,14 +234,14 @@ public final class Validator {
 
     /// Add a validation to be performed.
     @discardableResult
-    public func validating<T: Encodable>(_ validation: Validation<T>) -> Self {
+    public func validating<T: Encodable & Validatable>(_ validation: Validation<T>) -> Self {
         customValidations.append(AnyValidation(validation))
         return self
     }
 
     /// Add one or more builtin validations to be performed.
     @discardableResult
-    public func validating<each T: Encodable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
+    public func validating<each T: Encodable & Validatable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
         for validationPath in repeat each validations {
             customValidations.append(AnyValidation(BuiltinValidation.self[keyPath: validationPath]))
         }
@@ -250,7 +250,7 @@ public final class Validator {
 
     /// Remove a builtin validation.
     @discardableResult
-    public func withoutValidating<each T: Encodable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
+    public func withoutValidating<each T: Encodable & Validatable>(_ validations: repeat KeyPath<BuiltinValidation.Type, Validation<each T>>) -> Self {
         for validationPath in repeat each validations {
             nonReferenceDefaultValidations.removeAll { $0.description == BuiltinValidation.self[keyPath: validationPath].description }
             referenceDefaultValidations.removeAll { $0.description == BuiltinValidation.self[keyPath: validationPath].description }
@@ -267,7 +267,7 @@ public final class Validator {
     ///         `ValidationError` is a good general purpose error for this use-case.
     ///
     @discardableResult
-    public func validating<T: Encodable>(
+    public func validating<T: Encodable & Validatable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError]
     ) -> Self {
         return validating(Validation(check: validate, when: { _ in true }))
@@ -282,7 +282,7 @@ public final class Validator {
     ///     - predicate: A function returning `true` if this validator
     ///         should run against the given value.
     ///
-    public func validating<T: Encodable>(
+    public func validating<T: Encodable & Validatable>(
         _ validate: @escaping (ValidationContext<T>) -> [ValidationError],
         when predicate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
@@ -297,7 +297,7 @@ public final class Validator {
     ///     - validate: The function called to assert a condition. The function should return `false`
     ///         if the validity check has failed or `true` if everything is valid.
     @discardableResult
-    public func validating<T: Encodable>(
+    public func validating<T: Encodable & Validatable>(
         _ description: String,
         check validate: @escaping (ValidationContext<T>) -> Bool
     ) -> Self {
@@ -317,7 +317,7 @@ public final class Validator {
     ///         if the validity check has failed or `true` if everything is valid.
     ///     - predicate: A condition that must be met for this validation to be applied.
     @discardableResult
-    public func validating<T: Encodable>(
+    public func validating<T: Encodable & Validatable>(
         _ description: String,
         check validate: @escaping (ValidationContext<T>) -> Bool,
         when predicate: @escaping (ValidationContext<T>) -> Bool
