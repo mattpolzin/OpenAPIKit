@@ -57,3 +57,13 @@ After:
 ```swift
 static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPIKit.OpenAPI.ComponentKey
 ```
+
+### OpenAPI Standards Versions
+Version 3.2.1 of the OpenAPI standard has been added to the built-in
+enumeration in OpenAPIKit which means that any code that attempts to cover all
+cases of the `OpenAPI.Document.Version` enum must be updated to include the new
+case.
+
+Relatedly, code that creates `Version.v3_2_x(x: 1)` values must be updated to
+`Version.v3_2_1` as that is the spelling for versions supported at the time of
+release for any given OpenAPIKit version.
