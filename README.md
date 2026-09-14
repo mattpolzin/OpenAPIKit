@@ -14,11 +14,11 @@ OpenAPIKit follows semantic versioning despite the fact that the OpenAPI
 specificaiton does not. The following chart shows which OpenAPI specification
 versions and key features are supported by which OpenAPIKit versions.
 
-| OpenAPIKit | Swift | OpenAPI v3.0, v3.1 | OpenAPI v3.2 | Package Traits |
-|------------|-------|--------------------|--------------|----------------|
-| v5.x       | 5.10+ | ✅                 | ✅           |                |
-| v6.x       | 6.1+  | ✅                 | ✅           | ✅             |
-| v7.x       | 6.2+  | ✅                 | ✅           | ✅             |
+| OpenAPIKit | Swift | OpenAPI v3.0 - v3.2 | Dynamic Anchors/References |
+|------------|-------|---------------------|----------------------------|
+| v5.x       | 5.10+ | ✅                  |                            |
+| v6.x       | 6.1+  | ✅                  |                            |
+| v7.x       | 6.2+  | ✅                  | ✅                         |
 
 - [Usage](#usage)
   - [Migration](#migration)
