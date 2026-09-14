@@ -2,10 +2,6 @@
 //  Link.swift
 //  
 
-// TODO: create validation that operationIds in Link objects
-//       refer to Operation objects in the document that have the
-//       given ids.
-
 import OpenAPIKitCore
 
 #if canImport(FoundationEssentials)
@@ -294,5 +290,3 @@ extension OpenAPI.Link: ExternallyDereferenceable {
     }
 #endif
 }
-
-extension OpenAPI.Link: Validatable {}

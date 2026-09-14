@@ -49,5 +49,3 @@ extension OpenAPI.Discriminator {
         case mapping
     }
 }
-
-extension OpenAPI.Discriminator: Validatable {}

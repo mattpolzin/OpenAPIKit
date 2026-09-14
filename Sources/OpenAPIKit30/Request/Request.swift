@@ -125,5 +125,3 @@ extension OpenAPI.Request: Decodable {
         }
     }
 }
-
-extension OpenAPI.Request: Validatable {}

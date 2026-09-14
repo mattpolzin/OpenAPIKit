@@ -15,5 +15,3 @@ extension OpenAPI.Parameter.Context {
         case cookie
     }
 }
-
-extension OpenAPI.Parameter.Context.Location: Validatable {}

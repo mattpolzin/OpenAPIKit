@@ -474,13 +474,14 @@ extension OpenAPI.Document {
         case v3_1_x(x: Int)
 
         case v3_2_0
+        case v3_2_1
         case v3_2_x(x: Int)
 
       // Generally it makes sense for new documents to default to the latest
       // released version OpenAPIKit supports but to be safe we will avoid
       // the "breaking change" of the default version changing other than
       // with major releases.
-      public static let defaultVersion = Self.v3_2_0
+      public static let defaultVersion = Self.v3_2_1
 
       public init?(rawValue: String) {
           switch rawValue {
@@ -488,6 +489,7 @@ extension OpenAPI.Document {
           case "3.1.1": self = .v3_1_1
           case "3.1.2": self = .v3_1_2
           case "3.2.0": self = .v3_2_0
+          case "3.2.1": self = .v3_2_1
           default:
               let components = rawValue.split(separator: ".")
               guard components.count == 3 else {
@@ -506,7 +508,7 @@ extension OpenAPI.Document {
               let v3_1PatchUpperBound = 2
               let v3_2PatchUpperBound = 1
               if minorVersion == "2" {
-                  guard  patchVersion > 0 && patchVersion <= v3_2PatchUpperBound else {
+                  guard  patchVersion > 1 && patchVersion <= v3_2PatchUpperBound else {
                       return nil
                   }
                   self = .v3_2_x(x: patchVersion)
@@ -527,6 +529,7 @@ extension OpenAPI.Document {
             case .v3_1_x(x: let x): return "3.1.\(x)"
 
             case .v3_2_0: return "3.2.0"
+            case .v3_2_1: return "3.2.1"
             case .v3_2_x(x: let x): return "3.2.\(x)"
             }
         }
@@ -540,6 +543,7 @@ extension OpenAPI.Document {
                 case .v3_1_2: true
                 case .v3_1_x(x: let x): 0 < x
                 case .v3_2_0: true
+                case .v3_2_1: true
                 case .v3_2_x(x: _): true
                 }
 
@@ -550,6 +554,7 @@ extension OpenAPI.Document {
                 case .v3_1_2: true
                 case .v3_1_x(x: let y): 1 < y
                 case .v3_2_0: true
+                case .v3_2_1: true
                 case .v3_2_x(x: _): true
                 }
 
@@ -560,6 +565,7 @@ extension OpenAPI.Document {
                 case .v3_1_2: false
                 case .v3_1_x(x: let y): 2 < y
                 case .v3_2_0: true
+                case .v3_2_1: true
                 case .v3_2_x(x: _): true
                 }
 
@@ -570,6 +576,7 @@ extension OpenAPI.Document {
                 case .v3_1_2: x < 2
                 case .v3_1_x(x: let y): x < y
                 case .v3_2_0: true
+                case .v3_2_1: true
                 case .v3_2_x(x: _): true
                 }
 
@@ -580,7 +587,19 @@ extension OpenAPI.Document {
                 case .v3_1_2: false
                 case .v3_1_x(x: _): false
                 case .v3_2_0: false
+                case .v3_2_1: true
                 case .v3_2_x(x: let y): 0 < y
+                }
+
+            case .v3_2_1:
+                switch rhs {
+                case .v3_1_0: false
+                case .v3_1_1: false
+                case .v3_1_2: false
+                case .v3_1_x(x: _): false
+                case .v3_2_0: false
+                case .v3_2_1: false
+                case .v3_2_x(x: let y): 1 < y
                 }
 
             case .v3_2_x(x: let x):
@@ -590,6 +609,7 @@ extension OpenAPI.Document {
                 case .v3_1_2: false
                 case .v3_1_x(x: _): false
                 case .v3_2_0: x < 0
+                case .v3_2_1: x < 1
                 case .v3_2_x(x: let y): x < y
                 }
             }

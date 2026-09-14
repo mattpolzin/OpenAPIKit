@@ -215,5 +215,3 @@ extension OpenAPI.Content.Encoding {
         }
     }
 }
-
-extension OpenAPI.Content.Encoding: Validatable {}

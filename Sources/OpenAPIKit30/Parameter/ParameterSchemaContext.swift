@@ -220,5 +220,3 @@ extension OpenAPI.Parameter.SchemaContext {
         }
     }
 }
-
-extension OpenAPI.Parameter.SchemaContext.Style: Validatable {}

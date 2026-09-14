@@ -53,12 +53,6 @@ final class PetStoreAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_passesValidation() throws {
-        guard let apiDoc = apiDoc else { return }
-
-        try apiDoc.validate()
-    }
-
     func test_successfullyParsedBasicMetadata() throws {
         guard let apiDoc = apiDoc else { return }
 

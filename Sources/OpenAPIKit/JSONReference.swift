@@ -131,6 +131,9 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
         case component(name: String)
         /// The reference refers to some path outside the Components Object.
         case path(Path)
+        /// The reference refers to a plain URI fragment identifying a
+        /// `$dynamicAnchor` or `$anchor` (e.g. `#category`).
+        case anchor(String)
 
         /// Get the name of the referenced object.
         ///
@@ -149,6 +152,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
                 return name
             case .path(let path):
                 return path.components.last?.stringValue
+            case .anchor(let name):
+                return name
             }
         }
 
@@ -166,7 +171,10 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             }
             let fragment = rawValue.dropFirst()
             guard fragment.starts(with: "/components") else {
-                self = .path(Path(rawValue: String(fragment)))
+                // A fragment without a leading '/' is a plain anchor (#category).
+                self = fragment.first == "/"
+                    ? .path(Path(rawValue: String(fragment)))
+                    : .anchor(String(fragment))
                 return
             }
             guard fragment.starts(with: "/components/\(ReferenceType.openAPIComponentsKey)") else {
@@ -192,6 +200,8 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
                 return "#/components/\(ReferenceType.openAPIComponentsKey)/\(name)"
             case .path(let path):
                 return "#\(path.rawValue)"
+            case .anchor(let name):
+                return "#\(name)"
             }
         }
     }
@@ -236,7 +246,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             let pathComponents = rawValue
                 .split(separator: "/")
                 .map(String.init)
-                .map(PathComponent.init(stringValue:))
+                .map{ str in PathComponent(stringValue: str) }
 
             components = pathComponents
         }
@@ -589,15 +599,23 @@ extension JSONReference: LocallyDereferenceable where ReferenceType: LocallyDere
         following references: Set<AnyHashable>,
         dereferencedFromComponentNamed name: String?
     ) throws -> ReferenceType.DereferencedSelf {
+        try _dereferenced(in: components, following: references) { resolved, refs, name in
+            try resolved._dereferenced(in: components, following: refs, dereferencedFromComponentNamed: name)
+        }
+    }
+
+    internal func _dereferenced(
+        in components: OpenAPI.Components,
+        following references: Set<AnyHashable>,
+        then: (ReferenceType, Set<AnyHashable>, String?) throws -> ReferenceType.DereferencedSelf
+    ) throws -> ReferenceType.DereferencedSelf {
         var newReferences = references
         let (inserted, _) = newReferences.insert(self)
         guard inserted else {
             throw OpenAPI.Components.ReferenceCycleError(ref: self.absoluteString)
         }
-
-        return try components
-            .lookup(self)
-            ._dereferenced(in: components, following: newReferences, dereferencedFromComponentNamed: self.name)
+        let resolved = try components.lookup(self)
+        return try then(resolved, newReferences, self.name)
     }
 }
 
@@ -608,8 +626,8 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
         case .internal(let ref):
             return (.internal(ref), .init(), [])
         case .external(let url):
-            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
             let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
+            let componentKey = try loader.componentKey(for: component, at: url)
             var components = OpenAPI.Components()
             switch ReferenceType.openAPIComponentsKeyPath {
             case .a(let directPath):

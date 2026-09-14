@@ -65,6 +65,3 @@ extension OpenAPI.OAuthFlows: Decodable {
         authorizationCode = try container.decodeIfPresent(OpenAPI.OAuthFlows.AuthorizationCode.self, forKey: .authorizationCode)
     }
 }
-
-
-extension OpenAPI.OAuthFlows: Validatable {}

@@ -443,5 +443,3 @@ extension OpenAPI.Parameter {
         }
     }
 }
-
-extension OpenAPI.Parameter: Validatable {}

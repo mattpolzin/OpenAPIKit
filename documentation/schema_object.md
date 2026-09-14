@@ -77,6 +77,8 @@ OpenAPI v3.1
 ### Simplifying Schemas
 The support for this feature is in its early stages with some gaps in what can be successfully simplified and a lot of room for additional heuristics.
 
+To simplify OAS 3.0 documents, you must convert them to OAS 3.1 or OAS 3.2 documents using the `OpenAPIKitCompat` module.
+
 You can take any `JSONSchema` and dereference it with `.dereferenced()` or `.derefererenced(in:)`. You can then take the `DereferencedJSONSchema` and simplify it with `.simplified()`. Simplification will try to take a schema and make it into the simplest alternative schema that still has the same meaning. Many schemas are already in their simplest form, but when you start using schema components like `any`, `all`, `one`, etc. you open the door to schemas that are more complicated than other equivalent schemas.
 
 For example, the following schema with `.all(of:)` the given fragments add up to a simpler `.object` schema with the same rules:

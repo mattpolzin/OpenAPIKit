@@ -37,10 +37,6 @@ import Foundation
 /// or necessary depending on whether you have the Components Object built out and
 /// available at the time and location where you need to create a reference.
 ///
-/// Regardless of how you create your reference, internal references to things in the
-/// Components Object will be validated when you call `validate()` on an
-/// `OpenAPI.Document`.
-///
 public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatable, Hashable, _OpenAPIReference, Sendable {
     /// The reference is internal to the file.
     case `internal`(InternalReference)
@@ -224,7 +220,7 @@ public enum JSONReference<ReferenceType: ComponentDictionaryLocatable>: Equatabl
             let pathComponents = rawValue
                 .split(separator: "/")
                 .map(String.init)
-                .map(PathComponent.init(stringValue:))
+                .map { str in PathComponent(stringValue: str) }
 
             components = pathComponents
         }
@@ -395,8 +391,8 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
         case .internal(let ref):
             return (.internal(ref), .init(), [])
         case .external(let url):
-            let componentKey = try loader.componentKey(type: ReferenceType.self, at: url)
             let (component, messages): (ReferenceType, [Loader.Message]) = try await loader.load(url)
+            let componentKey = try loader.componentKey(for: component, at: url)
             var components = OpenAPI.Components()
             components[keyPath: ReferenceType.openAPIComponentsKeyPath][componentKey] = component
             return (try components.reference(named: componentKey.rawValue, ofType: ReferenceType.self), components, messages)
@@ -404,5 +400,3 @@ extension JSONReference: ExternallyDereferenceable where ReferenceType: External
     }
 #endif
 }
-
-extension JSONReference: Validatable where ReferenceType: Validatable {}

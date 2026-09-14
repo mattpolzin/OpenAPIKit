@@ -1920,5 +1920,3 @@ extension JSONSchema: Decodable {
             .mapValues(AnyCodable.init)
     }
 }
-
-extension JSONSchema: Validatable {}
