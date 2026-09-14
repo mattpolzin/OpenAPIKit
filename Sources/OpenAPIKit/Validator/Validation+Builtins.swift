@@ -755,7 +755,7 @@ public enum BuiltinValidation {
                     return false
                 }
                 if let prefixItems = arrayContext.prefixItems?.count {
-                    // defining more a bigger prefix than maxItems is weird
+                    // defining a bigger prefix than maxItems is weird
                     guard prefixItems <= maxItems else {
                         return false
                     }
