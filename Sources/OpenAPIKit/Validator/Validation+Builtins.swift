@@ -691,6 +691,141 @@ public enum BuiltinValidation {
             )
         )
     }
+
+    /// Ensure minimum and maximum are compatible for integers / numbers
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var jsonSchemaNumericBoundIsValid: Validation<JSONSchema> {
+        .init(
+            description: "Number and Integer minimum and maximum are compatible",
+            check: { context in
+                func isValidBound<T: Comparable>(minimum: (value: T, exclusive: Bool), maximum: (value: T, exclusive: Bool)) -> Bool {
+                    guard minimum.value <= maximum.value else {
+                        return false
+                    }
+
+                    if minimum.value == maximum.value, minimum.exclusive || maximum.exclusive {
+                        return false
+                    }
+
+                    return true
+                }
+
+                if
+                    case let .number(_, numberContext) = context.subject.value,
+                    let minimum = numberContext.minimum,
+                    let maximum = numberContext.maximum
+                {
+                    return isValidBound(minimum: (minimum.value, minimum.exclusive), maximum: (maximum.value, maximum.exclusive))
+                }
+
+                if
+                    case let .integer(_, integerContext) = context.subject.value,
+                    let minimum = integerContext.minimum,
+                    let maximum = integerContext.maximum
+                {
+                    return isValidBound(minimum: (minimum.value, minimum.exclusive), maximum: (maximum.value, maximum.exclusive))
+                }
+
+                // NOTE: base case
+                return true
+            }
+        )
+    }
+
+    /// Ensure array length definitions are compatible
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var jsonSchemaArrayLengthBoundIsValid: Validation<JSONSchema> {
+        .init(
+            description: "Array minItem, maxItem and prefixItems count are compatible",
+            check: { context in
+                guard
+                    case .array(_, let arrayContext) = context.subject.value
+                else {
+                    return true
+                }
+                guard arrayContext.minItems >= 0 else {
+                    return false
+                }
+
+                let maxItems = arrayContext.maxItems ?? Int.max
+
+                guard arrayContext.minItems <= maxItems else {
+                    return false
+                }
+                if let prefixItems = arrayContext.prefixItems?.count {
+                    // defining a bigger prefix than maxItems is weird
+                    guard prefixItems <= maxItems else {
+                        return false
+                    }
+
+                    // NOTE: minItems doesn't affect prefixItems (it's possible to have less items than prefix suggests)
+                }
+
+                return true
+            }
+        )
+    }
+
+    /// Ensure object property count definitions are compatible
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var jsonSchemaObjectPropertyCountIsValid: Validation<JSONSchema> {
+        .init(
+            description: "Object minProperties, maxProperties and required properties count are compatible",
+            check: { context in
+                guard
+                    case .object(_, let objectContext) = context.subject.value
+                else {
+                    return true
+                }
+                // NOTE: using `minProperties` a `max(_, 0)` would hide a negative value
+                let minProperties = objectContext._minProperties ?? 0
+
+                guard minProperties >= 0 else {
+                    return false
+                }
+                let maxProperties = objectContext.maxProperties ?? Int.max
+
+                guard minProperties <= maxProperties else {
+                    return false
+                }
+
+                let minRequired = objectContext.properties.count { $0.value.required }
+
+                // NOTE: checking `minProperties <= minRequired` would be wrong
+                guard
+                    minRequired <= maxProperties
+                else {
+                    return false
+                }
+
+                return true
+            }
+        )
+    }
+
+    /// Ensure string length definitions are compatible
+    ///
+    /// - Important: This is not an included validation by default.
+    public static var jsonSchemaStringLengthBoundIsValid: Validation<JSONSchema> {
+        .init(
+            description: "String minLength and maxLength are compatible",
+            check: { context in
+                guard
+                    case .string(_, let stringContext) = context.subject.value
+                else {
+                    return true
+                }
+                guard stringContext.minLength >= 0 else {
+                    return false
+                }
+                let maxLength = stringContext.maxLength ?? Int.max
+                return stringContext.minLength <= maxLength
+            }
+        )
+    }
 }
 
 // For backwards compatibilty, expose builtin validations on the Validation

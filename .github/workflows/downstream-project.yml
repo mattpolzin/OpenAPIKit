@@ -1,0 +1,25 @@
+name: Downstream Project
+
+on:
+  pull_request:
+
+jobs:
+  build-with-compiler-flags:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - swift:6.3-noble
+          - swiftlang/swift:nightly-noble
+        flags:
+          - []
+          - ['-Xswiftc', '-cross-module-optimization']
+    container: ${{ matrix.image }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+    - name: Build Downstream Project
+      run: |
+        cd .github/downstream-project
+        swift build -c release ${{ join(matrix.flags, ' ') }}
