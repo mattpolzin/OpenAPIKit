@@ -78,6 +78,11 @@ If you are migrating from OpenAPIKit 6.x to OpenAPIKit 7.x, check out the
 
 Be aware of the change to minimum Swift version, now Swift 6.2.
 
+This version drops support for validations and simplification against OAS 3.0.x
+documents. You can convert those documents to OAS 3.1/3.2 in-code and run
+validations against the newer versions which is generally going to be quite
+adequate. See the migration guide for more.
+
 ### Decoding OpenAPI Documents
 
 Most documentation will focus on what it looks like to work with the
