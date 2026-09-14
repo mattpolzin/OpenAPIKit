@@ -1646,7 +1646,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         try document.validate(using: validator)
     }
 
@@ -1667,7 +1667,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         try document.validate(using: validator)
     }
 
@@ -1688,7 +1688,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
         }
     }
@@ -1710,7 +1710,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaIntegerBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
         }
     }
@@ -1741,7 +1741,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         try document.validate(using: validator)
     }
 
@@ -1762,7 +1762,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         try document.validate(using: validator)
     }
 
@@ -1783,7 +1783,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
         }
     }
@@ -1805,7 +1805,7 @@ final class BuiltinValidationTests: XCTestCase {
             components: .noComponents
         )
 
-        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumberBoundIsValid)
+        let validator = Validator.blank.validating(BuiltinValidation.jsonSchemaNumericBoundIsValid)
         XCTAssertThrowsError(try document.validate(using: validator)) { error in
         }
     }

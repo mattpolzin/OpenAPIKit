@@ -692,56 +692,42 @@ public enum BuiltinValidation {
         )
     }
 
-    /// Ensure minimum and maximum are compatible for integers
+    /// Ensure minimum and maximum are compatible for integers / numbers
     ///
     /// - Important: This is not an included validation by default.
-    public static var jsonSchemaIntegerBoundIsValid: Validation<JSONSchema> {
+    public static var jsonSchemaNumericBoundIsValid: Validation<JSONSchema> {
         .init(
-            description: "Integer minimum and maximum are compatible",
+            description: "Number and Integer minimum and maximum are compatible",
             check: { context in
-                guard
-                    case .integer(_, let integerContext) = context.subject.value,
-                    let minimum = integerContext.minimum,
-                    let maximum = integerContext.maximum
-                else {
+                func isValidBound<T: Comparable>(minimum: (value: T, exclusive: Bool), maximum: (value: T, exclusive: Bool)) -> Bool {
+                    guard minimum.value <= maximum.value else {
+                        return false
+                    }
+
+                    if minimum.value == maximum.value, minimum.exclusive || maximum.exclusive {
+                        return false
+                    }
+
                     return true
                 }
-                guard minimum.value <= maximum.value else {
-                    return false
-                }
 
-                if minimum.value == maximum.value, minimum.exclusive || maximum.exclusive {
-                    return false
-                }
-
-                return true
-            }
-        )
-    }
-
-    /// Ensure minimum and maximum are compatible for numbers
-    ///
-    /// - Important: This is not an included validation by default.
-    public static var jsonSchemaNumberBoundIsValid: Validation<JSONSchema> {
-        .init(
-            description: "Number minimum and maximum are compatible",
-            check: { context in
-                guard
-                    case .number(_, let numberContext) = context.subject.value,
+                if
+                    case let .number(_, numberContext) = context.subject.value,
                     let minimum = numberContext.minimum,
                     let maximum = numberContext.maximum
-                else {
-                    return true
+                {
+                    return isValidBound(minimum: (minimum.value, minimum.exclusive), maximum: (maximum.value, maximum.exclusive))
                 }
 
-                guard minimum.value <= maximum.value else {
-                    return false
+                if
+                    case let .integer(_, integerContext) = context.subject.value,
+                    let minimum = integerContext.minimum,
+                    let maximum = integerContext.maximum
+                {
+                    return isValidBound(minimum: (minimum.value, minimum.exclusive), maximum: (maximum.value, maximum.exclusive))
                 }
 
-                if minimum.value == maximum.value, minimum.exclusive || maximum.exclusive {
-                    return false
-                }
-
+                // NOTE: base case
                 return true
             }
         )
