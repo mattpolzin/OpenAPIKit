@@ -1585,6 +1585,10 @@ final class ValidatorTests: XCTestCase {
         doc2.openAPIVersion = .v3_2_0
 
         try XCTAssertEqual(doc2.validate(strict: false).count, 0)
+
+        doc2.openAPIVersion = .v3_2_x(x: 1)
+
+        try XCTAssertEqual(doc2.validate(strict: false).count, 0)
     }
 
     func test_collectsConditionalTagWarningStrict() throws {

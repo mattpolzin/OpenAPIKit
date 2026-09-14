@@ -80,12 +80,18 @@ final class DocumentTests: XCTestCase {
         let t8 = OpenAPI.Document.Version(rawValue: "3.1.2")
         XCTAssertEqual(t8, .v3_1_2)
 
-        // not a known version:
-        let t9 = OpenAPI.Document.Version(rawValue: "3.1.8")
-        XCTAssertNil(t9)
+        let t9 = OpenAPI.Document.Version(rawValue: "3.2.0")
+        XCTAssertEqual(t9, .v3_2_0)
 
-        let t10 = OpenAPI.Document.Version(rawValue: "3.2.8")
-        XCTAssertNil(t10)
+        let t10 = OpenAPI.Document.Version(rawValue: "3.2.1")
+        XCTAssertEqual(t10, .v3_2_x(x: 1))
+
+        // not a known version:
+        let ta = OpenAPI.Document.Version(rawValue: "3.1.8")
+        XCTAssertNil(ta)
+
+        let tb = OpenAPI.Document.Version(rawValue: "3.2.8")
+        XCTAssertNil(tb)
     }
 
     func test_compareOASVersions() {
