@@ -67,3 +67,6 @@ case.
 Relatedly, code that creates `Version.v3_2_x(x: 1)` values must be updated to
 `Version.v3_2_1` as that is the spelling for versions supported at the time of
 release for any given OpenAPIKit version.
+
+`.v3_2_1` has been made the default version of new documents. Previously, new
+documents would default to `.v3_2_0`.
