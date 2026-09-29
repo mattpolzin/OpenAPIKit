@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - swift:6.3-noble
+          - swift:6.4-noble
           - swiftlang/swift:nightly-noble
         flags:
           - []
