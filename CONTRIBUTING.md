@@ -2,7 +2,7 @@ Thank you for considering contributing to OpenAPIKit!
 
 Take a look at the [Code of Conduct](https://github.com/mattpolzin/OpenAPIKit/blob/master/CODE_OF_CONDUCT.md) and note the [MIT license](https://github.com/mattpolzin/OpenAPIKit/blob/master/LICENSE.txt) associated with this project.
 
-If you are preparing a change for the current release of OpenAPIKit (major version 6), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 5 of OpenAPIKit, branch off of the `release/5_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version `7`), branch off of the `release/7_0` branch of this repository.
+If you are preparing a change for the current release of OpenAPIKit (major version 7), branch off of the `main` branch of this repositroy. If you are preparing a fix for version 6 of OpenAPIKit, branch off of the `release/6_x` branch of this repository. If you are preparing a change for the next major release of OpenAPIKit (major version `8`), branch off of the `release/8_0` branch of this repository.
 
 Please do the following in the course of preparing a branch and pull request for this project.
 
@@ -24,14 +24,14 @@ The following are some more specific requests around PR descriptions. Really the
 
 ### Goals for each currently maintained major version
 
-`5.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
+`6.x`: Non-breaking changes that fix bugs or add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
 
-`6.x`: Breaking changes that fix bugs or Non-breaking changes that add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
+`7.x`: Breaking changes that fix bugs or Non-breaking changes that add improvements to the support of OpenAPI Spec v3.0.x, OpenAPI Spec v3.1.x, or OpenAPI Spec v3.2.x.
 
 #### Goals for the Next/unreleased version
-The next major version will be `7.0`.
+The next major version will be `8.0`.
 
-The big goal of the `v7.0` release is removing OpenAPI 3.0 Standard tooling. That is specifically _not_ removing the ability to encoding/decode OAS 3.0 documents or convert OAS 3.0 documents to OAS 3.1/3,2 documents, but any other tooling related specifically to OAS 3.0 documents should get removed. This will reduce maintenance burden going forward. In effect this means that users who want to perform simplification, validation, etc. on OAS 3.0 documents will need to convert them (in Swift, using the OpenAPIKitCompat module provided by OpenAPIKit) to OAS 3.1/3.2 documents and then run the simplification, validation, etc. on those converted documents.
+Goals for version `8.0` have not been set, but breaking changes that aren't critical bug fixes should target the `release/8_0` branch.
 
 **Please create GitHub issues** to propose any specific code refactoring or breaking changes you would like to see as I am opinionated about the degree to which I want to refactor and breaking changes should be well motivated; in other words, I aim to adopt more modern Swift, but avoid structural changes motivated by a difference in opinion rather than common Swift coding practices.
 
