@@ -22,12 +22,12 @@ jobs:
                                    --output-path ./gh-pages/docs \
                                    --transform-for-static-hosting \
                                    --hosting-base-path OpenAPIKit \
-                                   --target OpenAPIKit
+                                   --enable-experimental-combined-documentation
       - name: Install rsync
         run: |
           apt-get update && apt-get install -y rsync
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
         with:
           folder: gh-pages
           branch: gh-pages
