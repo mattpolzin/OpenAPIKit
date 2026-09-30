@@ -246,7 +246,7 @@ To disable External Loading features, depend on OpenAPIKit with an empty
 ```swift
 .package(
   url: "https://github/com/mattpolzin/openapikit.git",
-  from: "6.0.0",
+  from: "7.0.0",
   traits: []
 )
 ```
