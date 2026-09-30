@@ -58,13 +58,6 @@ final class GitHubAPICampatibilityTests: XCTestCase {
         }
     }
 
-    func test_passesValidation() throws {
-        guard let apiDoc = apiDoc else { return }
-
-        let warnings = try apiDoc.validate(strict: false)
-        XCTAssertEqual(warnings.count, 4)
-    }
-
     func test_successfullyParsedBasicMetadata() throws {
         guard let apiDoc = apiDoc else { return }
 

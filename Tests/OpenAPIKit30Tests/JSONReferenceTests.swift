@@ -349,7 +349,7 @@ extension JSONReferenceTests {
             return (JSONSchema.string as! T, [url.absoluteString])
         }
 
-        static func componentKey<T>(type: T.Type, at url: URL) throws -> OpenAPI.ComponentKey {
+        static func componentKey<T>(for object: T, at url: URL) throws -> OpenAPI.ComponentKey {
             return try .forceInit(rawValue: url.absoluteString
                 .replacingOccurrences(of: "/", with: "_")
                 .replacingOccurrences(of: "#", with: "_")

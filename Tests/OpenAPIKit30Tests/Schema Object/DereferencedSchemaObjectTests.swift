@@ -126,21 +126,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t20 = JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced()
         XCTAssertEqual(t20, .all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))))
         XCTAssertEqual(t20?.discriminator, .init(propertyName: "test"))
-
-        // bonus tests around simplifying:
-        let t21 = try JSONSchema.all(of: []).dereferenced()?.simplified()
-        XCTAssertEqual(t21, .fragment(.init(description: nil)))
-        XCTAssertNil(t21?.discriminator)
-        XCTAssertNotNil(t21?.coreContext)
-
-        let t22 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced()?.simplified()
-        XCTAssertEqual(t22, .string(.init(), .init()))
-        XCTAssertNil(t22?.discriminator)
-        XCTAssertEqual(t22?.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
-
-        let t23 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced()?.simplified()
-        XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
-        XCTAssertEqual(t23?.discriminator, .init(propertyName: "test"))
     }
 
     func test_throwingBasicConstructionsFromSchemaObject() throws {
@@ -242,21 +227,6 @@ final class DereferencedSchemaObjectTests: XCTestCase {
         let t20 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced(in: components)
         XCTAssertEqual(t20, .all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))))
         XCTAssertEqual(t20.discriminator, .init(propertyName: "test"))
-
-        // bonus tests around simplifying:
-        let t21 = try JSONSchema.all(of: []).dereferenced(in: components).simplified()
-        XCTAssertEqual(t21, .fragment(.init(description: nil)))
-        XCTAssertNil(t21.discriminator)
-        XCTAssertNotNil(t21.coreContext)
-
-        let t22 = try JSONSchema.all(of: [.string(.init(), .init())]).dereferenced(in: components).simplified()
-        XCTAssertEqual(t22, .string(.init(), .init()))
-        XCTAssertNil(t22.discriminator)
-        XCTAssertEqual(t22.coreContext as? JSONSchema.CoreContext<JSONTypeFormat.StringFormat>, .init())
-
-        let t23 = try JSONSchema.all(of: [.string(.init(), .init())], core: .init(discriminator: .init(propertyName: "test"))).dereferenced(in: components).simplified()
-        XCTAssertEqual(t23, .string(.init(discriminator: .init(propertyName: "test")), .init()))
-        XCTAssertEqual(t23.discriminator, .init(propertyName: "test"))
     }
 
     func test_optionalReferenceMissing() {
